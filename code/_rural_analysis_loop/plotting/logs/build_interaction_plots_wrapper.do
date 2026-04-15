@@ -1,0 +1,6 @@
+global plot_dir   "/Users/anzony.quisperojas/Documents/GitHub/proj_bureaucrats_farms/code/_rural_analysis_loop/plotting"
+global fig_dir    "/Users/anzony.quisperojas/Documents/GitHub/proj_bureaucrats_farms/code/_rural_analysis_loop/plotting/figures"
+global ster_app18 "/Users/anzony.quisperojas/Library/CloudStorage/Dropbox/sa_fires/proj_bureaucrats_farms/tex/paper/tables/_app_18_protest_5km_did_downup_plot_sample_rural_test.ster"
+global ster_app19 "/Users/anzony.quisperojas/Library/CloudStorage/Dropbox/sa_fires/proj_bureaucrats_farms/tex/paper/tables/_app_19_polischar_did_downup_inter_plot_sample_rural_test.ster"
+global fe_labels  "1 8 16 24 32"
+do "/Users/anzony.quisperojas/Documents/GitHub/proj_bureaucrats_farms/code/_rural_analysis_loop/plotting/build_interaction_plots.do"

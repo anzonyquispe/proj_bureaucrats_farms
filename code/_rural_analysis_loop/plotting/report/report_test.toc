@@ -1,0 +1,4 @@
+\contentsline {section}{\numberline {1}Event studies --- Politician characteristics (\texttt {\_app\_16})}{2}{section.1}%
+\contentsline {section}{\numberline {2}Event studies --- Protest (\texttt {\_app\_17})}{7}{section.2}%
+\contentsline {section}{\numberline {3}Interaction DiD --- Protest with \texttt {downup\_ac} (\texttt {\_app\_18})}{12}{section.3}%
+\contentsline {section}{\numberline {4}Interaction DiD --- Politician characteristics with \texttt {downup\_ac} (\texttt {\_app\_19})}{15}{section.4}%

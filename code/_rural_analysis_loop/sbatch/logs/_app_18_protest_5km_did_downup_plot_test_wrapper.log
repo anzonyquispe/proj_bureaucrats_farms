@@ -1,0 +1,560 @@
+
+
+. clear all
+
+. set more off
+
+. global location     "dbox"
+
+. global sample       "_sample"
+
+. global is_rural_var "is_rural_area"
+
+. global fe_list      "1 8 16 24 32"
+
+. global ster_suffix  "_test"
+
+. global shell        "/groups/sgulzar/sa_fires/proj_bureaucrats_farms"
+
+. global dbox         "/Users/anzony.quisperojas/Library/CloudStorage/Dropbox/sa_fires/proj_bureaucrats_farms
+> "
+
+. global root         "/Users/anzony.quisperojas/Library/CloudStorage/Dropbox/sa_fires/proj_bureaucrats_farms
+> "
+
+. qui do "${root}/code/_replication_rural/estsave_csv.ado"
+
+. do "/Users/anzony.quisperojas/Documents/GitHub/proj_bureaucrats_farms/code/_rural_analysis_loop/_app_18_pro
+> test_5km_did_downup_plot.do"
+
+. ********************************************************************************
+. * _app_18_protest_5km_did_downup_plot_rural.do
+. * Protest DiD analysis with downup_ac interaction - RURAL GRIDS ONLY
+. * Loops over 32 fixed-effects specifications.
+. * No moderator loop: the downup_ac interaction is the core spec, not a swappable
+. * moderator (moderator heterogeneity is deferred until FE selection is done).
+. ********************************************************************************
+. 
+. ********************************************************************************
+. * Setup - Only set globals if running standalone (not from master)
+. ********************************************************************************
+. 
+. if "$root" == "" {
+.     clear all
+.     set more off
+. 
+.     * Defaults for standalone runs. When launched from an sbatch array these
+.     * globals are set by the caller and this whole block is skipped.
+.     * Five parameters are expected to be set by the sbatch array:
+.     *   location     : "shell" | "dbox"
+.     *   sample       : ""      | "_sample"
+.     *   is_rural_var : "is_rural_area" | "is_rural_farzad"
+.     *   fe_list      : any Stata numlist of FE indices (e.g. "1/32", "12 13 19")
+.     *   ster_suffix  : suffix appended to the output ster filename (default "")
+.     global location     "shell"
+.     global sample       ""
+.     global is_rural_var "is_rural_area"
+.     global fe_list      "1/32"
+.     global ster_suffix  ""
+. 
+.     global shell "/groups/sgulzar/sa_fires/proj_bureaucrats_farms"
+.     global dbox "/Users/anzony.quisperojas/Library/CloudStorage/Dropbox/sa_fires/proj_bureaucrats_farms"
+. 
+.     if "$location" == "dbox" {
+.         global root "$dbox"
+.     }
+.     else {
+.         global root "$shell"
+.     }
+. }
+
+. 
+. cd "${root}"
+/Users/anzony.quisperojas/Library/CloudStorage/Dropbox/sa_fires/proj_bureaucrats_farms
+
+. 
+. ********************************************************************************
+. * Import Data
+. ********************************************************************************
+. 
+. import delimited using "${root}/data_output/intermediate/stacked_data_protest${sample}.csv", clear varnames
+> (1)
+(encoding automatically selected: ISO-8859-1)
+(31 vars, 6,234,058 obs)
+
+. 
+. * Merge with rice moderators
+. merge m:1 unique_small_grid_id ac_uq_id using "data_output/intermediate/rice_moderators.dta"
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                        77,750
+        from master                         0  (_merge==1)
+        from using                     77,750  (_merge==2)
+
+    Matched                         6,234,058  (_merge==3)
+    -----------------------------------------
+
+. keep if _merge == 3
+(77,750 observations deleted)
+
+. drop _merge
+
+. 
+. * Merge with rural classification
+. merge m:1 unique_small_grid_id using "${root}/data_output/intermediate/ghs_grid_classification_2000.dta", k
+> eepusing(is_rural_area is_rural_farzad)
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                       136,174
+        from master                         0  (_merge==1)
+        from using                    136,174  (_merge==2)
+
+    Matched                         6,234,058  (_merge==3)
+    -----------------------------------------
+
+. keep if _merge == 3
+(136,174 observations deleted)
+
+. drop _merge
+
+. 
+. * Keep only rural grids (variable chosen via ${is_rural_var})
+. keep if ${is_rural_var} == 1
+(54,429 observations deleted)
+
+. 
+. display "Observations after rural filter: " _N
+Observations after rural filter: 6179629
+
+. 
+. ********************************************************************************
+. * Generate Variables
+. ********************************************************************************
+. 
+. sum relative_year_bin
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+relative_y~n |  6,179,629   -1.390609    1.420525         -4          1
+
+. local rmin = r(min)
+
+. gen post_ = relative_year_bin >= 0
+
+. gen moderator = 0
+
+. 
+. local dep_var countk
+
+. local rhs "ib0.post_##ib0.treat##ib0.downup_ac wind_direction av_wind_speed"
+
+. 
+. *-------------------------------------
+. * Define 32 FE specifications
+. *-------------------------------------
+. local fe1  "unique_small_grid_id_cohort "
+
+. local fe2  "unique_small_grid_id_cohort  monthyearco "
+
+. local fe3  "unique_small_grid_id_cohort  province_cohort#c.monthyear "
+
+. local fe4  "unique_small_grid_id_cohort  yeargov "
+
+. local fe5  "unique_small_grid_id_cohort  province_cohort#election_year "
+
+. local fe6  "unique_small_grid_id_cohort  province_cohort#election_year#yeargov "
+
+. local fe7  "unique_small_grid_id_cohort  monthyearco  province_cohort#c.monthyear "
+
+. local fe8  "unique_small_grid_id_cohort  monthyearco  yeargov "
+
+. local fe9  "unique_small_grid_id_cohort  monthyearco  province_cohort#election_year "
+
+. local fe10 "unique_small_grid_id_cohort  monthyearco  province_cohort#election_year#yeargov "
+
+. local fe11 "unique_small_grid_id_cohort  province_cohort#c.monthyear  yeargov "
+
+. local fe12 "unique_small_grid_id_cohort  province_cohort#c.monthyear  province_cohort#election_year "
+
+. local fe13 "unique_small_grid_id_cohort  province_cohort#c.monthyear  province_cohort#election_year#yeargov
+>  "
+
+. local fe14 "unique_small_grid_id_cohort  yeargov  province_cohort#election_year "
+
+. local fe15 "unique_small_grid_id_cohort  yeargov  province_cohort#election_year#yeargov "
+
+. local fe16 "unique_small_grid_id_cohort  province_cohort#election_year  province_cohort#election_year#yearg
+> ov "
+
+. local fe17 "unique_small_grid_id_cohort  monthyearco  province_cohort#c.monthyear  yeargov "
+
+. local fe18 "unique_small_grid_id_cohort  monthyearco  province_cohort#c.monthyear  province_cohort#election
+> _year "
+
+. local fe19 "unique_small_grid_id_cohort  monthyearco  province_cohort#c.monthyear  province_cohort#election
+> _year#yeargov "
+
+. local fe20 "unique_small_grid_id_cohort  monthyearco  yeargov  province_cohort#election_year "
+
+. local fe21 "unique_small_grid_id_cohort  monthyearco  yeargov  province_cohort#election_year#yeargov "
+
+. local fe22 "unique_small_grid_id_cohort  monthyearco  province_cohort#election_year  province_cohort#electi
+> on_year#yeargov "
+
+. local fe23 "unique_small_grid_id_cohort  province_cohort#c.monthyear  yeargov  province_cohort#election_yea
+> r "
+
+. local fe24 "unique_small_grid_id_cohort  province_cohort#c.monthyear  yeargov  province_cohort#election_yea
+> r#yeargov "
+
+. local fe25 "unique_small_grid_id_cohort  province_cohort#c.monthyear  province_cohort#election_year  provin
+> ce_cohort#election_year#yeargov "
+
+. local fe26 "unique_small_grid_id_cohort  yeargov  province_cohort#election_year  province_cohort#election_y
+> ear#yeargov "
+
+. local fe27 "unique_small_grid_id_cohort  monthyearco  province_cohort#c.monthyear  yeargov  province_cohort
+> #election_year "
+
+. local fe28 "unique_small_grid_id_cohort  monthyearco  province_cohort#c.monthyear  yeargov  province_cohort
+> #election_year#yeargov "
+
+. local fe29 "unique_small_grid_id_cohort  monthyearco  province_cohort#c.monthyear  province_cohort#election
+> _year  province_cohort#election_year#yeargov "
+
+. local fe30 "unique_small_grid_id_cohort  monthyearco  yeargov  province_cohort#election_year  province_coho
+> rt#election_year#yeargov "
+
+. local fe31 "unique_small_grid_id_cohort  province_cohort#c.monthyear  yeargov  province_cohort#election_yea
+> r  province_cohort#election_year#yeargov "
+
+. local fe32 "unique_small_grid_id_cohort  monthyearco  province_cohort#c.monthyear  yeargov  province_cohort
+> #election_year  province_cohort#election_year#yeargov "
+
+. 
+. ********************************************************************************
+. * Statistics
+. ********************************************************************************
+. 
+. * Mean of dep var for treated units, pre-treatment (all)
+. quietly summarize `dep_var' if treat == 1 & relative_year_bin <= -1
+
+. local ymean = r(mean)
+
+. 
+. * Mean of dep var for treated units, pre-treatment, moderator == 1
+. quietly summarize `dep_var' if treat == 1 & relative_year_bin <= -1 & moderator == 1
+
+. local ymean2 = r(mean)
+
+. 
+. unique ac_uq_id
+Number of unique values of ac_uq_id is  198
+Number of records is  6179629
+
+. local numacs = r(unique)
+
+. 
+. ********************************************************************************
+. * Loop over FE specifications
+. ********************************************************************************
+. 
+. local i = 1
+
+. 
+. foreach fe of numlist $fe_list {
+  2. 
+.     * Select FE spec
+.     local fespec `fe`fe''
+  3. 
+.     * Run regression with clustering
+.     reghdfejl `dep_var' `rhs', absorb(`fespec') cluster(ac_area_tr)
+  4. 
+.     * Accumulate scalars and labels, then store the estimate
+.     estadd scalar ymean  = `ymean'
+  5.     estadd scalar ymean2 = `ymean2'
+  6.     estadd scalar acq    = `numacs'
+  7.     estadd local  smpl   "Rural"
+  8.     estadd local  fespec "fe`fe'"
+  9. 
+.     est store evreg`i'
+ 10. 
+.     local i = `i' + 1
+ 11.     display("`i'")
+ 12. }
+(MWFE estimator converged in 1 iterations)
+
+HDFE linear regression with Julia                 Number of obs   =  6,179,629
+Absorbing 1 HDFE group                            F(   8,    797) =       2.24
+Statistics cluster-robust                         Prob > F        =     0.0230
+                                                  R-squared       =     0.1839
+                                                  Adj R-squared   =     0.1467
+Number of clusters (ac_area_tr) =        797      Within R-sq.    =     0.0002
+                                                  Root MSE        =   266.3500
+
+                                    (Std. err. adjusted for 797 clusters in ac_area_tr)
+---------------------------------------------------------------------------------------
+                      |               Robust
+               countk | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+----------------------+----------------------------------------------------------------
+              1.post_ |   .0887295    1.86786     0.05   0.962    -3.577778    3.755237
+              1.treat |          0  (omitted)
+          1.downup_ac |  -.1388156   3.182333    -0.04   0.965    -6.385559    6.107928
+       wind_direction |  -.0392861   .0341414    -1.15   0.250    -.1063038    .0277317
+        av_wind_speed |   11.25124   4.327561     2.60   0.009     2.756476    19.74601
+                      |
+          post_#treat |
+                 1 1  |   -3.28705   2.874709    -1.14   0.253    -8.929946    2.355846
+                      |
+      post_#downup_ac |
+                 1 1  |   .7707374    1.79231     0.43   0.667    -2.747468    4.288942
+                      |
+      treat#downup_ac |
+                 1 1  |    5.11542   8.959827     0.57   0.568    -12.47223    22.70307
+                      |
+post_#treat#downup_ac |
+               1 1 1  |  -3.787101   4.109186    -0.92   0.357    -11.85321    4.279005
+---------------------------------------------------------------------------------------
+
+added scalar:
+              e(ymean) =  32.996317
+
+added scalar:
+             e(ymean2) =  .
+
+added scalar:
+                e(acq) =  198
+
+added macro:
+               e(smpl) : "Rural"
+
+added macro:
+             e(fespec) : "fe1"
+2
+(MWFE estimator converged in 12 iterations)
+
+HDFE linear regression with Julia                 Number of obs   =  6,179,629
+Absorbing 3 HDFE groups                           F(   7,    797) =       1.95
+Statistics cluster-robust                         Prob > F        =     0.0595
+                                                  R-squared       =     0.1864
+                                                  Adj R-squared   =     0.1493
+Number of clusters (ac_area_tr) =        797      Within R-sq.    =     0.0002
+                                                  Root MSE        =   265.9567
+
+                                    (Std. err. adjusted for 797 clusters in ac_area_tr)
+---------------------------------------------------------------------------------------
+                      |               Robust
+               countk | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+----------------------+----------------------------------------------------------------
+              1.post_ |          0  (omitted)
+              1.treat |          0  (omitted)
+          1.downup_ac |    .429156   3.333802     0.13   0.898    -6.114914    6.973226
+       wind_direction |   .0966611   .0519419     1.86   0.063     -.005298    .1986202
+        av_wind_speed |  -19.93831   10.32689    -1.93   0.054    -40.20943    .3328037
+                      |
+          post_#treat |
+                 1 1  |  -3.887858   3.047899    -1.28   0.202    -9.870717       2.095
+                      |
+      post_#downup_ac |
+                 1 1  |   .7081053   1.808352     0.39   0.695     -2.84159      4.2578
+                      |
+      treat#downup_ac |
+                 1 1  |   4.839055   8.942885     0.54   0.589    -12.71534    22.39345
+                      |
+post_#treat#downup_ac |
+               1 1 1  |  -3.727922   4.125275    -0.90   0.366    -11.82561    4.369767
+---------------------------------------------------------------------------------------
+
+added scalar:
+              e(ymean) =  32.996317
+
+added scalar:
+             e(ymean2) =  .
+
+added scalar:
+                e(acq) =  198
+
+added macro:
+               e(smpl) : "Rural"
+
+added macro:
+             e(fespec) : "fe8"
+3
+(MWFE estimator converged in 3 iterations)
+
+HDFE linear regression with Julia                 Number of obs   =  6,179,629
+Absorbing 3 HDFE groups                           F(   8,    797) =       6.00
+Statistics cluster-robust                         Prob > F        =     0.0000
+                                                  R-squared       =     0.1851
+                                                  Adj R-squared   =     0.1479
+Number of clusters (ac_area_tr) =        797      Within R-sq.    =     0.0003
+                                                  Root MSE        =   266.1652
+
+                                    (Std. err. adjusted for 797 clusters in ac_area_tr)
+---------------------------------------------------------------------------------------
+                      |               Robust
+               countk | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+----------------------+----------------------------------------------------------------
+              1.post_ |  -14.23725   4.854317    -2.93   0.003      -23.766    -4.70849
+              1.treat |          0  (omitted)
+          1.downup_ac |  -.0793625   3.168718    -0.03   0.980    -6.299381    6.140656
+       wind_direction |  -.0538935    .032117    -1.68   0.094    -.1169374    .0091505
+        av_wind_speed |   11.23349   4.186269     2.68   0.007     3.016072     19.4509
+                      |
+          post_#treat |
+                 1 1  |  -4.206996   3.026729    -1.39   0.165     -10.1483    1.734306
+                      |
+      post_#downup_ac |
+                 1 1  |   .6528054   1.805472     0.36   0.718    -2.891236    4.196847
+                      |
+      treat#downup_ac |
+                 1 1  |   4.960691   8.918238     0.56   0.578    -12.54532     22.4667
+                      |
+post_#treat#downup_ac |
+               1 1 1  |  -3.491519   4.164033    -0.84   0.402    -11.66529    4.682249
+---------------------------------------------------------------------------------------
+
+added scalar:
+              e(ymean) =  32.996317
+
+added scalar:
+             e(ymean2) =  .
+
+added scalar:
+                e(acq) =  198
+
+added macro:
+               e(smpl) : "Rural"
+
+added macro:
+             e(fespec) : "fe16"
+4
+(MWFE estimator converged in 22 iterations)
+
+HDFE linear regression with Julia                 Number of obs   =  6,179,629
+Absorbing 4 HDFE groups                           F(   8,    797) =       2.08
+Statistics cluster-robust                         Prob > F        =     0.0355
+                                                  R-squared       =     0.1859
+                                                  Adj R-squared   =     0.1488
+Number of clusters (ac_area_tr) =        797      Within R-sq.    =     0.0003
+                                                  Root MSE        =   266.0325
+
+                                    (Std. err. adjusted for 797 clusters in ac_area_tr)
+---------------------------------------------------------------------------------------
+                      |               Robust
+               countk | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+----------------------+----------------------------------------------------------------
+              1.post_ |   2.238465   2.859022     0.78   0.434    -3.373636    7.850567
+              1.treat |          0  (omitted)
+          1.downup_ac |   .0476122   3.065969     0.02   0.988    -5.970717    6.065941
+       wind_direction |  -.1091689    .034794    -3.14   0.002    -.1774677   -.0408701
+        av_wind_speed |   11.57771   4.507555     2.57   0.010     2.729626    20.42579
+                      |
+          post_#treat |
+                 1 1  |  -4.121145   3.002946    -1.37   0.170    -10.01576    1.773473
+                      |
+      post_#downup_ac |
+                 1 1  |   .5946051   1.804064     0.33   0.742    -2.946673    4.135883
+                      |
+      treat#downup_ac |
+                 1 1  |   4.430913   8.723014     0.51   0.612    -12.69188    21.55371
+                      |
+post_#treat#downup_ac |
+               1 1 1  |  -3.468546   4.118198    -0.84   0.400    -11.55234    4.615249
+---------------------------------------------------------------------------------------
+
+added scalar:
+              e(ymean) =  32.996317
+
+added scalar:
+             e(ymean2) =  .
+
+added scalar:
+                e(acq) =  198
+
+added macro:
+               e(smpl) : "Rural"
+
+added macro:
+             e(fespec) : "fe24"
+5
+(MWFE estimator converged in 119 iterations)
+
+HDFE linear regression with Julia                 Number of obs   =  6,179,629
+Absorbing 6 HDFE groups                           F(   7,    797) =       1.27
+Statistics cluster-robust                         Prob > F        =     0.2648
+                                                  R-squared       =     0.1873
+                                                  Adj R-squared   =     0.1502
+Number of clusters (ac_area_tr) =        797      Within R-sq.    =     0.0000
+                                                  Root MSE        =   265.8123
+
+                                    (Std. err. adjusted for 797 clusters in ac_area_tr)
+---------------------------------------------------------------------------------------
+                      |               Robust
+               countk | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+----------------------+----------------------------------------------------------------
+              1.post_ |          0  (omitted)
+              1.treat |          0  (omitted)
+          1.downup_ac |    .293973   3.220053     0.09   0.927    -6.026813    6.614759
+       wind_direction |   .0412794   .0482968     0.85   0.393    -.0535245    .1360833
+        av_wind_speed |   -9.61507   9.084192    -1.06   0.290    -27.44684    8.216698
+                      |
+          post_#treat |
+                 1 1  |  -4.177738   3.100761    -1.35   0.178    -10.26436    1.908884
+                      |
+      post_#downup_ac |
+                 1 1  |   .7376164   1.809862     0.41   0.684    -2.815043    4.290276
+                      |
+      treat#downup_ac |
+                 1 1  |   4.370763   8.727956     0.50   0.617    -12.76173    21.50326
+                      |
+post_#treat#downup_ac |
+               1 1 1  |  -3.710876   4.098351    -0.91   0.365    -11.75571    4.333963
+---------------------------------------------------------------------------------------
+
+added scalar:
+              e(ymean) =  32.996317
+
+added scalar:
+             e(ymean2) =  .
+
+added scalar:
+                e(acq) =  198
+
+added macro:
+               e(smpl) : "Rural"
+
+added macro:
+             e(fespec) : "fe32"
+6
+
+. 
+. ********************************************************************************
+. * Save ster file
+. ********************************************************************************
+. 
+. estwrite evreg* using "${root}/tex/paper/tables/_app_18_protest_5km_did_downup_plot${sample}_rural${ster_su
+> ffix}.ster", replace
+(saving evreg1)
+(saving evreg2)
+(saving evreg3)
+(saving evreg4)
+(saving evreg5)
+(file /Users/anzony.quisperojas/Library/CloudStorage/Dropbox/sa_fires/proj_bureaucrats_farms/tex/paper/tables
+> /_app_18_protest_5km_did_downup_plot_sample_rural_test.ster saved)
+
+. 
+. display "Ster: ${root}/tex/paper/tables/_app_18_protest_5km_did_downup_plot${sample}_rural${ster_suffix}.st
+> er"
+Ster: /Users/anzony.quisperojas/Library/CloudStorage/Dropbox/sa_fires/proj_bureaucrats_farms/tex/paper/tables
+> /_app_18_protest_5km_did_downup_plot_sample_rural_test.ster
+
+. 
+. ********************************************************************************
+. 
+end of do-file
+
+. 
+end of do-file
