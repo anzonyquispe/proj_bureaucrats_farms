@@ -19,14 +19,16 @@ STER_SUFFIX="_area"
 DOFILE_NAME="_app_17_5km_evst_all.do"
 # ---------------------------------------------
 
-# Cluster paths (shared group folder)
+# Cluster paths
+# - PROJ_SHELL / PROJ_ROOT: the *data* root (shared group folder).
+#   Stata sees it as $root and loads every CSV/.dta from it.
+# - GIT_ROOT: the *code* checkout for this repo on the cluster.
+#   This is a per-user path and can differ from the data root.
 PROJ_SHELL="/groups/sgulzar/sa_fires/proj_bureaucrats_farms"
 PROJ_ROOT="$PROJ_SHELL"
-
-# The .do files live in the git repo checkout under the shared project root.
-# Override GIT_ROOT if your checkout lives elsewhere.
-GIT_ROOT="${GIT_ROOT:-$PROJ_SHELL}"
+GIT_ROOT="${GIT_ROOT:-/users/aquisper/proj_bureaucrats_farms}"
 DOFILE_PATH="$GIT_ROOT/code/_rural_analysis_loop/$DOFILE_NAME"
+ADO_PATH="$GIT_ROOT/code/_rural_analysis_loop/tools/estsave_csv.ado"
 
 # SGE copies this script to a spool path before running it, so BASH_SOURCE
 # resolves to the spool path rather than the submit dir. The #$ -cwd
@@ -46,7 +48,7 @@ global ster_suffix  "$STER_SUFFIX"
 global shell        "$PROJ_SHELL"
 global dbox         ""
 global root         "$PROJ_ROOT"
-qui do "\${root}/code/_replication_rural/estsave_csv.ado"
+qui do "$ADO_PATH"
 do "$DOFILE_PATH"
 EOF
 
