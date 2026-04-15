@@ -1,0 +1,1052 @@
+
+
+. global plot_dir   "/Users/anzony.quisperojas/Documents/GitHub/proj_bureaucrats_farms/code/_rural_analysis_l
+> oop/plotting"
+
+. global fig_dir    "/Users/anzony.quisperojas/Documents/GitHub/proj_bureaucrats_farms/code/_rural_analysis_l
+> oop/plotting/figures"
+
+. global ster_app18 "/Users/anzony.quisperojas/Library/CloudStorage/Dropbox/sa_fires/proj_bureaucrats_farms/t
+> ex/paper/tables/_app_18_protest_5km_did_downup_plot_sample_rural_test.ster"
+
+. global ster_app19 "/Users/anzony.quisperojas/Library/CloudStorage/Dropbox/sa_fires/proj_bureaucrats_farms/t
+> ex/paper/tables/_app_19_polischar_did_downup_inter_plot_sample_rural_test.ster"
+
+. global fe_labels  "1 8 16 24 32"
+
+. do "/Users/anzony.quisperojas/Documents/GitHub/proj_bureaucrats_farms/code/_rural_analysis_loop/plotting/bu
+> ild_interaction_plots.do"
+
+. *-------------------------------------------------------------------------------
+. * build_interaction_plots.do
+. * For _app_18 and _app_19 .ster files, call interaction_graph on every stored
+. * evreg estimate and export one PNG per (file, spec).
+. *
+. * Required globals (set by orchestrator):
+. *   $plot_dir      : absolute path to this plotting/ folder
+. *   $fig_dir       : output directory for PNGs
+. *   $ster_app18    : path to _app_18 .ster
+. *   $ster_app19    : path to _app_19 .ster
+. *   $fe_labels     : space-separated FE indices (e.g. "1 8 16 24 32")
+. *                    evreg1..evregN correspond to these FE indices in order
+. *-------------------------------------------------------------------------------
+. 
+. clear all
+
+. set more off
+
+. 
+. foreach g in plot_dir fig_dir ster_app18 ster_app19 fe_labels {
+  2.     if "${`g'}" == "" {
+  3.         display as error "build_interaction_plots: missing global \${`g'}"
+  4.         exit 198
+  5.     }
+  6. }
+
+. 
+. qui do "${plot_dir}/tools/interaction_graph.ado"
+
+. qui do "${plot_dir}/tools/estload_csv.ado"
+
+. 
+. * Build a name-style numlist 1..N from the number of FE labels
+. local nfe : word count ${fe_labels}
+
+. local est_numlist "1/`nfe'"
+
+. 
+. *-------------------------------------------------------------------------------
+. * _app_18 — protest DiD triple-interaction with downup_ac
+. *-------------------------------------------------------------------------------
+. 
+. display _n "Interaction plots — protest (_app_18)"
+
+Interaction plots — protest (_app_18)
+
+. est clear
+
+. local prefix_18 "${fig_dir}/app18_protest_did_downup"
+
+. interaction_graph using "${ster_app18}",       ///
+>     estimates(`est_numlist')                   ///
+>     output("`prefix_18'")                      ///
+>     type(protest)                              ///
+>     modvar(downup_ac)
+Using estimate prefix: evreg
+Using moderator variable: downup_ac
+Loading estimates from STER file...
+
+--------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+------------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with Julia
+      evreg2 | reghdfejl    countk          9  HDFE linear regression with Julia
+      evreg3 | reghdfejl    countk          9  HDFE linear regression with Julia
+      evreg4 | reghdfejl    countk          9  HDFE linear regression with Julia
+      evreg5 | reghdfejl    countk          9  HDFE linear regression with Julia
+--------------------------------------------------------------------------------
+
+Processing estimate 1...
+
+ ( 1)  1.downup_ac = 0
+
+------------------------------------------------------------------------------
+      countk | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+         (1) |  -.1388156   3.182333    -0.04   0.965    -6.385559    6.107928
+------------------------------------------------------------------------------
+
+ ( 1)  1.downup_ac + 1.post_#1.downup_ac = 0
+
+------------------------------------------------------------------------------
+      countk | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+         (1) |   .6319218   3.373961     0.19   0.851    -5.990978    7.254822
+------------------------------------------------------------------------------
+
+ ( 1)  1.downup_ac + 1.post_#1.treat + 1.post_#1.downup_ac + 1.treat#1.downup_ac +
+       1.post_#1.treat#1.downup_ac = 0
+
+------------------------------------------------------------------------------
+      countk | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+         (1) |  -1.326809    6.58276    -0.20   0.840     -14.2484    11.59479
+------------------------------------------------------------------------------
+
+ ( 1)  1.post_#1.treat + 1.treat#1.downup_ac + 1.post_#1.treat#1.downup_ac = 0
+
+------------------------------------------------------------------------------
+      countk | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+         (1) |  -1.958731   7.209676    -0.27   0.786    -16.11093    12.19347
+------------------------------------------------------------------------------
+
+ ( 1)  1.downup_ac = 0
+
+------------------------------------------------------------------------------
+      countk | Coefficient  Std. err.      t    P>|t|     [90% conf. interval]
+-------------+----------------------------------------------------------------
+         (1) |  -.1388156   3.182333    -0.04   0.965    -5.379378    5.101747
+------------------------------------------------------------------------------
+
+ ( 1)  1.downup_ac + 1.post_#1.downup_ac = 0
+
+------------------------------------------------------------------------------
+      countk | Coefficient  Std. err.      t    P>|t|     [90% conf. interval]
+-------------+----------------------------------------------------------------
+         (1) |   .6319218   3.373961     0.19   0.851    -4.924209    6.188052
+------------------------------------------------------------------------------
+
+ ( 1)  1.downup_ac + 1.post_#1.treat + 1.post_#1.downup_ac + 1.treat#1.downup_ac +
+       1.post_#1.treat#1.downup_ac = 0
+
+------------------------------------------------------------------------------
+      countk | Coefficient  Std. err.      t    P>|t|     [90% conf. interval]
+-------------+----------------------------------------------------------------
+         (1) |  -1.326809    6.58276    -0.20   0.840    -12.16709    9.513467
+------------------------------------------------------------------------------
+
+ ( 1)  1.post_#1.treat + 1.treat#1.downup_ac + 1.post_#1.treat#1.downup_ac = 0
+
+------------------------------------------------------------------------------
+      countk | Coefficient  Std. err.      t    P>|t|     [90% conf. interval]
+-------------+----------------------------------------------------------------
+         (1) |  -1.958731   7.209676    -0.27   0.786    -13.83139    9.913931
+------------------------------------------------------------------------------
+number of observations will be reset to 4
+Press any key to continue, or Break to abort
+Number of observations (_N) was 0, now 4.
+(4 missing values generated)
+
+ ( 1)  1.post_#1.treat + 1.treat#1.downup_ac + 1.post_#1.treat#1.downup_ac = 0
+
+------------------------------------------------------------------------------
+      countk | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+         (1) |  -1.958731   7.209676    -0.27   0.786    -16.11093    12.19347
+------------------------------------------------------------------------------
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+file
+    /Users/anzony.quisperojas/Documents/GitHub/proj_bureaucrats_farms/code/_rural_analysis_loop/plotting/fi
+    > gures/app18_protest_did_downup_1.png saved as PNG format
+Exported: /Users/anzony.quisperojas/Documents/GitHub/proj_bureaucrats_farms/code/_rural_analysis_loop/plottin
+> g/figures/app18_protest_did_downup_1.png
+
+Processing estimate 2...
+
+ ( 1)  1.downup_ac = 0
+
+------------------------------------------------------------------------------
+      countk | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+         (1) |    .429156   3.333802     0.13   0.898    -6.114914    6.973226
+------------------------------------------------------------------------------
+
+ ( 1)  1.downup_ac + 1.post_#1.downup_ac = 0
+
+------------------------------------------------------------------------------
+      countk | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+         (1) |   1.137261    3.45207     0.33   0.742    -5.638962    7.913485
+------------------------------------------------------------------------------
+
+ ( 1)  1.downup_ac + 1.post_#1.treat + 1.post_#1.downup_ac + 1.treat#1.downup_ac +
+       1.post_#1.treat#1.downup_ac = 0
+
+------------------------------------------------------------------------------
+      countk | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+         (1) |  -1.639464   6.603093    -0.25   0.804    -14.60097    11.32205
+------------------------------------------------------------------------------
+
+ ( 1)  1.post_#1.treat + 1.treat#1.downup_ac + 1.post_#1.treat#1.downup_ac = 0
+
+------------------------------------------------------------------------------
+      countk | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+         (1) |  -2.776725   7.300849    -0.38   0.704    -17.10789    11.55444
+------------------------------------------------------------------------------
+
+ ( 1)  1.downup_ac = 0
+
+------------------------------------------------------------------------------
+      countk | Coefficient  Std. err.      t    P>|t|     [90% conf. interval]
+-------------+----------------------------------------------------------------
+         (1) |    .429156   3.333802     0.13   0.898    -5.060841    5.919154
+------------------------------------------------------------------------------
+
+ ( 1)  1.downup_ac + 1.post_#1.downup_ac = 0
+
+------------------------------------------------------------------------------
+      countk | Coefficient  Std. err.      t    P>|t|     [90% conf. interval]
+-------------+----------------------------------------------------------------
+         (1) |   1.137261    3.45207     0.33   0.742    -4.547496    6.822019
+------------------------------------------------------------------------------
+
+ ( 1)  1.downup_ac + 1.post_#1.treat + 1.post_#1.downup_ac + 1.treat#1.downup_ac +
+       1.post_#1.treat#1.downup_ac = 0
+
+------------------------------------------------------------------------------
+      countk | Coefficient  Std. err.      t    P>|t|     [90% conf. interval]
+-------------+----------------------------------------------------------------
+         (1) |  -1.639464   6.603093    -0.25   0.804    -12.51322    9.234298
+------------------------------------------------------------------------------
+
+ ( 1)  1.post_#1.treat + 1.treat#1.downup_ac + 1.post_#1.treat#1.downup_ac = 0
+
+------------------------------------------------------------------------------
+      countk | Coefficient  Std. err.      t    P>|t|     [90% conf. interval]
+-------------+----------------------------------------------------------------
+         (1) |  -2.776725   7.300849    -0.38   0.704    -14.79953    9.246078
+------------------------------------------------------------------------------
+number of observations will be reset to 4
+Press any key to continue, or Break to abort
+Number of observations (_N) was 0, now 4.
+(4 missing values generated)
+
+ ( 1)  1.post_#1.treat + 1.treat#1.downup_ac + 1.post_#1.treat#1.downup_ac = 0
+
+------------------------------------------------------------------------------
+      countk | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+         (1) |  -2.776725   7.300849    -0.38   0.704    -17.10789    11.55444
+------------------------------------------------------------------------------
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+file
+    /Users/anzony.quisperojas/Documents/GitHub/proj_bureaucrats_farms/code/_rural_analysis_loop/plotting/fi
+    > gures/app18_protest_did_downup_2.png saved as PNG format
+Exported: /Users/anzony.quisperojas/Documents/GitHub/proj_bureaucrats_farms/code/_rural_analysis_loop/plottin
+> g/figures/app18_protest_did_downup_2.png
+
+Processing estimate 3...
+
+ ( 1)  1.downup_ac = 0
+
+------------------------------------------------------------------------------
+      countk | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+         (1) |  -.0793625   3.168718    -0.03   0.980    -6.299381    6.140656
+------------------------------------------------------------------------------
+
+ ( 1)  1.downup_ac + 1.post_#1.downup_ac = 0
+
+------------------------------------------------------------------------------
+      countk | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+         (1) |    .573443   3.282081     0.17   0.861    -5.869101    7.015987
+------------------------------------------------------------------------------
+
+ ( 1)  1.downup_ac + 1.post_#1.treat + 1.post_#1.downup_ac + 1.treat#1.downup_ac +
+       1.post_#1.treat#1.downup_ac = 0
+
+------------------------------------------------------------------------------
+      countk | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+         (1) |  -2.164381    6.58142    -0.33   0.742    -15.08334    10.75458
+------------------------------------------------------------------------------
+
+ ( 1)  1.post_#1.treat + 1.treat#1.downup_ac + 1.post_#1.treat#1.downup_ac = 0
+
+------------------------------------------------------------------------------
+      countk | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+         (1) |  -2.737824   7.159896    -0.38   0.702     -16.7923    11.31666
+------------------------------------------------------------------------------
+
+ ( 1)  1.downup_ac = 0
+
+------------------------------------------------------------------------------
+      countk | Coefficient  Std. err.      t    P>|t|     [90% conf. interval]
+-------------+----------------------------------------------------------------
+         (1) |  -.0793625   3.168718    -0.03   0.980    -5.297505     5.13878
+------------------------------------------------------------------------------
+
+ ( 1)  1.downup_ac + 1.post_#1.downup_ac = 0
+
+------------------------------------------------------------------------------
+      countk | Coefficient  Std. err.      t    P>|t|     [90% conf. interval]
+-------------+----------------------------------------------------------------
+         (1) |    .573443   3.282081     0.17   0.861    -4.831382    5.978268
+------------------------------------------------------------------------------
+
+ ( 1)  1.downup_ac + 1.post_#1.treat + 1.post_#1.downup_ac + 1.treat#1.downup_ac +
+       1.post_#1.treat#1.downup_ac = 0
+
+------------------------------------------------------------------------------
+      countk | Coefficient  Std. err.      t    P>|t|     [90% conf. interval]
+-------------+----------------------------------------------------------------
+         (1) |  -2.164381    6.58142    -0.33   0.742    -13.00245    8.673689
+------------------------------------------------------------------------------
+
+ ( 1)  1.post_#1.treat + 1.treat#1.downup_ac + 1.post_#1.treat#1.downup_ac = 0
+
+------------------------------------------------------------------------------
+      countk | Coefficient  Std. err.      t    P>|t|     [90% conf. interval]
+-------------+----------------------------------------------------------------
+         (1) |  -2.737824   7.159896    -0.38   0.702    -14.52851    9.052862
+------------------------------------------------------------------------------
+number of observations will be reset to 4
+Press any key to continue, or Break to abort
+Number of observations (_N) was 0, now 4.
+(4 missing values generated)
+
+ ( 1)  1.post_#1.treat + 1.treat#1.downup_ac + 1.post_#1.treat#1.downup_ac = 0
+
+------------------------------------------------------------------------------
+      countk | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+         (1) |  -2.737824   7.159896    -0.38   0.702     -16.7923    11.31666
+------------------------------------------------------------------------------
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+file
+    /Users/anzony.quisperojas/Documents/GitHub/proj_bureaucrats_farms/code/_rural_analysis_loop/plotting/fi
+    > gures/app18_protest_did_downup_3.png saved as PNG format
+Exported: /Users/anzony.quisperojas/Documents/GitHub/proj_bureaucrats_farms/code/_rural_analysis_loop/plottin
+> g/figures/app18_protest_did_downup_3.png
+
+Processing estimate 4...
+
+ ( 1)  1.downup_ac = 0
+
+------------------------------------------------------------------------------
+      countk | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+         (1) |   .0476122   3.065969     0.02   0.988    -5.970717    6.065941
+------------------------------------------------------------------------------
+
+ ( 1)  1.downup_ac + 1.post_#1.downup_ac = 0
+
+------------------------------------------------------------------------------
+      countk | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+         (1) |   .6422173   3.201514     0.20   0.841    -5.642179    6.926614
+------------------------------------------------------------------------------
+
+ ( 1)  1.downup_ac + 1.post_#1.treat + 1.post_#1.downup_ac + 1.treat#1.downup_ac +
+       1.post_#1.treat#1.downup_ac = 0
+
+------------------------------------------------------------------------------
+      countk | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+         (1) |   -2.51656   6.480859    -0.39   0.698    -15.23813    10.20501
+------------------------------------------------------------------------------
+
+ ( 1)  1.post_#1.treat + 1.treat#1.downup_ac + 1.post_#1.treat#1.downup_ac = 0
+
+------------------------------------------------------------------------------
+      countk | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+         (1) |  -3.158777   7.017463    -0.45   0.653    -16.93367    10.61612
+------------------------------------------------------------------------------
+
+ ( 1)  1.downup_ac = 0
+
+------------------------------------------------------------------------------
+      countk | Coefficient  Std. err.      t    P>|t|     [90% conf. interval]
+-------------+----------------------------------------------------------------
+         (1) |   .0476122   3.065969     0.02   0.988    -5.001327    5.096552
+------------------------------------------------------------------------------
+
+ ( 1)  1.downup_ac + 1.post_#1.downup_ac = 0
+
+------------------------------------------------------------------------------
+      countk | Coefficient  Std. err.      t    P>|t|     [90% conf. interval]
+-------------+----------------------------------------------------------------
+         (1) |   .6422173   3.201514     0.20   0.841    -4.629933    5.914368
+------------------------------------------------------------------------------
+
+ ( 1)  1.downup_ac + 1.post_#1.treat + 1.post_#1.downup_ac + 1.treat#1.downup_ac +
+       1.post_#1.treat#1.downup_ac = 0
+
+------------------------------------------------------------------------------
+      countk | Coefficient  Std. err.      t    P>|t|     [90% conf. interval]
+-------------+----------------------------------------------------------------
+         (1) |   -2.51656   6.480859    -0.39   0.698    -13.18903    8.155909
+------------------------------------------------------------------------------
+
+ ( 1)  1.post_#1.treat + 1.treat#1.downup_ac + 1.post_#1.treat#1.downup_ac = 0
+
+------------------------------------------------------------------------------
+      countk | Coefficient  Std. err.      t    P>|t|     [90% conf. interval]
+-------------+----------------------------------------------------------------
+         (1) |  -3.158777   7.017463    -0.45   0.653    -14.71491    8.397355
+------------------------------------------------------------------------------
+number of observations will be reset to 4
+Press any key to continue, or Break to abort
+Number of observations (_N) was 0, now 4.
+(4 missing values generated)
+
+ ( 1)  1.post_#1.treat + 1.treat#1.downup_ac + 1.post_#1.treat#1.downup_ac = 0
+
+------------------------------------------------------------------------------
+      countk | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+         (1) |  -3.158777   7.017463    -0.45   0.653    -16.93367    10.61612
+------------------------------------------------------------------------------
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+file
+    /Users/anzony.quisperojas/Documents/GitHub/proj_bureaucrats_farms/code/_rural_analysis_loop/plotting/fi
+    > gures/app18_protest_did_downup_4.png saved as PNG format
+Exported: /Users/anzony.quisperojas/Documents/GitHub/proj_bureaucrats_farms/code/_rural_analysis_loop/plottin
+> g/figures/app18_protest_did_downup_4.png
+
+Processing estimate 5...
+
+ ( 1)  1.downup_ac = 0
+
+------------------------------------------------------------------------------
+      countk | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+         (1) |    .293973   3.220053     0.09   0.927    -6.026813    6.614759
+------------------------------------------------------------------------------
+
+ ( 1)  1.downup_ac + 1.post_#1.downup_ac = 0
+
+------------------------------------------------------------------------------
+      countk | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+         (1) |   1.031589   3.333705     0.31   0.757     -5.51229    7.575468
+------------------------------------------------------------------------------
+
+ ( 1)  1.downup_ac + 1.post_#1.treat + 1.post_#1.downup_ac + 1.treat#1.downup_ac +
+       1.post_#1.treat#1.downup_ac = 0
+
+------------------------------------------------------------------------------
+      countk | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+         (1) |  -2.486262   6.526887    -0.38   0.703    -15.29818    10.32566
+------------------------------------------------------------------------------
+
+ ( 1)  1.post_#1.treat + 1.treat#1.downup_ac + 1.post_#1.treat#1.downup_ac = 0
+
+------------------------------------------------------------------------------
+      countk | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+         (1) |  -3.517851   7.170508    -0.49   0.624    -17.59316    10.55746
+------------------------------------------------------------------------------
+
+ ( 1)  1.downup_ac = 0
+
+------------------------------------------------------------------------------
+      countk | Coefficient  Std. err.      t    P>|t|     [90% conf. interval]
+-------------+----------------------------------------------------------------
+         (1) |    .293973   3.220053     0.09   0.927    -5.008706    5.596652
+------------------------------------------------------------------------------
+
+ ( 1)  1.downup_ac + 1.post_#1.downup_ac = 0
+
+------------------------------------------------------------------------------
+      countk | Coefficient  Std. err.      t    P>|t|     [90% conf. interval]
+-------------+----------------------------------------------------------------
+         (1) |   1.031589   3.333705     0.31   0.757    -4.458248    6.521427
+------------------------------------------------------------------------------
+
+ ( 1)  1.downup_ac + 1.post_#1.treat + 1.post_#1.downup_ac + 1.treat#1.downup_ac +
+       1.post_#1.treat#1.downup_ac = 0
+
+------------------------------------------------------------------------------
+      countk | Coefficient  Std. err.      t    P>|t|     [90% conf. interval]
+-------------+----------------------------------------------------------------
+         (1) |  -2.486262   6.526887    -0.38   0.703    -13.23453    8.262006
+------------------------------------------------------------------------------
+
+ ( 1)  1.post_#1.treat + 1.treat#1.downup_ac + 1.post_#1.treat#1.downup_ac = 0
+
+------------------------------------------------------------------------------
+      countk | Coefficient  Std. err.      t    P>|t|     [90% conf. interval]
+-------------+----------------------------------------------------------------
+         (1) |  -3.517851   7.170508    -0.49   0.624    -15.32601     8.29031
+------------------------------------------------------------------------------
+number of observations will be reset to 4
+Press any key to continue, or Break to abort
+Number of observations (_N) was 0, now 4.
+(4 missing values generated)
+
+ ( 1)  1.post_#1.treat + 1.treat#1.downup_ac + 1.post_#1.treat#1.downup_ac = 0
+
+------------------------------------------------------------------------------
+      countk | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+         (1) |  -3.517851   7.170508    -0.49   0.624    -17.59316    10.55746
+------------------------------------------------------------------------------
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+file
+    /Users/anzony.quisperojas/Documents/GitHub/proj_bureaucrats_farms/code/_rural_analysis_loop/plotting/fi
+    > gures/app18_protest_did_downup_5.png saved as PNG format
+Exported: /Users/anzony.quisperojas/Documents/GitHub/proj_bureaucrats_farms/code/_rural_analysis_loop/plottin
+> g/figures/app18_protest_did_downup_5.png
+
+All graphs exported successfully.
+
+. 
+. *-------------------------------------------------------------------------------
+. * _app_19 — polischar DiD triple-interaction with downup_ac
+. *-------------------------------------------------------------------------------
+. 
+. display _n "Interaction plots — polischar (_app_19)"
+
+Interaction plots — polischar (_app_19)
+
+. est clear
+
+. local prefix_19 "${fig_dir}/app19_polischar_did_downup"
+
+. interaction_graph using "${ster_app19}",       ///
+>     estimates(`est_numlist')                   ///
+>     output("`prefix_19'")                      ///
+>     type(politician)                           ///
+>     modvar(downup_ac)                          ///
+>     yrange(-20 10)
+Using estimate prefix: evreg
+Using moderator variable: downup_ac
+Loading estimates from STER file...
+
+--------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+------------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with Julia
+      evreg2 | reghdfejl    countk          9  HDFE linear regression with Julia
+      evreg3 | reghdfejl    countk          9  HDFE linear regression with Julia
+      evreg4 | reghdfejl    countk          9  HDFE linear regression with Julia
+      evreg5 | reghdfejl    countk          9  HDFE linear regression with Julia
+--------------------------------------------------------------------------------
+
+Processing estimate 1...
+
+ ( 1)  1.downup_ac = 0
+
+------------------------------------------------------------------------------
+      countk | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+         (1) |  -6.550759   2.429604    -2.70   0.007    -11.31444   -1.787075
+------------------------------------------------------------------------------
+
+ ( 1)  1.downup_ac + 1.post_#1.downup_ac = 0
+
+------------------------------------------------------------------------------
+      countk | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+         (1) |  -5.754341   1.997288    -2.88   0.004    -9.670391   -1.838292
+------------------------------------------------------------------------------
+
+ ( 1)  1.downup_ac + 1.post_#1.treat + 1.post_#1.downup_ac + 1.treat#1.downup_ac +
+       1.post_#1.treat#1.downup_ac = 0
+
+------------------------------------------------------------------------------
+      countk | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+         (1) |    2.92141   7.403088     0.39   0.693     -11.5937    17.43652
+------------------------------------------------------------------------------
+
+ ( 1)  1.post_#1.treat + 1.treat#1.downup_ac + 1.post_#1.treat#1.downup_ac = 0
+
+------------------------------------------------------------------------------
+      countk | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+         (1) |   8.675751   7.324865     1.18   0.236    -5.685993     23.0375
+------------------------------------------------------------------------------
+
+ ( 1)  1.downup_ac = 0
+
+------------------------------------------------------------------------------
+      countk | Coefficient  Std. err.      t    P>|t|     [90% conf. interval]
+-------------+----------------------------------------------------------------
+         (1) |  -6.550759   2.429604    -2.70   0.007    -10.54822   -2.553293
+------------------------------------------------------------------------------
+
+ ( 1)  1.downup_ac + 1.post_#1.downup_ac = 0
+
+------------------------------------------------------------------------------
+      countk | Coefficient  Std. err.      t    P>|t|     [90% conf. interval]
+-------------+----------------------------------------------------------------
+         (1) |  -5.754341   1.997288    -2.88   0.004    -9.040511   -2.468172
+------------------------------------------------------------------------------
+
+ ( 1)  1.downup_ac + 1.post_#1.treat + 1.post_#1.downup_ac + 1.treat#1.downup_ac +
+       1.post_#1.treat#1.downup_ac = 0
+
+------------------------------------------------------------------------------
+      countk | Coefficient  Std. err.      t    P>|t|     [90% conf. interval]
+-------------+----------------------------------------------------------------
+         (1) |    2.92141   7.403088     0.39   0.693    -9.259009    15.10183
+------------------------------------------------------------------------------
+
+ ( 1)  1.post_#1.treat + 1.treat#1.downup_ac + 1.post_#1.treat#1.downup_ac = 0
+
+------------------------------------------------------------------------------
+      countk | Coefficient  Std. err.      t    P>|t|     [90% conf. interval]
+-------------+----------------------------------------------------------------
+         (1) |   8.675751   7.324865     1.18   0.236    -3.375966    20.72747
+------------------------------------------------------------------------------
+number of observations will be reset to 4
+Press any key to continue, or Break to abort
+Number of observations (_N) was 0, now 4.
+(4 missing values generated)
+
+ ( 1)  1.downup_ac + 1.post_#1.treat + 1.post_#1.downup_ac + 1.treat#1.downup_ac +
+       1.post_#1.treat#1.downup_ac = 0
+
+------------------------------------------------------------------------------
+      countk | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+         (1) |    2.92141   7.403088     0.39   0.693     -11.5937    17.43652
+------------------------------------------------------------------------------
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+Number of observations (_N) was 4, now 5.
+(1 real change made)
+(1 real change made)
+(1 real change made)
+file
+    /Users/anzony.quisperojas/Documents/GitHub/proj_bureaucrats_farms/code/_rural_analysis_loop/plotting/fi
+    > gures/app19_polischar_did_downup_1.png saved as PNG format
+Exported: /Users/anzony.quisperojas/Documents/GitHub/proj_bureaucrats_farms/code/_rural_analysis_loop/plottin
+> g/figures/app19_polischar_did_downup_1.png
+
+Processing estimate 2...
+
+ ( 1)  1.downup_ac = 0
+
+------------------------------------------------------------------------------
+      countk | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+         (1) |  -5.018152   2.452946    -2.05   0.041    -9.827603   -.2087011
+------------------------------------------------------------------------------
+
+ ( 1)  1.downup_ac + 1.post_#1.downup_ac = 0
+
+------------------------------------------------------------------------------
+      countk | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+         (1) |   -4.57773   1.976948    -2.32   0.021      -8.4539   -.7015598
+------------------------------------------------------------------------------
+
+ ( 1)  1.downup_ac + 1.post_#1.treat + 1.post_#1.downup_ac + 1.treat#1.downup_ac +
+       1.post_#1.treat#1.downup_ac = 0
+
+------------------------------------------------------------------------------
+      countk | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+         (1) |   7.934212   7.146277     1.11   0.267    -6.077377     21.9458
+------------------------------------------------------------------------------
+
+ ( 1)  1.post_#1.treat + 1.treat#1.downup_ac + 1.post_#1.treat#1.downup_ac = 0
+
+------------------------------------------------------------------------------
+      countk | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+         (1) |   12.51194   7.068629     1.77   0.077    -1.347405    26.37129
+------------------------------------------------------------------------------
+
+ ( 1)  1.downup_ac = 0
+
+------------------------------------------------------------------------------
+      countk | Coefficient  Std. err.      t    P>|t|     [90% conf. interval]
+-------------+----------------------------------------------------------------
+         (1) |  -5.018152   2.452946    -2.05   0.041    -9.054023   -.9822814
+------------------------------------------------------------------------------
+
+ ( 1)  1.downup_ac + 1.post_#1.downup_ac = 0
+
+------------------------------------------------------------------------------
+      countk | Coefficient  Std. err.      t    P>|t|     [90% conf. interval]
+-------------+----------------------------------------------------------------
+         (1) |   -4.57773   1.976948    -2.32   0.021    -7.830434   -1.325026
+------------------------------------------------------------------------------
+
+ ( 1)  1.downup_ac + 1.post_#1.treat + 1.post_#1.downup_ac + 1.treat#1.downup_ac +
+       1.post_#1.treat#1.downup_ac = 0
+
+------------------------------------------------------------------------------
+      countk | Coefficient  Std. err.      t    P>|t|     [90% conf. interval]
+-------------+----------------------------------------------------------------
+         (1) |   7.934212   7.146277     1.11   0.267    -3.823671     19.6921
+------------------------------------------------------------------------------
+
+ ( 1)  1.post_#1.treat + 1.treat#1.downup_ac + 1.post_#1.treat#1.downup_ac = 0
+
+------------------------------------------------------------------------------
+      countk | Coefficient  Std. err.      t    P>|t|     [90% conf. interval]
+-------------+----------------------------------------------------------------
+         (1) |   12.51194   7.068629     1.77   0.077     .8818131    24.14207
+------------------------------------------------------------------------------
+number of observations will be reset to 4
+Press any key to continue, or Break to abort
+Number of observations (_N) was 0, now 4.
+(4 missing values generated)
+
+ ( 1)  1.downup_ac + 1.post_#1.treat + 1.post_#1.downup_ac + 1.treat#1.downup_ac +
+       1.post_#1.treat#1.downup_ac = 0
+
+------------------------------------------------------------------------------
+      countk | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+         (1) |   7.934212   7.146277     1.11   0.267    -6.077377     21.9458
+------------------------------------------------------------------------------
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+Number of observations (_N) was 4, now 5.
+(1 real change made)
+(1 real change made)
+(1 real change made)
+file
+    /Users/anzony.quisperojas/Documents/GitHub/proj_bureaucrats_farms/code/_rural_analysis_loop/plotting/fi
+    > gures/app19_polischar_did_downup_2.png saved as PNG format
+Exported: /Users/anzony.quisperojas/Documents/GitHub/proj_bureaucrats_farms/code/_rural_analysis_loop/plottin
+> g/figures/app19_polischar_did_downup_2.png
+
+Processing estimate 3...
+
+ ( 1)  1.downup_ac = 0
+
+------------------------------------------------------------------------------
+      countk | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+         (1) |  -6.969309   2.429004    -2.87   0.004    -11.73182   -2.206801
+------------------------------------------------------------------------------
+
+ ( 1)  1.downup_ac + 1.post_#1.downup_ac = 0
+
+------------------------------------------------------------------------------
+      countk | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+         (1) |  -5.950122   1.991759    -2.99   0.003    -9.855333   -2.044912
+------------------------------------------------------------------------------
+
+ ( 1)  1.downup_ac + 1.post_#1.treat + 1.post_#1.downup_ac + 1.treat#1.downup_ac +
+       1.post_#1.treat#1.downup_ac = 0
+
+------------------------------------------------------------------------------
+      countk | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+         (1) |   7.279795   7.235122     1.01   0.314    -6.905991    21.46558
+------------------------------------------------------------------------------
+
+ ( 1)  1.post_#1.treat + 1.treat#1.downup_ac + 1.post_#1.treat#1.downup_ac = 0
+
+------------------------------------------------------------------------------
+      countk | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+         (1) |   13.22992   7.124451     1.86   0.063    -.7388791    27.19871
+------------------------------------------------------------------------------
+
+ ( 1)  1.downup_ac = 0
+
+------------------------------------------------------------------------------
+      countk | Coefficient  Std. err.      t    P>|t|     [90% conf. interval]
+-------------+----------------------------------------------------------------
+         (1) |  -6.969309   2.429004    -2.87   0.004    -10.96579   -2.972831
+------------------------------------------------------------------------------
+
+ ( 1)  1.downup_ac + 1.post_#1.downup_ac = 0
+
+------------------------------------------------------------------------------
+      countk | Coefficient  Std. err.      t    P>|t|     [90% conf. interval]
+-------------+----------------------------------------------------------------
+         (1) |  -5.950122   1.991759    -2.99   0.003    -9.227196   -2.673049
+------------------------------------------------------------------------------
+
+ ( 1)  1.downup_ac + 1.post_#1.treat + 1.post_#1.downup_ac + 1.treat#1.downup_ac +
+       1.post_#1.treat#1.downup_ac = 0
+
+------------------------------------------------------------------------------
+      countk | Coefficient  Std. err.      t    P>|t|     [90% conf. interval]
+-------------+----------------------------------------------------------------
+         (1) |   7.279795   7.235122     1.01   0.314    -4.624266    19.18386
+------------------------------------------------------------------------------
+
+ ( 1)  1.post_#1.treat + 1.treat#1.downup_ac + 1.post_#1.treat#1.downup_ac = 0
+
+------------------------------------------------------------------------------
+      countk | Coefficient  Std. err.      t    P>|t|     [90% conf. interval]
+-------------+----------------------------------------------------------------
+         (1) |   13.22992   7.124451     1.86   0.063     1.507944    24.95189
+------------------------------------------------------------------------------
+number of observations will be reset to 4
+Press any key to continue, or Break to abort
+Number of observations (_N) was 0, now 4.
+(4 missing values generated)
+
+ ( 1)  1.downup_ac + 1.post_#1.treat + 1.post_#1.downup_ac + 1.treat#1.downup_ac +
+       1.post_#1.treat#1.downup_ac = 0
+
+------------------------------------------------------------------------------
+      countk | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+         (1) |   7.279795   7.235122     1.01   0.314    -6.905991    21.46558
+------------------------------------------------------------------------------
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+Number of observations (_N) was 4, now 5.
+(1 real change made)
+(1 real change made)
+(1 real change made)
+file
+    /Users/anzony.quisperojas/Documents/GitHub/proj_bureaucrats_farms/code/_rural_analysis_loop/plotting/fi
+    > gures/app19_polischar_did_downup_3.png saved as PNG format
+Exported: /Users/anzony.quisperojas/Documents/GitHub/proj_bureaucrats_farms/code/_rural_analysis_loop/plottin
+> g/figures/app19_polischar_did_downup_3.png
+
+Processing estimate 4...
+
+ ( 1)  1.downup_ac = 0
+
+------------------------------------------------------------------------------
+      countk | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+         (1) |  -6.948348   2.417586    -2.87   0.004    -11.68847   -2.208227
+------------------------------------------------------------------------------
+
+ ( 1)  1.downup_ac + 1.post_#1.downup_ac = 0
+
+------------------------------------------------------------------------------
+      countk | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+         (1) |  -5.933849   1.994737    -2.97   0.003    -9.844897   -2.022801
+------------------------------------------------------------------------------
+
+ ( 1)  1.downup_ac + 1.post_#1.treat + 1.post_#1.downup_ac + 1.treat#1.downup_ac +
+       1.post_#1.treat#1.downup_ac = 0
+
+------------------------------------------------------------------------------
+      countk | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+         (1) |   7.041475   7.228192     0.97   0.330    -7.130724    21.21367
+------------------------------------------------------------------------------
+
+ ( 1)  1.post_#1.treat + 1.treat#1.downup_ac + 1.post_#1.treat#1.downup_ac = 0
+
+------------------------------------------------------------------------------
+      countk | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+         (1) |   12.97532   7.121365     1.82   0.069    -.9874212    26.93807
+------------------------------------------------------------------------------
+
+ ( 1)  1.downup_ac = 0
+
+------------------------------------------------------------------------------
+      countk | Coefficient  Std. err.      t    P>|t|     [90% conf. interval]
+-------------+----------------------------------------------------------------
+         (1) |  -6.948348   2.417586    -2.87   0.004    -10.92604   -2.970656
+------------------------------------------------------------------------------
+
+ ( 1)  1.downup_ac + 1.post_#1.downup_ac = 0
+
+------------------------------------------------------------------------------
+      countk | Coefficient  Std. err.      t    P>|t|     [90% conf. interval]
+-------------+----------------------------------------------------------------
+         (1) |  -5.933849   1.994737    -2.97   0.003    -9.215821   -2.651877
+------------------------------------------------------------------------------
+
+ ( 1)  1.downup_ac + 1.post_#1.treat + 1.post_#1.downup_ac + 1.treat#1.downup_ac +
+       1.post_#1.treat#1.downup_ac = 0
+
+------------------------------------------------------------------------------
+      countk | Coefficient  Std. err.      t    P>|t|     [90% conf. interval]
+-------------+----------------------------------------------------------------
+         (1) |   7.041475   7.228192     0.97   0.330    -4.851184    18.93413
+------------------------------------------------------------------------------
+
+ ( 1)  1.post_#1.treat + 1.treat#1.downup_ac + 1.post_#1.treat#1.downup_ac = 0
+
+------------------------------------------------------------------------------
+      countk | Coefficient  Std. err.      t    P>|t|     [90% conf. interval]
+-------------+----------------------------------------------------------------
+         (1) |   12.97532   7.121365     1.82   0.069     1.258428    24.69222
+------------------------------------------------------------------------------
+number of observations will be reset to 4
+Press any key to continue, or Break to abort
+Number of observations (_N) was 0, now 4.
+(4 missing values generated)
+
+ ( 1)  1.downup_ac + 1.post_#1.treat + 1.post_#1.downup_ac + 1.treat#1.downup_ac +
+       1.post_#1.treat#1.downup_ac = 0
+
+------------------------------------------------------------------------------
+      countk | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+         (1) |   7.041475   7.228192     0.97   0.330    -7.130724    21.21367
+------------------------------------------------------------------------------
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+Number of observations (_N) was 4, now 5.
+(1 real change made)
+(1 real change made)
+(1 real change made)
+file
+    /Users/anzony.quisperojas/Documents/GitHub/proj_bureaucrats_farms/code/_rural_analysis_loop/plotting/fi
+    > gures/app19_polischar_did_downup_4.png saved as PNG format
+Exported: /Users/anzony.quisperojas/Documents/GitHub/proj_bureaucrats_farms/code/_rural_analysis_loop/plottin
+> g/figures/app19_polischar_did_downup_4.png
+
+Processing estimate 5...
+
+ ( 1)  1.downup_ac = 0
+
+------------------------------------------------------------------------------
+      countk | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+         (1) |  -4.993088   2.444808    -2.04   0.041    -9.786585   -.1995922
+------------------------------------------------------------------------------
+
+ ( 1)  1.downup_ac + 1.post_#1.downup_ac = 0
+
+------------------------------------------------------------------------------
+      countk | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+         (1) |   -4.44044     1.9711    -2.25   0.024    -8.305144   -.5757357
+------------------------------------------------------------------------------
+
+ ( 1)  1.downup_ac + 1.post_#1.treat + 1.post_#1.downup_ac + 1.treat#1.downup_ac +
+       1.post_#1.treat#1.downup_ac = 0
+
+------------------------------------------------------------------------------
+      countk | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+         (1) |   7.286081   7.018693     1.04   0.299    -6.475357    21.04752
+------------------------------------------------------------------------------
+
+ ( 1)  1.post_#1.treat + 1.treat#1.downup_ac + 1.post_#1.treat#1.downup_ac = 0
+
+------------------------------------------------------------------------------
+      countk | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+         (1) |   11.72652     6.9314     1.69   0.091    -1.863762     25.3168
+------------------------------------------------------------------------------
+
+ ( 1)  1.downup_ac = 0
+
+------------------------------------------------------------------------------
+      countk | Coefficient  Std. err.      t    P>|t|     [90% conf. interval]
+-------------+----------------------------------------------------------------
+         (1) |  -4.993088   2.444808    -2.04   0.041    -9.015571   -.9706062
+------------------------------------------------------------------------------
+
+ ( 1)  1.downup_ac + 1.post_#1.downup_ac = 0
+
+------------------------------------------------------------------------------
+      countk | Coefficient  Std. err.      t    P>|t|     [90% conf. interval]
+-------------+----------------------------------------------------------------
+         (1) |   -4.44044     1.9711    -2.25   0.024    -7.683523   -1.197357
+------------------------------------------------------------------------------
+
+ ( 1)  1.downup_ac + 1.post_#1.treat + 1.post_#1.downup_ac + 1.treat#1.downup_ac +
+       1.post_#1.treat#1.downup_ac = 0
+
+------------------------------------------------------------------------------
+      countk | Coefficient  Std. err.      t    P>|t|     [90% conf. interval]
+-------------+----------------------------------------------------------------
+         (1) |   7.286081   7.018693     1.04   0.299    -4.261887    18.83405
+------------------------------------------------------------------------------
+
+ ( 1)  1.post_#1.treat + 1.treat#1.downup_ac + 1.post_#1.treat#1.downup_ac = 0
+
+------------------------------------------------------------------------------
+      countk | Coefficient  Std. err.      t    P>|t|     [90% conf. interval]
+-------------+----------------------------------------------------------------
+         (1) |   11.72652     6.9314     1.69   0.091     .3221782    23.13086
+------------------------------------------------------------------------------
+number of observations will be reset to 4
+Press any key to continue, or Break to abort
+Number of observations (_N) was 0, now 4.
+(4 missing values generated)
+
+ ( 1)  1.downup_ac + 1.post_#1.treat + 1.post_#1.downup_ac + 1.treat#1.downup_ac +
+       1.post_#1.treat#1.downup_ac = 0
+
+------------------------------------------------------------------------------
+      countk | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+         (1) |   7.286081   7.018693     1.04   0.299    -6.475357    21.04752
+------------------------------------------------------------------------------
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+Number of observations (_N) was 4, now 5.
+(1 real change made)
+(1 real change made)
+(1 real change made)
+file
+    /Users/anzony.quisperojas/Documents/GitHub/proj_bureaucrats_farms/code/_rural_analysis_loop/plotting/fi
+    > gures/app19_polischar_did_downup_5.png saved as PNG format
+Exported: /Users/anzony.quisperojas/Documents/GitHub/proj_bureaucrats_farms/code/_rural_analysis_loop/plottin
+> g/figures/app19_polischar_did_downup_5.png
+
+All graphs exported successfully.
+
+. 
+. display _n "Interaction plots complete."
+
+Interaction plots complete.
+
+. 
+end of do-file
+
+. 
+end of do-file
