@@ -135,19 +135,21 @@ for v in area farzad; do
 done
 
 # _app_16 polischar event study: 2 sets × 2 variants = 4 files
+# STER_SUFFIX includes the set index so each sbatch writes a distinct ster.
 for v in area farzad; do
     rv="is_rural_$v"
-    emit_sbatch "app16_set1_${v}" "_app_16_polischar_evst_all.do" 5 "$FE_APP16_SET1" "$rv" "_$v"
-    emit_sbatch "app16_set2_${v}" "_app_16_polischar_evst_all.do" 5 "$FE_APP16_SET2" "$rv" "_$v"
+    emit_sbatch "app16_set1_${v}" "_app_16_polischar_evst_all.do" 5 "$FE_APP16_SET1" "$rv" "_${v}_set1"
+    emit_sbatch "app16_set2_${v}" "_app_16_polischar_evst_all.do" 5 "$FE_APP16_SET2" "$rv" "_${v}_set2"
 done
 
 # _app_17 protest event study: 4 sets × 2 variants = 8 files
+# Same STER_SUFFIX = _<variant>_set<N> pattern to avoid overwriting.
 for v in area farzad; do
     rv="is_rural_$v"
-    emit_sbatch "app17_set1_${v}" "_app_17_5km_evst_all.do" 10 "$FE_APP17_SET1" "$rv" "_$v"
-    emit_sbatch "app17_set2_${v}" "_app_17_5km_evst_all.do" 10 "$FE_APP17_SET2" "$rv" "_$v"
-    emit_sbatch "app17_set3_${v}" "_app_17_5km_evst_all.do" 10 "$FE_APP17_SET3" "$rv" "_$v"
-    emit_sbatch "app17_set4_${v}" "_app_17_5km_evst_all.do" 10 "$FE_APP17_SET4" "$rv" "_$v"
+    emit_sbatch "app17_set1_${v}" "_app_17_5km_evst_all.do" 10 "$FE_APP17_SET1" "$rv" "_${v}_set1"
+    emit_sbatch "app17_set2_${v}" "_app_17_5km_evst_all.do" 10 "$FE_APP17_SET2" "$rv" "_${v}_set2"
+    emit_sbatch "app17_set3_${v}" "_app_17_5km_evst_all.do" 10 "$FE_APP17_SET3" "$rv" "_${v}_set3"
+    emit_sbatch "app17_set4_${v}" "_app_17_5km_evst_all.do" 10 "$FE_APP17_SET4" "$rv" "_${v}_set4"
 done
 
 # --- Team split (6 / 5 / 5) ---------------------------------------------------

@@ -15,7 +15,7 @@ LOCATION="shell"
 SAMPLE=""
 IS_RURAL_VAR="is_rural_farzad"
 FE_LIST="22 24 26 27 28 30 31 32"
-STER_SUFFIX="_farzad"
+STER_SUFFIX="_farzad_set4"
 DOFILE_NAME="_app_17_5km_evst_all.do"
 # ---------------------------------------------
 
