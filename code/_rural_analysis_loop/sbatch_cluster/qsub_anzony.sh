@@ -14,8 +14,14 @@ FILES=(
     app17_set1_farzad.sbatch
     app17_set2_area.sbatch
     app17_set2_farzad.sbatch
-    app18_area.sbatch
-    app18_farzad.sbatch
+    app17_set3_area.sbatch
+    app17_set3_farzad.sbatch
+    app17_set4_area.sbatch
+    app17_set4_farzad.sbatch
+    app16_set1_area.sbatch
+    app16_set1_farzad.sbatch
+    app16_set2_area.sbatch
+    app16_set2_farzad.sbatch
 )
 
 for sb in "${FILES[@]}"; do
