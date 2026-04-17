@@ -15,7 +15,7 @@ LOCATION="shell"
 SAMPLE=""
 IS_RURAL_VAR="is_rural_area"
 FE_LIST="22 24 26 27 28 30 31 32"
-STER_SUFFIX="_area"
+STER_SUFFIX="_area_set4"
 DOFILE_NAME="_app_17_5km_evst_all.do"
 # ---------------------------------------------
 
