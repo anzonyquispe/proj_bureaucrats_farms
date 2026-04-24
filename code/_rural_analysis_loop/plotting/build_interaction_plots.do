@@ -1,23 +1,27 @@
 *-------------------------------------------------------------------------------
-* build_interaction_plots.do
-* For _app_18 and _app_19 .ster files, call interaction_graph on every stored
-* evreg estimate and export one PNG per (file, spec).
+* build_full_interaction_plots.do
+* For _app_18 (protest DiD x downup_ac) and _app_19 (polischar DiD x downup_ac),
+* call interaction_graph on every stored evreg estimate for BOTH rural variants
+* (area, farzad) and rename the raw `_<N>.png` outputs into the canonical
+* `<app>_<type>_did_downup_fe<N>_<variant>.png` scheme expected by the
+* full-report LaTeX.
 *
-* Required globals (set by orchestrator):
-*   $plot_dir      : absolute path to this plotting/ folder
-*   $fig_dir       : output directory for PNGs
-*   $ster_app18    : path to _app_18 .ster
-*   $ster_app19    : path to _app_19 .ster
-*   $fe_labels     : space-separated FE indices (e.g. "1 8 16 24 32")
-*                    evreg1..evregN correspond to these FE indices in order
+* Naming assumption: the cluster sbatch files for app18/app19 use
+* FE_LIST = "1 2 ... 32" (sequential), so slot N == fe N.
+*
+* Required globals (set by run_full_report.sh):
+*   $plot_dir : plotting/ folder
+*   $fig_dir  : output PNG directory
+*   $tables   : directory holding the .ster files
+*   $fe_all   : full FE numlist as a string, e.g. "1 2 ... 32"
 *-------------------------------------------------------------------------------
 
 clear all
 set more off
 
-foreach g in plot_dir fig_dir ster_app18 ster_app19 fe_labels {
+foreach g in plot_dir fig_dir tables fe_all {
     if "${`g'}" == "" {
-        display as error "build_interaction_plots: missing global \${`g'}"
+        display as error "build_full_interaction_plots: missing global \${`g'}"
         exit 198
     }
 }
@@ -25,35 +29,68 @@ foreach g in plot_dir fig_dir ster_app18 ster_app19 fe_labels {
 qui do "${plot_dir}/tools/interaction_graph.ado"
 qui do "${plot_dir}/tools/estload_csv.ado"
 
-* Build a name-style numlist 1..N from the number of FE labels
-local nfe : word count ${fe_labels}
+local nfe : word count ${fe_all}
 local est_numlist "1/`nfe'"
 
-*-------------------------------------------------------------------------------
-* _app_18 — protest DiD triple-interaction with downup_ac
-*-------------------------------------------------------------------------------
+local variants area farzad
 
-display _n "Interaction plots — protest (_app_18)"
-est clear
-local prefix_18 "${fig_dir}/app18_protest_did_downup"
-interaction_graph using "${ster_app18}",       ///
-    estimates(`est_numlist')                   ///
-    output("`prefix_18'")                      ///
-    type(protest)                              ///
-    modvar(downup_ac)
+foreach v of local variants {
 
-*-------------------------------------------------------------------------------
-* _app_19 — polischar DiD triple-interaction with downup_ac
-*-------------------------------------------------------------------------------
+    *-- _app_19 polischar interaction -----------------------------------------
+    local ster19 "${tables}/_app_19_polischar_did_downup_inter_plot_rural_`v'.ster"
+    capture confirm file "`ster19'"
+    if _rc {
+        display as error "MISSING: `ster19'"
+    }
+    else {
+        display _n "Interaction plots -- polischar (_app_19, `v')"
+        est clear
+        local tmp_prefix_19 "${fig_dir}/_tmp_app19_`v'"
+        interaction_graph using "`ster19'",  ///
+            estimates(`est_numlist')          ///
+            output("`tmp_prefix_19'")         ///
+            type(politician)                  ///
+            modvar(downup_ac)                 ///
+            yrange(-20 10)
 
-display _n "Interaction plots — polischar (_app_19)"
-est clear
-local prefix_19 "${fig_dir}/app19_polischar_did_downup"
-interaction_graph using "${ster_app19}",       ///
-    estimates(`est_numlist')                   ///
-    output("`prefix_19'")                      ///
-    type(politician)                           ///
-    modvar(downup_ac)                          ///
-    yrange(-20 10)
+        * Rename tmp outputs -> canonical names (slot N == fe N)
+        forvalues k = 1/`nfe' {
+            local fe : word `k' of ${fe_all}
+            local src "`tmp_prefix_19'_`k'.png"
+            local dst "${fig_dir}/app19_polischar_did_downup_fe`fe'_`v'.png"
+            capture confirm file "`src'"
+            if !_rc {
+                shell mv "`src'" "`dst'"
+            }
+        }
+    }
 
-display _n "Interaction plots complete."
+    *-- _app_18 protest interaction -------------------------------------------
+    local ster18 "${tables}/_app_18_protest_5km_did_downup_plot_rural_`v'.ster"
+    capture confirm file "`ster18'"
+    if _rc {
+        display as error "MISSING: `ster18'"
+    }
+    else {
+        display _n "Interaction plots -- protest (_app_18, `v')"
+        est clear
+        local tmp_prefix_18 "${fig_dir}/_tmp_app18_`v'"
+        interaction_graph using "`ster18'",  ///
+            estimates(`est_numlist')          ///
+            output("`tmp_prefix_18'")         ///
+            type(protest)                     ///
+            modvar(downup_ac)
+
+        forvalues k = 1/`nfe' {
+            local fe : word `k' of ${fe_all}
+            local src "`tmp_prefix_18'_`k'.png"
+            local dst "${fig_dir}/app18_protest_did_downup_fe`fe'_`v'.png"
+            capture confirm file "`src'"
+            if !_rc {
+                shell mv "`src'" "`dst'"
+            }
+        }
+    }
+}
+
+display _n "Full interaction plots complete."

@@ -1,0 +1,1093 @@
+\documentclass[10pt,landscape]{article}
+\usepackage[margin=0.5in]{geometry}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{hyperref}
+\usepackage{placeins}
+\usepackage{array}
+\usepackage{booktabs}
+\usepackage{longtable}
+
+\captionsetup[figure]{skip=3pt}
+\setlength{\tabcolsep}{2pt}
+\renewcommand{\arraystretch}{1.1}
+
+\title{Rural Analysis --- Full Report\\\large Area vs.\ Farzad Classification, All 32 FE Specs}
+\author{proj\_bureaucrats\_farms}
+\date{\today}
+
+\begin{document}
+\maketitle
+
+\noindent
+For each fixed-effect specification, this report arranges a 4-column by
+3-row grid.
+
+\begin{itemize}
+\itemsep0em
+\item Columns~1--2: rural pixels classified by area (\texttt{is\_rural\_area}).
+\item Columns~3--4: rural pixels classified by the Farzad methodology
+      (\texttt{is\_rural\_farzad}) --- any urban pixel touching the grid.
+\item Row~1: politician/fire event study (\texttt{\_app\_16}), original and
+      linear-detrended (``rotated'') panels per variant.
+\item Row~2: protest event study (\texttt{\_app\_17}), same two forms per variant.
+\item Row~3: triple-interaction DiD with \texttt{downup\_ac} ---
+      polischar (\texttt{\_app\_19}) and protest (\texttt{\_app\_18})
+      side-by-side per variant.
+\end{itemize}
+
+\clearpage
+
+\section*{Fixed-effects legend}
+
+\noindent Every specification includes the base \textbf{grid $\times$ cohort}
+fixed effect (\texttt{unique\_small\_grid\_id\_cohort}). The table below lists
+the additional components combined in each FE spec.
+
+\vspace{0.5em}
+\noindent
+\begin{tabular}{@{}cl@{}}
+\toprule
+\textbf{Code} & \textbf{Component} \\
+\midrule
+M & month-year $\times$ cohort \quad (\texttt{monthyearco}) \\
+T & province $\times$ cohort linear month-year trend \quad (\texttt{province\_cohort\#c.monthyear}) \\
+Y & government-year \quad (\texttt{yeargov}) \\
+E & province $\times$ election-year \quad (\texttt{province\_cohort\#election\_year}) \\
+P & province $\times$ election-year $\times$ government-year \quad (\texttt{province\_cohort\#election\_year\#yeargov}) \\
+\bottomrule
+\end{tabular}
+
+\vspace{1.2em}
+\noindent
+\begin{longtable}{@{}cl@{\hspace{3em}}cl@{}}
+\toprule
+\textbf{FE} & \textbf{Extras beyond grid $\times$ cohort} &
+\textbf{FE} & \textbf{Extras beyond grid $\times$ cohort} \\
+\midrule
+\endfirsthead
+\toprule
+\textbf{FE} & \textbf{Extras beyond grid $\times$ cohort} &
+\textbf{FE} & \textbf{Extras beyond grid $\times$ cohort} \\
+\midrule
+\endhead
+\texttt{fe1} & --- & \texttt{fe17} & M, T, Y \\
+\texttt{fe2} & M & \texttt{fe18} & M, T, E \\
+\texttt{fe3} & T & \texttt{fe19} & M, T, P \\
+\texttt{fe4} & Y & \texttt{fe20} & M, Y, E \\
+\texttt{fe5} & E & \texttt{fe21} & M, Y, P \\
+\texttt{fe6} & P & \texttt{fe22} & M, E, P \\
+\texttt{fe7} & M, T & \texttt{fe23} & T, Y, E \\
+\texttt{fe8} & M, Y & \texttt{fe24} & T, Y, P \\
+\texttt{fe9} & M, E & \texttt{fe25} & T, E, P \\
+\texttt{fe10} & M, P & \texttt{fe26} & Y, E, P \\
+\texttt{fe11} & T, Y & \texttt{fe27} & M, T, Y, E \\
+\texttt{fe12} & T, E & \texttt{fe28} & M, T, Y, P \\
+\texttt{fe13} & T, P & \texttt{fe29} & M, T, E, P \\
+\texttt{fe14} & Y, E & \texttt{fe30} & M, Y, E, P \\
+\texttt{fe15} & Y, P & \texttt{fe31} & T, Y, E, P \\
+\texttt{fe16} & E, P & \texttt{fe32} & M, T, Y, E, P \\
+\bottomrule
+\end{longtable}
+
+\clearpage
+
+\tableofcontents
+\clearpage
+
+\section*{Fixed-effects specification \texttt{fe1}}
+\addcontentsline{toc}{section}{fe1 --- grid$\times$cohort}
+\noindent\textit{grid$\times$cohort}
+\vspace{0.5em}
+
+\noindent
+\begin{tabular}{@{}m{0.245\linewidth}m{0.245\linewidth}m{0.245\linewidth}m{0.245\linewidth}@{}}
+\centering\arraybackslash\textbf{Area --- original} &
+\centering\arraybackslash\textbf{Area --- rotated} &
+\centering\arraybackslash\textbf{Farzad --- original} &
+\centering\arraybackslash\textbf{Farzad --- rotated} \\[2pt]
+
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app16_polischar_evst_fe1_area_ori.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app16_polischar_evst_fe1_area_rotated.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app16_polischar_evst_fe1_farzad_ori.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app16_polischar_evst_fe1_farzad_rotated.png} \\
+\multicolumn{4}{@{}c@{}}{\footnotesize\emph{Row 1 --- Politician event study (\texttt{\_app\_16})}} \\[4pt]
+
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app17_protest_evst_fe1_area_ori.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app17_protest_evst_fe1_area_rotated.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app17_protest_evst_fe1_farzad_ori.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app17_protest_evst_fe1_farzad_rotated.png} \\
+\multicolumn{4}{@{}c@{}}{\footnotesize\emph{Row 2 --- Protest event study (\texttt{\_app\_17})}} \\[4pt]
+
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app19_polischar_did_downup_fe1_area.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app18_protest_did_downup_fe1_area.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app19_polischar_did_downup_fe1_farzad.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app18_protest_did_downup_fe1_farzad.png} \\
+\multicolumn{4}{@{}c@{}}{\footnotesize\emph{Row 3 --- Interactions with \texttt{downup\_ac}: polischar (\texttt{\_app\_19}) and protest (\texttt{\_app\_18})}} \\
+\end{tabular}
+\clearpage
+\section*{Fixed-effects specification \texttt{fe2}}
+\addcontentsline{toc}{section}{fe2 --- grid$\times$cohort + mo-yr$\times$cohort}
+\noindent\textit{grid$\times$cohort + mo-yr$\times$cohort}
+\vspace{0.5em}
+
+\noindent
+\begin{tabular}{@{}m{0.245\linewidth}m{0.245\linewidth}m{0.245\linewidth}m{0.245\linewidth}@{}}
+\centering\arraybackslash\textbf{Area --- original} &
+\centering\arraybackslash\textbf{Area --- rotated} &
+\centering\arraybackslash\textbf{Farzad --- original} &
+\centering\arraybackslash\textbf{Farzad --- rotated} \\[2pt]
+
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app16_polischar_evst_fe2_area_ori.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app16_polischar_evst_fe2_area_rotated.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app16_polischar_evst_fe2_farzad_ori.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app16_polischar_evst_fe2_farzad_rotated.png} \\
+\multicolumn{4}{@{}c@{}}{\footnotesize\emph{Row 1 --- Politician event study (\texttt{\_app\_16})}} \\[4pt]
+
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app17_protest_evst_fe2_area_ori.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app17_protest_evst_fe2_area_rotated.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app17_protest_evst_fe2_farzad_ori.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app17_protest_evst_fe2_farzad_rotated.png} \\
+\multicolumn{4}{@{}c@{}}{\footnotesize\emph{Row 2 --- Protest event study (\texttt{\_app\_17})}} \\[4pt]
+
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app19_polischar_did_downup_fe2_area.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app18_protest_did_downup_fe2_area.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app19_polischar_did_downup_fe2_farzad.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app18_protest_did_downup_fe2_farzad.png} \\
+\multicolumn{4}{@{}c@{}}{\footnotesize\emph{Row 3 --- Interactions with \texttt{downup\_ac}: polischar (\texttt{\_app\_19}) and protest (\texttt{\_app\_18})}} \\
+\end{tabular}
+\clearpage
+\section*{Fixed-effects specification \texttt{fe3}}
+\addcontentsline{toc}{section}{fe3 --- grid$\times$cohort + prov$\times$cohort trend}
+\noindent\textit{grid$\times$cohort + prov$\times$cohort trend}
+\vspace{0.5em}
+
+\noindent
+\begin{tabular}{@{}m{0.245\linewidth}m{0.245\linewidth}m{0.245\linewidth}m{0.245\linewidth}@{}}
+\centering\arraybackslash\textbf{Area --- original} &
+\centering\arraybackslash\textbf{Area --- rotated} &
+\centering\arraybackslash\textbf{Farzad --- original} &
+\centering\arraybackslash\textbf{Farzad --- rotated} \\[2pt]
+
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app16_polischar_evst_fe3_area_ori.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app16_polischar_evst_fe3_area_rotated.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app16_polischar_evst_fe3_farzad_ori.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app16_polischar_evst_fe3_farzad_rotated.png} \\
+\multicolumn{4}{@{}c@{}}{\footnotesize\emph{Row 1 --- Politician event study (\texttt{\_app\_16})}} \\[4pt]
+
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app17_protest_evst_fe3_area_ori.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app17_protest_evst_fe3_area_rotated.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app17_protest_evst_fe3_farzad_ori.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app17_protest_evst_fe3_farzad_rotated.png} \\
+\multicolumn{4}{@{}c@{}}{\footnotesize\emph{Row 2 --- Protest event study (\texttt{\_app\_17})}} \\[4pt]
+
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app19_polischar_did_downup_fe3_area.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app18_protest_did_downup_fe3_area.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app19_polischar_did_downup_fe3_farzad.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app18_protest_did_downup_fe3_farzad.png} \\
+\multicolumn{4}{@{}c@{}}{\footnotesize\emph{Row 3 --- Interactions with \texttt{downup\_ac}: polischar (\texttt{\_app\_19}) and protest (\texttt{\_app\_18})}} \\
+\end{tabular}
+\clearpage
+\section*{Fixed-effects specification \texttt{fe4}}
+\addcontentsline{toc}{section}{fe4 --- grid$\times$cohort + govt-year}
+\noindent\textit{grid$\times$cohort + govt-year}
+\vspace{0.5em}
+
+\noindent
+\begin{tabular}{@{}m{0.245\linewidth}m{0.245\linewidth}m{0.245\linewidth}m{0.245\linewidth}@{}}
+\centering\arraybackslash\textbf{Area --- original} &
+\centering\arraybackslash\textbf{Area --- rotated} &
+\centering\arraybackslash\textbf{Farzad --- original} &
+\centering\arraybackslash\textbf{Farzad --- rotated} \\[2pt]
+
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app16_polischar_evst_fe4_area_ori.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app16_polischar_evst_fe4_area_rotated.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app16_polischar_evst_fe4_farzad_ori.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app16_polischar_evst_fe4_farzad_rotated.png} \\
+\multicolumn{4}{@{}c@{}}{\footnotesize\emph{Row 1 --- Politician event study (\texttt{\_app\_16})}} \\[4pt]
+
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app17_protest_evst_fe4_area_ori.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app17_protest_evst_fe4_area_rotated.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app17_protest_evst_fe4_farzad_ori.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app17_protest_evst_fe4_farzad_rotated.png} \\
+\multicolumn{4}{@{}c@{}}{\footnotesize\emph{Row 2 --- Protest event study (\texttt{\_app\_17})}} \\[4pt]
+
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app19_polischar_did_downup_fe4_area.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app18_protest_did_downup_fe4_area.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app19_polischar_did_downup_fe4_farzad.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app18_protest_did_downup_fe4_farzad.png} \\
+\multicolumn{4}{@{}c@{}}{\footnotesize\emph{Row 3 --- Interactions with \texttt{downup\_ac}: polischar (\texttt{\_app\_19}) and protest (\texttt{\_app\_18})}} \\
+\end{tabular}
+\clearpage
+\section*{Fixed-effects specification \texttt{fe5}}
+\addcontentsline{toc}{section}{fe5 --- grid$\times$cohort + prov$\times$elec-yr}
+\noindent\textit{grid$\times$cohort + prov$\times$elec-yr}
+\vspace{0.5em}
+
+\noindent
+\begin{tabular}{@{}m{0.245\linewidth}m{0.245\linewidth}m{0.245\linewidth}m{0.245\linewidth}@{}}
+\centering\arraybackslash\textbf{Area --- original} &
+\centering\arraybackslash\textbf{Area --- rotated} &
+\centering\arraybackslash\textbf{Farzad --- original} &
+\centering\arraybackslash\textbf{Farzad --- rotated} \\[2pt]
+
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app16_polischar_evst_fe5_area_ori.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app16_polischar_evst_fe5_area_rotated.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app16_polischar_evst_fe5_farzad_ori.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app16_polischar_evst_fe5_farzad_rotated.png} \\
+\multicolumn{4}{@{}c@{}}{\footnotesize\emph{Row 1 --- Politician event study (\texttt{\_app\_16})}} \\[4pt]
+
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app17_protest_evst_fe5_area_ori.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app17_protest_evst_fe5_area_rotated.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app17_protest_evst_fe5_farzad_ori.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app17_protest_evst_fe5_farzad_rotated.png} \\
+\multicolumn{4}{@{}c@{}}{\footnotesize\emph{Row 2 --- Protest event study (\texttt{\_app\_17})}} \\[4pt]
+
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app19_polischar_did_downup_fe5_area.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app18_protest_did_downup_fe5_area.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app19_polischar_did_downup_fe5_farzad.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app18_protest_did_downup_fe5_farzad.png} \\
+\multicolumn{4}{@{}c@{}}{\footnotesize\emph{Row 3 --- Interactions with \texttt{downup\_ac}: polischar (\texttt{\_app\_19}) and protest (\texttt{\_app\_18})}} \\
+\end{tabular}
+\clearpage
+\section*{Fixed-effects specification \texttt{fe6}}
+\addcontentsline{toc}{section}{fe6 --- grid$\times$cohort + prov$\times$elec-yr$\times$govt-yr}
+\noindent\textit{grid$\times$cohort + prov$\times$elec-yr$\times$govt-yr}
+\vspace{0.5em}
+
+\noindent
+\begin{tabular}{@{}m{0.245\linewidth}m{0.245\linewidth}m{0.245\linewidth}m{0.245\linewidth}@{}}
+\centering\arraybackslash\textbf{Area --- original} &
+\centering\arraybackslash\textbf{Area --- rotated} &
+\centering\arraybackslash\textbf{Farzad --- original} &
+\centering\arraybackslash\textbf{Farzad --- rotated} \\[2pt]
+
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app16_polischar_evst_fe6_area_ori.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app16_polischar_evst_fe6_area_rotated.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app16_polischar_evst_fe6_farzad_ori.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app16_polischar_evst_fe6_farzad_rotated.png} \\
+\multicolumn{4}{@{}c@{}}{\footnotesize\emph{Row 1 --- Politician event study (\texttt{\_app\_16})}} \\[4pt]
+
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app17_protest_evst_fe6_area_ori.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app17_protest_evst_fe6_area_rotated.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app17_protest_evst_fe6_farzad_ori.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app17_protest_evst_fe6_farzad_rotated.png} \\
+\multicolumn{4}{@{}c@{}}{\footnotesize\emph{Row 2 --- Protest event study (\texttt{\_app\_17})}} \\[4pt]
+
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app19_polischar_did_downup_fe6_area.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app18_protest_did_downup_fe6_area.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app19_polischar_did_downup_fe6_farzad.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app18_protest_did_downup_fe6_farzad.png} \\
+\multicolumn{4}{@{}c@{}}{\footnotesize\emph{Row 3 --- Interactions with \texttt{downup\_ac}: polischar (\texttt{\_app\_19}) and protest (\texttt{\_app\_18})}} \\
+\end{tabular}
+\clearpage
+\section*{Fixed-effects specification \texttt{fe7}}
+\addcontentsline{toc}{section}{fe7 --- grid$\times$cohort + mo-yr$\times$cohort + prov$\times$cohort trend}
+\noindent\textit{grid$\times$cohort + mo-yr$\times$cohort + prov$\times$cohort trend}
+\vspace{0.5em}
+
+\noindent
+\begin{tabular}{@{}m{0.245\linewidth}m{0.245\linewidth}m{0.245\linewidth}m{0.245\linewidth}@{}}
+\centering\arraybackslash\textbf{Area --- original} &
+\centering\arraybackslash\textbf{Area --- rotated} &
+\centering\arraybackslash\textbf{Farzad --- original} &
+\centering\arraybackslash\textbf{Farzad --- rotated} \\[2pt]
+
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app16_polischar_evst_fe7_area_ori.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app16_polischar_evst_fe7_area_rotated.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app16_polischar_evst_fe7_farzad_ori.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app16_polischar_evst_fe7_farzad_rotated.png} \\
+\multicolumn{4}{@{}c@{}}{\footnotesize\emph{Row 1 --- Politician event study (\texttt{\_app\_16})}} \\[4pt]
+
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app17_protest_evst_fe7_area_ori.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app17_protest_evst_fe7_area_rotated.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app17_protest_evst_fe7_farzad_ori.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app17_protest_evst_fe7_farzad_rotated.png} \\
+\multicolumn{4}{@{}c@{}}{\footnotesize\emph{Row 2 --- Protest event study (\texttt{\_app\_17})}} \\[4pt]
+
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app19_polischar_did_downup_fe7_area.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app18_protest_did_downup_fe7_area.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app19_polischar_did_downup_fe7_farzad.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app18_protest_did_downup_fe7_farzad.png} \\
+\multicolumn{4}{@{}c@{}}{\footnotesize\emph{Row 3 --- Interactions with \texttt{downup\_ac}: polischar (\texttt{\_app\_19}) and protest (\texttt{\_app\_18})}} \\
+\end{tabular}
+\clearpage
+\section*{Fixed-effects specification \texttt{fe8}}
+\addcontentsline{toc}{section}{fe8 --- grid$\times$cohort + mo-yr$\times$cohort + govt-year}
+\noindent\textit{grid$\times$cohort + mo-yr$\times$cohort + govt-year}
+\vspace{0.5em}
+
+\noindent
+\begin{tabular}{@{}m{0.245\linewidth}m{0.245\linewidth}m{0.245\linewidth}m{0.245\linewidth}@{}}
+\centering\arraybackslash\textbf{Area --- original} &
+\centering\arraybackslash\textbf{Area --- rotated} &
+\centering\arraybackslash\textbf{Farzad --- original} &
+\centering\arraybackslash\textbf{Farzad --- rotated} \\[2pt]
+
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app16_polischar_evst_fe8_area_ori.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app16_polischar_evst_fe8_area_rotated.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app16_polischar_evst_fe8_farzad_ori.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app16_polischar_evst_fe8_farzad_rotated.png} \\
+\multicolumn{4}{@{}c@{}}{\footnotesize\emph{Row 1 --- Politician event study (\texttt{\_app\_16})}} \\[4pt]
+
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app17_protest_evst_fe8_area_ori.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app17_protest_evst_fe8_area_rotated.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app17_protest_evst_fe8_farzad_ori.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app17_protest_evst_fe8_farzad_rotated.png} \\
+\multicolumn{4}{@{}c@{}}{\footnotesize\emph{Row 2 --- Protest event study (\texttt{\_app\_17})}} \\[4pt]
+
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app19_polischar_did_downup_fe8_area.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app18_protest_did_downup_fe8_area.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app19_polischar_did_downup_fe8_farzad.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app18_protest_did_downup_fe8_farzad.png} \\
+\multicolumn{4}{@{}c@{}}{\footnotesize\emph{Row 3 --- Interactions with \texttt{downup\_ac}: polischar (\texttt{\_app\_19}) and protest (\texttt{\_app\_18})}} \\
+\end{tabular}
+\clearpage
+\section*{Fixed-effects specification \texttt{fe9}}
+\addcontentsline{toc}{section}{fe9 --- grid$\times$cohort + mo-yr$\times$cohort + prov$\times$elec-yr}
+\noindent\textit{grid$\times$cohort + mo-yr$\times$cohort + prov$\times$elec-yr}
+\vspace{0.5em}
+
+\noindent
+\begin{tabular}{@{}m{0.245\linewidth}m{0.245\linewidth}m{0.245\linewidth}m{0.245\linewidth}@{}}
+\centering\arraybackslash\textbf{Area --- original} &
+\centering\arraybackslash\textbf{Area --- rotated} &
+\centering\arraybackslash\textbf{Farzad --- original} &
+\centering\arraybackslash\textbf{Farzad --- rotated} \\[2pt]
+
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app16_polischar_evst_fe9_area_ori.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app16_polischar_evst_fe9_area_rotated.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app16_polischar_evst_fe9_farzad_ori.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app16_polischar_evst_fe9_farzad_rotated.png} \\
+\multicolumn{4}{@{}c@{}}{\footnotesize\emph{Row 1 --- Politician event study (\texttt{\_app\_16})}} \\[4pt]
+
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app17_protest_evst_fe9_area_ori.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app17_protest_evst_fe9_area_rotated.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app17_protest_evst_fe9_farzad_ori.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app17_protest_evst_fe9_farzad_rotated.png} \\
+\multicolumn{4}{@{}c@{}}{\footnotesize\emph{Row 2 --- Protest event study (\texttt{\_app\_17})}} \\[4pt]
+
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app19_polischar_did_downup_fe9_area.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app18_protest_did_downup_fe9_area.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app19_polischar_did_downup_fe9_farzad.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app18_protest_did_downup_fe9_farzad.png} \\
+\multicolumn{4}{@{}c@{}}{\footnotesize\emph{Row 3 --- Interactions with \texttt{downup\_ac}: polischar (\texttt{\_app\_19}) and protest (\texttt{\_app\_18})}} \\
+\end{tabular}
+\clearpage
+\section*{Fixed-effects specification \texttt{fe10}}
+\addcontentsline{toc}{section}{fe10 --- grid$\times$cohort + mo-yr$\times$cohort + prov$\times$elec-yr$\times$govt-yr}
+\noindent\textit{grid$\times$cohort + mo-yr$\times$cohort + prov$\times$elec-yr$\times$govt-yr}
+\vspace{0.5em}
+
+\noindent
+\begin{tabular}{@{}m{0.245\linewidth}m{0.245\linewidth}m{0.245\linewidth}m{0.245\linewidth}@{}}
+\centering\arraybackslash\textbf{Area --- original} &
+\centering\arraybackslash\textbf{Area --- rotated} &
+\centering\arraybackslash\textbf{Farzad --- original} &
+\centering\arraybackslash\textbf{Farzad --- rotated} \\[2pt]
+
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app16_polischar_evst_fe10_area_ori.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app16_polischar_evst_fe10_area_rotated.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app16_polischar_evst_fe10_farzad_ori.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app16_polischar_evst_fe10_farzad_rotated.png} \\
+\multicolumn{4}{@{}c@{}}{\footnotesize\emph{Row 1 --- Politician event study (\texttt{\_app\_16})}} \\[4pt]
+
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app17_protest_evst_fe10_area_ori.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app17_protest_evst_fe10_area_rotated.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app17_protest_evst_fe10_farzad_ori.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app17_protest_evst_fe10_farzad_rotated.png} \\
+\multicolumn{4}{@{}c@{}}{\footnotesize\emph{Row 2 --- Protest event study (\texttt{\_app\_17})}} \\[4pt]
+
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app19_polischar_did_downup_fe10_area.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app18_protest_did_downup_fe10_area.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app19_polischar_did_downup_fe10_farzad.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app18_protest_did_downup_fe10_farzad.png} \\
+\multicolumn{4}{@{}c@{}}{\footnotesize\emph{Row 3 --- Interactions with \texttt{downup\_ac}: polischar (\texttt{\_app\_19}) and protest (\texttt{\_app\_18})}} \\
+\end{tabular}
+\clearpage
+\section*{Fixed-effects specification \texttt{fe11}}
+\addcontentsline{toc}{section}{fe11 --- grid$\times$cohort + prov$\times$cohort trend + govt-year}
+\noindent\textit{grid$\times$cohort + prov$\times$cohort trend + govt-year}
+\vspace{0.5em}
+
+\noindent
+\begin{tabular}{@{}m{0.245\linewidth}m{0.245\linewidth}m{0.245\linewidth}m{0.245\linewidth}@{}}
+\centering\arraybackslash\textbf{Area --- original} &
+\centering\arraybackslash\textbf{Area --- rotated} &
+\centering\arraybackslash\textbf{Farzad --- original} &
+\centering\arraybackslash\textbf{Farzad --- rotated} \\[2pt]
+
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app16_polischar_evst_fe11_area_ori.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app16_polischar_evst_fe11_area_rotated.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app16_polischar_evst_fe11_farzad_ori.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app16_polischar_evst_fe11_farzad_rotated.png} \\
+\multicolumn{4}{@{}c@{}}{\footnotesize\emph{Row 1 --- Politician event study (\texttt{\_app\_16})}} \\[4pt]
+
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app17_protest_evst_fe11_area_ori.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app17_protest_evst_fe11_area_rotated.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app17_protest_evst_fe11_farzad_ori.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app17_protest_evst_fe11_farzad_rotated.png} \\
+\multicolumn{4}{@{}c@{}}{\footnotesize\emph{Row 2 --- Protest event study (\texttt{\_app\_17})}} \\[4pt]
+
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app19_polischar_did_downup_fe11_area.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app18_protest_did_downup_fe11_area.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app19_polischar_did_downup_fe11_farzad.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app18_protest_did_downup_fe11_farzad.png} \\
+\multicolumn{4}{@{}c@{}}{\footnotesize\emph{Row 3 --- Interactions with \texttt{downup\_ac}: polischar (\texttt{\_app\_19}) and protest (\texttt{\_app\_18})}} \\
+\end{tabular}
+\clearpage
+\section*{Fixed-effects specification \texttt{fe12}}
+\addcontentsline{toc}{section}{fe12 --- grid$\times$cohort + prov$\times$cohort trend + prov$\times$elec-yr}
+\noindent\textit{grid$\times$cohort + prov$\times$cohort trend + prov$\times$elec-yr}
+\vspace{0.5em}
+
+\noindent
+\begin{tabular}{@{}m{0.245\linewidth}m{0.245\linewidth}m{0.245\linewidth}m{0.245\linewidth}@{}}
+\centering\arraybackslash\textbf{Area --- original} &
+\centering\arraybackslash\textbf{Area --- rotated} &
+\centering\arraybackslash\textbf{Farzad --- original} &
+\centering\arraybackslash\textbf{Farzad --- rotated} \\[2pt]
+
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app16_polischar_evst_fe12_area_ori.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app16_polischar_evst_fe12_area_rotated.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app16_polischar_evst_fe12_farzad_ori.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app16_polischar_evst_fe12_farzad_rotated.png} \\
+\multicolumn{4}{@{}c@{}}{\footnotesize\emph{Row 1 --- Politician event study (\texttt{\_app\_16})}} \\[4pt]
+
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app17_protest_evst_fe12_area_ori.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app17_protest_evst_fe12_area_rotated.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app17_protest_evst_fe12_farzad_ori.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app17_protest_evst_fe12_farzad_rotated.png} \\
+\multicolumn{4}{@{}c@{}}{\footnotesize\emph{Row 2 --- Protest event study (\texttt{\_app\_17})}} \\[4pt]
+
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app19_polischar_did_downup_fe12_area.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app18_protest_did_downup_fe12_area.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app19_polischar_did_downup_fe12_farzad.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app18_protest_did_downup_fe12_farzad.png} \\
+\multicolumn{4}{@{}c@{}}{\footnotesize\emph{Row 3 --- Interactions with \texttt{downup\_ac}: polischar (\texttt{\_app\_19}) and protest (\texttt{\_app\_18})}} \\
+\end{tabular}
+\clearpage
+\section*{Fixed-effects specification \texttt{fe13}}
+\addcontentsline{toc}{section}{fe13 --- grid$\times$cohort + prov$\times$cohort trend + prov$\times$elec-yr$\times$govt-yr}
+\noindent\textit{grid$\times$cohort + prov$\times$cohort trend + prov$\times$elec-yr$\times$govt-yr}
+\vspace{0.5em}
+
+\noindent
+\begin{tabular}{@{}m{0.245\linewidth}m{0.245\linewidth}m{0.245\linewidth}m{0.245\linewidth}@{}}
+\centering\arraybackslash\textbf{Area --- original} &
+\centering\arraybackslash\textbf{Area --- rotated} &
+\centering\arraybackslash\textbf{Farzad --- original} &
+\centering\arraybackslash\textbf{Farzad --- rotated} \\[2pt]
+
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app16_polischar_evst_fe13_area_ori.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app16_polischar_evst_fe13_area_rotated.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app16_polischar_evst_fe13_farzad_ori.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app16_polischar_evst_fe13_farzad_rotated.png} \\
+\multicolumn{4}{@{}c@{}}{\footnotesize\emph{Row 1 --- Politician event study (\texttt{\_app\_16})}} \\[4pt]
+
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app17_protest_evst_fe13_area_ori.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app17_protest_evst_fe13_area_rotated.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app17_protest_evst_fe13_farzad_ori.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app17_protest_evst_fe13_farzad_rotated.png} \\
+\multicolumn{4}{@{}c@{}}{\footnotesize\emph{Row 2 --- Protest event study (\texttt{\_app\_17})}} \\[4pt]
+
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app19_polischar_did_downup_fe13_area.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app18_protest_did_downup_fe13_area.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app19_polischar_did_downup_fe13_farzad.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app18_protest_did_downup_fe13_farzad.png} \\
+\multicolumn{4}{@{}c@{}}{\footnotesize\emph{Row 3 --- Interactions with \texttt{downup\_ac}: polischar (\texttt{\_app\_19}) and protest (\texttt{\_app\_18})}} \\
+\end{tabular}
+\clearpage
+\section*{Fixed-effects specification \texttt{fe14}}
+\addcontentsline{toc}{section}{fe14 --- grid$\times$cohort + govt-year + prov$\times$elec-yr}
+\noindent\textit{grid$\times$cohort + govt-year + prov$\times$elec-yr}
+\vspace{0.5em}
+
+\noindent
+\begin{tabular}{@{}m{0.245\linewidth}m{0.245\linewidth}m{0.245\linewidth}m{0.245\linewidth}@{}}
+\centering\arraybackslash\textbf{Area --- original} &
+\centering\arraybackslash\textbf{Area --- rotated} &
+\centering\arraybackslash\textbf{Farzad --- original} &
+\centering\arraybackslash\textbf{Farzad --- rotated} \\[2pt]
+
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app16_polischar_evst_fe14_area_ori.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app16_polischar_evst_fe14_area_rotated.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app16_polischar_evst_fe14_farzad_ori.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app16_polischar_evst_fe14_farzad_rotated.png} \\
+\multicolumn{4}{@{}c@{}}{\footnotesize\emph{Row 1 --- Politician event study (\texttt{\_app\_16})}} \\[4pt]
+
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app17_protest_evst_fe14_area_ori.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app17_protest_evst_fe14_area_rotated.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app17_protest_evst_fe14_farzad_ori.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app17_protest_evst_fe14_farzad_rotated.png} \\
+\multicolumn{4}{@{}c@{}}{\footnotesize\emph{Row 2 --- Protest event study (\texttt{\_app\_17})}} \\[4pt]
+
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app19_polischar_did_downup_fe14_area.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app18_protest_did_downup_fe14_area.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app19_polischar_did_downup_fe14_farzad.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app18_protest_did_downup_fe14_farzad.png} \\
+\multicolumn{4}{@{}c@{}}{\footnotesize\emph{Row 3 --- Interactions with \texttt{downup\_ac}: polischar (\texttt{\_app\_19}) and protest (\texttt{\_app\_18})}} \\
+\end{tabular}
+\clearpage
+\section*{Fixed-effects specification \texttt{fe15}}
+\addcontentsline{toc}{section}{fe15 --- grid$\times$cohort + govt-year + prov$\times$elec-yr$\times$govt-yr}
+\noindent\textit{grid$\times$cohort + govt-year + prov$\times$elec-yr$\times$govt-yr}
+\vspace{0.5em}
+
+\noindent
+\begin{tabular}{@{}m{0.245\linewidth}m{0.245\linewidth}m{0.245\linewidth}m{0.245\linewidth}@{}}
+\centering\arraybackslash\textbf{Area --- original} &
+\centering\arraybackslash\textbf{Area --- rotated} &
+\centering\arraybackslash\textbf{Farzad --- original} &
+\centering\arraybackslash\textbf{Farzad --- rotated} \\[2pt]
+
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app16_polischar_evst_fe15_area_ori.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app16_polischar_evst_fe15_area_rotated.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app16_polischar_evst_fe15_farzad_ori.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app16_polischar_evst_fe15_farzad_rotated.png} \\
+\multicolumn{4}{@{}c@{}}{\footnotesize\emph{Row 1 --- Politician event study (\texttt{\_app\_16})}} \\[4pt]
+
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app17_protest_evst_fe15_area_ori.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app17_protest_evst_fe15_area_rotated.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app17_protest_evst_fe15_farzad_ori.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app17_protest_evst_fe15_farzad_rotated.png} \\
+\multicolumn{4}{@{}c@{}}{\footnotesize\emph{Row 2 --- Protest event study (\texttt{\_app\_17})}} \\[4pt]
+
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app19_polischar_did_downup_fe15_area.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app18_protest_did_downup_fe15_area.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app19_polischar_did_downup_fe15_farzad.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app18_protest_did_downup_fe15_farzad.png} \\
+\multicolumn{4}{@{}c@{}}{\footnotesize\emph{Row 3 --- Interactions with \texttt{downup\_ac}: polischar (\texttt{\_app\_19}) and protest (\texttt{\_app\_18})}} \\
+\end{tabular}
+\clearpage
+\section*{Fixed-effects specification \texttt{fe16}}
+\addcontentsline{toc}{section}{fe16 --- grid$\times$cohort + prov$\times$elec-yr + prov$\times$elec-yr$\times$govt-yr}
+\noindent\textit{grid$\times$cohort + prov$\times$elec-yr + prov$\times$elec-yr$\times$govt-yr}
+\vspace{0.5em}
+
+\noindent
+\begin{tabular}{@{}m{0.245\linewidth}m{0.245\linewidth}m{0.245\linewidth}m{0.245\linewidth}@{}}
+\centering\arraybackslash\textbf{Area --- original} &
+\centering\arraybackslash\textbf{Area --- rotated} &
+\centering\arraybackslash\textbf{Farzad --- original} &
+\centering\arraybackslash\textbf{Farzad --- rotated} \\[2pt]
+
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app16_polischar_evst_fe16_area_ori.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app16_polischar_evst_fe16_area_rotated.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app16_polischar_evst_fe16_farzad_ori.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app16_polischar_evst_fe16_farzad_rotated.png} \\
+\multicolumn{4}{@{}c@{}}{\footnotesize\emph{Row 1 --- Politician event study (\texttt{\_app\_16})}} \\[4pt]
+
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app17_protest_evst_fe16_area_ori.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app17_protest_evst_fe16_area_rotated.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app17_protest_evst_fe16_farzad_ori.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app17_protest_evst_fe16_farzad_rotated.png} \\
+\multicolumn{4}{@{}c@{}}{\footnotesize\emph{Row 2 --- Protest event study (\texttt{\_app\_17})}} \\[4pt]
+
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app19_polischar_did_downup_fe16_area.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app18_protest_did_downup_fe16_area.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app19_polischar_did_downup_fe16_farzad.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app18_protest_did_downup_fe16_farzad.png} \\
+\multicolumn{4}{@{}c@{}}{\footnotesize\emph{Row 3 --- Interactions with \texttt{downup\_ac}: polischar (\texttt{\_app\_19}) and protest (\texttt{\_app\_18})}} \\
+\end{tabular}
+\clearpage
+\section*{Fixed-effects specification \texttt{fe17}}
+\addcontentsline{toc}{section}{fe17 --- grid$\times$cohort + mo-yr$\times$cohort + prov$\times$cohort trend + govt-year}
+\noindent\textit{grid$\times$cohort + mo-yr$\times$cohort + prov$\times$cohort trend + govt-year}
+\vspace{0.5em}
+
+\noindent
+\begin{tabular}{@{}m{0.245\linewidth}m{0.245\linewidth}m{0.245\linewidth}m{0.245\linewidth}@{}}
+\centering\arraybackslash\textbf{Area --- original} &
+\centering\arraybackslash\textbf{Area --- rotated} &
+\centering\arraybackslash\textbf{Farzad --- original} &
+\centering\arraybackslash\textbf{Farzad --- rotated} \\[2pt]
+
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app16_polischar_evst_fe17_area_ori.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app16_polischar_evst_fe17_area_rotated.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app16_polischar_evst_fe17_farzad_ori.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app16_polischar_evst_fe17_farzad_rotated.png} \\
+\multicolumn{4}{@{}c@{}}{\footnotesize\emph{Row 1 --- Politician event study (\texttt{\_app\_16})}} \\[4pt]
+
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app17_protest_evst_fe17_area_ori.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app17_protest_evst_fe17_area_rotated.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app17_protest_evst_fe17_farzad_ori.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app17_protest_evst_fe17_farzad_rotated.png} \\
+\multicolumn{4}{@{}c@{}}{\footnotesize\emph{Row 2 --- Protest event study (\texttt{\_app\_17})}} \\[4pt]
+
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app19_polischar_did_downup_fe17_area.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app18_protest_did_downup_fe17_area.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app19_polischar_did_downup_fe17_farzad.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app18_protest_did_downup_fe17_farzad.png} \\
+\multicolumn{4}{@{}c@{}}{\footnotesize\emph{Row 3 --- Interactions with \texttt{downup\_ac}: polischar (\texttt{\_app\_19}) and protest (\texttt{\_app\_18})}} \\
+\end{tabular}
+\clearpage
+\section*{Fixed-effects specification \texttt{fe18}}
+\addcontentsline{toc}{section}{fe18 --- grid$\times$cohort + mo-yr$\times$cohort + prov$\times$cohort trend + prov$\times$elec-yr}
+\noindent\textit{grid$\times$cohort + mo-yr$\times$cohort + prov$\times$cohort trend + prov$\times$elec-yr}
+\vspace{0.5em}
+
+\noindent
+\begin{tabular}{@{}m{0.245\linewidth}m{0.245\linewidth}m{0.245\linewidth}m{0.245\linewidth}@{}}
+\centering\arraybackslash\textbf{Area --- original} &
+\centering\arraybackslash\textbf{Area --- rotated} &
+\centering\arraybackslash\textbf{Farzad --- original} &
+\centering\arraybackslash\textbf{Farzad --- rotated} \\[2pt]
+
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app16_polischar_evst_fe18_area_ori.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app16_polischar_evst_fe18_area_rotated.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app16_polischar_evst_fe18_farzad_ori.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app16_polischar_evst_fe18_farzad_rotated.png} \\
+\multicolumn{4}{@{}c@{}}{\footnotesize\emph{Row 1 --- Politician event study (\texttt{\_app\_16})}} \\[4pt]
+
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app17_protest_evst_fe18_area_ori.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app17_protest_evst_fe18_area_rotated.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app17_protest_evst_fe18_farzad_ori.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app17_protest_evst_fe18_farzad_rotated.png} \\
+\multicolumn{4}{@{}c@{}}{\footnotesize\emph{Row 2 --- Protest event study (\texttt{\_app\_17})}} \\[4pt]
+
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app19_polischar_did_downup_fe18_area.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app18_protest_did_downup_fe18_area.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app19_polischar_did_downup_fe18_farzad.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app18_protest_did_downup_fe18_farzad.png} \\
+\multicolumn{4}{@{}c@{}}{\footnotesize\emph{Row 3 --- Interactions with \texttt{downup\_ac}: polischar (\texttt{\_app\_19}) and protest (\texttt{\_app\_18})}} \\
+\end{tabular}
+\clearpage
+\section*{Fixed-effects specification \texttt{fe19}}
+\addcontentsline{toc}{section}{fe19 --- grid$\times$cohort + mo-yr$\times$cohort + prov$\times$cohort trend + prov$\times$elec-yr$\times$govt-yr}
+\noindent\textit{grid$\times$cohort + mo-yr$\times$cohort + prov$\times$cohort trend + prov$\times$elec-yr$\times$govt-yr}
+\vspace{0.5em}
+
+\noindent
+\begin{tabular}{@{}m{0.245\linewidth}m{0.245\linewidth}m{0.245\linewidth}m{0.245\linewidth}@{}}
+\centering\arraybackslash\textbf{Area --- original} &
+\centering\arraybackslash\textbf{Area --- rotated} &
+\centering\arraybackslash\textbf{Farzad --- original} &
+\centering\arraybackslash\textbf{Farzad --- rotated} \\[2pt]
+
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app16_polischar_evst_fe19_area_ori.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app16_polischar_evst_fe19_area_rotated.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app16_polischar_evst_fe19_farzad_ori.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app16_polischar_evst_fe19_farzad_rotated.png} \\
+\multicolumn{4}{@{}c@{}}{\footnotesize\emph{Row 1 --- Politician event study (\texttt{\_app\_16})}} \\[4pt]
+
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app17_protest_evst_fe19_area_ori.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app17_protest_evst_fe19_area_rotated.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app17_protest_evst_fe19_farzad_ori.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app17_protest_evst_fe19_farzad_rotated.png} \\
+\multicolumn{4}{@{}c@{}}{\footnotesize\emph{Row 2 --- Protest event study (\texttt{\_app\_17})}} \\[4pt]
+
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app19_polischar_did_downup_fe19_area.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app18_protest_did_downup_fe19_area.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app19_polischar_did_downup_fe19_farzad.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app18_protest_did_downup_fe19_farzad.png} \\
+\multicolumn{4}{@{}c@{}}{\footnotesize\emph{Row 3 --- Interactions with \texttt{downup\_ac}: polischar (\texttt{\_app\_19}) and protest (\texttt{\_app\_18})}} \\
+\end{tabular}
+\clearpage
+\section*{Fixed-effects specification \texttt{fe20}}
+\addcontentsline{toc}{section}{fe20 --- grid$\times$cohort + mo-yr$\times$cohort + govt-year + prov$\times$elec-yr}
+\noindent\textit{grid$\times$cohort + mo-yr$\times$cohort + govt-year + prov$\times$elec-yr}
+\vspace{0.5em}
+
+\noindent
+\begin{tabular}{@{}m{0.245\linewidth}m{0.245\linewidth}m{0.245\linewidth}m{0.245\linewidth}@{}}
+\centering\arraybackslash\textbf{Area --- original} &
+\centering\arraybackslash\textbf{Area --- rotated} &
+\centering\arraybackslash\textbf{Farzad --- original} &
+\centering\arraybackslash\textbf{Farzad --- rotated} \\[2pt]
+
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app16_polischar_evst_fe20_area_ori.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app16_polischar_evst_fe20_area_rotated.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app16_polischar_evst_fe20_farzad_ori.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app16_polischar_evst_fe20_farzad_rotated.png} \\
+\multicolumn{4}{@{}c@{}}{\footnotesize\emph{Row 1 --- Politician event study (\texttt{\_app\_16})}} \\[4pt]
+
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app17_protest_evst_fe20_area_ori.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app17_protest_evst_fe20_area_rotated.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app17_protest_evst_fe20_farzad_ori.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app17_protest_evst_fe20_farzad_rotated.png} \\
+\multicolumn{4}{@{}c@{}}{\footnotesize\emph{Row 2 --- Protest event study (\texttt{\_app\_17})}} \\[4pt]
+
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app19_polischar_did_downup_fe20_area.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app18_protest_did_downup_fe20_area.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app19_polischar_did_downup_fe20_farzad.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app18_protest_did_downup_fe20_farzad.png} \\
+\multicolumn{4}{@{}c@{}}{\footnotesize\emph{Row 3 --- Interactions with \texttt{downup\_ac}: polischar (\texttt{\_app\_19}) and protest (\texttt{\_app\_18})}} \\
+\end{tabular}
+\clearpage
+\section*{Fixed-effects specification \texttt{fe21}}
+\addcontentsline{toc}{section}{fe21 --- grid$\times$cohort + mo-yr$\times$cohort + govt-year + prov$\times$elec-yr$\times$govt-yr}
+\noindent\textit{grid$\times$cohort + mo-yr$\times$cohort + govt-year + prov$\times$elec-yr$\times$govt-yr}
+\vspace{0.5em}
+
+\noindent
+\begin{tabular}{@{}m{0.245\linewidth}m{0.245\linewidth}m{0.245\linewidth}m{0.245\linewidth}@{}}
+\centering\arraybackslash\textbf{Area --- original} &
+\centering\arraybackslash\textbf{Area --- rotated} &
+\centering\arraybackslash\textbf{Farzad --- original} &
+\centering\arraybackslash\textbf{Farzad --- rotated} \\[2pt]
+
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app16_polischar_evst_fe21_area_ori.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app16_polischar_evst_fe21_area_rotated.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app16_polischar_evst_fe21_farzad_ori.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app16_polischar_evst_fe21_farzad_rotated.png} \\
+\multicolumn{4}{@{}c@{}}{\footnotesize\emph{Row 1 --- Politician event study (\texttt{\_app\_16})}} \\[4pt]
+
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app17_protest_evst_fe21_area_ori.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app17_protest_evst_fe21_area_rotated.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app17_protest_evst_fe21_farzad_ori.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app17_protest_evst_fe21_farzad_rotated.png} \\
+\multicolumn{4}{@{}c@{}}{\footnotesize\emph{Row 2 --- Protest event study (\texttt{\_app\_17})}} \\[4pt]
+
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app19_polischar_did_downup_fe21_area.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app18_protest_did_downup_fe21_area.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app19_polischar_did_downup_fe21_farzad.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app18_protest_did_downup_fe21_farzad.png} \\
+\multicolumn{4}{@{}c@{}}{\footnotesize\emph{Row 3 --- Interactions with \texttt{downup\_ac}: polischar (\texttt{\_app\_19}) and protest (\texttt{\_app\_18})}} \\
+\end{tabular}
+\clearpage
+\section*{Fixed-effects specification \texttt{fe22}}
+\addcontentsline{toc}{section}{fe22 --- grid$\times$cohort + mo-yr$\times$cohort + prov$\times$elec-yr + prov$\times$elec-yr$\times$govt-yr}
+\noindent\textit{grid$\times$cohort + mo-yr$\times$cohort + prov$\times$elec-yr + prov$\times$elec-yr$\times$govt-yr}
+\vspace{0.5em}
+
+\noindent
+\begin{tabular}{@{}m{0.245\linewidth}m{0.245\linewidth}m{0.245\linewidth}m{0.245\linewidth}@{}}
+\centering\arraybackslash\textbf{Area --- original} &
+\centering\arraybackslash\textbf{Area --- rotated} &
+\centering\arraybackslash\textbf{Farzad --- original} &
+\centering\arraybackslash\textbf{Farzad --- rotated} \\[2pt]
+
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app16_polischar_evst_fe22_area_ori.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app16_polischar_evst_fe22_area_rotated.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app16_polischar_evst_fe22_farzad_ori.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app16_polischar_evst_fe22_farzad_rotated.png} \\
+\multicolumn{4}{@{}c@{}}{\footnotesize\emph{Row 1 --- Politician event study (\texttt{\_app\_16})}} \\[4pt]
+
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app17_protest_evst_fe22_area_ori.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app17_protest_evst_fe22_area_rotated.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app17_protest_evst_fe22_farzad_ori.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app17_protest_evst_fe22_farzad_rotated.png} \\
+\multicolumn{4}{@{}c@{}}{\footnotesize\emph{Row 2 --- Protest event study (\texttt{\_app\_17})}} \\[4pt]
+
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app19_polischar_did_downup_fe22_area.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app18_protest_did_downup_fe22_area.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app19_polischar_did_downup_fe22_farzad.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app18_protest_did_downup_fe22_farzad.png} \\
+\multicolumn{4}{@{}c@{}}{\footnotesize\emph{Row 3 --- Interactions with \texttt{downup\_ac}: polischar (\texttt{\_app\_19}) and protest (\texttt{\_app\_18})}} \\
+\end{tabular}
+\clearpage
+\section*{Fixed-effects specification \texttt{fe23}}
+\addcontentsline{toc}{section}{fe23 --- grid$\times$cohort + prov$\times$cohort trend + govt-year + prov$\times$elec-yr}
+\noindent\textit{grid$\times$cohort + prov$\times$cohort trend + govt-year + prov$\times$elec-yr}
+\vspace{0.5em}
+
+\noindent
+\begin{tabular}{@{}m{0.245\linewidth}m{0.245\linewidth}m{0.245\linewidth}m{0.245\linewidth}@{}}
+\centering\arraybackslash\textbf{Area --- original} &
+\centering\arraybackslash\textbf{Area --- rotated} &
+\centering\arraybackslash\textbf{Farzad --- original} &
+\centering\arraybackslash\textbf{Farzad --- rotated} \\[2pt]
+
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app16_polischar_evst_fe23_area_ori.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app16_polischar_evst_fe23_area_rotated.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app16_polischar_evst_fe23_farzad_ori.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app16_polischar_evst_fe23_farzad_rotated.png} \\
+\multicolumn{4}{@{}c@{}}{\footnotesize\emph{Row 1 --- Politician event study (\texttt{\_app\_16})}} \\[4pt]
+
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app17_protest_evst_fe23_area_ori.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app17_protest_evst_fe23_area_rotated.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app17_protest_evst_fe23_farzad_ori.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app17_protest_evst_fe23_farzad_rotated.png} \\
+\multicolumn{4}{@{}c@{}}{\footnotesize\emph{Row 2 --- Protest event study (\texttt{\_app\_17})}} \\[4pt]
+
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app19_polischar_did_downup_fe23_area.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app18_protest_did_downup_fe23_area.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app19_polischar_did_downup_fe23_farzad.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app18_protest_did_downup_fe23_farzad.png} \\
+\multicolumn{4}{@{}c@{}}{\footnotesize\emph{Row 3 --- Interactions with \texttt{downup\_ac}: polischar (\texttt{\_app\_19}) and protest (\texttt{\_app\_18})}} \\
+\end{tabular}
+\clearpage
+\section*{Fixed-effects specification \texttt{fe24}}
+\addcontentsline{toc}{section}{fe24 --- grid$\times$cohort + prov$\times$cohort trend + govt-year + prov$\times$elec-yr$\times$govt-yr}
+\noindent\textit{grid$\times$cohort + prov$\times$cohort trend + govt-year + prov$\times$elec-yr$\times$govt-yr}
+\vspace{0.5em}
+
+\noindent
+\begin{tabular}{@{}m{0.245\linewidth}m{0.245\linewidth}m{0.245\linewidth}m{0.245\linewidth}@{}}
+\centering\arraybackslash\textbf{Area --- original} &
+\centering\arraybackslash\textbf{Area --- rotated} &
+\centering\arraybackslash\textbf{Farzad --- original} &
+\centering\arraybackslash\textbf{Farzad --- rotated} \\[2pt]
+
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app16_polischar_evst_fe24_area_ori.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app16_polischar_evst_fe24_area_rotated.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app16_polischar_evst_fe24_farzad_ori.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app16_polischar_evst_fe24_farzad_rotated.png} \\
+\multicolumn{4}{@{}c@{}}{\footnotesize\emph{Row 1 --- Politician event study (\texttt{\_app\_16})}} \\[4pt]
+
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app17_protest_evst_fe24_area_ori.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app17_protest_evst_fe24_area_rotated.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app17_protest_evst_fe24_farzad_ori.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app17_protest_evst_fe24_farzad_rotated.png} \\
+\multicolumn{4}{@{}c@{}}{\footnotesize\emph{Row 2 --- Protest event study (\texttt{\_app\_17})}} \\[4pt]
+
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app19_polischar_did_downup_fe24_area.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app18_protest_did_downup_fe24_area.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app19_polischar_did_downup_fe24_farzad.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app18_protest_did_downup_fe24_farzad.png} \\
+\multicolumn{4}{@{}c@{}}{\footnotesize\emph{Row 3 --- Interactions with \texttt{downup\_ac}: polischar (\texttt{\_app\_19}) and protest (\texttt{\_app\_18})}} \\
+\end{tabular}
+\clearpage
+\section*{Fixed-effects specification \texttt{fe25}}
+\addcontentsline{toc}{section}{fe25 --- grid$\times$cohort + prov$\times$cohort trend + prov$\times$elec-yr + prov$\times$elec-yr$\times$govt-yr}
+\noindent\textit{grid$\times$cohort + prov$\times$cohort trend + prov$\times$elec-yr + prov$\times$elec-yr$\times$govt-yr}
+\vspace{0.5em}
+
+\noindent
+\begin{tabular}{@{}m{0.245\linewidth}m{0.245\linewidth}m{0.245\linewidth}m{0.245\linewidth}@{}}
+\centering\arraybackslash\textbf{Area --- original} &
+\centering\arraybackslash\textbf{Area --- rotated} &
+\centering\arraybackslash\textbf{Farzad --- original} &
+\centering\arraybackslash\textbf{Farzad --- rotated} \\[2pt]
+
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app16_polischar_evst_fe25_area_ori.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app16_polischar_evst_fe25_area_rotated.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app16_polischar_evst_fe25_farzad_ori.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app16_polischar_evst_fe25_farzad_rotated.png} \\
+\multicolumn{4}{@{}c@{}}{\footnotesize\emph{Row 1 --- Politician event study (\texttt{\_app\_16})}} \\[4pt]
+
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app17_protest_evst_fe25_area_ori.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app17_protest_evst_fe25_area_rotated.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app17_protest_evst_fe25_farzad_ori.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app17_protest_evst_fe25_farzad_rotated.png} \\
+\multicolumn{4}{@{}c@{}}{\footnotesize\emph{Row 2 --- Protest event study (\texttt{\_app\_17})}} \\[4pt]
+
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app19_polischar_did_downup_fe25_area.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app18_protest_did_downup_fe25_area.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app19_polischar_did_downup_fe25_farzad.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app18_protest_did_downup_fe25_farzad.png} \\
+\multicolumn{4}{@{}c@{}}{\footnotesize\emph{Row 3 --- Interactions with \texttt{downup\_ac}: polischar (\texttt{\_app\_19}) and protest (\texttt{\_app\_18})}} \\
+\end{tabular}
+\clearpage
+\section*{Fixed-effects specification \texttt{fe26}}
+\addcontentsline{toc}{section}{fe26 --- grid$\times$cohort + govt-year + prov$\times$elec-yr + prov$\times$elec-yr$\times$govt-yr}
+\noindent\textit{grid$\times$cohort + govt-year + prov$\times$elec-yr + prov$\times$elec-yr$\times$govt-yr}
+\vspace{0.5em}
+
+\noindent
+\begin{tabular}{@{}m{0.245\linewidth}m{0.245\linewidth}m{0.245\linewidth}m{0.245\linewidth}@{}}
+\centering\arraybackslash\textbf{Area --- original} &
+\centering\arraybackslash\textbf{Area --- rotated} &
+\centering\arraybackslash\textbf{Farzad --- original} &
+\centering\arraybackslash\textbf{Farzad --- rotated} \\[2pt]
+
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app16_polischar_evst_fe26_area_ori.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app16_polischar_evst_fe26_area_rotated.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app16_polischar_evst_fe26_farzad_ori.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app16_polischar_evst_fe26_farzad_rotated.png} \\
+\multicolumn{4}{@{}c@{}}{\footnotesize\emph{Row 1 --- Politician event study (\texttt{\_app\_16})}} \\[4pt]
+
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app17_protest_evst_fe26_area_ori.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app17_protest_evst_fe26_area_rotated.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app17_protest_evst_fe26_farzad_ori.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app17_protest_evst_fe26_farzad_rotated.png} \\
+\multicolumn{4}{@{}c@{}}{\footnotesize\emph{Row 2 --- Protest event study (\texttt{\_app\_17})}} \\[4pt]
+
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app19_polischar_did_downup_fe26_area.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app18_protest_did_downup_fe26_area.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app19_polischar_did_downup_fe26_farzad.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app18_protest_did_downup_fe26_farzad.png} \\
+\multicolumn{4}{@{}c@{}}{\footnotesize\emph{Row 3 --- Interactions with \texttt{downup\_ac}: polischar (\texttt{\_app\_19}) and protest (\texttt{\_app\_18})}} \\
+\end{tabular}
+\clearpage
+\section*{Fixed-effects specification \texttt{fe27}}
+\addcontentsline{toc}{section}{fe27 --- grid$\times$cohort + mo-yr$\times$cohort + prov$\times$cohort trend + govt-year + prov$\times$elec-yr}
+\noindent\textit{grid$\times$cohort + mo-yr$\times$cohort + prov$\times$cohort trend + govt-year + prov$\times$elec-yr}
+\vspace{0.5em}
+
+\noindent
+\begin{tabular}{@{}m{0.245\linewidth}m{0.245\linewidth}m{0.245\linewidth}m{0.245\linewidth}@{}}
+\centering\arraybackslash\textbf{Area --- original} &
+\centering\arraybackslash\textbf{Area --- rotated} &
+\centering\arraybackslash\textbf{Farzad --- original} &
+\centering\arraybackslash\textbf{Farzad --- rotated} \\[2pt]
+
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app16_polischar_evst_fe27_area_ori.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app16_polischar_evst_fe27_area_rotated.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app16_polischar_evst_fe27_farzad_ori.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app16_polischar_evst_fe27_farzad_rotated.png} \\
+\multicolumn{4}{@{}c@{}}{\footnotesize\emph{Row 1 --- Politician event study (\texttt{\_app\_16})}} \\[4pt]
+
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app17_protest_evst_fe27_area_ori.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app17_protest_evst_fe27_area_rotated.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app17_protest_evst_fe27_farzad_ori.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app17_protest_evst_fe27_farzad_rotated.png} \\
+\multicolumn{4}{@{}c@{}}{\footnotesize\emph{Row 2 --- Protest event study (\texttt{\_app\_17})}} \\[4pt]
+
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app19_polischar_did_downup_fe27_area.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app18_protest_did_downup_fe27_area.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app19_polischar_did_downup_fe27_farzad.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app18_protest_did_downup_fe27_farzad.png} \\
+\multicolumn{4}{@{}c@{}}{\footnotesize\emph{Row 3 --- Interactions with \texttt{downup\_ac}: polischar (\texttt{\_app\_19}) and protest (\texttt{\_app\_18})}} \\
+\end{tabular}
+\clearpage
+\section*{Fixed-effects specification \texttt{fe28}}
+\addcontentsline{toc}{section}{fe28 --- grid$\times$cohort + mo-yr$\times$cohort + prov$\times$cohort trend + govt-year + prov$\times$elec-yr$\times$govt-yr}
+\noindent\textit{grid$\times$cohort + mo-yr$\times$cohort + prov$\times$cohort trend + govt-year + prov$\times$elec-yr$\times$govt-yr}
+\vspace{0.5em}
+
+\noindent
+\begin{tabular}{@{}m{0.245\linewidth}m{0.245\linewidth}m{0.245\linewidth}m{0.245\linewidth}@{}}
+\centering\arraybackslash\textbf{Area --- original} &
+\centering\arraybackslash\textbf{Area --- rotated} &
+\centering\arraybackslash\textbf{Farzad --- original} &
+\centering\arraybackslash\textbf{Farzad --- rotated} \\[2pt]
+
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app16_polischar_evst_fe28_area_ori.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app16_polischar_evst_fe28_area_rotated.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app16_polischar_evst_fe28_farzad_ori.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app16_polischar_evst_fe28_farzad_rotated.png} \\
+\multicolumn{4}{@{}c@{}}{\footnotesize\emph{Row 1 --- Politician event study (\texttt{\_app\_16})}} \\[4pt]
+
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app17_protest_evst_fe28_area_ori.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app17_protest_evst_fe28_area_rotated.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app17_protest_evst_fe28_farzad_ori.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app17_protest_evst_fe28_farzad_rotated.png} \\
+\multicolumn{4}{@{}c@{}}{\footnotesize\emph{Row 2 --- Protest event study (\texttt{\_app\_17})}} \\[4pt]
+
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app19_polischar_did_downup_fe28_area.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app18_protest_did_downup_fe28_area.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app19_polischar_did_downup_fe28_farzad.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app18_protest_did_downup_fe28_farzad.png} \\
+\multicolumn{4}{@{}c@{}}{\footnotesize\emph{Row 3 --- Interactions with \texttt{downup\_ac}: polischar (\texttt{\_app\_19}) and protest (\texttt{\_app\_18})}} \\
+\end{tabular}
+\clearpage
+\section*{Fixed-effects specification \texttt{fe29}}
+\addcontentsline{toc}{section}{fe29 --- grid$\times$cohort + mo-yr$\times$cohort + prov$\times$cohort trend + prov$\times$elec-yr + prov$\times$elec-yr$\times$govt-yr}
+\noindent\textit{grid$\times$cohort + mo-yr$\times$cohort + prov$\times$cohort trend + prov$\times$elec-yr + prov$\times$elec-yr$\times$govt-yr}
+\vspace{0.5em}
+
+\noindent
+\begin{tabular}{@{}m{0.245\linewidth}m{0.245\linewidth}m{0.245\linewidth}m{0.245\linewidth}@{}}
+\centering\arraybackslash\textbf{Area --- original} &
+\centering\arraybackslash\textbf{Area --- rotated} &
+\centering\arraybackslash\textbf{Farzad --- original} &
+\centering\arraybackslash\textbf{Farzad --- rotated} \\[2pt]
+
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app16_polischar_evst_fe29_area_ori.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app16_polischar_evst_fe29_area_rotated.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app16_polischar_evst_fe29_farzad_ori.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app16_polischar_evst_fe29_farzad_rotated.png} \\
+\multicolumn{4}{@{}c@{}}{\footnotesize\emph{Row 1 --- Politician event study (\texttt{\_app\_16})}} \\[4pt]
+
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app17_protest_evst_fe29_area_ori.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app17_protest_evst_fe29_area_rotated.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app17_protest_evst_fe29_farzad_ori.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app17_protest_evst_fe29_farzad_rotated.png} \\
+\multicolumn{4}{@{}c@{}}{\footnotesize\emph{Row 2 --- Protest event study (\texttt{\_app\_17})}} \\[4pt]
+
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app19_polischar_did_downup_fe29_area.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app18_protest_did_downup_fe29_area.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app19_polischar_did_downup_fe29_farzad.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app18_protest_did_downup_fe29_farzad.png} \\
+\multicolumn{4}{@{}c@{}}{\footnotesize\emph{Row 3 --- Interactions with \texttt{downup\_ac}: polischar (\texttt{\_app\_19}) and protest (\texttt{\_app\_18})}} \\
+\end{tabular}
+\clearpage
+\section*{Fixed-effects specification \texttt{fe30}}
+\addcontentsline{toc}{section}{fe30 --- grid$\times$cohort + mo-yr$\times$cohort + govt-year + prov$\times$elec-yr + prov$\times$elec-yr$\times$govt-yr}
+\noindent\textit{grid$\times$cohort + mo-yr$\times$cohort + govt-year + prov$\times$elec-yr + prov$\times$elec-yr$\times$govt-yr}
+\vspace{0.5em}
+
+\noindent
+\begin{tabular}{@{}m{0.245\linewidth}m{0.245\linewidth}m{0.245\linewidth}m{0.245\linewidth}@{}}
+\centering\arraybackslash\textbf{Area --- original} &
+\centering\arraybackslash\textbf{Area --- rotated} &
+\centering\arraybackslash\textbf{Farzad --- original} &
+\centering\arraybackslash\textbf{Farzad --- rotated} \\[2pt]
+
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app16_polischar_evst_fe30_area_ori.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app16_polischar_evst_fe30_area_rotated.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app16_polischar_evst_fe30_farzad_ori.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app16_polischar_evst_fe30_farzad_rotated.png} \\
+\multicolumn{4}{@{}c@{}}{\footnotesize\emph{Row 1 --- Politician event study (\texttt{\_app\_16})}} \\[4pt]
+
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app17_protest_evst_fe30_area_ori.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app17_protest_evst_fe30_area_rotated.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app17_protest_evst_fe30_farzad_ori.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app17_protest_evst_fe30_farzad_rotated.png} \\
+\multicolumn{4}{@{}c@{}}{\footnotesize\emph{Row 2 --- Protest event study (\texttt{\_app\_17})}} \\[4pt]
+
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app19_polischar_did_downup_fe30_area.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app18_protest_did_downup_fe30_area.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app19_polischar_did_downup_fe30_farzad.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app18_protest_did_downup_fe30_farzad.png} \\
+\multicolumn{4}{@{}c@{}}{\footnotesize\emph{Row 3 --- Interactions with \texttt{downup\_ac}: polischar (\texttt{\_app\_19}) and protest (\texttt{\_app\_18})}} \\
+\end{tabular}
+\clearpage
+\section*{Fixed-effects specification \texttt{fe31}}
+\addcontentsline{toc}{section}{fe31 --- grid$\times$cohort + prov$\times$cohort trend + govt-year + prov$\times$elec-yr + prov$\times$elec-yr$\times$govt-yr}
+\noindent\textit{grid$\times$cohort + prov$\times$cohort trend + govt-year + prov$\times$elec-yr + prov$\times$elec-yr$\times$govt-yr}
+\vspace{0.5em}
+
+\noindent
+\begin{tabular}{@{}m{0.245\linewidth}m{0.245\linewidth}m{0.245\linewidth}m{0.245\linewidth}@{}}
+\centering\arraybackslash\textbf{Area --- original} &
+\centering\arraybackslash\textbf{Area --- rotated} &
+\centering\arraybackslash\textbf{Farzad --- original} &
+\centering\arraybackslash\textbf{Farzad --- rotated} \\[2pt]
+
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app16_polischar_evst_fe31_area_ori.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app16_polischar_evst_fe31_area_rotated.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app16_polischar_evst_fe31_farzad_ori.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app16_polischar_evst_fe31_farzad_rotated.png} \\
+\multicolumn{4}{@{}c@{}}{\footnotesize\emph{Row 1 --- Politician event study (\texttt{\_app\_16})}} \\[4pt]
+
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app17_protest_evst_fe31_area_ori.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app17_protest_evst_fe31_area_rotated.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app17_protest_evst_fe31_farzad_ori.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app17_protest_evst_fe31_farzad_rotated.png} \\
+\multicolumn{4}{@{}c@{}}{\footnotesize\emph{Row 2 --- Protest event study (\texttt{\_app\_17})}} \\[4pt]
+
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app19_polischar_did_downup_fe31_area.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app18_protest_did_downup_fe31_area.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app19_polischar_did_downup_fe31_farzad.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app18_protest_did_downup_fe31_farzad.png} \\
+\multicolumn{4}{@{}c@{}}{\footnotesize\emph{Row 3 --- Interactions with \texttt{downup\_ac}: polischar (\texttt{\_app\_19}) and protest (\texttt{\_app\_18})}} \\
+\end{tabular}
+\clearpage
+\section*{Fixed-effects specification \texttt{fe32}}
+\addcontentsline{toc}{section}{fe32 --- grid$\times$cohort + mo-yr$\times$cohort + prov$\times$cohort trend + govt-year + prov$\times$elec-yr + prov$\times$elec-yr$\times$govt-yr}
+\noindent\textit{grid$\times$cohort + mo-yr$\times$cohort + prov$\times$cohort trend + govt-year + prov$\times$elec-yr + prov$\times$elec-yr$\times$govt-yr}
+\vspace{0.5em}
+
+\noindent
+\begin{tabular}{@{}m{0.245\linewidth}m{0.245\linewidth}m{0.245\linewidth}m{0.245\linewidth}@{}}
+\centering\arraybackslash\textbf{Area --- original} &
+\centering\arraybackslash\textbf{Area --- rotated} &
+\centering\arraybackslash\textbf{Farzad --- original} &
+\centering\arraybackslash\textbf{Farzad --- rotated} \\[2pt]
+
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app16_polischar_evst_fe32_area_ori.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app16_polischar_evst_fe32_area_rotated.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app16_polischar_evst_fe32_farzad_ori.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app16_polischar_evst_fe32_farzad_rotated.png} \\
+\multicolumn{4}{@{}c@{}}{\footnotesize\emph{Row 1 --- Politician event study (\texttt{\_app\_16})}} \\[4pt]
+
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app17_protest_evst_fe32_area_ori.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app17_protest_evst_fe32_area_rotated.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app17_protest_evst_fe32_farzad_ori.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app17_protest_evst_fe32_farzad_rotated.png} \\
+\multicolumn{4}{@{}c@{}}{\footnotesize\emph{Row 2 --- Protest event study (\texttt{\_app\_17})}} \\[4pt]
+
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app19_polischar_did_downup_fe32_area.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app18_protest_did_downup_fe32_area.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app19_polischar_did_downup_fe32_farzad.png} &
+\centering\arraybackslash \includegraphics[width=\linewidth,height=4.2cm,keepaspectratio]{../figures_full/app18_protest_did_downup_fe32_farzad.png} \\
+\multicolumn{4}{@{}c@{}}{\footnotesize\emph{Row 3 --- Interactions with \texttt{downup\_ac}: polischar (\texttt{\_app\_19}) and protest (\texttt{\_app\_18})}} \\
+\end{tabular}
+\clearpage
+
+\end{document}

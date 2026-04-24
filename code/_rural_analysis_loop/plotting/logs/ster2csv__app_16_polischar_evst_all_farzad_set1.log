@@ -1,0 +1,473 @@
+
+
+. global ster_path "/Users/anzony.quisperojas/Library/CloudStorage/Dropbox/sa_fires/proj_bureaucrats_farms/te
+> x/paper/tables/_app_16_polischar_evst_all_rural_farzad_set1.ster"
+
+. global csv_path  "/Users/anzony.quisperojas/Documents/GitHub/proj_bureaucrats_farms/code/_rural_analysis_lo
+> op/plotting/intermediate_csv_full/_app_16_polischar_evst_all_rural_farzad_set1.csv"
+
+. global plot_dir  "/Users/anzony.quisperojas/Documents/GitHub/proj_bureaucrats_farms/code/_rural_analysis_lo
+> op/plotting"
+
+. do "/Users/anzony.quisperojas/Documents/GitHub/proj_bureaucrats_farms/code/_rural_analysis_loop/plotting/st
+> er_to_csv.do"
+
+. *-------------------------------------------------------------------------------
+. * ster_to_csv.do
+. * Read a .ster produced by the rural analysis dofiles, restore every
+. * stored estimate, and export to a CSV usable by plotting_event_studies.R.
+. *
+. * Expected globals (set by the orchestrator before calling `do`):
+. *   $ster_path  : absolute path to the input .ster
+. *   $csv_path   : absolute path to the output .csv (basename used for _scalars.csv)
+. *   $plot_dir   : absolute path to this plotting folder (for estsave_csv.ado)
+. *-------------------------------------------------------------------------------
+. 
+. clear all
+
+. set more off
+
+. 
+. if "$ster_path" == "" | "$csv_path" == "" | "$plot_dir" == "" {
+.     display as error "ster_to_csv: missing required global(s). Need \$ster_path, \$csv_path, \$plot_dir."
+.     exit 198
+. }
+
+. 
+. qui do "${plot_dir}/tools/estsave_csv.ado"
+
+. 
+. display "Reading estimates from: ${ster_path}"
+Reading estimates from: /Users/anzony.quisperojas/Library/CloudStorage/Dropbox/sa_fires/proj_bureaucrats_farm
+> s/tex/paper/tables/_app_16_polischar_evst_all_rural_farzad_set1.ster
+
+. estread using "${ster_path}"
+
+--------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+------------------------------------------------------------------
+      evreg1 | reghdfejl    countk         21  HDFE linear regression with Julia
+      evreg2 | reghdfejl    countk         21  HDFE linear regression with Julia
+      evreg3 | reghdfejl    countk         21  HDFE linear regression with Julia
+      evreg4 | reghdfejl    countk         21  HDFE linear regression with Julia
+      evreg5 | reghdfejl    countk         21  HDFE linear regression with Julia
+      evreg6 | reghdfejl    countk         21  HDFE linear regression with Julia
+      evreg7 | reghdfejl    countk         21  HDFE linear regression with Julia
+      evreg8 | reghdfejl    countk         21  HDFE linear regression with Julia
+      evreg9 | reghdfejl    countk         21  HDFE linear regression with Julia
+     evreg10 | reghdfejl    countk         21  HDFE linear regression with Julia
+     evreg11 | reghdfejl    countk         21  HDFE linear regression with Julia
+     evreg12 | reghdfejl    countk         21  HDFE linear regression with Julia
+     evreg13 | reghdfejl    countk         21  HDFE linear regression with Julia
+     evreg14 | reghdfejl    countk         21  HDFE linear regression with Julia
+     evreg15 | reghdfejl    countk         21  HDFE linear regression with Julia
+     evreg16 | reghdfejl    countk         21  HDFE linear regression with Julia
+--------------------------------------------------------------------------------
+
+. 
+. * Collect every evreg* that was successfully restored
+. local estlist ""
+
+. forvalues k = 1/200 {
+  2.     capture est dir evreg`k'
+  3.     if _rc == 0 local estlist "`estlist' evreg`k'"
+  4. }
+
+. 
+. if "`estlist'" == "" {
+.     display as error "ster_to_csv: no evreg* estimates found in ${ster_path}"
+.     exit 198
+. }
+
+. 
+. display "Exporting estimates:`estlist'"
+Exporting estimates: evreg1 evreg2 evreg3 evreg4 evreg5 evreg6 evreg7 evreg8 evreg9 evreg10 evreg11 evreg12 e
+> vreg13 evreg14 evreg15 evreg16
+
+. estsave_csv `estlist' using "${csv_path}", replace
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+Coefficients + VCoV saved to: /Users/anzony.quisperojas/Documents/GitHub/proj_bureaucrats_farms/code/_rural_a
+> nalysis_loop/plotting/intermediate_csv_full/_app_16_polischar_evst_all_rural_farzad_set1.csv
+Scalars + Macros saved to: /Users/anzony.quisperojas/Documents/GitHub/proj_bureaucrats_farms/code/_rural_anal
+> ysis_loop/plotting/intermediate_csv_full/_app_16_polischar_evst_all_rural_farzad_set1_scalars.csv
+
+All estimates exported successfully!
+
+. 
+. display "Wrote: ${csv_path}"
+Wrote: /Users/anzony.quisperojas/Documents/GitHub/proj_bureaucrats_farms/code/_rural_analysis_loop/plotting/i
+> ntermediate_csv_full/_app_16_polischar_evst_all_rural_farzad_set1.csv
+
+. 
+end of do-file
+
+. 
+end of do-file
