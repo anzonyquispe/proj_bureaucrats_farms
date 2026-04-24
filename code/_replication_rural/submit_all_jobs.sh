@@ -33,6 +33,7 @@ qsub sbatch/main_4_protest_5km_fe12_did_downup_rural.sbatch
 qsub sbatch/app_12_protest_5km_fe_did_rural.sbatch
 qsub sbatch/app_13_protest_5km_fe12_did_ricemods_rural.sbatch
 qsub sbatch/app_17_5km_fe12_evst_all_rural.sbatch
+qsub sbatch/app_18_protest_5km_fe12_did_downup_plot.sbatch
 
 echo ""
 echo ">>> Politicians data jobs (5 cores each)..."
@@ -41,6 +42,7 @@ qsub sbatch/main_5_polischar_fe12_did_downup_inter_rural.sbatch
 qsub sbatch/app_14_polischar_fe12_did_ricemods_rural.sbatch
 qsub sbatch/app_15_polischar_fe12_did_rural.sbatch
 qsub sbatch/app_16_polischar_fe12_evst_all_rural.sbatch
+qsub sbatch/app_19_polischar_fe12_did_downup_inter_plot.sbatch
 
 echo ""
 echo "=============================================="
