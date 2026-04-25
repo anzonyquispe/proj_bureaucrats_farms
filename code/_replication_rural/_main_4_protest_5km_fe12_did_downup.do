@@ -91,7 +91,7 @@ foreach mod in 0 1 {
 	
 	quietly summarize `dep_var' if treat == 1 & relative_year_bin <= -1 & moderator == 1
 	local ymean2 = r(mean)
-	
+
 	quietly summarize `dep_var' if treat == 1 & relative_year_bin <= -1 & moderator == 0
 	local ymean3 = cond(r(N) == 0, " ", string(r(mean), "%9.3f"))
 

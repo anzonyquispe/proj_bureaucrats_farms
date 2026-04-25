@@ -1,0 +1,380 @@
+
+  ___  ____  ____  ____  ____ ®
+ /__    /   ____/   /   ____/      StataNow 19.5
+___/   /   /___/   /   /___/       MP—Parallel Edition
+
+ Statistics and Data Science       Copyright 1985-2025 StataCorp LLC
+                                   StataCorp
+                                   4905 Lakeway Drive
+                                   College Station, Texas 77845 USA
+                                   800-782-8272        https://www.stata.com
+                                   979-696-4600        service@stata.com
+
+Stata license: Unlimited-user 2-core network, expiring  8 Jun 2026
+Serial number: 501909302568
+  Licensed to: Anzony QUISPE ROJAS
+               
+
+Notes:
+      1. Stata is running in batch mode.
+      2. Unicode is supported; see help unicode_advice.
+      3. More than 2 billion observations are allowed; see help obs_advice.
+      4. Maximum number of variables is set to 5,000 but can be increased; see help set_maxvar.
+
+. do /Users/anzony.quisperojas/Documents/GitHub/proj_bureaucrats_farms/code/_replication_rural/reports/regen_available
+> .do 
+
+. ********************************************************************************
+. * One-off helper: regenerates the tables whose ster files are present in the
+. * local Dropbox mirror, mirroring the latest generator code (so they get the
+. * trailing-zero strip too). Sections 3 and 4 (_main_4, _main_5) require ster
+. * files that have not yet arrived from the cluster — they will pick up the
+. * same formatting automatically once those ster files land.
+. ********************************************************************************
+. 
+. clear all
+
+. set more off
+
+. 
+. global location "dbox"
+
+. global sample ""
+
+. global shell "/groups/sgulzar/sa_fires/proj_bureaucrats_farms"
+
+. global dbox "/Users/anzony.quisperojas/Library/CloudStorage/Dropbox/sa_fires/proj_bureaucrats_farms"
+
+. global root "$dbox"
+
+. global tables "${root}/tex/paper/tables"
+
+. 
+. * Pull in the strip-zeros helper from the main generator
+. capture program drop _strip_zeros_stats
+
+. program define _strip_zeros_stats
+  1.     syntax , Models(string) Stats(string)
+  2.     foreach m of local models {
+  3.         capture estimates restore `m'
+  4.         if _rc continue
+  5.         foreach s of local stats {
+  6.             local raw "`e(`s')'"
+  7.             if "`raw'" == "" continue
+  8.             local rnum = real("`raw'")
+  9.             if !missing(`rnum') {
+ 10.                 local raw = strtrim(string(`rnum', "%9.3f"))
+ 11.             }
+ 12.             else {
+ 13.                 local raw = strtrim("`raw'")
+ 14.             }
+ 15.             local cleaned = regexr(regexr("`raw'", "0+$", ""), "\.$", "")
+ 16.             estadd local `s'_clean "`cleaned'"
+ 17.         }
+ 18.         estimates store `m'
+ 19.     }
+ 20. end
+
+. 
+. * ----- Section 5: _app_6_main_did_treat_definition -----
+. est clear
+
+. estread using "${tables}/_app_6_main_did_treat_definition${sample}_rural.ster"
+
+--------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+------------------------------------------------------------------
+         eq1 | reghdfejl    countk          3  HDFE linear regression with Julia
+         eq2 | reghdfejl    countk          3  HDFE linear regression with Julia
+         eq3 | reghdfejl    countk          3  HDFE linear regression with Julia
+         eq4 | reghdfejl    countk          3  HDFE linear regression with Julia
+         eq5 | reghdfejl    countk          3  HDFE linear regression with Julia
+--------------------------------------------------------------------------------
+
+. _strip_zeros_stats, models(eq1 eq2 eq3 eq4 eq5) stats(ymean)
+
+added macro:
+        e(ymean_clean) : "160.3"
+
+added macro:
+        e(ymean_clean) : "152.2"
+
+added macro:
+        e(ymean_clean) : "168.2"
+
+added macro:
+        e(ymean_clean) : "140.9"
+
+added macro:
+        e(ymean_clean) : "140.9"
+
+. esttab eq1 eq2 eq3 eq4 eq5 ///
+>     using "${tables}/_app_6_main_did_treat_definition${sample}_rural.tex", ///
+>     replace ///
+>     cells(b(fmt(4) star) se(par fmt(4))) ///
+>     star(* 0.10 ** 0.05 *** 0.01) ///
+>     keep(downup_ac downup_ac_pop downup_1sd down_percent downup_diff_percent) ///
+>     order(downup_ac downup_ac_pop downup_1sd down_percent downup_diff_percent) ///
+>     varlabels(downup_ac "Down\$>\$Up" ///
+>               downup_ac_pop "Down\$>\$Up Population" ///
+>               downup_1sd "Down\$>\$Up by 1std" ///
+>               down_percent "Downwind over total area" ///
+>               downup_diff_percent "Down-Up Percent") ///
+>     stats(N acq gridfe acmonthfe ymean_clean, ///
+>           fmt(%12.0fc %s %s %s %s) ///
+>           labels("Observations" "Assembly" "Grid FE" "Assembly \$\times\$ Month-Year FE" "Mean DV")) ///
+>     nomtitles nonumbers ///
+>     collabels(none) ///
+>     nobaselevels ///
+>     prehead("\begin{tabular}{lccccc}" ///
+>             "\hline" ///
+>             "& (1) & (2) & (3) & (4) & (5)\\" ///
+>             "& \multicolumn{5}{c}{Number of Fires (in 1,000 units) }\\" ///
+>             "\hline") ///
+>     posthead("") ///
+>     prefoot("\hline") ///
+>     postfoot("\hline" "\end{tabular}")
+(output written to /Users/anzony.quisperojas/Library/CloudStorage/Dropbox/sa_fires/proj_bureaucrats_farms/tex/paper/ta
+> bles/_app_6_main_did_treat_definition_rural.tex)
+
+. 
+. * ----- Section 6: _app_7_main_did_downup_area_ac_dv -----
+. est clear
+
+. estread using "${tables}/_app_7_main_did_downup_area_ac_dv${sample}_rural.ster"
+
+--------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+------------------------------------------------------------------
+         eq1 | reghdfejl   anyfire          3  HDFE linear regression with Julia
+         eq2 | reghdfejl   logfire          3  HDFE linear regression with Julia
+         eq3 | reghdfejl mean_brigh~s       3  HDFE linear regression with Julia
+--------------------------------------------------------------------------------
+
+. _strip_zeros_stats, models(eq1 eq2 eq3) stats(ymean)
+
+added macro:
+        e(ymean_clean) : "0.051"
+
+added macro:
+        e(ymean_clean) : "0.061"
+
+added macro:
+        e(ymean_clean) : "17.02"
+
+. esttab eq1 eq2 eq3 ///
+>     using "${tables}/_app_7_main_did_downup_area_ac_dv${sample}_rural.tex", ///
+>     replace ///
+>     cells(b(fmt(4) star) se(par fmt(4))) ///
+>     star(* 0.10 ** 0.05 *** 0.01) ///
+>     keep(downup_ac) ///
+>     varlabels(downup_ac "Down \$>\$ Up") ///
+>     stats(N acq gridfe acmonthfe ymean_clean, ///
+>           fmt(%12.0fc %s %s %s %s) ///
+>           labels("Observations" "Assembly" "Grid FE" "Assembly \$\times\$ Month-Year FE" "Mean DV")) ///
+>     nomtitles nonumbers ///
+>     collabels(none) ///
+>     nobaselevels ///
+>     prehead("\begin{tabular}{lccc}" ///
+>             "\tabularnewline \hline" ///
+>             "& (1) & (2) & (3)\\" ///
+>             "& Any Fire & Log (N) Fires & Mean Brightness\\" ///
+>             "\hline") ///
+>     posthead("") ///
+>     prefoot("\hline") ///
+>     postfoot("\hline" "\end{tabular}")
+(output written to /Users/anzony.quisperojas/Library/CloudStorage/Dropbox/sa_fires/proj_bureaucrats_farms/tex/paper/ta
+> bles/_app_7_main_did_downup_area_ac_dv_rural.tex)
+
+. 
+. * ----- Section 7: _app_8_main_did_by_year -----
+. est clear
+
+. estread using "${tables}/_app_8_main_did_by_year${sample}_rural.ster"
+
+--------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+------------------------------------------------------------------
+         eq1 | reghdfejl    countk          3  HDFE linear regression with Julia
+         eq2 | reghdfejl    countk          3  HDFE linear regression with Julia
+         eq3 | reghdfejl    countk          3  HDFE linear regression with Julia
+         eq4 | reghdfejl    countk          3  HDFE linear regression with Julia
+         eq5 | reghdfejl    countk          3  HDFE linear regression with Julia
+         eq6 | reghdfejl    countk          3  HDFE linear regression with Julia
+         eq7 | reghdfejl    countk          3  HDFE linear regression with Julia
+         eq8 | reghdfejl    countk          3  HDFE linear regression with Julia
+         eq9 | reghdfejl    countk          3  HDFE linear regression with Julia
+        eq10 | reghdfejl    countk          3  HDFE linear regression with Julia
+--------------------------------------------------------------------------------
+
+. _strip_zeros_stats, models(eq1 eq2 eq3 eq4 eq5 eq6 eq7 eq8 eq9 eq10) stats(ymean)
+
+added macro:
+        e(ymean_clean) : "159.34"
+
+added macro:
+        e(ymean_clean) : "149.72"
+
+added macro:
+        e(ymean_clean) : "154.41"
+
+added macro:
+        e(ymean_clean) : "155.81"
+
+added macro:
+        e(ymean_clean) : "187.58"
+
+added macro:
+        e(ymean_clean) : "157.51"
+
+added macro:
+        e(ymean_clean) : "171.76"
+
+added macro:
+        e(ymean_clean) : "111.6"
+
+added macro:
+        e(ymean_clean) : "171.49"
+
+added macro:
+        e(ymean_clean) : "183.78"
+
+. esttab eq1 eq2 eq3 eq4 eq5 eq6 eq7 eq8 eq9 eq10 ///
+>     using "${tables}/_app_8_main_did_by_year${sample}_rural.tex", ///
+>     replace ///
+>     cells(b(fmt(3) star) se(par fmt(3))) ///
+>     star(* 0.10 ** 0.05 *** 0.01) ///
+>     keep(downup_ac) ///
+>     varlabels(downup_ac "Down\$>\$Up") ///
+>     stats(N acq gridfe acmonthfe ymean_clean, ///
+>           fmt(%12.0fc %s %s %s %s) ///
+>           labels("Observations" " N Assembly Constituencies " "Grid FE" "Assembly x Month-Year FE" "Mean DV")) ///
+>     nomtitles nonumbers ///
+>     collabels(none) ///
+>     nobaselevels ///
+>     prehead("\begin{tabular}{lcccccccccc} \hline" ///
+>             " & (1) & (2) & (3) & (4) & (5) & (6) & (7) & (8) & (9) & (10) \\" ///
+>             " & \multicolumn{10}{c}{Number of Fires (in 1,000 units)}\\" ///
+>             " & 2012/2013 & 2013/2014 & 2014/2015 & 2015/2016 & 2016/2017 & 2017/2018 & 2018/2019 & 2019/2020 & 2020
+> /2021 & 2021/2022 \\ \hline") ///
+>     posthead("") ///
+>     postfoot("\hline" "\end{tabular}")
+(output written to /Users/anzony.quisperojas/Library/CloudStorage/Dropbox/sa_fires/proj_bureaucrats_farms/tex/paper/ta
+> bles/_app_8_main_did_by_year_rural.tex)
+
+. 
+. * ----- Section 8: _app_9_main_did_by_state -----
+. est clear
+
+. estread using "${tables}/_app_9_main_did_by_state${sample}_rural.ster"
+
+--------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+------------------------------------------------------------------
+         eq1 | reghdfejl    countk          3  HDFE linear regression with Julia
+         eq2 | reghdfejl    countk          3  HDFE linear regression with Julia
+         eq3 | reghdfejl    countk          3  HDFE linear regression with Julia
+         eq4 | reghdfejl    countk          3  HDFE linear regression with Julia
+--------------------------------------------------------------------------------
+
+. _strip_zeros_stats, models(eq1 eq2 eq3 eq4) stats(ymean)
+
+added macro:
+        e(ymean_clean) : "32.899"
+
+added macro:
+        e(ymean_clean) : "176.426"
+
+added macro:
+        e(ymean_clean) : "758.63"
+
+added macro:
+        e(ymean_clean) : "48.055"
+
+. esttab eq1 eq2 eq3 eq4 ///
+>     using "${tables}/_app_9_main_did_by_state${sample}_rural.tex", ///
+>     replace ///
+>     cells(b(fmt(3) star) se(par fmt(3))) ///
+>     star(* 0.10 ** 0.05 *** 0.01) ///
+>     keep(downup_ac) ///
+>     varlabels(downup_ac "Down\$>\$Up") ///
+>     stats(N acq gridfe acmonthfe ymean_clean, ///
+>           fmt(%12.0fc %s %s %s %s) ///
+>           labels("Observations" "N Assembly Constituencies" "Grid FE" "Assembly \$\times\$ Month-Year FE" "Mean DV")
+> ) ///
+>     nomtitles nonumbers ///
+>     collabels(none) ///
+>     nobaselevels ///
+>     prehead("\begin{tabular}{lcccc} \hline" ///
+>             " & (1) & (2) & (3) & (4) \\" ///
+>             " & \multicolumn{4}{c}{Number of Fires (x 1,000 units)}\\" ///
+>             " & Bihar & Haryana & Punjab & Uttar Pradesh \\ \hline") ///
+>     posthead("") ///
+>     postfoot("\hline" "\end{tabular}")
+(output written to /Users/anzony.quisperojas/Library/CloudStorage/Dropbox/sa_fires/proj_bureaucrats_farms/tex/paper/ta
+> bles/_app_9_main_did_by_state_rural.tex)
+
+. 
+. * ----- Section 11: _app_12_protest_5km_fe_did -----
+. est clear
+
+. estread using "${tables}/_app_12_protest_5km_fe_did${sample}_rural.ster"
+
+--------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+------------------------------------------------------------------
+      evreg1 | reghdfejl    countk          5  HDFE linear regression with Julia
+      evreg2 | reghdfejl    countk          5  HDFE linear regression with Julia
+      evreg3 | reghdfejl    countk          5  HDFE linear regression with Julia
+--------------------------------------------------------------------------------
+
+. _strip_zeros_stats, models(evreg1 evreg2 evreg3) stats(ymean)
+
+added macro:
+        e(ymean_clean) : "382.643"
+
+added macro:
+        e(ymean_clean) : "382.643"
+
+added macro:
+        e(ymean_clean) : "382.643"
+
+. esttab evreg1 evreg2 evreg3 ///
+>     using "${tables}/_app_12_protest_5km_fe_did${sample}_rural.tex", ///
+>     replace ///
+>     cells(b(fmt(3) star) se(par fmt(3))) ///
+>     star(* 0.10 ** 0.05 *** 0.01) ///
+>     keep(1.post_#1.treat) ///
+>     order(1.post_#1.treat) ///
+>     varlabels(1.post_#1.treat "Post \$\times\$ Protest") ///
+>     stats(N acq gridfe time electionfe provtrendfe ymean_clean, ///
+>           fmt(%12.0fc %12.0fc %s %s %s %s %s) ///
+>           labels("Observations" "Assembly" ///
+>                  "Grid FE" "Time FE" "Election FE" "Province Trend FE" "Mean DV")) ///
+>     nomtitles nonumbers ///
+>     collabels(none) ///
+>     nobaselevels ///
+>     prehead("{" ///
+>             "\def\sym#1{\ifmmode^{#1}\else\(^{#1}\)\fi}" ///
+>             "\begin{tabular}{l*{3}{c}}" ///
+>             "\hline" ///
+>             "            &\multicolumn{1}{c}{(1)}         &\multicolumn{1}{c}{(2)}         &\multicolumn{1}{c}{(3)} 
+>         \\" ///
+>             "            & \multicolumn{3}{c}{Number of Fires (in 1,000 units) } \\ \hline") ///
+>     posthead("") ///
+>     prefoot("\hline") ///
+>     postfoot("\hline" "\end{tabular}" "}")
+(output written to /Users/anzony.quisperojas/Library/CloudStorage/Dropbox/sa_fires/proj_bureaucrats_farms/tex/paper/ta
+> bles/_app_12_protest_5km_fe_did_rural.tex)
+
+. 
+. display "Done regenerating sections 5, 6, 7, 8, 11"
+Done regenerating sections 5, 6, 7, 8, 11
+
+. 
+end of do-file
