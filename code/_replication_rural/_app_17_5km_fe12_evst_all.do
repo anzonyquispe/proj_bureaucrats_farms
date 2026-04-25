@@ -13,8 +13,8 @@ if "$root" == "" {
     set more off
 
     * Set toggles for standalone run
-    global location "dbox"
-    global sample "_sample"
+    global location "shell"
+    global sample ""
 
     global shell "/groups/sgulzar/sa_fires/proj_bureaucrats_farms"
     global dbox "/Users/anzony.quisperojas/Library/CloudStorage/Dropbox/sa_fires/proj_bureaucrats_farms"
@@ -137,4 +137,4 @@ foreach mod of local moderators_list {
 * Export Results
 *-------------------------------------------------------------------------------
 
-// estsave_csv evreg1 evreg2 evreg3 evreg4 evreg5 using "${root}/tex/paper/tables/_app_17_5km_fe12_evst_all${sample}_rural.csv", replace
+estsave_csv evreg1 evreg2 evreg3 evreg4 evreg5 using "${root}/tex/paper/tables/_app_17_5km_fe12_evst_all${sample}_rural.csv", replace
