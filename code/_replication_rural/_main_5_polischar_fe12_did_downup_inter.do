@@ -123,7 +123,7 @@ foreach mod of local moderators_list{
 
 	quietly summarize `dep_var' if treat == 1 & relative_year_bin <= -1 & `mod' == 1
 	local ymean2 = cond(r(N) == 0, string(`ymean', "%9.3f" ), string(r(mean), "%9.3f"))
-	
+
 	quietly summarize `dep_var' if treat == 1 & relative_year_bin <= -1 & `mod' == 0
 	local ymean3 = cond(r(N) == 0, string(`ymean', "%9.3f" ), string(r(mean), "%9.3f"))
 

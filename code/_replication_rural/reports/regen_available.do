@@ -1,41 +1,19 @@
 ********************************************************************************
-* _generate_all_tables_rural.do
-* Generates all LaTeX tables from .ster files - RURAL GRIDS ONLY
-* Run this AFTER analysis do-files have produced .ster files
+* One-off helper: regenerates all sections whose ster files are present.
+* Sections 3 and 4 (_main_4, _main_5) require ster files that have not yet
+* arrived from the cluster — they will pick up the same formatting
+* automatically once those ster files land.
 ********************************************************************************
 
-********************************************************************************
-* Setup
-********************************************************************************
+clear all
+set more off
 
-if "$root" == "" {
-    clear all
-    set more off
-
-    global location "dbox"
-    global sample ""
-
-    global shell "/groups/sgulzar/sa_fires/proj_bureaucrats_farms"
-    global dbox "/Users/anzony.quisperojas/Library/CloudStorage/Dropbox/sa_fires/proj_bureaucrats_farms"
-
-    if "$location" == "dbox" {
-        global root "$dbox"
-    }
-    else {
-        global root "$shell"
-    }
-}
-
+global location "dbox"
+global sample ""
+global shell "/groups/sgulzar/sa_fires/proj_bureaucrats_farms"
+global dbox "/Users/anzony.quisperojas/Library/CloudStorage/Dropbox/sa_fires/proj_bureaucrats_farms"
+global root "$dbox"
 global tables "${root}/tex/paper/tables"
-
-********************************************************************************
-* Helper: strip trailing zeros from one or more e()-stored stats.
-* Reads each stat as a string (works for both estadd-scalar and estadd-local
-* storage), runs "%9.3f" string formatting, then strips trailing zeros and a
-* trailing bare ".". Result is stored as estadd local under the same name so
-* esttab fmt(%s) renders it as-is. Stat names that are missing in a model are
-* skipped silently.
-********************************************************************************
 
 capture program drop _strip_zeros_stats
 program define _strip_zeros_stats
@@ -46,9 +24,6 @@ program define _strip_zeros_stats
         foreach s of local stats {
             local raw "`e(`s')'"
             if "`raw'" == "" continue
-            * Treat as a number when possible: this normalizes scalar e()
-            * storage and string-encoded numbers ("160.300") into a single
-            * "%9.3f" representation before stripping trailing zeros.
             local rnum = real("`raw'")
             if !missing(`rnum') {
                 local raw = strtrim(string(`rnum', "%9.3f"))
@@ -57,184 +32,16 @@ program define _strip_zeros_stats
                 local raw = strtrim("`raw'")
             }
             local cleaned = regexr(regexr("`raw'", "0+$", ""), "\.$", "")
-            * Write to a sibling macro <stat>_clean so we never collide with
-            * an existing scalar e(<stat>). esttab stats() lists reference
-            * the *_clean name for display.
             estadd local `s'_clean "`cleaned'"
         }
         estimates store `m'
     }
 end
 
-********************************************************************************
-* 1. Main DiD Table (_main_1_did)
-********************************************************************************
-
-estread using "${tables}/main_did_downup_area_ac${sample}_rural.ster"
-_strip_zeros_stats, models(eq1 eq2 eq3 eq4) stats(ymean)
-
-esttab eq1 eq2 eq3 eq4 using "${tables}/main_did_downup_area_ac${sample}_rural.tex", ///
-    replace ///
-    cells(b(fmt(3) star) se(par fmt(3))) ///
-    star(* 0.10 ** 0.05 *** 0.01) ///
-    keep(downup_ac) ///
-    order(downup_ac) ///
-    varlabels(downup_ac "Down \$>\$ Up") ///
-    stats(N acq monthyearfe acfe acmonthfe gridfe ymean_clean, ///
-          fmt(%12.0fc %12.0fc %s %s %s %s %s) ///
-          labels("Observations" "N Assembly Constituencies" ///
-                 "Month-Year FE" "AC FE" "AC \$\times\$ Month-Year FE" "Grid FE" "Mean DV")) ///
-    nomtitles nonumbers ///
-    collabels(none) ///
-    nobaselevels ///
-    prehead("{" ///
-            "\def\sym#1{\ifmmode^{#1}\else\(^{#1}\)\fi}" ///
-            "\begin{tabular}{l*{4}{c}}" ///
-            "\hline" ///
-            "            &\multicolumn{1}{c}{(1)}         &\multicolumn{1}{c}{(2)}         &\multicolumn{1}{c}{(3)}         &\multicolumn{1}{c}{(4)}         \\" ///
-            "            & \multicolumn{4}{c}{Number of Fires (in 1,000 units)} \\ \hline") ///
-    posthead("") ///
-    postfoot("\hline" "\end{tabular}" "}")
-
-display "Generated: main_did_downup_area_ac_rural.tex"
-
-********************************************************************************
-* 2. Bureaucrat-Politician DiD (_main_3_bureau_polisc_did)
-********************************************************************************
-
-estread using "${tables}/_main_3_bureau_polisc_did${sample}_rural.ster"
-_strip_zeros_stats, models(eq1 eq2 eq3 eq4 eq5) stats(ymean ymean2)
-
-esttab eq1 eq2 eq3 eq4 eq5 using "${tables}/_main_3_bureau_polisc_did${sample}_rural.tex", ///
-    replace ///
-    cells(b(fmt(3) star) se(par fmt(3))) ///
-    star(* 0.10 ** 0.05 *** 0.01) ///
-    keep(downup_ac downup_dummy downup_interaction) ///
-    order( downup_dummy downup_ac downup_interaction) ///
-    varlabels(downup_ac "Down\$>\$ Up Politician" ///
-              downup_dummy "Down\$>\$ Up Bureaucrat" ///
-              downup_interaction "Down\$>\$ Up Pol. \$\times\$ Down\$>\$ Up Bur.") ///
-    stats(N acq monthyearfe acfe acmonthfe gridfe ymean2_clean, ///
-          fmt(%12.0fc %12.0fc %s %s %s %s %s) ///
-          labels("Observations" "N Assembly Constituencies" ///
-                 "Month-Year FE" "AC FE" "AC \$\times\$ Month-Year FE" "Grid FE" "Mean DV")) ///
-    nomtitles nonumbers ///
-    collabels(none) ///
-    nobaselevels ///
-    prehead("{\def\sym#1{\ifmmode^{#1}\else\(^{#1}\)\fi}" ///
-            "\begin{tabular}{l*{5}{c}}" ///
-            "\hline" ///
-            " & (1) & (2) & (3) & (4) & (5) \\" ///
-            " & \multicolumn{5}{c}{Number of Fires (in 1,000 units)} \\ \hline") ///
-    posthead("") ///
-    postfoot("\hline" "\end{tabular}" "}")
-
-display "Generated: _main_3_bureau_polisc_did_rural.tex"
-
-********************************************************************************
-* 3. Protest DiD with Downup (_main_4_protest_5km_fe12_did_downup)
-********************************************************************************
-est clear
-estread using "${tables}/_main_4_protest_5km_fe12_did_downup${sample}_rural.ster"
-_strip_zeros_stats, models(evreg1 evreg2 evreg3 evreg4 evreg5 evreg6) stats(ymean ymean2 ymean3)
-
-esttab evreg1 evreg2 evreg3 evreg4 evreg5 evreg6 ///
-    using "${tables}/_main_4_protest_5km_fe12_did_downup${sample}_rural.tex", ///
-    replace ///
-    cells(b(fmt(3) star) se(par fmt(3))) ///
-    star(* 0.10 ** 0.05 *** 0.01) ///
-    keep(1.post_#1.treat ///
-          1.moderator ///
-          1.post_#1.moderator ///
-          1.treat#1.moderator ///
-          1.post_#1.treat#1.moderator) ///
-    order(1.post_#1.treat ///
-          1.moderator ///
-          1.post_#1.moderator ///
-          1.treat#1.moderator ///
-          1.post_#1.treat#1.moderator) ///
-    varlabels(1.post_#1.treat "Post \$\times\$ Protest" ///
-              1.moderator "Down \$>\$ Up" ///
-              1.post_#1.moderator "Post \$\times\$ Down \$>\$ Up" ///
-              1.treat#1.moderator "Protest \$\times\$ Down \$>\$ Up" ///
-              1.post_#1.treat#1.moderator "Post \$\times\$ Protest \$\times\$ Down \$>\$ Up") ///
-    stats(      N    acq gridfe time electionfe provtrendfe ymean_clean ymean2_clean, ///
-          fmt(%12.0fc  %s    %s %s    %s         %s          %s          %s) ///
-          labels("Observations" "N Assembly Constituencies" ///
-                 "Grid FE" "Relative Time FE" "Legislature FE" "Province Trend FE" ///
-                 "Mean DV" "Mean DV2 (Down\$>\$Up=1)")) ///
-    nomtitles nonumbers ///
-    collabels(none) ///
-    nobaselevels ///
-    prehead("{" ///
-            "\def\sym#1{\ifmmode^{#1}\else\(^{#1}\)\fi}" ///
-            "\begin{tabular}{l*{6}{c}}" ///
-            "\hline" ///
-            "            &\multicolumn{1}{c}{(1)}         &\multicolumn{1}{c}{(2)}         &\multicolumn{1}{c}{(3)}         &\multicolumn{1}{c}{(4)}         &\multicolumn{1}{c}{(5)}         &\multicolumn{1}{c}{(6)}         \\" ///
-            "            & \multicolumn{6}{c}{Number of Fires (in 1,000 units)} \\ \hline") ///
-    posthead("") ///
-    prefoot("\hline") ///
-    postfoot("\hline" "\end{tabular}" "}")
-
-display "Generated: _main_4_protest_5km_fe12_did_downup_rural.tex"
-
-********************************************************************************
-* 4. Politician Char DiD with Downup (_main_5_polischar_fe12_did_downup_inter)
-********************************************************************************
-est clear
-estread using "${tables}/_main_5_polischar_fe12_did_downup_inter${sample}_rural.ster"
-_strip_zeros_stats, models(evreg1 evreg2 evreg3 evreg4 evreg5 evreg6) stats(ymean ymean2 ymean3)
-
-esttab evreg1 evreg2 evreg3 evreg4 evreg5 evreg6 ///
-    using "${tables}/_main_5_polischar_fe12_did_downup_inter${sample}_rural.tex", ///
-    replace ///
-    cells(b(fmt(3) star) se(par fmt(3))) ///
-    star(* 0.10 ** 0.05 *** 0.01) ///
-    keep(1.post_#1.treat ///
-         1.post_#1.treat#1.moderator ///
-         1.moderator ///
-         1.post_#1.moderator ///
-         1.treat#1.moderator ///
-         1.post_#1.treat#1.moderator) ///
-    order(1.post_#1.treat ///
-          1.moderator ///
-          1.post_#1.moderator ///
-          1.treat#1.moderator ///
-          1.post_#1.treat#1.moderator) ///
-    varlabels(1.post_#1.treat "Post \$\times\$ Agriculturalist" ///
-              1.post_#1.treat#1.moderator "Post \$\times\$ Agriculturalist" ///
-              1.moderator "Down \$>\$ Up" ///
-              1.post_#1.moderator "Post \$\times\$ Down \$>\$ Up" ///
-              1.treat#1.moderator "Agriculturalist \$\times\$ Down \$>\$ Up" ///
-              1.post_#1.treat#1.moderator "Post \$\times\$ Agric. \$\times\$ Down \$>\$ Up") ///
-    stats(      N        acq     gridfe time electionfe provtrendfe ymean_clean ymean2_clean, ///
-          fmt( %12.0fc %12.0fc   %s     %s   %s         %s          %s          %s) ///
-          labels("Observations" "N Assembly Constituencies" ///
-                 "Grid FE" "Relative Time FE" "Legislature FE" ///
-                 "Province Linear Time Trend FE" ///
-                 "Mean DV" "Mean DV (Down \$>\$ Up=1)")) ///
-    nomtitles nonumbers ///
-    collabels(none) ///
-    nobaselevels ///
-    prehead("{" ///
-            "\def\sym#1{\ifmmode^{#1}\else\(^{#1}\)\fi}" ///
-            "\begin{tabular}{l*{6}{c}}" ///
-            "\hline" ///
-            "            &\multicolumn{1}{c}{(1)}         &\multicolumn{1}{c}{(2)}         &\multicolumn{1}{c}{(3)}         &\multicolumn{1}{c}{(4)}         &\multicolumn{1}{c}{(5)}         &\multicolumn{1}{c}{(6)}         \\" ///
-            "            & \multicolumn{6}{c}{Number of Fires (in 1,000 units)} \\ \hline") ///
-    posthead("") ///
-    prefoot("\hline") ///
-    postfoot("\hline" "\end{tabular}" "}")
-
-display "Generated: _main_5_polischar_fe12_did_downup_inter_rural.tex"
-
-********************************************************************************
-* 5. Treatment Definition Robustness (_app_6_main_did_treat_definition)
-********************************************************************************
+* ----- Section 5: _app_6_main_did_treat_definition -----
 est clear
 estread using "${tables}/_app_6_main_did_treat_definition${sample}_rural.ster"
 _strip_zeros_stats, models(eq1 eq2 eq3 eq4 eq5) stats(ymean)
-
 esttab eq1 eq2 eq3 eq4 eq5 ///
     using "${tables}/_app_6_main_did_treat_definition${sample}_rural.tex", ///
     replace ///
@@ -262,15 +69,10 @@ esttab eq1 eq2 eq3 eq4 eq5 ///
     prefoot("\hline") ///
     postfoot("\hline" "\end{tabular}")
 
-display "Generated: _app_6_main_did_treat_definition_rural.tex"
-
-********************************************************************************
-* 6. Alternative DVs (_app_7_main_did_downup_area_ac_dv)
-********************************************************************************
-
+* ----- Section 6: _app_7_main_did_downup_area_ac_dv -----
+est clear
 estread using "${tables}/_app_7_main_did_downup_area_ac_dv${sample}_rural.ster"
 _strip_zeros_stats, models(eq1 eq2 eq3) stats(ymean)
-
 esttab eq1 eq2 eq3 ///
     using "${tables}/_app_7_main_did_downup_area_ac_dv${sample}_rural.tex", ///
     replace ///
@@ -293,15 +95,10 @@ esttab eq1 eq2 eq3 ///
     prefoot("\hline") ///
     postfoot("\hline" "\end{tabular}")
 
-display "Generated: _app_7_main_did_downup_area_ac_dv_rural.tex"
-
-********************************************************************************
-* 7. DiD by Year (_app_8_main_did_by_year)
-********************************************************************************
-
+* ----- Section 7: _app_8_main_did_by_year -----
+est clear
 estread using "${tables}/_app_8_main_did_by_year${sample}_rural.ster"
 _strip_zeros_stats, models(eq1 eq2 eq3 eq4 eq5 eq6 eq7 eq8 eq9 eq10) stats(ymean)
-
 esttab eq1 eq2 eq3 eq4 eq5 eq6 eq7 eq8 eq9 eq10 ///
     using "${tables}/_app_8_main_did_by_year${sample}_rural.tex", ///
     replace ///
@@ -322,15 +119,10 @@ esttab eq1 eq2 eq3 eq4 eq5 eq6 eq7 eq8 eq9 eq10 ///
     posthead("") ///
     postfoot("\hline" "\end{tabular}")
 
-display "Generated: _app_8_main_did_by_year_rural.tex"
-
-********************************************************************************
-* 8. DiD by State (_app_9_main_did_by_state)
-********************************************************************************
-
+* ----- Section 8: _app_9_main_did_by_state -----
+est clear
 estread using "${tables}/_app_9_main_did_by_state${sample}_rural.ster"
 _strip_zeros_stats, models(eq1 eq2 eq3 eq4) stats(ymean)
-
 esttab eq1 eq2 eq3 eq4 ///
     using "${tables}/_app_9_main_did_by_state${sample}_rural.tex", ///
     replace ///
@@ -351,15 +143,10 @@ esttab eq1 eq2 eq3 eq4 ///
     posthead("") ///
     postfoot("\hline" "\end{tabular}")
 
-display "Generated: _app_9_main_did_by_state_rural.tex"
-
-********************************************************************************
-* 9. Rice Moderators (_app_10_did_rice_moderators)
-********************************************************************************
+* ----- Section 9: _app_10_did_rice_moderators -----
 est clear
 estread using "${tables}/_app_10_did_rice_moderators${sample}_rural.ster"
 _strip_zeros_stats, models(eq1 eq2 eq3) stats(ymean ymean2 ymean3)
-
 esttab eq1 eq2 eq3 ///
     using "${tables}/_app_10_did_rice_moderators${sample}_rural.tex", ///
     replace ///
@@ -393,15 +180,10 @@ esttab eq1 eq2 eq3 ///
     prefoot("\hline") ///
     postfoot("\hline" "\end{tabular}")
 
-display "Generated: _app_10_did_rice_moderators_rural.tex"
-
-********************************************************************************
-* 10. Placebo Pop 13km (_app_11_placebo_pop_13km)
-********************************************************************************
-est dir
+* ----- Section 10: _app_11_placebo_pop_13km -----
+est clear
 estread using "${tables}/_app_11_placebo_pop_13km${sample}_rural.ster"
 _strip_zeros_stats, models(eq1 eq2 eq3) stats(ymean)
-
 esttab eq1 eq2 eq3 ///
     using "${tables}/_app_11_placebo_pop_13km${sample}_rural.tex", ///
     replace ///
@@ -424,15 +206,10 @@ esttab eq1 eq2 eq3 ///
     prefoot("\hline") ///
     postfoot("\hline" "\end{tabular}")
 
-display "Generated: _app_11_placebo_pop_13km_rural.tex"
-
-********************************************************************************
-* 11. Protest 5km FE DiD (_app_12_protest_5km_fe_did)
-********************************************************************************
+* ----- Section 11: _app_12_protest_5km_fe_did -----
 est clear
 estread using "${tables}/_app_12_protest_5km_fe_did${sample}_rural.ster"
 _strip_zeros_stats, models(evreg1 evreg2 evreg3) stats(ymean)
-
 esttab evreg1 evreg2 evreg3 ///
     using "${tables}/_app_12_protest_5km_fe_did${sample}_rural.tex", ///
     replace ///
@@ -441,8 +218,8 @@ esttab evreg1 evreg2 evreg3 ///
     keep(1.post_#1.treat) ///
     order(1.post_#1.treat) ///
     varlabels(1.post_#1.treat "Post \$\times\$ Protest") ///
-    stats(		N 		acq 	gridfe time electionfe provtrendfe ymean_clean, ///
-          fmt(%12.0fc %12.0fc 	%s     %s   %s         %s          %s) ///
+    stats(N acq gridfe time electionfe provtrendfe ymean_clean, ///
+          fmt(%12.0fc %12.0fc %s %s %s %s %s) ///
           labels("Observations" "N Assembly Constituencies" ///
                  "Grid FE" "Relative Time FE" "Legislature FE" "Province Trend FE" "Mean DV")) ///
     nomtitles nonumbers ///
@@ -458,16 +235,12 @@ esttab evreg1 evreg2 evreg3 ///
     prefoot("\hline") ///
     postfoot("\hline" "\end{tabular}" "}")
 
-display "Generated: _app_12_protest_5km_fe_did_rural.tex"
-
-********************************************************************************
-* 12. Protest Rice Mods (_app_13_protest_5km_fe12_did_ricemods)
-********************************************************************************
+* ----- Section 12: _app_13_protest_5km_fe12_did_ricemods -----
 est clear
 estread using "${tables}/_app_13_protest_5km_fe12_did_ricemods${sample}_rural.ster"
 _strip_zeros_stats, models(eq1 eq2 eq3) stats(ymean ymean2 ymean3)
-
-esttab eq1 eq2 eq3 using "${tables}/_app_13_protest_5km_fe12_did_ricemods${sample}_rural.tex", ///
+esttab eq1 eq2 eq3 ///
+    using "${tables}/_app_13_protest_5km_fe12_did_ricemods${sample}_rural.tex", ///
     replace ///
     cells(b(fmt(3) star) se(par fmt(3))) ///
     star(* 0.10 ** 0.05 *** 0.01) ///
@@ -498,15 +271,10 @@ esttab eq1 eq2 eq3 using "${tables}/_app_13_protest_5km_fe12_did_ricemods${sampl
     prefoot("\hline") ///
     postfoot("\hline" "\end{tabular}" "}")
 
-display "Generated: _app_13_protest_5km_fe12_did_ricemods_rural.tex"
-
-********************************************************************************
-* 13. Politician Rice Mods (_app_14_polischar_fe12_did_ricemods)
-********************************************************************************
+* ----- Section 13: _app_14_polischar_fe12_did_ricemods -----
 est clear
 estread using "${tables}/_app_14_polischar_fe12_did_ricemods${sample}_rural.ster"
 _strip_zeros_stats, models(evreg1 evreg2 evreg3 evreg4) stats(ymean ymean2 ymean3)
-
 esttab evreg1 evreg2 evreg3 evreg4 ///
     using "${tables}/_app_14_polischar_fe12_did_ricemods${sample}_rural.tex", ///
     replace ///
@@ -542,15 +310,10 @@ esttab evreg1 evreg2 evreg3 evreg4 ///
     prefoot("\hline") ///
     postfoot("\hline" "\end{tabular}" "}")
 
-display "Generated: _app_14_polischar_fe12_did_ricemods_rural.tex"
-
-********************************************************************************
-* 14. Politician FE DiD (_app_15_polischar_fe12_did)
-********************************************************************************
+* ----- Section 14: _app_15_polischar_fe12_did -----
 est clear
 estread using "${tables}/_app_15_polischar_fe12_did${sample}_rural.ster"
 _strip_zeros_stats, models(evreg1 evreg2 evreg3) stats(ymean)
-
 esttab evreg1 evreg2 evreg3 ///
     using "${tables}/_app_15_polischar_fe12_did${sample}_rural.tex", ///
     replace ///
@@ -576,8 +339,4 @@ esttab evreg1 evreg2 evreg3 ///
     prefoot("\hline") ///
     postfoot("\hline" "\end{tabular}" "}")
 
-display "Generated: _app_15_polischar_fe12_did_rural.tex"
-
-********************************************************************************
-display "All rural tables generated successfully."
-********************************************************************************
+display "Done regenerating sections 5-14"
