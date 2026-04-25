@@ -12,7 +12,7 @@ if "$root" == "" {
     set more off
 
     * Set toggles for standalone run
-    global location "shell"
+    global location "dbox"
     global sample ""
 
     global shell "/groups/sgulzar/sa_fires/proj_bureaucrats_farms"
@@ -46,6 +46,11 @@ drop _merge
 keep if is_rural == 1
 
 display "Observations after rural filter: " _N
+
+* Drop grids with more than 1 ac
+merge m:1 unique_small_grid_id using "${root}/data_output/intermediate/grids_with_more_1_ac.dta"
+drop if dpl_ac ==1
+drop _merge
 
 * Keep relevant time period
 keep if year < 2022 | (year == 2022 & month <= 8)
