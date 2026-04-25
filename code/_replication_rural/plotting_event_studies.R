@@ -100,14 +100,14 @@ kl <- 1
 file_base <- paste0("_app_17_5km_fe12_evst_all_rural_", kl)
 filterval <- paste0("evreg", kl)
 ev <- df[reg == filterval,][c(13:21), c(  3, 4, 17:25)  ]
-agregation_result(ev, numPrePeriods=7, numPostPeriods = 2, M = 1, omitted_period = 0, honest = FALSE)
+agregation_result(ev, numPrePeriods=8, numPostPeriods = 2, M = 1, omitted_period = -1, honest = FALSE)
 mods <- c('downup', 'riceA', 'riceHA', 'riceP')
 for (kl in 2:5){
   i <- kl-1
   file_base <- paste0("_app_17_5km_fe12_evst_all_rural_", mods[i], "_", kl)
   filterval <- paste0("evreg", kl)
   ev <- df[reg == filterval,][c(33:41), c(  3, 4, 37:45)  ]
-  agregation_result(ev, numPrePeriods=7, numPostPeriods = 2, M = 1, omitted_period = 0, honest = FALSE)
+  agregation_result(ev, numPrePeriods=8, numPostPeriods = 2, M = 1, omitted_period = -1, honest = FALSE)
 }
 
 
