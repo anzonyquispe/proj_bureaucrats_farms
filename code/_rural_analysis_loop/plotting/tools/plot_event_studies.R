@@ -462,7 +462,11 @@ agregation_result <- function(ev, numPrePeriods = 4, numPostPeriods = 5, M = 1, 
   ggsave(save_path, plot = p2, width = 8, height = 4, dpi = 300)
 
   if (honest){
-    plot_honest_from_rds(out, file_base, M=M, numPrePeriods = numPrePeriods, numPostPeriods = numPostPeriods,
+    # Translate this function's convention (numPrePeriods counts the omitted
+    # reference period when omitted_period == -1) into HonestDiD's convention
+    # (numPrePeriods + numPostPeriods must equal length(betahat)).
+    hp <- if (omitted_period == -1) numPrePeriods - 1 else numPrePeriods
+    plot_honest_from_rds(out, file_base, M=M, numPrePeriods = hp, numPostPeriods = numPostPeriods,
                          extra_args_relativeMagnitudes = extra_args_relativeMagnitudes,
                          extra_args_sensitivityResults = extra_args_sensitivityResults)
   }
