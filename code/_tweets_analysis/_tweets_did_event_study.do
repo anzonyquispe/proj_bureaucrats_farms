@@ -27,7 +27,7 @@ if "$outcome_list" == "" {
 global int_data  "${shell}/data_output/intermediate"
 global figures   "${shell}/tex/paper/figures"
 
-use "${int_data}/tweets_by_rubric1.dta", clear
+use "${int_data}/tweets_by_rubric1_newver.dta", clear
 
 egen stateid       = group(STATE_UT)
 egen politicianid  = group(Politician_Name)
