@@ -1,11 +1,12 @@
 // _tweets_did_event_study.do
 // Event-study (did_multiplegt_dyn) over a list of tweet outcomes. One Stata
 // process per sbatch file; each loops through the outcomes passed in via the
-// $outcome_list global and saves a .ster + .png for every successful run.
+// $outcome_list global and saves a .ster + .png for every successful run,
+// both in ${shell}/tex/paper/figures/ (no subfolders, no mkdir).
 //
 // Globals expected (set by the sbatch wrapper):
 //   $shell        : data root, e.g. /groups/sgulzar/sa_fires/proj_bureaucrats_farms
-//   $job_name     : sbatch identifier, used as ster sub-folder name
+//   $job_name     : sbatch identifier (used only for log messages)
 //   $outcome_list : space-separated outcome variables to run
 
 clear all
@@ -24,14 +25,7 @@ if "$outcome_list" == "" {
 }
 
 global int_data  "${shell}/data_output/intermediate"
-global figures   "${shell}/tex/paper/figures/tweets_event_study"
-global ster_root "${shell}/tex/paper/sters/tweets_event_study"
-global ster_dir  "${ster_root}/${job_name}"
-
-cap mkdir "${shell}/tex/paper/figures/tweets_event_study"
-cap mkdir "${shell}/tex/paper/sters"
-cap mkdir "${ster_root}"
-cap mkdir "${ster_dir}"
+global figures   "${shell}/tex/paper/figures"
 
 use "${int_data}/tweets_by_rubric1.dta", clear
 
@@ -69,7 +63,7 @@ foreach outcome of global outcome_list {
         continue
     }
 
-    capture estimates save "${ster_dir}/`outcome'.ster", replace
+    capture estimates save "${figures}/`outcome'.ster", replace
     capture graph export   "${figures}/`outcome'.png",   replace width(1200)
     display as result "  -> ${figures}/`outcome'.png"
     local n_ok = `n_ok' + 1
