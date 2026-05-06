@@ -15,7 +15,7 @@ set linesize 240
 
 // Standalone defaults (interactive testing on a local Mac).
 if "$shell" == "" {
-    global shell        "/Users/anzony.quisperojas/Library/CloudStorage/Dropbox/sa_fires/proj_bureaucrats_farms"
+    global shell        "/groups/sgulzar/sa_fires/proj_bureaucrats_farms"
 }
 if "$job_name" == "" {
     global job_name     "tweets_test"
