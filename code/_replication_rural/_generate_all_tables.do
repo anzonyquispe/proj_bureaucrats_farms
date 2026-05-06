@@ -114,10 +114,10 @@ esttab eq1 eq2 eq3 eq4 eq5 using "${tables}/_main_3_bureau_polisc_did${sample}_r
     varlabels(downup_ac "Down\$>\$ Up Politician" ///
               downup_dummy "Down\$>\$ Up Bureaucrat" ///
               downup_interaction "Down\$>\$ Up Pol. \$\times\$ Down\$>\$ Up Bur.") ///
-    stats(N acq monthyearfe acfe acmonthfe gridfe ymean2_clean, ///
-          fmt(%12.0fc %12.0fc %s %s %s %s %s) ///
-          labels("Observations" "N Assembly Constituencies" ///
-                 "Month-Year FE" "AC FE" "AC \$\times\$ Month-Year FE" "Grid FE" "Mean DV")) ///
+    stats(N nacs ndists monthyearfe acfe  acmonthfe distmonthfe gridfe ymean2_clean, ///
+          fmt(%12.0fc %12.0fc %12.0fc %s %s %s %s %s %s) ///
+          labels("Observations" "N Assembly Constituencies" "N Districts" ///
+                 "Month-Year FE" "AC FE" "AC \$\times\$ Month-Year FE" "District \$\times\$ Month-Year FE" "Grid FE" "Mean DV")) ///
     nomtitles nonumbers ///
     collabels(none) ///
     nobaselevels ///
@@ -248,7 +248,7 @@ esttab eq1 eq2 eq3 eq4 eq5 ///
               down_percent "Downwind over total area" ///
               downup_diff_percent "Down-Up Percent") ///
     stats(N acq gridfe acmonthfe ymean_clean, ///
-          fmt(%12.0fc %s %s %s %s) ///
+          fmt(%12.0fc %s %s %s %12.3fc) ///
           labels("Observations" "N Assembly Constituencies" "Grid FE" "Assembly \$\times\$ Month-Year FE" "Mean DV")) ///
     nomtitles nonumbers ///
     collabels(none) ///
@@ -346,7 +346,7 @@ esttab eq1 eq2 eq3 eq4 ///
     nobaselevels ///
     prehead("\begin{tabular}{lcccc} \hline" ///
             " & (1) & (2) & (3) & (4) \\" ///
-            " & \multicolumn{4}{c}{Number of Fires (x 1,000 units)}\\" ///
+            " & \multicolumn{4}{c}{Number of Fires (in 1,000 units)}\\" ///
             " & Bihar & Haryana & Punjab & Uttar Pradesh \\ \hline") ///
     posthead("") ///
     postfoot("\hline" "\end{tabular}")
@@ -386,7 +386,7 @@ esttab eq1 eq2 eq3 ///
     nobaselevels ///
     prehead("\begin{tabular}{lccc}" ///
             "      \hline" ///
-            "       & \multicolumn{3}{c}{Number of Fires (x 1,000 units) - Rural Grids}\\" ///
+            "       & \multicolumn{3}{c}{Number of Fires (in 1,000 units) - Rural Grids}\\" ///
             "                                                              & (1)            & (2)            & (3)\\\\  " ///
             "      \midrule") ///
     posthead("") ///
@@ -418,7 +418,7 @@ esttab eq1 eq2 eq3 ///
     nobaselevels ///
     prehead("\begin{tabular}{lccc} \hline" ///
             "       & (1) & (2) & (3) \\" ///
-            "       & \multicolumn{3}{c}{Number of Fires (x 1,000 units) - Rural Grids}\\" ///
+            "       & \multicolumn{3}{c}{Number of Fires (in 1,000 units) - Rural Grids}\\" ///
             "    & Full Sample           &  Treated for Politicians             & Control for Politicians \\\\  \hline") ///
     posthead("") ///
     prefoot("\hline") ///
@@ -444,7 +444,7 @@ esttab evreg1 evreg2 evreg3 ///
     stats(		N 		acq 	gridfe time electionfe provtrendfe ymean_clean, ///
           fmt(%12.0fc %12.0fc 	%s     %s   %s         %s          %s) ///
           labels("Observations" "N Assembly Constituencies" ///
-                 "Grid FE" "Relative Time FE" "Legislature FE" "Province Trend FE" "Mean DV")) ///
+                 "Grid  \$\times\$ Cohort FE" "Relative Time FE" "Legislature  \$\times\$ Cohort FE" "Province  \$\times\$ Cohort Trend FE" "Mean DV")) ///
     nomtitles nonumbers ///
     collabels(none) ///
     nobaselevels ///
@@ -485,7 +485,7 @@ esttab eq1 eq2 eq3 using "${tables}/_app_13_protest_5km_fe12_did_ricemods${sampl
               1.post_#1.treat#1.rice_prod_aclvl_ahigh "Post \$\times\$ Protest \$\times\$ Rice Production") ///
     stats(N acq gridfe time electionfe provtrendfe ymean_clean ymean2_clean ymean3_clean, ///
           fmt(%12.0fc %12.0fc %s %s %s %s %s %s %s) ///
-          labels("Observations" "N Assembly Constituencies" "Grid FE" "Relative Time FE" "Legislature FE" "Province Trend FE" "Mean DV" "Mean DV2" "Mean DV3")) ///
+          labels("Observations" "N Assembly Constituencies" "Grid  \$\times\$ Cohort FE" "Relative Time FE" "Legislature  \$\times\$ Cohort FE" "Province  \$\times\$ Cohort Trend FE" "Mean DV" "Mean DV2" "Mean DV3")) ///
     nomtitles nonumbers ///
     collabels(none) ///
     nobaselevels ///
@@ -493,7 +493,7 @@ esttab eq1 eq2 eq3 using "${tables}/_app_13_protest_5km_fe12_did_ricemods${sampl
             "\begin{tabular}{l*{3}{c}}" ///
             "\hline" ///
             "            &\multicolumn{1}{c}{(1)}         &\multicolumn{1}{c}{(2)}         &\multicolumn{1}{c}{(3)}         \\\\" ///
-            "            &\multicolumn{3}{c}{Number of Fires (x 1,000 units) - Rural Grids} \\\\ \hline") ///
+            "            &\multicolumn{3}{c}{Number of Fires (in 1,000 units) } \\\\ \hline") ///
     posthead("") ///
     prefoot("\hline") ///
     postfoot("\hline" "\end{tabular}" "}")
@@ -527,7 +527,7 @@ esttab evreg1 evreg2 evreg3 evreg4 ///
     stats(N acq gridfe time electionfe provtrendfe ymean_clean ymean2_clean ymean3_clean, ///
           fmt(%12.0fc %12.0fc %s %s %s %s %s %s %s) ///
           labels("Observations" "N Assembly Constituencies" ///
-                 "Grid FE" "Relative Time FE" "Legislature FE" "Province Trend FE" ///
+                 "Grid  \$\times\$ Cohort FE" "Relative Time FE" "Legislature  \$\times\$ Cohort FE" "Province  \$\times\$ Cohort Trend FE" ///
                  "Mean DV" "Mean DV2" "Mean DV3")) ///
     nomtitles nonumbers ///
     collabels(none) ///
@@ -537,7 +537,7 @@ esttab evreg1 evreg2 evreg3 evreg4 ///
             "\begin{tabular}{l*{4}{c}}" ///
             "\hline" ///
             "            &\multicolumn{1}{c}{(1)}         &\multicolumn{1}{c}{(2)}         &\multicolumn{1}{c}{(3)} &\multicolumn{1}{c}{(4)}         \\" ///
-            "            & \multicolumn{4}{c}{Number of Fires (x 1,000 units) - Rural Grids} \\ \hline") ///
+            "            & \multicolumn{4}{c}{Number of Fires (in 1,000 units)} \\ \hline") ///
     posthead("") ///
     prefoot("\hline") ///
     postfoot("\hline" "\end{tabular}" "}")
@@ -562,7 +562,7 @@ esttab evreg1 evreg2 evreg3 ///
     stats(N acq gridfe time electionfe provtrendfe ymean_clean, ///
           fmt(%12.0fc %12.0fc %s %s %s %s %s) ///
           labels("Observations" "N Assembly Constituencies" ///
-                 "Grid FE" "Relative Time FE" "Legislature FE" "Province Trend FE" "Mean DV")) ///
+                 "Grid \$\times\$ Cohort FE" "Relative Time FE" "Legislature  \$\times\$ Cohort FE" "Province  \$\times\$ Cohort Trend FE" "Mean DV")) ///
     nomtitles nonumbers ///
     collabels(none) ///
     nobaselevels ///
@@ -571,12 +571,49 @@ esttab evreg1 evreg2 evreg3 ///
             "\begin{tabular}{l*{3}{c}}" ///
             "\hline" ///
             "            &\multicolumn{1}{c}{(1)}         &\multicolumn{1}{c}{(2)}         &\multicolumn{1}{c}{(3)}         \\" ///
-            "            & \multicolumn{3}{c}{Number of Fires (x 1,000 units) - Rural Grids} \\ \hline") ///
+            "            & \multicolumn{3}{c}{Number of Fires (in 1,000 units) } \\ \hline") ///
     posthead("") ///
     prefoot("\hline") ///
     postfoot("\hline" "\end{tabular}" "}")
 
 display "Generated: _app_15_polischar_fe12_did_rural.tex"
+
+
+
+********************************************************************************
+* 20. Main DiD Table (_main_1_did)
+********************************************************************************
+
+estread using "${tables}/_app_20_did_downwind_hm_${sample}_rural.ster"
+_strip_zeros_stats, models(eq1 eq2 eq3 eq4) stats(ymean)
+_strip_zeros_stats, models(eq1 eq2 eq3 eq4) stats(ymean2)
+
+
+esttab eq1 eq2 eq3 eq4 using "${tables}/_app_20_did_downwind_hm${sample}_rural.tex", ///
+    replace ///
+    cells(b(fmt(3) star) se(par fmt(3))) ///
+    star(* 0.10 ** 0.05 *** 0.01) ///
+    keep(1.downup_ac 1.downup_ac#1.rice_prod_aclvl_ahigh ) ///
+    order(1.downup_ac 1.downup_ac#1.rice_prod_aclvl_ahigh) ///
+    varlabels(1.downup_ac "Down \$>\$ Up" 1.downup_ac#1.rice_prod_aclvl_ahigh "Down \$>\$ Up \$\times\$ Rice Production" ) ///
+    stats(N acq monthyearfe acfe acmonthfe gridfe ymean_clean ymean2_clean, ///
+          fmt(%12.0fc %12.0fc %s %s %s %s %s %s) ///
+          labels("Observations" "N Assembly Constituencies" ///
+                 "Month-Year FE" "AC FE" "AC \$\times\$ Month-Year FE" "Grid FE" "Mean DV")) ///
+    nomtitles nonumbers ///
+    collabels(none) ///
+    nobaselevels ///
+    prehead("{" ///
+            "\def\sym#1{\ifmmode^{#1}\else\(^{#1}\)\fi}" ///
+            "\begin{tabular}{l*{4}{c}}" ///
+            "\hline" ///
+            "            &\multicolumn{1}{c}{(1)}         &\multicolumn{1}{c}{(2)}         &\multicolumn{1}{c}{(3)}         &\multicolumn{1}{c}{(4)}         \\" ///
+            "            & \multicolumn{4}{c}{Number of Fires (in 1,000 units)} \\ \hline") ///
+    posthead("") ///
+    postfoot("\hline" "\end{tabular}" "}")
+
+
+
 
 ********************************************************************************
 display "All rural tables generated successfully."

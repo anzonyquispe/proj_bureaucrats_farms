@@ -156,7 +156,7 @@ reghdfejl countk downup_ac_pop $controls, ///
     absorb(grid_id ac_id#monthyear) cluster(grid_id cluster_acmonth)
 estadd local gridfe "Y"
 estadd local acmonthfe "Y"
-estadd scalar ymean `meandv2'
+estadd scalar ymean `meandv1'
 estadd local acq "`numacs'"
 est store eq2
 
@@ -165,7 +165,7 @@ reghdfejl countk downup_1sd $controls, ///
     absorb(grid_id ac_id#monthyear) cluster(grid_id cluster_acmonth)
 estadd local gridfe "Y"
 estadd local acmonthfe "Y"
-estadd scalar ymean `meandv3'
+estadd local ymean "`meandv3'"
 estadd local acq "`numacs'"
 est store eq3
 
@@ -174,7 +174,7 @@ reghdfejl countk down_percent $controls, ///
     absorb(grid_id ac_id#monthyear) cluster(grid_id cluster_acmonth)
 estadd local gridfe "Y"
 estadd local acmonthfe "Y"
-estadd scalar ymean `meandv4'
+estadd local ymean "`meandv4'"
 estadd local acq "`numacs'"
 est store eq4
 
@@ -183,7 +183,7 @@ reghdfejl countk downup_diff_percent $controls, ///
     absorb(grid_id ac_id#monthyear) cluster(grid_id cluster_acmonth)
 estadd local gridfe "Y"
 estadd local acmonthfe "Y"
-estadd scalar ymean `meandv5'
+estadd local ymean "`meandv5'"
 estadd local acq "`numacs'"
 est store eq5
 
