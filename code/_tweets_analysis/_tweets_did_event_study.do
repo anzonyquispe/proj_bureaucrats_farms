@@ -1,0 +1,78 @@
+// _tweets_did_event_study.do
+// Event-study (did_multiplegt_dyn) over a list of tweet outcomes. One Stata
+// process per sbatch file; each loops through the outcomes passed in via the
+// $outcome_list global and saves a .ster + .png for every successful run.
+//
+// Globals expected (set by the sbatch wrapper):
+//   $shell        : data root, e.g. /groups/sgulzar/sa_fires/proj_bureaucrats_farms
+//   $job_name     : sbatch identifier, used as ster sub-folder name
+//   $outcome_list : space-separated outcome variables to run
+
+clear all
+set more off
+set linesize 240
+
+// Standalone defaults (interactive testing on a local Mac).
+if "$shell" == "" {
+    global shell        "/Users/anzony.quisperojas/Library/CloudStorage/Dropbox/sa_fires/proj_bureaucrats_farms"
+}
+if "$job_name" == "" {
+    global job_name     "tweets_test"
+}
+if "$outcome_list" == "" {
+    global outcome_list "tw_agriculture_all"
+}
+
+global int_data  "${shell}/data_output/intermediate"
+global figures   "${shell}/tex/paper/figures/tweets_event_study"
+global ster_root "${shell}/tex/paper/sters/tweets_event_study"
+global ster_dir  "${ster_root}/${job_name}"
+
+cap mkdir "${shell}/tex/paper/figures/tweets_event_study"
+cap mkdir "${shell}/tex/paper/sters"
+cap mkdir "${ster_root}"
+cap mkdir "${ster_dir}"
+
+use "${int_data}/tweets_by_rubric1.dta", clear
+
+egen stateid       = group(STATE_UT)
+egen politicianid  = group(Politician_Name)
+egen monthyear     = group(year month)
+
+local graphopts xlabel(-5(5)5, labsize(2)) yline(0, lc(red)) ///
+    xline(0, lc(gray) lp(dash)) legend(off) xtitle(Time Relative to Switch)
+
+display as text _newline "=== ${job_name}: $S_DATE $S_TIME ==="
+display as text "outcomes: ${outcome_list}"
+
+local n_ok   = 0
+local n_skip = 0
+local n_fail = 0
+
+foreach outcome of global outcome_list {
+    capture confirm variable `outcome'
+    if _rc != 0 {
+        display as error "[skip] `outcome' not in dataset"
+        local n_skip = `n_skip' + 1
+        continue
+    }
+
+    display as text _newline ">>> event study: `outcome'"
+
+    capture noisily did_multiplegt_dyn `outcome' politicianid monthyear elected, ///
+        effects(5) placebo(5) cluster(stateid) switchers(out) graph_off ///
+        graphoptions(`graphopts' ytitle(Effect on Tweets))
+
+    if _rc != 0 {
+        display as error "[fail] did_multiplegt_dyn errored on `outcome' (rc=`=_rc')"
+        local n_fail = `n_fail' + 1
+        continue
+    }
+
+    capture estimates save "${ster_dir}/`outcome'.ster", replace
+    capture graph export   "${figures}/`outcome'.png",   replace width(1200)
+    display as result "  -> ${figures}/`outcome'.png"
+    local n_ok = `n_ok' + 1
+}
+
+display as text _newline "=== ${job_name} DONE  ok=`n_ok' skip=`n_skip' fail=`n_fail' ==="
