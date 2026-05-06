@@ -1,25 +1,30 @@
 #!/bin/bash
 # _generate_sbatch_files.sh
-# Emit one SGE sbatch file per (prefix, suffix) pair (22 total) plus a
-# single qsub launcher that submits them all. Each sbatch runs the shared
+#
+# Emit one SGE sbatch file per (prefix, suffix) pair (22 total) into ./sbatch/,
+# plus submit_all_jobs.sh at the top level. Each sbatch runs the shared
 # _tweets_did_event_study.do once with $outcome_list set to that group's
-# outcomes.
+# outcomes. Mirrors the structure of code/_replication_rural/.
 #
 # Plan:
 #   prefixes (11): n1 n2 n3 tw em rh pos neg neu mix unc
 #   suffixes (2):  all own
 #   total: 22 sbatch files, 1 core each, runnable concurrently.
 #
-# Re-run any time the outcome plan changes.
+# Re-run any time the outcome plan changes; wipes prior generator output first.
 
 set -euo pipefail
 
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-cd "$HERE"
-mkdir -p logs
+SBATCH_DIR="$HERE/sbatch"
+mkdir -p "$SBATCH_DIR" "$HERE/logs"
 
 # Wipe stale generator output.
-rm -f "$HERE"/tweets_*.sbatch "$HERE"/qsub_all_tweets.sh
+rm -f "$SBATCH_DIR"/tweets_*.sbatch "$HERE"/submit_all_jobs.sh
+
+# --- Cluster paths (also referenced inside each emitted sbatch) -------------
+CODE_DIR_REMOTE="/users/aquisper/proj_bureaucrats_farms/code/_tweets_analysis"
+PROJ_SHELL_REMOTE="/groups/sgulzar/sa_fires/proj_bureaucrats_farms"
 
 # --- Outcome universes per rubric_1 categorical -----------------------------
 TOPICS_PRIMARY="agriculture development election_campaign environment_pollution farmer_protest governance party_politics sports_culture tribute_ceremony unclear welfare"
@@ -33,13 +38,13 @@ build_list () {
     local prefix="$1" suffix="$2"
     local items=""
     case "$prefix" in
-        n1)                       items="$TOPICS_PRIMARY" ;;
-        n2)                       items="$TOPICS_SECONDARY" ;;
-        n3)                       items="$TOPICS_TERTIARY" ;;
-        tw)                       items="$TOPICS_NO_UNCLEAR" ;;
-        em)                       items="$VALENCES" ;;
-        rh)                       items="$RHET_MODES" ;;
-        pos|neg|neu|mix|unc)      items="$TOPICS_PRIMARY" ;;
+        n1)                  items="$TOPICS_PRIMARY" ;;
+        n2)                  items="$TOPICS_SECONDARY" ;;
+        n3)                  items="$TOPICS_TERTIARY" ;;
+        tw)                  items="$TOPICS_NO_UNCLEAR" ;;
+        em)                  items="$VALENCES" ;;
+        rh)                  items="$RHET_MODES" ;;
+        pos|neg|neu|mix|unc) items="$TOPICS_PRIMARY" ;;
         *) echo "unknown prefix: $prefix" >&2; exit 1 ;;
     esac
     local out=""
@@ -51,7 +56,7 @@ emit_sbatch () {
     local prefix="$1" suffix="$2"
     local job="tweets_${prefix}_${suffix}"
     local outcomes; outcomes="$(build_list "$prefix" "$suffix")"
-    local out="${HERE}/${job}.sbatch"
+    local out="${SBATCH_DIR}/${job}.sbatch"
 
     cat > "$out" <<SBATCH
 #!/bin/bash
@@ -64,40 +69,60 @@ emit_sbatch () {
 #\$ -o logs/\$JOB_NAME.\$JOB_ID.out
 #\$ -e logs/\$JOB_NAME.\$JOB_ID.err
 
+# -----------------------------------------------------------------------------
+# Robustness preamble: fail loud, run the latest checked-out code, and start
+# Stata from a clean module/temp environment so this job never picks up stale
+# state from a prior submission. (Mirrors code/_replication_rural/sbatch/.)
+# -----------------------------------------------------------------------------
 set -euo pipefail
-module purge 2>/dev/null || true
-module load stata
 
-PROJ_SHELL="/groups/sgulzar/sa_fires/proj_bureaucrats_farms"
-GIT_ROOT="\${GIT_ROOT:-/users/aquisper/proj_bureaucrats_farms}"
-DOFILE_PATH="\$GIT_ROOT/code/_tweets_analysis/_tweets_did_event_study.do"
+# Always run from the canonical project tree on the cluster — guards against
+# inheriting a stale CWD from the submitter's shell.
+CODE_DIR="${CODE_DIR_REMOTE}"
+cd "\${CODE_DIR}"
 
 mkdir -p logs
 
-# Per-job scratch dir so concurrent jobs don't share Stata temp state.
-export TMPDIR="\${TMPDIR:-/tmp}/stata.\${JOB_ID:-\$\$}"
-mkdir -p "\$TMPDIR"
-trap 'rm -rf "\$TMPDIR"' EXIT
+echo "[\$(date '+%F %T')] host=\$(hostname) job=\${JOB_ID:-NA} pwd=\$(pwd)"
+if command -v git >/dev/null 2>&1; then
+    echo "[\$(date '+%F %T')] git HEAD: \$(git -C "\${CODE_DIR}" rev-parse --short HEAD 2>/dev/null || echo 'not-a-git-repo')"
+fi
 
+# Force a clean module environment then load stata fresh.
+module purge 2>/dev/null || true
+module load stata
+
+# Per-job scratch dir so concurrent / repeat submissions don't share state.
+export TMPDIR="\${TMPDIR:-/tmp}/stata.\${JOB_ID:-\$\$}"
+mkdir -p "\${TMPDIR}"
+trap 'rm -rf "\${TMPDIR}"' EXIT
+
+# ---- Job-specific globals → wrapper.do --------------------------------------
+PROJ_SHELL="${PROJ_SHELL_REMOTE}"
+DOFILE_PATH="\${CODE_DIR}/_tweets_did_event_study.do"
 WRAPPER="logs/${job}_wrapper.do"
-cat > "\$WRAPPER" <<EOF
+
+cat > "\${WRAPPER}" <<EOF
 clear all
 set more off
-global shell        "\$PROJ_SHELL"
+global shell        "\${PROJ_SHELL}"
 global job_name     "${job}"
 global outcome_list "${outcomes}"
-do "\$DOFILE_PATH"
+do "\${DOFILE_PATH}"
 EOF
+
+# Wipe the prior Stata log for this wrapper so we read only this run's output.
+rm -f "\${WRAPPER%.do}.log"
 
 echo "[\$(date '+%F %T')] starting ${job}"
 echo "  outcomes: ${outcomes}"
-stata-mp -b do "\$WRAPPER"
+stata-mp -b do "\${WRAPPER}"
 rc=\$?
 echo "[\$(date '+%F %T')] ${job} finished rc=\$rc"
 exit \$rc
 SBATCH
     chmod +x "$out"
-    echo "wrote $(basename "$out")"
+    echo "wrote sbatch/$(basename "$out")"
 }
 
 PREFIXES=(n1 n2 n3 tw em rh pos neg neu mix unc)
@@ -109,27 +134,41 @@ for p in "${PREFIXES[@]}"; do
     done
 done
 
-# --- qsub launcher ----------------------------------------------------------
-LAUNCHER="${HERE}/qsub_all_tweets.sh"
-{
-    echo '#!/bin/bash'
-    echo '# Submit all tweets-analysis sbatch files to the cluster.'
-    echo 'set -euo pipefail'
-    echo 'HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"'
-    echo 'cd "$HERE"'
-    echo 'mkdir -p logs'
-    echo
-    echo 'count=0'
-    echo 'for sb in tweets_*.sbatch; do'
-    echo '    [[ -f "$sb" ]] || continue'
-    echo '    echo "qsub $sb"'
-    echo '    qsub "$sb"'
-    echo '    count=$((count + 1))'
-    echo 'done'
-    echo
-    echo 'echo "submitted $count tweets jobs."'
-} > "$LAUNCHER"
+# --- submit_all_jobs.sh ------------------------------------------------------
+LAUNCHER="${HERE}/submit_all_jobs.sh"
+cat > "$LAUNCHER" <<'LAUNCHER_EOF'
+#!/bin/bash
+################################################################################
+# submit_all_jobs.sh
+# Submits all tweets-analysis sbatch files (one per (prefix, suffix) pair) to
+# the cluster. 1 core per job, 22 jobs total — fully parallelizable.
+################################################################################
+
+set -euo pipefail
+HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+cd "$HERE"
+
+mkdir -p logs
+
+echo "=============================================="
+echo "SUBMITTING ALL TWEETS-ANALYSIS JOBS"
+echo "Date: $(date)"
+echo "=============================================="
+
+count=0
+for sb in sbatch/tweets_*.sbatch; do
+    [[ -f "$sb" ]] || continue
+    echo "qsub $sb"
+    qsub "$sb"
+    count=$((count + 1))
+done
+
+echo ""
+echo "=============================================="
+echo "submitted $count jobs. Use 'qstat' to check status."
+echo "=============================================="
+LAUNCHER_EOF
 chmod +x "$LAUNCHER"
 
 echo
-echo "Generated $(ls "${HERE}"/tweets_*.sbatch 2>/dev/null | wc -l | tr -d ' ') sbatch files + launcher."
+echo "Generated $(ls "${SBATCH_DIR}"/tweets_*.sbatch 2>/dev/null | wc -l | tr -d ' ') sbatch files in sbatch/ + submit_all_jobs.sh"
