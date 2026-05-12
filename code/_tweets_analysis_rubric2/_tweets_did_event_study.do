@@ -39,7 +39,7 @@ if _rc != 0 {
     exit 199
 }
 
-use "${int_data}/tweets_by_rubric2.dta", clear
+use "${int_data}/tweets_by_rubric2_azver.dta", clear
 
 egen stateid       = group(STATE_UT)
 egen politicianid  = group(Politician_Name)
