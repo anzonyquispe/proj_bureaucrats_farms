@@ -76,9 +76,9 @@ foreach outcome of global outcome_list {
         continue
     }
 
-    capture estimates save "${figures}/`outcome'.ster", replace
-    capture graph export   "${figures}/`outcome'.png",   replace width(1200)
-    display as result "  -> ${figures}/`outcome'.png"
+    capture estimates save "${figures}/r3_`outcome'.ster", replace
+    capture graph export   "${figures}/r3_`outcome'.png",   replace width(1200)
+    display as result "  -> ${figures}/r3_`outcome'.png"
     local n_ok = `n_ok' + 1
 }
 
