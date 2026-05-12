@@ -1,8 +1,9 @@
-// _tweets_did_event_study.do
-// Event-study (did_multiplegt_dyn) over a list of tweet outcomes. One Stata
-// process per sbatch file; each loops through the outcomes passed in via the
-// $outcome_list global and saves a .ster + .png for every successful run,
-// both in ${shell}/tex/paper/figures/ (no subfolders, no mkdir).
+// _tweets_did_event_study.do  (rubric_3)
+// Event-study (did_multiplegt_dyn) over a list of rubric_3 tweet outcomes
+// (crop burning & policy). One Stata process per sbatch file; each loops
+// through the outcomes passed in via the $outcome_list global and saves a
+// .ster + .png for every successful run, both in ${shell}/tex/paper/figures/
+// (no subfolders, no mkdir).
 //
 // Globals expected (set by the sbatch wrapper):
 //   $shell        : data root, e.g. /groups/sgulzar/sa_fires/proj_bureaucrats_farms
@@ -18,10 +19,10 @@ if "$shell" == "" {
     global shell        "/groups/sgulzar/sa_fires/proj_bureaucrats_farms"
 }
 if "$job_name" == "" {
-    global job_name     "tweets_test"
+    global job_name     "tweets_r3_test"
 }
 if "$outcome_list" == "" {
-    global outcome_list "tw_agriculture_all"
+    global outcome_list "cr3_all"
 }
 
 global int_data  "${shell}/data_output/intermediate"
@@ -39,7 +40,7 @@ if _rc != 0 {
     exit 199
 }
 
-use "${int_data}/tweets_by_rubric1_newver.dta", clear
+use "${int_data}/tweets_by_rubric3.dta", clear
 
 egen stateid       = group(STATE_UT)
 egen politicianid  = group(Politician_Name)
