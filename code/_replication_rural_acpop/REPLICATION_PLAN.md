@@ -311,9 +311,67 @@ compile.
    logging conventions as the original sbatch files. Job names use the
    `_acp` suffix to disambiguate from the original jobs in `qstat`.
 
+7. **`$code` is independent from `$root`.** Code and data live in
+   different filesystem roots on both environments, so `$code` is set via
+   its own pair `$code_shell` / `$code_dbox` rather than as a subpath of
+   `$root`. See Section 7 (Code vs. Data roots) for the full mapping.
+
+8. **`global location` defaults to `"shell"` everywhere.** Every
+   standalone fallback block (every `_main_*.do` and `_app_*.do`, plus
+   `_generate_all_tables.do` and `_master_replication.do`) hardcodes
+   `global location "shell"`. The location toggle is meant to be flipped
+   in **one** place (the master file or by the sbatch caller), not
+   diverge per dofile.
+
 ---
 
-## 7. Caveats
+## 7. Code vs. Data roots (cluster + Mac asymmetry)
+
+On both the cluster and the Mac, the project code and the project data
+live in **separate filesystem roots**, so a single `$root` can't address
+both. The dofiles therefore keep four globals:
+
+| Global         | Cluster (`location="shell"`)                                                    | Local (`location="dbox"`)                                                                       | Holds  |
+| -------------- | ------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- | ------ |
+| `$shell`       | `/groups/sgulzar/sa_fires/proj_bureaucrats_farms`                               | (n/a; data side)                                                                                | data   |
+| `$dbox`        | (n/a; data side)                                                                | `/Users/anzony.quisperojas/Library/CloudStorage/Dropbox/sa_fires/proj_bureaucrats_farms`        | data   |
+| `$code_shell`  | `/users/aquisper/proj_bureaucrats_farms/code/_replication_rural_acpop`          | (n/a; code side)                                                                                | code   |
+| `$code_dbox`   | (n/a; code side)                                                                | `/Users/anzony.quisperojas/Documents/GitHub/proj_bureaucrats_farms/code/_replication_rural_acpop` | code |
+
+The toggle assigns:
+
+```stata
+if "$location" == "dbox" {
+    global root "$dbox"
+    global code "$code_dbox"
+}
+else {
+    global root "$shell"
+    global code "$code_shell"
+}
+```
+
+After that:
+- All **data** paths (`$int_data`, `$tables`, `$figures`, the `import
+  delimited "${root}/..."` and `merge ... using "${root}/..."` calls) hang
+  off `$root`.
+- All **code** paths (`qui do "${code}/estsave_csv.ado"`, log file,
+  `${code}/_..._.do` invocations from the master) hang off `$code`.
+
+### Note for the next iteration
+
+This asymmetry was discovered while editing the ado-load lines in
+`_main_2`, `_app_16`, and `_app_17`. The earlier versions of those files
+loaded the ado via `"${root}/code/_replication_rural_acpop/estsave_csv.ado"`,
+which silently resolved to `/groups/sgulzar/sa_fires/proj_bureaucrats_farms/code/...`
+on the cluster — a path that does **not** exist. Future dofiles in this
+folder (and any other folder added under `_replication_*`) must use
+`${code}/...` for code and `${root}/...` for data; never assume code is a
+child of `$root`.
+
+---
+
+## 8. Caveats
 
 - The analysis assumes `downup_ac_pop` already exists as a column in
   `0_master_merge_data_gen${sample}.csv`. This is consistent with how

@@ -20,7 +20,7 @@ if "$root" == "" {
     clear all
     set more off
 
-    global location "dbox"
+    global location "shell"
     global sample ""
 
     global shell "/groups/sgulzar/sa_fires/proj_bureaucrats_farms"

@@ -34,19 +34,27 @@ global sample ""
 * SET PATHS BASED ON TOGGLES
 ********************************************************************************
 
+* DATA roots
 global shell "/groups/sgulzar/sa_fires/proj_bureaucrats_farms"
-global dbox "/Users/anzony.quisperojas/Library/CloudStorage/Dropbox/sa_fires/proj_bureaucrats_farms"
+global dbox  "/Users/anzony.quisperojas/Library/CloudStorage/Dropbox/sa_fires/proj_bureaucrats_farms"
 
-* Set root based on location toggle
+* CODE roots - NOTE: on the cluster, code lives in /users/aquisper/... while
+* data lives in /groups/sgulzar/... so $code is NOT a subpath of $root.
+* On Mac the same asymmetry holds: code in GitHub repo, data in Dropbox.
+global code_shell "/users/aquisper/proj_bureaucrats_farms/code/_replication_rural_acpop"
+global code_dbox  "/Users/anzony.quisperojas/Documents/GitHub/proj_bureaucrats_farms/code/_replication_rural_acpop"
+
+* Set root + code based on location toggle
 if "$location" == "dbox" {
     global root "$dbox"
+    global code "$code_dbox"
 }
 else {
     global root "$shell"
+    global code "$code_shell"
 }
 
-* Derived paths
-global code     "${root}/code/_replication_rural_acpop"
+* Derived data paths (still hang off $root)
 global int_data "${root}/data_output/intermediate"
 global tables   "${root}/tex/paper/tables"
 global figures  "${root}/tex/paper/figures"
@@ -67,7 +75,7 @@ display "=============================================="
 
 
 /// Generating Ado File
-qui do "${root}/code/_replication_rural_acpop/estsave_csv.ado"
+qui do "${code}/estsave_csv.ado"
 
 
 ********************************************************************************

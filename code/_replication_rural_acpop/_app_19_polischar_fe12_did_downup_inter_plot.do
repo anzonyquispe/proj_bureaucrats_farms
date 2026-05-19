@@ -38,6 +38,7 @@ import delimited using "${root}/data_output/intermediate/politicians_characteris
 
 merge m:1 unique_small_grid_id ac_uq_id using  "${root}/data_output/intermediate/rice_moderators.dta"
 keep if _merge == 3
+drop _merge
 
 * Merge with rural classification
 merge m:1 unique_small_grid_id using "${root}/data_output/intermediate/ghs_grid_classification_2000.dta", keepusing(is_rural)

@@ -12,21 +12,28 @@ if "$root" == "" {
     set more off
 
     * Set toggles for standalone run
-    global location "dbox"
+    global location "shell"
     global sample ""
 
+    * DATA roots
     global shell "/groups/sgulzar/sa_fires/proj_bureaucrats_farms"
-    global dbox "/Users/anzony.quisperojas/Library/CloudStorage/Dropbox/sa_fires/proj_bureaucrats_farms"
+    global dbox  "/Users/anzony.quisperojas/Library/CloudStorage/Dropbox/sa_fires/proj_bureaucrats_farms"
+
+    * CODE roots (code is NOT a subpath of data root on either machine)
+    global code_shell "/users/aquisper/proj_bureaucrats_farms/code/_replication_rural_acpop"
+    global code_dbox  "/Users/anzony.quisperojas/Documents/GitHub/proj_bureaucrats_farms/code/_replication_rural_acpop"
 
     if "$location" == "dbox" {
         global root "$dbox"
+        global code "$code_dbox"
     }
     else {
         global root "$shell"
+        global code "$code_shell"
     }
-	
-	* Load Ados
-	qui do "${root}/code/_replication_rural_acpop/estsave_csv.ado"
+
+    * Load Ados
+    qui do "${code}/estsave_csv.ado"
 
 }
 
