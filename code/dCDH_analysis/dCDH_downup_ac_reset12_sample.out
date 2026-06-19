@@ -1,6 +1,26 @@
+[lib] ROOT   = /groups/sgulzar/sa_fires/proj_bureaucrats_farms
+[lib] SAMPLE = '_sample'
+[load] master CSV: /groups/sgulzar/sa_fires/proj_bureaucrats_farms/data_output/intermediate/0_master_merge_data_gen_sample.csv
+[load] treatment column: downup_ac
 Traceback (most recent call last):
-  File "/users/aquisper/proj_bureaucrats_farms/code/dCDH_analysis/dCDH_downup_ac_reset12.py", line 14, in <module>
-    from _dCDH_lib import (
-  File "/users/aquisper/proj_bureaucrats_farms/code/dCDH_analysis/_dCDH_lib.py", line 41, in <module>
-    import pyreadstat
-ModuleNotFoundError: No module named 'pyreadstat'
+  File "/users/aquisper/proj_bureaucrats_farms/code/dCDH_analysis/dCDH_downup_ac_reset12.py", line 26, in <module>
+    df = load_panel(treatment=TREATMENT)
+  File "/users/aquisper/proj_bureaucrats_farms/code/dCDH_analysis/_dCDH_lib.py", line 140, in load_panel
+    .collect()
+  File "/groups/sgulzar/india_forest_land/did_stat/lib/python3.10/site-packages/polars/_utils/deprecation.py", line 97, in wrapper
+    return function(*args, **kwargs)
+  File "/groups/sgulzar/india_forest_land/did_stat/lib/python3.10/site-packages/polars/lazyframe/opt_flags.py", line 324, in wrapper
+    return function(*args, **kwargs)
+  File "/groups/sgulzar/india_forest_land/did_stat/lib/python3.10/site-packages/polars/lazyframe/frame.py", line 2429, in collect
+    return wrap_df(ldf.collect(engine, callback))
+FileNotFoundError: No such file or directory (os error 2): ...fires/proj_bureaucrats_farms/data_output/intermediate/0_master_merge_data_gen_sample.csv (set POLARS_VERBOSE=1 to see full path)
+
+This error occurred with the following context stack:
+	[1] 'csv scan'
+	[2] 'select'
+	[3] 'filter'
+	[4] 'filter'
+	[5] 'filter'
+	[6] 'with_columns'
+	[7] 'sink'
+
