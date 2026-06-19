@@ -1,0 +1,6 @@
+Traceback (most recent call last):
+  File "/users/aquisper/proj_bureaucrats_farms/code/dCDH_analysis/dCDH_downup_ac_reset6.py", line 13, in <module>
+    from _dCDH_lib import (
+  File "/users/aquisper/proj_bureaucrats_farms/code/dCDH_analysis/_dCDH_lib.py", line 41, in <module>
+    import pyreadstat
+ModuleNotFoundError: No module named 'pyreadstat'
