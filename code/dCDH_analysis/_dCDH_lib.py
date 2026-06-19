@@ -18,9 +18,11 @@ Memory-efficient by design:
   * `ZeroDivisionError` inside the package is caught and logged; the run keeps going
 
 Env vars:
-  ROOT             Override the data root (default: cluster path)
+  ROOT             Override the data root. If unset, auto-detects:
+                     1) cluster path  (/groups/sgulzar/sa_fires/proj_bureaucrats_farms)
+                     2) Mac Dropbox path
   SAMPLE           "" | "_sample" suffix on the master CSV
-  DCDH_LOCAL_OUT   Override the second output dir (the one in your home/code tree)
+  DCDH_LOCAL_OUT   Override the second output dir (default cluster home tree)
 """
 
 from __future__ import annotations
@@ -36,14 +38,40 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
 import polars as pl
+import pyreadstat
+
+
+def _read_dta(path: str | os.PathLike) -> pl.DataFrame:
+    """Read a Stata .dta into a polars DataFrame via pyreadstat."""
+    pdf, _meta = pyreadstat.read_dta(str(path))
+    return pl.from_pandas(pdf)
 
 
 # ---- Configuration ---------------------------------------------------------
 
-ROOT = os.environ.get(
-    "ROOT", "/groups/sgulzar/sa_fires/proj_bureaucrats_farms"
-)
+CLUSTER_ROOT = "/groups/sgulzar/sa_fires/proj_bureaucrats_farms"
+DBOX_ROOT    = ("/Users/anzony.quisperojas/Library/CloudStorage/Dropbox/"
+                "sa_fires/proj_bureaucrats_farms")
+
+
+def _detect_root() -> str:
+    """Pick ROOT from env, else first existing of cluster -> Mac Dropbox."""
+    env_root = os.environ.get("ROOT", "").strip()
+    if env_root:
+        return env_root
+    for candidate in (CLUSTER_ROOT, DBOX_ROOT):
+        if Path(candidate).exists():
+            return candidate
+    raise RuntimeError(
+        "Could not auto-detect ROOT. Set the ROOT env var or make sure one "
+        f"of these paths exists:\n  {CLUSTER_ROOT}\n  {DBOX_ROOT}"
+    )
+
+
+ROOT   = _detect_root()
 SAMPLE = os.environ.get("SAMPLE", "")
+print(f"[lib] ROOT   = {ROOT}")
+print(f"[lib] SAMPLE = {SAMPLE!r}")
 
 INTERMEDIATE_DIR = Path(ROOT) / "data_output" / "intermediate"
 MASTER_CSV = INTERMEDIATE_DIR / f"0_master_merge_data_gen{SAMPLE}.csv"
@@ -85,12 +113,12 @@ def load_panel(treatment: str) -> pl.DataFrame:
     print(f"[load] treatment column: {treatment}")
 
     # Small lookups -- read with native polars, convert to id Series for is_in
-    ghs = pl.read_stata(str(GHS_DTA)).select(
+    ghs = _read_dta(GHS_DTA).select(
         ["unique_small_grid_id", "is_rural"]
     )
     rural_grids = ghs.filter(pl.col("is_rural") == 1)["unique_small_grid_id"]
 
-    grids = pl.read_stata(str(GRIDS_DTA))
+    grids = _read_dta(GRIDS_DTA)
     excluded_grids = grids.filter(pl.col("dpl_ac") == 1)["unique_small_grid_id"]
 
     keep_cols = [

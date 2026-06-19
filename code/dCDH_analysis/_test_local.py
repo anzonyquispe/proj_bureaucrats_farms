@@ -3,19 +3,23 @@
 Local sanity-test entry point for the dCDH pipeline.
 
 Runs all 4 driver scripts on the SAMPLE dataset, each in its own subprocess so
-memory is reset between them. Useful to verify the pipeline end-to-end before
-submitting any cluster job.
+memory is reset between them. Useful to verify the pipeline end-to-end on your
+Mac before submitting any cluster job.
 
 Usage (from this directory):
-    SAMPLE=_sample python _test_local.py
-or
-    ROOT=/path/to/local/proj_bureaucrats_farms SAMPLE=_sample \
-    DCDH_LOCAL_OUT=/tmp/dCDH_local_out \
     python _test_local.py
+
+The lib auto-detects ROOT: it tries the cluster path first, then the Mac
+Dropbox path. SAMPLE defaults to "_sample" here so you don't have to set it.
+
+Override anything with env vars if needed, e.g.:
+    ROOT=/some/other/proj_bureaucrats_farms python _test_local.py
+    DCDH_LOCAL_OUT=$HOME/Downloads/dCDH_out python _test_local.py
 
 Outputs land in:
     ${ROOT}/data_output/intermediate/dCDH/
-    ${DCDH_LOCAL_OUT}  (default: /users/aquisper/proj_bureaucrats_farms/code/dCDH_analysis)
+    ${DCDH_LOCAL_OUT}                   (defaults to cluster home path,
+                                         silently skipped on a Mac)
 """
 
 import os
