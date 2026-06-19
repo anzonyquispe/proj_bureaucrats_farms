@@ -1,26 +1,66 @@
+/groups/sgulzar/india_forest_land/did_stat/lib/python3.10/site-packages/did_multiplegt_dyn/did_multiplegt_main.py:3662: UserWarning: The F-test may not be reliable, because the variance of placebos is close to not being invertible (the ratio of its largest and smallest eigenvalues is 7695.1, which is larger than 1000). This can for instance happen when you compute many estimators, or when your estimates are very strongly correlated. We recommend that you complement the F-test with a sup t-test, see FAQ section of the help file for more details.
+  warnings.warn(matrix_warning_pl, UserWarning)
 [lib] ROOT   = /groups/sgulzar/sa_fires/proj_bureaucrats_farms
 [lib] SAMPLE = '_sample'
 [load] master CSV: /groups/sgulzar/sa_fires/proj_bureaucrats_farms/data_output/intermediate/0_master_merge_data_gen_sample.csv
 [load] treatment column: downup_ac
-Traceback (most recent call last):
-  File "/users/aquisper/proj_bureaucrats_farms/code/dCDH_analysis/dCDH_downup_ac_reset12.py", line 26, in <module>
-    df = load_panel(treatment=TREATMENT)
-  File "/users/aquisper/proj_bureaucrats_farms/code/dCDH_analysis/_dCDH_lib.py", line 140, in load_panel
-    .collect()
-  File "/groups/sgulzar/india_forest_land/did_stat/lib/python3.10/site-packages/polars/_utils/deprecation.py", line 97, in wrapper
-    return function(*args, **kwargs)
-  File "/groups/sgulzar/india_forest_land/did_stat/lib/python3.10/site-packages/polars/lazyframe/opt_flags.py", line 324, in wrapper
-    return function(*args, **kwargs)
-  File "/groups/sgulzar/india_forest_land/did_stat/lib/python3.10/site-packages/polars/lazyframe/frame.py", line 2429, in collect
-    return wrap_df(ldf.collect(engine, callback))
-FileNotFoundError: No such file or directory (os error 2): ...fires/proj_bureaucrats_farms/data_output/intermediate/0_master_merge_data_gen_sample.csv (set POLARS_VERBOSE=1 to see full path)
+[load] rows after filters: 171,072
+[load] unique grids:       3,888
+[load] unique ac_uq_id:    728
+[12month] new groups: 15,552
+[fit] dCDH_downup_ac_reset12_notrend  rows=171,072  groups=15,552  effects=6  placebo=5  with_actrend=False
+================================================================================
+             Estimation of treatment effects: Event-study effects
+================================================================================
+               Block   Estimate        SE       LB CI      UB CI        N  Switchers      N.w  Switchers.w
+            Effect_1 -34.664147 15.766646  -65.566205  -3.762089  90509.0    11763.0  90509.0      11763.0
+            Effect_2 -39.368482 16.529797  -71.766288  -6.970676  77055.0    11677.0  77055.0      11677.0
+            Effect_3 -37.017069 20.729225  -77.645602   3.611465  62896.0    10494.0  62896.0      10494.0
+            Effect_4  -6.364827 23.684446  -52.785488  40.055834  48582.0     9761.0  48582.0       9761.0
+            Effect_5  92.952074 37.282817   19.879096 166.025053  38191.0     9227.0  38191.0       9227.0
+            Effect_6  53.325629 33.329687  -11.999356 118.650615  28340.0     8673.0  28340.0       8673.0
+Average_Total_Effect   0.063384 29.879504  -58.499369  58.626136 145057.0    61595.0 145057.0      61595.0
+           Placebo_1 -21.681271 21.539429  -63.897776  20.535235  74957.0    11043.0  74957.0      11043.0
+           Placebo_2 -48.248489 23.226258  -93.771118  -2.725860  47919.0    10492.0  47919.0      10492.0
+           Placebo_3 -55.568016 26.678236 -107.856398  -3.279635  26332.0     8526.0  26332.0       8526.0
+           Placebo_4 -46.871120 19.329242  -84.755738  -8.986501  15427.0     5924.0  15427.0       5924.0
+           Placebo_5  -4.555754  9.641173  -23.452105  14.340597   9720.0     4116.0   9720.0       4116.0
+================================================================================
+Test of joint nullity of the effects: p-value = 0.017045
+Test of joint nullity of the placebos: p-value = 0.182091
 
-This error occurred with the following context stack:
-	[1] 'csv scan'
-	[2] 'select'
-	[3] 'filter'
-	[4] 'filter'
-	[5] 'filter'
-	[6] 'with_columns'
-	[7] 'sink'
+The development of this package was funded by the European Union.
+ERC REALLYCREDIBLE - GA N. 101043899
+[out] wrote /groups/sgulzar/sa_fires/proj_bureaucrats_farms/data_output/intermediate/dCDH/dCDH_downup_ac_reset12_notrend.csv
+[out] wrote /groups/sgulzar/sa_fires/proj_bureaucrats_farms/data_output/intermediate/dCDH/dCDH_downup_ac_reset12_notrend.png
+[out] wrote /users/aquisper/proj_bureaucrats_farms/code/dCDH_analysis/dCDH_downup_ac_reset12_notrend.csv
+[out] wrote /users/aquisper/proj_bureaucrats_farms/code/dCDH_analysis/dCDH_downup_ac_reset12_notrend.png
+[fit] dCDH_downup_ac_reset12_actrend  rows=171,072  groups=15,552  effects=6  placebo=5  with_actrend=True
+================================================================================
+             Estimation of treatment effects: Event-study effects
+================================================================================
+               Block   Estimate       SE      LB CI      UB CI       N  Switchers     N.w  Switchers.w
+            Effect_1   5.975974 1.784764   2.477901   9.474046 20493.0     6901.0 20493.0       6901.0
+            Effect_2 -22.084201 2.259508 -26.512754 -17.655647 16226.0     5513.0 16226.0       5513.0
+            Effect_3 -30.285485 2.388945 -34.967732 -25.603238 12857.0     4486.0 12857.0       4486.0
+            Effect_4 -26.468037 1.958849 -30.307310 -22.628764 10822.0     3944.0 10822.0       3944.0
+            Effect_5  -6.239198 4.629035 -15.311941   2.833544  9421.0     3536.0  9421.0       3536.0
+            Effect_6  -4.404279 4.570209 -13.361723   4.553166  7719.0     3012.0  7719.0       3012.0
+Average_Total_Effect -21.298410 2.436963 -26.074770 -16.522050 62071.0    27392.0 62071.0      27392.0
+           Placebo_1 -26.845425 1.245769 -29.287088 -24.403762 17873.0     6260.0 17873.0       6260.0
+           Placebo_2 -21.494206 5.306436 -31.894629 -11.093783 12033.0     4442.0 12033.0       4442.0
+           Placebo_3 -64.255291 6.944133 -77.865541 -50.645040  7098.0     2843.0  7098.0       2843.0
+           Placebo_4 -21.311369 9.691993 -40.307327  -2.315411  4575.0     1880.0  4575.0       1880.0
+           Placebo_5  -2.765980 6.753439 -16.002476  10.470517  3377.0     1433.0  3377.0       1433.0
+================================================================================
+Test of joint nullity of the effects: p-value = 0.000000
+Test of joint nullity of the placebos: p-value = 0.000000
 
+WARNING: The F-test may not be reliable, because the variance of placebos is close to not being invertible (the ratio of its largest and smallest eigenvalues is 7695.1, which is larger than 1000). This can for instance happen when you compute many estimators, or when your estimates are very strongly correlated. We recommend that you complement the F-test with a sup t-test, see FAQ section of the help file for more details.
+
+The development of this package was funded by the European Union.
+ERC REALLYCREDIBLE - GA N. 101043899
+[out] wrote /groups/sgulzar/sa_fires/proj_bureaucrats_farms/data_output/intermediate/dCDH/dCDH_downup_ac_reset12_actrend.csv
+[out] wrote /groups/sgulzar/sa_fires/proj_bureaucrats_farms/data_output/intermediate/dCDH/dCDH_downup_ac_reset12_actrend.png
+[out] wrote /users/aquisper/proj_bureaucrats_farms/code/dCDH_analysis/dCDH_downup_ac_reset12_actrend.csv
+[out] wrote /users/aquisper/proj_bureaucrats_farms/code/dCDH_analysis/dCDH_downup_ac_reset12_actrend.png
