@@ -1,0 +1,8 @@
+Traceback (most recent call last):
+  File "/groups/sgulzar/sa_fires/dCDH_reset12month_year.py", line 99, in <module>
+    model1.fit()
+  File "/groups/sgulzar/india_forest_land/did_stat/lib/python3.10/site-packages/did_multiplegt_dyn/did_multiplegt_dyn.py", line 179, in fit
+    ret = did_multiplegt_main( **self.args )
+  File "/groups/sgulzar/india_forest_land/did_stat/lib/python3.10/site-packages/did_multiplegt_dyn/did_multiplegt_main.py", line 2951, in did_multiplegt_main
+    (N1_pl_new / (N1_pl_new + N0_pl_new)) * pl.col(f"U_Gg_pl_{i}_plus_XX") +
+ZeroDivisionError: division by zero

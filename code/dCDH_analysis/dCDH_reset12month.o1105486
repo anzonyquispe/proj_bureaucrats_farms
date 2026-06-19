@@ -1,0 +1,4 @@
+Loading CRC_default/1.1
+Loading CRC_default/1.1
+/opt/sge/crc/spool/d32cepyc256/job_scripts/1105486: line 9: 393348 Segmentation fault      (core dumped) /groups/sgulzar/india_forest_land/did_stat/bin/python dCDH_reset12month_year.py > dCDH_reset12month_year.out 2>&1
+Loading CRC_default/1.1
