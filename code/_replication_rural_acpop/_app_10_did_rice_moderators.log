@@ -1,0 +1,432 @@
+
+  ___  ____  ____  ____  ____ ®
+ /__    /   ____/   /   ____/      StataNow 19.5
+___/   /   /___/   /   /___/       MP—Parallel Edition
+
+ Statistics and Data Science       Copyright 1985-2025 StataCorp LLC
+                                   StataCorp
+                                   4905 Lakeway Drive
+                                   College Station, Texas 77845 USA
+                                   800-782-8272        https://www.stata.com
+                                   979-696-4600        service@stata.com
+
+Stata license: 4-user 16-core network, expiring 14 Sep 2026
+Serial number: 501909301589
+  Licensed to: University of Notre Dame
+               Notre Dame, IN 46556
+
+Notes:
+      1. Stata is running in batch mode.
+      2. Unicode is supported; see help unicode_advice.
+      3. More than 2 billion observations are allowed; see help obs_advice.
+      4. Maximum number of variables is set to 5,000 but can be increased;
+          see help set_maxvar.
+
+. do _app_10_did_rice_moderators.do 
+
+. *****************************************************************************
+> ***
+. * _main_did_rice_moderators_rural.do
+. * Main DiD analysis with rice moderators - RURAL GRIDS ONLY
+. * Tests heterogeneity by rice area, harvested rice area, and rice production
+. *
+. * From paper Appendix Table: main_did_downup_area_ac_rice_moderators.tex
+. * "Effect on the number of fires of constituency exposure to smoke by rice
+. *  producing area"
+. *****************************************************************************
+> ***
+. 
+. *****************************************************************************
+> ***
+. * Setup - Only set globals if running standalone (not from master)
+. *****************************************************************************
+> ***
+. 
+. if "$root" == "" {
+.     clear all
+.     set more off
+. 
+.     global location "shell"
+.     global sample ""
+. 
+.     global shell "/groups/sgulzar/sa_fires/proj_bureaucrats_farms"
+.     global dbox "/Users/anzony.quisperojas/Library/CloudStorage/Dropbox/sa_fi
+> res/proj_bureaucrats_farms"
+. 
+.     if "$location" == "dbox" {
+.         global root "$dbox"
+.     }
+.     else {
+.         global root "$shell"
+.     }
+. }
+
+. 
+. cd "${root}"
+/groups/sgulzar/sa_fires/proj_bureaucrats_farms
+
+. 
+. *****************************************************************************
+> ***
+. * Import Data
+. *****************************************************************************
+> ***
+. 
+. import delimited "${root}/data_output/intermediate/0_master_merge_data_gen${s
+> ample}.csv", clear
+(encoding automatically selected: ISO-8859-2)
+(77 vars, 14,837,592 obs)
+
+. 
+. * Merge with rural classification
+. merge m:1 unique_small_grid_id using "${root}/data_output/intermediate/ghs_gr
+> id_classification_2000.dta", keepusing(is_rural)
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                        58,521
+        from master                         0  (_merge==1)
+        from using                     58,521  (_merge==2)
+
+    Matched                        14,837,592  (_merge==3)
+    -----------------------------------------
+
+. keep if _merge == 3
+(58,521 observations deleted)
+
+. drop _merge
+
+. 
+. * Keep only rural grids
+. keep if is_rural == 1
+(3,471,192 observations deleted)
+
+. 
+. display "Observations after rural filter: " _N
+Observations after rural filter: 11366400
+
+. 
+. * Drop grids with more than 1 ac
+. merge m:1 unique_small_grid_id using "${root}/data_output/intermediate/grids_
+> with_more_1_ac.dta"
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                    11,356,812
+        from master                11,356,780  (_merge==1)
+        from using                         32  (_merge==2)
+
+    Matched                             9,620  (_merge==3)
+    -----------------------------------------
+
+. drop if dpl_ac ==1
+(9,652 observations deleted)
+
+. drop _merge
+
+. 
+. * Create count in thousands
+. gen countk = count * 1000
+
+. 
+. * Filter data: year < 2022 or (year == 2022 & month <= 8)
+. keep if year < 2022 | (year == 2022 & month <= 8)
+(2,148,580 observations deleted)
+
+. 
+. * Sort data
+. sort unique_small_grid_id monthyear
+
+. 
+. *****************************************************************************
+> ***
+. * Encode IDs
+. *****************************************************************************
+> ***
+. 
+. capture confirm numeric variable unique_small_grid_id
+
+. if _rc {
+.     encode unique_small_grid_id, gen(grid_id)
+. }
+
+. else {
+.     gen grid_id = unique_small_grid_id
+. }
+
+. 
+. capture confirm numeric variable ac_uq_id
+
+. if _rc {
+.     encode ac_uq_id, gen(ac_id)
+. }
+
+. else {
+.     gen ac_id = ac_uq_id
+. }
+
+. 
+. * Create cluster variable
+. egen cluster_acmonth = group(ac_id monthyear)
+
+. 
+. *****************************************************************************
+> ***
+. * Create rice moderator variables
+. * These should be in the data or merged from rice_moderators.dta
+. *****************************************************************************
+> ***
+. 
+. * Merge rice moderators if not already present
+. capture confirm variable rice_area_aclvl_ahigh
+
+. if _rc {
+.     display "Merging rice moderators..."
+.     merge m:1 unique_small_grid_id ac_uq_id using "${root}/data_output/interm
+> ediate/rice_moderators.dta", nogen
+. }
+
+. 
+. * Create indicator variables for above median rice characteristics
+. capture confirm variable rice_area_aclvl_ahigh
+
+. if _rc {
+.     * If variables don't exist, create from raw data
+.     * rice_area_aclvl_ahigh: Above median rice area
+.     * rice_harvarea_aclvl_ahigh: Above median harvested rice area
+.     * rice_prod_aclvl_ahigh: Above median rice production
+.     display as error "Rice moderator variables not found"
+.     display as error "Expected: rice_area_aclvl_ahigh, rice_harvarea_aclvl_ah
+> igh, rice_prod_aclvl_ahigh"
+.     exit 1
+. }
+
+. 
+. *****************************************************************************
+> ***
+. * Calculate statistics
+. *****************************************************************************
+> ***
+. 
+. * Count unique ACs
+. unique ac_id
+Number of unique values of ac_id is  808
+Number of records is  9208200
+
+. local numacs = r(unique)
+
+. 
+. * Mean DV for control group
+. bys unique_small_grid_id: egen ever_treat = max(downup_ac_pop)
+
+. summarize countk if downup_ac_pop == 0 & ever_treat == 1
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+      countk |  3,958,485    170.7466    1068.215          0      66000
+
+. local meandv = r(mean)
+
+. 
+. *****************************************************************************
+> ***
+. * Run Regressions
+. *****************************************************************************
+> ***
+. 
+. global controls av_wind_speed wind_direction
+
+. local moderators rice_area_aclvl_ahigh rice_harvarea_aclvl_ahigh rice_prod_ac
+> lvl_ahigh
+
+. 
+. local i = 1
+
+. foreach mod of local moderators {
+  2.     
+.     * Mean DV for low moderator group
+.         quietly summarize countk if downup_ac_pop == 0 & ever_treat == 1
+  3.     local meandv = cond(r(N) == 0, ., r(mean))
+  4.         
+.     quietly summarize countk if downup_ac_pop == 0 & ever_treat == 1 & `mod' 
+> == 0
+  5.     local meandv2 = cond(r(N) == 0, ., r(mean))
+  6.         
+.         quietly summarize countk if downup_ac_pop == 0 & ever_treat == 1 & `m
+> od' == 1
+  7.     local meandv3 = cond(r(N) == 0, ., r(mean))
+  8.     
+.     * Regression
+.     reghdfejl countk ib0.downup_ac_pop##ib0.`mod' $controls, ///
+>         absorb(grid_id ac_id#monthyear) cluster(grid_id cluster_acmonth)
+  9.     
+.     * Store results
+.     estadd local gridfe    "Y"
+ 10.     estadd local acmonthfe "Y"
+ 11.     estadd local ymean    = cond(missing(`meandv'), "", string(`meandv', "
+> %9.3f"))
+ 12.     estadd local ymean2    = cond(missing(`meandv2'), "", string(`meandv2'
+> , "%9.3f"))
+ 13.         estadd local ymean3    = cond(missing(`meandv3'), "", string(`mean
+> dv3', "%9.3f"))
+ 14.     estadd scalar acq      `numacs'
+ 15.     
+.     est store eq`i'
+ 16.     local i = `i' + 1
+ 17. }
+(dropped 1200 singleton observations)
+(MWFE estimator converged in 2 iterations)
+
+HDFE linear regression with Julia                 Number of obs   =  9,207,000
+Absorbing 2 HDFE groups                           F(   4,  76725) =       9.38
+Statistics cluster-robust                         Prob > F        =     0.0000
+                                                  R-squared       =     0.6066
+                                                  Adj R-squared   =     0.5991
+Number of clusters (grid_id) =      76725         Within R-sq.    =     0.0000
+Number of clusters (cluster_acmonth) =      95760 Root MSE        =   642.1486
+
+           (Std. err. adjusted for 76,725 clusters in grid_id cluster_acmonth)
+------------------------------------------------------------------------------
+             |               Robust
+      countk | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+1.downup_a~p |  -9.061385   1.591248    -5.69   0.000    -12.18022   -5.942547
+1.rice_are~h |          0  (omitted)
+av_wind_sp~d |   21.42093   16.86092     1.27   0.204    -11.62639    54.46825
+wind_direc~n |    .001761   .0416985     0.04   0.966    -.0799678    .0834899
+             |
+downup_ac_~p#|
+rice_area_~h |
+        1 1  |   4.685912   2.918657     1.61   0.108    -1.034642    10.40647
+------------------------------------------------------------------------------
+
+added macro:
+             e(gridfe) : "Y"
+
+added macro:
+          e(acmonthfe) : "Y"
+
+added macro:
+              e(ymean) : "170.747"
+
+added macro:
+             e(ymean2) : "126.233"
+
+added macro:
+             e(ymean3) : "233.813"
+
+added scalar:
+                e(acq) =  808
+(dropped 1200 singleton observations)
+(MWFE estimator converged in 2 iterations)
+
+HDFE linear regression with Julia                 Number of obs   =  9,207,000
+Absorbing 2 HDFE groups                           F(   4,  76725) =       8.89
+Statistics cluster-robust                         Prob > F        =     0.0000
+                                                  R-squared       =     0.6066
+                                                  Adj R-squared   =     0.5991
+Number of clusters (grid_id) =      76725         Within R-sq.    =     0.0000
+Number of clusters (cluster_acmonth) =      95760 Root MSE        =   642.1490
+
+           (Std. err. adjusted for 76,725 clusters in grid_id cluster_acmonth)
+------------------------------------------------------------------------------
+             |               Robust
+      countk | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+1.downup_a~p |  -6.126342   1.255685    -4.88   0.000    -8.587479   -3.665205
+1.rice_har~h |          0  (omitted)
+av_wind_sp~d |   21.08745   16.85336     1.25   0.211    -11.94506    54.11995
+wind_direc~n |   .0024541   .0416932     0.06   0.953    -.0792644    .0841727
+             |
+downup_ac_~p#|
+rice_harva~h |
+        1 1  |  -2.317753   2.925258    -0.79   0.428    -8.051244    3.415738
+------------------------------------------------------------------------------
+
+added macro:
+             e(gridfe) : "Y"
+
+added macro:
+          e(acmonthfe) : "Y"
+
+added macro:
+              e(ymean) : "170.747"
+
+added macro:
+             e(ymean2) : "56.022"
+
+added macro:
+             e(ymean3) : "317.672"
+
+added scalar:
+                e(acq) =  808
+(dropped 1200 singleton observations)
+(MWFE estimator converged in 2 iterations)
+
+HDFE linear regression with Julia                 Number of obs   =  9,207,000
+Absorbing 2 HDFE groups                           F(   4,  76725) =       9.78
+Statistics cluster-robust                         Prob > F        =     0.0000
+                                                  R-squared       =     0.6066
+                                                  Adj R-squared   =     0.5991
+Number of clusters (grid_id) =      76725         Within R-sq.    =     0.0000
+Number of clusters (cluster_acmonth) =      95760 Root MSE        =   642.1491
+
+           (Std. err. adjusted for 76,725 clusters in grid_id cluster_acmonth)
+------------------------------------------------------------------------------
+             |               Robust
+      countk | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+1.downup_a~p |  -6.470443   1.231711    -5.25   0.000     -8.88459   -4.056297
+1.rice_pro~h |          0  (omitted)
+av_wind_sp~d |   21.07355   16.85856     1.25   0.211    -11.96915    54.11625
+wind_direc~n |   .0022416    .041683     0.05   0.957    -.0794569    .0839402
+             |
+downup_ac_~p#|
+rice_prod_~h |
+        1 1  |  -1.390414   2.746287    -0.51   0.613    -6.773122    3.992294
+------------------------------------------------------------------------------
+
+added macro:
+             e(gridfe) : "Y"
+
+added macro:
+          e(acmonthfe) : "Y"
+
+added macro:
+              e(ymean) : "170.747"
+
+added macro:
+             e(ymean2) : "43.480"
+
+added macro:
+             e(ymean3) : "305.768"
+
+added scalar:
+                e(acq) =  808
+
+. 
+. *****************************************************************************
+> ***
+. * Save ster file
+. *****************************************************************************
+> ***
+. 
+. estwrite eq* using "${root}/tex/paper/tables/_app_10_did_rice_moderators${sam
+> ple}_rural_acpop.ster", replace
+(saving eq1)
+(saving eq2)
+(saving eq3)
+(file /groups/sgulzar/sa_fires/proj_bureaucrats_farms/tex/paper/tables/_app_10_
+> did_rice_moderators_rural_acpop.ster saved)
+
+. 
+. display "Ster: ${root}/tex/paper/tables/_app_10_did_rice_moderators${sample}_
+> rural_acpop.ster"
+Ster: /groups/sgulzar/sa_fires/proj_bureaucrats_farms/tex/paper/tables/_app_10_
+> did_rice_moderators_rural_acpop.ster
+
+. 
+. *****************************************************************************
+> ***
+. 
+end of do-file

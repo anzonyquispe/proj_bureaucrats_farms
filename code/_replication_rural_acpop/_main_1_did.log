@@ -1,0 +1,468 @@
+
+  ___  ____  ____  ____  ____ ®
+ /__    /   ____/   /   ____/      StataNow 19.5
+___/   /   /___/   /   /___/       MP—Parallel Edition
+
+ Statistics and Data Science       Copyright 1985-2025 StataCorp LLC
+                                   StataCorp
+                                   4905 Lakeway Drive
+                                   College Station, Texas 77845 USA
+                                   800-782-8272        https://www.stata.com
+                                   979-696-4600        service@stata.com
+
+Stata license: 4-user 16-core network, expiring 14 Sep 2026
+Serial number: 501909301589
+  Licensed to: University of Notre Dame
+               Notre Dame, IN 46556
+
+Notes:
+      1. Stata is running in batch mode.
+      2. Unicode is supported; see help unicode_advice.
+      3. More than 2 billion observations are allowed; see help obs_advice.
+      4. Maximum number of variables is set to 5,000 but can be increased;
+          see help set_maxvar.
+
+. do _main_1_did.do 
+
+. *****************************************************************************
+> ***
+. * _main_did_rural.do
+. * Replicates analysis from _main_did.R - RURAL GRIDS ONLY
+. * Generates DiD table with downup_ac_pop treatment
+. *****************************************************************************
+> ***
+. 
+. *****************************************************************************
+> ***
+. * Setup - Only set globals if running standalone (not from master)
+. *****************************************************************************
+> ***
+. 
+. if "$root" == "" {
+.     clear all
+.     set more off
+. 
+.     * Set toggles for standalone run
+.     global location "shell"
+.     global sample ""
+. 
+.     global shell "/groups/sgulzar/sa_fires/proj_bureaucrats_farms"
+.     global dbox "/Users/anzony.quisperojas/Library/CloudStorage/Dropbox/sa_fi
+> res/proj_bureaucrats_farms"
+. 
+.     if "$location" == "dbox" {
+.         global root "$dbox"
+.     }
+.     else {
+.         global root "$shell"
+.     }
+. }
+
+. 
+. global int_farms "${root}/data_output/intermediate"
+
+. global table_farms "${root}/tex/paper/tables"
+
+. global figure_farms "${root}/tex/paper/figures"
+
+. 
+. *****************************************************************************
+> ***
+. * Import Data
+. *****************************************************************************
+> ***
+. 
+. import delimited "${int_farms}/0_master_merge_data_gen${sample}.csv", clear
+(encoding automatically selected: ISO-8859-2)
+(77 vars, 14,837,592 obs)
+
+. 
+. * Merge with rural classification
+. merge m:1 unique_small_grid_id using "${root}/data_output/intermediate/ghs_gr
+> id_classification_2000.dta", keepusing(is_rural)
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                        58,521
+        from master                         0  (_merge==1)
+        from using                     58,521  (_merge==2)
+
+    Matched                        14,837,592  (_merge==3)
+    -----------------------------------------
+
+. keep if _merge == 3
+(58,521 observations deleted)
+
+. drop _merge
+
+. 
+. * Keep only rural grids
+. keep if is_rural == 1
+(3,471,192 observations deleted)
+
+. 
+. display "Observations after rural filter: " _N
+Observations after rural filter: 11366400
+
+. 
+. * Drop grids with more than 1 ac
+. merge m:1 unique_small_grid_id using "${root}/data_output/intermediate/grids_
+> with_more_1_ac.dta"
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                    11,356,812
+        from master                11,356,780  (_merge==1)
+        from using                         32  (_merge==2)
+
+    Matched                             9,620  (_merge==3)
+    -----------------------------------------
+
+. drop if dpl_ac ==1
+(9,652 observations deleted)
+
+. drop _merge
+
+. 
+. * Create count in thousands
+. gen countk = count * 1000
+
+. 
+. * Filter data: year < 2022 or (year == 2022 & month <= 8)
+. keep if year < 2022 | (year == 2022 & month <= 8)
+(2,148,580 observations deleted)
+
+. 
+. * Sort data
+. sort unique_small_grid_id monthyear
+
+. 
+. *****************************************************************************
+> ***
+. * Create TREAT_abs variable (to identify pure control)
+. *****************************************************************************
+> ***
+. 
+. bysort unique_small_grid_id: egen TREAT_abs = max(downup_ac_pop)
+
+. 
+. *****************************************************************************
+> ***
+. * Encode string IDs if necessary
+. *****************************************************************************
+> ***
+. 
+. capture confirm numeric variable unique_small_grid_id
+
+. if _rc {
+.     encode unique_small_grid_id, gen(grid_id)
+. }
+
+. else {
+.     gen grid_id = unique_small_grid_id
+. }
+
+. 
+. capture confirm numeric variable ac_uq_id
+
+. if _rc {
+.     encode ac_uq_id, gen(ac_id)
+. }
+
+. else {
+.     gen ac_id = ac_uq_id
+. }
+
+. 
+. *****************************************************************************
+> ***
+. * Calculate statistics for table footer
+. *****************************************************************************
+> ***
+. 
+. * Calculate mean DV for control group (downup_ac_pop==0 & TREAT_abs==1)
+. summarize countk if downup_ac_pop == 0 & TREAT_abs == 1
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+      countk |  3,958,485    170.7466    1068.215          0      66000
+
+. local meandv = r(mean)
+
+. local meandv_fmt = string(`meandv', "%9.3f")
+
+. 
+. * Count unique ACs
+. unique ac_id
+Number of unique values of ac_id is  808
+Number of records is  9208200
+
+. local numacs = r(unique)
+
+. 
+. *****************************************************************************
+> ***
+. * DiD Regressions
+. *****************************************************************************
+> ***
+. 
+. * Controls
+. global controls av_wind_speed wind_direction
+
+. 
+. * Cluster variables
+. egen cluster_acmonth = group(ac_id monthyear)
+
+. 
+. * Specification 1: No FE (baseline with controls only)
+. reg countk downup_ac_pop $controls, vce(cluster grid_id)
+
+Linear regression                               Number of obs     =  9,208,200
+                                                F(3, 76734)       =    4743.50
+                                                Prob > F          =     0.0000
+                                                R-squared         =     0.0116
+                                                Root MSE          =     1008.2
+
+                           (Std. err. adjusted for 76,735 clusters in grid_id)
+------------------------------------------------------------------------------
+             |               Robust
+      countk | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+downup_ac_~p |  -6.417951   1.996363    -3.21   0.001    -10.33081    -2.50509
+av_wind_sp~d |  -36.01549   1.398231   -25.76   0.000    -38.75602   -33.27496
+wind_direc~n |  -1.771498   .0151995  -116.55   0.000    -1.801289   -1.741707
+       _cons |   195.1274   2.715489    71.86   0.000      189.805    200.4497
+------------------------------------------------------------------------------
+
+. estadd local ymean `meandv_fmt'
+
+added macro:
+              e(ymean) : "170.747"
+
+. estadd local acq `numacs'
+
+added macro:
+                e(acq) : "808"
+
+. estadd local monthyearfe "N"
+
+added macro:
+        e(monthyearfe) : "N"
+
+. estadd local acfe "N"
+
+added macro:
+               e(acfe) : "N"
+
+. estadd local acmonthfe "N"
+
+added macro:
+          e(acmonthfe) : "N"
+
+. estadd local gridfe "N"
+
+added macro:
+             e(gridfe) : "N"
+
+. estimates store eq1
+
+. 
+. * Specification 2: AC FE + MonthYear FE
+. reghdfejl countk downup_ac_pop $controls, ///
+>     absorb(ac_id monthyear) ///
+>     cluster(grid_id cluster_acmonth)
+(MWFE estimator converged in 2 iterations)
+
+HDFE linear regression with Julia                 Number of obs   =  9,208,200
+Absorbing 2 HDFE groups                           F(   3,  76735) =     324.26
+Statistics cluster-robust                         Prob > F        =     0.0000
+                                                  R-squared       =     0.1371
+                                                  Adj R-squared   =     0.1371
+Number of clusters (grid_id) =      76735         Within R-sq.    =     0.0054
+Number of clusters (cluster_acmonth) =      96960 Root MSE        =   942.1061
+
+           (Std. err. adjusted for 76,735 clusters in grid_id cluster_acmonth)
+------------------------------------------------------------------------------
+             |               Robust
+      countk | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+downup_ac_~p |  -10.66037   1.746927    -6.10   0.000    -14.08434   -7.236405
+av_wind_sp~d |   218.7181   7.973445    27.43   0.000     203.0902     234.346
+wind_direc~n |  -1.137859   .0512644   -22.20   0.000    -1.238337   -1.037381
+------------------------------------------------------------------------------
+
+. estadd local ymean `meandv_fmt'
+
+added macro:
+              e(ymean) : "170.747"
+
+. estadd local acq `numacs'
+
+added macro:
+                e(acq) : "808"
+
+. estadd local monthyearfe "Y"
+
+added macro:
+        e(monthyearfe) : "Y"
+
+. estadd local acfe "Y"
+
+added macro:
+               e(acfe) : "Y"
+
+. estadd local acmonthfe "N"
+
+added macro:
+          e(acmonthfe) : "N"
+
+. estadd local gridfe "N"
+
+added macro:
+             e(gridfe) : "N"
+
+. estimates store eq2
+
+. 
+. * Specification 3: AC x MonthYear FE
+. reghdfejl countk downup_ac_pop $controls, ///
+>     absorb(ac_id#monthyear) ///
+>     cluster(grid_id cluster_acmonth)
+(dropped 1200 singleton observations)
+(MWFE estimator converged in 1 iterations)
+
+HDFE linear regression with Julia                 Number of obs   =  9,207,000
+Absorbing 1 HDFE group                            F(   3,  76725) =      14.97
+Statistics cluster-robust                         Prob > F        =     0.0000
+                                                  R-squared       =     0.5898
+                                                  Adj R-squared   =     0.5855
+Number of clusters (grid_id) =      76725         Within R-sq.    =     0.0001
+Number of clusters (cluster_acmonth) =      95760 Root MSE        =   652.9854
+
+           (Std. err. adjusted for 76,725 clusters in grid_id cluster_acmonth)
+------------------------------------------------------------------------------
+             |               Robust
+      countk | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+downup_ac_~p |    -8.8645   1.387257    -6.39   0.000    -11.58352   -6.145483
+av_wind_sp~d |  -31.03332   10.91451    -2.84   0.004    -52.42571   -9.640926
+wind_direc~n |   .0232329   .0383122     0.61   0.544    -.0518589    .0983246
+------------------------------------------------------------------------------
+
+. estadd local ymean `meandv_fmt'
+
+added macro:
+              e(ymean) : "170.747"
+
+. estadd local acq `numacs'
+
+added macro:
+                e(acq) : "808"
+
+. estadd local monthyearfe "N"
+
+added macro:
+        e(monthyearfe) : "N"
+
+. estadd local acfe "N"
+
+added macro:
+               e(acfe) : "N"
+
+. estadd local acmonthfe "Y"
+
+added macro:
+          e(acmonthfe) : "Y"
+
+. estadd local gridfe "N"
+
+added macro:
+             e(gridfe) : "N"
+
+. estimates store eq3
+
+. 
+. * Specification 4: Grid FE + AC x MonthYear FE
+. reghdfejl countk downup_ac_pop $controls, ///
+>     absorb(grid_id ac_id#monthyear) ///
+>     cluster(grid_id cluster_acmonth)
+(dropped 1200 singleton observations)
+(MWFE estimator converged in 2 iterations)
+
+HDFE linear regression with Julia                 Number of obs   =  9,207,000
+Absorbing 2 HDFE groups                           F(   3,  76725) =       9.89
+Statistics cluster-robust                         Prob > F        =     0.0000
+                                                  R-squared       =     0.6066
+                                                  Adj R-squared   =     0.5991
+Number of clusters (grid_id) =      76725         Within R-sq.    =     0.0000
+Number of clusters (cluster_acmonth) =      95760 Root MSE        =   642.1491
+
+           (Std. err. adjusted for 76,725 clusters in grid_id cluster_acmonth)
+------------------------------------------------------------------------------
+             |               Robust
+      countk | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+downup_ac_~p |  -7.164622   1.360188    -5.27   0.000    -9.830583   -4.498661
+av_wind_sp~d |   21.09944     16.851     1.25   0.211    -11.92843    54.12731
+wind_direc~n |   .0020806   .0416851     0.05   0.960     -.079622    .0837832
+------------------------------------------------------------------------------
+
+. estadd local ymean `meandv_fmt'
+
+added macro:
+              e(ymean) : "170.747"
+
+. estadd local acq `numacs'
+
+added macro:
+                e(acq) : "808"
+
+. estadd local monthyearfe "N"
+
+added macro:
+        e(monthyearfe) : "N"
+
+. estadd local acfe "N"
+
+added macro:
+               e(acfe) : "N"
+
+. estadd local acmonthfe "Y"
+
+added macro:
+          e(acmonthfe) : "Y"
+
+. estadd local gridfe "Y"
+
+added macro:
+             e(gridfe) : "Y"
+
+. estimates store eq4
+
+. 
+. *****************************************************************************
+> ***
+. * Save estimates to ster file
+. *****************************************************************************
+> ***
+. 
+. estwrite eq1 eq2 eq3 eq4 using "${table_farms}/main_did_downup_area_ac${sampl
+> e}_rural_acpop.ster", replace
+(saving eq1)
+(saving eq2)
+(saving eq3)
+(saving eq4)
+(file /groups/sgulzar/sa_fires/proj_bureaucrats_farms/tex/paper/tables/main_did
+> _downup_area_ac_rural_acpop.ster saved)
+
+. 
+. display "Estimates saved to: ${table_farms}/main_did_downup_area_ac${sample}_
+> rural_acpop.ster"
+Estimates saved to: /groups/sgulzar/sa_fires/proj_bureaucrats_farms/tex/paper/t
+> ables/main_did_downup_area_ac_rural_acpop.ster
+
+. 
+. *****************************************************************************
+> ***
+. 
+end of do-file

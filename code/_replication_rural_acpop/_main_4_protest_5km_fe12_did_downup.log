@@ -1,0 +1,628 @@
+
+  ___  ____  ____  ____  ____ ®
+ /__    /   ____/   /   ____/      StataNow 19.5
+___/   /   /___/   /   /___/       MP—Parallel Edition
+
+ Statistics and Data Science       Copyright 1985-2025 StataCorp LLC
+                                   StataCorp
+                                   4905 Lakeway Drive
+                                   College Station, Texas 77845 USA
+                                   800-782-8272        https://www.stata.com
+                                   979-696-4600        service@stata.com
+
+Stata license: 4-user 16-core network, expiring 14 Sep 2026
+Serial number: 501909301589
+  Licensed to: University of Notre Dame
+               Notre Dame, IN 46556
+
+Notes:
+      1. Stata is running in batch mode.
+      2. Unicode is supported; see help unicode_advice.
+      3. More than 2 billion observations are allowed; see help obs_advice.
+      4. Maximum number of variables is set to 5,000 but can be increased;
+          see help set_maxvar.
+
+. do _main_4_protest_5km_fe12_did_downup.do 
+
+. *****************************************************************************
+> ***
+. * _main_4_protest_5km_fe12_did_downup_rural.do
+. * Protest DiD analysis with downup_ac_pop moderator - RURAL GRIDS ONLY
+. * 6 columns: 3 FE specs × 2 moderator types (baseline + downup_ac_pop)
+. *****************************************************************************
+> ***
+. 
+. *****************************************************************************
+> ***
+. * Setup - Only set globals if running standalone (not from master)
+. *****************************************************************************
+> ***
+. 
+. if "$root" == "" {
+.     clear all
+.     set more off
+. 
+.     * Set toggles for standalone run
+.     global location "shell"
+.     global sample ""
+. 
+.     global shell "/groups/sgulzar/sa_fires/proj_bureaucrats_farms"
+.     global dbox "/Users/anzony.quisperojas/Library/CloudStorage/Dropbox/sa_fi
+> res/proj_bureaucrats_farms"
+. 
+.     if "$location" == "dbox" {
+.         global root "$dbox"
+.     }
+.     else {
+.         global root "$shell"
+.     }
+. }
+
+. 
+. cd "${root}"
+/groups/sgulzar/sa_fires/proj_bureaucrats_farms
+
+. 
+. *****************************************************************************
+> ***
+. * Import Data
+. *****************************************************************************
+> ***
+. 
+. import delimited using "${root}/data_output/intermediate/stacked_data_protest
+> ${sample}.csv", clear varnames(1)
+(encoding automatically selected: ISO-8859-9)
+(31 vars, 189,881,483 obs)
+
+. 
+. * Merge with rice moderators
+. merge m:1 unique_small_grid_id ac_uq_id using "data_output/intermediate/rice_
+> moderators.dta"
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                            98
+        from master                         0  (_merge==1)
+        from using                         98  (_merge==2)
+
+    Matched                       189,881,483  (_merge==3)
+    -----------------------------------------
+
+. keep if _merge == 3
+(98 observations deleted)
+
+. drop _merge
+
+. 
+. * Merge with rural classification
+. merge m:1 unique_small_grid_id using "${root}/data_output/intermediate/ghs_gr
+> id_classification_2000.dta", keepusing(is_rural)
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                        58,522
+        from master                         0  (_merge==1)
+        from using                     58,522  (_merge==2)
+
+    Matched                       189,881,483  (_merge==3)
+    -----------------------------------------
+
+. keep if _merge == 3
+(58,522 observations deleted)
+
+. drop _merge
+
+. 
+. * Keep only rural grids
+. keep if is_rural == 1
+(41,710,453 observations deleted)
+
+. 
+. display "Observations after rural filter: " _N
+Observations after rural filter: 1.482e+08
+
+. 
+. * Drop grids with more than 1 ac
+. merge m:1 unique_small_grid_id using "${root}/data_output/intermediate/grids_
+> with_more_1_ac.dta"
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                   148,049,500
+        from master               148,049,467  (_merge==1)
+        from using                         33  (_merge==2)
+
+    Matched                           121,563  (_merge==3)
+    -----------------------------------------
+
+. drop if dpl_ac ==1
+(121,596 observations deleted)
+
+. drop _merge
+
+. 
+. *----------------------------------------------------------------------------
+> ---
+. * Merge in downup_ac_pop from master data (not present in this dataset)
+. *----------------------------------------------------------------------------
+> ---
+. preserve
+
+. import delimited "${root}/data_output/intermediate/0_master_merge_data_gen${s
+> ample}.csv", ///
+>     clear varnames(1)
+(encoding automatically selected: ISO-8859-2)
+(77 vars, 14,837,592 obs)
+
+. keep unique_small_grid_id monthyear downup_ac_pop
+
+. duplicates drop unique_small_grid_id monthyear, force
+
+Duplicates in terms of unique_small_grid_id monthyear
+
+(0 observations are duplicates)
+
+. tempfile downup_ac_pop_lookup
+
+. save `downup_ac_pop_lookup'
+file /tmp/934195.1.largemem/stata.934195/St314990.000002 saved as .dta format
+
+. restore
+
+. merge m:1 unique_small_grid_id monthyear using `downup_ac_pop_lookup', ///
+>     keep(master match) keepusing(downup_ac_pop) nogen
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                             0
+    Matched                       148,049,467  
+    -----------------------------------------
+
+. 
+. *****************************************************************************
+> ***
+. * Generate Variables
+. *****************************************************************************
+> ***
+. 
+. sum relative_year_bin
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+relative_y~n |148,049,467   -3.735022    2.741565         -8          1
+
+. local rmin = r(min)
+
+. gen post_ = relative_year_bin >= 0
+
+. gen moderator = 0
+
+. 
+. local dep_var countk
+
+. local rhs "ib0.post_##ib0.treat##ib0.moderator wind_direction av_wind_speed"
+
+. 
+. * FE specifications
+. local fe1 "unique_small_grid_id_cohort relative_year_bin"
+
+. local fe2 "unique_small_grid_id_cohort relative_year_bin province_cohort#elec
+> tion_year"
+
+. local fe3 "unique_small_grid_id_cohort relative_year_bin province_cohort#elec
+> tion_year province_cohort#c.monthyear "
+
+. 
+. * Statistics
+. quietly summarize `dep_var' if treat == 1 & relative_year_bin <= -1
+
+. local ymean_fmt = string(r(mean), "%9.3f")
+
+. unique ac_uq_id
+Number of unique values of ac_uq_id is  808
+Number of records is  148049467
+
+. local numacs = r(unique)
+
+. 
+. *****************************************************************************
+> ***
+. * Run Regressions
+. *****************************************************************************
+> ***
+. 
+. local i = 1
+
+. 
+. foreach mod in 0 1 {
+  2. 
+.     if `mod' == 0 {
+  3.         replace moderator = 0
+  4.     }
+  5.     else {
+  6.         replace moderator = downup_ac_pop
+  7.         replace moderator = . if downup_ac_pop == .
+  8.     }
+  9.         
+.         quietly summarize `dep_var' if treat == 1 & relative_year_bin <= -1 &
+>  moderator == 1
+ 10.         local ymean2 = r(mean)
+ 11. 
+.         quietly summarize `dep_var' if treat == 1 & relative_year_bin <= -1 &
+>  moderator == 0
+ 12.         local ymean3 = cond(r(N) == 0, " ", string(r(mean), "%9.3f"))
+ 13. 
+. 
+. 
+.     foreach fe of numlist 1/3 {
+ 14. 
+.         reghdfejl `dep_var' `rhs', absorb(`fe`fe'') cluster(ac_area_tr)
+ 15. 
+.         * Store FE indicators
+.         estadd local gridfe "Y"
+ 16.                 estadd local time "Y"
+ 17.                 estadd local electionfe = cond(`fe' >= 2, "Y", "N")
+ 18.         estadd local provtrendfe = cond(`fe' == 3, "Y", "N")
+ 19.         estadd local ymean "`ymean_fmt'"
+ 20.                 estadd scalar ymean2 `ymean2'
+ 21.                 estadd local ymean3 "`ymean3'"
+ 22.         estadd local acq "`numacs'"
+ 23. 
+.         est store evreg`i'
+ 24.         local i = `i' + 1
+ 25.     }
+ 26. }
+(0 real changes made)
+(MWFE estimator converged in 6 iterations)
+
+HDFE linear regression with Julia                 Number of obs   =  148049467
+Absorbing 2 HDFE groups                           F(   3,   1651) =      67.35
+Statistics cluster-robust                         Prob > F        =     0.0000
+                                                  R-squared       =     0.1029
+                                                  Adj R-squared   =     0.0950
+Number of clusters (ac_area_tr) =       1652      Within R-sq.    =     0.0078
+                                                  Root MSE        =   832.2293
+
+                         (Std. err. adjusted for 1,652 clusters in ac_area_tr)
+------------------------------------------------------------------------------
+             |               Robust
+      countk | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+     1.post_ |          0  (omitted)
+     1.treat |          0  (omitted)
+wind_direc~n |  -1.252436   .1012513   -12.37   0.000     -1.45103   -1.053841
+av_wind_sp~d |    66.7868   7.567187     8.83   0.000     51.94451     81.6291
+             |
+ post_#treat |
+        1 1  |   19.13539   8.533682     2.24   0.025     2.397414    35.87337
+------------------------------------------------------------------------------
+
+added macro:
+             e(gridfe) : "Y"
+
+added macro:
+               e(time) : "Y"
+
+added macro:
+         e(electionfe) : "N"
+
+added macro:
+        e(provtrendfe) : "N"
+
+added macro:
+              e(ymean) : "439.770"
+
+added scalar:
+             e(ymean2) =  .
+
+added macro:
+             e(ymean3) : "439.770"
+
+added macro:
+                e(acq) : "808"
+(MWFE estimator converged in 14 iterations)
+
+HDFE linear regression with Julia                 Number of obs   =  148049467
+Absorbing 3 HDFE groups                           F(   3,   1651) =      74.47
+Statistics cluster-robust                         Prob > F        =     0.0000
+                                                  R-squared       =     0.1036
+                                                  Adj R-squared   =     0.0956
+Number of clusters (ac_area_tr) =       1652      Within R-sq.    =     0.0078
+                                                  Root MSE        =   831.9385
+
+                         (Std. err. adjusted for 1,652 clusters in ac_area_tr)
+------------------------------------------------------------------------------
+             |               Robust
+      countk | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+     1.post_ |          0  (omitted)
+     1.treat |          0  (omitted)
+wind_direc~n |  -1.253828   .1001881   -12.51   0.000    -1.450337   -1.057319
+av_wind_sp~d |   66.15448   7.541625     8.77   0.000     51.36232    80.94664
+             |
+ post_#treat |
+        1 1  |    76.9508   11.30834     6.80   0.000      54.7706      99.131
+------------------------------------------------------------------------------
+
+added macro:
+             e(gridfe) : "Y"
+
+added macro:
+               e(time) : "Y"
+
+added macro:
+         e(electionfe) : "Y"
+
+added macro:
+        e(provtrendfe) : "N"
+
+added macro:
+              e(ymean) : "439.770"
+
+added scalar:
+             e(ymean2) =  .
+
+added macro:
+             e(ymean3) : "439.770"
+
+added macro:
+                e(acq) : "808"
+(MWFE estimator converged in 42 iterations)
+
+HDFE linear regression with Julia                 Number of obs   =  148049467
+Absorbing 4 HDFE groups                           F(   3,   1651) =      69.98
+Statistics cluster-robust                         Prob > F        =     0.0000
+                                                  R-squared       =     0.1039
+                                                  Adj R-squared   =     0.0959
+Number of clusters (ac_area_tr) =       1652      Within R-sq.    =     0.0077
+                                                  Root MSE        =   831.7797
+
+                         (Std. err. adjusted for 1,652 clusters in ac_area_tr)
+------------------------------------------------------------------------------
+             |               Robust
+      countk | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+     1.post_ |          0  (omitted)
+     1.treat |          0  (omitted)
+wind_direc~n |  -1.245981   .0993719   -12.54   0.000    -1.440889   -1.051073
+av_wind_sp~d |   66.60589   7.552876     8.82   0.000     51.79166    81.42012
+             |
+ post_#treat |
+        1 1  |    55.2908   11.04066     5.01   0.000     33.63562    76.94597
+------------------------------------------------------------------------------
+
+added macro:
+             e(gridfe) : "Y"
+
+added macro:
+               e(time) : "Y"
+
+added macro:
+         e(electionfe) : "Y"
+
+added macro:
+        e(provtrendfe) : "Y"
+
+added macro:
+              e(ymean) : "439.770"
+
+added scalar:
+             e(ymean2) =  .
+
+added macro:
+             e(ymean3) : "439.770"
+
+added macro:
+                e(acq) : "808"
+(74,549,291 real changes made)
+(0 real changes made)
+(MWFE estimator converged in 6 iterations)
+
+HDFE linear regression with Julia                 Number of obs   =  148049467
+Absorbing 2 HDFE groups                           F(   7,   1651) =      30.35
+Statistics cluster-robust                         Prob > F        =     0.0000
+                                                  R-squared       =     0.1030
+                                                  Adj R-squared   =     0.0950
+Number of clusters (ac_area_tr) =       1652      Within R-sq.    =     0.0079
+                                                  Root MSE        =   832.2234
+
+                         (Std. err. adjusted for 1,652 clusters in ac_area_tr)
+------------------------------------------------------------------------------
+             |               Robust
+      countk | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+     1.post_ |          0  (omitted)
+     1.treat |          0  (omitted)
+ 1.moderator |  -8.192668    4.01838    -2.04   0.042    -16.07433   -.3110085
+wind_direc~n |  -1.253159   .1012889   -12.37   0.000    -1.451828   -1.054491
+av_wind_sp~d |   66.83424   7.571869     8.83   0.000     51.98277    81.68572
+             |
+ post_#treat |
+        1 1  |   23.28357   11.42383     2.04   0.042     .8768515    45.69028
+             |
+       post_#|
+   moderator |
+        1 1  |   10.01874   2.937716     3.41   0.001     4.256702    15.78078
+             |
+       treat#|
+   moderator |
+        1 1  |   36.50587   28.51232     1.28   0.201    -19.41825    92.42999
+             |
+ post_#treat#|
+   moderator |
+      1 1 1  |  -8.101094   14.79416    -0.55   0.584    -37.11839     20.9162
+------------------------------------------------------------------------------
+
+added macro:
+             e(gridfe) : "Y"
+
+added macro:
+               e(time) : "Y"
+
+added macro:
+         e(electionfe) : "N"
+
+added macro:
+        e(provtrendfe) : "N"
+
+added macro:
+              e(ymean) : "439.770"
+
+added scalar:
+             e(ymean2) =  447.43777
+
+added macro:
+             e(ymean3) : "431.667"
+
+added macro:
+                e(acq) : "808"
+(MWFE estimator converged in 14 iterations)
+
+HDFE linear regression with Julia                 Number of obs   =  148049467
+Absorbing 3 HDFE groups                           F(   7,   1651) =      33.56
+Statistics cluster-robust                         Prob > F        =     0.0000
+                                                  R-squared       =     0.1036
+                                                  Adj R-squared   =     0.0956
+Number of clusters (ac_area_tr) =       1652      Within R-sq.    =     0.0078
+                                                  Root MSE        =   831.9325
+
+                         (Std. err. adjusted for 1,652 clusters in ac_area_tr)
+------------------------------------------------------------------------------
+             |               Robust
+      countk | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+     1.post_ |          0  (omitted)
+     1.treat |          0  (omitted)
+ 1.moderator |  -8.237514   3.984706    -2.07   0.039    -16.05312   -.4219046
+wind_direc~n |   -1.25457   .1002248   -12.52   0.000    -1.451151   -1.057988
+av_wind_sp~d |   66.20203   7.546624     8.77   0.000     51.40007    81.00399
+             |
+ post_#treat |
+        1 1  |   82.31458   13.73075     5.99   0.000     55.38305    109.2461
+             |
+       post_#|
+   moderator |
+        1 1  |   9.746146   2.909109     3.35   0.001     4.040214    15.45208
+             |
+       treat#|
+   moderator |
+        1 1  |   36.47789   28.29092     1.29   0.197    -19.01198    91.96775
+             |
+ post_#treat#|
+   moderator |
+      1 1 1  |  -10.48478   14.84684    -0.71   0.480    -39.60541    18.63584
+------------------------------------------------------------------------------
+
+added macro:
+             e(gridfe) : "Y"
+
+added macro:
+               e(time) : "Y"
+
+added macro:
+         e(electionfe) : "Y"
+
+added macro:
+        e(provtrendfe) : "N"
+
+added macro:
+              e(ymean) : "439.770"
+
+added scalar:
+             e(ymean2) =  447.43777
+
+added macro:
+             e(ymean3) : "431.667"
+
+added macro:
+                e(acq) : "808"
+(MWFE estimator converged in 42 iterations)
+
+HDFE linear regression with Julia                 Number of obs   =  148049467
+Absorbing 4 HDFE groups                           F(   7,   1651) =      31.54
+Statistics cluster-robust                         Prob > F        =     0.0000
+                                                  R-squared       =     0.1039
+                                                  Adj R-squared   =     0.0959
+Number of clusters (ac_area_tr) =       1652      Within R-sq.    =     0.0077
+                                                  Root MSE        =   831.7738
+
+                         (Std. err. adjusted for 1,652 clusters in ac_area_tr)
+------------------------------------------------------------------------------
+             |               Robust
+      countk | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+     1.post_ |          0  (omitted)
+     1.treat |          0  (omitted)
+ 1.moderator |   -8.24748   3.985545    -2.07   0.039    -16.06474   -.4302245
+wind_direc~n |  -1.246729   .0994078   -12.54   0.000    -1.441708   -1.051751
+av_wind_sp~d |   66.65366   7.557864     8.82   0.000     51.82965    81.47767
+             |
+ post_#treat |
+        1 1  |   60.62227   13.45415     4.51   0.000     34.23329    87.01126
+             |
+       post_#|
+   moderator |
+        1 1  |   9.823844   2.908669     3.38   0.001     4.118774    15.52891
+             |
+       treat#|
+   moderator |
+        1 1  |    36.3066   28.24033     1.29   0.199    -19.08404    91.69725
+             |
+ post_#treat#|
+   moderator |
+      1 1 1  |  -10.43972   14.85428    -0.70   0.482    -39.57493     18.6955
+------------------------------------------------------------------------------
+
+added macro:
+             e(gridfe) : "Y"
+
+added macro:
+               e(time) : "Y"
+
+added macro:
+         e(electionfe) : "Y"
+
+added macro:
+        e(provtrendfe) : "Y"
+
+added macro:
+              e(ymean) : "439.770"
+
+added scalar:
+             e(ymean2) =  447.43777
+
+added macro:
+             e(ymean3) : "431.667"
+
+added macro:
+                e(acq) : "808"
+
+. 
+. *****************************************************************************
+> ***
+. * Save ster file
+. *****************************************************************************
+> ***
+. 
+. estwrite evreg* using "${root}/tex/paper/tables/_main_4_protest_5km_fe12_did_
+> downup${sample}_rural_acpop.ster", replace
+(saving evreg1)
+(saving evreg2)
+(saving evreg3)
+(saving evreg4)
+(saving evreg5)
+(saving evreg6)
+(file /groups/sgulzar/sa_fires/proj_bureaucrats_farms/tex/paper/tables/_main_4_
+> protest_5km_fe12_did_downup_rural_acpop.ster saved)
+
+. 
+. display "Ster: ${root}/tex/paper/tables/_main_4_protest_5km_fe12_did_downup${
+> sample}_rural_acpop.ster"
+Ster: /groups/sgulzar/sa_fires/proj_bureaucrats_farms/tex/paper/tables/_main_4_
+> protest_5km_fe12_did_downup_rural_acpop.ster
+
+. 
+. *****************************************************************************
+> ***
+. 
+end of do-file

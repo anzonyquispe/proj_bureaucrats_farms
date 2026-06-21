@@ -1,0 +1,632 @@
+
+  ___  ____  ____  ____  ____ ®
+ /__    /   ____/   /   ____/      StataNow 19.5
+___/   /   /___/   /   /___/       MP—Parallel Edition
+
+ Statistics and Data Science       Copyright 1985-2025 StataCorp LLC
+                                   StataCorp
+                                   4905 Lakeway Drive
+                                   College Station, Texas 77845 USA
+                                   800-782-8272        https://www.stata.com
+                                   979-696-4600        service@stata.com
+
+Stata license: 4-user 16-core network, expiring 14 Sep 2026
+Serial number: 501909301589
+  Licensed to: University of Notre Dame
+               Notre Dame, IN 46556
+
+Notes:
+      1. Stata is running in batch mode.
+      2. Unicode is supported; see help unicode_advice.
+      3. More than 2 billion observations are allowed; see help obs_advice.
+      4. Maximum number of variables is set to 5,000 but can be increased;
+          see help set_maxvar.
+
+. do _app_8_main_did_by_year.do 
+
+. *****************************************************************************
+> ***
+. * _app_main_did_by_year_rural.do
+. * Replicates _app_main_did_by_year.R - RURAL GRIDS ONLY
+. * DiD regressions by agricultural year (Sep-Aug)
+. *****************************************************************************
+> ***
+. 
+. *****************************************************************************
+> ***
+. * Setup - Only set globals if running standalone (not from master)
+. *****************************************************************************
+> ***
+. 
+. if "$root" == "" {
+.     clear all
+.     set more off
+. 
+.     global location "shell"
+.     global sample ""
+. 
+.     global shell "/groups/sgulzar/sa_fires/proj_bureaucrats_farms"
+.     global dbox "/Users/anzony.quisperojas/Library/CloudStorage/Dropbox/sa_fi
+> res/proj_bureaucrats_farms"
+. 
+.     if "$location" == "dbox" {
+.         global root "$dbox"
+.     }
+.     else {
+.         global root "$shell"
+.     }
+. }
+
+. 
+. cd "${root}"
+/groups/sgulzar/sa_fires/proj_bureaucrats_farms
+
+. 
+. *****************************************************************************
+> ***
+. * Import Data
+. *****************************************************************************
+> ***
+. 
+. import delimited "${root}/data_output/intermediate/0_master_merge_data_gen${s
+> ample}.csv", clear
+(encoding automatically selected: ISO-8859-2)
+(77 vars, 14,837,592 obs)
+
+. 
+. * Merge with rural classification
+. merge m:1 unique_small_grid_id using "${root}/data_output/intermediate/ghs_gr
+> id_classification_2000.dta", keepusing(is_rural)
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                        58,521
+        from master                         0  (_merge==1)
+        from using                     58,521  (_merge==2)
+
+    Matched                        14,837,592  (_merge==3)
+    -----------------------------------------
+
+. keep if _merge == 3
+(58,521 observations deleted)
+
+. drop _merge
+
+. 
+. * Keep only rural grids
+. keep if is_rural == 1
+(3,471,192 observations deleted)
+
+. 
+. display "Observations after rural filter: " _N
+Observations after rural filter: 11366400
+
+. 
+. * Drop grids with more than 1 ac
+. merge m:1 unique_small_grid_id using "${root}/data_output/intermediate/grids_
+> with_more_1_ac.dta"
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                    11,356,812
+        from master                11,356,780  (_merge==1)
+        from using                         32  (_merge==2)
+
+    Matched                             9,620  (_merge==3)
+    -----------------------------------------
+
+. drop if dpl_ac ==1
+(9,652 observations deleted)
+
+. drop _merge
+
+. 
+. * Create count in thousands
+. gen countk = count * 1000
+
+. 
+. * Filter data: year < 2022 or (year == 2022 & month <= 8)
+. keep if year < 2022 | (year == 2022 & month <= 8)
+(2,148,580 observations deleted)
+
+. 
+. * Sort data
+. sort unique_small_grid_id monthyear
+
+. 
+. *****************************************************************************
+> ***
+. * Encode IDs
+. *****************************************************************************
+> ***
+. 
+. capture confirm numeric variable unique_small_grid_id
+
+. if _rc {
+.     encode unique_small_grid_id, gen(grid_id)
+. }
+
+. else {
+.     gen grid_id = unique_small_grid_id
+. }
+
+. 
+. capture confirm numeric variable ac_uq_id
+
+. if _rc {
+.     encode ac_uq_id, gen(ac_id)
+. }
+
+. else {
+.     gen ac_id = ac_uq_id
+. }
+
+. 
+. * Create cluster variable
+. egen cluster_acmonth = group(ac_id monthyear)
+
+. bysort unique_small_grid_id: egen treat = max(downup_ac_pop)
+
+. 
+. 
+. * Count unique ACs
+. unique ac_id
+Number of unique values of ac_id is  808
+Number of records is  9208200
+
+. local numacs = r(unique)
+
+. 
+. *****************************************************************************
+> ***
+. * Run Regressions by Agricultural Year (Sep-Aug)
+. *****************************************************************************
+> ***
+. 
+. global controls av_wind_speed wind_direction
+
+. 
+. * Store year labels for table header
+. local yearlabels ""
+
+. 
+. local i = 1
+
+. forvalues yr = 2012/2021 {
+  2. 
+.     local yr_next = `yr' + 1
+  3. 
+.     * Define agricultural year: Sep of yr to Aug of yr+1
+.     * (year == yr & month >= 9) | (year == yr+1 & month <= 8)
+. 
+.     preserve
+  4.                 keep if (year == `yr' & month >= 9) | (year == `yr_next' &
+>  month <= 8)
+  5. 
+.                 * Calculate mean DV for this year
+.                 summarize countk if treat == 1 & downup_ac_pop == 0
+  6.                 local meandv`i' = string(r(mean), "%9.2f")
+  7. 
+.                 * Run regression
+.                 reghdfejl countk downup_ac_pop $controls, ///
+>                         absorb(grid_id ac_id#monthyear) cluster(grid_id clust
+> er_acmonth)
+  8. 
+.                 * Store statistics
+.                 estadd local gridfe "Y"
+  9.                 estadd local acmonthfe "Y"
+ 10.                 estadd local ymean "`meandv`i''"
+ 11.                 estadd local acq "`numacs'"
+ 12.                 est store eq`i'
+ 13.                 
+.     restore
+ 14. 
+.     * Build year label
+.     local yearlabels "`yearlabels' `yr'/`yr_next'"
+ 15. 
+.     local i = `i' + 1
+ 16. }
+(8,287,380 observations deleted)
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+      countk |    396,041    170.9949    1089.657          0      37000
+(dropped 120 singleton observations)
+(MWFE estimator converged in 2 iterations)
+
+HDFE linear regression with Julia                 Number of obs   =    920,700
+Absorbing 2 HDFE groups                           F(   3,   9575) =       1.72
+Statistics cluster-robust                         Prob > F        =     0.1608
+                                                  R-squared       =     0.6410
+                                                  Adj R-squared   =     0.6039
+Number of clusters (grid_id) =      76725         Within R-sq.    =     0.0000
+Number of clusters (cluster_acmonth) =       9576 Root MSE        =   639.8965
+
+            (Std. err. adjusted for 9,576 clusters in grid_id cluster_acmonth)
+------------------------------------------------------------------------------
+             |               Robust
+      countk | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+downup_ac_~p |  -6.795082   3.732549    -1.82   0.069    -14.11167    .5215042
+av_wind_sp~d |    50.8806   43.50338     1.17   0.242    -34.39524    136.1564
+wind_direc~n |  -.0573272   .1072514    -0.53   0.593    -.2675626    .1529083
+------------------------------------------------------------------------------
+
+added macro:
+             e(gridfe) : "Y"
+
+added macro:
+          e(acmonthfe) : "Y"
+
+added macro:
+              e(ymean) : "170.99"
+
+added macro:
+                e(acq) : "808"
+(8,287,380 observations deleted)
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+      countk |    395,679    160.2284    985.9284          0      66000
+(dropped 120 singleton observations)
+(MWFE estimator converged in 2 iterations)
+
+HDFE linear regression with Julia                 Number of obs   =    920,700
+Absorbing 2 HDFE groups                           F(   3,   9575) =       2.74
+Statistics cluster-robust                         Prob > F        =     0.0419
+                                                  R-squared       =     0.6076
+                                                  Adj R-squared   =     0.5670
+Number of clusters (grid_id) =      76725         Within R-sq.    =     0.0000
+Number of clusters (cluster_acmonth) =       9576 Root MSE        =   603.1479
+
+            (Std. err. adjusted for 9,576 clusters in grid_id cluster_acmonth)
+------------------------------------------------------------------------------
+             |               Robust
+      countk | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+downup_ac_~p |  -9.374165    3.54696    -2.64   0.008    -16.32696   -2.421371
+av_wind_sp~d |   35.67318   60.58238     0.59   0.556     -83.0811    154.4275
+wind_direc~n |  -.1004839   .1356441    -0.74   0.459     -.366375    .1654071
+------------------------------------------------------------------------------
+
+added macro:
+             e(gridfe) : "Y"
+
+added macro:
+          e(acmonthfe) : "Y"
+
+added macro:
+              e(ymean) : "160.23"
+
+added macro:
+                e(acq) : "808"
+(8,287,380 observations deleted)
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+      countk |    395,660    165.2479    1086.362          0      31000
+(dropped 120 singleton observations)
+(MWFE estimator converged in 2 iterations)
+
+HDFE linear regression with Julia                 Number of obs   =    920,700
+Absorbing 2 HDFE groups                           F(   3,   9575) =       1.03
+Statistics cluster-robust                         Prob > F        =     0.3776
+                                                  R-squared       =     0.6627
+                                                  Adj R-squared   =     0.6278
+Number of clusters (grid_id) =      76725         Within R-sq.    =     0.0000
+Number of clusters (cluster_acmonth) =       9576 Root MSE        =   614.8274
+
+            (Std. err. adjusted for 9,576 clusters in grid_id cluster_acmonth)
+------------------------------------------------------------------------------
+             |               Robust
+      countk | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+downup_ac_~p |   -5.75949   4.026896    -1.43   0.153    -13.65306    2.134078
+av_wind_sp~d |  -1.001683    34.8634    -0.03   0.977    -69.34134    67.33797
+wind_direc~n |  -.1112288   .0946715    -1.17   0.240    -.2968049    .0743473
+------------------------------------------------------------------------------
+
+added macro:
+             e(gridfe) : "Y"
+
+added macro:
+          e(acmonthfe) : "Y"
+
+added macro:
+              e(ymean) : "165.25"
+
+added macro:
+                e(acq) : "808"
+(8,287,380 observations deleted)
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+      countk |    395,402    167.0427    1007.723          0      33000
+(dropped 120 singleton observations)
+(MWFE estimator converged in 2 iterations)
+
+HDFE linear regression with Julia                 Number of obs   =    920,700
+Absorbing 2 HDFE groups                           F(   3,   9575) =       0.94
+Statistics cluster-robust                         Prob > F        =     0.4184
+                                                  R-squared       =     0.5732
+                                                  Adj R-squared   =     0.5291
+Number of clusters (grid_id) =      76725         Within R-sq.    =     0.0000
+Number of clusters (cluster_acmonth) =       9576 Root MSE        =   661.5009
+
+            (Std. err. adjusted for 9,576 clusters in grid_id cluster_acmonth)
+------------------------------------------------------------------------------
+             |               Robust
+      countk | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+downup_ac_~p |  -6.110592   3.843649    -1.59   0.112    -13.64496    1.423774
+av_wind_sp~d |   60.02696   78.05184     0.77   0.442    -92.97118    213.0251
+wind_direc~n |  -.0124129   .1420367    -0.09   0.930    -.2908348     .266009
+------------------------------------------------------------------------------
+
+added macro:
+             e(gridfe) : "Y"
+
+added macro:
+          e(acmonthfe) : "Y"
+
+added macro:
+              e(ymean) : "167.04"
+
+added macro:
+                e(acq) : "808"
+(8,287,380 observations deleted)
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+      countk |    395,834    199.6822    1242.065          0      33000
+(dropped 120 singleton observations)
+(MWFE estimator converged in 2 iterations)
+
+HDFE linear regression with Julia                 Number of obs   =    920,700
+Absorbing 2 HDFE groups                           F(   3,   9575) =       2.17
+Statistics cluster-robust                         Prob > F        =     0.0899
+                                                  R-squared       =     0.6650
+                                                  Adj R-squared   =     0.6303
+Number of clusters (grid_id) =      76725         Within R-sq.    =     0.0000
+Number of clusters (cluster_acmonth) =       9576 Root MSE        =   707.8473
+
+            (Std. err. adjusted for 9,576 clusters in grid_id cluster_acmonth)
+------------------------------------------------------------------------------
+             |               Robust
+      countk | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+downup_ac_~p |  -11.08792   4.404558    -2.52   0.012    -19.72179   -2.454058
+av_wind_sp~d |   -9.06785   46.93436    -0.19   0.847    -101.0691    82.93344
+wind_direc~n |  -.0479224   .1446478    -0.33   0.740    -.3314627    .2356179
+------------------------------------------------------------------------------
+
+added macro:
+             e(gridfe) : "Y"
+
+added macro:
+          e(acmonthfe) : "Y"
+
+added macro:
+              e(ymean) : "199.68"
+
+added macro:
+                e(acq) : "808"
+(8,287,380 observations deleted)
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+      countk |    395,968    166.3367    968.2606          0      26000
+(dropped 120 singleton observations)
+(MWFE estimator converged in 2 iterations)
+
+HDFE linear regression with Julia                 Number of obs   =    920,700
+Absorbing 2 HDFE groups                           F(   3,   9575) =       2.59
+Statistics cluster-robust                         Prob > F        =     0.0509
+                                                  R-squared       =     0.5464
+                                                  Adj R-squared   =     0.4994
+Number of clusters (grid_id) =      76725         Within R-sq.    =     0.0000
+Number of clusters (cluster_acmonth) =       9576 Root MSE        =   655.9422
+
+            (Std. err. adjusted for 9,576 clusters in grid_id cluster_acmonth)
+------------------------------------------------------------------------------
+             |               Robust
+      countk | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+downup_ac_~p |  -9.916717   3.708668    -2.67   0.008    -17.18649   -2.646942
+av_wind_sp~d |  -12.96347   51.62771    -0.25   0.802    -114.1647    88.23777
+wind_direc~n |   .1428375   .1272088     1.12   0.262    -.1065187    .3921937
+------------------------------------------------------------------------------
+
+added macro:
+             e(gridfe) : "Y"
+
+added macro:
+          e(acmonthfe) : "Y"
+
+added macro:
+              e(ymean) : "166.34"
+
+added macro:
+                e(acq) : "808"
+(8,287,380 observations deleted)
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+      countk |    395,803    181.3402     1055.94          0      32000
+(dropped 120 singleton observations)
+(MWFE estimator converged in 2 iterations)
+
+HDFE linear regression with Julia                 Number of obs   =    920,700
+Absorbing 2 HDFE groups                           F(   3,   9575) =       2.56
+Statistics cluster-robust                         Prob > F        =     0.0531
+                                                  R-squared       =     0.6002
+                                                  Adj R-squared   =     0.5589
+Number of clusters (grid_id) =      76725         Within R-sq.    =     0.0000
+Number of clusters (cluster_acmonth) =       9576 Root MSE        =   669.0523
+
+            (Std. err. adjusted for 9,576 clusters in grid_id cluster_acmonth)
+------------------------------------------------------------------------------
+             |               Robust
+      countk | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+downup_ac_~p |   -9.44463    3.48702    -2.71   0.007    -16.27993   -2.609334
+av_wind_sp~d |   .4484548   35.67682     0.01   0.990    -69.48568    70.38259
+wind_direc~n |  -.0459945   .1916338    -0.24   0.810    -.4216373    .3296483
+------------------------------------------------------------------------------
+
+added macro:
+             e(gridfe) : "Y"
+
+added macro:
+          e(acmonthfe) : "Y"
+
+added macro:
+              e(ymean) : "181.34"
+
+added macro:
+                e(acq) : "808"
+(8,287,380 observations deleted)
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+      countk |    396,066    118.9953    753.6558          0      30000
+(dropped 120 singleton observations)
+(MWFE estimator converged in 2 iterations)
+
+HDFE linear regression with Julia                 Number of obs   =    920,700
+Absorbing 2 HDFE groups                           F(   3,   9575) =       1.67
+Statistics cluster-robust                         Prob > F        =     0.1722
+                                                  R-squared       =     0.5830
+                                                  Adj R-squared   =     0.5399
+Number of clusters (grid_id) =      76725         Within R-sq.    =     0.0000
+Number of clusters (cluster_acmonth) =       9576 Root MSE        =   489.6662
+
+            (Std. err. adjusted for 9,576 clusters in grid_id cluster_acmonth)
+------------------------------------------------------------------------------
+             |               Robust
+      countk | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+downup_ac_~p |  -5.437648   2.588715    -2.10   0.036    -10.51208   -.3632184
+av_wind_sp~d |   2.153555   24.56306     0.09   0.930    -45.99524    50.30235
+wind_direc~n |   .0180097   .0846958     0.21   0.832    -.1480119    .1840314
+------------------------------------------------------------------------------
+
+added macro:
+             e(gridfe) : "Y"
+
+added macro:
+          e(acmonthfe) : "Y"
+
+added macro:
+              e(ymean) : "119.00"
+
+added macro:
+                e(acq) : "808"
+(8,287,380 observations deleted)
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+      countk |    395,586    182.8048     1143.69          0      42000
+(dropped 120 singleton observations)
+(MWFE estimator converged in 2 iterations)
+
+HDFE linear regression with Julia                 Number of obs   =    920,700
+Absorbing 2 HDFE groups                           F(   3,   9575) =       2.95
+Statistics cluster-robust                         Prob > F        =     0.0314
+                                                  R-squared       =     0.6373
+                                                  Adj R-squared   =     0.5998
+Number of clusters (grid_id) =      76725         Within R-sq.    =     0.0000
+Number of clusters (cluster_acmonth) =       9576 Root MSE        =   708.7066
+
+            (Std. err. adjusted for 9,576 clusters in grid_id cluster_acmonth)
+------------------------------------------------------------------------------
+             |               Robust
+      countk | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+downup_ac_~p |  -6.374183   3.478557    -1.83   0.067    -13.19289    .4445248
+av_wind_sp~d |    58.3857   53.75485     1.09   0.277     -46.9852    163.7566
+wind_direc~n |   .3141604   .1511456     2.08   0.038      .017883    .6104378
+------------------------------------------------------------------------------
+
+added macro:
+             e(gridfe) : "Y"
+
+added macro:
+          e(acmonthfe) : "Y"
+
+added macro:
+              e(ymean) : "182.80"
+
+added macro:
+                e(acq) : "808"
+(8,287,380 observations deleted)
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+      countk |    396,446    194.7857    1256.805          0      38000
+(dropped 120 singleton observations)
+(MWFE estimator converged in 2 iterations)
+
+HDFE linear regression with Julia                 Number of obs   =    920,700
+Absorbing 2 HDFE groups                           F(   3,   9575) =       0.47
+Statistics cluster-robust                         Prob > F        =     0.7043
+                                                  R-squared       =     0.6842
+                                                  Adj R-squared   =     0.6515
+Number of clusters (grid_id) =      76725         Within R-sq.    =     0.0000
+Number of clusters (cluster_acmonth) =       9576 Root MSE        =   712.7765
+
+            (Std. err. adjusted for 9,576 clusters in grid_id cluster_acmonth)
+------------------------------------------------------------------------------
+             |               Robust
+      countk | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+downup_ac_~p |  -2.410791   3.891739    -0.62   0.536    -10.03942    5.217841
+av_wind_sp~d |   27.72374   39.47064     0.70   0.482    -49.64707    105.0946
+wind_direc~n |  -.0873982   .1174662    -0.74   0.457    -.3176567    .1428604
+------------------------------------------------------------------------------
+
+added macro:
+             e(gridfe) : "Y"
+
+added macro:
+          e(acmonthfe) : "Y"
+
+added macro:
+              e(ymean) : "194.79"
+
+added macro:
+                e(acq) : "808"
+
+. 
+. *****************************************************************************
+> ***
+. * Save ster file
+. *****************************************************************************
+> ***
+. 
+. estwrite eq* using "${root}/tex/paper/tables/_app_8_main_did_by_year${sample}
+> _rural_acpop.ster", replace
+(saving eq1)
+(saving eq2)
+(saving eq3)
+(saving eq4)
+(saving eq5)
+(saving eq6)
+(saving eq7)
+(saving eq8)
+(saving eq9)
+(saving eq10)
+(file /groups/sgulzar/sa_fires/proj_bureaucrats_farms/tex/paper/tables/_app_8_m
+> ain_did_by_year_rural_acpop.ster saved)
+
+. 
+. display "Ster: ${root}/tex/paper/tables/_app_8_main_did_by_year${sample}_rura
+> l_acpop.ster"
+Ster: /groups/sgulzar/sa_fires/proj_bureaucrats_farms/tex/paper/tables/_app_8_m
+> ain_did_by_year_rural_acpop.ster
+
+. 
+. *****************************************************************************
+> ***
+. 
+end of do-file

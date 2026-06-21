@@ -1,0 +1,813 @@
+
+  ___  ____  ____  ____  ____ ®
+ /__    /   ____/   /   ____/      StataNow 19.5
+___/   /   /___/   /   /___/       MP—Parallel Edition
+
+ Statistics and Data Science       Copyright 1985-2025 StataCorp LLC
+                                   StataCorp
+                                   4905 Lakeway Drive
+                                   College Station, Texas 77845 USA
+                                   800-782-8272        https://www.stata.com
+                                   979-696-4600        service@stata.com
+
+Stata license: 4-user 16-core network, expiring 14 Sep 2026
+Serial number: 501909301589
+  Licensed to: University of Notre Dame
+               Notre Dame, IN 46556
+
+Notes:
+      1. Stata is running in batch mode.
+      2. Unicode is supported; see help unicode_advice.
+      3. More than 2 billion observations are allowed; see help obs_advice.
+      4. Maximum number of variables is set to 5,000 but can be increased;
+          see help set_maxvar.
+
+. do _main_2_event_study.do 
+
+. *----------------------------------------------------------------------------
+> ---
+. * Main Event Study - RURAL GRIDS ONLY
+. * Output: main_event_study_rural_acpop.ster
+. *----------------------------------------------------------------------------
+> ---
+. 
+. *****************************************************************************
+> ***
+. * Setup - Only set globals if running standalone (not from master)
+. *****************************************************************************
+> ***
+. 
+. if "$root" == "" {
+.     clear all
+.     set more off
+. 
+.     * Set toggles for standalone run
+.     global location "shell"
+.     global sample ""
+. 
+.     * DATA roots
+.     global shell "/groups/sgulzar/sa_fires/proj_bureaucrats_farms"
+.     global dbox  "/Users/anzony.quisperojas/Library/CloudStorage/Dropbox/sa_f
+> ires/proj_bureaucrats_farms"
+. 
+.     * CODE roots (code is NOT a subpath of data root on either machine)
+.     global code_shell "/users/aquisper/proj_bureaucrats_farms/code/_replicati
+> on_rural_acpop"
+.     global code_dbox  "/Users/anzony.quisperojas/Documents/GitHub/proj_bureau
+> crats_farms/code/_replication_rural_acpop"
+. 
+.     if "$location" == "dbox" {
+.         global root "$dbox"
+.         global code "$code_dbox"
+.     }
+.     else {
+.         global root "$shell"
+.         global code "$code_shell"
+.     }
+. 
+.     * Load Ados
+.     qui do "${code}/estsave_csv.ado"
+. 
+. }
+
+. 
+. 
+. *----------------------------------------------------------------------------
+> ---
+. * Import and Merge Data
+. *----------------------------------------------------------------------------
+> ---
+. 
+. import delimited "${root}/data_output/intermediate/0_master_merge_data_gen${s
+> ample}.csv", clear varnames(1)
+(encoding automatically selected: ISO-8859-2)
+(77 vars, 14,837,592 obs)
+
+. 
+. * Merge with rural classification
+. merge m:1 unique_small_grid_id using "${root}/data_output/intermediate/ghs_gr
+> id_classification_2000.dta", keepusing(is_rural)
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                        58,521
+        from master                         0  (_merge==1)
+        from using                     58,521  (_merge==2)
+
+    Matched                        14,837,592  (_merge==3)
+    -----------------------------------------
+
+. keep if _merge == 3
+(58,521 observations deleted)
+
+. drop _merge
+
+. 
+. * Keep only rural grids
+. keep if is_rural == 1
+(3,471,192 observations deleted)
+
+. 
+. display "Observations after rural filter: " _N
+Observations after rural filter: 11366400
+
+. 
+. * Drop grids with more than 1 ac
+. merge m:1 unique_small_grid_id using "${root}/data_output/intermediate/grids_
+> with_more_1_ac.dta"
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                    11,356,812
+        from master                11,356,780  (_merge==1)
+        from using                         32  (_merge==2)
+
+    Matched                             9,620  (_merge==3)
+    -----------------------------------------
+
+. drop if dpl_ac ==1
+(9,652 observations deleted)
+
+. drop _merge
+
+. 
+. * Keep relevant time period
+. keep if year < 2022 | (year == 2022 & month <= 8)
+(2,148,580 observations deleted)
+
+. keep unique_small_grid_id monthyear downup_ac_pop av_wind_speed wind_directio
+> n count ac_uq_id is_rural rice_area_aclvl_ahigh rice_harvarea_aclvl_ahigh ric
+> e_prod_aclvl_ahigh
+
+. 
+. *----------------------------------------------------------------------------
+> ---
+. * Generate Event Study Variables
+. *----------------------------------------------------------------------------
+> ---
+. 
+. * Temporarily rename variables
+. rename downup_ac_pop abs
+
+. 
+. * First, set switchtoexp = 1 everytime there is a switch
+. gsort unique_small_grid_id monthyear
+
+. bys unique_small_grid_id: gen switchtoexp=1 if abs==1 & abs[_n-1]==0
+(8,462,707 missing values generated)
+
+. 
+. * Set switch to unexp = 1 if switch to unexposed
+. gsort unique_small_grid_id monthyear
+
+. bys unique_small_grid_id: gen switchtounexp=1 if abs==0 & abs[_n-1]==1
+(8,461,385 missing values generated)
+
+. 
+. * Second, set rtime = +n after the switch and -n after
+. gen rtime_abs=switchtoexp
+(8,462,707 missing values generated)
+
+. replace rtime_abs=-1 if switchtounexp==1
+(746,815 real changes made)
+
+.     bys unique_small_grid_id: replace rtime_abs=rtime_abs[_n-1]+1 if abs==1 &
+>  rtime_abs==.
+(3015970 real changes made)
+
+. gsort unique_small_grid_id -monthyear
+
+. replace rtime_abs=. if rtime_abs==-1
+(746,815 real changes made, 746,815 to missing)
+
+. replace rtime_abs=-1 if rtime_abs==. & rtime_abs[_n-1]==1
+(745,493 real changes made)
+
+.     bys unique_small_grid_id: replace rtime_abs=rtime_abs[_n-1]-1 if abs==0 &
+>  rtime_abs==.
+(2959850 real changes made)
+
+. 
+. drop switchtoexp switchtounexp
+
+. gsort unique_small_grid_id monthyear
+
+. 
+. * Time invariant treatment
+. bys unique_small_grid_id: egen TREAT_abs=max(abs)
+
+. 
+. * First treated time is zero
+. replace rtime_abs=rtime_abs-1 if rtime_abs>0
+(3,761,463 real changes made)
+
+. 
+. rename abs downup_ac_pop
+
+. 
+. * Generate event study dummies
+. su rtime_abs
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+   rtime_abs |  7,466,806   -.1560671    10.86031       -119        118
+
+. forvalues l = 0/6 {
+  2.     gen byte La`l'_abs = rtime_abs ==`l'
+  3.     label var La`l'_abs "`l'"
+  4. }
+
+. forvalues l = 1/6 {
+  2.     gen byte Le`l'_abs = rtime_abs ==-`l'
+  3.     label var Le`l'_abs "-`l'"
+  4. }
+
+. 
+. drop La0_abs // normalize rtime = 0
+
+. 
+. gen countk = count * 1000
+
+. 
+. global tr abs
+
+. 
+. drop if TREAT_$tr==1 & rtime_$tr>=7
+(1,938,877 observations deleted)
+
+. drop if TREAT_$tr==1 & rtime_$tr<=-7
+(995,008 observations deleted)
+
+. bys unique_small_grid_id: egen TREAT = max(downup_ac_pop)
+
+. 
+. *----------------------------------------------------------------------------
+> ---
+. * Regressions
+. *----------------------------------------------------------------------------
+> ---
+. 
+. global controls av_wind_speed wind_direction
+
+. global cluster unique_small_grid_id monthyear#ac_uq_id
+
+. local dep_var countk
+
+. 
+. local fe1 "unique_small_grid_id ac_uq_id#monthyear"
+
+. 
+. * Compute mean of dep var where untreated
+. quietly summarize `dep_var' if downup_ac_pop ==0 & TREAT == 1
+
+. local ymean = r(mean)
+
+. gen moderator = 0
+
+. * Count number of unique ACs in subsample
+. unique ac_uq_id
+Number of unique values of ac_uq_id is  808
+Number of records is  6274315
+
+. local numacs = r(unique)
+
+. local modlist moderator rice_area_aclvl_ahigh rice_harvarea_aclvl_ahigh rice_
+> prod_aclvl_ahigh
+
+. local i = 1
+
+. foreach mod of local modlist{
+  2.         
+.         local rhs Le*_${tr} La*_${tr} 1.Le*_${tr}#1.`mod' 1.La*_${tr}#1.`mod'
+>  $controls
+  3.         
+.         quietly summarize `dep_var' if downup_ac_pop ==0 & TREAT == 1 & `mod'
+>  == 1
+  4.         local ymean2 = cond(r(N) == 0, `ymean', r(mean))
+  5.         
+.         quietly summarize `dep_var' if downup_ac_pop ==0 & TREAT == 1 & `mod'
+>  == 0
+  6.         local ymean3 = cond(r(N) == 0, `ymean', r(mean))
+  7.         
+.         * Run regression with clustering
+.         reghdfejl `dep_var' `rhs', absorb(`fe1') cluster($cluster) nocons
+  8. 
+.         * Store coefficient + SE of main var
+.         estadd local ymean `ymean'
+  9.         estadd local ymean2 `ymean2'
+ 10.         estadd local ymean3 `ymean3'
+ 11.         estadd local acq `numacs'
+ 12.         est store evreg`i'
+ 13.         local i = `i' + 1
+ 14. }
+(dropped 1215 singleton observations)
+(MWFE estimator converged in 14 iterations)
+
+HDFE linear regression with Julia                 Number of obs   =  6,273,100
+Absorbing 2 HDFE groups                           F(  14,  71829) =       4.23
+Statistics cluster-robust                         Prob > F        =     0.0000
+                                                  R-squared       =     0.6203
+                                                  Adj R-squared   =     0.6099
+Number of clusters (unique_small_grid_id) =      71830Within R-sq.=     0.0001
+Number of clusters (monthyear#ac_uq_id) =      95308Root MSE      =   610.2515
+
+(Std. err. adjusted for 71,830 clusters in unique_small_grid_id monthyear#ac_uq
+> _id)
+------------------------------------------------------------------------------
+             |               Robust
+      countk | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+     Le1_abs |   .8384129   2.386416     0.35   0.725    -3.838956    5.515781
+     Le2_abs |  -1.762575   2.514708    -0.70   0.483    -6.691395    3.166246
+     Le3_abs |  -7.632923   2.836471    -2.69   0.007     -13.1924   -2.073449
+     Le4_abs |  -7.936282    2.74228    -2.89   0.004    -13.31114   -2.561421
+     Le5_abs |  -8.516693   3.165313    -2.69   0.007     -14.7207   -2.312689
+     Le6_abs |   -10.5579   6.072382    -1.74   0.082    -22.45975    1.343952
+     La1_abs |  -13.45575   3.371788    -3.99   0.000    -20.06444    -6.84705
+     La2_abs |  -15.12291   4.415935    -3.42   0.001    -23.77813   -6.467687
+     La3_abs |   -8.51402   3.175899    -2.68   0.007    -14.73877   -2.289267
+     La4_abs |  -6.149433   2.767588    -2.22   0.026     -11.5739   -.7249681
+     La5_abs |  -12.13573   3.616744    -3.36   0.001    -19.22454   -5.046925
+     La6_abs |  -6.460368   3.876991    -1.67   0.096    -14.05926    1.138523
+             |
+     Le1_abs#|
+   moderator |
+        1 1  |          0  (empty)
+             |
+     Le2_abs#|
+   moderator |
+        1 1  |          0  (empty)
+             |
+     Le3_abs#|
+   moderator |
+        1 1  |          0  (empty)
+             |
+     Le4_abs#|
+   moderator |
+        1 1  |          0  (empty)
+             |
+     Le5_abs#|
+   moderator |
+        1 1  |          0  (empty)
+             |
+     Le6_abs#|
+   moderator |
+        1 1  |          0  (empty)
+             |
+     La1_abs#|
+   moderator |
+        1 1  |          0  (empty)
+             |
+     La2_abs#|
+   moderator |
+        1 1  |          0  (empty)
+             |
+     La3_abs#|
+   moderator |
+        1 1  |          0  (empty)
+             |
+     La4_abs#|
+   moderator |
+        1 1  |          0  (empty)
+             |
+     La5_abs#|
+   moderator |
+        1 1  |          0  (empty)
+             |
+     La6_abs#|
+   moderator |
+        1 1  |          0  (empty)
+             |
+av_wind_sp~d |   8.080759   16.83544     0.48   0.631    -24.91666    41.07818
+wind_direc~n |  -.0771285   .0443877    -1.74   0.082    -.1641284    .0098713
+------------------------------------------------------------------------------
+
+added macro:
+              e(ymean) : "122.8774302807586"
+
+added macro:
+             e(ymean2) : "122.8774302807586"
+
+added macro:
+             e(ymean3) : "122.8774302807586"
+
+added macro:
+                e(acq) : "808"
+(dropped 1215 singleton observations)
+(MWFE estimator converged in 14 iterations)
+
+HDFE linear regression with Julia                 Number of obs   =  6,273,100
+Absorbing 2 HDFE groups                           F(  26,  71829) =       3.69
+Statistics cluster-robust                         Prob > F        =     0.0000
+                                                  R-squared       =     0.6204
+                                                  Adj R-squared   =     0.6100
+Number of clusters (unique_small_grid_id) =      71830Within R-sq.=     0.0001
+Number of clusters (monthyear#ac_uq_id) =      95308Root MSE      =   610.2312
+
+(Std. err. adjusted for 71,830 clusters in unique_small_grid_id monthyear#ac_uq
+> _id)
+------------------------------------------------------------------------------
+             |               Robust
+      countk | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+     Le1_abs |    5.96571   2.619742     2.28   0.023     .8310242     11.1004
+     Le2_abs |   5.883712   2.831675     2.08   0.038     .3336365    11.43379
+     Le3_abs |  -.3794733   3.146192    -0.12   0.904    -6.546001    5.787054
+     Le4_abs |   -2.30343   3.029683    -0.76   0.447    -8.241601     3.63474
+     Le5_abs |   4.585887    3.69608     1.24   0.215    -2.658418    11.83019
+     Le6_abs |   7.106572   7.949021     0.89   0.371    -8.473486    22.68663
+     La1_abs |  -4.639731   3.549218    -1.31   0.191    -11.59619    2.316725
+     La2_abs |   4.430862   4.680966     0.95   0.344    -4.743818    13.60554
+     La3_abs |   1.747092   3.150217     0.55   0.579    -4.427325    7.921509
+     La4_abs |   1.226639   3.115325     0.39   0.694    -4.879388    7.332667
+     La5_abs |  -7.712921   4.260543    -1.81   0.070    -16.06357    .6377306
+     La6_abs |  -2.390157   4.153209    -0.58   0.565    -10.53044     5.75012
+             |
+     Le1_abs#|
+rice_area_~h |
+        1 1  |  -11.85405   5.062036    -2.34   0.019    -21.77563   -1.932478
+             |
+     Le2_abs#|
+rice_area_~h |
+        1 1  |  -17.74942   5.330422    -3.33   0.001    -28.19703   -7.301806
+             |
+     Le3_abs#|
+rice_area_~h |
+        1 1  |  -16.66302    6.05327    -2.75   0.006    -28.52741   -4.798626
+             |
+     Le4_abs#|
+rice_area_~h |
+        1 1  |  -12.85605   5.946568    -2.16   0.031     -24.5113   -1.200793
+             |
+     Le5_abs#|
+rice_area_~h |
+        1 1  |  -32.05392   6.751285    -4.75   0.000    -45.28642   -18.82142
+             |
+     Le6_abs#|
+rice_area_~h |
+        1 1  |   -43.1759   12.37158    -3.49   0.000    -67.42415   -18.92765
+             |
+     La1_abs#|
+rice_area_~h |
+        1 1  |  -20.65148   7.215353    -2.86   0.004    -34.79355   -6.509409
+             |
+     La2_abs#|
+rice_area_~h |
+        1 1  |  -46.51692   9.494225    -4.90   0.000    -65.12557   -27.90826
+             |
+     La3_abs#|
+rice_area_~h |
+        1 1  |  -24.41232   6.956442    -3.51   0.000    -38.04693   -10.77772
+             |
+     La4_abs#|
+rice_area_~h |
+        1 1  |  -17.79167   5.858902    -3.04   0.002     -29.2751   -6.308243
+             |
+     La5_abs#|
+rice_area_~h |
+        1 1  |  -10.54145   7.596012    -1.39   0.165    -25.42961    4.346709
+             |
+     La6_abs#|
+rice_area_~h |
+        1 1  |  -9.222707   8.400937    -1.10   0.272    -25.68852    7.243104
+             |
+av_wind_sp~d |   6.856193   16.86744     0.41   0.684    -26.20394    39.91632
+wind_direc~n |  -.0735783   .0444203    -1.66   0.098     -.160642    .0134853
+------------------------------------------------------------------------------
+
+added macro:
+              e(ymean) : "122.8774302807586"
+
+added macro:
+             e(ymean2) : "159.1111150625011"
+
+added macro:
+             e(ymean3) : "97.17354491014187"
+
+added macro:
+                e(acq) : "808"
+(dropped 1215 singleton observations)
+(MWFE estimator converged in 14 iterations)
+
+HDFE linear regression with Julia                 Number of obs   =  6,273,100
+Absorbing 2 HDFE groups                           F(  26,  71829) =       4.01
+Statistics cluster-robust                         Prob > F        =     0.0000
+                                                  R-squared       =     0.6204
+                                                  Adj R-squared   =     0.6100
+Number of clusters (unique_small_grid_id) =      71830Within R-sq.=     0.0001
+Number of clusters (monthyear#ac_uq_id) =      95308Root MSE      =   610.2282
+
+(Std. err. adjusted for 71,830 clusters in unique_small_grid_id monthyear#ac_uq
+> _id)
+------------------------------------------------------------------------------
+             |               Robust
+      countk | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+     Le1_abs |   1.413806   2.129303     0.66   0.507    -2.759622    5.587234
+     Le2_abs |   1.834203   2.345697     0.78   0.434    -2.763357    6.431763
+     Le3_abs |  -3.408891    2.91197    -1.17   0.242    -9.116343    2.298561
+     Le4_abs |  -2.245558   2.655974    -0.85   0.398    -7.451259    2.960144
+     Le5_abs |   5.446103   3.031489     1.80   0.072    -.4956051    11.38781
+     Le6_abs |   13.02898    6.93245     1.88   0.060    -.5586061    26.61656
+     La1_abs |  -5.563735   2.301211    -2.42   0.016     -10.0741   -1.053368
+     La2_abs |   1.113067    4.05004     0.27   0.783       -6.825    9.051133
+     La3_abs |  -.1217733   2.649188    -0.05   0.963    -5.314174    5.070628
+     La4_abs |   .5492474    2.76292     0.20   0.842    -4.866067    5.964562
+     La5_abs |  -6.886315   3.968078    -1.74   0.083    -14.66373    .8911057
+     La6_abs |  -4.476205   4.267254    -1.05   0.294    -12.84001    3.887599
+             |
+     Le1_abs#|
+rice_harva~h |
+        1 1  |  -1.155153   4.997332    -0.23   0.817    -10.94991    8.639603
+             |
+     Le2_abs#|
+rice_harva~h |
+        1 1  |  -7.664305   5.314784    -1.44   0.149    -18.08127    2.752655
+             |
+     Le3_abs#|
+rice_harva~h |
+        1 1  |  -8.923219   5.942141    -1.50   0.133     -20.5698    2.723359
+             |
+     Le4_abs#|
+rice_harva~h |
+        1 1  |  -12.57468   5.876361    -2.14   0.032    -24.09233   -1.057029
+             |
+     Le5_abs#|
+rice_harva~h |
+        1 1  |  -32.63375   6.885104    -4.74   0.000    -46.12853   -19.13897
+             |
+     Le6_abs#|
+rice_harva~h |
+        1 1  |  -55.05747   12.85326    -4.28   0.000    -80.24983   -29.86511
+             |
+     La1_abs#|
+rice_harva~h |
+        1 1  |  -17.35479   7.103897    -2.44   0.015     -31.2784   -3.431169
+             |
+     La2_abs#|
+rice_harva~h |
+        1 1  |  -36.14887   9.298466    -3.89   0.000    -54.37383    -17.9239
+             |
+     La3_abs#|
+rice_harva~h |
+        1 1  |  -19.39988   6.801141    -2.85   0.004     -32.7301   -6.069665
+             |
+     La4_abs#|
+rice_harva~h |
+        1 1  |  -15.38498   5.847097    -2.63   0.009    -26.84527   -3.924687
+             |
+     La5_abs#|
+rice_harva~h |
+        1 1  |  -11.80862   7.583287    -1.56   0.119    -26.67184      3.0546
+             |
+     La6_abs#|
+rice_harva~h |
+        1 1  |  -3.624558     8.0964    -0.45   0.654    -19.49348    12.24436
+             |
+av_wind_sp~d |    9.20733   16.83629     0.55   0.584    -23.79175    42.20641
+wind_direc~n |  -.0707401   .0443763    -1.59   0.111    -.1577174    .0162372
+------------------------------------------------------------------------------
+
+added macro:
+              e(ymean) : "122.8774302807586"
+
+added macro:
+             e(ymean2) : "212.6092125715213"
+
+added macro:
+             e(ymean3) : "49.37398231015092"
+
+added macro:
+                e(acq) : "808"
+(dropped 1215 singleton observations)
+(MWFE estimator converged in 14 iterations)
+
+HDFE linear regression with Julia                 Number of obs   =  6,273,100
+Absorbing 2 HDFE groups                           F(  26,  71829) =       4.05
+Statistics cluster-robust                         Prob > F        =     0.0000
+                                                  R-squared       =     0.6204
+                                                  Adj R-squared   =     0.6100
+Number of clusters (unique_small_grid_id) =      71830Within R-sq.=     0.0001
+Number of clusters (monthyear#ac_uq_id) =      95308Root MSE      =   610.2264
+
+(Std. err. adjusted for 71,830 clusters in unique_small_grid_id monthyear#ac_uq
+> _id)
+------------------------------------------------------------------------------
+             |               Robust
+      countk | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+     Le1_abs |   3.079463   2.007151     1.53   0.125    -.8545477    7.013473
+     Le2_abs |   3.823786    2.29028     1.67   0.095     -.665156    8.312727
+     Le3_abs |  -2.254667   2.881651    -0.78   0.434    -7.902695     3.39336
+     Le4_abs |  -.8455931   2.593231    -0.33   0.744    -5.928318    4.237132
+     Le5_abs |   7.086386   3.037401     2.33   0.020      1.13309    13.03968
+     Le6_abs |   16.73862   7.301022     2.29   0.022     2.428641     31.0486
+     La1_abs |  -3.217216   2.017958    -1.59   0.111    -7.172408    .7379763
+     La2_abs |   3.734116   4.141543     0.90   0.367    -4.383296    11.85153
+     La3_abs |   2.657354    2.60417     1.02   0.308    -2.446811     7.76152
+     La4_abs |   3.016605   2.711795     1.11   0.266    -2.298505    8.331715
+     La5_abs |   -3.11591   3.671936    -0.85   0.396    -10.31289    4.081074
+     La6_abs |  -4.151143   4.340078    -0.96   0.339    -12.65768    4.355397
+             |
+     Le1_abs#|
+rice_prod_~h |
+        1 1  |  -4.346516   4.758344    -0.91   0.361    -13.67286    4.979824
+             |
+     Le2_abs#|
+rice_prod_~h |
+        1 1  |  -10.90708   5.050369    -2.16   0.031    -20.80579   -1.008375
+             |
+     Le3_abs#|
+rice_prod_~h |
+        1 1  |  -10.53342   5.716938    -1.84   0.065    -21.73861    .6717579
+             |
+     Le4_abs#|
+rice_prod_~h |
+        1 1  |  -14.44681   5.610185    -2.58   0.010    -25.44275    -3.45086
+             |
+     Le5_abs#|
+rice_prod_~h |
+        1 1  |  -33.18514   6.543977    -5.07   0.000    -46.01131   -20.35896
+             |
+     Le6_abs#|
+rice_prod_~h |
+        1 1  |  -57.99924   12.40055    -4.68   0.000    -82.30428   -33.69421
+             |
+     La1_abs#|
+rice_prod_~h |
+        1 1  |   -20.6384   6.651741    -3.10   0.002    -33.67579   -7.601005
+             |
+     La2_abs#|
+rice_prod_~h |
+        1 1  |  -38.62388   8.847463    -4.37   0.000    -55.96488   -21.28287
+             |
+     La3_abs#|
+rice_prod_~h |
+        1 1  |  -23.56034   6.414145    -3.67   0.000    -36.13204   -10.98863
+             |
+     La4_abs#|
+rice_prod_~h |
+        1 1  |  -19.48867   5.597538    -3.48   0.000    -30.45983   -8.517516
+             |
+     La5_abs#|
+rice_prod_~h |
+        1 1  |  -18.62924   7.351283    -2.53   0.011    -33.03773   -4.220743
+             |
+     La6_abs#|
+rice_prod_~h |
+        1 1  |  -4.047572   7.786486    -0.52   0.603    -19.30906    11.21392
+             |
+av_wind_sp~d |   8.919284   16.83963     0.53   0.596    -24.08633     41.9249
+wind_direc~n |  -.0743945   .0443119    -1.68   0.093    -.1612458    .0124567
+------------------------------------------------------------------------------
+
+added macro:
+              e(ymean) : "122.8774302807586"
+
+added macro:
+             e(ymean2) : "208.247013610032"
+
+added macro:
+             e(ymean3) : "38.68344664189195"
+
+added macro:
+                e(acq) : "808"
+
+. 
+. estwrite evreg* using "${root}/tex/paper/tables/main_event_study${sample}_rur
+> al_acpop.ster", replace
+(saving evreg1)
+(saving evreg2)
+(saving evreg3)
+(saving evreg4)
+(file /groups/sgulzar/sa_fires/proj_bureaucrats_farms/tex/paper/tables/main_eve
+> nt_study_rural_acpop.ster saved)
+
+. estsave_csv evreg1  evreg2  evreg3  evreg4 using "${root}/tex/paper/tables/ma
+> in_event_study${sample}_rural_acpop.csv", replace
+(26 missing values generated)
+(26 missing values generated)
+(26 missing values generated)
+(26 missing values generated)
+(26 missing values generated)
+(26 missing values generated)
+(26 missing values generated)
+(26 missing values generated)
+(26 missing values generated)
+(26 missing values generated)
+(26 missing values generated)
+(26 missing values generated)
+(26 missing values generated)
+(26 missing values generated)
+(26 missing values generated)
+(26 missing values generated)
+(26 missing values generated)
+(26 missing values generated)
+(26 missing values generated)
+(26 missing values generated)
+(26 missing values generated)
+(26 missing values generated)
+(26 missing values generated)
+(26 missing values generated)
+(26 missing values generated)
+(26 missing values generated)
+(26 missing values generated)
+(26 missing values generated)
+(26 missing values generated)
+(26 missing values generated)
+(26 missing values generated)
+(26 missing values generated)
+(26 missing values generated)
+(26 missing values generated)
+(26 missing values generated)
+(26 missing values generated)
+(26 missing values generated)
+(26 missing values generated)
+(26 missing values generated)
+(26 missing values generated)
+(26 missing values generated)
+(26 missing values generated)
+(26 missing values generated)
+(26 missing values generated)
+(26 missing values generated)
+(26 missing values generated)
+(26 missing values generated)
+(26 missing values generated)
+(26 missing values generated)
+(26 missing values generated)
+(26 missing values generated)
+(26 missing values generated)
+(26 missing values generated)
+(26 missing values generated)
+(26 missing values generated)
+(26 missing values generated)
+(26 missing values generated)
+(26 missing values generated)
+(26 missing values generated)
+(26 missing values generated)
+(26 missing values generated)
+(26 missing values generated)
+(26 missing values generated)
+(26 missing values generated)
+(26 missing values generated)
+(26 missing values generated)
+(26 missing values generated)
+(26 missing values generated)
+(26 missing values generated)
+(26 missing values generated)
+(26 missing values generated)
+(26 missing values generated)
+(26 missing values generated)
+(26 missing values generated)
+(26 missing values generated)
+(26 missing values generated)
+(26 missing values generated)
+(26 missing values generated)
+(26 missing values generated)
+(26 missing values generated)
+(26 missing values generated)
+(26 missing values generated)
+(26 missing values generated)
+(26 missing values generated)
+(26 missing values generated)
+(26 missing values generated)
+(26 missing values generated)
+(26 missing values generated)
+(26 missing values generated)
+(26 missing values generated)
+(26 missing values generated)
+(26 missing values generated)
+(26 missing values generated)
+(26 missing values generated)
+(26 missing values generated)
+(26 missing values generated)
+(26 missing values generated)
+(26 missing values generated)
+(26 missing values generated)
+(26 missing values generated)
+(26 missing values generated)
+(26 missing values generated)
+(26 missing values generated)
+(26 missing values generated)
+(26 missing values generated)
+(26 missing values generated)
+(26 missing values generated)
+(26 missing values generated)
+(26 missing values generated)
+(26 missing values generated)
+(26 missing values generated)
+(26 missing values generated)
+Coefficients + VCoV saved to: /groups/sgulzar/sa_fires/proj_bureaucrats_farms/t
+> ex/paper/tables/main_event_study_rural_acpop.csv
+Scalars + Macros saved to: /groups/sgulzar/sa_fires/proj_bureaucrats_farms/tex/
+> paper/tables/main_event_study_rural_acpop_scalars.csv
+
+All estimates exported successfully!
+
+. 
+. 
+. *----------------------------------------------------------------------------
+> ---
+. 
+. 
+end of do-file
