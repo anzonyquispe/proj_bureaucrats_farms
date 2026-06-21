@@ -120,7 +120,7 @@ local numacs = r(unique)
 global controls av_wind_speed wind_direction
 
 * Cluster variables
-// egen cluster_acmonth = group(ac_id monthyear)
+egen cluster_acmonth = group(ac_id monthyear)
 
 * Specification 1: No FE (baseline with controls only)
 reg countk i.downup_ac_pop##i.rice_prod_aclvl_ahigh $controls, vce(cluster grid_id)

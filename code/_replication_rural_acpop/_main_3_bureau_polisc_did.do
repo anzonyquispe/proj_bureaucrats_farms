@@ -134,7 +134,7 @@ local numdist = r(unique)
 global controls av_wind_speed wind_direction
 
 * Cluster variables
-// egen cluster_distmonth = group(district_id monthyear)
+egen cluster_distmonth = group(district_id monthyear)
 
 * Specification 1: No FE (baseline)
 reg countk downup_dummy downup_ac_pop downup_interaction $controls, ///

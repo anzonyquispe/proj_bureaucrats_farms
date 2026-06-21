@@ -122,7 +122,7 @@ local numacs = r(unique)
 * Run Regressions
 ********************************************************************************
 
-reghdfejl `dep_var' `rhs', absorb(`fe12') cluster(ac_area_tr)
+reghdfejl `dep_var' `rhs', absorb(`fe12') cluster(ac_elec_yr)
 est store evreg1 
   
 estwrite evreg* using "${root}/tex/paper/tables/_app_19_polischar_fe12_did_downup_inter_plot${sample}_rural_acpop.ster", replace
