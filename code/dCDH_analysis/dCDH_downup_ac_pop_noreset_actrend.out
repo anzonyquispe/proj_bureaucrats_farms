@@ -1,0 +1,44 @@
+/groups/sgulzar/india_forest_land/did_stat/lib/python3.10/site-packages/did_multiplegt_dyn/did_multiplegt_main.py:3531: UserWarning: The F-test may not be reliable, because the variance of effects is close to not being invertible (the ratio of its largest and smallest eigenvalues is 3347.3, which is larger than 1000). This can for instance happen when you compute many estimators, or when your estimates are very strongly correlated. We recommend that you complement the F-test with a sup t-test, see FAQ section of the help file for more details.
+  warnings.warn(matrix_warning, UserWarning)
+/groups/sgulzar/india_forest_land/did_stat/lib/python3.10/site-packages/did_multiplegt_dyn/did_multiplegt_main.py:3662: UserWarning: The F-test may not be reliable, because the variance of placebos is close to not being invertible (the ratio of its largest and smallest eigenvalues is 18368.7, which is larger than 1000). This can for instance happen when you compute many estimators, or when your estimates are very strongly correlated. We recommend that you complement the F-test with a sup t-test, see FAQ section of the help file for more details.
+  warnings.warn(matrix_warning_pl, UserWarning)
+[lib] ROOT   = /groups/sgulzar/sa_fires/proj_bureaucrats_farms
+[lib] SAMPLE = ''
+[driver] VARIANT = 'actrend'
+[load] master CSV: /groups/sgulzar/sa_fires/proj_bureaucrats_farms/data_output/intermediate/0_master_merge_data_gen.csv
+[load] treatment column: downup_ac_pop
+[load] rows after filters: 9,208,200
+[load] unique grids:       76,735
+[load] unique ac_uq_id:    808
+[fit] dCDH_downup_ac_pop_noreset_actrend  rows=9,208,200  groups=76,735  effects=6  placebo=6  with_actrend=True
+================================================================================
+             Estimation of treatment effects: Event-study effects
+================================================================================
+               Block   Estimate       SE      LB CI      UB CI         N  Switchers       N.w  Switchers.w
+            Effect_1 -23.016628 0.243550 -23.493978 -22.539279  343075.0    60058.0  343075.0      60058.0
+            Effect_2 -41.046619 0.597444 -42.217588 -39.875651  316976.0    57488.0  316976.0      57488.0
+            Effect_3 -11.923166 0.412033 -12.730736 -11.115597  295373.0    56186.0  295373.0      56186.0
+            Effect_4 -15.543732 0.792633 -17.097264 -13.990199  283351.0    55613.0  283351.0      55613.0
+            Effect_5  -4.296733 0.425168  -5.130048  -3.463419  272004.0    55186.0  272004.0      55186.0
+            Effect_6 -14.404784 0.545722 -15.474379 -13.335189  259577.0    54845.0  259577.0      54845.0
+Average_Total_Effect -35.417407 0.516370 -36.429473 -34.405341 1125991.0   339376.0 1125991.0     339376.0
+           Placebo_1 -19.403250 0.800610 -20.972415 -17.834084  269946.0    41674.0  269946.0      41674.0
+           Placebo_2 -18.157371 2.732341 -23.512661 -12.802080  214549.0    35820.0  214549.0      35820.0
+           Placebo_3  -4.548968 4.774586 -13.906985   4.809049  171371.0    32575.0  171371.0      32575.0
+           Placebo_4  -3.135147 4.783031 -12.509716   6.239422  143090.0    30558.0  143090.0      30558.0
+           Placebo_5  -3.371198 4.044743 -11.298749   4.556353  120098.0    29231.0  120098.0      29231.0
+           Placebo_6   2.108207 4.231345  -6.185077  10.401491  114945.0    28633.0  114945.0      28633.0
+================================================================================
+Test of joint nullity of the effects: p-value = 0.000000
+Test of joint nullity of the placebos: p-value = 0.000000
+
+WARNING: The F-test may not be reliable, because the variance of effects is close to not being invertible (the ratio of its largest and smallest eigenvalues is 3347.3, which is larger than 1000). This can for instance happen when you compute many estimators, or when your estimates are very strongly correlated. We recommend that you complement the F-test with a sup t-test, see FAQ section of the help file for more details.
+
+WARNING: The F-test may not be reliable, because the variance of placebos is close to not being invertible (the ratio of its largest and smallest eigenvalues is 18368.7, which is larger than 1000). This can for instance happen when you compute many estimators, or when your estimates are very strongly correlated. We recommend that you complement the F-test with a sup t-test, see FAQ section of the help file for more details.
+
+The development of this package was funded by the European Union.
+ERC REALLYCREDIBLE - GA N. 101043899
+[out] wrote /groups/sgulzar/sa_fires/proj_bureaucrats_farms/data_output/intermediate/dCDH/dCDH_downup_ac_pop_noreset_actrend.csv
+[out] wrote /groups/sgulzar/sa_fires/proj_bureaucrats_farms/data_output/intermediate/dCDH/dCDH_downup_ac_pop_noreset_actrend.png
+[out] wrote /users/aquisper/proj_bureaucrats_farms/code/dCDH_analysis/dCDH_downup_ac_pop_noreset_actrend.csv
+[out] wrote /users/aquisper/proj_bureaucrats_farms/code/dCDH_analysis/dCDH_downup_ac_pop_noreset_actrend.png
