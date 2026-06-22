@@ -34,8 +34,10 @@ PYTHON = os.environ.get("PYTHON", sys.executable)
 os.environ.setdefault("SAMPLE", "_sample")
 
 SCRIPTS = [
+    "dCDH_downup_ac_noreset.py",
     "dCDH_downup_ac_reset6.py",
     "dCDH_downup_ac_reset12.py",
+    "dCDH_downup_ac_pop_noreset.py",
     "dCDH_downup_ac_pop_reset6.py",
     "dCDH_downup_ac_pop_reset12.py",
 ]

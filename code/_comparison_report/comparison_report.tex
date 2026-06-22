@@ -1,0 +1,200 @@
+% ============================================================================
+% comparison_report.tex
+%
+% Side-by-side comparison: downup_ac vs downup_ac_pop
+% Covers:
+%   Section 1 -- dCDH event study (3 reset modes x 2 treatments x 2 FE variants
+%                = 12 panels, arranged 3 rows x 4 columns)
+%   Section 2 -- Stacked event study (4 designs: {ac, ac_pop} x {unbalanced,
+%                balanced}, sourced from the existing HonestDiD plots produced
+%                by code/_replication_rural_acpop/plotting_event_studies.R)
+%
+% Robust to missing files: every \includegraphics is wrapped in \IfFileExists
+% so a pending result becomes an inline "(pending)" note, not a compile error.
+%
+% Compile:
+%   pdflatex -interaction=nonstopmode comparison_report.tex
+%
+% Edit the two \def lines below if your Dropbox path differs.
+% ============================================================================
+
+\documentclass[11pt]{article}
+
+\usepackage[a4paper,margin=2cm]{geometry}
+\usepackage{graphicx}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\usepackage{float}
+
+% ---------------------------------------------------------------------------
+% Paths -- edit these two lines if your Dropbox is mounted elsewhere
+% ---------------------------------------------------------------------------
+\def\dropboxroot{/Users/anzony.quisperojas/Library/CloudStorage/Dropbox/sa_fires/proj_bureaucrats_farms}
+\def\dCDHplots{\dropboxroot/data_output/intermediate/dCDH/plots_R}
+\def\figdir{\dropboxroot/tex/paper/figures}
+
+% Make graphics search these paths first (lets \includegraphics use bare names)
+\graphicspath{{\dCDHplots/}{\figdir/}}
+
+% ---------------------------------------------------------------------------
+% Helpers
+% ---------------------------------------------------------------------------
+
+% \safefig{<bare basename, no extension>}{<width>}{<caption-line>}
+% Tries the basename across the registered \graphicspath dirs. If the file
+% does not exist, prints an inline "(pending: <basename>)" note instead of
+% breaking the build.
+\newcommand{\safefig}[3]{%
+  \IfFileExists{\dCDHplots/#1.png}{%
+    \includegraphics[width=#2]{#1.png}%
+  }{%
+    \IfFileExists{\figdir/#1.png}{%
+      \includegraphics[width=#2]{#1.png}%
+    }{%
+      \fbox{\parbox[c][0.6\linewidth][c]{0.95\linewidth}{%
+        \centering\color{red}\textit{(pending: #1.png)}%
+        \\[0.3em]\tiny#3%
+      }}%
+    }%
+  }%
+}
+
+% \dCDHpanel{<treatment>}{<reset>}{<variant>}{<header text>}
+% Wraps one column of the dCDH 4-panel figure.
+\newcommand{\dCDHpanel}[4]{%
+  \begin{subfigure}[t]{0.245\textwidth}
+    \centering
+    \safefig{dCDH_#1_#2_#3}{\linewidth}{dCDH_#1_#2_#3}
+    \caption*{\scriptsize #4}
+  \end{subfigure}%
+}
+
+% ---------------------------------------------------------------------------
+\title{Comparison: \texttt{downup\_ac} vs \texttt{downup\_ac\_pop}}
+\author{}
+\date{\today}
+% ---------------------------------------------------------------------------
+
+\begin{document}
+\maketitle
+
+\noindent
+This document compares results obtained with the original treatment
+\texttt{downup\_ac} and the population-weighted variant
+\texttt{downup\_ac\_pop}, across the two non-rural-replication branches of
+the project: the dynamic-DiD estimator of de~Chaisemartin \& d'Haultf\oe{}uille
+(dCDH) and the stacked event study. Rural replication results are documented
+separately in
+\texttt{\dropboxroot/tex/paper/tables/\_comparison\_downup\_ac\_vs\_acpop.pdf}.
+
+Missing figures are flagged inline as
+\fbox{\color{red}\textit{(pending: \dots)}} so the document compiles even while
+some jobs are still running.
+
+% ===========================================================================
+\section{dCDH event study (de Chaisemartin \& d'Haultf\oe{}uille)}
+% ===========================================================================
+
+\noindent
+Plots produced by \texttt{code/dCDH\_analysis/plot\_dCDH\_event\_study.R} from
+the per-fit CSVs at \texttt{data\_output/intermediate/dCDH/}. The top-left
+label on each panel reports the Average Total Effect (ATE) and its standard
+error. Within each section the first two panels show \texttt{downup\_ac}
+(original) and the last two show \texttt{downup\_ac\_pop} (population-weighted);
+within each treatment the left panel omits the AC trend and the right panel
+adds \texttt{trends\_nonparam = ['ac\_uq\_id']} (i.e.\ ac$\times$monthyear
+linear trend).
+
+% --- noreset ---------------------------------------------------------------
+\subsection{No reset}
+\begin{figure}[H]
+  \centering
+  \dCDHpanel{downup_ac}{noreset}{notrend}{downup\_ac, no ac$\times$monthyear FE}\hfill
+  \dCDHpanel{downup_ac}{noreset}{actrend}{downup\_ac, with ac$\times$monthyear FE}\hfill
+  \dCDHpanel{downup_ac_pop}{noreset}{notrend}{downup\_ac\_pop, no ac$\times$monthyear FE}\hfill
+  \dCDHpanel{downup_ac_pop}{noreset}{actrend}{downup\_ac\_pop, with ac$\times$monthyear FE}
+  \caption{dCDH event study, raw panel (each grid is its own group).
+           Effects $1{:}6$, placebos $1{:}6$.}
+\end{figure}
+
+% --- reset every 6 periods -------------------------------------------------
+\subsection{Reset every 6 same-treatment periods (\texttt{apply\_reset(6)})}
+\begin{figure}[H]
+  \centering
+  \dCDHpanel{downup_ac}{reset6}{notrend}{downup\_ac, no ac$\times$monthyear FE}\hfill
+  \dCDHpanel{downup_ac}{reset6}{actrend}{downup\_ac, with ac$\times$monthyear FE}\hfill
+  \dCDHpanel{downup_ac_pop}{reset6}{notrend}{downup\_ac\_pop, no ac$\times$monthyear FE}\hfill
+  \dCDHpanel{downup_ac_pop}{reset6}{actrend}{downup\_ac\_pop, with ac$\times$monthyear FE}
+  \caption{dCDH event study with adjacent-spell reset every 6 same-treatment
+           periods (Stata-equivalent \texttt{reset = 6}).
+           Effects $1{:}6$, placebos $1{:}6$.}
+\end{figure}
+
+% --- 12-month calendar buckets ---------------------------------------------
+\subsection{12-month calendar buckets (\texttt{generate\_12month\_subgroups})}
+\begin{figure}[H]
+  \centering
+  \dCDHpanel{downup_ac}{reset12}{notrend}{downup\_ac, no ac$\times$monthyear FE}\hfill
+  \dCDHpanel{downup_ac}{reset12}{actrend}{downup\_ac, with ac$\times$monthyear FE}\hfill
+  \dCDHpanel{downup_ac_pop}{reset12}{notrend}{downup\_ac\_pop, no ac$\times$monthyear FE}\hfill
+  \dCDHpanel{downup_ac_pop}{reset12}{actrend}{downup\_ac\_pop, with ac$\times$monthyear FE}
+  \caption{dCDH event study with 12-month calendar bucketing (each grid split
+           into 12-month sub-groups). Effects $1{:}6$, placebos $1{:}5$.}
+\end{figure}
+
+\clearpage
+
+% ===========================================================================
+\section{Stacked event study}
+% ===========================================================================
+
+\noindent
+Plots produced by
+\texttt{code/\_replication\_rural\_acpop/plotting\_event\_studies.R}, which
+calls \texttt{agregation\_result()} from
+\texttt{code/\_replication\_rural/tools/plot\_event\_studies.R}. Output PNGs
+land under \texttt{tex/paper/figures/}. The figures shown here are the
+``HonestDiD relative-magnitudes'' bound (\texttt{\_honest1.png}); the
+``smoothness-restriction'' bound (\texttt{\_honest2.png}) is in the same
+folder if you want to swap it in.
+
+% --- Unbalanced ------------------------------------------------------------
+\subsection{Unbalanced panel}
+\begin{figure}[H]
+  \centering
+  \begin{subfigure}[t]{0.48\textwidth}
+    \centering
+    \safefig{stacked_event_study_rural_1_honest1}{\linewidth}{stacked_event_study_rural_1_honest1}
+    \caption*{\small downup\_ac}
+  \end{subfigure}\hfill
+  \begin{subfigure}[t]{0.48\textwidth}
+    \centering
+    \safefig{stacked_event_study_pop_rural_1_honest1}{\linewidth}{stacked_event_study_pop_rural_1_honest1}
+    \caption*{\small downup\_ac\_pop}
+  \end{subfigure}
+  \caption{Stacked event study, unbalanced control panel.
+           HonestDiD relative-magnitudes bound.}
+\end{figure}
+
+% --- Balanced --------------------------------------------------------------
+\subsection{Balanced control panel}
+\begin{figure}[H]
+  \centering
+  \begin{subfigure}[t]{0.48\textwidth}
+    \centering
+    \safefig{stacked_event_study_balanced_rural_1_honest1}{\linewidth}{stacked_event_study_balanced_rural_1_honest1}
+    \caption*{\small downup\_ac}
+  \end{subfigure}\hfill
+  \begin{subfigure}[t]{0.48\textwidth}
+    \centering
+    \safefig{stacked_event_study_balanced_pop_rural_1_honest1}{\linewidth}{stacked_event_study_balanced_pop_rural_1_honest1}
+    \caption*{\small downup\_ac\_pop}
+  \end{subfigure}
+  \caption{Stacked event study, balanced control panel (control grids that do
+           not cover all 13 event-time periods are dropped).
+           HonestDiD relative-magnitudes bound.}
+\end{figure}
+
+\end{document}
