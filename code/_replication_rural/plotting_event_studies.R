@@ -133,6 +133,70 @@ for (kl in 2:5){
 }
 
 
+
+# Stacked dataset
+# Inspecting the images event studies
+df <- fread(file.path(table_farms, "stacked_event_study_rural.csv"))
+kl <- 1
+file_base <- paste0("stacked_event_study_rural_", kl)
+filterval <- paste0("evreg", kl)
+ev <- df[reg == filterval,][c(16:27),  c(  3, 4, 20:31)  ]
+agregation_result(ev, numPrePeriods=6, numPostPeriods = 6, M = 1, 
+                  xlab = "Time from Treatment (months)", 
+                  ylab = "Effect on Number of Fires (in 1,000 units)",
+                  omitted_period = 0, honest = TRUE, 
+                  ylim_ori = c(-40, 20), ylim_rot = c(-40, 30),
+                  extra_args_relativeMagnitudes = list(l_vec=rep(1/6,6)),         
+                  extra_args_sensitivityResults = list(l_vec=rep(1/6,6)))
+mods <- c( 'riceP')
+for (kl in 2:2){
+  i <- kl-1
+  file_base <- paste0("stacked_event_study_rural_", mods[i])
+  filterval <- paste0("evreg", kl)
+  ev <- df[reg == filterval,][c(42:53), c(  3, 4, 46:57)  ]
+  agregation_result(ev, numPrePeriods=6, numPostPeriods = 6, M = 1, 
+                    ylim_ori = c(-80, 50), ylim_rot = c(-80, 50),
+                    xlab = "Time from Treatment (months)", 
+                    ylab = "Effect on Number of Fires (in 1,000 units)",
+                    omitted_period = 0, honest = TRUE, 
+                    extra_args_relativeMagnitudes = list(l_vec=rep(1/6,6)),         
+                    extra_args_sensitivityResults = list(l_vec=rep(1/6,6)))
+}
+
+
+
+
+
+# Stacked dataset balanced panel
+# Inspecting the images event studies
+df <- fread(file.path(table_farms, "stacked_event_study_balanced_rural.csv"))
+kl <- 1
+file_base <- paste0("stacked_event_study_balanced_rural_", kl)
+filterval <- paste0("evreg", kl)
+ev <- df[reg == filterval,][c(16:27),  c(  3, 4, 20:31)  ]
+agregation_result(ev, numPrePeriods=6, numPostPeriods = 6, M = 1, 
+                  xlab = "Time from Treatment (months)", 
+                  ylab = "Effect on Number of Fires (in 1,000 units)",
+                  omitted_period = 0, honest = TRUE, 
+                  ylim_ori = c(-40, 20), ylim_rot = c(-40, 30),
+                  extra_args_relativeMagnitudes = list(l_vec=rep(1/6,6)),         
+                  extra_args_sensitivityResults = list(l_vec=rep(1/6,6)))
+mods <- c( 'riceP')
+for (kl in 2:2){
+  i <- kl-1
+  file_base <- paste0("stacked_event_study_balanced_rural_", mods[i])
+  filterval <- paste0("evreg", kl)
+  ev <- df[reg == filterval,][c(42:53), c(  3, 4, 46:57)  ]
+  agregation_result(ev, numPrePeriods=6, numPostPeriods = 6, M = 1, 
+                    ylim_ori = c(-80, 50), ylim_rot = c(-80, 50),
+                    xlab = "Time from Treatment (months)", 
+                    ylab = "Effect on Number of Fires (in 1,000 units)",
+                    omitted_period = 0, honest = TRUE, 
+                    extra_args_relativeMagnitudes = list(l_vec=rep(1/6,6)),         
+                    extra_args_sensitivityResults = list(l_vec=rep(1/6,6)))
+}
+
+
 ################################################################################
 
 
@@ -190,67 +254,6 @@ dev.off()
 
 
 
-# Stacked dataset
-# Inspecting the images event studies
-df <- fread(file.path(table_farms, "stacked_event_study_rural.csv"))
-kl <- 1
-file_base <- paste0("stacked_event_study_rural_", kl)
-filterval <- paste0("evreg", kl)
-ev <- df[reg == filterval,][c(16:27),  c(  3, 4, 20:31)  ]
-agregation_result(ev, numPrePeriods=6, numPostPeriods = 6, M = 1, 
-                  xlab = "Time from Treatment (months)", 
-                  ylab = "Effect on Number of Fires (in 1,000 units)",
-                  omitted_period = 0, honest = TRUE, 
-                  ylim_ori = c(-40, 20), ylim_rot = c(-40, 30),
-                  extra_args_relativeMagnitudes = list(l_vec=rep(1/6,6)),         
-                  extra_args_sensitivityResults = list(l_vec=rep(1/6,6)))
-mods <- c( 'riceP')
-for (kl in 2:2){
-  i <- kl-1
-  file_base <- paste0("main_event_study_rural_", mods[i])
-  filterval <- paste0("evreg", kl)
-  ev <- df[reg == filterval,][c(42:53), c(  3, 4, 46:57)  ]
-  agregation_result(ev, numPrePeriods=6, numPostPeriods = 6, M = 1, 
-                    ylim_ori = c(-80, 50), ylim_rot = c(-80, 50),
-                    xlab = "Time from Treatment (months)", 
-                    ylab = "Effect on Number of Fires (in 1,000 units)",
-                    omitted_period = 0, honest = TRUE, 
-                    extra_args_relativeMagnitudes = list(l_vec=rep(1/6,6)),         
-                    extra_args_sensitivityResults = list(l_vec=rep(1/6,6)))
-}
-
-
-
-
-
-# Stacked dataset balanced panel
-# Inspecting the images event studies
-df <- fread(file.path(table_farms, "stacked_event_study_balanced_rural.csv"))
-kl <- 1
-file_base <- paste0("stacked_event_study_balanced_rural_", kl)
-filterval <- paste0("evreg", kl)
-ev <- df[reg == filterval,][c(16:27),  c(  3, 4, 20:31)  ]
-agregation_result(ev, numPrePeriods=6, numPostPeriods = 6, M = 1, 
-                  xlab = "Time from Treatment (months)", 
-                  ylab = "Effect on Number of Fires (in 1,000 units)",
-                  omitted_period = 0, honest = TRUE, 
-                  ylim_ori = c(-40, 20), ylim_rot = c(-40, 30),
-                  extra_args_relativeMagnitudes = list(l_vec=rep(1/6,6)),         
-                  extra_args_sensitivityResults = list(l_vec=rep(1/6,6)))
-mods <- c( 'riceP')
-for (kl in 2:2){
-  i <- kl-1
-  file_base <- paste0("stacked_event_study_balanced_rural_", mods[i])
-  filterval <- paste0("evreg", kl)
-  ev <- df[reg == filterval,][c(42:53), c(  3, 4, 46:57)  ]
-  agregation_result(ev, numPrePeriods=6, numPostPeriods = 6, M = 1, 
-                    ylim_ori = c(-80, 50), ylim_rot = c(-80, 50),
-                    xlab = "Time from Treatment (months)", 
-                    ylab = "Effect on Number of Fires (in 1,000 units)",
-                    omitted_period = 0, honest = TRUE, 
-                    extra_args_relativeMagnitudes = list(l_vec=rep(1/6,6)),         
-                    extra_args_sensitivityResults = list(l_vec=rep(1/6,6)))
-}
 
 
 

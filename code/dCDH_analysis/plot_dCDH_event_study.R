@@ -31,11 +31,11 @@ suppressPackageStartupMessages({
 })
 
 # ---- Paths ------------------------------------------------------------------
-
-default_in <- "/Users/anzony.quisperojas/Library/CloudStorage/Dropbox/sa_fires/proj_bureaucrats_farms/data_output/intermediate/dCDH"
+main_path <- "/Users/anzony.quisperojas/Library/CloudStorage/Dropbox/sa_fires"
+default_in <- file.path( main_path, "proj_bureaucrats_farms/tex/paper/tables")
 
 in_dir  <- Sys.getenv("IN_DIR",  default_in)
-out_dir <- Sys.getenv("OUT_DIR", file.path(in_dir, "plots_R"))
+out_dir <- file.path( main_path, "proj_bureaucrats_farms/tex/paper/figures")
 
 if (!dir.exists(in_dir)) {
   stop("Input dir does not exist: ", in_dir,
