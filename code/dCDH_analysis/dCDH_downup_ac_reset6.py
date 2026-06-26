@@ -30,6 +30,10 @@ TAG       = "dCDH_downup_ac_reset6"
 #   "actrend" -> run only the ac-trend fit
 VARIANT = os.environ.get("VARIANT", "").lower()
 print(f"[driver] VARIANT = {VARIANT!r}")
+SWITCHERS = os.environ.get("SWITCHERS", "").lower()  # "in", "out", or ""
+print(f"[driver] SWITCHERS = {SWITCHERS!r}")
+switchers_arg    = SWITCHERS if SWITCHERS in ("in", "out") else None
+switchers_suffix = f"_{SWITCHERS}" if switchers_arg else ""
 
 df = load_panel(treatment=TREATMENT)
 df, _ = apply_reset(
@@ -44,11 +48,13 @@ if VARIANT in ("", "notrend"):
     fit_and_save(
         df, treatment=TREATMENT, with_actrend=False,
         effects=EFFECTS, placebo=PLACEBO, cluster=CLUSTER,
-        out_basename=f"{TAG}_notrend", out_dirs=OUT_DIRS,
+        out_basename=f"{TAG}_notrend{switchers_suffix}", out_dirs=OUT_DIRS,
+        switchers=switchers_arg,
     )
 if VARIANT in ("", "actrend"):
     fit_and_save(
         df, treatment=TREATMENT, with_actrend=True,
         effects=EFFECTS, placebo=PLACEBO, cluster=CLUSTER,
-        out_basename=f"{TAG}_actrend", out_dirs=OUT_DIRS,
+        out_basename=f"{TAG}_actrend{switchers_suffix}", out_dirs=OUT_DIRS,
+        switchers=switchers_arg,
     )

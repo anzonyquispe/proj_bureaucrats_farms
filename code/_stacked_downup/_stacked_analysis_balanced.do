@@ -19,7 +19,7 @@ if "$root" == "" {
     set more off
 
     * Set toggles for standalone run
-    global location "dbox"
+    global location "shell"
     global sample ""
 
     global shell "/groups/sgulzar/sa_fires/proj_bureaucrats_farms"

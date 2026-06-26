@@ -20,7 +20,7 @@ if "$root" == "" {
     set more off
 
     * Set toggles for standalone run
-    global location "dbox"
+    global location "shell"
     global sample ""
 
     global shell "/groups/sgulzar/sa_fires/proj_bureaucrats_farms"
@@ -110,12 +110,12 @@ local numacs = r(unique)
 * Event-study regressions
 *-------------------------------------------------------------------------------
 
-reghdfejl countk ib7.relative_monthyear_aux##ib0.treat $controls, absorb($setfe) cluster($cluster)
+reghdfejl countk ib6.relative_monthyear_aux##ib0.treat $controls, absorb($setfe) cluster($cluster)
 estadd local ymean `ymean'
 estadd local acq `numacs'
 est store evreg1
 
-reghdfejl countk ib7.relative_monthyear_aux##ib0.treat##ib0.rice_prod_aclvl_ahigh $controls, absorb($setfe) cluster($cluster)
+reghdfejl countk ib6.relative_monthyear_aux##ib0.treat##ib0.rice_prod_aclvl_ahigh $controls, absorb($setfe) cluster($cluster)
 estadd local ymean `ymean'
 estadd local ymean2 `ymean2'
 estadd local acq `numacs'

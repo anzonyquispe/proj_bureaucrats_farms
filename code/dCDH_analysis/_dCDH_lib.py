@@ -280,6 +280,7 @@ def fit_and_save(
     cluster: str,
     out_basename: str,
     out_dirs,
+    switchers: str | None = None,
 ) -> None:
     """
     Fit one DidMultiplegtDyn model and write summary CSV + event-study PNG to
@@ -301,11 +302,14 @@ def fit_and_save(
     )
     if with_actrend:
         kwargs["trends_nonparam"] = ["ac_uq_id"]
+    if switchers:
+        kwargs["switchers"] = switchers
 
     print(
         f"[fit] {out_basename}  rows={df.height:,}  "
         f"groups={df['unique_small_grid_id'].n_unique():,}  "
         f"effects={effects}  placebo={placebo}  with_actrend={with_actrend}"
+        f"  switchers={switchers!r}"
     )
 
     model = DidMultiplegtDyn(**kwargs)
