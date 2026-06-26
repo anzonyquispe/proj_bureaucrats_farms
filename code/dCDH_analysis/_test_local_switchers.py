@@ -10,17 +10,11 @@ on your Mac before submitting any cluster job.
 Usage (from this directory):
     python _test_local_switchers.py
 
-SAMPLE defaults to "_sample" so you don't have to set it. VARIANT is left
-unset (empty string) so each script exercises its own default behaviour.
+SAMPLE defaults to "_sample". VARIANT is left unset so each script exercises
+both notrend and actrend.
 
-Override anything with env vars if needed, e.g.:
-    ROOT=/some/other/proj_bureaucrats_farms python _test_local_switchers.py
-    SAMPLE="" python _test_local_switchers.py
-
-Outputs land in:
-    ${ROOT}/data_output/intermediate/dCDH/
-    ${DCDH_LOCAL_OUT}                   (defaults to cluster home path,
-                                         silently skipped on a Mac)
+Logs are written to  _test_switchers_logs/<script_stem>_<switchers>.log
+A summary is printed at the end.
 """
 
 import os
@@ -28,11 +22,13 @@ import subprocess
 import sys
 from pathlib import Path
 
-HERE = Path(__file__).resolve().parent
+HERE   = Path(__file__).resolve().parent
 PYTHON = os.environ.get("PYTHON", sys.executable)
 
-# Default to the sample so runs stay fast.
 os.environ.setdefault("SAMPLE", "_sample")
+
+LOG_DIR = HERE / "_test_switchers_logs"
+LOG_DIR.mkdir(exist_ok=True)
 
 SCRIPTS = [
     "dCDH_downup_ac_noreset.py",
@@ -46,23 +42,57 @@ SCRIPTS = [
 SWITCHERS_VALUES = ["in", "out"]
 
 failures = []
+results  = []
+
 for switchers in SWITCHERS_VALUES:
     for s in SCRIPTS:
+        stem     = Path(s).stem
+        log_path = LOG_DIR / f"{stem}_{switchers}.log"
+        env      = {**os.environ, "SWITCHERS": switchers}
+
         print("=" * 72)
-        print(
-            f"RUNNING {s}  "
-            f"(SAMPLE={os.environ['SAMPLE']}, SWITCHERS={switchers})"
-        )
+        print(f"RUNNING {s}  (SAMPLE={os.environ['SAMPLE']}, SWITCHERS={switchers})")
+        print(f"  log → {log_path}")
         print("=" * 72)
-        env = {**os.environ, "SWITCHERS": switchers}
-        rc = subprocess.call([PYTHON, str(HERE / s)], cwd=str(HERE), env=env)
+
+        with open(log_path, "w") as fh:
+            proc = subprocess.run(
+                [PYTHON, str(HERE / s)],
+                cwd=str(HERE),
+                env=env,
+                stdout=fh,
+                stderr=subprocess.STDOUT,
+            )
+
+        rc = proc.returncode
+        status = "OK" if rc == 0 else f"FAILED (exit {rc})"
+        results.append((s, switchers, rc, log_path))
         if rc != 0:
-            failures.append((s, switchers, rc))
+            failures.append((s, switchers, rc, log_path))
+        print(f"  → {status}\n")
+
+# ---- Summary -----------------------------------------------------------------
+print("=" * 72)
+print("SUMMARY")
+print("=" * 72)
+for s, sw, rc, log_path in results:
+    tag = "OK  " if rc == 0 else "FAIL"
+    print(f"  [{tag}] {s}  SWITCHERS={sw}  (log: {log_path.name})")
 
 print()
 if failures:
-    print("FAILURES:")
-    for s, sw, rc in failures:
+    print(f"{len(failures)} FAILURE(S):")
+    for s, sw, rc, log_path in failures:
         print(f"  {s}  SWITCHERS={sw}  exit={rc}")
+        print(f"  last 20 lines of log:")
+        try:
+            lines = log_path.read_text().splitlines()
+            for line in lines[-20:]:
+                print(f"    {line}")
+        except Exception:
+            pass
+        print()
     sys.exit(1)
+
 print(f"All {len(SCRIPTS) * len(SWITCHERS_VALUES)} runs completed successfully.")
+print(f"Logs in: {LOG_DIR}")
