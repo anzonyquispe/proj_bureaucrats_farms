@@ -67,7 +67,7 @@ result <- did_multiplegt_dyn(
   outcome   = "countk",
   group     = "unique_small_grid_id",
   time      = "monthyear",
-  controls = c("av_wind_speed", "wind_direction")
+  controls = c("av_wind_speed", "wind_direction"),
   treatment = "downup_ac",
   effects   = 6,
   placebo   = 6,

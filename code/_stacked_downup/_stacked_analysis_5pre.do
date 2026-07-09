@@ -8,13 +8,13 @@
 ********************************************************************************
 * Setup - Only set globals if running standalone (not from master)
 ********************************************************************************
-
+macro drop root
 if "$root" == "" {
     clear all
     set more off
 
     * Set toggles for standalone run
-    global location "shell"
+    global location "dbox"
     global sample ""
 
     global shell "/groups/sgulzar/sa_fires/proj_bureaucrats_farms"

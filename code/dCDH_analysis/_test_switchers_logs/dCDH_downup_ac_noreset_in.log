@@ -1,0 +1,63 @@
+[out] WARNING: cannot create /users/aquisper/proj_bureaucrats_farms/code/dCDH_analysis: [Errno 13] Permission denied: '/users/aquisper'
+[out] WARNING: cannot create /users/aquisper/proj_bureaucrats_farms/code/dCDH_analysis: [Errno 13] Permission denied: '/users/aquisper'
+[lib] ROOT   = /Users/anzony.quisperojas/Library/CloudStorage/Dropbox/sa_fires/proj_bureaucrats_farms
+[lib] SAMPLE = '_sample'
+[driver] VARIANT = ''
+[driver] SWITCHERS = 'in'
+[load] master CSV: /Users/anzony.quisperojas/Library/CloudStorage/Dropbox/sa_fires/proj_bureaucrats_farms/data_output/intermediate/0_master_merge_data_gen_sample.csv
+[load] treatment column: downup_ac
+[load] rows after filters: 171,072
+[load] unique grids:       3,888
+[load] unique ac_uq_id:    728
+[fit] dCDH_downup_ac_noreset_notrend_in  rows=171,072  groups=3,888  effects=6  placebo=6  with_actrend=False  switchers='in'
+================================================================================
+             Estimation of treatment effects: Event-study effects
+================================================================================
+               Block    Estimate        SE       LB CI       UB CI       N  Switchers     N.w  Switchers.w
+            Effect_1 -178.008915 40.100319 -256.604097  -99.413733 20161.0     1587.0 20161.0       1587.0
+            Effect_2 -171.118825 37.948415 -245.496352  -96.741298 18298.0     1581.0 18298.0       1581.0
+            Effect_3 -146.049528 36.499204 -217.586653  -74.512403 16489.0     1579.0 16489.0       1579.0
+            Effect_4  -22.615282 42.954993 -106.805520   61.574957 15189.0     1579.0 15189.0       1579.0
+            Effect_5  240.400065 66.018891  111.005416  369.794714 13718.0     1567.0 13718.0       1567.0
+            Effect_6  101.414805 54.270336   -4.953099  207.782709 12922.0     1567.0 12922.0       1567.0
+Average_Total_Effect  -62.787529 74.831666 -209.454900   83.879842 34558.0     9460.0 34558.0       9460.0
+           Placebo_1 -104.976148 52.501192 -207.876594   -2.075703 18171.0     1490.0 18171.0       1490.0
+           Placebo_2 -222.534579 43.835964 -308.451491 -136.617668 14574.0     1430.0 14574.0       1430.0
+           Placebo_3 -154.477859 46.922742 -246.444743  -62.510974 11785.0     1323.0 11785.0       1323.0
+           Placebo_4 -251.405203 50.209708 -349.814423 -152.995983 10912.0     1085.0 10912.0       1085.0
+           Placebo_5  -10.506478 18.189207  -46.156668   25.143713  9682.0      795.0  9682.0        795.0
+           Placebo_6   26.287616 44.855358  -61.627270  114.202502  8514.0      142.0  8514.0        142.0
+================================================================================
+Test of joint nullity of the effects: p-value = 0.000000
+Test of joint nullity of the placebos: p-value = 0.000023
+
+The development of this package was funded by the European Union.
+ERC REALLYCREDIBLE - GA N. 101043899
+[out] wrote /Users/anzony.quisperojas/Library/CloudStorage/Dropbox/sa_fires/proj_bureaucrats_farms/data_output/intermediate/dCDH/dCDH_downup_ac_noreset_notrend_in.csv
+[out] wrote /Users/anzony.quisperojas/Library/CloudStorage/Dropbox/sa_fires/proj_bureaucrats_farms/data_output/intermediate/dCDH/dCDH_downup_ac_noreset_notrend_in.png
+[fit] dCDH_downup_ac_noreset_actrend_in  rows=171,072  groups=3,888  effects=6  placebo=6  with_actrend=True  switchers='in'
+================================================================================
+             Estimation of treatment effects: Event-study effects
+================================================================================
+               Block    Estimate       SE       LB CI       UB CI      N  Switchers    N.w  Switchers.w
+            Effect_1  -54.868932 2.277848  -59.333432  -50.404433 2835.0      949.0 2835.0        949.0
+            Effect_2  -34.607205 2.636335  -39.774326  -29.440085 2276.0      764.0 2276.0        764.0
+            Effect_3  -64.495340 2.998008  -70.371328  -58.619352 1921.0      667.0 1921.0        667.0
+            Effect_4   -4.721040 0.359134   -5.424930   -4.017150 1719.0      626.0 1719.0        626.0
+            Effect_5  -61.032935 4.615241  -70.078642  -51.987229 1602.0      604.0 1602.0        604.0
+            Effect_6  -42.740885 2.516401  -47.672941  -37.808830 1498.0      579.0 1498.0        579.0
+Average_Total_Effect  -84.320412 2.328532  -88.884250  -79.756574 9656.0     4189.0 9656.0       4189.0
+           Placebo_1 -104.109998 1.294505 -106.647182 -101.572814 2474.0      867.0 2474.0        867.0
+           Placebo_2   -7.748269 4.342354  -16.259127    0.762589 1744.0      633.0 1744.0        633.0
+           Placebo_3  -44.481124 5.005262  -54.291257  -34.670992 1169.0      462.0 1169.0        462.0
+           Placebo_4  -59.599651 6.499271  -72.337988  -46.861315  888.0      358.0  888.0        358.0
+           Placebo_5  -32.393111 5.556072  -43.282811  -21.503410  715.0      301.0  715.0        301.0
+           Placebo_6   31.220566 5.429869   20.578218   41.862913  258.0       89.0  258.0         89.0
+================================================================================
+Test of joint nullity of the effects: p-value = 0.000000
+Test of joint nullity of the placebos: p-value = 0.000000
+
+The development of this package was funded by the European Union.
+ERC REALLYCREDIBLE - GA N. 101043899
+[out] wrote /Users/anzony.quisperojas/Library/CloudStorage/Dropbox/sa_fires/proj_bureaucrats_farms/data_output/intermediate/dCDH/dCDH_downup_ac_noreset_actrend_in.csv
+[out] wrote /Users/anzony.quisperojas/Library/CloudStorage/Dropbox/sa_fires/proj_bureaucrats_farms/data_output/intermediate/dCDH/dCDH_downup_ac_noreset_actrend_in.png

@@ -1,0 +1,19 @@
+# Fdb version 4
+["pdflatex"] 1782564199.63686 "/Users/anzony.quisperojas/Documents/GitHub/proj_bureaucrats_farms/code/main.tex" "out/main.pdf" "main" 1782564199.7719 2
+  "/Users/anzony.quisperojas/Documents/GitHub/proj_bureaucrats_farms/code/main.tex" 1782554765.68059 232105 f6cff09d7414e1f6733e12aea0678294 ""
+  "/usr/local/texlive/2026/texmf-dist/fonts/map/fontname/texfonts.map" 1577235249 3524 cb3e574dea2d1052e39280babc910dc8 ""
+  "/usr/local/texlive/2026/texmf-dist/fonts/tfm/public/cm/cmr12.tfm" 1136768653 1288 655e228510b4c2a1abe905c368440826 ""
+  "/usr/local/texlive/2026/texmf-dist/tex/latex/base/article.cls" 1748806692 20144 b966087dda3b194755eb460d32e2ef75 ""
+  "/usr/local/texlive/2026/texmf-dist/tex/latex/base/size12.clo" 1748806692 8449 8dc66c6c313c8eb2d774af83bca435dd ""
+  "/usr/local/texlive/2026/texmf-dist/web2c/texmf.cnf" 1770478701 43630 e9fa012910491fe5ae08a72c3c2997a7 ""
+  "/usr/local/texlive/2026/texmf-var/web2c/pdftex/pdflatex.fmt" 1776244909 3636770 38be67a314efb7cc62b06e8408dd22a1 ""
+  "/usr/local/texlive/2026/texmf.cnf" 1774209515 577 648cd9f92f9c0eac486f4c71c85cfbbe ""
+  "auxiliaries/preamble.tex" 0 -1 0 ""
+  "main.tex" 1782554765.68059 232105 f6cff09d7414e1f6733e12aea0678294 ""
+  "out/auxiliaries/preamble.tex" 0 -1 0 ""
+  "out/main.aux" 1782564191.63641 32 3985256e7290058c681f74d7a3565a19 "pdflatex"
+  (generated)
+  "out/main.aux"
+  "out/main.log"
+  "out/main.pdf"
+  (rewritten before read)

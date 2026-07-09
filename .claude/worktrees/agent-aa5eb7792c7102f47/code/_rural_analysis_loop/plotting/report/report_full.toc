@@ -1,0 +1,32 @@
+\contentsline {section}{fe1 --- grid$\times $cohort}{5}{section*.3}%
+\contentsline {section}{fe2 --- grid$\times $cohort + mo-yr$\times $cohort}{6}{section*.4}%
+\contentsline {section}{fe3 --- grid$\times $cohort + prov$\times $cohort trend}{7}{section*.5}%
+\contentsline {section}{fe4 --- grid$\times $cohort + govt-year}{8}{section*.6}%
+\contentsline {section}{fe5 --- grid$\times $cohort + prov$\times $elec-yr}{9}{section*.7}%
+\contentsline {section}{fe6 --- grid$\times $cohort + prov$\times $elec-yr$\times $govt-yr}{10}{section*.8}%
+\contentsline {section}{fe7 --- grid$\times $cohort + mo-yr$\times $cohort + prov$\times $cohort trend}{11}{section*.9}%
+\contentsline {section}{fe8 --- grid$\times $cohort + mo-yr$\times $cohort + govt-year}{12}{section*.10}%
+\contentsline {section}{fe9 --- grid$\times $cohort + mo-yr$\times $cohort + prov$\times $elec-yr}{13}{section*.11}%
+\contentsline {section}{fe10 --- grid$\times $cohort + mo-yr$\times $cohort + prov$\times $elec-yr$\times $govt-yr}{14}{section*.12}%
+\contentsline {section}{fe11 --- grid$\times $cohort + prov$\times $cohort trend + govt-year}{15}{section*.13}%
+\contentsline {section}{fe12 --- grid$\times $cohort + prov$\times $cohort trend + prov$\times $elec-yr}{16}{section*.14}%
+\contentsline {section}{fe13 --- grid$\times $cohort + prov$\times $cohort trend + prov$\times $elec-yr$\times $govt-yr}{17}{section*.15}%
+\contentsline {section}{fe14 --- grid$\times $cohort + govt-year + prov$\times $elec-yr}{18}{section*.16}%
+\contentsline {section}{fe15 --- grid$\times $cohort + govt-year + prov$\times $elec-yr$\times $govt-yr}{19}{section*.17}%
+\contentsline {section}{fe16 --- grid$\times $cohort + prov$\times $elec-yr + prov$\times $elec-yr$\times $govt-yr}{20}{section*.18}%
+\contentsline {section}{fe17 --- grid$\times $cohort + mo-yr$\times $cohort + prov$\times $cohort trend + govt-year}{21}{section*.19}%
+\contentsline {section}{fe18 --- grid$\times $cohort + mo-yr$\times $cohort + prov$\times $cohort trend + prov$\times $elec-yr}{22}{section*.20}%
+\contentsline {section}{fe19 --- grid$\times $cohort + mo-yr$\times $cohort + prov$\times $cohort trend + prov$\times $elec-yr$\times $govt-yr}{23}{section*.21}%
+\contentsline {section}{fe20 --- grid$\times $cohort + mo-yr$\times $cohort + govt-year + prov$\times $elec-yr}{24}{section*.22}%
+\contentsline {section}{fe21 --- grid$\times $cohort + mo-yr$\times $cohort + govt-year + prov$\times $elec-yr$\times $govt-yr}{25}{section*.23}%
+\contentsline {section}{fe22 --- grid$\times $cohort + mo-yr$\times $cohort + prov$\times $elec-yr + prov$\times $elec-yr$\times $govt-yr}{26}{section*.24}%
+\contentsline {section}{fe23 --- grid$\times $cohort + prov$\times $cohort trend + govt-year + prov$\times $elec-yr}{27}{section*.25}%
+\contentsline {section}{fe24 --- grid$\times $cohort + prov$\times $cohort trend + govt-year + prov$\times $elec-yr$\times $govt-yr}{28}{section*.26}%
+\contentsline {section}{fe25 --- grid$\times $cohort + prov$\times $cohort trend + prov$\times $elec-yr + prov$\times $elec-yr$\times $govt-yr}{29}{section*.27}%
+\contentsline {section}{fe26 --- grid$\times $cohort + govt-year + prov$\times $elec-yr + prov$\times $elec-yr$\times $govt-yr}{30}{section*.28}%
+\contentsline {section}{fe27 --- grid$\times $cohort + mo-yr$\times $cohort + prov$\times $cohort trend + govt-year + prov$\times $elec-yr}{31}{section*.29}%
+\contentsline {section}{fe28 --- grid$\times $cohort + mo-yr$\times $cohort + prov$\times $cohort trend + govt-year + prov$\times $elec-yr$\times $govt-yr}{32}{section*.30}%
+\contentsline {section}{fe29 --- grid$\times $cohort + mo-yr$\times $cohort + prov$\times $cohort trend + prov$\times $elec-yr + prov$\times $elec-yr$\times $govt-yr}{33}{section*.31}%
+\contentsline {section}{fe30 --- grid$\times $cohort + mo-yr$\times $cohort + govt-year + prov$\times $elec-yr + prov$\times $elec-yr$\times $govt-yr}{34}{section*.32}%
+\contentsline {section}{fe31 --- grid$\times $cohort + prov$\times $cohort trend + govt-year + prov$\times $elec-yr + prov$\times $elec-yr$\times $govt-yr}{35}{section*.33}%
+\contentsline {section}{fe32 --- grid$\times $cohort + mo-yr$\times $cohort + prov$\times $cohort trend + govt-year + prov$\times $elec-yr + prov$\times $elec-yr$\times $govt-yr}{36}{section*.34}%

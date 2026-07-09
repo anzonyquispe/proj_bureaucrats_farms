@@ -22,19 +22,6 @@ qui do "code/tools/interaction_graph.ado"
 global tables "${root}/tex/paper/tables"
 global figures "${root}/tex/paper/figures"
 																							   
-* With STER file                                                                                 
-interaction_graph using "${tables}/_main_4_protest_5km_fe12_did_downup_rural.ster", ///                        
-  estimates(6) ///                                                                                     
-  output("${figures}/_main_4_protest_5km_fe12_did_downup_rural") ///                                         
-  type(protest) ///                                                                                    
-  modvar(moderator) 
-
-est clear
-interaction_graph using "${tables}/_main_5_polischar_fe12_did_downup_inter_rural.ster", ///
-  estimates(6) ///
-  output("${figures}/_main_5_polischar_fe12_did_downup_inter_rural") ///
-  type(politician) ///
-  modvar(moderator) yrange(-20 10)
 
 * ---- app_18 protest downup plot (rural) ------------------------------------
 est clear

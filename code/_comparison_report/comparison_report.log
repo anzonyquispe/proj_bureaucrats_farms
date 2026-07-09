@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.29 (TeX Live 2026) (preloaded format=pdflatex 2026.4.15)  23 JUN 2026 14:29
+This is pdfTeX, Version 3.141592653-2.6-1.40.29 (TeX Live 2026) (preloaded format=pdflatex 2026.4.15)  23 JUN 2026 15:51
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -2625,32 +2625,22 @@ ats_farms/tex/paper/figures/_app_18_protest_5km_fe12_did_downup_plot_rural_1.pn
 g> </Users/anzony.quisperojas/Library/CloudStorage/Dropbox/sa_fires/proj_bureau
 crats_farms/tex/paper/figures/_app_18_protest_5km_fe12_did_downup_plot_rural_ac
 pop_1.png>]
-! Missing $ inserted.
-<inserted text> 
-                $
-l.508 ..._downup_inter_plot_rural_1}{\linewidth}{}
-                                                  
-I've inserted a begin-math/end-math symbol since I think
-you left one out. Proceed, with fingers crossed.
-
-! Missing $ inserted.
-<inserted text> 
-                $
-l.508 ..._downup_inter_plot_rural_1}{\linewidth}{}
-                                                  
-I've inserted a begin-math/end-math symbol since I think
-you left one out. Proceed, with fingers crossed.
-
-
-Overfull \hbox (13.651pt too wide) in paragraph at lines 508--508
- []\OML/cmm/m/it/10.95 pp[]\OT1/cmr/m/n/10.95 9[]\OML/cmm/m/it/10.95 olischar[]
-e\OT1/cmr/m/n/10.95 12[]\OML/cmm/m/it/10.95 id[]ownup[]nter[]lot[]ural[]:png\OT
-1/cmr/m/n/10.95 )$ 
- []
-
+</Users/anzony.quisperojas/Library/CloudStorage/Dropbox/sa_fires/proj_bureaucra
+ts_farms/tex/paper/figures/_app_19_polischar_fe12_did_downup_inter_plot_rural_1
+.png, id=431, 1050.92625pt x 700.6175pt>
+File: /Users/anzony.quisperojas/Library/CloudStorage/Dropbox/sa_fires/proj_bure
+aucrats_farms/tex/paper/figures/_app_19_polischar_fe12_did_downup_inter_plot_ru
+ral_1.png Graphic file (type png)
+<use /Users/anzony.quisperojas/Library/CloudStorage/Dropbox/sa_fires/proj_burea
+ucrats_farms/tex/paper/figures/_app_19_polischar_fe12_did_downup_inter_plot_rur
+al_1.png>
+Package pdftex.def Info: /Users/anzony.quisperojas/Library/CloudStorage/Dropbox
+/sa_fires/proj_bureaucrats_farms/tex/paper/figures/_app_19_polischar_fe12_did_d
+ownup_inter_plot_rural_1.png  used on input line 508.
+(pdftex.def)             Requested size: 237.63522pt x 158.42323pt.
 </Users/anzony.quisperojas/Library/CloudStorage/Dropbox/sa_fires/proj_bureaucra
 ts_farms/tex/paper/figures/_app_19_polischar_fe12_did_downup_inter_plot_rural_a
-cpop_1.png, id=431, 1050.92625pt x 700.6175pt>
+cpop_1.png, id=432, 1050.92625pt x 700.6175pt>
 File: /Users/anzony.quisperojas/Library/CloudStorage/Dropbox/sa_fires/proj_bure
 aucrats_farms/tex/paper/figures/_app_19_polischar_fe12_did_downup_inter_plot_ru
 ral_acpop_1.png Graphic file (type png)
@@ -2661,11 +2651,13 @@ Package pdftex.def Info: /Users/anzony.quisperojas/Library/CloudStorage/Dropbox
 /sa_fires/proj_bureaucrats_farms/tex/paper/figures/_app_19_polischar_fe12_did_d
 ownup_inter_plot_rural_acpop_1.png  used on input line 513.
 (pdftex.def)             Requested size: 237.63522pt x 158.42323pt.
-[28
+ [28
 
  </Users/anzony.quisperojas/Library/CloudStorage/Dropbox/sa_fires/proj_bureaucr
 ats_farms/tex/paper/figures/_app_19_polischar_fe12_did_downup_inter_plot_rural_
-acpop_1.png>] (./comparison_report.aux)
+1.png> </Users/anzony.quisperojas/Library/CloudStorage/Dropbox/sa_fires/proj_bu
+reaucrats_farms/tex/paper/figures/_app_19_polischar_fe12_did_downup_inter_plot_
+rural_acpop_1.png>] (./comparison_report.aux)
  ***********
 LaTeX2e <2025-11-01>
 L3 programming layer <2026-01-19>
@@ -2678,33 +2670,32 @@ Package rerunfilecheck Info: File `comparison_report.out' has not changed.
 (rerunfilecheck)             Checksum: DE37FA289E10F93AE855F83D30311E4F;7582.
  ) 
 Here is how much of TeX's memory you used:
- 13383 strings out of 467525
- 353029 string characters out of 5418982
+ 13390 strings out of 467525
+ 353994 string characters out of 5418982
  643498 words of memory out of 5000000
- 42001 multiletter control sequences out of 15000+600000
+ 42008 multiletter control sequences out of 15000+600000
  634601 words of font info for 65 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 75i,10n,79p,410b,698s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ 75i,9n,79p,410b,698s stack positions out of 10000i,1000n,20000p,200000b,200000s
 </usr/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx10.pfb
 ></usr/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx12.pfb>
 </usr/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmitt10.pfb>
 </usr/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb><
-/usr/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi8.pfb></u
-sr/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb></usr
-/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmr12.pfb></usr/l
-ocal/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmr17.pfb></usr/loc
-al/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmr8.pfb></usr/local/
-texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/local/t
-exlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy6.pfb></usr/local/tex
-live/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy8.pfb></usr/local/texli
-ve/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmti10.pfb></usr/local/texliv
-e/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmtt10.pfb></usr/local/texlive
-/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmtt12.pfb></usr/local/texlive/
-2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmtt8.pfb>
-Output written on comparison_report.pdf (28 pages, 8658977 bytes).
+/usr/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb></u
+sr/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmr12.pfb></usr
+/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmr17.pfb></usr/l
+ocal/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmr8.pfb></usr/loca
+l/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/local
+/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy6.pfb></usr/local/t
+exlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy8.pfb></usr/local/tex
+live/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmti10.pfb></usr/local/texl
+ive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmtt10.pfb></usr/local/texli
+ve/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmtt12.pfb></usr/local/texliv
+e/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmtt8.pfb>
+Output written on comparison_report.pdf (28 pages, 8738882 bytes).
 PDF statistics:
- 526 PDF objects out of 1000 (max. 8388607)
- 349 compressed objects within 4 object streams
+ 522 PDF objects out of 1000 (max. 8388607)
+ 346 compressed objects within 4 object streams
  81 named destinations out of 1000 (max. 500000)
- 828 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 833 words of extra memory for PDF output out of 10000 (max. 10000000)
 
