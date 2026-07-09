@@ -1,0 +1,365 @@
+This is pdfTeX, Version 3.141592653-2.6-1.40.29 (TeX Live 2026) (preloaded format=pdflatex)
+ restricted \write18 enabled.
+entering extended mode
+(./report_full.tex
+LaTeX2e <2025-11-01>
+L3 programming layer <2026-01-19>
+(/usr/local/texlive/2026/texmf-dist/tex/latex/base/article.cls
+Document Class: article 2025/01/22 v1.4n Standard LaTeX document class
+(/usr/local/texlive/2026/texmf-dist/tex/latex/base/size10.clo))
+(/usr/local/texlive/2026/texmf-dist/tex/latex/geometry/geometry.sty
+(/usr/local/texlive/2026/texmf-dist/tex/latex/graphics/keyval.sty)
+(/usr/local/texlive/2026/texmf-dist/tex/generic/iftex/ifvtex.sty
+(/usr/local/texlive/2026/texmf-dist/tex/generic/iftex/iftex.sty)))
+(/usr/local/texlive/2026/texmf-dist/tex/latex/graphics/graphicx.sty
+(/usr/local/texlive/2026/texmf-dist/tex/latex/graphics/graphics.sty
+(/usr/local/texlive/2026/texmf-dist/tex/latex/graphics/trig.sty)
+(/usr/local/texlive/2026/texmf-dist/tex/latex/graphics-cfg/graphics.cfg)
+(/usr/local/texlive/2026/texmf-dist/tex/latex/graphics-def/pdftex.def)))
+(/usr/local/texlive/2026/texmf-dist/tex/latex/float/float.sty)
+(/usr/local/texlive/2026/texmf-dist/tex/latex/caption/caption.sty
+(/usr/local/texlive/2026/texmf-dist/tex/latex/caption/caption3.sty))
+(/usr/local/texlive/2026/texmf-dist/tex/latex/caption/subcaption.sty)
+(/usr/local/texlive/2026/texmf-dist/tex/latex/hyperref/hyperref.sty
+(/usr/local/texlive/2026/texmf-dist/tex/latex/kvsetkeys/kvsetkeys.sty)
+(/usr/local/texlive/2026/texmf-dist/tex/generic/kvdefinekeys/kvdefinekeys.sty)
+(/usr/local/texlive/2026/texmf-dist/tex/generic/pdfescape/pdfescape.sty
+(/usr/local/texlive/2026/texmf-dist/tex/generic/ltxcmds/ltxcmds.sty)
+(/usr/local/texlive/2026/texmf-dist/tex/generic/pdftexcmds/pdftexcmds.sty
+(/usr/local/texlive/2026/texmf-dist/tex/generic/infwarerr/infwarerr.sty)))
+(/usr/local/texlive/2026/texmf-dist/tex/latex/hycolor/hycolor.sty)
+(/usr/local/texlive/2026/texmf-dist/tex/latex/hyperref/nameref.sty
+(/usr/local/texlive/2026/texmf-dist/tex/latex/refcount/refcount.sty)
+(/usr/local/texlive/2026/texmf-dist/tex/generic/gettitlestring/gettitlestring.s
+ty (/usr/local/texlive/2026/texmf-dist/tex/latex/kvoptions/kvoptions.sty)))
+(/usr/local/texlive/2026/texmf-dist/tex/latex/etoolbox/etoolbox.sty)
+(/usr/local/texlive/2026/texmf-dist/tex/generic/stringenc/stringenc.sty)
+(/usr/local/texlive/2026/texmf-dist/tex/latex/hyperref/pd1enc.def)
+(/usr/local/texlive/2026/texmf-dist/tex/generic/intcalc/intcalc.sty)
+(/usr/local/texlive/2026/texmf-dist/tex/latex/hyperref/puenc.def)
+(/usr/local/texlive/2026/texmf-dist/tex/latex/url/url.sty)
+(/usr/local/texlive/2026/texmf-dist/tex/generic/bitset/bitset.sty
+(/usr/local/texlive/2026/texmf-dist/tex/generic/bigintcalc/bigintcalc.sty)))
+(/usr/local/texlive/2026/texmf-dist/tex/latex/hyperref/hpdftex.def
+(/usr/local/texlive/2026/texmf-dist/tex/latex/rerunfilecheck/rerunfilecheck.sty
+
+(/usr/local/texlive/2026/texmf-dist/tex/generic/uniquecounter/uniquecounter.sty
+))) (/usr/local/texlive/2026/texmf-dist/tex/latex/placeins/placeins.sty)
+(/usr/local/texlive/2026/texmf-dist/tex/latex/tools/array.sty)
+(/usr/local/texlive/2026/texmf-dist/tex/latex/booktabs/booktabs.sty)
+(/usr/local/texlive/2026/texmf-dist/tex/latex/l3backend/l3backend-pdftex.def)
+(./report_full.aux)
+*geometry* driver: auto-detecting
+*geometry* detected driver: pdftex
+(/usr/local/texlive/2026/texmf-dist/tex/context/base/mkii/supp-pdf.mkii
+[Loading MPS to PDF converter (version 2006.09.02).]
+) (/usr/local/texlive/2026/texmf-dist/tex/latex/epstopdf-pkg/epstopdf-base.sty
+(/usr/local/texlive/2026/texmf-dist/tex/latex/latexconfig/epstopdf-sys.cfg))
+(./report_full.out) (./report_full.out) (./report_full.toc [1{/usr/local/texliv
+e/2026/texmf-var/fonts/map/pdftex/updmap/pdftex.map}{/usr/local/texlive/2026/te
+xmf-dist/fonts/enc/dvips/cm-super/cm-super-ts1.enc}]) [2] [3 <../figures_full/a
+pp16_polischar_evst_fe1_area_ori.png> <../figures_full/app16_polischar_evst_fe1
+_area_rotated.png> <../figures_full/app16_polischar_evst_fe1_farzad_ori.png> <.
+./figures_full/app16_polischar_evst_fe1_farzad_rotated.png> <../figures_full/ap
+p17_protest_evst_fe1_area_ori.png> <../figures_full/app17_protest_evst_fe1_area
+_rotated.png> <../figures_full/app17_protest_evst_fe1_farzad_ori.png> <../figur
+es_full/app17_protest_evst_fe1_farzad_rotated.png> <../figures_full/app19_polis
+char_did_downup_fe1_area.png> <../figures_full/app18_protest_did_downup_fe1_are
+a.png> <../figures_full/app19_polischar_did_downup_fe1_farzad.png> <../figures_
+full/app18_protest_did_downup_fe1_farzad.png>] [4 <../figures_full/app16_polisc
+har_evst_fe2_area_ori.png> <../figures_full/app16_polischar_evst_fe2_area_rotat
+ed.png> <../figures_full/app16_polischar_evst_fe2_farzad_ori.png> <../figures_f
+ull/app16_polischar_evst_fe2_farzad_rotated.png> <../figures_full/app17_protest
+_evst_fe2_area_ori.png> <../figures_full/app17_protest_evst_fe2_area_rotated.pn
+g> <../figures_full/app17_protest_evst_fe2_farzad_ori.png> <../figures_full/app
+17_protest_evst_fe2_farzad_rotated.png> <../figures_full/app19_polischar_did_do
+wnup_fe2_area.png> <../figures_full/app18_protest_did_downup_fe2_area.png> <../
+figures_full/app19_polischar_did_downup_fe2_farzad.png> <../figures_full/app18_
+protest_did_downup_fe2_farzad.png>] [5 <../figures_full/app16_polischar_evst_fe
+3_area_ori.png> <../figures_full/app16_polischar_evst_fe3_area_rotated.png> <..
+/figures_full/app16_polischar_evst_fe3_farzad_ori.png> <../figures_full/app16_p
+olischar_evst_fe3_farzad_rotated.png> <../figures_full/app17_protest_evst_fe3_a
+rea_ori.png> <../figures_full/app17_protest_evst_fe3_area_rotated.png> <../figu
+res_full/app17_protest_evst_fe3_farzad_ori.png> <../figures_full/app17_protest_
+evst_fe3_farzad_rotated.png> <../figures_full/app19_polischar_did_downup_fe3_ar
+ea.png> <../figures_full/app18_protest_did_downup_fe3_area.png> <../figures_ful
+l/app19_polischar_did_downup_fe3_farzad.png> <../figures_full/app18_protest_did
+_downup_fe3_farzad.png>] [6 <../figures_full/app16_polischar_evst_fe4_area_ori.
+png> <../figures_full/app16_polischar_evst_fe4_area_rotated.png> <../figures_fu
+ll/app16_polischar_evst_fe4_farzad_ori.png> <../figures_full/app16_polischar_ev
+st_fe4_farzad_rotated.png> <../figures_full/app17_protest_evst_fe4_area_ori.png
+> <../figures_full/app17_protest_evst_fe4_area_rotated.png> <../figures_full/ap
+p17_protest_evst_fe4_farzad_ori.png> <../figures_full/app17_protest_evst_fe4_fa
+rzad_rotated.png> <../figures_full/app19_polischar_did_downup_fe4_area.png> <..
+/figures_full/app18_protest_did_downup_fe4_area.png> <../figures_full/app19_pol
+ischar_did_downup_fe4_farzad.png> <../figures_full/app18_protest_did_downup_fe4
+_farzad.png>] [7 <../figures_full/app16_polischar_evst_fe5_area_ori.png> <../fi
+gures_full/app16_polischar_evst_fe5_area_rotated.png> <../figures_full/app16_po
+lischar_evst_fe5_farzad_ori.png> <../figures_full/app16_polischar_evst_fe5_farz
+ad_rotated.png> <../figures_full/app17_protest_evst_fe5_area_ori.png> <../figur
+es_full/app17_protest_evst_fe5_area_rotated.png> <../figures_full/app17_protest
+_evst_fe5_farzad_ori.png> <../figures_full/app17_protest_evst_fe5_farzad_rotate
+d.png> <../figures_full/app19_polischar_did_downup_fe5_area.png> <../figures_fu
+ll/app18_protest_did_downup_fe5_area.png> <../figures_full/app19_polischar_did_
+downup_fe5_farzad.png> <../figures_full/app18_protest_did_downup_fe5_farzad.png
+>] [8 <../figures_full/app16_polischar_evst_fe6_area_ori.png> <../figures_full/
+app16_polischar_evst_fe6_area_rotated.png> <../figures_full/app16_polischar_evs
+t_fe6_farzad_ori.png> <../figures_full/app16_polischar_evst_fe6_farzad_rotated.
+png> <../figures_full/app17_protest_evst_fe6_area_ori.png> <../figures_full/app
+17_protest_evst_fe6_area_rotated.png> <../figures_full/app17_protest_evst_fe6_f
+arzad_ori.png> <../figures_full/app17_protest_evst_fe6_farzad_rotated.png> <../
+figures_full/app19_polischar_did_downup_fe6_area.png> <../figures_full/app18_pr
+otest_did_downup_fe6_area.png> <../figures_full/app19_polischar_did_downup_fe6_
+farzad.png> <../figures_full/app18_protest_did_downup_fe6_farzad.png>] [9 <../f
+igures_full/app16_polischar_evst_fe7_area_ori.png> <../figures_full/app16_polis
+char_evst_fe7_area_rotated.png> <../figures_full/app16_polischar_evst_fe7_farza
+d_ori.png> <../figures_full/app16_polischar_evst_fe7_farzad_rotated.png> <../fi
+gures_full/app17_protest_evst_fe7_area_ori.png> <../figures_full/app17_protest_
+evst_fe7_area_rotated.png> <../figures_full/app17_protest_evst_fe7_farzad_ori.p
+ng> <../figures_full/app17_protest_evst_fe7_farzad_rotated.png> <../figures_ful
+l/app19_polischar_did_downup_fe7_area.png> <../figures_full/app18_protest_did_d
+ownup_fe7_area.png> <../figures_full/app19_polischar_did_downup_fe7_farzad.png>
+ <../figures_full/app18_protest_did_downup_fe7_farzad.png>] [10 <../figures_ful
+l/app16_polischar_evst_fe8_area_ori.png> <../figures_full/app16_polischar_evst_
+fe8_area_rotated.png> <../figures_full/app16_polischar_evst_fe8_farzad_ori.png>
+ <../figures_full/app16_polischar_evst_fe8_farzad_rotated.png> <../figures_full
+/app17_protest_evst_fe8_area_ori.png> <../figures_full/app17_protest_evst_fe8_a
+rea_rotated.png> <../figures_full/app17_protest_evst_fe8_farzad_ori.png> <../fi
+gures_full/app17_protest_evst_fe8_farzad_rotated.png> <../figures_full/app19_po
+lischar_did_downup_fe8_area.png> <../figures_full/app18_protest_did_downup_fe8_
+area.png> <../figures_full/app19_polischar_did_downup_fe8_farzad.png> <../figur
+es_full/app18_protest_did_downup_fe8_farzad.png>] [11 <../figures_full/app16_po
+lischar_evst_fe9_area_ori.png> <../figures_full/app16_polischar_evst_fe9_area_r
+otated.png> <../figures_full/app16_polischar_evst_fe9_farzad_ori.png> <../figur
+es_full/app16_polischar_evst_fe9_farzad_rotated.png> <../figures_full/app17_pro
+test_evst_fe9_area_ori.png> <../figures_full/app17_protest_evst_fe9_area_rotate
+d.png> <../figures_full/app17_protest_evst_fe9_farzad_ori.png> <../figures_full
+/app17_protest_evst_fe9_farzad_rotated.png> <../figures_full/app19_polischar_di
+d_downup_fe9_area.png> <../figures_full/app18_protest_did_downup_fe9_area.png> 
+<../figures_full/app19_polischar_did_downup_fe9_farzad.png> <../figures_full/ap
+p18_protest_did_downup_fe9_farzad.png>] [12 <../figures_full/app16_polischar_ev
+st_fe10_area_ori.png> <../figures_full/app16_polischar_evst_fe10_area_rotated.p
+ng> <../figures_full/app16_polischar_evst_fe10_farzad_ori.png> <../figures_full
+/app16_polischar_evst_fe10_farzad_rotated.png> <../figures_full/app17_protest_e
+vst_fe10_area_ori.png> <../figures_full/app17_protest_evst_fe10_area_rotated.pn
+g> <../figures_full/app17_protest_evst_fe10_farzad_ori.png> <../figures_full/ap
+p17_protest_evst_fe10_farzad_rotated.png> <../figures_full/app19_polischar_did_
+downup_fe10_area.png> <../figures_full/app18_protest_did_downup_fe10_area.png> 
+<../figures_full/app19_polischar_did_downup_fe10_farzad.png> <../figures_full/a
+pp18_protest_did_downup_fe10_farzad.png>] [13 <../figures_full/app16_polischar_
+evst_fe11_area_ori.png> <../figures_full/app16_polischar_evst_fe11_area_rotated
+.png> <../figures_full/app16_polischar_evst_fe11_farzad_ori.png> <../figures_fu
+ll/app16_polischar_evst_fe11_farzad_rotated.png> <../figures_full/app17_protest
+_evst_fe11_area_ori.png> <../figures_full/app17_protest_evst_fe11_area_rotated.
+png> <../figures_full/app17_protest_evst_fe11_farzad_ori.png> <../figures_full/
+app17_protest_evst_fe11_farzad_rotated.png> <../figures_full/app19_polischar_di
+d_downup_fe11_area.png> <../figures_full/app18_protest_did_downup_fe11_area.png
+> <../figures_full/app19_polischar_did_downup_fe11_farzad.png> <../figures_full
+/app18_protest_did_downup_fe11_farzad.png>] [14 <../figures_full/app16_polischa
+r_evst_fe12_area_ori.png> <../figures_full/app16_polischar_evst_fe12_area_rotat
+ed.png> <../figures_full/app16_polischar_evst_fe12_farzad_ori.png> <../figures_
+full/app16_polischar_evst_fe12_farzad_rotated.png> <../figures_full/app17_prote
+st_evst_fe12_area_ori.png> <../figures_full/app17_protest_evst_fe12_area_rotate
+d.png> <../figures_full/app17_protest_evst_fe12_farzad_ori.png> <../figures_ful
+l/app17_protest_evst_fe12_farzad_rotated.png> <../figures_full/app19_polischar_
+did_downup_fe12_area.png> <../figures_full/app18_protest_did_downup_fe12_area.p
+ng> <../figures_full/app19_polischar_did_downup_fe12_farzad.png> <../figures_fu
+ll/app18_protest_did_downup_fe12_farzad.png>] [15 <../figures_full/app16_polisc
+har_evst_fe13_area_ori.png> <../figures_full/app16_polischar_evst_fe13_area_rot
+ated.png> <../figures_full/app16_polischar_evst_fe13_farzad_ori.png> <../figure
+s_full/app16_polischar_evst_fe13_farzad_rotated.png> <../figures_full/app17_pro
+test_evst_fe13_area_ori.png> <../figures_full/app17_protest_evst_fe13_area_rota
+ted.png> <../figures_full/app17_protest_evst_fe13_farzad_ori.png> <../figures_f
+ull/app17_protest_evst_fe13_farzad_rotated.png> <../figures_full/app19_polischa
+r_did_downup_fe13_area.png> <../figures_full/app18_protest_did_downup_fe13_area
+.png> <../figures_full/app19_polischar_did_downup_fe13_farzad.png> <../figures_
+full/app18_protest_did_downup_fe13_farzad.png>] [16 <../figures_full/app16_poli
+schar_evst_fe14_area_ori.png> <../figures_full/app16_polischar_evst_fe14_area_r
+otated.png> <../figures_full/app16_polischar_evst_fe14_farzad_ori.png> <../figu
+res_full/app16_polischar_evst_fe14_farzad_rotated.png> <../figures_full/app17_p
+rotest_evst_fe14_area_ori.png> <../figures_full/app17_protest_evst_fe14_area_ro
+tated.png> <../figures_full/app17_protest_evst_fe14_farzad_ori.png> <../figures
+_full/app17_protest_evst_fe14_farzad_rotated.png> <../figures_full/app19_polisc
+har_did_downup_fe14_area.png> <../figures_full/app18_protest_did_downup_fe14_ar
+ea.png> <../figures_full/app19_polischar_did_downup_fe14_farzad.png> <../figure
+s_full/app18_protest_did_downup_fe14_farzad.png>] [17 <../figures_full/app16_po
+lischar_evst_fe15_area_ori.png> <../figures_full/app16_polischar_evst_fe15_area
+_rotated.png> <../figures_full/app16_polischar_evst_fe15_farzad_ori.png> <../fi
+gures_full/app16_polischar_evst_fe15_farzad_rotated.png> <../figures_full/app17
+_protest_evst_fe15_area_ori.png> <../figures_full/app17_protest_evst_fe15_area_
+rotated.png> <../figures_full/app17_protest_evst_fe15_farzad_ori.png> <../figur
+es_full/app17_protest_evst_fe15_farzad_rotated.png> <../figures_full/app19_poli
+schar_did_downup_fe15_area.png> <../figures_full/app18_protest_did_downup_fe15_
+area.png> <../figures_full/app19_polischar_did_downup_fe15_farzad.png> <../figu
+res_full/app18_protest_did_downup_fe15_farzad.png>] [18 <../figures_full/app16_
+polischar_evst_fe16_area_ori.png> <../figures_full/app16_polischar_evst_fe16_ar
+ea_rotated.png> <../figures_full/app16_polischar_evst_fe16_farzad_ori.png> <../
+figures_full/app16_polischar_evst_fe16_farzad_rotated.png> <../figures_full/app
+17_protest_evst_fe16_area_ori.png> <../figures_full/app17_protest_evst_fe16_are
+a_rotated.png> <../figures_full/app17_protest_evst_fe16_farzad_ori.png> <../fig
+ures_full/app17_protest_evst_fe16_farzad_rotated.png> <../figures_full/app19_po
+lischar_did_downup_fe16_area.png> <../figures_full/app18_protest_did_downup_fe1
+6_area.png> <../figures_full/app19_polischar_did_downup_fe16_farzad.png> <../fi
+gures_full/app18_protest_did_downup_fe16_farzad.png>] [19 <../figures_full/app1
+6_polischar_evst_fe17_area_ori.png> <../figures_full/app16_polischar_evst_fe17_
+area_rotated.png> <../figures_full/app16_polischar_evst_fe17_farzad_ori.png> <.
+./figures_full/app16_polischar_evst_fe17_farzad_rotated.png> <../figures_full/a
+pp17_protest_evst_fe17_area_ori.png> <../figures_full/app17_protest_evst_fe17_a
+rea_rotated.png> <../figures_full/app17_protest_evst_fe17_farzad_ori.png> <../f
+igures_full/app17_protest_evst_fe17_farzad_rotated.png> <../figures_full/app19_
+polischar_did_downup_fe17_area.png> <../figures_full/app18_protest_did_downup_f
+e17_area.png> <../figures_full/app19_polischar_did_downup_fe17_farzad.png> <../
+figures_full/app18_protest_did_downup_fe17_farzad.png>] [20 <../figures_full/ap
+p16_polischar_evst_fe18_area_ori.png> <../figures_full/app16_polischar_evst_fe1
+8_area_rotated.png> <../figures_full/app16_polischar_evst_fe18_farzad_ori.png> 
+<../figures_full/app16_polischar_evst_fe18_farzad_rotated.png> <../figures_full
+/app17_protest_evst_fe18_area_ori.png> <../figures_full/app17_protest_evst_fe18
+_area_rotated.png> <../figures_full/app17_protest_evst_fe18_farzad_ori.png> <..
+/figures_full/app17_protest_evst_fe18_farzad_rotated.png> <../figures_full/app1
+9_polischar_did_downup_fe18_area.png> <../figures_full/app18_protest_did_downup
+_fe18_area.png> <../figures_full/app19_polischar_did_downup_fe18_farzad.png> <.
+./figures_full/app18_protest_did_downup_fe18_farzad.png>] [21 <../figures_full/
+app16_polischar_evst_fe19_area_ori.png> <../figures_full/app16_polischar_evst_f
+e19_area_rotated.png> <../figures_full/app16_polischar_evst_fe19_farzad_ori.png
+> <../figures_full/app16_polischar_evst_fe19_farzad_rotated.png> <../figures_fu
+ll/app17_protest_evst_fe19_area_ori.png> <../figures_full/app17_protest_evst_fe
+19_area_rotated.png> <../figures_full/app17_protest_evst_fe19_farzad_ori.png> <
+../figures_full/app17_protest_evst_fe19_farzad_rotated.png> <../figures_full/ap
+p19_polischar_did_downup_fe19_area.png> <../figures_full/app18_protest_did_down
+up_fe19_area.png> <../figures_full/app19_polischar_did_downup_fe19_farzad.png> 
+<../figures_full/app18_protest_did_downup_fe19_farzad.png>] [22 <../figures_ful
+l/app16_polischar_evst_fe20_area_ori.png> <../figures_full/app16_polischar_evst
+_fe20_area_rotated.png> <../figures_full/app16_polischar_evst_fe20_farzad_ori.p
+ng> <../figures_full/app16_polischar_evst_fe20_farzad_rotated.png> <../figures_
+full/app17_protest_evst_fe20_area_ori.png> <../figures_full/app17_protest_evst_
+fe20_area_rotated.png> <../figures_full/app17_protest_evst_fe20_farzad_ori.png>
+ <../figures_full/app17_protest_evst_fe20_farzad_rotated.png> <../figures_full/
+app19_polischar_did_downup_fe20_area.png> <../figures_full/app18_protest_did_do
+wnup_fe20_area.png> <../figures_full/app19_polischar_did_downup_fe20_farzad.png
+> <../figures_full/app18_protest_did_downup_fe20_farzad.png>] [23 <../figures_f
+ull/app16_polischar_evst_fe21_area_ori.png> <../figures_full/app16_polischar_ev
+st_fe21_area_rotated.png> <../figures_full/app16_polischar_evst_fe21_farzad_ori
+.png> <../figures_full/app16_polischar_evst_fe21_farzad_rotated.png> <../figure
+s_full/app17_protest_evst_fe21_area_ori.png> <../figures_full/app17_protest_evs
+t_fe21_area_rotated.png> <../figures_full/app17_protest_evst_fe21_farzad_ori.pn
+g> <../figures_full/app17_protest_evst_fe21_farzad_rotated.png> <../figures_ful
+l/app19_polischar_did_downup_fe21_area.png> <../figures_full/app18_protest_did_
+downup_fe21_area.png> <../figures_full/app19_polischar_did_downup_fe21_farzad.p
+ng> <../figures_full/app18_protest_did_downup_fe21_farzad.png>] [24 <../figures
+_full/app16_polischar_evst_fe22_area_ori.png> <../figures_full/app16_polischar_
+evst_fe22_area_rotated.png> <../figures_full/app16_polischar_evst_fe22_farzad_o
+ri.png> <../figures_full/app16_polischar_evst_fe22_farzad_rotated.png> <../figu
+res_full/app17_protest_evst_fe22_area_ori.png> <../figures_full/app17_protest_e
+vst_fe22_area_rotated.png> <../figures_full/app17_protest_evst_fe22_farzad_ori.
+png> <../figures_full/app17_protest_evst_fe22_farzad_rotated.png> <../figures_f
+ull/app19_polischar_did_downup_fe22_area.png> <../figures_full/app18_protest_di
+d_downup_fe22_area.png> <../figures_full/app19_polischar_did_downup_fe22_farzad
+.png> <../figures_full/app18_protest_did_downup_fe22_farzad.png>] [25 <../figur
+es_full/app16_polischar_evst_fe23_area_ori.png> <../figures_full/app16_polischa
+r_evst_fe23_area_rotated.png> <../figures_full/app16_polischar_evst_fe23_farzad
+_ori.png> <../figures_full/app16_polischar_evst_fe23_farzad_rotated.png> <../fi
+gures_full/app17_protest_evst_fe23_area_ori.png> <../figures_full/app17_protest
+_evst_fe23_area_rotated.png> <../figures_full/app17_protest_evst_fe23_farzad_or
+i.png> <../figures_full/app17_protest_evst_fe23_farzad_rotated.png> <../figures
+_full/app19_polischar_did_downup_fe23_area.png> <../figures_full/app18_protest_
+did_downup_fe23_area.png> <../figures_full/app19_polischar_did_downup_fe23_farz
+ad.png> <../figures_full/app18_protest_did_downup_fe23_farzad.png>] [26 <../fig
+ures_full/app16_polischar_evst_fe24_area_ori.png> <../figures_full/app16_polisc
+har_evst_fe24_area_rotated.png> <../figures_full/app16_polischar_evst_fe24_farz
+ad_ori.png> <../figures_full/app16_polischar_evst_fe24_farzad_rotated.png> <../
+figures_full/app17_protest_evst_fe24_area_ori.png> <../figures_full/app17_prote
+st_evst_fe24_area_rotated.png> <../figures_full/app17_protest_evst_fe24_farzad_
+ori.png> <../figures_full/app17_protest_evst_fe24_farzad_rotated.png> <../figur
+es_full/app19_polischar_did_downup_fe24_area.png> <../figures_full/app18_protes
+t_did_downup_fe24_area.png> <../figures_full/app19_polischar_did_downup_fe24_fa
+rzad.png> <../figures_full/app18_protest_did_downup_fe24_farzad.png>] [27 <../f
+igures_full/app16_polischar_evst_fe25_area_ori.png> <../figures_full/app16_poli
+schar_evst_fe25_area_rotated.png> <../figures_full/app16_polischar_evst_fe25_fa
+rzad_ori.png> <../figures_full/app16_polischar_evst_fe25_farzad_rotated.png> <.
+./figures_full/app17_protest_evst_fe25_area_ori.png> <../figures_full/app17_pro
+test_evst_fe25_area_rotated.png> <../figures_full/app17_protest_evst_fe25_farza
+d_ori.png> <../figures_full/app17_protest_evst_fe25_farzad_rotated.png> <../fig
+ures_full/app19_polischar_did_downup_fe25_area.png> <../figures_full/app18_prot
+est_did_downup_fe25_area.png> <../figures_full/app19_polischar_did_downup_fe25_
+farzad.png> <../figures_full/app18_protest_did_downup_fe25_farzad.png>]
+[28 <../figures_full/app16_polischar_evst_fe26_area_ori.png> <../figures_full/a
+pp16_polischar_evst_fe26_area_rotated.png> <../figures_full/app16_polischar_evs
+t_fe26_farzad_ori.png> <../figures_full/app16_polischar_evst_fe26_farzad_rotate
+d.png> <../figures_full/app17_protest_evst_fe26_area_ori.png> <../figures_full/
+app17_protest_evst_fe26_area_rotated.png> <../figures_full/app17_protest_evst_f
+e26_farzad_ori.png> <../figures_full/app17_protest_evst_fe26_farzad_rotated.png
+> <../figures_full/app19_polischar_did_downup_fe26_area.png> <../figures_full/a
+pp18_protest_did_downup_fe26_area.png> <../figures_full/app19_polischar_did_dow
+nup_fe26_farzad.png> <../figures_full/app18_protest_did_downup_fe26_farzad.png>
+] [29 <../figures_full/app16_polischar_evst_fe27_area_ori.png> <../figures_full
+/app16_polischar_evst_fe27_area_rotated.png> <../figures_full/app16_polischar_e
+vst_fe27_farzad_ori.png> <../figures_full/app16_polischar_evst_fe27_farzad_rota
+ted.png> <../figures_full/app17_protest_evst_fe27_area_ori.png> <../figures_ful
+l/app17_protest_evst_fe27_area_rotated.png> <../figures_full/app17_protest_evst
+_fe27_farzad_ori.png> <../figures_full/app17_protest_evst_fe27_farzad_rotated.p
+ng> <../figures_full/app19_polischar_did_downup_fe27_area.png> <../figures_full
+/app18_protest_did_downup_fe27_area.png> <../figures_full/app19_polischar_did_d
+ownup_fe27_farzad.png> <../figures_full/app18_protest_did_downup_fe27_farzad.pn
+g>] [30 <../figures_full/app16_polischar_evst_fe28_area_ori.png> <../figures_fu
+ll/app16_polischar_evst_fe28_area_rotated.png> <../figures_full/app16_polischar
+_evst_fe28_farzad_ori.png> <../figures_full/app16_polischar_evst_fe28_farzad_ro
+tated.png> <../figures_full/app17_protest_evst_fe28_area_ori.png> <../figures_f
+ull/app17_protest_evst_fe28_area_rotated.png> <../figures_full/app17_protest_ev
+st_fe28_farzad_ori.png> <../figures_full/app17_protest_evst_fe28_farzad_rotated
+.png> <../figures_full/app19_polischar_did_downup_fe28_area.png> <../figures_fu
+ll/app18_protest_did_downup_fe28_area.png> <../figures_full/app19_polischar_did
+_downup_fe28_farzad.png> <../figures_full/app18_protest_did_downup_fe28_farzad.
+png>] [31 <../figures_full/app16_polischar_evst_fe29_area_ori.png> <../figures_
+full/app16_polischar_evst_fe29_area_rotated.png> <../figures_full/app16_polisch
+ar_evst_fe29_farzad_ori.png> <../figures_full/app16_polischar_evst_fe29_farzad_
+rotated.png> <../figures_full/app17_protest_evst_fe29_area_ori.png> <../figures
+_full/app17_protest_evst_fe29_area_rotated.png> <../figures_full/app17_protest_
+evst_fe29_farzad_ori.png> <../figures_full/app17_protest_evst_fe29_farzad_rotat
+ed.png> <../figures_full/app19_polischar_did_downup_fe29_area.png> <../figures_
+full/app18_protest_did_downup_fe29_area.png> <../figures_full/app19_polischar_d
+id_downup_fe29_farzad.png> <../figures_full/app18_protest_did_downup_fe29_farza
+d.png>] [32 <../figures_full/app16_polischar_evst_fe30_area_ori.png> <../figure
+s_full/app16_polischar_evst_fe30_area_rotated.png> <../figures_full/app16_polis
+char_evst_fe30_farzad_ori.png> <../figures_full/app16_polischar_evst_fe30_farza
+d_rotated.png> <../figures_full/app17_protest_evst_fe30_area_ori.png> <../figur
+es_full/app17_protest_evst_fe30_area_rotated.png> <../figures_full/app17_protes
+t_evst_fe30_farzad_ori.png> <../figures_full/app17_protest_evst_fe30_farzad_rot
+ated.png> <../figures_full/app19_polischar_did_downup_fe30_area.png> <../figure
+s_full/app18_protest_did_downup_fe30_area.png> <../figures_full/app19_polischar
+_did_downup_fe30_farzad.png> <../figures_full/app18_protest_did_downup_fe30_far
+zad.png>] [33 <../figures_full/app16_polischar_evst_fe31_area_ori.png> <../figu
+res_full/app16_polischar_evst_fe31_area_rotated.png> <../figures_full/app16_pol
+ischar_evst_fe31_farzad_ori.png> <../figures_full/app16_polischar_evst_fe31_far
+zad_rotated.png> <../figures_full/app17_protest_evst_fe31_area_ori.png> <../fig
+ures_full/app17_protest_evst_fe31_area_rotated.png> <../figures_full/app17_prot
+est_evst_fe31_farzad_ori.png> <../figures_full/app17_protest_evst_fe31_farzad_r
+otated.png> <../figures_full/app19_polischar_did_downup_fe31_area.png> <../figu
+res_full/app18_protest_did_downup_fe31_area.png> <../figures_full/app19_polisch
+ar_did_downup_fe31_farzad.png> <../figures_full/app18_protest_did_downup_fe31_f
+arzad.png>] [34 <../figures_full/app16_polischar_evst_fe32_area_ori.png> <../fi
+gures_full/app16_polischar_evst_fe32_area_rotated.png> <../figures_full/app16_p
+olischar_evst_fe32_farzad_ori.png> <../figures_full/app16_polischar_evst_fe32_f
+arzad_rotated.png> <../figures_full/app17_protest_evst_fe32_area_ori.png> <../f
+igures_full/app17_protest_evst_fe32_area_rotated.png> <../figures_full/app17_pr
+otest_evst_fe32_farzad_ori.png> <../figures_full/app17_protest_evst_fe32_farzad
+_rotated.png> <../figures_full/app19_polischar_did_downup_fe32_area.png> <../fi
+gures_full/app18_protest_did_downup_fe32_area.png> <../figures_full/app19_polis
+char_did_downup_fe32_farzad.png> <../figures_full/app18_protest_did_downup_fe32
+_farzad.png>]
+
+Package caption Warning: Unused \captionsetup[figure] on input line 12.
+See the caption package documentation for explanation.
+
+(./report_full.aux) )</usr/local/texlive/2026/texmf-dist/fonts/type1/public/ams
+fonts/cm/cmbx10.pfb></usr/local/texlive/2026/texmf-dist/fonts/type1/public/amsf
+onts/cm/cmbx12.pfb></usr/local/texlive/2026/texmf-dist/fonts/type1/public/amsfo
+nts/cm/cmitt10.pfb></usr/local/texlive/2026/texmf-dist/fonts/type1/public/amsfo
+nts/cm/cmr10.pfb></usr/local/texlive/2026/texmf-dist/fonts/type1/public/amsfont
+s/cm/cmr12.pfb></usr/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/
+cm/cmr17.pfb></usr/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm
+/cmti8.pfb></usr/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/c
+mtt10.pfb></usr/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cm
+tt12.pfb></usr/local/texlive/2026/texmf-dist/fonts/type1/public/cm-super/sfrm10
+00.pfb>
+Output written on report_full.pdf (34 pages, 44524311 bytes).
+Transcript written on report_full.log.

@@ -1,0 +1,38 @@
+[lib] ROOT   = /groups/sgulzar/sa_fires/proj_bureaucrats_farms
+[lib] SAMPLE = ''
+[driver] VARIANT = 'notrend'
+[load] master CSV: /groups/sgulzar/sa_fires/proj_bureaucrats_farms/data_output/intermediate/0_master_merge_data_gen.csv
+[load] treatment column: downup_ac_pop
+[load] rows after filters: 9,208,200
+[load] unique grids:       76,735
+[load] unique ac_uq_id:    808
+[reset=6] balanced panel: kept 9,208,200 / 9,208,200 rows
+[reset=6] new groups: 547,805
+[fit] dCDH_downup_ac_pop_reset6_notrend  rows=9,208,200  groups=547,805  effects=6  placebo=6  with_actrend=False
+================================================================================
+             Estimation of treatment effects: Event-study effects
+================================================================================
+               Block   Estimate        SE      LB CI     UB CI         N  Switchers       N.w  Switchers.w
+            Effect_1 -14.853990  6.017420 -26.647917 -3.060064 3792753.0   528661.0 3792753.0     528661.0
+            Effect_2 -17.129946  6.583867 -30.034088 -4.225803 3329532.0   526733.0 3329532.0     526733.0
+            Effect_3  -6.352783  6.533539 -19.158284  6.452718 2927022.0   505248.0 2927022.0     505248.0
+            Effect_4 -35.102758 12.839172 -60.267074 -9.938443 2600384.0   493860.0 2600384.0     493860.0
+            Effect_5 -21.120977 17.960632 -56.323168 14.081214 2449511.0   486044.0 2449511.0     486044.0
+            Effect_6  -0.124469 14.265299 -28.083940 27.835003 2379810.0   484941.0 2379810.0     484941.0
+Average_Total_Effect -34.327531 16.256054 -66.188812 -2.466251 6289579.0  3025487.0 6289579.0    3025487.0
+           Placebo_1 -17.580595  8.792046 -34.812688 -0.348502 3246020.0   443221.0 3246020.0     443221.0
+           Placebo_2  -4.705476 19.860509 -43.631359 34.220407 2467940.0   361416.0 2467940.0     361416.0
+           Placebo_3 -11.632978 10.798500 -32.797649  9.531692 2171941.0   277072.0 2171941.0     277072.0
+           Placebo_4  -5.052703  6.137345 -17.081677  6.976272 1883332.0   119307.0 1883332.0     119307.0
+           Placebo_5  -6.739231  6.986861 -20.433228  6.954766 1696654.0    50390.0 1696654.0      50390.0
+           Placebo_6 -21.540695 11.026179 -43.151609  0.070220 1634279.0    48475.0 1634279.0      48475.0
+================================================================================
+Test of joint nullity of the effects: p-value = 0.000390
+Test of joint nullity of the placebos: p-value = 0.079949
+
+The development of this package was funded by the European Union.
+ERC REALLYCREDIBLE - GA N. 101043899
+[out] wrote /groups/sgulzar/sa_fires/proj_bureaucrats_farms/data_output/intermediate/dCDH/dCDH_downup_ac_pop_reset6_notrend.csv
+[out] wrote /groups/sgulzar/sa_fires/proj_bureaucrats_farms/data_output/intermediate/dCDH/dCDH_downup_ac_pop_reset6_notrend.png
+[out] wrote /users/aquisper/proj_bureaucrats_farms/code/dCDH_analysis/dCDH_downup_ac_pop_reset6_notrend.csv
+[out] wrote /users/aquisper/proj_bureaucrats_farms/code/dCDH_analysis/dCDH_downup_ac_pop_reset6_notrend.png

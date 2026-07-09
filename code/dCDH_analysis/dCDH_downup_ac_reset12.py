@@ -1,0 +1,54 @@
+#!/usr/bin/env python
+"""
+dCDH event-study run.
+
+Treatment      : downup_ac
+Reset rule     : fixed calendar 12-month buckets per grid
+                 (generate_12month_subgroups, NO panel balancing per request)
+Effects/placebo: 6 / 5
+Model variants : 1) no trends, 2) trends_nonparam = ['ac_uq_id']
+"""
+
+import gc
+import os
+
+from _dCDH_lib import (
+    load_panel, generate_12month_subgroups, prune_for_fit, fit_and_save, OUT_DIRS,
+)
+
+TREATMENT = "downup_ac"
+GROUP_COL = "unique_small_grid_id"
+TIME_COL  = "monthyear"
+EFFECTS   = 6
+PLACEBO   = 5
+CLUSTER   = "ac_uq_id"
+TAG       = "dCDH_downup_ac_reset12"
+
+VARIANT = os.environ.get("VARIANT", "").lower()
+print(f"[driver] VARIANT = {VARIANT!r}")
+SWITCHERS = os.environ.get("SWITCHERS", "").lower()  # "in", "out", or ""
+print(f"[driver] SWITCHERS = {SWITCHERS!r}")
+switchers_arg    = SWITCHERS if SWITCHERS in ("in", "out") else None
+switchers_suffix = f"_{SWITCHERS}" if switchers_arg else ""
+
+df = load_panel(treatment=TREATMENT)
+df, _ = generate_12month_subgroups(
+    df, time_col=TIME_COL, group_col=GROUP_COL, cluster=CLUSTER,
+)
+df = prune_for_fit(df, treatment=TREATMENT, cluster=CLUSTER)
+gc.collect()
+
+if VARIANT in ("", "notrend"):
+    fit_and_save(
+        df, treatment=TREATMENT, with_actrend=False,
+        effects=EFFECTS, placebo=PLACEBO, cluster=CLUSTER,
+        out_basename=f"{TAG}_notrend{switchers_suffix}", out_dirs=OUT_DIRS,
+        switchers=switchers_arg,
+    )
+if VARIANT in ("", "actrend"):
+    fit_and_save(
+        df, treatment=TREATMENT, with_actrend=True,
+        effects=EFFECTS, placebo=PLACEBO, cluster=CLUSTER,
+        out_basename=f"{TAG}_actrend{switchers_suffix}", out_dirs=OUT_DIRS,
+        switchers=switchers_arg,
+    )

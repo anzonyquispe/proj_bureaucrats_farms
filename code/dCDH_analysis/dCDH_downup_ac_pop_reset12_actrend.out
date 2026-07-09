@@ -1,0 +1,44 @@
+/groups/sgulzar/india_forest_land/did_stat/lib/python3.10/site-packages/did_multiplegt_dyn/did_multiplegt_main.py:3531: UserWarning: The F-test may not be reliable, because the variance of effects is close to not being invertible (the ratio of its largest and smallest eigenvalues is 4760.8, which is larger than 1000). This can for instance happen when you compute many estimators, or when your estimates are very strongly correlated. We recommend that you complement the F-test with a sup t-test, see FAQ section of the help file for more details.
+  warnings.warn(matrix_warning, UserWarning)
+/groups/sgulzar/india_forest_land/did_stat/lib/python3.10/site-packages/did_multiplegt_dyn/did_multiplegt_main.py:3662: UserWarning: The F-test may not be reliable, because the variance of placebos is close to not being invertible (the ratio of its largest and smallest eigenvalues is 26374.5, which is larger than 1000). This can for instance happen when you compute many estimators, or when your estimates are very strongly correlated. We recommend that you complement the F-test with a sup t-test, see FAQ section of the help file for more details.
+  warnings.warn(matrix_warning_pl, UserWarning)
+[lib] ROOT   = /groups/sgulzar/sa_fires/proj_bureaucrats_farms
+[lib] SAMPLE = ''
+[driver] VARIANT = 'actrend'
+[load] master CSV: /groups/sgulzar/sa_fires/proj_bureaucrats_farms/data_output/intermediate/0_master_merge_data_gen.csv
+[load] treatment column: downup_ac_pop
+[load] rows after filters: 9,208,200
+[load] unique grids:       76,735
+[load] unique ac_uq_id:    808
+[12month] new groups: 767,350
+[fit] dCDH_downup_ac_pop_reset12_actrend  rows=9,208,200  groups=767,350  effects=6  placebo=5  with_actrend=True
+================================================================================
+             Estimation of treatment effects: Event-study effects
+================================================================================
+               Block   Estimate       SE      LB CI      UB CI         N  Switchers       N.w  Switchers.w
+            Effect_1 -11.972691 0.229331 -12.422172 -11.523210 2849096.0   549575.0 2849096.0     549575.0
+            Effect_2 -31.534553 0.686418 -32.879908 -30.189198 2470185.0   502505.0 2470185.0     502505.0
+            Effect_3  -4.770102 1.917926  -8.529169  -1.011036 1991205.0   334978.0 1991205.0     334978.0
+            Effect_4  -7.988680 2.242761 -12.384411  -3.592950 1779259.0   311011.0 1779259.0     311011.0
+            Effect_5  -9.739694 2.202513 -14.056541  -5.422847 1592133.0   287071.0 1592133.0     287071.0
+            Effect_6 -13.111812 2.490527 -17.993156  -8.230469 1426459.0   274749.0 1426459.0     274749.0
+Average_Total_Effect -19.075423 1.681568 -22.371235 -15.779611 6757336.0  2259889.0 6757336.0    2259889.0
+           Placebo_1 -11.038468 0.536657 -12.090296  -9.986640 2115538.0   358459.0 2115538.0     358459.0
+           Placebo_2 -14.775677 1.713710 -18.134488 -11.416866 1433225.0   271283.0 1433225.0     271283.0
+           Placebo_3  10.632562 1.603959   7.488860  13.776264  763425.0    85441.0  763425.0      85441.0
+           Placebo_4  10.987540 1.575126   7.900350  14.074729  397694.0    47970.0  397694.0      47970.0
+           Placebo_5  -4.368589 0.268523  -4.894885  -3.842293   89948.0    12613.0   89948.0      12613.0
+================================================================================
+Test of joint nullity of the effects: p-value = 0.000000
+Test of joint nullity of the placebos: p-value = 0.000000
+
+WARNING: The F-test may not be reliable, because the variance of effects is close to not being invertible (the ratio of its largest and smallest eigenvalues is 4760.8, which is larger than 1000). This can for instance happen when you compute many estimators, or when your estimates are very strongly correlated. We recommend that you complement the F-test with a sup t-test, see FAQ section of the help file for more details.
+
+WARNING: The F-test may not be reliable, because the variance of placebos is close to not being invertible (the ratio of its largest and smallest eigenvalues is 26374.5, which is larger than 1000). This can for instance happen when you compute many estimators, or when your estimates are very strongly correlated. We recommend that you complement the F-test with a sup t-test, see FAQ section of the help file for more details.
+
+The development of this package was funded by the European Union.
+ERC REALLYCREDIBLE - GA N. 101043899
+[out] wrote /groups/sgulzar/sa_fires/proj_bureaucrats_farms/data_output/intermediate/dCDH/dCDH_downup_ac_pop_reset12_actrend.csv
+[out] wrote /groups/sgulzar/sa_fires/proj_bureaucrats_farms/data_output/intermediate/dCDH/dCDH_downup_ac_pop_reset12_actrend.png
+[out] wrote /users/aquisper/proj_bureaucrats_farms/code/dCDH_analysis/dCDH_downup_ac_pop_reset12_actrend.csv
+[out] wrote /users/aquisper/proj_bureaucrats_farms/code/dCDH_analysis/dCDH_downup_ac_pop_reset12_actrend.png

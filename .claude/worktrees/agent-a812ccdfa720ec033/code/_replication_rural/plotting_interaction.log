@@ -1,0 +1,325 @@
+
+  ___  ____  ____  ____  ____ ®
+ /__    /   ____/   /   ____/      StataNow 19.5
+___/   /   /___/   /   /___/       MP—Parallel Edition
+
+ Statistics and Data Science       Copyright 1985-2025 StataCorp LLC
+                                   StataCorp
+                                   4905 Lakeway Drive
+                                   College Station, Texas 77845 USA
+                                   800-782-8272        https://www.stata.com
+                                   979-696-4600        service@stata.com
+
+Stata license: Unlimited-user 2-core network, expiring  8 Jun 2026
+Serial number: 501909302568
+  Licensed to: Anzony QUISPE ROJAS
+               
+
+Notes:
+      1. Stata is running in batch mode.
+      2. Unicode is supported; see help unicode_advice.
+      3. More than 2 billion observations are allowed; see help obs_advice.
+      4. Maximum number of variables is set to 5,000 but can be increased;
+          see help set_maxvar.
+
+. do plotting_interaction.do 
+
+. * Load the ado
+. clear all
+
+. set more off
+
+. 
+. * Auto-detect environment
+. global dbox "/Users/anzony.quisperojas/Library/CloudStorage/Dropbox/sa_fires/
+> proj_bureaucrats_farms"
+
+. global shell "/groups/sgulzar/sa_fires/proj_bureaucrats_farms"
+
+. 
+. capture confirm file "${shell}/code/tools/interaction_graph.ado"
+
+. if _rc == 0 {
+.     global root "$shell"
+.     display "Running on cluster (shell)"
+. }
+
+. else {
+.     global root "$dbox"
+.     display "Running locally (dbox)"
+Running locally (dbox)
+. }
+
+. 
+. cd "${root}"
+/Users/anzony.quisperojas/Library/CloudStorage/Dropbox/sa_fires/proj_bureaucrat
+> s_farms
+
+. qui do "code/tools/interaction_graph.ado" 
+
+. 
+. global tables "${root}/tex/paper/tables"
+
+. global figures "${root}/tex/paper/figures"
+
+.                                                                              
+>                                                                              
+>                                  
+. * With STER file                                                             
+>                     
+. interaction_graph using "${tables}/_main_4_protest_5km_fe12_did_downup_rural.
+> ster", ///                        
+>   estimates(6) ///                                                           
+>                           
+>   output("${figures}/_main_4_protest_5km_fe12_did_downup_rural") ///         
+>                                 
+>   type(protest) ///                                                          
+>                           
+>   modvar(moderator) 
+Using estimate prefix: evreg
+Using moderator variable: moderator
+Loading estimates from STER file...
+
+-------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+-----------------------------------------------------------------
+      evreg1 | reghdfejl    countk          5  HDFE linear regression with
+             |                                 Julia
+      evreg2 | reghdfejl    countk          5  HDFE linear regression with
+             |                                 Julia
+      evreg3 | reghdfejl    countk          5  HDFE linear regression with
+             |                                 Julia
+      evreg4 | reghdfejl    countk          9  HDFE linear regression with
+             |                                 Julia
+      evreg5 | reghdfejl    countk          9  HDFE linear regression with
+             |                                 Julia
+      evreg6 | reghdfejl    countk          9  HDFE linear regression with
+             |                                 Julia
+-------------------------------------------------------------------------------
+
+Processing estimate 6...
+
+ ( 1)  1.moderator = 0
+
+------------------------------------------------------------------------------
+      countk | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+         (1) |  -9.641914   3.752489    -2.57   0.010    -17.00176   -2.282067
+------------------------------------------------------------------------------
+
+ ( 1)  1.moderator + 1.post_#1.moderator = 0
+
+------------------------------------------------------------------------------
+      countk | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+         (1) |  -4.431128   4.278568    -1.04   0.301    -12.82279    3.960532
+------------------------------------------------------------------------------
+
+ ( 1)  1.moderator + 1.post_#1.treat + 1.post_#1.moderator +
+       1.treat#1.moderator + 1.post_#1.treat#1.moderator = 0
+
+------------------------------------------------------------------------------
+      countk | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+         (1) |   56.91414   26.08203     2.18   0.029     5.758819    108.0695
+------------------------------------------------------------------------------
+
+ ( 1)  1.post_#1.treat + 1.treat#1.moderator + 1.post_#1.treat#1.moderator = 0
+
+------------------------------------------------------------------------------
+      countk | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+         (1) |   61.34527   26.38908     2.32   0.020     9.587722    113.1028
+------------------------------------------------------------------------------
+
+ ( 1)  1.moderator = 0
+
+------------------------------------------------------------------------------
+      countk | Coefficient  Std. err.      t    P>|t|     [90% conf. interval]
+-------------+----------------------------------------------------------------
+         (1) |  -9.641914   3.752489    -2.57   0.010    -15.81749   -3.466341
+------------------------------------------------------------------------------
+
+ ( 1)  1.moderator + 1.post_#1.moderator = 0
+
+------------------------------------------------------------------------------
+      countk | Coefficient  Std. err.      t    P>|t|     [90% conf. interval]
+-------------+----------------------------------------------------------------
+         (1) |  -4.431128   4.278568    -1.04   0.301    -11.47248    2.610228
+------------------------------------------------------------------------------
+
+ ( 1)  1.moderator + 1.post_#1.treat + 1.post_#1.moderator +
+       1.treat#1.moderator + 1.post_#1.treat#1.moderator = 0
+
+------------------------------------------------------------------------------
+      countk | Coefficient  Std. err.      t    P>|t|     [90% conf. interval]
+-------------+----------------------------------------------------------------
+         (1) |   56.91414   26.08203     2.18   0.029     13.99023    99.83805
+------------------------------------------------------------------------------
+
+ ( 1)  1.post_#1.treat + 1.treat#1.moderator + 1.post_#1.treat#1.moderator = 0
+
+------------------------------------------------------------------------------
+      countk | Coefficient  Std. err.      t    P>|t|     [90% conf. interval]
+-------------+----------------------------------------------------------------
+         (1) |   61.34527   26.38908     2.32   0.020     17.91604    104.7745
+------------------------------------------------------------------------------
+number of observations will be reset to 4
+Press any key to continue, or Break to abort
+Number of observations (_N) was 0, now 4.
+(4 missing values generated)
+
+ ( 1)  1.post_#1.treat + 1.treat#1.moderator + 1.post_#1.treat#1.moderator = 0
+
+------------------------------------------------------------------------------
+      countk | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+         (1) |   61.34527   26.38908     2.32   0.020     9.587722    113.1028
+------------------------------------------------------------------------------
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+file /Users/anzony.quisperojas/Library/CloudStorage/Dropbox/sa_fires/proj_burea
+> ucrats_farms/tex/paper/figures/_main_4_protest_5km_fe12_did_downup_rural_6.pn
+> g written in PNG format
+Exported: /Users/anzony.quisperojas/Library/CloudStorage/Dropbox/sa_fires/proj_
+> bureaucrats_farms/tex/paper/figures/_main_4_protest_5km_fe12_did_downup_rural
+> _6.png
+
+All graphs exported successfully.
+
+. 
+. est clear
+
+. interaction_graph using "${tables}/_main_5_polischar_fe12_did_downup_inter_ru
+> ral.ster", ///                        
+>   estimates(6) ///                                                           
+>                           
+>   output("${figures}/_main_5_polischar_fe12_did_downup_inter_rural") ///     
+>                                     
+>   type(politician) ///                                                       
+>                              
+>   modvar(moderator) yrange(-20 10)
+Using estimate prefix: evreg
+Using moderator variable: moderator
+Loading estimates from STER file...
+
+-------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+-----------------------------------------------------------------
+      evreg1 | reghdfejl    countk          5  HDFE linear regression with
+             |                                 Julia
+      evreg2 | reghdfejl    countk          5  HDFE linear regression with
+             |                                 Julia
+      evreg3 | reghdfejl    countk          5  HDFE linear regression with
+             |                                 Julia
+      evreg4 | reghdfejl    countk          9  HDFE linear regression with
+             |                                 Julia
+      evreg5 | reghdfejl    countk          9  HDFE linear regression with
+             |                                 Julia
+      evreg6 | reghdfejl    countk          9  HDFE linear regression with
+             |                                 Julia
+-------------------------------------------------------------------------------
+
+Processing estimate 6...
+
+ ( 1)  1.moderator = 0
+
+------------------------------------------------------------------------------
+      countk | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+         (1) |  -15.75811    1.83515    -8.59   0.000    -19.35561   -12.16062
+------------------------------------------------------------------------------
+
+ ( 1)  1.moderator + 1.post_#1.moderator = 0
+
+------------------------------------------------------------------------------
+      countk | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+         (1) |  -12.96875   1.695179    -7.65   0.000    -16.29186   -9.645648
+------------------------------------------------------------------------------
+
+ ( 1)  1.moderator + 1.post_#1.treat + 1.post_#1.moderator +
+       1.treat#1.moderator + 1.post_#1.treat#1.moderator = 0
+
+------------------------------------------------------------------------------
+      countk | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+         (1) |   3.510204   3.213957     1.09   0.275    -2.790202     9.81061
+------------------------------------------------------------------------------
+
+ ( 1)  1.post_#1.treat + 1.treat#1.moderator + 1.post_#1.treat#1.moderator = 0
+
+------------------------------------------------------------------------------
+      countk | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+         (1) |   16.47896   3.481022     4.73   0.000     9.655016     23.3029
+------------------------------------------------------------------------------
+
+ ( 1)  1.moderator = 0
+
+------------------------------------------------------------------------------
+      countk | Coefficient  Std. err.      t    P>|t|     [90% conf. interval]
+-------------+----------------------------------------------------------------
+         (1) |  -15.75811    1.83515    -8.59   0.000    -18.77709   -12.73913
+------------------------------------------------------------------------------
+
+ ( 1)  1.moderator + 1.post_#1.moderator = 0
+
+------------------------------------------------------------------------------
+      countk | Coefficient  Std. err.      t    P>|t|     [90% conf. interval]
+-------------+----------------------------------------------------------------
+         (1) |  -12.96875   1.695179    -7.65   0.000    -15.75747   -10.18004
+------------------------------------------------------------------------------
+
+ ( 1)  1.moderator + 1.post_#1.treat + 1.post_#1.moderator +
+       1.treat#1.moderator + 1.post_#1.treat#1.moderator = 0
+
+------------------------------------------------------------------------------
+      countk | Coefficient  Std. err.      t    P>|t|     [90% conf. interval]
+-------------+----------------------------------------------------------------
+         (1) |   3.510204   3.213957     1.09   0.275    -1.777034    8.797442
+------------------------------------------------------------------------------
+
+ ( 1)  1.post_#1.treat + 1.treat#1.moderator + 1.post_#1.treat#1.moderator = 0
+
+------------------------------------------------------------------------------
+      countk | Coefficient  Std. err.      t    P>|t|     [90% conf. interval]
+-------------+----------------------------------------------------------------
+         (1) |   16.47896   3.481022     4.73   0.000     10.75237    22.20554
+------------------------------------------------------------------------------
+number of observations will be reset to 4
+Press any key to continue, or Break to abort
+Number of observations (_N) was 0, now 4.
+(4 missing values generated)
+
+ ( 1)  1.moderator + 1.post_#1.treat + 1.post_#1.moderator +
+       1.treat#1.moderator + 1.post_#1.treat#1.moderator = 0
+
+------------------------------------------------------------------------------
+      countk | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+         (1) |   3.510204   3.213957     1.09   0.275    -2.790202     9.81061
+------------------------------------------------------------------------------
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+Number of observations (_N) was 4, now 5.
+(1 real change made)
+(1 real change made)
+(1 real change made)
+file /Users/anzony.quisperojas/Library/CloudStorage/Dropbox/sa_fires/proj_burea
+> ucrats_farms/tex/paper/figures/_main_5_polischar_fe12_did_downup_inter_rural_
+> 6.png written in PNG format
+Exported: /Users/anzony.quisperojas/Library/CloudStorage/Dropbox/sa_fires/proj_
+> bureaucrats_farms/tex/paper/figures/_main_5_polischar_fe12_did_downup_inter_r
+> ural_6.png
+
+All graphs exported successfully.
+
+. 
+end of do-file

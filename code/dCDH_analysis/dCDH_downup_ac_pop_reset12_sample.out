@@ -1,0 +1,66 @@
+/groups/sgulzar/india_forest_land/did_stat/lib/python3.10/site-packages/did_multiplegt_dyn/did_multiplegt_main.py:3662: UserWarning: The F-test may not be reliable, because the variance of placebos is close to not being invertible (the ratio of its largest and smallest eigenvalues is 9204.6, which is larger than 1000). This can for instance happen when you compute many estimators, or when your estimates are very strongly correlated. We recommend that you complement the F-test with a sup t-test, see FAQ section of the help file for more details.
+  warnings.warn(matrix_warning_pl, UserWarning)
+[lib] ROOT   = /groups/sgulzar/sa_fires/proj_bureaucrats_farms
+[lib] SAMPLE = '_sample'
+[load] master CSV: /groups/sgulzar/sa_fires/proj_bureaucrats_farms/data_output/intermediate/0_master_merge_data_gen_sample.csv
+[load] treatment column: downup_ac_pop
+[load] rows after filters: 171,072
+[load] unique grids:       3,888
+[load] unique ac_uq_id:    728
+[12month] new groups: 15,552
+[fit] dCDH_downup_ac_pop_reset12_notrend  rows=171,072  groups=15,552  effects=6  placebo=5  with_actrend=False
+================================================================================
+             Estimation of treatment effects: Event-study effects
+================================================================================
+               Block   Estimate        SE      LB CI      UB CI        N  Switchers      N.w  Switchers.w
+            Effect_1  -7.557829 14.715421 -36.399524  21.283867  90861.0    12069.0  90861.0      12069.0
+            Effect_2 -23.775077 13.375013 -49.989620   2.439466  76687.0    11933.0  76687.0      11933.0
+            Effect_3  -6.757917 14.315016 -34.814832  21.298999  61796.0    10832.0  61796.0      10832.0
+            Effect_4 -18.080773 21.030076 -59.298966  23.137419  48217.0    10125.0  48217.0      10125.0
+            Effect_5  44.458862 34.882477 -23.909537 112.827261  36666.0     9594.0  36666.0       9594.0
+            Effect_6  14.182255 36.278144 -56.921600  85.286110  27289.0     8931.0  27289.0       8931.0
+Average_Total_Effect  -2.235460 24.794743 -50.832264  46.361343 142697.0    63484.0 142697.0      63484.0
+           Placebo_1   3.460014 16.941920 -29.745540  36.665567  75309.0    10976.0  75309.0      10976.0
+           Placebo_2 -28.636850 22.331452 -72.405692  15.131993  48263.0    10171.0  48263.0      10171.0
+           Placebo_3 -32.937952 21.626423 -75.324964   9.449059  26510.0     8152.0  26510.0       8152.0
+           Placebo_4 -41.621680 20.789878 -82.369092  -0.874268  16042.0     5593.0  16042.0       5593.0
+           Placebo_5  -5.449731  9.052743 -23.192782  12.293320   8975.0     3850.0   8975.0       3850.0
+================================================================================
+Test of joint nullity of the effects: p-value = 0.134605
+Test of joint nullity of the placebos: p-value = 0.372718
+
+The development of this package was funded by the European Union.
+ERC REALLYCREDIBLE - GA N. 101043899
+[out] wrote /groups/sgulzar/sa_fires/proj_bureaucrats_farms/data_output/intermediate/dCDH/dCDH_downup_ac_pop_reset12_notrend.csv
+[out] wrote /groups/sgulzar/sa_fires/proj_bureaucrats_farms/data_output/intermediate/dCDH/dCDH_downup_ac_pop_reset12_notrend.png
+[out] wrote /users/aquisper/proj_bureaucrats_farms/code/dCDH_analysis/dCDH_downup_ac_pop_reset12_notrend.csv
+[out] wrote /users/aquisper/proj_bureaucrats_farms/code/dCDH_analysis/dCDH_downup_ac_pop_reset12_notrend.png
+[fit] dCDH_downup_ac_pop_reset12_actrend  rows=171,072  groups=15,552  effects=6  placebo=5  with_actrend=True
+================================================================================
+             Estimation of treatment effects: Event-study effects
+================================================================================
+               Block   Estimate        SE      LB CI      UB CI       N  Switchers     N.w  Switchers.w
+            Effect_1  13.536669  0.732259  12.101468  14.971871 21298.0     7181.0 21298.0       7181.0
+            Effect_2   5.077644  1.868947   1.414575   8.740714 16928.0     5808.0 16928.0       5808.0
+            Effect_3   8.359595  3.736955   1.035297  15.683892 13468.0     4717.0 13468.0       4717.0
+            Effect_4  -2.095048  2.905399  -7.789526   3.599430 11135.0     4099.0 11135.0       4099.0
+            Effect_5  -7.159411  2.458320 -11.977629  -2.341194  9505.0     3615.0  9505.0       3615.0
+            Effect_6 -23.985884  0.949987 -25.847825 -22.123943  7580.0     2986.0  7580.0       2986.0
+Average_Total_Effect   3.425921  2.868143  -2.195536   9.047377 63754.0    28406.0 63754.0      28406.0
+           Placebo_1  14.702027  1.133729  12.479959  16.924095 17707.0     6257.0 17707.0       6257.0
+           Placebo_2 -20.155918  4.380321 -28.741188 -11.570647 11682.0     4393.0 11682.0       4393.0
+           Placebo_3 -27.585689  8.148885 -43.557210 -11.614167  6627.0     2729.0  6627.0       2729.0
+           Placebo_4 -28.314697 11.178072 -50.223316  -6.406078  4136.0     1735.0  4136.0       1735.0
+           Placebo_5   6.160809  8.676274 -10.844376  23.165993  3008.0     1315.0  3008.0       1315.0
+================================================================================
+Test of joint nullity of the effects: p-value = 0.000000
+Test of joint nullity of the placebos: p-value = 0.000000
+
+WARNING: The F-test may not be reliable, because the variance of placebos is close to not being invertible (the ratio of its largest and smallest eigenvalues is 9204.6, which is larger than 1000). This can for instance happen when you compute many estimators, or when your estimates are very strongly correlated. We recommend that you complement the F-test with a sup t-test, see FAQ section of the help file for more details.
+
+The development of this package was funded by the European Union.
+ERC REALLYCREDIBLE - GA N. 101043899
+[out] wrote /groups/sgulzar/sa_fires/proj_bureaucrats_farms/data_output/intermediate/dCDH/dCDH_downup_ac_pop_reset12_actrend.csv
+[out] wrote /groups/sgulzar/sa_fires/proj_bureaucrats_farms/data_output/intermediate/dCDH/dCDH_downup_ac_pop_reset12_actrend.png
+[out] wrote /users/aquisper/proj_bureaucrats_farms/code/dCDH_analysis/dCDH_downup_ac_pop_reset12_actrend.csv
+[out] wrote /users/aquisper/proj_bureaucrats_farms/code/dCDH_analysis/dCDH_downup_ac_pop_reset12_actrend.png

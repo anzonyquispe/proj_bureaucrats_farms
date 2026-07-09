@@ -1,0 +1,1399 @@
+
+  ___  ____  ____  ____  ____ ®
+ /__    /   ____/   /   ____/      StataNow 19.5
+___/   /   /___/   /   /___/       MP—Parallel Edition
+
+ Statistics and Data Science       Copyright 1985-2025 StataCorp LLC
+                                   StataCorp
+                                   4905 Lakeway Drive
+                                   College Station, Texas 77845 USA
+                                   800-782-8272        https://www.stata.com
+                                   979-696-4600        service@stata.com
+
+Stata license: Unlimited-user 2-core network, expiring  8 Jun 2026
+Serial number: 501909302568
+  Licensed to: Anzony QUISPE ROJAS
+               
+
+Notes:
+      1. Stata is running in batch mode.
+      2. Unicode is supported; see help unicode_advice.
+      3. More than 2 billion observations are allowed; see help obs_advice.
+      4. Maximum number of variables is set to 5,000 but can be increased; see
+          help set_maxvar.
+
+. do _tweets_replot_r2_r3.do 
+
+. // _tweets_replot_r2_r3.do
+. // Walk every r2_*.ster and r3_*.ster file in ${shell}/tex/paper/figures/, read
+. // did_multiplegt_dyn estimates directly from e() scalars, and produce TWO
+. // connected-scatter event-study plots per ster:
+. //   <stem>.png         original estimates with 95% CIs
+. //   <stem>_rotated.png same outcome with a linear pre-trend (fit on x<0
+. //                       via OLS no-constant) extrapolated across all periods
+. //                       and subtracted from each estimate -- mirrors the
+. //                       agregation_result() rotation used in
+. //                       code/_replication_rural/tools/plot_event_studies.R.
+. //
+. // Convention:
+. //   e(Placebo_k) / e(se_placebo_k)  -> x = -k     (k = 1..5)
+. //   e(Effect_k)  / e(se_effect_k)   -> x = +k     (k = 1..5)
+. //   omitted reference at x = 0 (beta=0, no CI)
+. //   CI = beta +/- 1.96 * se
+. 
+. clear all
+
+. set more off
+
+. 
+. local sters_dir "/Users/anzony.quisperojas/Library/CloudStorage/Dropbox/sa_fires
+> /proj_bureaucrats_farms/tex/paper/figures"
+
+. 
+. display as text "Replotting r2_*/r3_* ster files in: `sters_dir'"
+Replotting r2_*/r3_* ster files in: /Users/anzony.quisperojas/Library/CloudStorage
+> /Dropbox/sa_fires/proj_bureaucrats_farms/tex/paper/figures
+
+. 
+. local n_ok   = 0
+
+. local n_fail = 0
+
+. 
+. foreach pat in "r2_*.ster" "r3_*.ster" {
+  2.     local files : dir "`sters_dir'" files "`pat'"
+  3.     local nfiles : word count `files'
+  4.     display as text _newline "=== Pattern `pat' : `nfiles' files ==="
+  5. 
+.     foreach f of local files {
+  6.         local stem = subinstr("`f'", ".ster", "", .)
+  7.         display as text _newline ">>> `stem'"
+  8. 
+.         capture estimates use "`sters_dir'/`f'"
+  9.         if _rc != 0 {
+ 10.             display as error "[fail] cannot load `f' (rc=`=_rc')"
+ 11.             local n_fail = `n_fail' + 1
+ 12.             continue
+ 13.         }
+ 14. 
+.         tempfile post_tmp
+ 15.         capture postclose ph_tmp
+ 16.         postfile ph_tmp double(x beta se) using "`post_tmp'", replace
+ 17. 
+.         local found = 0
+ 18.         forvalues k = 1/5 {
+ 19.             local beta_val = e(Placebo_`k')
+ 20.             local se_val   = e(se_placebo_`k')
+ 21.             if !missing(`beta_val') & !missing(`se_val') {
+ 22.                 post ph_tmp (-`k') (`beta_val') (`se_val')
+ 23.                 local found = `found' + 1
+ 24.             }
+ 25.         }
+ 26.         forvalues k = 1/5 {
+ 27.             local beta_val = e(Effect_`k')
+ 28.             local se_val   = e(se_effect_`k')
+ 29.             if !missing(`beta_val') & !missing(`se_val') {
+ 30.                 post ph_tmp (`k') (`beta_val') (`se_val')
+ 31.                 local found = `found' + 1
+ 32.             }
+ 33.         }
+ 34.         post ph_tmp (0) (0) (0)
+ 35.         postclose ph_tmp
+ 36. 
+.         if `found' == 0 {
+ 37.             display as error "[fail] no e(Effect_*) / e(Placebo_*) in `f'"
+ 38.             local n_fail = `n_fail' + 1
+ 39.             continue
+ 40.         }
+ 41. 
+.         use "`post_tmp'", clear
+ 42.         sort x
+ 43.         gen ci_lo = beta - 1.96 * se
+ 44.         gen ci_hi = beta + 1.96 * se
+ 45. 
+.         // -------------------------------------------------------------------
+.         // 1) Original event study
+.         // -------------------------------------------------------------------
+.         twoway (rcap ci_hi ci_lo x, lc(navy) lwidth(medthin)) ///
+>                (connected beta x, ms(O) mc(navy) lc(navy) msize(small)), ///
+>             xline(0, lp(dash) lc(gray)) yline(0, lp(solid) lc(red)) ///
+>             xtitle("Time relative to switch") ///
+>             ytitle("Effect on tweets") ///
+>             xlabel(-5(1)5) ///
+>             legend(off) ///
+>             title("`stem'", size(small)) ///
+>             graphregion(color(white))
+ 46. 
+.         capture graph export "`sters_dir'/`stem'.png", replace width(1200)
+ 47.         if _rc != 0 {
+ 48.             display as error "[fail] graph export failed for `stem'"
+ 49.             local n_fail = `n_fail' + 1
+ 50.             continue
+ 51.         }
+ 52. 
+.         // -------------------------------------------------------------------
+.         // 2) Rotated event study: fit linear pre-trend through omitted period
+.         //    (x=0, beta=0) via OLS without constant on x<0, then subtract.
+.         // -------------------------------------------------------------------
+.         capture quietly regress beta x if x < 0, noconstant
+ 53.         if _rc != 0 | missing(_b[x]) {
+ 54.             // Pre-trend not estimable (e.g. all betas zero); skip rotation.
+.             display as text "  -- pre-trend not estimable; skipping rotated plot
+> "
+ 55.             local n_ok = `n_ok' + 1
+ 56.             estimates clear
+ 57.             clear
+ 58.             continue
+ 59.         }
+ 60.         scalar slope = _b[x]
+ 61.         gen trend       = slope * x
+ 62.         gen res_b       = beta - trend
+ 63.         gen rot_ci_lo   = res_b - 1.96 * se
+ 64.         gen rot_ci_hi   = res_b + 1.96 * se
+ 65.         // Omitted period (x=0): keep at zero (residual = 0 - 0 = 0).
+.         replace res_b     = 0 if x == 0
+ 66.         replace rot_ci_lo = 0 if x == 0
+ 67.         replace rot_ci_hi = 0 if x == 0
+ 68. 
+.         twoway (rcap rot_ci_hi rot_ci_lo x, lc(maroon) lwidth(medthin)) ///
+>                (connected res_b x, ms(O) mc(maroon) lc(maroon) msize(small)), //
+> /
+>             xline(0, lp(dash) lc(gray)) yline(0, lp(solid) lc(red)) ///
+>             xtitle("Time relative to switch") ///
+>             ytitle("Effect on tweets (rotated)") ///
+>             xlabel(-5(1)5) ///
+>             legend(off) ///
+>             title("`stem' (rotated)", size(small)) ///
+>             graphregion(color(white))
+ 69. 
+.         capture graph export "`sters_dir'/`stem'_rotated.png", replace width(120
+> 0)
+ 70.         if _rc != 0 {
+ 71.             display as error "[fail] rotated graph export failed for `stem'"
+ 72.             local n_fail = `n_fail' + 1
+ 73.         }
+ 74.         else {
+ 75.             local n_ok = `n_ok' + 1
+ 76.         }
+ 77. 
+.         scalar drop _all
+ 78.         estimates clear
+ 79.         clear
+ 80.     }
+ 81. }
+
+=== Pattern r2_*.ster : 82 files ===
+
+>>> r2_sl_neutral_all
+(file /var/folders/gb/56xms55d53n734tnp7xq55bh0000gq/T//S_24888.000001 not
+    found)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+
+>>> r2_ff_provider_hero_own
+(file /var/folders/gb/56xms55d53n734tnp7xq55bh0000gq/T//S_24888.000002 not
+    found)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+
+>>> r2_pr1_own
+(file /var/folders/gb/56xms55d53n734tnp7xq55bh0000gq/T//S_24888.000003 not
+    found)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+
+>>> r2_pr0_own
+(file /var/folders/gb/56xms55d53n734tnp7xq55bh0000gq/T//S_24888.000004 not
+    found)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+
+>>> r2_ff_victim_all
+(file /var/folders/gb/56xms55d53n734tnp7xq55bh0000gq/T//S_24888.000005 not
+    found)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+
+>>> r2_ba_central_govt_all
+(file /var/folders/gb/56xms55d53n734tnp7xq55bh0000gq/T//S_24888.000006 not
+    found)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+
+>>> r2_wp_other_farm_policy_own
+(file /var/folders/gb/56xms55d53n734tnp7xq55bh0000gq/T//S_24888.000007 not
+    found)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+
+>>> r2_wp_irrigation_scheme_all
+(file /var/folders/gb/56xms55d53n734tnp7xq55bh0000gq/T//S_24888.000008 not
+    found)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+
+>>> r2_sl_pro_laws_own
+(file /var/folders/gb/56xms55d53n734tnp7xq55bh0000gq/T//S_24888.000009 not
+    found)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+
+>>> r2_ar2_all
+(file /var/folders/gb/56xms55d53n734tnp7xq55bh0000gq/T//S_24888.00000a not
+    found)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+
+>>> r2_ar3_all
+(file /var/folders/gb/56xms55d53n734tnp7xq55bh0000gq/T//S_24888.00000b not
+    found)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+
+>>> r2_sl_not_applicable_own
+(file /var/folders/gb/56xms55d53n734tnp7xq55bh0000gq/T//S_24888.00000c not
+    found)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+
+>>> r2_ba_bureaucracy_all
+(file /var/folders/gb/56xms55d53n734tnp7xq55bh0000gq/T//S_24888.00000d not
+    found)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+
+>>> r2_ff_protester_activist_own
+(file /var/folders/gb/56xms55d53n734tnp7xq55bh0000gq/T//S_24888.00000e not
+    found)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+
+>>> r2_sf_pro_farmer_own
+(file /var/folders/gb/56xms55d53n734tnp7xq55bh0000gq/T//S_24888.00000f not
+    found)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+
+>>> r2_ff_neutral_reference_own
+(file /var/folders/gb/56xms55d53n734tnp7xq55bh0000gq/T//S_24888.00000g not
+    found)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+
+>>> r2_wp_machinery_distribution_all
+(file /var/folders/gb/56xms55d53n734tnp7xq55bh0000gq/T//S_24888.00000h not
+    found)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+
+>>> r2_ff_beneficiary_own
+(file /var/folders/gb/56xms55d53n734tnp7xq55bh0000gq/T//S_24888.00000i not
+    found)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+
+>>> r2_ba_opposition_own
+(file /var/folders/gb/56xms55d53n734tnp7xq55bh0000gq/T//S_24888.00000j not
+    found)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+
+>>> r2_ba_middlemen_all
+(file /var/folders/gb/56xms55d53n734tnp7xq55bh0000gq/T//S_24888.00000k not
+    found)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+
+>>> r2_sl_anti_laws_own
+(file /var/folders/gb/56xms55d53n734tnp7xq55bh0000gq/T//S_24888.00000l not
+    found)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+
+>>> r2_sf_not_applicable_all
+(file /var/folders/gb/56xms55d53n734tnp7xq55bh0000gq/T//S_24888.00000m not
+    found)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+
+>>> r2_cc_true_own
+(file /var/folders/gb/56xms55d53n734tnp7xq55bh0000gq/T//S_24888.00000n not
+    found)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+
+>>> r2_pr3_all
+(file /var/folders/gb/56xms55d53n734tnp7xq55bh0000gq/T//S_24888.00000o not
+    found)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+
+>>> r2_pr2_all
+(file /var/folders/gb/56xms55d53n734tnp7xq55bh0000gq/T//S_24888.00000p not
+    found)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+
+>>> r2_ff_problem_causer_all
+(file /var/folders/gb/56xms55d53n734tnp7xq55bh0000gq/T//S_24888.00000q not
+    found)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+
+>>> r2_wp_crop_insurance_own
+(file /var/folders/gb/56xms55d53n734tnp7xq55bh0000gq/T//S_24888.00000r not
+    found)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+
+>>> r2_ar0_own
+(file /var/folders/gb/56xms55d53n734tnp7xq55bh0000gq/T//S_24888.00000s not
+    found)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+
+>>> r2_ar1_own
+(file /var/folders/gb/56xms55d53n734tnp7xq55bh0000gq/T//S_24888.00000t not
+    found)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+
+>>> r2_ba_none_all
+(file /var/folders/gb/56xms55d53n734tnp7xq55bh0000gq/T//S_24888.00000u not
+    found)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+
+>>> r2_wp_msp_procurement_own
+(file /var/folders/gb/56xms55d53n734tnp7xq55bh0000gq/T//S_24888.00000v not
+    found)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+
+>>> r2_ba_state_govt_own
+(file /var/folders/gb/56xms55d53n734tnp7xq55bh0000gq/T//S_24888.00000w not
+    found)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+
+>>> r2_sf_neutral_all
+(file /var/folders/gb/56xms55d53n734tnp7xq55bh0000gq/T//S_24888.00000x not
+    found)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+
+>>> r2_ba_other_own
+(file /var/folders/gb/56xms55d53n734tnp7xq55bh0000gq/T//S_24888.000010 not
+    found)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+
+>>> r2_wp_pm_kisan_own
+(file /var/folders/gb/56xms55d53n734tnp7xq55bh0000gq/T//S_24888.000011 not
+    found)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+
+>>> r2_wp_debt_relief_all
+(file /var/folders/gb/56xms55d53n734tnp7xq55bh0000gq/T//S_24888.000012 not
+    found)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+
+>>> r2_cc_false_own
+(file /var/folders/gb/56xms55d53n734tnp7xq55bh0000gq/T//S_24888.000013 not
+    found)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+
+>>> r2_ff_rhetorical_own
+(file /var/folders/gb/56xms55d53n734tnp7xq55bh0000gq/T//S_24888.000014 not
+    found)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+
+>>> r2_wp_organic_farming_all
+(file /var/folders/gb/56xms55d53n734tnp7xq55bh0000gq/T//S_24888.000015 not
+    found)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+
+>>> r2_wp_none_own
+(file /var/folders/gb/56xms55d53n734tnp7xq55bh0000gq/T//S_24888.000016 not
+    found)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+
+>>> r2_wp_soil_health_all
+(file /var/folders/gb/56xms55d53n734tnp7xq55bh0000gq/T//S_24888.000017 not
+    found)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+
+>>> r2_wp_soil_health_own
+(file /var/folders/gb/56xms55d53n734tnp7xq55bh0000gq/T//S_24888.000018 not
+    found)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+
+>>> r2_wp_none_all
+(file /var/folders/gb/56xms55d53n734tnp7xq55bh0000gq/T//S_24888.000019 not
+    found)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+
+>>> r2_ff_rhetorical_all
+(file /var/folders/gb/56xms55d53n734tnp7xq55bh0000gq/T//S_24888.00001a not
+    found)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+
+>>> r2_wp_organic_farming_own
+(file /var/folders/gb/56xms55d53n734tnp7xq55bh0000gq/T//S_24888.00001b not
+    found)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+
+>>> r2_cc_false_all
+(file /var/folders/gb/56xms55d53n734tnp7xq55bh0000gq/T//S_24888.00001c not
+    found)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+
+>>> r2_wp_pm_kisan_all
+(file /var/folders/gb/56xms55d53n734tnp7xq55bh0000gq/T//S_24888.00001d not
+    found)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+
+>>> r2_wp_debt_relief_own
+(file /var/folders/gb/56xms55d53n734tnp7xq55bh0000gq/T//S_24888.00001e not
+    found)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+
+>>> r2_ba_other_all
+(file /var/folders/gb/56xms55d53n734tnp7xq55bh0000gq/T//S_24888.00001f not
+    found)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+
+>>> r2_ba_state_govt_all
+(file /var/folders/gb/56xms55d53n734tnp7xq55bh0000gq/T//S_24888.00001g not
+    found)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+
+>>> r2_sf_neutral_own
+(file /var/folders/gb/56xms55d53n734tnp7xq55bh0000gq/T//S_24888.00001h not
+    found)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+
+>>> r2_ba_none_own
+(file /var/folders/gb/56xms55d53n734tnp7xq55bh0000gq/T//S_24888.00001i not
+    found)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+
+>>> r2_ar1_all
+(file /var/folders/gb/56xms55d53n734tnp7xq55bh0000gq/T//S_24888.00001j not
+    found)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+
+>>> r2_ar0_all
+(file /var/folders/gb/56xms55d53n734tnp7xq55bh0000gq/T//S_24888.00001k not
+    found)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+
+>>> r2_wp_msp_procurement_all
+(file /var/folders/gb/56xms55d53n734tnp7xq55bh0000gq/T//S_24888.00001l not
+    found)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+
+>>> r2_ff_problem_causer_own
+(file /var/folders/gb/56xms55d53n734tnp7xq55bh0000gq/T//S_24888.00001m not
+    found)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+
+>>> r2_wp_crop_insurance_all
+(file /var/folders/gb/56xms55d53n734tnp7xq55bh0000gq/T//S_24888.00001n not
+    found)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+
+>>> r2_pr2_own
+(file /var/folders/gb/56xms55d53n734tnp7xq55bh0000gq/T//S_24888.00001o not
+    found)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+
+>>> r2_pr3_own
+(file /var/folders/gb/56xms55d53n734tnp7xq55bh0000gq/T//S_24888.00001p not
+    found)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+
+>>> r2_sf_not_applicable_own
+(file /var/folders/gb/56xms55d53n734tnp7xq55bh0000gq/T//S_24888.00001q not
+    found)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+
+>>> r2_cc_true_all
+(file /var/folders/gb/56xms55d53n734tnp7xq55bh0000gq/T//S_24888.00001r not
+    found)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+
+>>> r2_sl_anti_laws_all
+(file /var/folders/gb/56xms55d53n734tnp7xq55bh0000gq/T//S_24888.00001s not
+    found)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+
+>>> r2_ba_middlemen_own
+(file /var/folders/gb/56xms55d53n734tnp7xq55bh0000gq/T//S_24888.00001t not
+    found)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+
+>>> r2_ba_opposition_all
+(file /var/folders/gb/56xms55d53n734tnp7xq55bh0000gq/T//S_24888.00001u not
+    found)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+
+>>> r2_ff_beneficiary_all
+(file /var/folders/gb/56xms55d53n734tnp7xq55bh0000gq/T//S_24888.00001v not
+    found)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+
+>>> r2_ff_neutral_reference_all
+(file /var/folders/gb/56xms55d53n734tnp7xq55bh0000gq/T//S_24888.00001w not
+    found)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+
+>>> r2_sf_pro_farmer_all
+(file /var/folders/gb/56xms55d53n734tnp7xq55bh0000gq/T//S_24888.00001x not
+    found)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+
+>>> r2_wp_machinery_distribution_own
+(file /var/folders/gb/56xms55d53n734tnp7xq55bh0000gq/T//S_24888.000020 not
+    found)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+
+>>> r2_ff_protester_activist_all
+(file /var/folders/gb/56xms55d53n734tnp7xq55bh0000gq/T//S_24888.000021 not
+    found)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+
+>>> r2_sl_not_applicable_all
+(file /var/folders/gb/56xms55d53n734tnp7xq55bh0000gq/T//S_24888.000022 not
+    found)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+
+>>> r2_ba_bureaucracy_own
+(file /var/folders/gb/56xms55d53n734tnp7xq55bh0000gq/T//S_24888.000023 not
+    found)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+
+>>> r2_sl_pro_laws_all
+(file /var/folders/gb/56xms55d53n734tnp7xq55bh0000gq/T//S_24888.000024 not
+    found)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+
+>>> r2_ar3_own
+(file /var/folders/gb/56xms55d53n734tnp7xq55bh0000gq/T//S_24888.000025 not
+    found)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+
+>>> r2_ar2_own
+(file /var/folders/gb/56xms55d53n734tnp7xq55bh0000gq/T//S_24888.000026 not
+    found)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+
+>>> r2_wp_irrigation_scheme_own
+(file /var/folders/gb/56xms55d53n734tnp7xq55bh0000gq/T//S_24888.000027 not
+    found)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+
+>>> r2_wp_other_farm_policy_all
+(file /var/folders/gb/56xms55d53n734tnp7xq55bh0000gq/T//S_24888.000028 not
+    found)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+
+>>> r2_ba_central_govt_own
+(file /var/folders/gb/56xms55d53n734tnp7xq55bh0000gq/T//S_24888.000029 not
+    found)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+
+>>> r2_ff_victim_own
+(file /var/folders/gb/56xms55d53n734tnp7xq55bh0000gq/T//S_24888.00002a not
+    found)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+
+>>> r2_ff_provider_hero_all
+(file /var/folders/gb/56xms55d53n734tnp7xq55bh0000gq/T//S_24888.00002b not
+    found)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+
+>>> r2_pr0_all
+(file /var/folders/gb/56xms55d53n734tnp7xq55bh0000gq/T//S_24888.00002c not
+    found)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+
+>>> r2_pr1_all
+(file /var/folders/gb/56xms55d53n734tnp7xq55bh0000gq/T//S_24888.00002d not
+    found)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+
+>>> r2_sl_neutral_own
+(file /var/folders/gb/56xms55d53n734tnp7xq55bh0000gq/T//S_24888.00002e not
+    found)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+
+=== Pattern r3_*.ster : 90 files ===
+
+>>> r3_pi_other_instrument_own
+(file /var/folders/gb/56xms55d53n734tnp7xq55bh0000gq/T//S_24888.00002f not
+    found)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+
+>>> r3_cc_true_own
+(file /var/folders/gb/56xms55d53n734tnp7xq55bh0000gq/T//S_24888.00002g not
+    found)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+
+>>> r3_sb_not_applicable_all
+(file /var/folders/gb/56xms55d53n734tnp7xq55bh0000gq/T//S_24888.00002h not
+    found)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+
+>>> r3_ps_implementation_all
+(file /var/folders/gb/56xms55d53n734tnp7xq55bh0000gq/T//S_24888.00002i not
+    found)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+
+>>> r3_pi_baler_all
+(file /var/folders/gb/56xms55d53n734tnp7xq55bh0000gq/T//S_24888.00002j not
+    found)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+
+>>> r3_pa_compensation_all
+(file /var/folders/gb/56xms55d53n734tnp7xq55bh0000gq/T//S_24888.00002k not
+    found)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+
+>>> r3_ps_demand_own
+(file /var/folders/gb/56xms55d53n734tnp7xq55bh0000gq/T//S_24888.00002l not
+    found)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+
+>>> r3_ba_farmers_own
+(file /var/folders/gb/56xms55d53n734tnp7xq55bh0000gq/T//S_24888.00002m not
+    found)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+
+>>> r3_pi_fines_penalties_own
+(file /var/folders/gb/56xms55d53n734tnp7xq55bh0000gq/T//S_24888.00002n not
+    found)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+
+>>> r3_pt_other_environmental_own
+(file /var/folders/gb/56xms55d53n734tnp7xq55bh0000gq/T//S_24888.00002o not
+    found)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+
+>>> r3_pt_crop_burning_smoke_own
+(file /var/folders/gb/56xms55d53n734tnp7xq55bh0000gq/T//S_24888.00002p not
+    found)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+
+>>> r3_ba_state_govt_own
+(file /var/folders/gb/56xms55d53n734tnp7xq55bh0000gq/T//S_24888.00002q not
+    found)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+
+>>> r3_sb_anti_enforcement_own
+(file /var/folders/gb/56xms55d53n734tnp7xq55bh0000gq/T//S_24888.00002r not
+    found)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+
+>>> r3_pt_water_pollution_own
+(file /var/folders/gb/56xms55d53n734tnp7xq55bh0000gq/T//S_24888.00002s not
+    found)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+
+>>> r3_pi_biomass_plant_own
+(file /var/folders/gb/56xms55d53n734tnp7xq55bh0000gq/T//S_24888.00002t not
+    found)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+
+>>> r3_ba_delhi_govt_own
+(file /var/folders/gb/56xms55d53n734tnp7xq55bh0000gq/T//S_24888.00002u not
+    found)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+
+>>> r3_ps_evaluation_own
+(file /var/folders/gb/56xms55d53n734tnp7xq55bh0000gq/T//S_24888.00002v not
+    found)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+
+>>> r3_pa_subsidy_scheme_all
+(file /var/folders/gb/56xms55d53n734tnp7xq55bh0000gq/T//S_24888.00002w not
+    found)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+
+>>> r3_pi_satellite_monitoring_all
+(file /var/folders/gb/56xms55d53n734tnp7xq55bh0000gq/T//S_24888.00002x not
+    found)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+
+>>> r3_bs_true_all
+(file /var/folders/gb/56xms55d53n734tnp7xq55bh0000gq/T//S_24888.000030 not
+    found)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+
+>>> r3_pi_awareness_campaign_own
+(file /var/folders/gb/56xms55d53n734tnp7xq55bh0000gq/T//S_24888.000031 not
+    found)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+
+>>> r3_ps_criticism_all
+(file /var/folders/gb/56xms55d53n734tnp7xq55bh0000gq/T//S_24888.000032 not
+    found)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+
+>>> r3_cr0_own
+(file /var/folders/gb/56xms55d53n734tnp7xq55bh0000gq/T//S_24888.000033 not
+    found)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+
+>>> r3_cr1_own
+(file /var/folders/gb/56xms55d53n734tnp7xq55bh0000gq/T//S_24888.000034 not
+    found)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+
+>>> r3_ps_announcement_own
+(file /var/folders/gb/56xms55d53n734tnp7xq55bh0000gq/T//S_24888.000035 not
+    found)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+
+>>> r3_ba_other_own
+(file /var/folders/gb/56xms55d53n734tnp7xq55bh0000gq/T//S_24888.000036 not
+    found)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+
+>>> r3_pa_awareness_campaign_all
+(file /var/folders/gb/56xms55d53n734tnp7xq55bh0000gq/T//S_24888.000037 not
+    found)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+
+>>> r3_cc_false_own
+(file /var/folders/gb/56xms55d53n734tnp7xq55bh0000gq/T//S_24888.000038 not
+    found)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+
+>>> r3_ba_opposition_own
+(file /var/folders/gb/56xms55d53n734tnp7xq55bh0000gq/T//S_24888.000039 not
+    found)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+
+>>> r3_pa_enforcement_penalty_all
+(file /var/folders/gb/56xms55d53n734tnp7xq55bh0000gq/T//S_24888.00003a not
+    found)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+
+>>> r3_pi_straw_market_all
+(file /var/folders/gb/56xms55d53n734tnp7xq55bh0000gq/T//S_24888.00003b not
+    found)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+
+>>> r3_sb_pro_enforcement_all
+(file /var/folders/gb/56xms55d53n734tnp7xq55bh0000gq/T//S_24888.00003c not
+    found)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+
+>>> r3_pi_compensation_payment_all
+(file /var/folders/gb/56xms55d53n734tnp7xq55bh0000gq/T//S_24888.00003d not
+    found)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+
+>>> r3_pa_regulation_own
+(file /var/folders/gb/56xms55d53n734tnp7xq55bh0000gq/T//S_24888.00003e not
+    found)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+
+>>> r3_pa_infrastructure_own
+(file /var/folders/gb/56xms55d53n734tnp7xq55bh0000gq/T//S_24888.00003f not
+    found)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+
+>>> r3_ba_central_govt_all
+(file /var/folders/gb/56xms55d53n734tnp7xq55bh0000gq/T//S_24888.00003g not
+    found)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+
+>>> r3_sb_permissive_own
+(file /var/folders/gb/56xms55d53n734tnp7xq55bh0000gq/T//S_24888.00003h not
+    found)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+
+>>> r3_pa_other_policy_all
+(file /var/folders/gb/56xms55d53n734tnp7xq55bh0000gq/T//S_24888.00003i not
+    found)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+
+>>> r3_sb_neutral_all
+(file /var/folders/gb/56xms55d53n734tnp7xq55bh0000gq/T//S_24888.00003j not
+    found)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+
+>>> r3_pt_industrial_pollution_all
+(file /var/folders/gb/56xms55d53n734tnp7xq55bh0000gq/T//S_24888.00003k not
+    found)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+
+>>> r3_pi_machinery_subsidy_all
+(file /var/folders/gb/56xms55d53n734tnp7xq55bh0000gq/T//S_24888.00003l not
+    found)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+
+>>> r3_cr2_all
+(file /var/folders/gb/56xms55d53n734tnp7xq55bh0000gq/T//S_24888.00003m not
+    found)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+
+>>> r3_cr3_all
+(file /var/folders/gb/56xms55d53n734tnp7xq55bh0000gq/T//S_24888.00003n not
+    found)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+
+>>> r3_pt_general_air_pollution_all
+(file /var/folders/gb/56xms55d53n734tnp7xq55bh0000gq/T//S_24888.00003o not
+    found)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+
+>>> r3_bs_false_all
+(file /var/folders/gb/56xms55d53n734tnp7xq55bh0000gq/T//S_24888.00003p not
+    found)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+
+>>> r3_pt_general_air_pollution_own
+(file /var/folders/gb/56xms55d53n734tnp7xq55bh0000gq/T//S_24888.00003q not
+    found)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+
+>>> r3_bs_false_own
+(file /var/folders/gb/56xms55d53n734tnp7xq55bh0000gq/T//S_24888.00003r not
+    found)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+
+>>> r3_pi_machinery_subsidy_own
+(file /var/folders/gb/56xms55d53n734tnp7xq55bh0000gq/T//S_24888.00003s not
+    found)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+
+>>> r3_cr3_own
+(file /var/folders/gb/56xms55d53n734tnp7xq55bh0000gq/T//S_24888.00003t not
+    found)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+
+>>> r3_cr2_own
+(file /var/folders/gb/56xms55d53n734tnp7xq55bh0000gq/T//S_24888.00003u not
+    found)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+
+>>> r3_pt_industrial_pollution_own
+(file /var/folders/gb/56xms55d53n734tnp7xq55bh0000gq/T//S_24888.00003v not
+    found)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+
+>>> r3_pa_other_policy_own
+(file /var/folders/gb/56xms55d53n734tnp7xq55bh0000gq/T//S_24888.00003w not
+    found)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+
+>>> r3_sb_neutral_own
+(file /var/folders/gb/56xms55d53n734tnp7xq55bh0000gq/T//S_24888.00003x not
+    found)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+
+>>> r3_sb_permissive_all
+(file /var/folders/gb/56xms55d53n734tnp7xq55bh0000gq/T//S_24888.000040 not
+    found)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+
+>>> r3_ba_central_govt_own
+(file /var/folders/gb/56xms55d53n734tnp7xq55bh0000gq/T//S_24888.000041 not
+    found)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+
+>>> r3_pa_regulation_all
+(file /var/folders/gb/56xms55d53n734tnp7xq55bh0000gq/T//S_24888.000042 not
+    found)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+
+>>> r3_pa_infrastructure_all
+(file /var/folders/gb/56xms55d53n734tnp7xq55bh0000gq/T//S_24888.000043 not
+    found)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+
+>>> r3_pi_compensation_payment_own
+(file /var/folders/gb/56xms55d53n734tnp7xq55bh0000gq/T//S_24888.000044 not
+    found)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+
+>>> r3_sb_pro_enforcement_own
+(file /var/folders/gb/56xms55d53n734tnp7xq55bh0000gq/T//S_24888.000045 not
+    found)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+
+>>> r3_pi_straw_market_own
+(file /var/folders/gb/56xms55d53n734tnp7xq55bh0000gq/T//S_24888.000046 not
+    found)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+
+>>> r3_cc_false_all
+(file /var/folders/gb/56xms55d53n734tnp7xq55bh0000gq/T//S_24888.000047 not
+    found)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+
+>>> r3_ba_opposition_all
+(file /var/folders/gb/56xms55d53n734tnp7xq55bh0000gq/T//S_24888.000048 not
+    found)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+
+>>> r3_pa_enforcement_penalty_own
+(file /var/folders/gb/56xms55d53n734tnp7xq55bh0000gq/T//S_24888.000049 not
+    found)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+
+>>> r3_pa_awareness_campaign_own
+(file /var/folders/gb/56xms55d53n734tnp7xq55bh0000gq/T//S_24888.00004a not
+    found)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+
+>>> r3_ps_announcement_all
+(file /var/folders/gb/56xms55d53n734tnp7xq55bh0000gq/T//S_24888.00004b not
+    found)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+
+>>> r3_ba_other_all
+(file /var/folders/gb/56xms55d53n734tnp7xq55bh0000gq/T//S_24888.00004c not
+    found)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+
+>>> r3_pi_awareness_campaign_all
+(file /var/folders/gb/56xms55d53n734tnp7xq55bh0000gq/T//S_24888.00004d not
+    found)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+
+>>> r3_ps_criticism_own
+(file /var/folders/gb/56xms55d53n734tnp7xq55bh0000gq/T//S_24888.00004e not
+    found)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+
+>>> r3_cr1_all
+(file /var/folders/gb/56xms55d53n734tnp7xq55bh0000gq/T//S_24888.00004f not
+    found)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+
+>>> r3_cr0_all
+(file /var/folders/gb/56xms55d53n734tnp7xq55bh0000gq/T//S_24888.00004g not
+    found)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+
+>>> r3_pa_subsidy_scheme_own
+(file /var/folders/gb/56xms55d53n734tnp7xq55bh0000gq/T//S_24888.00004h not
+    found)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+
+>>> r3_pi_satellite_monitoring_own
+(file /var/folders/gb/56xms55d53n734tnp7xq55bh0000gq/T//S_24888.00004i not
+    found)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+
+>>> r3_bs_true_own
+(file /var/folders/gb/56xms55d53n734tnp7xq55bh0000gq/T//S_24888.00004j not
+    found)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+
+>>> r3_ba_delhi_govt_all
+(file /var/folders/gb/56xms55d53n734tnp7xq55bh0000gq/T//S_24888.00004k not
+    found)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+
+>>> r3_ps_evaluation_all
+(file /var/folders/gb/56xms55d53n734tnp7xq55bh0000gq/T//S_24888.00004l not
+    found)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+
+>>> r3_ba_state_govt_all
+(file /var/folders/gb/56xms55d53n734tnp7xq55bh0000gq/T//S_24888.00004m not
+    found)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+
+>>> r3_sb_anti_enforcement_all
+(file /var/folders/gb/56xms55d53n734tnp7xq55bh0000gq/T//S_24888.00004n not
+    found)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+
+>>> r3_pt_water_pollution_all
+(file /var/folders/gb/56xms55d53n734tnp7xq55bh0000gq/T//S_24888.00004o not
+    found)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+
+>>> r3_pi_biomass_plant_all
+(file /var/folders/gb/56xms55d53n734tnp7xq55bh0000gq/T//S_24888.00004p not
+    found)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+
+>>> r3_pt_crop_burning_smoke_all
+(file /var/folders/gb/56xms55d53n734tnp7xq55bh0000gq/T//S_24888.00004q not
+    found)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+
+>>> r3_pt_other_environmental_all
+(file /var/folders/gb/56xms55d53n734tnp7xq55bh0000gq/T//S_24888.00004r not
+    found)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+
+>>> r3_ba_farmers_all
+(file /var/folders/gb/56xms55d53n734tnp7xq55bh0000gq/T//S_24888.00004s not
+    found)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+
+>>> r3_pi_fines_penalties_all
+(file /var/folders/gb/56xms55d53n734tnp7xq55bh0000gq/T//S_24888.00004t not
+    found)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+
+>>> r3_pa_compensation_own
+(file /var/folders/gb/56xms55d53n734tnp7xq55bh0000gq/T//S_24888.00004u not
+    found)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+
+>>> r3_ps_demand_all
+(file /var/folders/gb/56xms55d53n734tnp7xq55bh0000gq/T//S_24888.00004v not
+    found)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+
+>>> r3_ps_implementation_own
+(file /var/folders/gb/56xms55d53n734tnp7xq55bh0000gq/T//S_24888.00004w not
+    found)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+
+>>> r3_pi_baler_own
+(file /var/folders/gb/56xms55d53n734tnp7xq55bh0000gq/T//S_24888.00004x not
+    found)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+
+>>> r3_cc_true_all
+(file /var/folders/gb/56xms55d53n734tnp7xq55bh0000gq/T//S_24888.000050 not
+    found)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+
+>>> r3_sb_not_applicable_own
+(file /var/folders/gb/56xms55d53n734tnp7xq55bh0000gq/T//S_24888.000051 not
+    found)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+
+>>> r3_pi_other_instrument_all
+(file /var/folders/gb/56xms55d53n734tnp7xq55bh0000gq/T//S_24888.000052 not
+    found)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+
+. 
+. display as text _newline "=== DONE: `n_ok' plotted, `n_fail' failed ==="
+
+=== DONE: 172 plotted, 0 failed ===
+
+. 
+end of do-file

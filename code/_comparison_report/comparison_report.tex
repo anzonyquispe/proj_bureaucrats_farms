@@ -1,0 +1,519 @@
+% ============================================================================
+% comparison_report.tex
+%
+% Comprehensive comparison: downup_ac vs downup_ac_pop (rural sample)
+%
+% Sections:
+%   1  DiD Regression Tables (11 pairs)
+%   2  Main Event Study (_main_2): no mod | riceP
+%   3  Stacked Event Study: {unbalanced,balanced} x {no mod,riceP}
+%   4  dCDH Event Study: noreset | reset6 | reset12  [3 x 4 panels]
+%   5  App 16: Politician char. event study: no mod | downup | riceP
+%   6  App 17: 5km protest event study: no mod | downup | riceP
+%   7  App 18: Protest downup interaction plot
+%   8  App 19: Polischar downup interaction plot
+%
+% Layout for Sections 2-6 (R event-study pipeline), per treatment row:
+%   Top row:    original (_ori)          | rotated (_rotated)
+%   Bottom row: HonestDiD on ori (_honest1†) | HonestDiD on rotated (_rot_honest1†)
+%
+% † _honest1 / _rot_honest1 = HonestDiD relative-magnitudes sensitivity bound
+%   (createSensitivityResults_relativeMagnitudes). _honest1 applied to the
+%   ORIGINAL coefficients; _rot_honest1 applied to the ROTATED coefficients.
+%   Other files on disk but not shown: _honest2, _rot_honest2 (smoothness bound).
+%
+% Layout for Sections 7-8 (Stata interaction_graph pipeline):
+%   Left  downup_ac  |  Right  downup_ac_pop   (single PNG, no triplet)
+%
+% Compile from code/_comparison_report/:
+%   pdflatex -interaction=nonstopmode comparison_report.tex
+%   (or: make)
+%
+% Edit \def\dropboxroot below if your Dropbox is mounted elsewhere.
+% ============================================================================
+
+\documentclass[11pt]{article}
+
+\usepackage[a4paper, margin=1.8cm]{geometry}
+\usepackage{graphicx}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\usepackage{float}
+\usepackage{booktabs}
+\usepackage{pdflscape}
+\usepackage{adjustbox}
+
+% ---------------------------------------------------------------------------
+% Paths -- edit \dropboxroot if your Dropbox is mounted elsewhere
+% ---------------------------------------------------------------------------
+\def\dropboxroot{/Users/anzony.quisperojas/Library/CloudStorage/Dropbox/sa_fires/proj_bureaucrats_farms}
+\def\figdir{\dropboxroot/tex/paper/figures}
+\def\tablesdir{\dropboxroot/tex/paper/tables}
+
+\graphicspath{{\figdir/}}
+
+% ---------------------------------------------------------------------------
+% \safefig{<basename>}{<width>}{<caption hint>}
+%   Includes <basename>.png from \figdir; shows (pending) if the file is
+%   missing so the document compiles even while jobs are still running.
+% ---------------------------------------------------------------------------
+\newcommand{\safefig}[3]{%
+  \IfFileExists{\figdir/#1.png}{%
+    \includegraphics[width=#2]{#1.png}%
+  }{%
+    \fbox{\parbox[c][0.45\linewidth][c]{0.95\linewidth}{%
+      \centering\color{red}\itshape(pending: #1.png)%
+    }}%
+  }%
+}
+
+% ---------------------------------------------------------------------------
+% \safeTab{<stem>}
+%   \inputs <stem>.tex from \tablesdir, scaled to fit \linewidth if wider.
+%   Shows (pending) if the file is missing.
+% ---------------------------------------------------------------------------
+\newcommand{\safeTab}[1]{%
+  \IfFileExists{\tablesdir/#1.tex}{%
+    \begin{adjustbox}{max width=\linewidth, center}%
+      \input{\tablesdir/#1.tex}%
+    \end{adjustbox}%
+  }{%
+    \smallskip
+    \fbox{\parbox{\linewidth}{\centering\color{red}\itshape(pending: #1.tex)}}%
+    \smallskip
+  }%
+}
+
+% ---------------------------------------------------------------------------
+% \tabpair{<ac stem>}{<acpop stem>}
+%   Red-ruled original block then green-ruled new block.
+% ---------------------------------------------------------------------------
+\newcommand{\tabpair}[2]{%
+  \noindent{\color{red!80!black}\rule{\linewidth}{1.5pt}}\par\smallskip
+  {\bfseries\color{red!80!black}Original (\texttt{downup\_ac})}\par\medskip
+  \safeTab{#1}%
+  \bigskip
+  \noindent{\color{green!55!black}\rule{\linewidth}{1.5pt}}\par\smallskip
+  {\bfseries\color{green!55!black}New (\texttt{downup\_ac\_pop})}\par\medskip
+  \safeTab{#2}%
+}
+
+% ---------------------------------------------------------------------------
+% \evfour{<base>}{<treatment label>}
+%   2x2 grid per treatment:
+%     top row    original (_ori)            | rotated (_rotated)
+%     bottom row HonestDiD on ori (_honest1) | HonestDiD on rotated (_rot_honest1)
+% ---------------------------------------------------------------------------
+\newcommand{\evfour}[2]{%
+  \noindent
+  \begin{minipage}[t]{0.48\linewidth}
+    \centering
+    \safefig{#1_ori}{\linewidth}{}%
+    \par\vspace{3pt}%
+    {\scriptsize\textit{#2} --- original}%
+  \end{minipage}\hfill
+  \begin{minipage}[t]{0.48\linewidth}
+    \centering
+    \safefig{#1_rotated}{\linewidth}{}%
+    \par\vspace{3pt}%
+    {\scriptsize\textit{#2} --- rotated}%
+  \end{minipage}%
+  \par\vspace{0.5em}%
+  \begin{minipage}[t]{0.48\linewidth}
+    \centering
+    \safefig{#1_honest1}{\linewidth}{}%
+    \par\vspace{3pt}%
+    {\scriptsize\textit{#2} --- HonestDiD$^\dagger$ (original)}%
+  \end{minipage}\hfill
+  \begin{minipage}[t]{0.48\linewidth}
+    \centering
+    \safefig{#1_rot_honest1}{\linewidth}{}%
+    \par\vspace{3pt}%
+    {\scriptsize\textit{#2} --- HonestDiD$^\dagger$ (rotated)}%
+  \end{minipage}%
+}
+
+% ---------------------------------------------------------------------------
+% \dCDHpanel{<treatment>}{<reset>}{<variant>}{<caption text>}
+%   One 24.5%-wide subfigure for the dCDH 4-panel rows.
+% ---------------------------------------------------------------------------
+\newcommand{\dCDHpanel}[4]{%
+  \begin{subfigure}[t]{0.245\textwidth}
+    \centering
+    \safefig{dCDH_#1_#2_#3}{\linewidth}{}
+    \caption*{\scriptsize #4}
+  \end{subfigure}%
+}
+
+% ---------------------------------------------------------------------------
+\title{Comparison: \texttt{downup\_ac} vs \texttt{downup\_ac\_pop} (rural sample)}
+\author{}
+\date{\today}
+% ---------------------------------------------------------------------------
+
+\begin{document}
+\maketitle
+
+\noindent
+This document compares all rural results under the original treatment
+\texttt{downup\_ac} and the population-weighted variant \texttt{downup\_ac\_pop},
+across the full rural-replication, stacked event-study, and dCDH pipelines.
+
+\medskip\noindent
+$^\dagger$\,\textbf{HonestDiD panels (Sections~2--6):} each treatment row
+shows a 2$\times$2 grid.  Top row: original event-study coefficients
+(\texttt{\_ori}) and their rotation-based version (\texttt{\_rotated}).
+Bottom row: \emph{relative-magnitudes} sensitivity bounds from
+\texttt{HonestDiD::createSensitivityResults\_relativeMagnitudes} applied to
+the \textbf{original} coefficients (\texttt{\_honest1}) and to the
+\textbf{rotated} coefficients (\texttt{\_rot\_honest1}).  Other files on disk
+but not shown: \texttt{\_honest2} and \texttt{\_rot\_honest2}
+(smoothness-restriction bound on original and rotated, respectively).
+
+\medskip\noindent
+Missing figures or tables are flagged inline as
+{\color{red}\itshape(pending: \dots)} and do not break compilation.
+
+\tableofcontents
+\clearpage
+
+% ===========================================================================
+\section{DiD Regression Tables}
+% ===========================================================================
+
+\noindent
+Each subsection shows the original \texttt{downup\_ac} table (red rule)
+followed by the \texttt{downup\_ac\_pop} table (green rule).  Tables are
+\texttt{\textbackslash input}'d from the Dropbox \texttt{tables/} folder; the
+stems follow the pattern \texttt{<name>\_rural.tex} /
+\texttt{<name>\_rural\_acpop.tex}.
+
+% ---- 1.1 ------------------------------------------------------------------
+\subsection{Main DiD (\texttt{\_main\_1})}
+\tabpair{main_did_downup_area_ac_rural}{main_did_downup_area_ac_rural_acpop}
+\clearpage
+
+% ---- 1.2 ------------------------------------------------------------------
+\subsection{Bureaucrat $\times$ Politician DiD (\texttt{\_main\_3})}
+\tabpair{_main_3_bureau_polisc_did_rural}{_main_3_bureau_polisc_did_rural_acpop}
+\clearpage
+
+% ---- 1.3 ------------------------------------------------------------------
+\subsection{Protest 5\,km DiD (\texttt{\_main\_4})}
+\tabpair{_main_4_protest_5km_fe12_did_downup_rural}{_main_4_protest_5km_fe12_did_downup_rural_acpop}
+\clearpage
+
+% ---- 1.4 ------------------------------------------------------------------
+\subsection{Politician Characteristics DiD (\texttt{\_main\_5})}
+\tabpair{_main_5_polischar_fe12_did_downup_inter_rural}{_main_5_polischar_fe12_did_downup_inter_rural_acpop}
+\clearpage
+
+% ---- 1.5 ------------------------------------------------------------------
+\subsection{Alternative Dependent Variables (\texttt{\_app\_7})}
+\tabpair{_app_7_main_did_downup_area_ac_dv_rural}{_app_7_main_did_downup_area_ac_dv_rural_acpop}
+\clearpage
+
+% ---- 1.6 ------------------------------------------------------------------
+\subsection{DiD by Year (\texttt{\_app\_8})}
+\tabpair{_app_8_main_did_by_year_rural}{_app_8_main_did_by_year_rural_acpop}
+\clearpage
+
+% ---- 1.7 ------------------------------------------------------------------
+\subsection{DiD by State (\texttt{\_app\_9})}
+\tabpair{_app_9_main_did_by_state_rural}{_app_9_main_did_by_state_rural_acpop}
+\clearpage
+
+% ---- 1.8 ------------------------------------------------------------------
+\subsection{Rice Moderators DiD (\texttt{\_app\_10})}
+\tabpair{_app_10_did_rice_moderators_rural}{_app_10_did_rice_moderators_rural_acpop}
+\clearpage
+
+% ---- 1.9 ------------------------------------------------------------------
+\subsection{Politician Char.\ Rice Moderators (\texttt{\_app\_14})}
+\tabpair{_app_14_polischar_fe12_did_ricemods_rural}{_app_14_polischar_fe12_did_ricemods_rural_acpop}
+\clearpage
+
+% ---- 1.10 -----------------------------------------------------------------
+\subsection{Politician Char.\ DiD (\texttt{\_app\_15})}
+\tabpair{_app_15_polischar_fe12_did_rural}{_app_15_polischar_fe12_did_rural_acpop}
+\clearpage
+
+% ---- 1.11 -----------------------------------------------------------------
+\subsection{Downwind Heatmap DiD (\texttt{\_app\_20})}
+\tabpair{_app_20_did_downwind_hm_rural}{_app_20_did_downwind_hm_rural_acpop}
+\clearpage
+
+% ===========================================================================
+\section{Main Event Study (\texttt{\_main\_2})}
+% ===========================================================================
+
+\noindent
+Source: \texttt{\_replication\_rural/plotting\_event\_studies.R} and
+\texttt{\_replication\_rural\_acpop/plotting\_event\_studies.R}.
+Figures land in \texttt{tex/paper/figures/}.
+Each block: row~1 = \texttt{downup\_ac}, row~2 = \texttt{downup\_ac\_pop};
+each row is a 2$\times$2 grid (original~$|$~rotated / HonestDiD-ori$^\dagger$~$|$~HonestDiD-rotated$^\dagger$).
+
+% ---- 2.1 ------------------------------------------------------------------
+\subsection{No moderator}
+\begin{figure}[H]
+  \centering
+  \evfour{main_event_study_rural_1}{\texttt{downup\_ac}}
+  \vspace{0.8em}
+  \evfour{main_event_study_rural_acpop_1}{\texttt{downup\_ac\_pop}}
+  \caption{Main event study (\texttt{\_main\_2}), no moderator.}
+\end{figure}
+\clearpage
+
+% ---- 2.2 ------------------------------------------------------------------
+\subsection{Rice production moderator (\texttt{rice\_prod\_aclvl\_ahigh})}
+\begin{figure}[H]
+  \centering
+  \evfour{main_event_study_rural_riceP}{\texttt{downup\_ac}}
+  \vspace{0.8em}
+  \evfour{main_event_study_rural_acpop_riceP}{\texttt{downup\_ac\_pop}}
+  \caption{Main event study (\texttt{\_main\_2}), rice production moderator.}
+\end{figure}
+\clearpage
+
+% ===========================================================================
+\section{Stacked Event Study}
+% ===========================================================================
+
+\noindent
+Source: \texttt{\_replication\_rural/plotting\_event\_studies.R}
+(produces both \texttt{downup\_ac} and \texttt{downup\_ac\_pop} stacked
+results).  Each row is a 2$\times$2 grid: original~$|$~rotated /
+HonestDiD-ori$^\dagger$~$|$~HonestDiD-rotated$^\dagger$.
+
+% ---- 3.1 ------------------------------------------------------------------
+\subsection{Unbalanced panel --- no moderator}
+\begin{figure}[H]
+  \centering
+  \evfour{stacked_event_study_rural_1}{\texttt{downup\_ac}}
+  \vspace{0.8em}
+  \evfour{stacked_event_study_pop_rural_1}{\texttt{downup\_ac\_pop}}
+  \caption{Stacked event study, unbalanced panel, no moderator.}
+\end{figure}
+\clearpage
+
+% ---- 3.2 ------------------------------------------------------------------
+\subsection{Unbalanced panel --- rice production moderator}
+\begin{figure}[H]
+  \centering
+  \evfour{stacked_event_study_rural_riceP}{\texttt{downup\_ac}}
+  \vspace{0.8em}
+  \evfour{stacked_event_study_pop_rural_riceP}{\texttt{downup\_ac\_pop}}
+  \caption{Stacked event study, unbalanced panel, rice production moderator.}
+\end{figure}
+\clearpage
+
+% ---- 3.3 ------------------------------------------------------------------
+\subsection{Balanced panel --- no moderator}
+\begin{figure}[H]
+  \centering
+  \evfour{stacked_event_study_balanced_rural_1}{\texttt{downup\_ac}}
+  \vspace{0.8em}
+  \evfour{stacked_event_study_balanced_pop_rural_1}{\texttt{downup\_ac\_pop}}
+  \caption{Stacked event study, balanced panel, no moderator.}
+\end{figure}
+\clearpage
+
+% ---- 3.4 ------------------------------------------------------------------
+\subsection{Balanced panel --- rice production moderator}
+\begin{figure}[H]
+  \centering
+  \evfour{stacked_event_study_balanced_rural_riceP}{\texttt{downup\_ac}}
+  \vspace{0.8em}
+  \evfour{stacked_event_study_balanced_pop_rural_riceP}{\texttt{downup\_ac\_pop}}
+  \caption{Stacked event study, balanced panel, rice production moderator.}
+\end{figure}
+\clearpage
+
+% ===========================================================================
+\section{dCDH Event Study (de~Chaisemartin \& d'Haultf\oe{}uille)}
+% ===========================================================================
+
+\noindent
+Source: \texttt{plot\_dCDH\_event\_study.R} (reads per-fit CSVs from
+\texttt{data\_output/intermediate/dCDH/}, writes PNGs to
+\texttt{tex/paper/figures/}).
+Within each panel the top-left annotation reports ATE and SE.
+Columns within each row: \texttt{downup\_ac} no ac$\times$monthyear
+FE~$|$~\texttt{downup\_ac} with ac$\times$monthyear FE~$|$~\texttt{downup\_ac\_pop}
+no FE~$|$~\texttt{downup\_ac\_pop} with FE.
+
+% ---- 4.1 ------------------------------------------------------------------
+\subsection{No reset}
+\begin{figure}[H]
+  \centering
+  \dCDHpanel{downup_ac}{noreset}{notrend}{\texttt{downup\_ac}, no ac$\times$monthyear FE}\hfill
+  \dCDHpanel{downup_ac}{noreset}{actrend}{\texttt{downup\_ac}, with ac$\times$monthyear FE}\hfill
+  \dCDHpanel{downup_ac_pop}{noreset}{notrend}{\texttt{downup\_ac\_pop}, no ac$\times$monthyear FE}\hfill
+  \dCDHpanel{downup_ac_pop}{noreset}{actrend}{\texttt{downup\_ac\_pop}, with ac$\times$monthyear FE}
+  \caption{dCDH event study, raw panel (no reset).
+           Effects $1$:$6$, placebos $1$:$6$.}
+\end{figure}
+
+% ---- 4.2 ------------------------------------------------------------------
+\subsection{Reset every 6 same-treatment periods (\texttt{apply\_reset(6)})}
+\begin{figure}[H]
+  \centering
+  \dCDHpanel{downup_ac}{reset6}{notrend}{\texttt{downup\_ac}, no ac$\times$monthyear FE}\hfill
+  \dCDHpanel{downup_ac}{reset6}{actrend}{\texttt{downup\_ac}, with ac$\times$monthyear FE}\hfill
+  \dCDHpanel{downup_ac_pop}{reset6}{notrend}{\texttt{downup\_ac\_pop}, no ac$\times$monthyear FE}\hfill
+  \dCDHpanel{downup_ac_pop}{reset6}{actrend}{\texttt{downup\_ac\_pop}, with ac$\times$monthyear FE}
+  \caption{dCDH event study, reset every 6 same-treatment periods.
+           Effects $1$:$6$, placebos $1$:$6$.}
+\end{figure}
+
+% ---- 4.3 ------------------------------------------------------------------
+\subsection{12-month calendar buckets (\texttt{generate\_12month\_subgroups})}
+\begin{figure}[H]
+  \centering
+  \dCDHpanel{downup_ac}{reset12}{notrend}{\texttt{downup\_ac}, no ac$\times$monthyear FE}\hfill
+  \dCDHpanel{downup_ac}{reset12}{actrend}{\texttt{downup\_ac}, with ac$\times$monthyear FE}\hfill
+  \dCDHpanel{downup_ac_pop}{reset12}{notrend}{\texttt{downup\_ac\_pop}, no ac$\times$monthyear FE}\hfill
+  \dCDHpanel{downup_ac_pop}{reset12}{actrend}{\texttt{downup\_ac\_pop}, with ac$\times$monthyear FE}
+  \caption{dCDH event study, 12-month calendar buckets.
+           Effects $1$:$6$, placebos $1$:$5$.}
+\end{figure}
+\clearpage
+
+% ===========================================================================
+\section{App~16: Politician Characteristics Event Study}
+% ===========================================================================
+
+\noindent
+Source: \texttt{\_replication\_rural/plotting\_event\_studies.R} and
+\texttt{\_replication\_rural\_acpop/plotting\_event\_studies.R}.
+Each row is a 2$\times$2 grid: original~$|$~rotated / HonestDiD-ori$^\dagger$~$|$~HonestDiD-rotated$^\dagger$.
+
+% ---- 5.1 ------------------------------------------------------------------
+\subsection{No moderator}
+\begin{figure}[H]
+  \centering
+  \evfour{_app_16_polischar_fe12_evst_all_rural_1}{\texttt{downup\_ac}}
+  \vspace{0.8em}
+  \evfour{_app_16_polischar_fe12_evst_all_rural_acpop_1}{\texttt{downup\_ac\_pop}}
+  \caption{App~16: politician char.\ event study, no moderator.}
+\end{figure}
+\clearpage
+
+% ---- 5.2 ------------------------------------------------------------------
+\subsection{\texttt{downup\_ac} moderator}
+\begin{figure}[H]
+  \centering
+  \evfour{_app_16_polischar_fe12_evst_all_rural_downup_2}{\texttt{downup\_ac}}
+  \vspace{0.8em}
+  \evfour{_app_16_polischar_fe12_evst_all_rural_acpop_downup_2}{\texttt{downup\_ac\_pop}}
+  \caption{App~16: politician char.\ event study, \texttt{downup\_ac} moderator.}
+\end{figure}
+\clearpage
+
+% ---- 5.3 ------------------------------------------------------------------
+\subsection{Rice production moderator}
+\begin{figure}[H]
+  \centering
+  \evfour{_app_16_polischar_fe12_evst_all_rural_riceP_5}{\texttt{downup\_ac}}
+  \vspace{0.8em}
+  \evfour{_app_16_polischar_fe12_evst_all_rural_acpop_riceP_5}{\texttt{downup\_ac\_pop}}
+  \caption{App~16: politician char.\ event study, rice production moderator.}
+\end{figure}
+\clearpage
+
+% ===========================================================================
+\section{App~17: 5\,km Protest Event Study}
+% ===========================================================================
+
+\noindent
+Source: \texttt{\_replication\_rural/plotting\_event\_studies.R} and
+\texttt{\_replication\_rural\_acpop/plotting\_event\_studies.R}.
+Each row is a 2$\times$2 grid: original~$|$~rotated / HonestDiD-ori$^\dagger$~$|$~HonestDiD-rotated$^\dagger$.
+
+% ---- 6.1 ------------------------------------------------------------------
+\subsection{No moderator}
+\begin{figure}[H]
+  \centering
+  \evfour{_app_17_5km_fe12_evst_all_rural_1}{\texttt{downup\_ac}}
+  \vspace{0.8em}
+  \evfour{_app_17_5km_fe12_evst_all_rural_acpop_1}{\texttt{downup\_ac\_pop}}
+  \caption{App~17: 5\,km protest event study, no moderator.}
+\end{figure}
+\clearpage
+
+% ---- 6.2 ------------------------------------------------------------------
+\subsection{\texttt{downup\_ac} moderator}
+\begin{figure}[H]
+  \centering
+  \evfour{_app_17_5km_fe12_evst_all_rural_downup_2}{\texttt{downup\_ac}}
+  \vspace{0.8em}
+  \evfour{_app_17_5km_fe12_evst_all_rural_acpop_downup_2}{\texttt{downup\_ac\_pop}}
+  \caption{App~17: 5\,km protest event study, \texttt{downup\_ac} moderator.}
+\end{figure}
+\clearpage
+
+% ---- 6.3 ------------------------------------------------------------------
+\subsection{Rice production moderator}
+\begin{figure}[H]
+  \centering
+  \evfour{_app_17_5km_fe12_evst_all_rural_riceP_5}{\texttt{downup\_ac}}
+  \vspace{0.8em}
+  \evfour{_app_17_5km_fe12_evst_all_rural_acpop_riceP_5}{\texttt{downup\_ac\_pop}}
+  \caption{App~17: 5\,km protest event study, rice production moderator.}
+\end{figure}
+\clearpage
+
+% ===========================================================================
+\section{App~18: Protest Downup Interaction Plot}
+% ===========================================================================
+
+\noindent
+Source: \texttt{plotting\_interaction.do} via \texttt{interaction\_graph.ado}.
+These are pre/post interaction figures (not event-study paths) --- there is no
+ori/rotated/HonestDiD decomposition.  The moderating variable is
+\texttt{downup\_ac} (left) or \texttt{downup\_ac\_pop} (right).
+
+\begin{figure}[H]
+  \centering
+  \begin{minipage}[t]{0.48\linewidth}
+    \centering
+    \safefig{_app_18_protest_5km_fe12_did_downup_plot_rural_1}{\linewidth}{}
+    \par\vspace{3pt}{\scriptsize\texttt{downup\_ac}}
+  \end{minipage}\hfill
+  \begin{minipage}[t]{0.48\linewidth}
+    \centering
+    \safefig{_app_18_protest_5km_fe12_did_downup_plot_rural_acpop_1}{\linewidth}{}
+    \par\vspace{3pt}{\scriptsize\texttt{downup\_ac\_pop}}
+  \end{minipage}
+  \caption{App~18: protest pre/post interaction, \texttt{downup} as moderating variable.}
+\end{figure}
+\clearpage
+
+% ===========================================================================
+\section{App~19: Polischar Downup Interaction Plot}
+% ===========================================================================
+
+\noindent
+Source: \texttt{plotting\_interaction.do} via \texttt{interaction\_graph.ado}.
+The moderating variable is \texttt{downup\_ac} (left) or
+\texttt{downup\_ac\_pop} (right).
+
+\begin{figure}[H]
+  \centering
+  \begin{minipage}[t]{0.48\linewidth}
+    \centering
+    \safefig{_app_19_polischar_fe12_did_downup_inter_plot_rural_1}{\linewidth}{}
+    \par\vspace{3pt}{\scriptsize\texttt{downup\_ac}}
+  \end{minipage}\hfill
+  \begin{minipage}[t]{0.48\linewidth}
+    \centering
+    \safefig{_app_19_polischar_fe12_did_downup_inter_plot_rural_acpop_1}{\linewidth}{}
+    \par\vspace{3pt}{\scriptsize\texttt{downup\_ac\_pop}}
+  \end{minipage}
+  \caption{App~19: polischar pre/post interaction, \texttt{downup} as moderating variable.}
+\end{figure}
+
+\end{document}

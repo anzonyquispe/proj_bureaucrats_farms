@@ -1,0 +1,331 @@
+
+  ___  ____  ____  ____  ____ ®
+ /__    /   ____/   /   ____/      StataNow 19.5
+___/   /   /___/   /   /___/       MP—Parallel Edition
+
+ Statistics and Data Science       Copyright 1985-2025 StataCorp LLC
+                                   StataCorp
+                                   4905 Lakeway Drive
+                                   College Station, Texas 77845 USA
+                                   800-782-8272        https://www.stata.com
+                                   979-696-4600        service@stata.com
+
+Stata license: 4-user 16-core network, expiring 14 Sep 2026
+Serial number: 501909301589
+  Licensed to: University of Notre Dame
+               Notre Dame, IN 46556
+
+Notes:
+      1. Stata is running in batch mode.
+      2. Unicode is supported; see help unicode_advice.
+      3. More than 2 billion observations are allowed; see help obs_advice.
+      4. Maximum number of variables is set to 5,000 but can be increased;
+          see help set_maxvar.
+
+. do _main_3_bureau_polisc_did.do 
+
+. *****************************************************************************
+> ***
+. * _main_bureau_polisc_did_rural.do
+. * Replicates analysis from _main_bureau_polisc_did.R - RURAL GRIDS ONLY
+. * Generates DiD table with bureaucrat and politician downup treatments
+. *****************************************************************************
+> ***
+. 
+. *****************************************************************************
+> ***
+. * Setup - Only set globals if running standalone (not from master)
+. *****************************************************************************
+> ***
+. clear all 
+
+. macro drop _all
+
+. if "$root" == "" {
+.     clear all
+.     set more off
+. 
+.     * Set toggles for standalone run
+.     global location "shell"
+.     global sample ""
+. 
+.     global shell "/groups/sgulzar/sa_fires/proj_bureaucrats_farms"
+.     global dbox "/Users/anzony.quisperojas/Library/CloudStorage/Dropbox/sa_fi
+> res/proj_bureaucrats_farms"
+. 
+.     if "$location" == "dbox" {
+.         global root "$dbox"
+.     }
+.     else {
+.         global root "$shell"
+.     }
+. }
+
+. 
+. global int_farms "${root}/data_output/intermediate"
+
+. global table_farms "${root}/tex/paper/tables"
+
+. global figure_farms "${root}/tex/paper/figures"
+
+. 
+. *****************************************************************************
+> ***
+. * Import Data
+. *****************************************************************************
+> ***
+. 
+. import delimited "${int_farms}/0_master_merge_data_gen${sample}.csv", clear
+(encoding automatically selected: ISO-8859-2)
+(77 vars, 14,837,592 obs)
+
+. 
+. * Merge with rural classification
+. merge m:1 unique_small_grid_id using "${root}/data_output/intermediate/ghs_gr
+> id_classification_2000.dta", keepusing(is_rural)
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                        58,521
+        from master                         0  (_merge==1)
+        from using                     58,521  (_merge==2)
+
+    Matched                        14,837,592  (_merge==3)
+    -----------------------------------------
+
+. keep if _merge == 3
+(58,521 observations deleted)
+
+. drop _merge
+
+. 
+. * Keep only rural grids
+. keep if is_rural == 1
+(3,471,192 observations deleted)
+
+. 
+. display "Observations after rural filter: " _N
+Observations after rural filter: 11366400
+
+. 
+. * Drop grids with more than 1 ac
+. // merge m:1 unique_small_grid_id using "${root}/data_output/intermediate/gri
+> ds_with_more_1_ac.dta"
+. // drop if dpl_ac ==1
+. // drop _merge
+. 
+. * Create count in thousands
+. gen countk = count * 1000
+
+. 
+. * Filter data: year < 2022 or (year == 2022 & month <= 8)
+. keep if year < 2022 | (year == 2022 & month <= 8)
+(2,150,400 observations deleted)
+
+. 
+. * Sort data
+. sort unique_small_grid_id monthyear
+
+. 
+. *****************************************************************************
+> ***
+. * Create interaction variable
+. *****************************************************************************
+> ***
+. 
+. gen downup_interaction = downup_ac_pop * downup_dummy
+
+. 
+. *****************************************************************************
+> ***
+. * Encode string IDs if necessary
+. *****************************************************************************
+> ***
+. 
+. * Check if variables need encoding
+. capture confirm numeric variable unique_small_grid_id
+
+. if _rc {
+.     encode unique_small_grid_id, gen(grid_id)
+. }
+
+. else {
+.     gen grid_id = unique_small_grid_id
+. }
+
+. 
+. capture confirm numeric variable distr_id
+
+. if _rc {
+.     encode distr_id, gen(district_id)
+. }
+
+. else {
+.     gen district_id = distr_id
+. }
+
+. 
+. capture confirm numeric variable ac_uq_id
+
+. if _rc {
+.     encode ac_uq_id, gen(assembly_id)
+. }
+
+. else {
+.     gen assembly_id = ac_uq_id
+. }
+
+. 
+. *****************************************************************************
+> ***
+. * Calculate statistics for table footer
+. *****************************************************************************
+> ***
+. 
+. * Count unique assemblies
+. egen tag_assembly = tag(assembly_id)
+
+. count if tag_assembly == 1
+  808
+
+. local n_assemblies = r(N)
+
+. 
+. * Count unique districts
+. egen tag_district = tag(district_id)
+
+. count if tag_district == 1
+  160
+
+. local n_districts = r(N)
+
+. 
+. * Calculate mean DV for control group (downup_ac_pop==0 & downup_dummy==0)
+. bysort unique_small_grid_id: egen treat = max(downup_ac_pop)
+
+. summarize countk if downup_ac_pop == 0 & treat == 1
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+      countk |  3,961,926    170.7013    1067.989          0      66000
+
+. local meandv = r(mean)
+
+. 
+. 
+. summarize countk if downup_ac_pop == 0 & downup_dummy == 0 & treat == 1
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+      countk |  2,551,192    184.3283    1118.042          0      38000
+
+. local meandv2 = r(mean)
+
+. 
+. 
+. unique ac_uq_id
+Number of unique values of ac_uq_id is  808
+Number of records is  9216000
+
+. local numacs = r(unique)
+
+. unique district_id
+Number of unique values of district_id is  160
+Number of records is  9216000
+
+. local numdist = r(unique)
+
+. 
+. *****************************************************************************
+> ***
+. * DiD Regressions
+. *****************************************************************************
+> ***
+. 
+. * Controls
+. global controls av_wind_speed wind_direction
+
+. 
+. * Cluster variables
+. // egen cluster_distmonth = group(district_id monthyear)
+. 
+. * Specification 1: No FE (baseline)
+. reg countk downup_dummy downup_ac_pop downup_interaction $controls, ///
+>     vce(cluster grid_id)
+
+Linear regression                               Number of obs     =  9,216,000
+                                                F(5, 76799)       =    2865.49
+                                                Prob > F          =     0.0000
+                                                R-squared         =     0.0118
+                                                Root MSE          =     1008.1
+
+                           (Std. err. adjusted for 76,800 clusters in grid_id)
+------------------------------------------------------------------------------
+             |               Robust
+      countk | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+downup_dummy |    -28.266   2.820682   -10.02   0.000    -33.79452   -22.73748
+downup_ac_~p |  -.1438267   2.974858    -0.05   0.961    -5.974533     5.68688
+downup_int~n |    4.17629   3.886686     1.07   0.283    -3.441595    11.79417
+av_wind_sp~d |  -35.35427   1.390694   -25.42   0.000    -38.08002   -32.62851
+wind_direc~n |  -1.769363   .0151724  -116.62   0.000    -1.799101   -1.739626
+       _cons |   204.0401   2.961793    68.89   0.000      198.235    209.8452
+------------------------------------------------------------------------------
+
+. estadd scalar ymean `meandv'
+
+added scalar:
+              e(ymean) =  170.70132
+
+. estadd scalar ymean2 `meandv2'
+
+added scalar:
+             e(ymean2) =  184.32835
+
+. estadd scalar nacs `numacs'
+
+added scalar:
+               e(nacs) =  808
+
+. estadd scalar ndists `numdist'
+
+added scalar:
+             e(ndists) =  160
+
+. estadd local monthyearfe "N"
+
+added macro:
+        e(monthyearfe) : "N"
+
+. estadd local acfe "N"
+
+added macro:
+               e(acfe) : "N"
+
+. estadd local acmonthfe "N"
+
+added macro:
+          e(acmonthfe) : "N"
+
+. estadd local distmonthfe "N"
+
+added macro:
+        e(distmonthfe) : "N"
+
+. estadd local gridfe "N"
+
+added macro:
+             e(gridfe) : "N"
+
+. estimates store eq1
+
+. 
+. * Specification 2: MonthYear FE + AC FE
+. reghdfejl countk downup_dummy downup_ac_pop downup_interaction $controls, ///
+>     absorb(monthyear assembly_id) ///
+>     cluster(grid_id cluster_distmonth)
+variable cluster_distmonth not found
+r(111);
+
+end of do-file
+r(111);

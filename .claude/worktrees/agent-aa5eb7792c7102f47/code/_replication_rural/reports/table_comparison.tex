@@ -1,0 +1,251 @@
+\documentclass[10pt,landscape]{article}
+\usepackage[landscape,margin=0.5in]{geometry}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{multirow}
+\usepackage{xcolor}
+\usepackage{colortbl}
+\usepackage{tabularx}
+\usepackage{longtable}
+\usepackage{graphicx}
+\usepackage{pdflscape}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{fancyhdr}
+\usepackage{titlesec}
+\usepackage{url}
+
+\providecommand{\sym}[1]{\ifmmode^{#1}\else\(^{#1}\)\fi}
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{Table Format Comparison: Overleaf vs Dofile Output}
+\fancyhead[R]{\thepage}
+\fancyfoot[C]{\small Overleaf = target format \quad Dropbox = current dofile output}
+
+\titleformat{\section}{\normalfont\Large\bfseries\color{blue}}{\thesection}{1em}{}
+\titleformat{\subsection}{\normalfont\large\bfseries}{\thesubsection}{1em}{}
+
+\newcommand{\OV}[1]{%
+  \begin{center}
+    \colorbox{green!10}{\parbox{0.97\linewidth}{%
+      \textbf{\textcolor{green!50!black}{OVERLEAF (target format):}}\par\vspace{0.3em}
+      \centering #1
+    }}
+  \end{center}
+}
+
+\newcommand{\DB}[1]{%
+  \begin{center}
+    \colorbox{red!10}{\parbox{0.97\linewidth}{%
+      \textbf{\textcolor{red!60!black}{DROPBOX (current dofile output):}}\par\vspace{0.3em}
+      \centering #1
+    }}
+  \end{center}
+}
+
+\newcommand{\OVPATH}{/Users/anzony.quisperojas/Library/CloudStorage/Dropbox/Aplicaciones/Overleaf/sa_fires_politicians/tables}
+\newcommand{\DBPATH}{/Users/anzony.quisperojas/Library/CloudStorage/Dropbox/sa_fires/proj_bureaucrats_farms/tex/paper/tables}
+
+\begin{document}
+
+\begin{center}
+{\Huge\bfseries Table Format Comparison Report}\\[0.5em]
+{\large Overleaf target tables vs. current \texttt{\_generate\_all\_tables.do} output}\\[0.5em]
+{\normalsize Generated \today}
+\end{center}
+
+\vspace{1em}
+
+\noindent This report compares, for each of the 9 tables inputted in
+\texttt{main.tex} that are produced by
+\texttt{\_generate\_all\_tables.do}, the Overleaf version (target) against
+the current Dropbox output. The goal is to identify the formatting deltas
+that must be fixed in the dofile so that Dropbox outputs match Overleaf.
+
+\medskip
+
+\noindent\textbf{Sources:}
+\begin{itemize}\itemsep0em
+  \item Overleaf: \url{/Users/.../Overleaf/sa_fires_politicians/tables}
+  \item Dropbox:  \url{/Users/.../Dropbox/sa_fires/proj_bureaucrats_farms/tex/paper/tables}
+\end{itemize}
+
+\newpage
+
+% ========================================================================
+\section{Table 1 --- \texttt{main\_did\_downup\_area\_ac\_rural}}
+% ========================================================================
+\noindent\textbf{Dofile section:} 1.\quad
+\textbf{Source analysis:} \texttt{\_main\_1\_did.do}\\
+\textbf{Key deltas:} header text, duplicate (1)(2)(3)(4) row (missing \texttt{nonumbers}),
+stats row order (Mean DV last), label hyphenation, Assembly $\rightarrow$ N Assembly Constituencies.
+
+\OV{\input{\OVPATH/main_did_downup_area_ac_rural}}
+\DB{\input{\DBPATH/main_did_downup_area_ac_rural}}
+
+\newpage
+
+% ========================================================================
+\section{Table 2 --- \texttt{\_main\_3\_bureau\_polisc\_did\_rural}}
+% ========================================================================
+\noindent\textbf{Dofile section:} 2.\quad
+\textbf{Source analysis:} \texttt{\_main\_3\_bureau\_polisc\_did.do}\\
+\textbf{Key deltas:} header says ``N Fires $-$ Rural Grids'' vs ``Number of Fires'';
+stray \texttt{\textbackslash\textbackslash\textbackslash\textbackslash} in prehead;
+extra empty prefoot row; hyphenate ``Month-Year fe'' and ``AC x Month-Year fe'';
+drop \texttt{Mean DV2} label, show \texttt{Mean DV2} as ``Mean DV''.
+
+\OV{\input{\OVPATH/_main_3_bureau_polisc_did_rural}}
+\DB{\input{\DBPATH/_main_3_bureau_polisc_did_rural}}
+
+\newpage
+
+% ========================================================================
+\section{Table 3 --- \texttt{\_main\_4\_protest\_5km\_fe12\_did\_downup\_rural}}
+% ========================================================================
+\noindent\textbf{Dofile section:} 3.\quad
+\textbf{Source analysis:} \texttt{\_main\_4\_protest\_5km\_fe12\_did\_downup.do}\\
+\textbf{Key deltas:} header text; empty posthead row; reorder stats (FE block, then means);
+relabel Time FE $\rightarrow$ Relative Time FE;
+Mean DV2 $\rightarrow$ ``Mean DV2 (Down$>$Up=1)''; drop Mean DV3.
+
+\OV{\input{\OVPATH/_main_4_protest_5km_fe12_did_downup_rural}}
+\DB{\input{\DBPATH/_main_4_protest_5km_fe12_did_downup_rural}}
+
+\newpage
+
+% ========================================================================
+\section{Table 4 --- \texttt{\_main\_5\_polischar\_fe12\_did\_downup\_inter\_rural}}
+% ========================================================================
+\noindent\textbf{Dofile section:} 4.\quad
+\textbf{Source analysis:} \texttt{\_main\_5\_polischar\_fe12\_did\_downup\_inter.do}\\
+\textbf{Key deltas:} header text; \textbf{BUG: \texttt{govyearfe} referenced in stats but
+dofile stores \texttt{electionfe}}
+--- Election FE row is empty in current output;
+relabel to Electoral Cycle FE / Province Linear Time Trend FE / Relative Time FE;
+drop Mean DV3.
+
+\OV{\input{\OVPATH/_main_5_polischar_fe12_did_downup_inter_rural}}
+\DB{\input{\DBPATH/_main_5_polischar_fe12_did_downup_inter_rural}}
+
+\newpage
+
+% ========================================================================
+\section{Table 5 --- \texttt{\_app\_6\_main\_did\_treat\_definition\_rural}}
+% ========================================================================
+\noindent\textbf{Dofile section:} 5.\quad
+\textbf{Source analysis:} \texttt{\_app\_6\_main\_did\_treat\_definition.do}\\
+\textbf{Key deltas:} header text (add trailing space in Overleaf); hyphenate
+``Assembly $\times$ Month-Year FE''. Otherwise matches closely.
+
+\OV{\input{\OVPATH/_app_6_main_did_treat_definition_rural}}
+\DB{\input{\DBPATH/_app_6_main_did_treat_definition_rural}}
+
+\newpage
+
+% ========================================================================
+\section{Table 6 --- \texttt{\_app\_7\_main\_did\_downup\_area\_ac\_dv\_rural}}
+% ========================================================================
+\noindent\textbf{Dofile section:} 6.\quad
+\textbf{Source analysis:} \texttt{\_app\_7\_main\_did\_downup\_area\_ac\_dv.do}\\
+\textbf{Key deltas:} only difference is hyphenation of ``Assembly $\times$ Month-Year FE''.
+Column headers (Any Fire / Log Fires / Mean Brightness) match.
+
+\OV{\input{\OVPATH/_app_7_main_did_downup_area_ac_dv_rural}}
+\DB{\input{\DBPATH/_app_7_main_did_downup_area_ac_dv_rural}}
+
+\newpage
+
+% ========================================================================
+\section{Table 7 --- \texttt{\_app\_8\_main\_did\_by\_year\_rural}}
+% ========================================================================
+\noindent\textbf{Dofile section:} 7.\quad
+\textbf{Source analysis:} \texttt{\_app\_8\_main\_did\_by\_year.do}\\
+\textbf{Key deltas:} header text; remove \texttt{prefoot} empty row;
+relabel Assembly $\rightarrow$ `` N Assembly Constituencies ''; hyphenate ``Month-Year FE''.
+
+\OV{\resizebox{0.95\linewidth}{!}{\input{\OVPATH/_app_8_main_did_by_year_rural}}}
+\DB{\resizebox{0.95\linewidth}{!}{\input{\DBPATH/_app_8_main_did_by_year_rural}}}
+
+\newpage
+
+% ========================================================================
+\section{Table 8 --- \texttt{\_app\_9\_main\_did\_by\_state\_rural}}
+% ========================================================================
+\noindent\textbf{Dofile section:} 8.\quad
+\textbf{Source analysis:} \texttt{\_app\_9\_main\_did\_by\_state.do}\\
+\textbf{Key deltas:} drop `` $-$ Rural Grids'' from header (keep the ``x''); remove
+\texttt{prefoot} empty row; relabel ``Number of Assembly'' $\rightarrow$
+``N Assembly Constituencies''; hyphenate ``Assembly $\times$ Month-Year FE''.
+
+\OV{\input{\OVPATH/_app_9_main_did_by_state_rural}}
+\DB{\input{\DBPATH/_app_9_main_did_by_state_rural}}
+
+\newpage
+
+% ========================================================================
+\section{Table 9 --- \texttt{\_app\_12\_protest\_5km\_fe\_did\_rural}}
+% ========================================================================
+\noindent\textbf{Dofile section:} 11.\quad
+\textbf{Source analysis:} \texttt{\_app\_12\_protest\_5km\_fe\_did.do}\\
+\textbf{Key deltas:} header text (trailing space); reorder stats so \texttt{Mean DV} is last
+(currently sits just after Assembly).
+
+\OV{\input{\OVPATH/_app_12_protest_5km_fe_did_rural}}
+\DB{\input{\DBPATH/_app_12_protest_5km_fe_did_rural}}
+
+\newpage
+
+% ========================================================================
+\section*{Summary of fixes required in \texttt{\_generate\_all\_tables.do}}
+% ========================================================================
+
+\begin{enumerate}
+\item \textbf{Section 1} (main\_did): add \texttt{nonumbers}; change header to
+      ``Number of Fires (in 1,000 units)''; reorder stats so \texttt{ymean}
+      comes last; relabel \texttt{Assembly} $\rightarrow$ ``N Assembly Constituencies'',
+      \texttt{Month Year FE} $\rightarrow$ ``Month-Year FE'',
+      \texttt{AC x Month FE} $\rightarrow$ ``AC x Month-Year FE''.
+
+\item \textbf{Section 2} (\_main\_3): header $\rightarrow$ ``Number of Fires (in 1,000 units)'';
+      change \texttt{\textbackslash\textbackslash\textbackslash\textbackslash} $\rightarrow$
+      \texttt{\textbackslash\textbackslash} in prehead; drop prefoot row; hyphenate labels;
+      drop ``Mean DV'' (ymean) and relabel ymean2 $\rightarrow$ ``Mean DV''.
+
+\item \textbf{Section 3} (\_main\_4): header $\rightarrow$ ``Number of Fires (in 1,000 units)'';
+      reorder stats (FE block then means); ``Assembly''$\rightarrow$``N Assembly Constituencies'';
+      ``Time FE''$\rightarrow$``Relative Time FE''; ``Mean DV2''$\rightarrow$``Mean DV2 (Down$>$Up=1)'';
+      drop Mean DV3.
+
+\item \textbf{Section 4} (\_main\_5): \textbf{fix bug} \texttt{govyearfe} $\rightarrow$ \texttt{electionfe};
+      header text; reorder stats; relabel Election FE $\rightarrow$ ``Electoral Cycle FE'',
+      Time FE $\rightarrow$ ``Relative Time FE'', Province Trend FE $\rightarrow$
+      ``Province Linear Time Trend FE''; drop Mean DV3.
+
+\item \textbf{Section 5} (\_app\_6): header text; hyphenate ``Month-Year FE''.
+
+\item \textbf{Section 6} (\_app\_7): hyphenate ``Month-Year FE''.
+
+\item \textbf{Section 7} (\_app\_8): header text; remove prefoot empty row;
+      relabel ``Assembly'' $\rightarrow$ `` N Assembly Constituencies '';
+      hyphenate ``Month-Year FE''.
+
+\item \textbf{Section 8} (\_app\_9): remove `` - Rural Grids'' from header (keep ``x'');
+      remove prefoot empty row; relabel ``Number of Assembly'' $\rightarrow$
+      ``N Assembly Constituencies''; hyphenate.
+
+\item \textbf{Section 11} (\_app\_12): header text (trailing space); reorder stats
+      so \texttt{ymean} is last.
+\end{enumerate}
+
+\vspace{1em}
+
+\noindent\textbf{Not fixable from the dofile alone:} the analysis scripts
+store \texttt{ymean}/\texttt{acq} as \texttt{estadd local} (pre-formatted
+strings like ``160.300''). Since \texttt{esttab}'s \texttt{fmt()} only
+applies to scalars, the 3-decimal precision in Dropbox vs Overleaf's 1-
+or 2-decimal display cannot be changed without editing each analysis
+script's \texttt{string(mean, "\%9.3f")} $\rightarrow$ \texttt{"\%9.1f"}.
+
+\end{document}

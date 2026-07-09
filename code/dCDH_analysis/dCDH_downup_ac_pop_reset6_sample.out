@@ -1,0 +1,69 @@
+/groups/sgulzar/india_forest_land/did_stat/lib/python3.10/site-packages/did_multiplegt_dyn/did_multiplegt_main.py:3662: UserWarning: The F-test may not be reliable, because the variance of placebos is close to not being invertible (the ratio of its largest and smallest eigenvalues is 12519.3, which is larger than 1000). This can for instance happen when you compute many estimators, or when your estimates are very strongly correlated. We recommend that you complement the F-test with a sup t-test, see FAQ section of the help file for more details.
+  warnings.warn(matrix_warning_pl, UserWarning)
+[lib] ROOT   = /groups/sgulzar/sa_fires/proj_bureaucrats_farms
+[lib] SAMPLE = '_sample'
+[load] master CSV: /groups/sgulzar/sa_fires/proj_bureaucrats_farms/data_output/intermediate/0_master_merge_data_gen_sample.csv
+[load] treatment column: downup_ac_pop
+[load] rows after filters: 171,072
+[load] unique grids:       3,888
+[load] unique ac_uq_id:    728
+[reset=6] balanced panel: kept 171,072 / 171,072 rows
+[reset=6] new groups: 11,444
+[fit] dCDH_downup_ac_pop_reset6_notrend  rows=171,072  groups=11,444  effects=6  placebo=6  with_actrend=False
+================================================================================
+             Estimation of treatment effects: Event-study effects
+================================================================================
+               Block   Estimate        SE      LB CI      UB CI        N  Switchers      N.w  Switchers.w
+            Effect_1  -8.064620 15.722955 -38.881046  22.751805  75445.0    10462.0  75445.0      10462.0
+            Effect_2 -22.369112 13.726779 -49.273105   4.534880  65204.0    10351.0  65204.0      10351.0
+            Effect_3  -8.243309 15.360228 -38.348802  21.862184  55654.0     9281.0  55654.0       9281.0
+            Effect_4 -20.623057 22.147169 -64.030711  22.784596  47968.0     8723.0  47968.0       8723.0
+            Effect_5  49.590925 38.797212 -26.450214 125.632064  43288.0     8331.0  43288.0       8331.0
+            Effect_6  12.544560 37.769199 -61.481710  86.570830  40668.0     8279.0  40668.0       8279.0
+Average_Total_Effect  -1.999039 29.677915 -60.166683  56.168605 120410.0    55427.0 120410.0      55427.0
+           Placebo_1  -0.473231 20.009930 -39.691973  38.745512  64050.0     9197.0  64050.0       9197.0
+           Placebo_2 -25.343601 28.115529 -80.449026  29.761824  46705.0     7460.0  46705.0       7460.0
+           Placebo_3 -25.289469 20.193460 -64.867923  14.288985  37579.0     5190.0  37579.0       5190.0
+           Placebo_4 -39.826376 22.072390 -83.087465   3.434714  32564.0     3066.0  32564.0       3066.0
+           Placebo_5  -3.824870 11.720097 -26.795839  19.146098  25309.0     1624.0  25309.0       1624.0
+           Placebo_6  -6.767731 14.693216 -35.565905  22.030442  20876.0      429.0  20876.0        429.0
+================================================================================
+Test of joint nullity of the effects: p-value = 0.069229
+Test of joint nullity of the placebos: p-value = 0.596312
+
+The development of this package was funded by the European Union.
+ERC REALLYCREDIBLE - GA N. 101043899
+[out] wrote /groups/sgulzar/sa_fires/proj_bureaucrats_farms/data_output/intermediate/dCDH/dCDH_downup_ac_pop_reset6_notrend.csv
+[out] wrote /groups/sgulzar/sa_fires/proj_bureaucrats_farms/data_output/intermediate/dCDH/dCDH_downup_ac_pop_reset6_notrend.png
+[out] wrote /users/aquisper/proj_bureaucrats_farms/code/dCDH_analysis/dCDH_downup_ac_pop_reset6_notrend.csv
+[out] wrote /users/aquisper/proj_bureaucrats_farms/code/dCDH_analysis/dCDH_downup_ac_pop_reset6_notrend.png
+[fit] dCDH_downup_ac_pop_reset6_actrend  rows=171,072  groups=11,444  effects=6  placebo=6  with_actrend=True
+================================================================================
+             Estimation of treatment effects: Event-study effects
+================================================================================
+               Block   Estimate        SE      LB CI      UB CI       N  Switchers     N.w  Switchers.w
+            Effect_1  22.512682  1.740186  19.101980  25.923384 15082.0     5376.0 15082.0       5376.0
+            Effect_2  12.456877  3.780366   5.047495  19.866259 11672.0     4221.0 11672.0       4221.0
+            Effect_3   4.000714  7.184175 -10.080011  18.081439  9262.0     3399.0  9262.0       3399.0
+            Effect_4   5.665257  5.097032  -4.324741  15.655256  8323.0     3132.0  8323.0       3132.0
+            Effect_5 -10.882393  3.403503 -17.553137  -4.211649  7709.0     2919.0  7709.0       2919.0
+            Effect_6 -27.030140  3.324055 -33.545168 -20.515113  7425.0     2837.0  7425.0       2837.0
+Average_Total_Effect   8.185636  7.121320  -5.771896  22.143167 48199.0    21884.0 48199.0      21884.0
+           Placebo_1  23.180346  1.396469  20.443317  25.917374 11975.0     4427.0 11975.0       4427.0
+           Placebo_2 -27.852175  6.345498 -40.289122 -15.415229  7256.0     2766.0  7256.0       2766.0
+           Placebo_3 -23.044324 10.683602 -43.983799  -2.104848  4631.0     1808.0  4631.0       1808.0
+           Placebo_4 -40.315740 14.768532 -69.261532 -11.369949  2723.0     1011.0  2723.0       1011.0
+           Placebo_5  -5.053361  9.795005 -24.251218  14.144496  1428.0      554.0  1428.0        554.0
+           Placebo_6 -44.404006  4.798830 -53.809541 -34.998472   638.0      206.0   638.0        206.0
+================================================================================
+Test of joint nullity of the effects: p-value = 0.000000
+Test of joint nullity of the placebos: p-value = 0.000000
+
+WARNING: The F-test may not be reliable, because the variance of placebos is close to not being invertible (the ratio of its largest and smallest eigenvalues is 12519.3, which is larger than 1000). This can for instance happen when you compute many estimators, or when your estimates are very strongly correlated. We recommend that you complement the F-test with a sup t-test, see FAQ section of the help file for more details.
+
+The development of this package was funded by the European Union.
+ERC REALLYCREDIBLE - GA N. 101043899
+[out] wrote /groups/sgulzar/sa_fires/proj_bureaucrats_farms/data_output/intermediate/dCDH/dCDH_downup_ac_pop_reset6_actrend.csv
+[out] wrote /groups/sgulzar/sa_fires/proj_bureaucrats_farms/data_output/intermediate/dCDH/dCDH_downup_ac_pop_reset6_actrend.png
+[out] wrote /users/aquisper/proj_bureaucrats_farms/code/dCDH_analysis/dCDH_downup_ac_pop_reset6_actrend.csv
+[out] wrote /users/aquisper/proj_bureaucrats_farms/code/dCDH_analysis/dCDH_downup_ac_pop_reset6_actrend.png

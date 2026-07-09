@@ -22,16 +22,35 @@ qui do "code/tools/interaction_graph.ado"
 global tables "${root}/tex/paper/tables"
 global figures "${root}/tex/paper/figures"
 																							   
-* With STER file                                                                                 
-interaction_graph using "${tables}/_main_4_protest_5km_fe12_did_downup_rural.ster", ///                        
-  estimates(6) ///                                                                                     
-  output("${figures}/_main_4_protest_5km_fe12_did_downup_rural") ///                                         
-  type(protest) ///                                                                                    
-  modvar(moderator) 
 
+* ---- app_18 protest downup plot (rural) ------------------------------------
 est clear
-interaction_graph using "${tables}/_main_5_polischar_fe12_did_downup_inter_rural.ster", ///                        
-  estimates(6) ///                                                                                     
-  output("${figures}/_main_5_polischar_fe12_did_downup_inter_rural") ///                                         
-  type(politician) ///                                                                                    
-  modvar(moderator) yrange(-20 10)
+interaction_graph using "${tables}/_app_18_protest_5km_fe12_did_downup_plot_rural.ster", ///
+  estimates(1) ///
+  output("${figures}/_app_18_protest_5km_fe12_did_downup_plot_rural") ///
+  type(protest) ///
+  modvar(downup_ac)
+
+* ---- app_18 protest downup plot (acpop) ------------------------------------
+est clear
+interaction_graph using "${tables}/_app_18_protest_5km_fe12_did_downup_plot_rural_acpop.ster", ///
+  estimates(1) ///
+  output("${figures}/_app_18_protest_5km_fe12_did_downup_plot_rural_acpop") ///
+  type(protest) ///
+  modvar(downup_ac_pop)
+
+* ---- app_19 polischar downup inter plot (rural) ----------------------------
+est clear
+interaction_graph using "${tables}/_app_19_polischar_fe12_did_downup_inter_plot_rural.ster", ///
+  estimates(1) ///
+  output("${figures}/_app_19_polischar_fe12_did_downup_inter_plot_rural") ///
+  type(politician) ///
+  modvar(downup_ac)
+
+* ---- app_19 polischar downup inter plot (acpop) ----------------------------
+est clear
+interaction_graph using "${tables}/_app_19_polischar_fe12_did_downup_inter_plot_rural_acpop.ster", ///
+  estimates(1) ///
+  output("${figures}/_app_19_polischar_fe12_did_downup_inter_plot_rural_acpop") ///
+  type(politician) ///
+  modvar(downup_ac_pop)

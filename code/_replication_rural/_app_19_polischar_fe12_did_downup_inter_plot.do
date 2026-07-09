@@ -38,6 +38,7 @@ import delimited using "${root}/data_output/intermediate/politicians_characteris
 
 merge m:1 unique_small_grid_id ac_uq_id using  "${root}/data_output/intermediate/rice_moderators.dta"
 keep if _merge == 3
+drop _merge
 
 * Merge with rural classification
 merge m:1 unique_small_grid_id using "${root}/data_output/intermediate/ghs_grid_classification_2000.dta", keepusing(is_rural)
@@ -107,7 +108,7 @@ local numacs = r(unique)
 * Run Regressions
 ********************************************************************************
 
-reghdfejl `dep_var' `rhs', absorb(`fe12') cluster(ac_area_tr)
+reghdfejl `dep_var' `rhs', absorb(`fe12') cluster(ac_elec_yr)
 est store evreg1 
   
 estwrite evreg* using "${root}/tex/paper/tables/_app_19_polischar_fe12_did_downup_inter_plot${sample}_rural.ster", replace
@@ -115,4 +116,6 @@ estwrite evreg* using "${root}/tex/paper/tables/_app_19_polischar_fe12_did_downu
 display "Ster: ${root}/tex/paper/tables/_app_19_polischar_fe12_did_downup_inter_plot${sample}_rural.ster"
 
 ********************************************************************************
+
+
 
