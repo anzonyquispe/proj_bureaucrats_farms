@@ -7,6 +7,8 @@ library(fixest)
 library(ggfixest)
 library(marginaleffects)
 library(haven)
+library(kableExtra)
+
 
 ################################################################################
 
@@ -15,7 +17,7 @@ library(haven)
 
 dbox_root <- '/Users/anzony.quisperojas/Library/CloudStorage/Dropbox/sa_fires'
 shell_root <- '/groups/sgulzar/sa_fires'
-root <- dbox_root
+root <- shell_root
 int_farms <- file.path( root, 'proj_bureaucrats_farms/data_output/intermediate')
 table_farms <- file.path(root, 'proj_bureaucrats_farms/tex/paper/tables')
 figure_farms <- file.path(root, 'proj_bureaucrats_farms/tex/paper/figures')
@@ -93,8 +95,7 @@ desc_table <- rbindlist(results)
 numcol <- ncol(desc_table)
 # desc_table[, 2:numcol] <- round(desc_table[, 2:numcol], 3)
 
-
-library(kableExtra)
+################################################################################
 
 # --- Etiquetas legibles (edita a gusto) ---
 label_map <- c(
@@ -143,8 +144,4 @@ kbl(tex_table,
   kable_styling(latex_options = c("hold_position")) |>
   save_kable(file.path(table_farms, "_protest_stacked_descriptive.tex"))
 
-
-
-
-
-
+################################################################################
