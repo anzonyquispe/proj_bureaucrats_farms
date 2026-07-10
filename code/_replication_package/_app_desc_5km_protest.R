@@ -7,14 +7,15 @@ library(fixest)
 library(ggfixest)
 library(marginaleffects)
 library(haven)
+
 ################################################################################
 
 ################################################################################
 ####################### Setting working directory ##############################
 
-dbox_root <- 'C:/Users/Anzony/Dropbox/sa_fires'
+dbox_root <- '/Users/anzony.quisperojas/Library/CloudStorage/Dropbox/sa_fires'
 shell_root <- '/groups/sgulzar/sa_fires'
-root <- shell_root
+root <- dbox_root
 int_farms <- file.path( root, 'proj_bureaucrats_farms/data_output/intermediate')
 table_farms <- file.path(root, 'proj_bureaucrats_farms/tex/paper/tables')
 figure_farms <- file.path(root, 'proj_bureaucrats_farms/tex/paper/figures')
@@ -27,7 +28,7 @@ figure_farms <- file.path(root, 'proj_bureaucrats_farms/tex/paper/figures')
 ########################## Import Data ########################################
 
 # 1. Read data
-path1 <- file.path( int_farms, '10_pr_cluster_2022_5km.csv' )
+path1 <- file.path( int_farms, 'stacked_data_protest_sample.csv' )
 dt <- fread( path1)
 ghs <- as.data.table(read_dta(file.path( int_farms, "ghs_grid_classification_2000.dta")))
 # Set keys for fast join
@@ -39,26 +40,31 @@ dt <- ghs[dt][is_rural == 1]
 
 
 dt[, prov := .GRP, by = .(province)]
-dt[, legis.govyear := .GRP, by = .(province, election_year, yeargov)]
+dt[, legis.govyear := .GRP, by = .(province, election_year)]
 names(dt)
 path1 <- file.path(int_farms, "rice_moderators.dta")
 rice_mods <- read_stata(path1)
 
 dt <- merge(dt, rice_mods, all.x = TRUE, by =  c("unique_small_grid_id", "ac_uq_id"))
+dt$post <- dt$relative_year_bin >= 0
 dt$protest <- dt$post * dt$treat
+
 ################################################################################
 
 colsel <- c("unique_small_grid_id", 
-            "year", "month", "ac_uq_id", "prov", "ac_area_tr",
-            "protest", "count.k", "legis.govyear",
-            "rice_area_aclvl_ahigh", "rice_harvarea_aclvl_ahigh", 
-            "rice_prod_aclvl_ahigh")
+            "year", "month", "ac_uq_id", "prov", 
+            "ac_area_tr", "cohort", "legis.govyear",
+            "relative_year_bin",
+            "protest", "countk", "rice_prod_aclvl_ahigh"
+            )
 results <- list()
 
 for (v in colsel) {
   col <- dt[[v]]
   
-  if (is.numeric(col)) {
+  # test columns continuous
+  check <- v %in% c("countk", "rice_prod_aclvl_ahigh", "protest", "relative_year_bin") 
+  if (check) {
     res <- data.table(
       variable = v,
       mean = mean(col, na.rm = TRUE),
@@ -85,11 +91,57 @@ for (v in colsel) {
 # Bind into one table
 desc_table <- rbindlist(results)
 numcol <- ncol(desc_table)
-desc_table[, 2:numcol] <- round(desc_table[, 2:numcol], 3)
+# desc_table[, 2:numcol] <- round(desc_table[, 2:numcol], 3)
 
 
-fwrite(desc_table, file.path(int_farms, "_app_desc_10_5km_protest.csv"))
+library(kableExtra)
 
+# --- Etiquetas legibles (edita a gusto) ---
+label_map <- c(
+  unique_small_grid_id       = "Grid ID",
+  year                       = "Year",
+  month                      = "Month",
+  relative_year_bin          = "Relative year",
+  ac_uq_id                   = "Assembly Constituency (AC)",
+  prov                       = "Province",
+  ac_area_tr                 = "Protest Area",
+  cohort = "Cohort",
+  protest                    = "Protest",
+  countk                    = "Number of Fires",
+  legis.govyear              = "Legislature",
+  rice_prod_aclvl_ahigh      = "High Rice production (AC level)"
+)
+
+# --- Preparar tabla ---
+tex_table <- copy(desc_table)
+tex_table[, variable := label_map[variable]]
+tex_table <- tex_table[, .(variable, mean, sd, min, max, N, unique)]
+
+# Formato: 3 decimales para estadísticos, enteros con coma para conteos
+fmt_num <- function(x) {
+  out <- formatC(round(x, 3), format = "f", digits = 3, big.mark = ",")
+  out <- sub("\\.?0+$", "", out)   # quita ".000", ".500"->".5", etc.
+  ifelse(is.na(x), "", out)
+}
+fmt_int <- function(x) ifelse(is.na(x), "", formatC(x, format = "d", big.mark = ","))
+tex_table[, `:=`(
+  mean = fmt_num(mean), sd = fmt_num(sd),
+  min  = fmt_num(min),  max = fmt_num(max),
+  N = fmt_int(N), unique = fmt_int(unique)
+)]
+
+# --- Escribir .tex ---
+kbl(tex_table,
+    format    = "latex",
+    booktabs  = TRUE,
+    escape    = FALSE,
+    linesep   = "",
+    col.names = c("", "Mean", "SD", "Min", "Max", "Observations", "Unique Obs."),
+    align     = "lrrrrrr",
+    caption   = "Descriptive statistics",
+    label     = "app_desc_10_5km_protest") |>
+  kable_styling(latex_options = c("hold_position")) |>
+  save_kable(file.path(table_farms, "_protest_stacked_descriptive.tex"))
 
 
 
