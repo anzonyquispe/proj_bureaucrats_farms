@@ -17,7 +17,7 @@ library(kableExtra)
 
 dbox_root <- '/Users/anzony.quisperojas/Library/CloudStorage/Dropbox/sa_fires'
 shell_root <- '/groups/sgulzar/sa_fires'
-root <- dbox_root
+root <- shell_root
 int_farms <- file.path( root, 'proj_bureaucrats_farms/data_output/intermediate')
 table_farms <- file.path(root, 'proj_bureaucrats_farms/tex/paper/tables')
 figure_farms <- file.path(root, 'proj_bureaucrats_farms/tex/paper/figures')
