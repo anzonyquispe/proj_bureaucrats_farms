@@ -30,7 +30,7 @@ figure_farms <- file.path(root, 'proj_bureaucrats_farms/tex/paper/figures')
 ########################## Import Data ########################################
 
 # 1. Read data
-path1 <- file.path( int_farms, 'stacked_data_protest_sample.csv' )
+path1 <- file.path( int_farms, 'stacked_data_protest.csv' )
 dt <- fread( path1)
 ghs <- as.data.table(read_dta(file.path( int_farms, "ghs_grid_classification_2000.dta")))
 # Set keys for fast join
