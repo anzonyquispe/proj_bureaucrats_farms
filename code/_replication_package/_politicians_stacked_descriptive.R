@@ -30,7 +30,7 @@ figure_farms <- file.path(root, 'proj_bureaucrats_farms/tex/paper/figures')
 ########################## Import Data ########################################
 
 # 1. Read data
-path1 <- file.path( int_farms, 'stacked_data_protest.csv' )
+path1 <- file.path( int_farms, 'politicians_characteristics_sample.csv' )
 dt <- fread( path1)
 ghs <- as.data.table(read_dta(file.path( int_farms, "ghs_grid_classification_2000.dta")))
 # Set keys for fast join
@@ -49,16 +49,16 @@ rice_mods <- read_stata(path1)
 
 dt <- merge(dt, rice_mods, all.x = TRUE, by =  c("unique_small_grid_id", "ac_uq_id"))
 dt$post <- dt$relative_year_bin >= 0
-dt$protest <- dt$post * dt$treat
-
+dt$agri_politician <- dt$post * dt$treat
+dt$countk <- dt$count * 1000
 ################################################################################
 
 colsel <- c("unique_small_grid_id", 
             "year", "month", "ac_uq_id", "prov", 
-            "ac_area_tr", "cohort", "legis.govyear",
+            "election_year", "cohort", "legis.govyear",
             "relative_year_bin",
-            "protest", "countk", "rice_prod_aclvl_ahigh"
-            )
+            "agri_politician", "countk", "rice_prod_aclvl_ahigh"
+)
 results <- list()
 
 for (v in colsel) {
@@ -105,9 +105,9 @@ label_map <- c(
   relative_year_bin          = "Relative year",
   ac_uq_id                   = "Assembly Constituency (AC)",
   prov                       = "Province",
-  ac_area_tr                 = "Protest Area",
+  election_year                 = "Election Year",
   cohort = "Cohort",
-  protest                    = "Protest",
+  agri_politician = "Agricultural Politician",
   countk                    = "Number of Fires",
   legis.govyear              = "Legislature",
   rice_prod_aclvl_ahigh      = "High Rice production (AC level)"
@@ -142,6 +142,6 @@ kbl(tex_table,
     caption   = "Descriptive statistics",
     label     = "app_desc_10_5km_protest") |>
   kable_styling(latex_options = c("hold_position")) |>
-  save_kable(file.path(table_farms, "_protest_stacked_descriptive.tex"))
+  save_kable(file.path(table_farms, "_politicians_stacked_descriptive.tex"))
 
 ################################################################################
