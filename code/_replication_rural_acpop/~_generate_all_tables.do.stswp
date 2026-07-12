@@ -237,8 +237,8 @@ esttab eq1 eq2 eq3 eq4 eq5 ///
     replace ///
     cells(b(fmt(4) star) se(par fmt(4))) ///
     star(* 0.10 ** 0.05 *** 0.01) ///
-    keep(downup_ac downup_ac_pop downup_1sd_pop down_percent_pop downup_diff_percent_pop) ///
-    order(downup_ac downup_ac_pop downup_1sd_pop down_percent_pop downup_diff_percent_pop) ///
+    keep( downup_ac_pop downup_ac downup_1sd_pop down_percent_pop downup_diff_percent_pop) ///
+    order( downup_ac_pop  downup_ac downup_1sd_pop down_percent_pop downup_diff_percent_pop) ///
     varlabels(downup_ac_pop "Down\$>\$Up (Pop)" ///
               downup_ac "Down\$>\$Up (Area)" ///
               downup_1sd_pop "Down\$>\$Up by 1std" ///
