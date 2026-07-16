@@ -1,5 +1,5 @@
 cd "/groups/sgulzar/sa_fires/proj_bureaucrats_farms"
-import delimited "/data_output/intermediate/stacked_downup_neigh.csv"
+import delimited "data_output/intermediate/stacked_downup_neigh.csv"
 
 merge m:1 unique_small_grid_id using "data_output/intermediate/ghs_grid_classification_2000.dta", keepusing(is_rural)
 keep if _merge == 3
