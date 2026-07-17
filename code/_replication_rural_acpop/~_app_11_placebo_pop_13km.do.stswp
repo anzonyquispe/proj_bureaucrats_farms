@@ -125,7 +125,7 @@ local meandv = cond(r(N) == 0, ".", string(r(mean), "%9.3f"))
 * Run regressions
 forvalues i = 1/3 {
     reghdfejl countk downup_pop_13km $controls `if`i'', ///
-        absorb(grid_id#cohort ac_id#monthyear#cohort) cluster(grid_id cluster_acmonth)
+        absorb(grid_id#cohort ac_id#monthyear#) cluster(grid_id cluster_acmonth)
     estadd local gridfe    "Y"
     estadd local acmonthfe "Y"
     estadd local ymean     "`meandv'"
