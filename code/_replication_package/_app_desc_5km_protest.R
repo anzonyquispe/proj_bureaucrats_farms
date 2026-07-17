@@ -50,6 +50,7 @@ rice_mods <- read_stata(path1)
 dt <- merge(dt, rice_mods, all.x = TRUE, by =  c("unique_small_grid_id", "ac_uq_id"))
 dt$post <- dt$relative_year_bin >= 0
 dt$protest <- dt$post * dt$treat
+dt$countk <- dt$count * 1000
 
 ################################################################################
 
