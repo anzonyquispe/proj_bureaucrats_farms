@@ -106,17 +106,17 @@ if _rc {
 * Count unique ACs
 unique ac_id
 local numacs = r(unique)
-bysort unique_small_grid_id: egen treat = max(downup_ac_pop)
+bysort unique_small_grid_id: egen treat_pop = max(downup_ac_pop)
 
 global controls av_wind_speed wind_direction
 
 * Define sample conditions and labels
-local cond1 "downup_pop_13km == 0 & treat == 1"
-local cond2 "downup_pop_13km == 0 & downup_ac_pop == 1 & treat == 1"
-local cond3 "downup_pop_13km == 0 & downup_ac_pop == 0 & treat == 1"
+local cond1 "downup_pop_13km == 0 & treat_pop == 1"
+local cond2 "downup_pop_13km == 0 & downup_ac_pop == 1 & treat_pop == 1"
+local cond3 "downup_pop_13km == 0 & downup_ac_pop == 0 & treat_pop == 1"
 
-local if2 "if treat == 1"
-local if3 "if treat == 0"
+local if2 "if treat_pop == 1"
+local if3 "if treat_pop == 0"
 
 * Pre-compute means
 quietly summarize countk if downup_pop_13km == 0 & treat == 1
