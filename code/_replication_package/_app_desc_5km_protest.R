@@ -57,7 +57,7 @@ colsel <- c("unique_small_grid_id",
             "year", "month", "ac_uq_id", "prov", 
             "ac_area_tr", "cohort", "legis.govyear",
             "relative_year_bin",
-            "protest", "countk", "rice_prod_aclvl_ahigh"
+            "protest", "count.k", "rice_prod_aclvl_ahigh"
             )
 results <- list()
 
@@ -65,7 +65,7 @@ for (v in colsel) {
   col <- dt[[v]]
   
   # test columns continuous
-  check <- v %in% c("countk", "rice_prod_aclvl_ahigh", "protest", "relative_year_bin") 
+  check <- v %in% c("count.k", "rice_prod_aclvl_ahigh", "protest", "relative_year_bin") 
   if (check) {
     res <- data.table(
       variable = v,
@@ -108,7 +108,7 @@ label_map <- c(
   ac_area_tr                 = "Protest Area",
   cohort = "Cohort",
   protest                    = "Protest",
-  countk                    = "Number of Fires",
+  count.k                    = "Number of Fires",
   legis.govyear              = "Legislature",
   rice_prod_aclvl_ahigh      = "High Rice production (AC level)"
 )
