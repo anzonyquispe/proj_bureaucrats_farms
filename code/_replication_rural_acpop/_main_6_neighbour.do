@@ -13,4 +13,4 @@ replace count = count * 1000
 
 reghdfejl count b5.dist_q##b0.downwind_neighbours, abs(ac_uq_id#ac_uq_id_neighbor#month#year#cohort unique_small_grid_id#cohort ) cluster($cluster)
 est store reg1
-estwrite using "tex/paper/tables/main_figure4_neighbour.ster"
+estwrite using "tex/paper/tables/main_figure4_neighbour.ster", replace
