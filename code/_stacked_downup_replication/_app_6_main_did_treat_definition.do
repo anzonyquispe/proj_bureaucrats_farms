@@ -1,18 +1,51 @@
 ********************************************************************************
+* _app_6_main_did_treat_definition_rural.do
+* Replicates _app_main_did_treat_definition.R - RURAL GRIDS ONLY
+* DiD table comparing alternative treatment definitions
+********************************************************************************
+
+********************************************************************************
+* Setup - Only set globals if running standalone (not from master)
+********************************************************************************
+
+if "$root" == "" {
+    clear all
+    set more off
+
+    * Set toggles for standalone run
+    global location "shell"
+    global sample ""
+
+    global shell "/groups/sgulzar/sa_fires/proj_bureaucrats_farms"
+    global dbox "/Users/anzony.quisperojas/Library/CloudStorage/Dropbox/sa_fires/proj_bureaucrats_farms"
+
+    if "$location" == "dbox" {
+        global root "$dbox"
+    }
+    else {
+        global root "$shell"
+    }
+}
+
+global int_farms "${root}/data_output/intermediate"
+global table_farms "${root}/tex/paper/tables"
+global figure_farms "${root}/tex/paper/figures"
+
+********************************************************************************
 * Import Data
 ********************************************************************************
-clear all
-
-use "C:\Users\rjbar\Saadgulzar Dropbox\rbarreraf@fen.uchile.cl\sa_fires\proj_bureaucrats_farms\data_output\intermediate\combined_dt_pop.dta"
 
 * Getting downup_dummy & mean_brigthness
-merge m:1 unique_small_grid_id year month ac_uq_id using "C:\Users\rjbar\OneDrive\Desktop\_stacked_downup\merged_data6.dta"
+import delimited "${int_farms}/0_master_merge_data_gen${sample}.csv", clear
+keep ac_uq_id unique_small_grid_id downup_ac down_percent_pop downup_diff_percent_pop downwind_area_ac_nosmall upwind_area_ac_nosmall downup_1sd_pop year month
+duplicates drop unique_small_grid_id month year, force
+
+merge 1:m unique_small_grid_id month year using "${int_farms}/combined_dt_pop.dta"
 keep if _merge == 3
 drop _merge
 
-
 * Merge with rural classification
-merge m:1 unique_small_grid_id using "C:\Users\rjbar\Saadgulzar Dropbox\rbarreraf@fen.uchile.cl\sa_fires\proj_bureaucrats_farms\data_output\intermediate\ghs_grid_classification_2000.dta", keepusing(is_rural)
+merge m:1 unique_small_grid_id using "${root}/data_output/intermediate/ghs_grid_classification_2000.dta", keepusing(is_rural)
 keep if _merge == 3
 drop _merge
 
@@ -171,7 +204,7 @@ est store eq5
 * Save ster file
 ********************************************************************************
 
-estwrite eq* using "C:\Users\rjbar\OneDrive\Desktop\_stacked_downup\tables\_app_6_main_did_treat_definition_rural_acpop.ster", replace
+estwrite eq* using "${table_farms}/_app_6_main_did_treat_definition${sample}_rural_acpop.ster", replace
 
 display "Ster: ${root}/tex/paper/tables/_app_6_main_did_treat_definition${sample}_rural_acpop.ster"
 

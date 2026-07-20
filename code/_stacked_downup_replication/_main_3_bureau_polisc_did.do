@@ -36,7 +36,15 @@ global figure_farms "${root}/tex/paper/figures"
 * Import Data
 ********************************************************************************
 
-use  "${int_farms}/combined_dt_pop.dta", clear
+* Getting downup_dummy & mean_brigthness
+import delimited "${int_farms}/0_master_merge_data_gen${sample}.csv", clear
+keep ac_uq_id unique_small_grid_id downup_dummy mean_brightness distr_id year month
+duplicates drop unique_small_grid_id month year, force
+
+merge 1:m unique_small_grid_id month year using "${int_farms}/combined_dt_pop.dta"
+keep if _merge == 3
+drop _merge
+
 
 * Merge with rural classification
 merge m:1 unique_small_grid_id using "${root}/data_output/intermediate/ghs_grid_classification_2000.dta", keepusing(is_rural)
