@@ -148,8 +148,9 @@ global controls av_wind_speed wind_direction
 global cluster unique_small_grid_id#cohort distr_id#cohort#monthyear
 
 * Specification 1: No FE (baseline)
-reg countk downup_dummy downup_ac_pop downup_interaction $controls , ///
-    vce(cluster grid_id)
+reghdfejl countk downup_dummy downup_ac_pop downup_interaction $controls , ///
+    absorb(ac_id#cohort monthyear#cohort) ///
+    cluster($cluster )
 estadd scalar ymean `meandv'
 estadd scalar ymean2 `meandv2'
 estadd scalar nacs `numacs'
