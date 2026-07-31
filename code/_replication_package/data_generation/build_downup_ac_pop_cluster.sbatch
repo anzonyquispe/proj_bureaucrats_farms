@@ -3,21 +3,46 @@
 #$ -m abe
 #$ -q largemem
 #$ -N build_downup_ac_pop
-#$ -pe smp 60
+#$ -pe smp 10
 #$ -cwd
 
 set -euo pipefail
 
 ROOT="/users/aquisper/proj_bureaucrats_farms"
 CODE_DIR="${ROOT}/code/_replication_package/data_generation"
-PYTHON="/groups/sgulzar/india_forest_land/did_stat/bin/python"
+CONDA_ENV="/groups/sgulzar/india_forest_land/geo_shp"
+PYTHON="${CONDA_ENV}/bin/python"
+BRANCH="replication_data"
 
-cd "${CODE_DIR}"
+cd "${ROOT}"
 
 echo "[$(date '+%F %T')] host=$(hostname) job=${JOB_ID:-NA} pwd=$(pwd)"
-if command -v git >/dev/null 2>&1; then
-    echo "[$(date '+%F %T')] git HEAD: $(git -C "${ROOT}" rev-parse --short HEAD 2>/dev/null || echo 'not-a-git-repo')"
+echo "[$(date '+%F %T')] conda environment=${CONDA_ENV}"
+if ! command -v git >/dev/null 2>&1; then
+    echo "ERROR: git is unavailable on this compute node." >&2
+    exit 1
 fi
+if [[ ! -x "${PYTHON}" ]]; then
+    echo "ERROR: Python was not found at ${PYTHON}." >&2
+    exit 1
+fi
+if [[ -n "$(git status --porcelain --untracked-files=no)" ]]; then
+    echo "ERROR: ${ROOT} contains uncommitted changes to tracked files." >&2
+    git status --short --untracked-files=no >&2
+    exit 1
+fi
+
+echo "[$(date '+%F %T')] updating origin/${BRANCH}"
+git fetch origin "${BRANCH}"
+if git show-ref --verify --quiet "refs/heads/${BRANCH}"; then
+    git switch "${BRANCH}"
+else
+    git switch --track -c "${BRANCH}" "origin/${BRANCH}"
+fi
+git pull --ff-only origin "${BRANCH}"
+echo "[$(date '+%F %T')] git HEAD: $(git rev-parse --short HEAD)"
+
+cd "${CODE_DIR}"
 
 "${PYTHON}" -c "import duckdb"
 
