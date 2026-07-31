@@ -35,11 +35,19 @@ from typing import Any
 def configure_geospatial_data_paths() -> None:
     """Override stale inherited PROJ/GDAL paths with this Python environment."""
     prefix = Path(sys.prefix)
+    configured_proj_data = os.environ.get(
+        "PROJ_DATA", os.environ.get("PROJ_LIB", "")
+    )
     proj_candidates = [
-        prefix / "share" / "proj",
         *prefix.glob(
             "lib/python*/site-packages/pyproj/proj_dir/share/proj"
         ),
+        *(
+            Path(value)
+            for value in configured_proj_data.split(os.pathsep)
+            if value
+        ),
+        prefix / "share" / "proj",
     ]
     for candidate in proj_candidates:
         if (candidate / "proj.db").is_file():
@@ -61,6 +69,11 @@ configure_geospatial_data_paths()
 
 try:
     import duckdb
+    import pyproj
+
+    pyproj.datadir.set_data_dir(os.environ["PROJ_DATA"])
+    pyproj.CRS.from_epsg(4326)
+
     import geopandas as gpd
     import numpy as np
     import pandas as pd
@@ -70,7 +83,7 @@ try:
 except ImportError as exc:  # pragma: no cover
     raise SystemExit(
         "The area stage requires duckdb, geopandas, numpy, pandas, pyarrow, "
-        "and shapely>=2."
+        "pyproj, and shapely>=2."
     ) from exc
 
 

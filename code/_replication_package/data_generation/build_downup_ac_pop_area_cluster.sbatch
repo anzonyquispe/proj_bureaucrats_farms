@@ -11,31 +11,24 @@ set -euo pipefail
 ROOT="/users/aquisper/proj_bureaucrats_farms"
 CODE_DIR="${ROOT}/code/_replication_package/data_generation"
 CONDA_ENV="/groups/sgulzar/india_forest_land/geo_shp"
-PYTHON="${CONDA_ENV}/bin/python"
+CONDA_SH="/afs/crc.nd.edu/x86_64_linux/c/conda/24.7.1/etc/profile.d/conda.sh"
 BRANCH="replication_data"
 
-export PATH="${CONDA_ENV}/bin:${PATH}"
-export PROJ_DATA="${CONDA_ENV}/share/proj"
-if [[ ! -f "${PROJ_DATA}/proj.db" ]]; then
-    PROJ_DB="$(find "${CONDA_ENV}" -type f -name proj.db -print -quit)"
-    if [[ -z "${PROJ_DB}" ]]; then
-        echo "ERROR: proj.db was not found inside ${CONDA_ENV}." >&2
-        exit 1
-    fi
-    PROJ_DATA="$(dirname "${PROJ_DB}")"
+if [[ ! -f "${CONDA_SH}" ]]; then
+    echo "ERROR: conda initialization script was not found at ${CONDA_SH}." >&2
+    exit 1
 fi
-export PROJ_DATA
-export PROJ_LIB="${PROJ_DATA}"
-if [[ -d "${CONDA_ENV}/share/gdal" ]]; then
-    export GDAL_DATA="${CONDA_ENV}/share/gdal"
-else
-    unset GDAL_DATA || true
-fi
+# Activating the environment is required: its activation scripts select the
+# PROJ/GDAL data and native-library paths that match the installed pyproj.
+source "${CONDA_SH}"
+conda activate "${CONDA_ENV}"
+PYTHON="$(command -v python)"
 
 cd "${ROOT}"
 
 echo "[$(date '+%F %T')] host=$(hostname) job=${JOB_ID:-NA} pwd=$(pwd)"
 echo "[$(date '+%F %T')] conda environment=${CONDA_ENV}"
+echo "[$(date '+%F %T')] python=${PYTHON}"
 if ! command -v git >/dev/null 2>&1; then
     echo "ERROR: git is unavailable on this compute node." >&2
     exit 1
@@ -63,7 +56,7 @@ echo "[$(date '+%F %T')] git HEAD: $(git rev-parse --short HEAD)"
 cd "${CODE_DIR}"
 
 echo "[$(date '+%F %T')] checking Python dependencies"
-"${PYTHON}" -c "from pathlib import Path; import duckdb, geopandas, numpy, pandas, pyarrow, pyproj, shapely; assert int(shapely.__version__.split('.')[0]) >= 2; assert (Path(pyproj.datadir.get_data_dir()) / 'proj.db').is_file(); pyproj.CRS.from_epsg(4326); print('PROJ data:', pyproj.datadir.get_data_dir())"
+"${PYTHON}" -c "from pathlib import Path; import duckdb, geopandas, numpy, pandas, pyarrow, pyproj, shapely; data=pyproj.datadir.get_data_dir(); print('pyproj:', pyproj.__version__, 'PROJ:', pyproj.proj_version_str, flush=True); print('PROJ data:', data, flush=True); assert (Path(data) / 'proj.db').is_file(); pyproj.datadir.set_data_dir(data); pyproj.CRS.from_epsg(4326); assert int(shapely.__version__.split('.')[0]) >= 2"
 
 echo "[$(date '+%F %T')] stage 1/2: downwind/upwind population"
 "${PYTHON}" build_downup_ac_pop_cluster.py \
