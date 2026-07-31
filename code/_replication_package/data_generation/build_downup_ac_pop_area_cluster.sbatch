@@ -14,6 +14,24 @@ CONDA_ENV="/groups/sgulzar/india_forest_land/geo_shp"
 PYTHON="${CONDA_ENV}/bin/python"
 BRANCH="replication_data"
 
+export PATH="${CONDA_ENV}/bin:${PATH}"
+export PROJ_DATA="${CONDA_ENV}/share/proj"
+if [[ ! -f "${PROJ_DATA}/proj.db" ]]; then
+    PROJ_DB="$(find "${CONDA_ENV}" -type f -name proj.db -print -quit)"
+    if [[ -z "${PROJ_DB}" ]]; then
+        echo "ERROR: proj.db was not found inside ${CONDA_ENV}." >&2
+        exit 1
+    fi
+    PROJ_DATA="$(dirname "${PROJ_DB}")"
+fi
+export PROJ_DATA
+export PROJ_LIB="${PROJ_DATA}"
+if [[ -d "${CONDA_ENV}/share/gdal" ]]; then
+    export GDAL_DATA="${CONDA_ENV}/share/gdal"
+else
+    unset GDAL_DATA || true
+fi
+
 cd "${ROOT}"
 
 echo "[$(date '+%F %T')] host=$(hostname) job=${JOB_ID:-NA} pwd=$(pwd)"
@@ -45,7 +63,7 @@ echo "[$(date '+%F %T')] git HEAD: $(git rev-parse --short HEAD)"
 cd "${CODE_DIR}"
 
 echo "[$(date '+%F %T')] checking Python dependencies"
-"${PYTHON}" -c "import duckdb, geopandas, numpy, pandas, pyarrow, shapely; assert int(shapely.__version__.split('.')[0]) >= 2"
+"${PYTHON}" -c "from pathlib import Path; import duckdb, geopandas, numpy, pandas, pyarrow, pyproj, shapely; assert int(shapely.__version__.split('.')[0]) >= 2; assert (Path(pyproj.datadir.get_data_dir()) / 'proj.db').is_file(); pyproj.CRS.from_epsg(4326); print('PROJ data:', pyproj.datadir.get_data_dir())"
 
 echo "[$(date '+%F %T')] stage 1/2: downwind/upwind population"
 "${PYTHON}" build_downup_ac_pop_cluster.py \

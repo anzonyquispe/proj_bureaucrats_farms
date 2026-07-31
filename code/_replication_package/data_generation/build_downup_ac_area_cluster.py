@@ -31,6 +31,34 @@ from concurrent.futures import (
 from pathlib import Path
 from typing import Any
 
+
+def configure_geospatial_data_paths() -> None:
+    """Override stale inherited PROJ/GDAL paths with this Python environment."""
+    prefix = Path(sys.prefix)
+    proj_candidates = [
+        prefix / "share" / "proj",
+        *prefix.glob(
+            "lib/python*/site-packages/pyproj/proj_dir/share/proj"
+        ),
+    ]
+    for candidate in proj_candidates:
+        if (candidate / "proj.db").is_file():
+            os.environ["PROJ_DATA"] = str(candidate)
+            # PROJ_LIB supports older PROJ releases used on some cluster nodes.
+            os.environ["PROJ_LIB"] = str(candidate)
+            break
+    else:
+        raise RuntimeError(
+            f"Cannot find proj.db inside Python environment {prefix}."
+        )
+
+    gdal_candidate = prefix / "share" / "gdal"
+    if gdal_candidate.is_dir():
+        os.environ["GDAL_DATA"] = str(gdal_candidate)
+
+
+configure_geospatial_data_paths()
+
 try:
     import duckdb
     import geopandas as gpd
