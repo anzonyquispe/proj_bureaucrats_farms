@@ -31,49 +31,8 @@ from concurrent.futures import (
 from pathlib import Path
 from typing import Any
 
-
-def configure_geospatial_data_paths() -> None:
-    """Override stale inherited PROJ/GDAL paths with this Python environment."""
-    prefix = Path(sys.prefix)
-    configured_proj_data = os.environ.get(
-        "PROJ_DATA", os.environ.get("PROJ_LIB", "")
-    )
-    proj_candidates = [
-        *prefix.glob(
-            "lib/python*/site-packages/pyproj/proj_dir/share/proj"
-        ),
-        *(
-            Path(value)
-            for value in configured_proj_data.split(os.pathsep)
-            if value
-        ),
-        prefix / "share" / "proj",
-    ]
-    for candidate in proj_candidates:
-        if (candidate / "proj.db").is_file():
-            os.environ["PROJ_DATA"] = str(candidate)
-            # PROJ_LIB supports older PROJ releases used on some cluster nodes.
-            os.environ["PROJ_LIB"] = str(candidate)
-            break
-    else:
-        raise RuntimeError(
-            f"Cannot find proj.db inside Python environment {prefix}."
-        )
-
-    gdal_candidate = prefix / "share" / "gdal"
-    if gdal_candidate.is_dir():
-        os.environ["GDAL_DATA"] = str(gdal_candidate)
-
-
-configure_geospatial_data_paths()
-
 try:
     import duckdb
-    import pyproj
-
-    pyproj.datadir.set_data_dir(os.environ["PROJ_DATA"])
-    pyproj.CRS.from_epsg(4326)
-
     import geopandas as gpd
     import numpy as np
     import pandas as pd
@@ -83,7 +42,7 @@ try:
 except ImportError as exc:  # pragma: no cover
     raise SystemExit(
         "The area stage requires duckdb, geopandas, numpy, pandas, pyarrow, "
-        "pyproj, and shapely>=2."
+        "and shapely>=2."
     ) from exc
 
 

@@ -1,0 +1,17 @@
+name: downup_geo
+channels:
+  - conda-forge
+  - nodefaults
+dependencies:
+  - python=3.11
+  - python-duckdb>=1.2,<2
+  - geopandas>=1.0,<2
+  - numpy>=1.26,<3
+  - pandas>=2.2,<3
+  - pyarrow>=16
+  - pyogrio>=0.10,<1
+  - pyproj>=3.6,<4
+  - proj>=9.3,<10
+  - proj-data
+  - shapely>=2.0,<3
+  - gdal>=3.8,<4

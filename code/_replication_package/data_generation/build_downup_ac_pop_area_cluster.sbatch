@@ -10,7 +10,7 @@ set -euo pipefail
 
 ROOT="/users/aquisper/proj_bureaucrats_farms"
 CODE_DIR="${ROOT}/code/_replication_package/data_generation"
-CONDA_ENV="/groups/sgulzar/india_forest_land/geo_shp"
+CONDA_ENV="${DOWNUP_ENV_PREFIX:-/groups/sgulzar/india_forest_land/downup_geo}"
 CONDA_SH="/afs/crc.nd.edu/x86_64_linux/c/conda/24.7.1/etc/profile.d/conda.sh"
 BRANCH="replication_data"
 
@@ -18,8 +18,6 @@ if [[ ! -f "${CONDA_SH}" ]]; then
     echo "ERROR: conda initialization script was not found at ${CONDA_SH}." >&2
     exit 1
 fi
-# Activating the environment is required: its activation scripts select the
-# PROJ/GDAL data and native-library paths that match the installed pyproj.
 source "${CONDA_SH}"
 conda activate "${CONDA_ENV}"
 PYTHON="$(command -v python)"

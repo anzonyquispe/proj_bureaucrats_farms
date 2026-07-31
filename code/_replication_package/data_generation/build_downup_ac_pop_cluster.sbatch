@@ -10,14 +10,23 @@ set -euo pipefail
 
 ROOT="/users/aquisper/proj_bureaucrats_farms"
 CODE_DIR="${ROOT}/code/_replication_package/data_generation"
-CONDA_ENV="/groups/sgulzar/india_forest_land/geo_shp"
-PYTHON="${CONDA_ENV}/bin/python"
+CONDA_ENV="${DOWNUP_ENV_PREFIX:-/groups/sgulzar/india_forest_land/downup_geo}"
+CONDA_SH="/afs/crc.nd.edu/x86_64_linux/c/conda/24.7.1/etc/profile.d/conda.sh"
 BRANCH="replication_data"
+
+if [[ ! -f "${CONDA_SH}" ]]; then
+    echo "ERROR: conda initialization script was not found at ${CONDA_SH}." >&2
+    exit 1
+fi
+source "${CONDA_SH}"
+conda activate "${CONDA_ENV}"
+PYTHON="$(command -v python)"
 
 cd "${ROOT}"
 
 echo "[$(date '+%F %T')] host=$(hostname) job=${JOB_ID:-NA} pwd=$(pwd)"
 echo "[$(date '+%F %T')] conda environment=${CONDA_ENV}"
+echo "[$(date '+%F %T')] python=${PYTHON}"
 if ! command -v git >/dev/null 2>&1; then
     echo "ERROR: git is unavailable on this compute node." >&2
     exit 1
