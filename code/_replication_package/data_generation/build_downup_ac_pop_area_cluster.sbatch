@@ -3,7 +3,7 @@
 #$ -m abe
 #$ -q largemem
 #$ -N build_downup_ac_pop_area
-#$ -pe smp 60
+#$ -pe smp 10
 #$ -cwd
 
 set -euo pipefail
