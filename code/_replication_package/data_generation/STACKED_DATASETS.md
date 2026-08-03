@@ -77,13 +77,16 @@ outputs by default because its input master has just been regenerated. Set
 `STACK_OVERWRITE=0` only to resume an interrupted run against the unchanged
 master Parquet.
 
-To build the master first and release the stacked-data job only after it
-succeeds, submit both jobs from the data-generation directory:
+To build the master first and then all five stacked datasets in one cluster
+job, submit the combined shell script from the data-generation directory:
 
 ```bash
-master_job=$(qsub -terse build_0_master_dataset.sbatch)
-qsub -hold_jid "${master_job}" build_stacked_datasets.sbatch
+qsub build_master_and_stacked_datasets.sh
 ```
+
+The shell uses `set -euo pipefail`, so the stacked stage will not start if the
+master stage fails. Both stages overwrite their existing outputs. By default,
+the stacked stage runs all five registered treatments.
 
 The master job reads `9_rice_info_ac_lvl.parquet` and
 `panel_data_election_year.parquet` by default. The stack job reads the resulting
