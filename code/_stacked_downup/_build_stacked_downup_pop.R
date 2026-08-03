@@ -232,11 +232,22 @@ process_cohort <- function(c_value) {
   list(cohort = c_value, rows = n, file = out_file)
 }
 
-# ---- Run cohorts in parallel ------------------------------------------------
-message("Processing cohorts in parallel...")
-results <- mclapply(cohorts, process_cohort,
-                    mc.cores = cores,
-                    mc.preschedule = FALSE)
+# ---- Run cohorts (fork-parallel on Unix; sequential on Windows) -------------
+# parallel::mclapply relies on fork(), which does not exist on Windows, so there
+# `mc.cores > 1` errors out. Fall back to a sequential lapply on Windows (the
+# copy-on-write memory sharing that makes forking worthwhile is unavailable
+# there anyway).
+if (.Platform$OS.type == "windows" || cores == 1L) {
+  if (.Platform$OS.type == "windows" && cores > 1L) {
+    message("Windows detected: fork-based mclapply is unavailable; running cohorts sequentially.")
+  }
+  results <- lapply(cohorts, process_cohort)
+} else {
+  message("Processing cohorts in parallel...")
+  results <- mclapply(cohorts, process_cohort,
+                      mc.cores = cores,
+                      mc.preschedule = FALSE)
+}
 
 # Surface any worker errors
 errs <- vapply(results, inherits, logical(1L), what = "try-error")

@@ -15,16 +15,17 @@
 ********************************************************************************
 * Setup
 ********************************************************************************
-
+macro drop _all
+clear all
 if "$root" == "" {
     clear all
     set more off
 
-    global location "shell"
+    global location "dbox"
     global sample ""
 
     global shell "/groups/sgulzar/sa_fires/proj_bureaucrats_farms"
-    global dbox "/Users/anzony.quisperojas/Library/CloudStorage/Dropbox/sa_fires/proj_bureaucrats_farms"
+    global dbox "C:/Users/eunic/Dropbox/sa_fires/proj_bureaucrats_farms"
 
     if "$location" == "dbox" {
         global root "$dbox"
@@ -393,6 +394,61 @@ esttab eq1 eq2 eq3 ///
 
 display "Generated: _app_10_did_rice_moderators_rural_acpop.tex"
 
+
+********************************************************************************
+* 11. Population Placebo Within 13 km
+********************************************************************************
+
+est clear
+
+estread using ///
+    "${tables}/_app_11_placebo_pop_13km${sample}_rural.ster"
+
+esttab eq1 eq2 eq3  ///
+    using "${tables}/_app_11_placebo_pop_13km${sample}_rural.tex", ///
+    replace ///
+    cells(b(fmt(3) star) se(par fmt(3))) ///
+    star(* 0.10 ** 0.05 *** 0.01) ///
+    keep(downup_pop_13km) ///
+    order(downup_pop_13km) ///
+    varlabels( ///
+        downup_pop_13km ///
+        "Down\$>\$up (Placebo)" ///
+    ) ///
+    stats(N acq gridfe acmonthfe ymean, ///
+        fmt(%12.0fc %12.0fc %s %s 3) ///
+        labels( ///
+            "Observations" ///
+            "N Assembly Constituencies" ///
+            "Grid \$\times\$ Cohort FE" ///
+            "AC \$\times\$ Month-Year \$\times\$ Cohort FE" ///
+            "Mean DV" ///
+        ) ///
+    ) ///
+    nomtitles ///
+    nonumbers ///
+    collabels(none) ///
+    nobaselevels ///
+    prehead( ///
+        "\begin{tabular}{lccc}" ///
+        "\hline" ///
+        "& \multicolumn{3}{c}{Number of Fires (in 1,000 units)}\\" ///
+        "& Full Sample & Treated for Politicians & Control for Politicians \\" ///
+        "& (1) & (2) & (3) \\" ///
+        "\midrule" ///
+    ) ///
+    posthead("") ///
+    prefoot("\hline") ///
+    postfoot( ///
+        "\hline" ///
+        "\end{tabular}" ///
+    )
+
+display as result ///
+    "Generated: _app_11_placebo_pop_13km${sample}_rural.tex"
+	
+	
+	
 ********************************************************************************
 * 9. Politician Rice Mods (_app_14_polischar_fe12_did_ricemods)
 ********************************************************************************

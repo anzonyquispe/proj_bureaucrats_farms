@@ -2,8 +2,8 @@
 #$ -M anzony.quispe@gmail.com
 #$ -m abe
 #$ -q largemem
-#$ -N main_5_pol_acp
-#$ -pe smp 5
+#$ -N app11_placebo
+#$ -pe smp 4
 #$ -cwd
 
 # -----------------------------------------------------------------------------
@@ -33,7 +33,7 @@ mkdir -p "${TMPDIR}"
 trap 'rm -rf "${TMPDIR}"' EXIT
 
 # Wipe the prior Stata log for this dofile so we read only this run's output.
-DOFILE="_main_5_polischar_fe12_did_downup_inter.do"
+DOFILE="_app_11_placebo_pop_13km.do"
 rm -f "${DOFILE%.do}.log"
 
 stata-mp -b do "${DOFILE}"

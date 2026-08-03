@@ -2,9 +2,9 @@
 #$ -M rj.barrera.fuentes@gmail.com
 #$ -m abe
 #$ -q largemem
-#$ -N main_1_did_acp_stkd
+#$ -N app_11_placebo
 #$ -pe smp 2
 #$ -cwd
 
 module load stata gcc
-stata-mp -b do _main_1_did.do
+stata-mp -b do _app_11_placebo_pop_13km.do

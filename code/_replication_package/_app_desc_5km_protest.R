@@ -15,7 +15,7 @@ library(kableExtra)
 ################################################################################
 ####################### Setting working directory ##############################
 
-dbox_root <- '/Users/anzony.quisperojas/Library/CloudStorage/Dropbox/sa_fires'
+dbox_root <- 'C:/Users/eunic/Dropbox/sa_fires'
 shell_root <- '/groups/sgulzar/sa_fires'
 root <- shell_root
 int_farms <- file.path( root, 'proj_bureaucrats_farms/data_output/intermediate')
@@ -57,7 +57,7 @@ colsel <- c("unique_small_grid_id",
             "year", "month", "ac_uq_id", "prov", 
             "ac_area_tr", "cohort", "legis.govyear",
             "relative_year_bin",
-            "protest", "countk", "rice_prod_aclvl_ahigh"
+            "protest", "count.k", "rice_prod_aclvl_ahigh"
             )
 results <- list()
 
@@ -65,7 +65,7 @@ for (v in colsel) {
   col <- dt[[v]]
   
   # test columns continuous
-  check <- v %in% c("countk", "rice_prod_aclvl_ahigh", "protest", "relative_year_bin") 
+  check <- v %in% c("count.k", "rice_prod_aclvl_ahigh", "protest", "relative_year_bin") 
   if (check) {
     res <- data.table(
       variable = v,
@@ -108,7 +108,7 @@ label_map <- c(
   ac_area_tr                 = "Protest Area",
   cohort = "Cohort",
   protest                    = "Protest",
-  countk                    = "Number of Fires",
+  count.k                    = "Number of Fires",
   legis.govyear              = "Legislature",
   rice_prod_aclvl_ahigh      = "High Rice production (AC level)"
 )
@@ -121,7 +121,7 @@ tex_table <- tex_table[, .(variable, mean, sd, min, max, N, unique)]
 # Formato: 3 decimales para estadísticos, enteros con coma para conteos
 fmt_num <- function(x) {
   out <- formatC(round(x, 3), format = "f", digits = 3, big.mark = ",")
-  out <- sub("\\.?0+$", "", out)   # quita ".000", ".500"->".5", etc.
+  out <- sub("//.?0+$", "", out)   # quita ".000", ".500"->".5", etc.
   ifelse(is.na(x), "", out)
 }
 fmt_int <- function(x) ifelse(is.na(x), "", formatC(x, format = "d", big.mark = ","))

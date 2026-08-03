@@ -35,7 +35,18 @@ global figure_farms "${root}/tex/paper/figures"
 * Import Data
 ********************************************************************************
 
-import delimited "${int_farms}/combined_dt_pop.csv", clear
+import delimited "${root}/data_output/intermediate/combined_dt_pop.csv", clear
+
+preserve
+		import delimited using "${root}/data_output/intermediate/0_master_dataset.csv", ///
+    clear varnames(1)
+		keep unique_small_grid_id month year downup_ac downup_dummy
+		tempfile dta
+		save `dta'
+	restore
+	
+	merge m:1 unique_small_grid_id month year using `dta', keep(3) nogen
+	
 
 * Merge with rural classification
 merge m:1 unique_small_grid_id using "${root}/data_output/intermediate/ghs_grid_classification_2000.dta", keepusing(is_rural)
@@ -50,6 +61,12 @@ display "Observations after rural filter: " _N
 * Drop grids with more than 1 ac
 merge m:1 unique_small_grid_id using "${root}/data_output/intermediate/grids_with_more_1_ac.dta"
 drop if dpl_ac ==1
+drop _merge
+
+
+* Getting downup_dummy & mean_brigthness
+merge m:1 unique_small_grid_id month year ac_uq_id using "${root}/data_output/intermediate/merged_data.dta"
+keep if _merge == 3
 drop _merge
 
 * Create count in thousands
@@ -113,11 +130,24 @@ global controls av_wind_speed wind_direction
 * Cluster variables
 global cluster ac_uq_id#cohort#monthyear unique_small_grid_id#cohort
 
-
+qui reghdfejl countk downup_dummy $controls , ///
+    absorb(grid_id#cohort ac_id#monthyear#cohort) ///
+    cluster($cluster )
+	gen esample4 = e(sample)
+	
+qui reghdfejl countk downup_dummy $controls , ///
+    absorb(ac_id#monthyear#cohort) ///
+    cluster($cluster )
+	gen esample3 = e(sample)
+	
+	
 * Specification 1: No FE (baseline with controls only)
-reg countk downup_ac $controls, vce(cluster grid_id)
+reghdfejl countk downup_dummy $controls if esample4 == 1 & esample3 == 1 , ///
+	cluster($cluster ) ///
+	absorb(cohort ) ///
 estadd local ymean `meandv_fmt'
 estadd local acq `numacs'
+estadd local cohortt "Y"
 estadd local monthyearfe "N"
 estadd local acfe "N"
 estadd local acmonthfe "N"
@@ -125,11 +155,13 @@ estadd local gridfe "N"
 estimates store eq1
 
 * Specification 2: AC FE + MonthYear FE
-reghdfejl countk downup_ac $controls, ///
+reghdfejl countk downup_dummy $controls if esample4 == 1 & esample3 == 1 , ///
+	cluster($cluster ) ///
     absorb(ac_id#cohort monthyear#cohort) ///
     cluster($cluster)
 estadd local ymean `meandv_fmt'
 estadd local acq `numacs'
+estadd local cohortt "N"
 estadd local monthyearfe "Y"
 estadd local acfe "Y"
 estadd local acmonthfe "N"
@@ -137,11 +169,13 @@ estadd local gridfe "N"
 estimates store eq2
 
 * Specification 3: AC x MonthYear FE
-reghdfejl countk downup_ac $controls, ///
+reghdfejl countk downup_dummy $controls if esample4 == 1 & esample3 == 1 , ///
+	cluster($cluster ) ///
     absorb(ac_id#monthyear#cohort) ///
     cluster($cluster)
 estadd local ymean `meandv_fmt'
 estadd local acq `numacs'
+estadd local cohortt "N"
 estadd local monthyearfe "N"
 estadd local acfe "N"
 estadd local acmonthfe "Y"
@@ -149,16 +183,19 @@ estadd local gridfe "N"
 estimates store eq3
 
 * Specification 4: Grid FE + AC x MonthYear FE
-reghdfejl countk downup_ac $controls, ///
+reghdfejl countk downup_dummy $controls if esample4 == 1 & esample3 == 1 , ///
+	cluster($cluster ) ///
     absorb(grid_id#cohort ac_id#monthyear#cohort) ///
-    cluster($cluster)
+    cluster($cluster )
 estadd local ymean `meandv_fmt'
 estadd local acq `numacs'
+estadd local cohortt "N"
 estadd local monthyearfe "N"
 estadd local acfe "N"
 estadd local acmonthfe "Y"
 estadd local gridfe "Y"
 estimates store eq4
+
 
 ********************************************************************************
 * Save estimates to ster file

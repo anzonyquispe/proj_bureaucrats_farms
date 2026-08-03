@@ -35,7 +35,8 @@ global figure_farms "${root}/tex/paper/figures"
 * Import Data
 ********************************************************************************
 
-use  "${int_farms}/combined_dt_pop.dta", clear
+import delimited "${root}/data_output/intermediate/combined_dt_pop.csv", clear
+
 
 * Merge with rural classification
 merge m:1 unique_small_grid_id using "${root}/data_output/intermediate/ghs_grid_classification_2000.dta", keepusing(is_rural)
@@ -44,13 +45,13 @@ drop _merge
 
 * Keep only rural grids
 keep if is_rural == 1
-
+keep if relative_monthyear >= -5 & relative_monthyear <= 6
 display "Observations after rural filter: " _N
 
 * Drop grids with more than 1 ac
-merge m:1 unique_small_grid_id using "${root}/data_output/intermediate/grids_with_more_1_ac.dta"
-drop if dpl_ac ==1
-drop _merge
+// merge m:1 unique_small_grid_id using "${root}/data_output/intermediate/grids_with_more_1_ac.dta"
+// drop if dpl_ac ==1
+// drop _merge
 
 * Create count in thousands
 gen countk = count * 1000
@@ -65,7 +66,7 @@ sort unique_small_grid_id monthyear
 * Create TREAT_abs variable (to identify pure control)
 ********************************************************************************
 
-bysort unique_small_grid_id: egen TREAT_abs = max(downup_ac)
+bysort unique_small_grid_id: egen TREAT_abs = max(downup_ac_pop)
 
 ********************************************************************************
 * Encode string IDs if necessary
@@ -91,19 +92,6 @@ else {
 * Calculate statistics for table footer
 ********************************************************************************
 
-* Calculate mean DV for control group (downup_ac==0 & TREAT_abs==1)
-summarize countk if downup_ac == 0 & TREAT_abs == 1
-local meandv = r(mean)
-local meandv_fmt = string(`meandv', "%9.3f")
-
-* Count unique ACs
-unique ac_id
-local numacs = r(unique)
-
-********************************************************************************
-* DiD Regressions
-********************************************************************************
-
 * FE
 global setfe ac_id#cohort ac_id#monthyear#cohort
 
@@ -113,11 +101,37 @@ global controls av_wind_speed wind_direction
 * Cluster variables
 global cluster ac_uq_id#cohort#monthyear unique_small_grid_id#cohort
 
+qui reghdfejl countk downup_ac_pop $controls , ///
+    absorb(grid_id#cohort ac_id#monthyear#cohort) ///
+    cluster($cluster )
+	gen esample4 = e(sample)
+	
+qui reghdfejl countk downup_ac_pop $controls , ///
+    absorb(ac_id#monthyear#cohort) ///
+    cluster($cluster )
+	gen esample3 = e(sample)
+	
+
+* Calculate mean DV for control group (downup_ac==0 & TREAT_abs==1)
+summarize countk if downup_ac_pop == 0 & TREAT_abs == 1 & esample3 == 1 & esample4 == 1
+local meandv = r(mean)
+local meandv_fmt = string(`meandv', "%9.3f")
+
+* Count unique ACs
+unique ac_id if esample3 == 1 & esample4 == 1
+local numacs = r(unique)
+
+********************************************************************************
+* DiD Regressions
+********************************************************************************
 
 * Specification 1: No FE (baseline with controls only)
-reg countk downup_ac $controls, vce(cluster grid_id)
+reghdfejl countk downup_ac_pop $controls if esample4 == 1 & esample3 == 1 , ///
+	cluster($cluster ) ///
+	absorb(cohort ) ///
 estadd local ymean `meandv_fmt'
 estadd local acq `numacs'
+estadd local cohortt "Y"
 estadd local monthyearfe "N"
 estadd local acfe "N"
 estadd local acmonthfe "N"
@@ -125,11 +139,13 @@ estadd local gridfe "N"
 estimates store eq1
 
 * Specification 2: AC FE + MonthYear FE
-reghdfejl countk downup_ac $controls, ///
+reghdfejl countk downup_ac_pop $controls if esample4 == 1 & esample3 == 1 , ///
+	cluster($cluster ) ///
     absorb(ac_id#cohort monthyear#cohort) ///
     cluster($cluster)
 estadd local ymean `meandv_fmt'
 estadd local acq `numacs'
+estadd local cohortt "N"
 estadd local monthyearfe "Y"
 estadd local acfe "Y"
 estadd local acmonthfe "N"
@@ -137,11 +153,13 @@ estadd local gridfe "N"
 estimates store eq2
 
 * Specification 3: AC x MonthYear FE
-reghdfejl countk downup_ac $controls, ///
+reghdfejl countk downup_ac_pop $controls if esample4 == 1 & esample3 == 1 , ///
+	cluster($cluster ) ///
     absorb(ac_id#monthyear#cohort) ///
     cluster($cluster)
 estadd local ymean `meandv_fmt'
 estadd local acq `numacs'
+estadd local cohortt "N"
 estadd local monthyearfe "N"
 estadd local acfe "N"
 estadd local acmonthfe "Y"
@@ -149,23 +167,27 @@ estadd local gridfe "N"
 estimates store eq3
 
 * Specification 4: Grid FE + AC x MonthYear FE
-reghdfejl countk downup_ac $controls, ///
+reghdfejl countk downup_ac_pop $controls if esample4 == 1 & esample3 == 1 , ///
+	cluster($cluster ) ///
     absorb(grid_id#cohort ac_id#monthyear#cohort) ///
-    cluster($cluster)
+    cluster($cluster )
 estadd local ymean `meandv_fmt'
 estadd local acq `numacs'
+estadd local cohortt "N"
 estadd local monthyearfe "N"
 estadd local acfe "N"
 estadd local acmonthfe "Y"
 estadd local gridfe "Y"
 estimates store eq4
 
+
 ********************************************************************************
 * Save estimates to ster file
 ********************************************************************************
 
-estwrite eq1 eq2 eq3 eq4 using "${table_farms}/main_did_downup_area_ac_rural_stacked.ster", replace
+estwrite eq1 eq2 eq3 eq4 using "${table_farms}/main_did_downup_pop_ac_rural_stacked.ster", replace
 
-display "Estimates saved to: ${table_farms}/main_did_downup_area_ac_rural_stacked.ster"
+display "Estimates saved to: ${table_farms}/main_did_downup_pop_ac_rural_stacked.ster"
 
+********************************************************************************
 ********************************************************************************

@@ -30,7 +30,6 @@ cd "${root}"
 global int_farms "${root}/data_output/intermediate"
 global table_farms "${root}/tex/paper/tables"
 global figure_farms "${root}/tex/paper/figures"
-
 ********************************************************************************
 * Import Data
 ********************************************************************************

@@ -2,11 +2,11 @@
 ###############################################################################
 # _build_stacked_downup_pop.R
 #
-# Mirror of _build_stacked_downup.R, but uses downup_ac_pop (population-based
+# Mirror of _build_stacked_downup.R, but uses downwind_neighbours (population-based
 # down/up treatment) instead of downup_ac to detect 0 -> 1 switching events.
 #
 # Differences vs. _build_stacked_downup.R:
-#   * Treatment variable is downup_ac_pop (downup_ac is NOT read).
+#   * Treatment variable is downwind_neighbours (downup_ac is NOT read).
 #   * Per-cohort files are written as Stata .dta (not .csv) into
 #       DOWNLOADS_DIR/stacked_downup_pop<sample>/cohort_<c>.dta
 #     (default DOWNLOADS_DIR = /Users/anzony.quisperojas/Downloads/stackedata).
@@ -25,23 +25,23 @@
 #
 # Algorithm  (per cohort c)
 # -------------------------
-#   1. Treated grids = grids with a 0 -> 1 transition in downup_ac_pop at c.
+#   1. Treated grids = grids with a 0 -> 1 transition in downwind_neighbours at c.
 #   2. Cohort window [t_min, t_max], pooled across treated grids:
-#        t_min = min(monthyear) when downup_ac_pop == 0
-#        t_max = max(monthyear) when downup_ac_pop == 1
+#        t_min = min(monthyear) when downwind_neighbours == 0
+#        t_max = max(monthyear) when downwind_neighbours == 1
 #   3. Treated rows: contiguous "clean" stretch around c per grid
-#        d_pre  = latest monthyear < c with downup_ac_pop == 1   (or -Inf)
-#        d_post = earliest monthyear > c with downup_ac_pop == 0 (or +Inf)
+#        d_pre  = latest monthyear < c with downwind_neighbours == 1   (or -Inf)
+#        d_post = earliest monthyear > c with downwind_neighbours == 0 (or +Inf)
 #      intersected with [t_min, t_max].
-#   4. Control rows: any grid not treated at c whose downup_ac_pop is 0 in a
+#   4. Control rows: any grid not treated at c whose downwind_neighbours is 0 in a
 #      contiguous stretch covering c:
-#        d_pre  = latest monthyear < c with downup_ac_pop == 1   (or -Inf)
-#        d_post = earliest monthyear > c with downup_ac_pop == 1 (or +Inf)
+#        d_pre  = latest monthyear < c with downwind_neighbours == 1   (or -Inf)
+#        d_post = earliest monthyear > c with downwind_neighbours == 1 (or +Inf)
 #      intersected with [t_min, t_max].
 #
 # Per-cohort output columns:
 #   unique_small_grid_id, month, year, monthyear, province, ac_uq_id,
-#   downup_ac_pop, count, av_wind_speed, wind_direction, rice_prod_aclvl_ahigh,
+#   downwind_neighbours, count, av_wind_speed, wind_direction, rice_prod_aclvl_ahigh,
 #   treat, cohort, relative_monthyear
 #
 # Toggles (env vars; defaults match _main_1_did.do):
@@ -68,21 +68,21 @@ if (is.na(cores) || cores < 1L) cores <- 1L
 shell_root <- Sys.getenv("SHELL_ROOT",
   "/groups/sgulzar/sa_fires/proj_bureaucrats_farms")
 dbox_root  <- Sys.getenv("DBOX_ROOT",
-  "/Users/anzony.quisperojas/Library/CloudStorage/Dropbox/sa_fires/proj_bureaucrats_farms")
+  "C:/Users/Anzony/Dropbox/sa_fires/proj_bureaucrats_farms")
 root <- if (location == "shell") shell_root else dbox_root
 
 downloads_dir <- Sys.getenv("DOWNLOADS_DIR",
-  "/Users/anzony.quisperojas/Downloads/stackedata")
+  "C:/Users/Anzony/Downloads/stackdata")
 
 input_path <- file.path(root, "data_output", "intermediate",
-                       paste0("0_master_merge_data_gen", sample_tag, ".csv"))
+                       paste0("10_ac_neighs_downup", sample_tag, ".csv"))
 
 # Try the user-facing Downloads dir first. Fall back to the intermediate dir
 # if the parent doesn't exist (e.g. running on the cluster).
 primary_output_dir  <- file.path(downloads_dir,
-                                paste0("stacked_downup_pop", sample_tag))
+                                paste0("stacked_downup_neigh", sample_tag))
 fallback_output_dir <- file.path(root, "data_output", "intermediate",
-                                paste0("stacked_downup_pop", sample_tag))
+                                paste0("stacked_downup_neigh", sample_tag))
 
 output_dir <- tryCatch({
   dir.create(primary_output_dir, showWarnings = FALSE, recursive = TRUE)
@@ -101,8 +101,8 @@ setDTthreads(1L)
 
 # ---- Load -------------------------------------------------------------------
 keep_cols <- c("unique_small_grid_id", "month", "year", "monthyear",
-               "province", "ac_uq_id", "downup_ac_pop", "count",
-               "av_wind_speed", "wind_direction", "rice_prod_aclvl_ahigh")
+               "province", "ac_uq_id", "ac_uq_id_neighbor", "downwind_neighbours", 
+               "count", "av_wind_speed", "wind_direction", "dist_q")
 
 message("Reading: ", input_path)
 dt <- fread(input_path, select = keep_cols)
@@ -112,13 +112,13 @@ if (length(missing) > 0L) {
   stop("Input is missing required columns: ", paste(missing, collapse = ", "))
 }
 
-dt[, downup_ac_pop := as.integer(downup_ac_pop)]
+dt[, downwind_neighbours := as.integer(downwind_neighbours)]
 setorder(dt, unique_small_grid_id, monthyear)
 
 # ---- Detect 0 -> 1 switching events ----------------------------------------
-dt[, downup_lag := shift(downup_ac_pop, 1L, type = "lag"),
+dt[, downup_lag := shift(downwind_neighbours, 1L, type = "lag"),
    by = unique_small_grid_id]
-dt[, is_switch  := !is.na(downup_lag) & downup_lag == 0L & downup_ac_pop == 1L]
+dt[, is_switch  := !is.na(downup_lag) & downup_lag == 0L & downwind_neighbours == 1L]
 
 cohorts   <- sort(unique(dt[is_switch == TRUE, monthyear]))
 all_grids <- unique(dt$unique_small_grid_id)
@@ -140,9 +140,9 @@ process_cohort <- function(c_value) {
   if (length(treated_grids) == 0L) return(list(cohort = c_value, rows = 0L, file = NA_character_))
 
   # 2. Cohort window pooled across treated grids
-  t_min <- dt[unique_small_grid_id %in% treated_grids & downup_ac_pop == 0L,
+  t_min <- dt[unique_small_grid_id %in% treated_grids & downwind_neighbours == 0L,
               min(monthyear, na.rm = TRUE)]
-  t_max <- dt[unique_small_grid_id %in% treated_grids & downup_ac_pop == 1L,
+  t_max <- dt[unique_small_grid_id %in% treated_grids & downwind_neighbours == 1L,
               max(monthyear, na.rm = TRUE)]
   if (!is.finite(t_min) || !is.finite(t_max)) {
     return(list(cohort = c_value, rows = 0L, file = NA_character_))
@@ -150,11 +150,11 @@ process_cohort <- function(c_value) {
 
   # 3. Treated rows -- contiguous clean window around c, per grid
   treated_pre  <- dt[unique_small_grid_id %in% treated_grids &
-                     monthyear < c_value & downup_ac_pop == 1L,
+                     monthyear < c_value & downwind_neighbours == 1L,
                      .(d_pre = max(monthyear)),
                      by = unique_small_grid_id]
   treated_post <- dt[unique_small_grid_id %in% treated_grids &
-                     monthyear > c_value & downup_ac_pop == 0L,
+                     monthyear > c_value & downwind_neighbours == 0L,
                      .(d_post = min(monthyear)),
                      by = unique_small_grid_id]
   treated_bounds <- data.table(unique_small_grid_id = treated_grids)
@@ -176,7 +176,7 @@ process_cohort <- function(c_value) {
   # 4. Control candidates -- any other grid that is not treated at c
   ctrl_candidates <- setdiff(all_grids, treated_grids)
   treated_at_c <- dt[unique_small_grid_id %in% ctrl_candidates &
-                     monthyear == c_value & downup_ac_pop == 1L,
+                     monthyear == c_value & downwind_neighbours == 1L,
                      unique(unique_small_grid_id)]
   ctrl_candidates <- setdiff(ctrl_candidates, treated_at_c)
 
@@ -185,11 +185,11 @@ process_cohort <- function(c_value) {
   } else {
     # 5. Control rows
     ctrl_pre  <- dt[unique_small_grid_id %in% ctrl_candidates &
-                    monthyear < c_value & downup_ac_pop == 1L,
+                    monthyear < c_value & downwind_neighbours == 1L,
                     .(d_pre = max(monthyear)),
                     by = unique_small_grid_id]
     ctrl_post <- dt[unique_small_grid_id %in% ctrl_candidates &
-                    monthyear > c_value & downup_ac_pop == 1L,
+                    monthyear > c_value & downwind_neighbours == 1L,
                     .(d_post = min(monthyear)),
                     by = unique_small_grid_id]
     ctrl_bounds <- data.table(unique_small_grid_id = ctrl_candidates)
@@ -202,7 +202,7 @@ process_cohort <- function(c_value) {
 
     ctrl_data <- dt[unique_small_grid_id %in% ctrl_candidates &
                     monthyear >= t_min & monthyear <= t_max &
-                    downup_ac_pop == 0L]
+                    downwind_neighbours == 0L]
     ctrl_data <- merge(ctrl_data, ctrl_bounds,
                        by = "unique_small_grid_id")
     ctrl_data <- ctrl_data[monthyear > d_pre & monthyear < d_post]

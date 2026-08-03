@@ -37,13 +37,21 @@ global figure_farms "${root}/tex/paper/figures"
 ********************************************************************************
 
 * Getting downup_dummy & mean_brigthness
-import delimited "${int_farms}/0_master_merge_data_gen${sample}.csv", clear
-keep ac_uq_id unique_small_grid_id downup_dummy mean_brightness distr_id year month
-duplicates drop unique_small_grid_id month year, force
+import delimited "${root}/data_output/intermediate/combined_dt_pop.csv", clear
 
-merge 1:m unique_small_grid_id month year using "${int_farms}/combined_dt_pop.dta"
-keep if _merge == 3
-drop _merge
+preserve
+		import delimited using "${root}/data_output/intermediate/0_master_dataset.csv", ///
+    clear varnames(1)
+	d*
+	
+		keep ac_uq_id unique_small_grid_id year month downup_dummy mean_brightness 
+
+		tempfile dta
+		save `dta'
+	restore
+	
+	merge m:1 unique_small_grid_id month year using `dta', keep(3) nogen
+
 
 
 * Merge with rural classification
@@ -56,10 +64,13 @@ keep if is_rural == 1
 
 display "Observations after rural filter: " _N
 
-* Drop grids with more than 1 ac
-// merge m:1 unique_small_grid_id using "${root}/data_output/intermediate/grids_with_more_1_ac.dta"
-// drop if dpl_ac ==1
-// drop _merge
+
+* Merge rice moderators if not already present
+capture confirm variable rice_area_aclvl_ahigh
+if _rc {
+    display "Merging rice moderators..."
+    merge m:1 unique_small_grid_id ac_uq_id using "${root}/data_output/intermediate/rice_moderators.dta", nogen
+}
 
 * Create count in thousands
 gen countk = count * 1000
@@ -105,6 +116,14 @@ else {
     gen assembly_id = ac_uq_id
 }
 
+capture confirm numeric variable ac_uq_id
+if _rc {
+    encode ac_uq_id, gen(ac_id)
+}
+else {
+    gen ac_id = ac_uq_id
+}
+
 ********************************************************************************
 * Calculate statistics for table footer
 ********************************************************************************
@@ -120,6 +139,7 @@ count if tag_district == 1
 local n_districts = r(N)
 
 * Calculate mean DV for control group (downup_ac_pop==0 & downup_dummy==0)
+drop treat
 bysort unique_small_grid_id: egen treat = max(downup_ac_pop)
 summarize countk if downup_ac_pop == 0 & treat == 1
 local meandv = r(mean)
@@ -147,10 +167,16 @@ global controls av_wind_speed wind_direction
 * Cluster variables (stacked: interact with cohort)
 global cluster unique_small_grid_id#cohort distr_id#cohort#monthyear
 
-* Specification 1: No FE (baseline)
-reghdfejl countk downup_dummy downup_ac_pop downup_interaction $controls , ///
-    absorb(ac_id#cohort monthyear#cohort) ///
+
+** Equalizing sample
+qui reghdfejl countk downup_dummy downup_ac_pop downup_interaction $controls , ///
+    absorb(grid_id#cohort assembly_id#monthyear#cohort) ///
     cluster($cluster )
+	gen esample3 = e(sample)
+
+* Specification 1: No FE (baseline) 
+reg countk downup_dummy downup_ac_pop downup_interaction $controls if esample3 == 1 , ///
+    vce(cluster grid_id)
 estadd scalar ymean `meandv'
 estadd scalar ymean2 `meandv2'
 estadd scalar nacs `numacs'
@@ -162,9 +188,9 @@ estadd local distmonthfe "N"
 estadd local gridfe "N"
 estimates store eq1
 
-* Specification 2: MonthYear FE + AC FE
-reghdfejl countk downup_dummy downup_ac_pop downup_interaction $controls , ///
-    absorb(ac_id#cohort monthyear#cohort) ///
+* Specification 2:  MonthYear FE + AC FE
+reghdfejl countk downup_dummy downup_ac_pop downup_interaction $controls if esample3 == 1 , ///
+    absorb(monthyear#cohort assembly_id#cohort) ///
     cluster($cluster )
 estadd scalar ymean `meandv'
 estadd scalar ymean2 `meandv2'
@@ -177,9 +203,9 @@ estadd local distmonthfe "N"
 estadd local gridfe "N"
 estimates store eq2
 
-* Specification 3: AC x MonthYear FE
-reghdfejl countk downup_dummy downup_ac_pop downup_interaction $controls , ///
-    absorb(ac_id#monthyear#cohort) ///
+* Specification 3:	AC x MonthYear FE
+reghdfejl countk downup_dummy downup_ac_pop downup_interaction $controls if esample3 == 1 , ///
+    absorb(assembly_id#monthyear#cohort) ///
     cluster($cluster )
 estadd scalar ymean `meandv'
 estadd scalar ymean2 `meandv2'
@@ -192,9 +218,9 @@ estadd local distmonthfe "N"
 estadd local gridfe "N"
 estimates store eq3
 
-* Specification 4: AC x MonthYear FE + Grid FE
-reghdfejl countk downup_dummy downup_ac_pop downup_interaction $controls , ///
-    absorb(grid_id#cohort ac_id#monthyear#cohort) ///
+* Specification 4: 	AC x MonthYear FE + Grid FE
+reghdfejl countk downup_dummy downup_ac_pop downup_interaction $controls if esample3 == 1  , ///
+    absorb(grid_id#cohort assembly_id#monthyear#cohort) ///
     cluster($cluster )
 estadd scalar ymean `meandv'
 estadd scalar ymean2 `meandv2'
@@ -207,8 +233,8 @@ estadd local distmonthfe "N"
 estadd local gridfe "Y"
 estimates store eq4
 
-* Specification 5: Grid FE + District x MonthYear FE (alternative)
-reghdfejl countk downup_dummy downup_ac_pop downup_interaction $controls , ///
+* Specification 5: 	Grid FE + District x MonthYear FE (alternative)
+reghdfejl countk downup_dummy downup_ac_pop downup_interaction $controls if esample3 == 1 , ///
     absorb(grid_id#cohort district_id#monthyear#cohort) ///
     cluster($cluster )
 estadd scalar ymean `meandv'
@@ -221,6 +247,7 @@ estadd local acmonthfe "N"
 estadd local distmonthfe "Y"
 estadd local gridfe "Y"
 estimates store eq5
+
 
 ********************************************************************************
 * Save estimates
