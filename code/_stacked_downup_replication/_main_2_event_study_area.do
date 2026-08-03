@@ -35,7 +35,7 @@ global figure_farms "${root}/tex/paper/figures"
 * Import and Merge Data
 *-------------------------------------------------------------------------------
 
-use  "${int_farms}/combined_dt.dta", clear
+import delimited "${root}/data_output/intermediate/combined_dt_pop.csv", clear
 
 * Merge with rural classification
 merge m:1 unique_small_grid_id using "${root}/data_output/intermediate/ghs_grid_classification_2000.dta", keepusing(is_rural)
@@ -44,13 +44,8 @@ drop _merge
 
 * Keep only rural grids
 keep if is_rural == 1
-
+keep if relative_monthyear >= -5 & relative_monthyear <= 6
 display "Observations after rural filter: " _N
-
-* Drop grids with more than 1 ac
-merge m:1 unique_small_grid_id using "${root}/data_output/intermediate/grids_with_more_1_ac.dta"
-drop if dpl_ac ==1
-drop _merge
 
 * Create count in thousands
 gen countk = count * 1000

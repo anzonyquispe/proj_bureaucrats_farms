@@ -61,7 +61,7 @@ drop _merge
 
 * Keep only rural grids
 keep if is_rural == 1
-
+keep if relative_monthyear >= -5 & relative_monthyear <= 6
 display "Observations after rural filter: " _N
 
 

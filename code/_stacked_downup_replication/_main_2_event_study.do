@@ -44,13 +44,8 @@ drop _merge
 
 * Keep only rural grids
 keep if is_rural == 1
-
+keep if relative_monthyear >= -5 & relative_monthyear <= 6
 display "Observations after rural filter: " _N
-
-* Drop grids with more than 1 ac
-merge m:1 unique_small_grid_id using "${root}/data_output/intermediate/grids_with_more_1_ac.dta"
-drop if dpl_ac ==1
-drop _merge
 
 * Merge rice moderators if not already present
 capture confirm variable rice_area_aclvl_ahigh

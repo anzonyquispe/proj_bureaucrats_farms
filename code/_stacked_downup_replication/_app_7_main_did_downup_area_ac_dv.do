@@ -34,14 +34,21 @@ global figure_farms "${root}/tex/paper/figures"
 * Import Data
 ********************************************************************************
 
-* Getting downup_dummy & mean_brigthness
-import delimited "${root}/data_output/intermediate/0_master_dataset.csv", clear
-keep ac_uq_id unique_small_grid_id year month downup_dummy mean_brigthness 
-duplicates drop unique_small_grid_id month year, force
 
-merge 1:m unique_small_grid_id month year using "${root}/data_output/intermediate/combined_dt_pop.dta"
-keep if _merge == 3
-drop _merge
+* Getting downup_dummy & mean_brigthness
+import delimited "${root}/data_output/intermediate/combined_dt_pop.csv", clear
+
+preserve
+		import delimited using "${root}/data_output/intermediate/0_master_dataset.csv", ///
+    clear varnames(1)
+	d*
+	
+		keep ac_uq_id unique_small_grid_id year month downup_dummy mean_brigthness 
+		tempfile dta
+		save `dta'
+	restore
+	
+	merge m:1 unique_small_grid_id month year using `dta', keep(3) nogen
 
 
 * Merge with rural classification
@@ -51,13 +58,8 @@ drop _merge
 
 * Keep only rural grids
 keep if is_rural == 1
-
+keep if relative_monthyear >= -5 & relative_monthyear <= 6
 display "Observations after rural filter: " _N
-
-* Drop grids with more than 1 ac
-merge m:1 unique_small_grid_id using "${root}/data_output/intermediate/grids_with_more_1_ac.dta"
-drop if dpl_ac ==1
-drop _merge
 
 * Create count in thousands
 gen countk = count * 1000
