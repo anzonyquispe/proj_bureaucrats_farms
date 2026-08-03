@@ -30,7 +30,6 @@ cd "${root}"
 global int_farms "${root}/data_output/intermediate"
 global table_farms "${root}/tex/paper/tables"
 global figure_farms "${root}/tex/paper/figures"
-
 ********************************************************************************
 * Import Data
 ********************************************************************************
@@ -83,7 +82,6 @@ else {
 
 * Create cluster variable (stacked: interact with cohort)
 global cluster unique_small_grid_id#cohort ac_uq_id#cohort#monthyear
-bysort unique_small_grid_id: egen treat = max(downup_ac_pop)
 
 
 * Count unique ACs

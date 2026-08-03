@@ -1,39 +1,10 @@
 #!/bin/bash
-#$ -M anzony.quispe@gmail.com
+#$ -M rj.barrera.fuentes@gmail.com
 #$ -m abe
 #$ -q largemem
-#$ -N app20_hm_acp
+#$ -N main_20_did_acp_stck
 #$ -pe smp 2
 #$ -cwd
 
-# -----------------------------------------------------------------------------
-# Robustness preamble: fail loud, run the latest checked-out code, and start
-# Stata from a clean module/temp environment so this job never picks up stale
-# state from a prior submission.
-# -----------------------------------------------------------------------------
-set -euo pipefail
-
-# Always run from the canonical project tree on the cluster — guards against
-# inheriting a stale CWD from the submitter's shell.
-CODE_DIR="/users/aquisper/proj_bureaucrats_farms/code/_replication_rural_acpop"
-cd "${CODE_DIR}"
-
-echo "[$(date '+%F %T')] host=$(hostname) job=${JOB_ID:-NA} pwd=$(pwd)"
-if command -v git >/dev/null 2>&1; then
-    echo "[$(date '+%F %T')] git HEAD: $(git -C "${CODE_DIR}" rev-parse --short HEAD 2>/dev/null || echo 'not-a-git-repo')"
-fi
-
-# Force a clean module environment then load stata fresh.
-module purge 2>/dev/null || true
-module load stata
-
-# Per-job scratch dir so concurrent / repeat submissions don't share state.
-export TMPDIR="${TMPDIR:-/tmp}/stata.${JOB_ID:-$$}"
-mkdir -p "${TMPDIR}"
-trap 'rm -rf "${TMPDIR}"' EXIT
-
-# Wipe the prior Stata log for this dofile so we read only this run's output.
-DOFILE="_app_20_did_downwind_hm.do"
-rm -f "${DOFILE%.do}.log"
-
-stata-mp -b do "${DOFILE}"
+module load stata gcc
+stata-mp -b do _app_20_did_downwind_hm.do

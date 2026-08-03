@@ -23,9 +23,25 @@
 * Setup
 ********************************************************************************
 
-global root "C:\Users\rjbar\OneDrive\Desktop\_stacked_downup"
+if "$root" == "" {
+    clear all
+    set more off
 
-global tables "${root}/tables"
+    global location "shell"
+    global sample ""
+
+    global shell "/groups/sgulzar/sa_fires/proj_bureaucrats_farms"
+    global dbox "/Users/anzony.quisperojas/Library/CloudStorage/Dropbox/sa_fires/proj_bureaucrats_farms"
+
+    if "$location" == "dbox" {
+        global root "$dbox"
+    }
+    else {
+        global root "$shell"
+    }
+}
+
+global tables "${root}/tex/paper/tables"
 
 ********************************************************************************
 * Helper: strip trailing zeros from one or more e()-stored stats.
@@ -57,12 +73,11 @@ end
 ********************************************************************************
 * 1. Main DiD Table (_main_1_did)
 ********************************************************************************
-{
 est clear
-estread using "${tables}/main_did_downup_area_ac_rural_stacked2.ster"
+estread using "${tables}/main_did_downup_area_ac_rural_stacked.ster"
 _strip_zeros_stats, models(eq1 eq2 eq3 eq4) stats(ymean)
 
-esttab eq2 eq3 eq4 using "${tables}/main_did_downup_area_ac${sample}_rural_acpop.tex", ///
+esttab eq1 eq2 eq3 eq4 using "${tables}/main_did_downup_area_ac${sample}_rural_acpop.tex", ///
     replace ///
     cells(b(fmt(3) star) se(par fmt(3))) ///
     star(* 0.10 ** 0.05 *** 0.01) ///
@@ -80,22 +95,21 @@ esttab eq2 eq3 eq4 using "${tables}/main_did_downup_area_ac${sample}_rural_acpop
             "\def\sym#1{\ifmmode^{#1}\else\(^{#1}\)\fi}" ///
             "\begin{tabular}{l*{4}{c}}" ///
             "\hline" ///
-            "            &\multicolumn{1}{c}{(1)}         &\multicolumn{1}{c}{(2)}         &\multicolumn{1}{c}{(3)}             \\" ///
-            "            & \multicolumn{3}{c}{Number of Fires (in 1,000 units)} \\ \hline") ///
+            "            &\multicolumn{1}{c}{(1)}         &\multicolumn{1}{c}{(2)}         &\multicolumn{1}{c}{(3)}         &\multicolumn{1}{c}{(4)}         \\" ///
+            "            & \multicolumn{4}{c}{Number of Fires (in 1,000 units)} \\ \hline") ///
     posthead("") ///
     postfoot("\hline" "\end{tabular}" "}")
 
 display "Generated: main_did_downup_area_ac_rural_acpop.tex"
-}
+
 ********************************************************************************
 * 2. Bureaucrat-Politician DiD (_main_3_bureau_polisc_did)
 ********************************************************************************
-{
 est clear
 estread using "${tables}/_main_3_bureau_polisc_did_rural_stacked.ster"
 _strip_zeros_stats, models(eq1 eq2 eq3 eq4 eq5) stats(ymean ymean2)
 
-esttab  eq2 eq3 eq4 eq5 using "${tables}/_main_3_bureau_polisc_did${sample}_rural_acpop.tex", ///
+esttab eq1 eq2 eq3 eq4 eq5 using "${tables}/_main_3_bureau_polisc_did${sample}_rural_acpop.tex", ///
     replace ///
     cells(b(fmt(3) star) se(par fmt(3))) ///
     star(* 0.10 ** 0.05 *** 0.01) ///
@@ -114,75 +128,23 @@ esttab  eq2 eq3 eq4 eq5 using "${tables}/_main_3_bureau_polisc_did${sample}_rura
     prehead("{\def\sym#1{\ifmmode^{#1}\else\(^{#1}\)\fi}" ///
             "\begin{tabular}{l*{5}{c}}" ///
             "\hline" ///
-            " & (1) & (2) & (3) & (4)  \\" ///
-            " & \multicolumn{4}{c}{Number of Fires (in 1,000 units)} \\ \hline") ///
+            " & (1) & (2) & (3) & (4) & (5) \\" ///
+            " & \multicolumn{5}{c}{Number of Fires (in 1,000 units)} \\ \hline") ///
     posthead("") ///
     postfoot("\hline" "\end{tabular}" "}")
 
 display "Generated: _main_3_bureau_polisc_did_rural_acpop.tex"
-}
+
 ********************************************************************************
 * 3. Protest DiD with Downup (_main_4_protest_5km_fe12_did_downup)
 ********************************************************************************
-{
 est clear
 estread using "${tables}/_main_4_protest_5km_fe12_did_downup${sample}_rural_acpop.ster"
 _strip_zeros_stats, models(evreg1 evreg2 evreg3 evreg4 evreg5 evreg6) stats(ymean ymean2 ymean3)
 
-* Program to add a lincom result with stars + SE in parentheses
-capture program drop _add_lincom
-program define _add_lincom
-    args k   // suffix number for the stored stat
-    local b  = r(estimate)
-    local se = r(se)
-    * two-sided p-value (use r(df) if available, otherwise normal)
-    if r(df) != . & r(df) > 0 {
-        local p = 2*ttail(r(df), abs(`b'/`se'))
-    }
-    else {
-        local p = 2*normal(-abs(`b'/`se'))
-    }
-    local stars ""
-    if `p' < 0.01      local stars "\sym{***}"
-    else if `p' < 0.05 local stars "\sym{**}"
-    else if `p' < 0.10 local stars "\sym{*}"
-    estadd local ysum`k' = string(`b', "%12.3fc") + "`stars'"
-    estadd local ysd`k'  = "(" + string(`se', "%12.3fc") + ")"
-end
-
-forval i = 4(1)6 {
-    est restore evreg`i'
-
-    lincom 1.moderator
-    _add_lincom 1
-
-    lincom 1.post_ + 1.moderator + ///
-           1.post_#1.moderator
-    _add_lincom 2
-
-    lincom 1.post_ + 1.treat + 1.moderator + ///
-           1.post_#1.treat + 1.post_#1.moderator + 1.treat#1.moderator + ///
-           1.post_#1.treat#1.moderator
-    _add_lincom 3
-
-    lincom (1.post_ + 1.treat + 1.moderator + ///
-           1.post_#1.treat + 1.post_#1.moderator + 1.treat#1.moderator + ///
-           1.post_#1.treat#1.moderator) - (1.post_ + 1.moderator + ///
-           1.post_#1.moderator)
-    _add_lincom 4
-
-    est store evreg`i'
-}
-
-
-
-
-*---------------------------------------------------------------
-* Panel A: estimated coefficients
-*---------------------------------------------------------------
 esttab evreg1 evreg2 evreg3 evreg4 evreg5 evreg6 ///
-    using "${tables}/_main_4_protest_5km_fe12_did_downup_${sample}rural_acpop.tex", ///
-    replace fragment ///
+    using "${tables}/_main_4_protest_5km_fe12_did_downup${sample}_rural_acpop.tex", ///
+    replace ///
     cells(b(fmt(3) star) se(par fmt(3))) ///
     star(* 0.10 ** 0.05 *** 0.01) ///
     keep(1.post_#1.treat ///
@@ -195,205 +157,81 @@ esttab evreg1 evreg2 evreg3 evreg4 evreg5 evreg6 ///
           1.post_#1.moderator ///
           1.treat#1.moderator ///
           1.post_#1.treat#1.moderator) ///
-    varlabels(1.post_#1.treat "(1) Post \$\times\$ Protest" ///
-              1.moderator "(2) Down \$>\$ Up" ///
-              1.post_#1.moderator "(3) Post \$\times\$ Down \$>\$ Up" ///
-              1.treat#1.moderator "(4) Protest \$\times\$ Down \$>\$ Up" ///
-              1.post_#1.treat#1.moderator "(5) Post \$\times\$ Protest \$\times\$ Down \$>\$ Up") ///
-    nomtitles nonumbers collabels(none) nobaselevels noobs ///
+    varlabels(1.post_#1.treat "Post \$\times\$ Protest" ///
+              1.moderator "Down \$>\$ Up (Pop)" ///
+              1.post_#1.moderator "Post \$\times\$ Down \$>\$ Up (Pop)" ///
+              1.treat#1.moderator "Protest \$\times\$ Down \$>\$ Up (Pop)" ///
+              1.post_#1.treat#1.moderator "Post \$\times\$ Protest \$\times\$ Down \$>\$ Up (Pop)") ///
+    stats(      N    acq gridfe time electionfe provtrendfe ymean_clean ymean2_clean, ///
+          fmt(%12.0fc  %s    %s %s    %s         %s          %s          %s) ///
+          labels("Observations" "N Assembly Constituencies" ///
+                 "Grid FE" "Relative Time FE" "Legislature FE" "Province Trend FE" ///
+                 "Mean DV" "Mean DV2 (Down\$>\$Up=1)")) ///
+    nomtitles nonumbers ///
+    collabels(none) ///
+    nobaselevels ///
     prehead("{" ///
             "\def\sym#1{\ifmmode^{#1}\else\(^{#1}\)\fi}" ///
             "\begin{tabular}{l*{6}{c}}" ///
             "\hline" ///
             "            &\multicolumn{1}{c}{(1)}         &\multicolumn{1}{c}{(2)}         &\multicolumn{1}{c}{(3)}         &\multicolumn{1}{c}{(4)}         &\multicolumn{1}{c}{(5)}         &\multicolumn{1}{c}{(6)}         \\" ///
             "            & \multicolumn{6}{c}{Number of Fires (in 1,000 units)} \\ \hline") ///
-    posthead("\multicolumn{7}{l}{\textbf{Panel A: Estimated Coefficients}} \\ \hline") ///
-    prefoot("") postfoot("")
-
-*---------------------------------------------------------------
-* Panel B: linear combinations
-*---------------------------------------------------------------
-esttab evreg1 evreg2 evreg3 evreg4 evreg5 evreg6 ///
-    using "${tables}/_main_4_protest_5km_fe12_did_downup_${sample}rural_acpop.tex", ///
-    append fragment ///
-    cells(none) ///
-    stats(ysum1 ysd1 ysum2 ysd2 ysum3 ysd3 ysum4 ysd4, ///
-          fmt(%s %s %s %s %s %s %s %s) ///
-          labels("\multicolumn{2}{l}{Down\$>\$Up Effect, pre-period in no protest areas (2)}" " " ///
-                 "\multicolumn{2}{l}{Down\$>\$Up Effect, post-period in no protest areas (2+3)}" " " ///
-                 "\multicolumn{2}{l}{Down\$>\$Up Effect, post-period in protest areas (1+2+3+4+5)}" " " ///
-                 "\multicolumn{2}{l}{Differential downwind effect (protest-no protest), post period (1+2+3+4+5)-(2+3)}" " ")) ///
-    nomtitles nonumbers collabels(none) nobaselevels noobs ///
-    prehead("") posthead("") ///
-    prefoot("\hline" ///
-            "\multicolumn{7}{l}{\textbf{Panel B: Linear Combinations}} \\ \hline") ///
-    postfoot("")
-
-*---------------------------------------------------------------
-* Footer: sample info and fixed effects
-*---------------------------------------------------------------
-esttab evreg1 evreg2 evreg3 evreg4 evreg5 evreg6 ///
-    using "${tables}/_main_4_protest_5km_fe12_did_downup_${sample}rural_acpop.tex", ///
-    append fragment ///
-    cells(none) ///
-    stats(N acq gridfe time electionfe provtrendfe ymean_clean ymean2_clean, ///
-          fmt(%12.0fc %s %s %s %s %s %s %s) ///
-          labels("Observations" "N Assembly Constituencies" ///
-                 "Grid FE" "Relative Time FE" "Legislature FE" "Province Trend FE" ///
-                 "Mean DV" "Mean DV2 (Down\$>\$Up=1)")) ///
-    nomtitles nonumbers collabels(none) nobaselevels noobs ///
-    prehead("") posthead("") ///
+    posthead("") ///
     prefoot("\hline") ///
     postfoot("\hline" "\end{tabular}" "}")
 
 display "Generated: _main_4_protest_5km_fe12_did_downup_rural_acpop.tex"
-}
 
 ********************************************************************************
 * 4. Politician Char DiD with Downup (_main_5_polischar_fe12_did_downup_inter)
 ********************************************************************************
-{
 est clear
 estread using "${tables}/_main_5_polischar_fe12_did_downup_inter${sample}_rural_acpop.ster"
 _strip_zeros_stats, models(evreg1 evreg2 evreg3 evreg4 evreg5 evreg6) stats(ymean ymean2 ymean3)
 
-
-forval i = 4(1)6 {
-    est restore evreg`i'
-
-    lincom 1.moderator
-    _add_lincom 1
-
-    lincom 1.post_ + 1.moderator + ///
-           1.post_#1.moderator
-    _add_lincom 2
-
-    lincom 1.post_ + 1.treat + 1.moderator + ///
-           1.post_#1.treat + 1.post_#1.moderator + 1.treat#1.moderator + ///
-           1.post_#1.treat#1.moderator
-    _add_lincom 3
-
-    lincom (1.post_ + 1.treat + 1.moderator + ///
-           1.post_#1.treat + 1.post_#1.moderator + 1.treat#1.moderator + ///
-           1.post_#1.treat#1.moderator) - (1.post_ + 1.moderator + ///
-           1.post_#1.moderator)
-    _add_lincom 4
-
-    est store evreg`i'
-}
-
-
-
-*---------------------------------------------------------------
-* Panel A: estimated coefficients
-*---------------------------------------------------------------
 esttab evreg1 evreg2 evreg3 evreg4 evreg5 evreg6 ///
     using "${tables}/_main_5_polischar_fe12_did_downup_inter${sample}_rural_acpop.tex", ///
-    replace fragment ///
+    replace ///
     cells(b(fmt(3) star) se(par fmt(3))) ///
     star(* 0.10 ** 0.05 *** 0.01) ///
     keep(1.post_#1.treat ///
-          1.moderator ///
-          1.post_#1.moderator ///
-          1.treat#1.moderator ///
-          1.post_#1.treat#1.moderator) ///
+         1.post_#1.treat#1.moderator ///
+         1.moderator ///
+         1.post_#1.moderator ///
+         1.treat#1.moderator ///
+         1.post_#1.treat#1.moderator) ///
     order(1.post_#1.treat ///
           1.moderator ///
           1.post_#1.moderator ///
           1.treat#1.moderator ///
           1.post_#1.treat#1.moderator) ///
-    varlabels(1.post_#1.treat "(1) Post \$\times\$ Switch Agric" ///
-              1.moderator "(2) Down \$>\$ Up" ///
-              1.post_#1.moderator "(3) Post \$\times\$ Down \$>\$ Up" ///
-              1.treat#1.moderator "(4) Switch Agric  \$\times\$ Down \$>\$ Up" ///
-              1.post_#1.treat#1.moderator "(5) Post \$\times\$ Switch Agric  \$\times\$ Down \$>\$ Up") ///
-    nomtitles nonumbers collabels(none) nobaselevels noobs ///
+    varlabels(1.post_#1.treat "Post \$\times\$ Agriculturalist" ///
+              1.post_#1.treat#1.moderator "Post \$\times\$ Agriculturalist" ///
+              1.moderator "Down \$>\$ Up (Pop)" ///
+              1.post_#1.moderator "Post \$\times\$ Down \$>\$ Up (Pop)" ///
+              1.treat#1.moderator "Agriculturalist \$\times\$ Down \$>\$ Up (Pop)" ///
+              1.post_#1.treat#1.moderator "Post \$\times\$ Agric. \$\times\$ Down \$>\$ Up (Pop)") ///
+    stats(      N        acq     gridfe time electionfe provtrendfe ymean_clean ymean2_clean, ///
+          fmt( %12.0fc %12.0fc   %s     %s   %s         %s          %s          %s) ///
+          labels("Observations" "N Assembly Constituencies" ///
+                 "Grid FE" "Relative Time FE" "Legislature FE" ///
+                 "Province Linear Time Trend FE" ///
+                 "Mean DV" "Mean DV (Down \$>\$ Up=1)")) ///
+    nomtitles nonumbers ///
+    collabels(none) ///
+    nobaselevels ///
     prehead("{" ///
             "\def\sym#1{\ifmmode^{#1}\else\(^{#1}\)\fi}" ///
             "\begin{tabular}{l*{6}{c}}" ///
             "\hline" ///
             "            &\multicolumn{1}{c}{(1)}         &\multicolumn{1}{c}{(2)}         &\multicolumn{1}{c}{(3)}         &\multicolumn{1}{c}{(4)}         &\multicolumn{1}{c}{(5)}         &\multicolumn{1}{c}{(6)}         \\" ///
             "            & \multicolumn{6}{c}{Number of Fires (in 1,000 units)} \\ \hline") ///
-    posthead("\multicolumn{7}{l}{\textbf{Panel A: Estimated Coefficients}} \\ \hline") ///
-    prefoot("") postfoot("")
-
-*---------------------------------------------------------------
-* Panel B: linear combinations
-*---------------------------------------------------------------
-esttab evreg1 evreg2 evreg3 evreg4 evreg5 evreg6 ///
-    using "${tables}/_main_5_polischar_fe12_did_downup_inter${sample}_rural_acpop.tex", ///
-    append fragment ///
-    cells(none) ///
-    stats(ysum1 ysd1 ysum2 ysd2 ysum3 ysd3 ysum4 ysd4, ///
-          fmt(%s %s %s %s %s %s %s %s) ///
-          labels("\multicolumn{2}{l}{Down\$>\$Up Effect, pre-period of no-switch politicians (2)}" " " ///
-                 "\multicolumn{2}{l}{Down\$>\$Up Effect, post-period of no-switch politicians  (2+3)}" " " ///
-                 "\multicolumn{2}{l}{Down\$>\$Up Effect, post-period of switch politicians (1+2+3+4+5)}" " " ///
-                 "\multicolumn{2}{l}{Differential downwind effect, post period (1+2+3+4+5)-(2+3)}" " ")) ///
-    nomtitles nonumbers collabels(none) nobaselevels noobs ///
-    prehead("") posthead("") ///
-    prefoot("\hline" ///
-            "\multicolumn{7}{l}{\textbf{Panel B: Linear Combinations}} \\ \hline") ///
-    postfoot("")
-
-*---------------------------------------------------------------
-* Footer: sample info and fixed effects
-*---------------------------------------------------------------
-esttab evreg1 evreg2 evreg3 evreg4 evreg5 evreg6 ///
-    using "${tables}/_main_5_polischar_fe12_did_downup_inter${sample}_rural_acpop.tex", ///
-    append fragment ///
-    cells(none) ///
-    stats(N acq gridfe time electionfe provtrendfe ymean_clean ymean2_clean, ///
-	fmt(%12.0fc %12.0fc %9s %9s %9s %9s %9s %9s) ///
-          labels("Observations" "N Assembly Constituencies" ///
-                 "Grid FE" "Relative Time FE" "Legislature FE" "Province Trend FE" ///
-                 "Mean DV" "Mean DV2 (Down\$>\$Up=1)")) ///
-    nomtitles nonumbers collabels(none) nobaselevels noobs ///
-    prehead("") posthead("") ///
+    posthead("") ///
     prefoot("\hline") ///
     postfoot("\hline" "\end{tabular}" "}")
 
-display "Generated: _main_4_protest_5km_fe12_did_downup_rural_acpop.tex"
-	}
+display "Generated: _main_5_polischar_fe12_did_downup_inter_rural_acpop.tex"
 
-********************************************************************************
-* 5. Treatment Definition Robustness (_app_6_main_did_treat_definition)
-********************************************************************************
-{
-est clear
-estread using "${tables}/_app_6_main_did_treat_definition${sample}_rural_acpop.ster"
-_strip_zeros_stats, models(eq1 eq2 eq3 eq4 eq5) stats(ymean)
-
-esttab eq1 eq2 eq3 eq4 eq5 ///
-    using "${tables}/_app_6_main_did_treat_definition${sample}_rural_acpop.tex", ///
-    replace ///
-    cells(b(fmt(4) star) se(par fmt(4))) ///
-    star(* 0.10 ** 0.05 *** 0.01) ///
-    keep(downup_ac downup_ac_pop downup_1sd_pop down_percent_pop downup_diff_percent_pop) ///
-    order(downup_ac downup_ac_pop downup_1sd_pop down_percent_pop downup_diff_percent_pop) ///
-    varlabels(downup_ac_pop "Down\$>\$Up (Pop)" ///
-              downup_ac "Down\$>\$Up (Area)" ///
-              downup_1sd_pop "Down\$>\$Up by 1std" ///
-              down_percent_pop "Downwind over total Population" ///
-              downup_diff_percent_pop "Down-Up Percent") ///
-    stats(N acq gridfe acmonthfe ymean_clean, ///
-          fmt(%12.0fc %s %s %s %12.3fc) ///
-          labels("Observations" "N Assembly Constituencies" "Grid FE" "Assembly \$\times\$ Month-Year FE" "Mean DV")) ///
-    nomtitles nonumbers ///
-    collabels(none) ///
-    nobaselevels ///
-    prehead("\begin{tabular}{lccccc}" ///
-            "\hline" ///
-            "& (1) & (2) & (3) & (4) & (5)\\" ///
-            "& \multicolumn{5}{c}{Number of Fires (in 1,000 units) }\\" ///
-            "\hline") ///
-    posthead("") ///
-    prefoot("\hline") ///
-    postfoot("\hline" "\end{tabular}")
-
-display "Generated: _app_6_main_did_treat_definition_rural.tex"
-	}
-	
 ********************************************************************************
 * 5. Alternative DVs (_app_7_main_did_downup_area_ac_dv)
 ********************************************************************************

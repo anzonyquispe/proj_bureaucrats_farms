@@ -58,6 +58,21 @@ Intermediate datasets include `stacked_data_protest.csv`,
 - The base event-time category is constructed dynamically from
   `relative_year_bin` so the omitted period is always `-1`.
 
+## Data-generation merge requirements
+
+- `data_2012_2024_grid_ac_downup_pop.parquet` is the row-preserving base for
+  `0_master_dataset.parquet`.
+- Attachments to that base must use left joins. Never change the master sample
+  implicitly through an inner or right join.
+- Before every construction merge, report the full-outer overlap counts
+  `left_only`, `right_only`, and `both` at the actual merge key.
+- State and enforce the expected unmatched categories. Core panel attachments
+  such as the area and 13 km placebo panels require zero `left_only` and zero
+  `right_only`; sparse or wider-universe inputs such as fires, protests, rice,
+  and elections may have documented nonmatches.
+- Validate that the final output row count and
+  `unique_small_grid_id x year x month` key exactly match the population base.
+
 ## Standard requirements for event-study / DiD analysis dofiles
 
 These requirements apply to **every** analysis dofile (event study or DiD) and

@@ -1,8 +1,10 @@
 #!/bin/bash
-#$ -M anzony.quispe@gmail.com
+#$ -M rj.barrera.fuentes@gmail.com
 #$ -m abe
 #$ -q largemem
-#$ -N app10_rc_acp
+#$ -N main_1_did_acp_stkd
 #$ -pe smp 2
 #$ -cwd
 
+module load stata gcc
+stata-mp -b do _master_replication.do

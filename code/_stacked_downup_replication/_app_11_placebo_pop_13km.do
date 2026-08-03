@@ -42,7 +42,7 @@ global figure_farms "${root}/tex/paper/figures"
 * Import Data
 ********************************************************************************
 
-import delimited "${int_farms}/0_master_merge_data_gen${sample}.csv", clear
+import delimited "${int_farms}/0_master_dataset.csv", clear
 keep unique_small_grid_id month year downup_dummy
 duplicates drop unique_small_grid_id month year, force
 

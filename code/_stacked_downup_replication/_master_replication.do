@@ -36,23 +36,11 @@ global sample ""
 
 * DATA roots
 global shell "/groups/sgulzar/sa_fires/proj_bureaucrats_farms"
-global dbox  "/Users/anzony.quisperojas/Library/CloudStorage/Dropbox/sa_fires/proj_bureaucrats_farms"
+global code_shell "/users/aquisper/proj_bureaucrats_farms/code/_stacked_downup"
 
-* CODE roots - NOTE: on the cluster, code lives in /users/aquisper/... while
-* data lives in /groups/sgulzar/... so $code is NOT a subpath of $root.
-* On Mac the same asymmetry holds: code in GitHub repo, data in Dropbox.
-global code_shell "/users/aquisper/proj_bureaucrats_farms/code/_replication_rural_acpop"
-global code_dbox  "/Users/anzony.quisperojas/Documents/GitHub/proj_bureaucrats_farms/code/_replication_rural_acpop"
+global root "$shell"
+global code "$code_shell"
 
-* Set root + code based on location toggle
-if "$location" == "dbox" {
-    global root "$dbox"
-    global code "$code_dbox"
-}
-else {
-    global root "$shell"
-    global code "$code_shell"
-}
 
 * Derived data paths (still hang off $root)
 global int_data "${root}/data_output/intermediate"
@@ -63,10 +51,10 @@ cd "${root}"
 
 * Log file
 cap log close
-log using "${code}/_master_replication_log${sample}.txt", replace text
+log using "${code}/_master_replication_log.txt", replace text
 
 display "=============================================="
-display "MASTER REPLICATION FILE (downup_ac_pop)"
+display "MASTER REPLICATION FILE (downup_ac_pop - stacked)"
 display "Location: $location"
 display "Sample mode: $sample"
 display "Root path: $root"
@@ -82,23 +70,39 @@ qui do "${code}/estsave_csv.ado"
 * RUN DO-FILES
 ********************************************************************************
 
+** MAIN ESTIMATIONS -- AND -- ROBUSTNESS
+
 do "${code}/_main_1_did.do"
 do "${code}/_main_2_event_study.do"
+
+*do "${code}/_main_1_did_area.do"
+*do "${code}/_main_2_event_study_area.do"
+
 do "${code}/_main_3_bureau_polisc_did.do"
-do "${code}/_main_4_protest_5km_fe12_did_downup.do"
-do "${code}/_main_5_polischar_fe12_did_downup_inter.do"
 do "${code}/_app_7_main_did_downup_area_ac_dv.do"
 do "${code}/_app_8_main_did_by_year.do"
 do "${code}/_app_9_main_did_by_state.do"
 do "${code}/_app_10_did_rice_moderators.do"
+do "${code}/_app_20_did_downwind_hm.do"
+
+** POL SWITCH -- AND -- PROTEST
+
+do "${code}/_main_4_protest_5km_fe12_did_downup.do"
+do "${code}/_main_4_polischar_fe12_did_downup_inter.do"
+
+do "${code}/_app_12_protest_5km_fe_did.do"
+do "${code}/_app_13_protest_5km_fe12_did_ricemods.do"
 do "${code}/_app_14_polischar_fe12_did_ricemods.do"
 do "${code}/_app_15_polischar_fe12_did.do"
-do "${code}/_app_16_polischar_fe12_evst_all.do"
+do "${code}/_app_16_polischar_fe12_evst.do"
 do "${code}/_app_17_5km_fe12_evst_all.do"
 do "${code}/_app_18_protest_5km_fe12_did_downup_plot.do"
 do "${code}/_app_19_polischar_fe12_did_downup_inter_plot.do"
-do "${code}/_app_20_did_downwind_hm.do"
 
+
+** TABLES -- AND -- FIGURES
+do "${code}/_generate_all_tables.do"
+do "${code}/_.do"
 
 ********************************************************************************
 * COMPLETION
