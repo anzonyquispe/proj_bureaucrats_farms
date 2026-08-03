@@ -4,14 +4,19 @@
 `0_master_dataset.parquet`, validates the required schema before writing any
 output, and runs every registered treatment specification by default.
 
+The master sample excludes the entire history of any `unique_small_grid_id`
+that has a missing raw or calculation wind direction in any month. Every
+stacked output therefore inherits the same wind-complete grid sample.
+
 ## Standard outputs
 
 | Treatment | CSV | DuckDB work database |
 | --- | --- | --- |
 | `downup_ac` | `combined_dt.csv` | `combined_dt.db` |
 | `downup_ac_pop` | `combined_dt_pop.csv` | `combined_dt_pop.db` |
-| `protest5km` | `stacked_data_protest5km.csv` | `stacked_data_protest5km.db` |
 | `self_profession_nomiss` | `politicians_characteristics.csv` | `politicians_characteristics.db` |
+| `protest5km` | `stacked_data_protest5km.csv` | `stacked_data_protest5km.db` |
+| `downup_13kmpl` | `stacked_downup_13kmpl.csv` | `stacked_downup_13kmpl.db` |
 
 The wrapper uses the full time span in the master dataset. A cutoff is applied
 only when `--cutoff-year` is explicitly supplied.
@@ -67,8 +72,22 @@ python build_stacked_downup_13kmpl_duckdb.py --dry-run
 
 On the cluster, submit `build_stacked_datasets.sbatch`. It runs all treatments
 by default. Set a comma-separated subset with, for example,
-`STACK_SPECS=downup_ac,downup_ac_pop`. Set `STACK_OVERWRITE=1` to rebuild work
-databases and outputs.
+`STACK_SPECS=downup_ac,downup_ac_pop`. It rebuilds the work databases and
+outputs by default because its input master has just been regenerated. Set
+`STACK_OVERWRITE=0` only to resume an interrupted run against the unchanged
+master Parquet.
+
+To build the master first and release the stacked-data job only after it
+succeeds, submit both jobs from the data-generation directory:
+
+```bash
+master_job=$(qsub -terse build_0_master_dataset.sbatch)
+qsub -hold_jid "${master_job}" build_stacked_datasets.sbatch
+```
+
+The master job reads `9_rice_info_ac_lvl.parquet` and
+`panel_data_election_year.parquet` by default. The stack job reads the resulting
+`0_master_dataset.parquet` and generates all five standard CSVs.
 
 ## Adding another treatment
 

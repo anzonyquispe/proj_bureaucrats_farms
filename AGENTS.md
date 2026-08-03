@@ -60,18 +60,22 @@ Intermediate datasets include `stacked_data_protest.csv`,
 
 ## Data-generation merge requirements
 
-- `data_2012_2024_grid_ac_downup_pop.parquet` is the row-preserving base for
-  `0_master_dataset.parquet`.
+- `data_2012_2024_grid_ac_downup_pop.parquet` is the source for the
+  row-preserving base of `0_master_dataset.parquet`. Exclude the entire
+  `unique_small_grid_id` history when either raw wind direction or
+  `calculation_wind_direction` is missing in any month.
 - Attachments to that base must use left joins. Never change the master sample
   implicitly through an inner or right join.
 - Before every construction merge, report the full-outer overlap counts
   `left_only`, `right_only`, and `both` at the actual merge key.
 - State and enforce the expected unmatched categories. Core panel attachments
-  such as the area and 13 km placebo panels require zero `left_only` and zero
-  `right_only`; sparse or wider-universe inputs such as fires, protests, rice,
-  and elections may have documented nonmatches.
+  such as the area and 13 km placebo panels require zero `left_only`; their
+  `right_only` rows must equal the intentionally excluded wind-missing base
+  histories. Sparse or wider-universe inputs such as fires, protests, rice,
+  and elections may have other documented nonmatches.
 - Validate that the final output row count and
-  `unique_small_grid_id x year x month` key exactly match the population base.
+  `unique_small_grid_id x year x month` key exactly match the retained,
+  wind-complete population base.
 
 ## Standard requirements for event-study / DiD analysis dofiles
 

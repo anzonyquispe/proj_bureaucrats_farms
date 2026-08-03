@@ -40,6 +40,7 @@ def panel_rows() -> list[dict[str, object]]:
                     "monthyear": 2023 * 12 + month,
                     "downup_ac": treatment,
                     "downup_ac_pop": treatment,
+                    "downup_13kmpl": treatment,
                     "protest5km": treatment,
                     "self_profession_nomiss": treatment,
                     "av_wind_speed": 2.5,
@@ -77,6 +78,21 @@ def temporary_workspace():
 
 
 class StackedEngineTests(unittest.TestCase):
+    def test_standard_output_names(self) -> None:
+        self.assertEqual(
+            {
+                spec.treatment_col: spec.output_csv
+                for spec in wrapper.STACK_SPECIFICATIONS
+            },
+            {
+                "downup_ac": "combined_dt.csv",
+                "downup_ac_pop": "combined_dt_pop.csv",
+                "self_profession_nomiss": "politicians_characteristics.csv",
+                "protest5km": "stacked_data_protest5km.csv",
+                "downup_13kmpl": "stacked_downup_13kmpl.csv",
+            },
+        )
+
     def test_clean_spells_and_generated_indicators(self) -> None:
         with temporary_workspace() as work:
             source = work / "panel.csv"

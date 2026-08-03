@@ -99,6 +99,13 @@ STACK_SPECIFICATIONS = (
         description="AC downwind/upwind population treatment",
     ),
     StackSpecification(
+        treatment_col="self_profession_nomiss",
+        output_csv="politicians_characteristics.csv",
+        database="politicians_characteristics.db",
+        temp_directory="politicians_characteristics_duckdb_tmp",
+        description="politician self-profession treatment without missing values",
+    ),
+    StackSpecification(
         treatment_col="protest5km",
         output_csv="stacked_data_protest5km.csv",
         database="stacked_data_protest5km.db",
@@ -106,11 +113,11 @@ STACK_SPECIFICATIONS = (
         description="grid within 5 km of a protest treatment",
     ),
     StackSpecification(
-        treatment_col="self_profession_nomiss",
-        output_csv="politicians_characteristics.csv",
-        database="politicians_characteristics.db",
-        temp_directory="politicians_characteristics_duckdb_tmp",
-        description="politician self-profession treatment without missing values",
+        treatment_col="downup_13kmpl",
+        output_csv="stacked_downup_13kmpl.csv",
+        database="stacked_downup_13kmpl.db",
+        temp_directory="stacked_downup_13kmpl_duckdb_tmp",
+        description="13 km placebo downwind/upwind population treatment",
     ),
 )
 

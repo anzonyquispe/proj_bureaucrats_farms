@@ -14,6 +14,10 @@ CONDA_ENV="${DOWNUP_ENV_PREFIX:-/groups/sgulzar/india_forest_land/downup_geo}"
 CONDA_SH="/afs/crc.nd.edu/x86_64_linux/c/conda/24.7.1/etc/profile.d/conda.sh"
 BRANCH="replication_data"
 
+if [[ ! -f "${CONDA_SH}" ]]; then
+    echo "ERROR: conda initialization script was not found at ${CONDA_SH}." >&2
+    exit 1
+fi
 source "${CONDA_SH}"
 conda activate "${CONDA_ENV}"
 PYTHON="$(command -v python)"
@@ -47,9 +51,14 @@ if [[ -n "${STACK_SPECS:-}" && "${STACK_SPECS}" != "all" ]]; then
 fi
 
 OVERWRITE_ARGS=()
-if [[ "${STACK_OVERWRITE:-0}" == "1" ]]; then
-    OVERWRITE_ARGS+=(--overwrite)
-fi
+case "${STACK_OVERWRITE:-1}" in
+    0) ;;
+    1) OVERWRITE_ARGS+=(--overwrite) ;;
+    *)
+        echo "ERROR: STACK_OVERWRITE must be 0 or 1." >&2
+        exit 1
+        ;;
+esac
 
 "${PYTHON}" build_stacked_downup_13kmpl_duckdb.py \
     --threads "${NSLOTS:-10}" \

@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 """Build the 2012-2024 grid-month master dataset with DuckDB.
 
-The population-stage Parquet is the row-preserving base. Area treatment, the
-13 km placebo measures, protests, elections, fires, and AC-level rice
-information are left-joined without changing that key. Every merge reports
-left_only, right_only, and both counts. Both Parquet and CSV outputs are
-written.
+The population-stage Parquet is the source for the row-preserving base. Grids
+with a missing raw or calculation wind direction in any month are excluded in
+their entirety. Area treatment, the 13 km placebo measures, protests,
+elections, fires, and AC-level rice information are left-joined without
+changing the retained key. Every merge reports left_only, right_only, and both
+counts. Both Parquet and CSV outputs are written.
 """
 
 from __future__ import annotations
@@ -115,7 +116,7 @@ def resolve_paths(args: argparse.Namespace) -> dict[str, Path]:
         "rice": (
             args.rice.resolve()
             if args.rice
-            else intermediate / "rice_info_ac_lvl.dta"
+            else intermediate / "9_rice_info_ac_lvl.parquet"
         ),
         "output_parquet": output_parquet,
         "output_csv": (
@@ -211,7 +212,7 @@ def normalize_elections(path: Path) -> pd.DataFrame:
             "The election input must be a .parquet file "
             f"(or a legacy .dta override), not {path.suffix!r}."
         )
-    required = {"ac_uq_id", "year", "month", "yeargov"}
+    required = {"ac_uq_id", "year", "month", "yeargov", "self_profession"}
     missing = sorted(required.difference(frame.columns))
     if missing:
         raise KeyError(f"Missing election columns: {missing}")
@@ -221,6 +222,16 @@ def normalize_elections(path: Path) -> pd.DataFrame:
         )
     if frame["yeargov"].isna().any():
         raise ValueError("The election panel contains missing yeargov values.")
+    self_profession = pd.to_numeric(frame["self_profession"], errors="raise")
+    invalid_profession = self_profession.notna() & ~self_profession.isin([0, 1])
+    if invalid_profession.any():
+        invalid_values = sorted(self_profession.loc[invalid_profession].unique())
+        raise ValueError(
+            "self_profession must contain only 0, 1, or missing values; found "
+            f"{invalid_values}."
+        )
+    frame["self_profession"] = self_profession
+    frame["self_profession_nomiss"] = self_profession.fillna(0).astype("int8")
 
     # Convert blank Stata strings to genuine missing values. The upstream
     # panel has 1,440 politician-unmatched rows whose geographic fields were
@@ -267,28 +278,51 @@ def normalize_elections(path: Path) -> pd.DataFrame:
 
 
 def normalize_rice(path: Path) -> tuple[pd.DataFrame, float]:
-    frame = pd.read_stata(path, convert_categoricals=False)
+    suffix = path.suffix.casefold()
+    if suffix == ".parquet":
+        frame = pd.read_parquet(path)
+    elif suffix == ".dta":
+        logging.warning(
+            "Reading legacy Stata rice input; prefer the Parquet file: %s",
+            path,
+        )
+        frame = pd.read_stata(path, convert_categoricals=False)
+    else:
+        raise ValueError(
+            "The rice input must be a .parquet file "
+            f"(or a legacy .dta override), not {path.suffix!r}."
+        )
     if "ac_uq_id" not in frame.columns:
         raise KeyError("The rice file does not contain ac_uq_id.")
     if frame["ac_uq_id"].isna().any() or frame["ac_uq_id"].duplicated().any():
         raise ValueError("The rice file must be unique and nonmissing by AC.")
     required = {
-        "rice_area_ha_aclvl",
-        "rice_harvarea_ha_aclvl",
-        "rice_prod_mt_aclvl",
-        "rice_area_share_aclvl",
-        "rice_harvarea_share_aclvl",
         "rice_area_aclvl_ahigh",
         "rice_harvarea_aclvl_ahigh",
+        "rice_prod_aclvl_ahigh",
+        "rice_prod_mt",
     }
     missing = sorted(required.difference(frame.columns))
     if missing:
         raise KeyError(f"Missing rice columns: {missing}")
-    median = float(frame["rice_prod_mt_aclvl"].median(skipna=True))
-    frame["rice_prod_aclvl_ahigh"] = (
-        frame["rice_prod_mt_aclvl"].fillna(0).gt(median).astype("int8")
-    )
-    keep = ["ac_uq_id", *sorted(required), "rice_prod_aclvl_ahigh"]
+    indicator_columns = [
+        "rice_area_aclvl_ahigh",
+        "rice_harvarea_aclvl_ahigh",
+        "rice_prod_aclvl_ahigh",
+    ]
+    for column in indicator_columns:
+        values = pd.to_numeric(frame[column], errors="raise")
+        invalid = values.notna() & ~values.isin([0, 1])
+        if invalid.any():
+            invalid_values = sorted(values.loc[invalid].unique())
+            raise ValueError(
+                f"{column} must contain only 0, 1, or missing values; "
+                f"found {invalid_values}."
+            )
+        frame[column] = values
+
+    keep = ["ac_uq_id", *indicator_columns, "rice_prod_mt"]
+    median = pd.to_numeric(frame["rice_prod_mt"], errors="raise").median()
     return frame[keep].copy(), median
 
 
@@ -298,7 +332,13 @@ def election_select_list(
     selections: list[str] = []
     used = {column.casefold() for column in existing_columns}
     for column in election_columns:
-        if column in {"ac_uq_id", "year", "month", "yeargov"}:
+        if column in {
+            "ac_uq_id",
+            "year",
+            "month",
+            "yeargov",
+            "self_profession_nomiss",
+        }:
             continue
         output = "election_index" if column == "index" else column
         if output.casefold() in used:
@@ -327,6 +367,16 @@ class MergeDiagnostics:
     left_only: int
     right_only: int
     both: int
+
+
+@dataclass(frozen=True)
+class PopulationBaseDiagnostics:
+    """Counts produced when excluding grids with any missing wind direction."""
+
+    source_rows: int
+    excluded_grids: int
+    excluded_rows: int
+    retained_rows: int
 
 
 def check_merge(
@@ -394,6 +444,69 @@ def check_merge(
     if failures:
         raise ValueError(f"Merge {name} failed coverage checks: {', '.join(failures)}.")
     return result
+
+
+def create_population_base(
+    connection: duckdb.DuckDBPyConnection,
+    population_relation: str,
+) -> PopulationBaseDiagnostics:
+    """Create the wind-complete population view used by every master merge."""
+
+    connection.execute(
+        f"""
+        CREATE TEMP TABLE excluded_wind_grids AS
+        SELECT DISTINCT unique_small_grid_id
+        FROM {population_relation}
+        WHERE
+            wind_direction_av_cellid_month IS NULL
+            OR calculation_wind_direction IS NULL
+        """
+    )
+    connection.execute(
+        f"""
+        CREATE TEMP VIEW population_base AS
+        SELECT population.*
+        FROM {population_relation} AS population
+        ANTI JOIN excluded_wind_grids USING (unique_small_grid_id)
+        """
+    )
+    source_rows, retained_rows, excluded_grids = connection.execute(
+        f"""
+        SELECT
+            (SELECT count(*) FROM {population_relation}),
+            (SELECT count(*) FROM population_base),
+            (SELECT count(*) FROM excluded_wind_grids)
+        """
+    ).fetchone()
+    diagnostics = PopulationBaseDiagnostics(
+        source_rows=int(source_rows),
+        excluded_grids=int(excluded_grids),
+        excluded_rows=int(source_rows) - int(retained_rows),
+        retained_rows=int(retained_rows),
+    )
+    remaining_missing = scalar(
+        connection,
+        """
+        SELECT count(*)
+        FROM population_base
+        WHERE
+            wind_direction_av_cellid_month IS NULL
+            OR calculation_wind_direction IS NULL
+        """,
+    )
+    if remaining_missing:
+        raise ValueError(
+            "The filtered population base still contains missing wind direction."
+        )
+    logging.info(
+        "Wind-complete population base | source_rows=%s | excluded_grids=%s "
+        "| excluded_rows=%s | retained_rows=%s",
+        f"{diagnostics.source_rows:,}",
+        f"{diagnostics.excluded_grids:,}",
+        f"{diagnostics.excluded_rows:,}",
+        f"{diagnostics.retained_rows:,}",
+    )
+    return diagnostics
 
 
 def main() -> int:
@@ -491,6 +604,8 @@ def main() -> int:
         area = sql_string(paths["area"])
         population = sql_string(paths["population"])
         placebo_13km = sql_string(paths["placebo_13km"])
+        population_relation = f"read_parquet({population})"
+        population_base = create_population_base(connection, population_relation)
 
         logging.info("Validating large-panel keys")
         area_rows, area_keys = connection.execute(
@@ -501,12 +616,20 @@ def main() -> int:
             FROM read_parquet({area})
             """
         ).fetchone()
-        population_rows, population_keys = connection.execute(
+        population_source_rows, population_source_keys = connection.execute(
             f"""
             SELECT count(*), count(DISTINCT (
                 unique_small_grid_id, year, month
             ))
             FROM read_parquet({population})
+            """
+        ).fetchone()
+        population_rows, population_keys = connection.execute(
+            """
+            SELECT count(*), count(DISTINCT (
+                unique_small_grid_id, year, month
+            ))
+            FROM population_base
             """
         ).fetchone()
         placebo_rows, placebo_keys = connection.execute(
@@ -519,17 +642,24 @@ def main() -> int:
         ).fetchone()
         if area_rows != area_keys:
             raise ValueError("The area panel key is not unique.")
+        if population_source_rows != population_source_keys:
+            raise ValueError("The source population panel key is not unique.")
         if population_rows != population_keys:
-            raise ValueError("The population panel key is not unique.")
+            raise ValueError("The filtered population base key is not unique.")
+        if (
+            population_base.source_rows != population_source_rows
+            or population_base.retained_rows != population_rows
+        ):
+            raise ValueError("The population-base exclusion counts are inconsistent.")
         if placebo_rows != placebo_keys:
             raise ValueError("The 13 km placebo panel key is not unique.")
 
         population_area_merge = check_merge(
             connection,
             name="population base x area panel [grid-month]",
-            left_query=f"""
+            left_query="""
                 SELECT unique_small_grid_id, year, month
-                FROM read_parquet({population})
+                FROM population_base
             """,
             right_query=f"""
                 SELECT unique_small_grid_id, year, month
@@ -537,17 +667,19 @@ def main() -> int:
             """,
             using_columns=("unique_small_grid_id", "year", "month"),
             require_all_left=True,
-            require_all_right=True,
         )
-        if population_area_merge.both != population_rows:
+        if (
+            population_area_merge.both != population_rows
+            or population_area_merge.right_only != population_base.excluded_rows
+        ):
             raise ValueError("The area merge does not preserve the population base.")
 
         population_placebo_merge = check_merge(
             connection,
             name="population base x 13 km placebo [grid-AC-month]",
-            left_query=f"""
+            left_query="""
                 SELECT unique_small_grid_id, ac_uq_id, year, month
-                FROM read_parquet({population})
+                FROM population_base
             """,
             right_query=f"""
                 SELECT unique_small_grid_id, ac_uq_id, year, month
@@ -555,9 +687,12 @@ def main() -> int:
             """,
             using_columns=("unique_small_grid_id", "ac_uq_id", "year", "month"),
             require_all_left=True,
-            require_all_right=True,
         )
-        if population_placebo_merge.both != population_rows:
+        if (
+            population_placebo_merge.both != population_rows
+            or population_placebo_merge.right_only
+            != population_base.excluded_rows
+        ):
             raise ValueError(
                 "The 13 km merge does not preserve the population base."
             )
@@ -584,9 +719,9 @@ def main() -> int:
         check_merge(
             connection,
             name="population base x fire panel [grid-month]",
-            left_query=f"""
+            left_query="""
                 SELECT unique_small_grid_id, year, month
-                FROM read_parquet({population})
+                FROM population_base
             """,
             right_query="""
                 SELECT unique_small_grid_id, year, month
@@ -598,9 +733,9 @@ def main() -> int:
         protest_merge = check_merge(
             connection,
             name="population grids x protest grids [grid]",
-            left_query=f"""
+            left_query="""
                 SELECT DISTINCT unique_small_grid_id
-                FROM read_parquet({population})
+                FROM population_base
             """,
             right_query="SELECT unique_small_grid_id FROM protest_grid",
             using_columns=("unique_small_grid_id",),
@@ -619,7 +754,7 @@ def main() -> int:
                     unique_small_grid_id,
                     min(ac_uq_id) AS ac_uq_id,
                     count(DISTINCT ac_uq_id) AS ac_count
-                FROM read_parquet({population})
+                FROM population_base
                 GROUP BY unique_small_grid_id
             ),
             assigned AS (
@@ -645,9 +780,9 @@ def main() -> int:
         check_merge(
             connection,
             name="population base x grid/protest lookup [grid-AC]",
-            left_query=f"""
+            left_query="""
                 SELECT DISTINCT unique_small_grid_id, ac_uq_id
-                FROM read_parquet({population})
+                FROM population_base
             """,
             right_query="SELECT unique_small_grid_id, ac_uq_id FROM grid_lookup",
             using_columns=("unique_small_grid_id", "ac_uq_id"),
@@ -658,9 +793,9 @@ def main() -> int:
         check_merge(
             connection,
             name="population base x election panel [AC-month]",
-            left_query=f"""
+            left_query="""
                 SELECT ac_uq_id, year, month
-                FROM read_parquet({population})
+                FROM population_base
             """,
             right_query="SELECT ac_uq_id, year, month FROM election_panel",
             using_columns=("ac_uq_id", "year", "month"),
@@ -670,9 +805,9 @@ def main() -> int:
         rice_merge = check_merge(
             connection,
             name="population ACs x rice panel [AC]",
-            left_query=f"""
+            left_query="""
                 SELECT DISTINCT ac_uq_id
-                FROM read_parquet({population})
+                FROM population_base
             """,
             right_query="SELECT ac_uq_id FROM rice_ac",
             using_columns=("ac_uq_id",),
@@ -688,7 +823,7 @@ def main() -> int:
             f"""
             SELECT count(*)
             FROM read_parquet({area}) AS a
-            JOIN read_parquet({population}) AS p
+            JOIN population_base AS p
               USING (unique_small_grid_id, year, month)
             WHERE
                 a.province IS DISTINCT FROM p.province
@@ -717,7 +852,7 @@ def main() -> int:
             connection,
             f"""
             SELECT count(*)
-            FROM read_parquet({population}) AS p
+            FROM population_base AS p
             JOIN read_parquet({placebo_13km}) AS q
               USING (unique_small_grid_id, year, month)
             WHERE
@@ -734,9 +869,9 @@ def main() -> int:
 
         sd_value = scalar(
             connection,
-            f"""
+            """
             SELECT stddev_samp(downwind_pop - upwind_pop)
-            FROM read_parquet({population})
+            FROM population_base
             """,
         )
         logging.info("downup_diff_pop sample SD: %.12g", sd_value)
@@ -744,7 +879,7 @@ def main() -> int:
         base_columns = {
             row[0]
             for row in connection.execute(
-                f"DESCRIBE SELECT * FROM read_parquet({population})"
+                "DESCRIBE SELECT * FROM population_base"
             ).fetchall()
         }
         additional_columns = {
@@ -772,15 +907,11 @@ def main() -> int:
             "mean_brightness",
             "av_wind_speed",
             "wind_direction",
-            "rice_area_ha_aclvl",
-            "rice_harvarea_ha_aclvl",
-            "rice_prod_mt_aclvl",
-            "rice_area_share_aclvl",
-            "rice_harvarea_share_aclvl",
             "rice_area_aclvl_ahigh",
             "rice_harvarea_aclvl_ahigh",
             "rice_prod_aclvl_ahigh",
             "yeargov",
+            "self_profession_nomiss",
             "downwind_area_13kmpl",
             "upwind_area_13kmpl",
             "downwind_pop_13kmpl",
@@ -820,16 +951,6 @@ def main() -> int:
                 f.mean_brightness,
                 p.rollav_wind_speed_cellid_month AS av_wind_speed,
                 p.wind_direction_av_cellid_month AS wind_direction,
-                coalesce(r.rice_area_ha_aclvl, 0)::DOUBLE
-                    AS rice_area_ha_aclvl,
-                coalesce(r.rice_harvarea_ha_aclvl, 0)::DOUBLE
-                    AS rice_harvarea_ha_aclvl,
-                coalesce(r.rice_prod_mt_aclvl, 0)::DOUBLE
-                    AS rice_prod_mt_aclvl,
-                coalesce(r.rice_area_share_aclvl, 0)::DOUBLE
-                    AS rice_area_share_aclvl,
-                coalesce(r.rice_harvarea_share_aclvl, 0)::DOUBLE
-                    AS rice_harvarea_share_aclvl,
                 coalesce(r.rice_area_aclvl_ahigh, 0)::TINYINT
                     AS rice_area_aclvl_ahigh,
                 coalesce(r.rice_harvarea_aclvl_ahigh, 0)::TINYINT
@@ -837,6 +958,7 @@ def main() -> int:
                 coalesce(r.rice_prod_aclvl_ahigh, 0)::TINYINT
                     AS rice_prod_aclvl_ahigh,
                 e.yeargov AS yeargov,
+                e.self_profession_nomiss AS self_profession_nomiss,
                 CASE
                     WHEN g.yr_pr_5km IS NULL OR g.mt_pr_5km IS NULL THEN 0
                     WHEN (p.year::INTEGER * 12 + p.month::INTEGER)
@@ -845,7 +967,7 @@ def main() -> int:
                     ELSE 0
                 END::TINYINT AS protest5km
                 {election_suffix}
-            FROM read_parquet({population}) AS p
+            FROM population_base AS p
             LEFT JOIN read_parquet({area}) AS a
               ON p.unique_small_grid_id = a.unique_small_grid_id
              AND p.year = a.year
@@ -899,12 +1021,15 @@ def main() -> int:
             missing_ac,
             missing_election,
             missing_yeargov,
+            missing_self_profession_nomiss,
+            invalid_self_profession_nomiss,
             missing_count,
             missing_brightness_with_fire,
             no_fire_rows,
             missing_rice,
             missing_placebo,
-            missing_wind,
+            missing_calculation_wind,
+            missing_raw_wind,
             incomplete_placebo,
         ) = connection.execute(
                 f"""
@@ -916,21 +1041,19 @@ def main() -> int:
                     count_if(ac_uq_id IS NULL),
                     count_if(election_year IS NULL),
                     count_if(yeargov IS NULL),
+                    count_if(self_profession_nomiss IS NULL),
+                    count_if(self_profession_nomiss NOT IN (0, 1)),
                     count_if("count" IS NULL),
                     count_if("count" > 0 AND mean_brightness IS NULL),
                     count_if("count" = 0 AND mean_brightness IS NULL),
                     count_if(
-                        rice_area_ha_aclvl IS NULL
-                        OR rice_harvarea_ha_aclvl IS NULL
-                        OR rice_prod_mt_aclvl IS NULL
-                        OR rice_area_share_aclvl IS NULL
-                        OR rice_harvarea_share_aclvl IS NULL
-                        OR rice_area_aclvl_ahigh IS NULL
+                        rice_area_aclvl_ahigh IS NULL
                         OR rice_harvarea_aclvl_ahigh IS NULL
                         OR rice_prod_aclvl_ahigh IS NULL
                     ),
                     count_if(downup_13kmpl IS NULL),
                     count_if(calculation_wind_direction IS NULL),
+                    count_if(wind_direction IS NULL),
                     count_if(
                         calculation_wind_direction IS NOT NULL
                         AND (
@@ -952,6 +1075,10 @@ def main() -> int:
             raise ValueError(
                 f"The output contains {missing_yeargov:,} missing yeargov values."
             )
+        if missing_self_profession_nomiss or invalid_self_profession_nomiss:
+            raise ValueError(
+                "The output self_profession_nomiss field is missing or nonbinary."
+            )
         if missing_count or missing_rice:
             raise ValueError("Fire counts or rice fields remain missing.")
         if missing_brightness_with_fire:
@@ -959,9 +1086,14 @@ def main() -> int:
                 "mean_brightness is missing for "
                 f"{missing_brightness_with_fire:,} rows with positive fire counts."
             )
-        if missing_placebo != missing_wind or incomplete_placebo:
+        if missing_calculation_wind or missing_raw_wind:
             raise ValueError(
-                "The 13 km measures are incomplete beyond missing-wind rows."
+                "The output contains rows with missing wind direction after "
+                "the grid-level exclusion."
+            )
+        if missing_placebo or incomplete_placebo:
+            raise ValueError(
+                "The retained sample contains incomplete 13 km measures."
             )
         logging.info(
             "Rows without election_year (field may legitimately be missing): %s",
