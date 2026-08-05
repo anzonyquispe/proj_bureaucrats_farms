@@ -62,6 +62,41 @@ def write_grid(path: Path) -> None:
     path.write_text(json.dumps(collection), encoding="utf-8")
 
 
+def write_split_grid(path: Path) -> None:
+    """Write two parent grids, each divided into two small-grid polygons."""
+
+    def polygon(min_x: float, max_x: float) -> list[list[list[float]]]:
+        return [[
+            [min_x, -0.5],
+            [max_x, -0.5],
+            [max_x, 0.5],
+            [min_x, 0.5],
+            [min_x, -0.5],
+        ]]
+
+    features = []
+    for parent_id, starts_at, wind_half in ((101, -0.5, 0), (102, 1.5, 1)):
+        for split_index in range(2):
+            min_x = starts_at + split_index * 0.5
+            features.append(
+                {
+                    "type": "Feature",
+                    "properties": {
+                        "id": parent_id,
+                        "split_d": split_index + 1,
+                        "split": wind_half + 1,
+                        "unq_s__": (parent_id - 101) * 2 + split_index + 1,
+                    },
+                    "geometry": {
+                        "type": "Polygon",
+                        "coordinates": polygon(min_x, min_x + 0.5),
+                    },
+                }
+            )
+    collection = {"type": "FeatureCollection", "features": features}
+    path.write_text(json.dumps(collection), encoding="utf-8")
+
+
 def write_wind_netcdf(
     path: Path,
     indexed_years: list[tuple[int, int]],
@@ -96,6 +131,41 @@ def write_wind_netcdf(
 
 
 class FireWindDuckDBTests(unittest.TestCase):
+    def test_wind_crosswalk_propagates_parent_cell_to_every_split(self) -> None:
+        with temporary_workspace() as work:
+            grid_path = work / "split_grids.geojson"
+            write_split_grid(grid_path)
+            connection = duckdb.connect()
+            try:
+                wind_builder.load_spatial(connection)
+                connection.execute(
+                    """
+                    CREATE TABLE wind_monthly_rolling (
+                        longitude DOUBLE,
+                        latitude DOUBLE
+                    )
+                    """
+                )
+                connection.executemany(
+                    "INSERT INTO wind_monthly_rolling VALUES (?, ?)",
+                    [(0.0, 0.0), (2.0, 0.0)],
+                )
+                wind_builder.build_grid_crosswalk(connection, grid_path)
+                rows = connection.execute(
+                    """
+                    SELECT id, unique_small_grid_id, longitude, latitude
+                    FROM grid_wind_crosswalk
+                    ORDER BY unique_small_grid_id
+                    """
+                ).fetchall()
+            finally:
+                connection.close()
+
+            self.assertEqual(len(rows), 4)
+            self.assertEqual([row[1] for row in rows], [1, 2, 3, 4])
+            self.assertEqual([row[2] for row in rows], [0.0, 0.0, 2.0, 2.0])
+            self.assertEqual([row[3] for row in rows], [0.0, 0.0, 0.0, 0.0])
+
     def test_fire_point_in_polygon_aggregation(self) -> None:
         with temporary_workspace() as work:
             grid_path = work / "grids.geojson"

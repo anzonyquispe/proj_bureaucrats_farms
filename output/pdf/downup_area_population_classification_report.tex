@@ -1,0 +1,184 @@
+\documentclass[10pt]{article}
+\usepackage{graphicx}
+\setlength{\textwidth}{6.85in}
+\setlength{\oddsidemargin}{-0.18in}
+\setlength{\evensidemargin}{-0.18in}
+\setlength{\textheight}{9.45in}
+\setlength{\topmargin}{-0.65in}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0.45em}
+\setlength{\emergencystretch}{3em}
+\title{\textbf{How We Classify Downwind and Upwind AC Area and Population}}
+\author{Corrected East-referenced construction}
+\date{August 2026}
+
+\begin{document}
+\maketitle
+
+\section*{Executive summary}
+For each focal grid and month, one rolling wind direction divides its assigned
+assembly constituency (AC) into a downwind half and an upwind half. We then
+construct two related but distinct indicators:
+\[
+\texttt{downup\_ac\_area}
+=\mathbf{1}[A_{down}>A_{up}],
+\qquad
+\texttt{downup\_ac\_pop}
+=\mathbf{1}[P_{down}>P_{up}].
+\]
+The area indicator compares exact polygon areas. The population indicator
+compares the sum of 2010 population assigned to other small-grid centroids in
+the same AC. Therefore, the indicators can differ when population is unevenly
+distributed across the AC.
+
+\section*{One angular convention throughout}
+Every directional calculation is a Cartesian angle measured counterclockwise
+from East:
+\[
+0^\circ=\mathrm{East},\quad 90^\circ=\mathrm{North},\quad
+180^\circ=\mathrm{West},\quad 270^\circ=\mathrm{South}.
+\]
+The wind is $w=\mathrm{atan2}(v10,u10)$. For a comparison-grid centroid $j$
+relative to focal grid $i$, the bearing is
+\[
+\beta_{ij}=\mathrm{atan2}(y_j-y_i,x_j-x_i).
+\]
+No step interprets either angle as a clockwise-from-North compass bearing.
+The normalized calculation angle remains East-referenced; normalization only
+changes its numeric range to $[0,360)$.
+
+\section*{Real example used in the figure}
+The reproducible script selected grid \textbf{77902} in
+\textbf{Prithla} AC
+(AC ID \textbf{262}),
+Faridabad, Haryana, for
+\textbf{2019-03}. The rolling wind direction is
+\textbf{-57.820$^\circ$ from East}.
+
+\begin{center}
+\begin{tabular}{lrrr}
+\hline
+Measure & Downwind & Upwind & Indicator \\
+\hline
+Area (km$^2$) & 186.74 & 99.54 &
+1 \\
+Area share (\%) & 65.2 & 34.8 & \\
+Population & 115438 & 152215 &
+0 \\
+Population share (\%) & 43.1 & 56.9 & \\
+\hline
+\end{tabular}
+\end{center}
+Here, the downwind side contains the majority of AC area but not the majority
+of the comparison-grid population. Thus
+\texttt{downup\_ac\_area}=1 and
+\texttt{downup\_ac\_pop}=0.
+
+\clearpage
+\begin{figure}[p]
+\centering
+\includegraphics[width=\textwidth]{downup\_area\_population\_classification\_figure.pdf}
+\caption{Corrected construction for one real grid-month. Panel (a) uses the
+East-referenced wind vector and a perpendicular line through the focal-grid
+centroid. Panel (b) intersects the AC with the two complementary squares.
+Panel (c) classifies every other same-AC population centroid using the same
+wind direction; marker size represents population. Panel (d) shows why the
+two majority indicators can differ.}
+\end{figure}
+\clearpage
+
+\section*{Step 1: construct the area measure}
+Let $p=(x_i,y_i)$ be the focal-grid centroid and let $\theta$ be the rolling
+wind direction from East. Define
+\[
+v=(\cos\theta,\sin\theta),\qquad
+t=(\sin\theta,-\cos\theta),
+\]
+where $v$ points downwind and $t$ is perpendicular to the wind. Choose $R$
+larger than the maximum distance from $p$ to the AC bounds. The downwind square
+has corners
+\[
+p-Rt,\quad p+Rt,\quad p+Rt+2Rv,\quad p-Rt+2Rv.
+\]
+The upwind square uses $-v$. We compute the exact intersections
+\[
+A_{down}=\mathrm{area}(AC\cap S_{down}),\qquad
+A_{up}=\mathrm{area}(AC\cap S_{up}).
+\]
+The binary indicator equals 1 only when $A_{down}>A_{up}$. An exact tie is
+coded 0. A missing rolling direction produces a missing indicator.
+
+\section*{Step 2: construct the population measure}
+For every other grid $j$ assigned to the same AC, compute the signed circular
+difference
+\[
+\delta_{ij}=((\beta_{ij}-\theta+180)\bmod 360)-180.
+\]
+Grid $j$ is downwind when $|\delta_{ij}|<90^\circ$ and upwind when
+$|\delta_{ij}|>90^\circ$. The focal grid is excluded because its centroid is
+on the dividing line. A comparison centroid exactly on that line is also
+excluded from both sums. Population is then
+\[
+P_{down}=\sum_{j:\,|\delta_{ij}|<90^\circ} Pop_{j,2010},\qquad
+P_{up}=\sum_{j:\,|\delta_{ij}|>90^\circ} Pop_{j,2010}.
+\]
+The binary indicator equals 1 only when $P_{down}>P_{up}$; ties are 0 and
+missing rolling direction produces a missing value.
+
+\section*{What is shared and what is different}
+\begin{center}
+\begin{tabular}{lll}
+\hline
+Component & Area construction & Population construction \\
+\hline
+Focal unit & grid centroid & grid centroid \\
+Wind angle & rolling, from East & rolling, from East \\
+Divider & perpendicular line & same perpendicular line \\
+Objects classified & AC polygon surface & same-AC grid centroids \\
+Weights & square kilometres & 2010 grid population \\
+Indicator & down area $>$ up area & down pop. $>$ up pop. \\
+\hline
+\end{tabular}
+\end{center}
+
+\clearpage
+\section*{Implementation safeguards}
+The production code retains the unrounded rolling-direction float for every
+grid-month. Area rows are never rounded, grouped, cached, or deduplicated by
+wind direction. The population lookup uses circular intervals and an ASOF join
+only after both the wind and centroid bearings have been placed in the same
+East-referenced $[0,360)$ system.
+
+The automated tests enforce the four cardinal cases:
+\begin{itemize}
+  \item East wind: the eastern half-plane is downwind.
+  \item North wind: the northern half-plane is downwind.
+  \item West wind: the western half-plane is downwind.
+  \item South wind: the southern half-plane is downwind.
+\end{itemize}
+They also test the $179^\circ/-179^\circ$ wraparound to ensure that monthly and
+rolling directions are calculated from eastward/northward vector components,
+not arithmetic averages of degree values.
+
+\section*{Production sequence}
+The corrected files are generated in this order:
+\begin{enumerate}
+  \item \texttt{build\_wind\_direction\_grid\_duckdb.py}\par
+  \item \texttt{build\_downup\_ac\_pop\_cluster.py}\par
+  \item \texttt{build\_downup\_ac\_area\_cluster.py}\par
+  \item \texttt{build\_downup\_13kmpl\_cluster.py}\par
+  \item \texttt{build\_0\_master\_dataset.py}\par
+  \item \texttt{build\_all\_stacked\_datasets\_duckdb.py}\par
+\end{enumerate}
+The one-job launcher is
+\texttt{rebuild\_corrected\_downup\_pipeline.sbatch}.
+
+\section*{Interpretation}
+Both indicators describe exposure generated by a hypothetical fire at the
+focal grid under the prevailing rolling wind. The area measure asks whether
+most of the constituency's land lies downwind. The population measure asks
+whether most of the measured same-AC population lies downwind. Neither measure
+should be interpreted as the other, and disagreement between them is a valid
+feature of the construction rather than a merge error.
+
+\end{document}

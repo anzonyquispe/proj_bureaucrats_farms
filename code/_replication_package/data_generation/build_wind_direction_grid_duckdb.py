@@ -479,6 +479,18 @@ def build_grid_crosswalk(
     grid_path: Path,
 ) -> list[str]:
     grid_attributes = create_grid_table(connection, grid_path)
+    parent_id_column = next(
+        (column for column in grid_attributes if column.lower() == "id"),
+        None,
+    )
+    if parent_id_column is None:
+        raise KeyError(
+            f"The split-grid layer {grid_path} has no parent-grid 'id' column. "
+            "It is required to propagate each ERA5 wind cell to all small "
+            "grid splits, following the original R crosswalk."
+        )
+    parent_id = qid(parent_id_column)
+
     connection.execute(
         """
         CREATE TABLE wind_cells AS
@@ -495,6 +507,82 @@ def build_grid_crosswalk(
         """
     )
 
+    null_parent_ids = int(
+        connection.execute(
+            f"SELECT count(*) FROM grids WHERE {parent_id} IS NULL"
+        ).fetchone()[0]
+    )
+    if null_parent_ids:
+        raise ValueError(
+            f"The split-grid layer has {null_parent_ids:,} rows with a null "
+            f"parent-grid {parent_id_column!r}."
+        )
+
+    # The raw layer contains 25 small polygons for every parent grid. ERA5 has
+    # one coordinate inside the parent grid, so only one of those 25 polygons
+    # directly intersects the point. The original R pipeline first recovered
+    # the parent ``id`` from that intersection and then right-joined by ``id``
+    # to propagate the same wind cell to all 25 small polygons. Do the same
+    # explicitly here instead of incorrectly requiring a wind point inside
+    # every small polygon.
+    connection.execute(
+        f"""
+        CREATE TEMP TABLE parent_wind_candidates AS
+        SELECT DISTINCT
+            g.{parent_id} AS parent_grid_id,
+            w.cellid_wind,
+            w.longitude,
+            w.latitude
+        FROM grids AS g
+        JOIN wind_cells AS w
+          ON ST_Intersects(g.geometry, w.geometry)
+        """
+    )
+    parent_count, matched_parent_count, missing_parents, multi_cell_parents = (
+        connection.execute(
+            f"""
+            SELECT
+                (SELECT count(DISTINCT {parent_id}) FROM grids),
+                (SELECT count(DISTINCT parent_grid_id)
+                 FROM parent_wind_candidates),
+                (
+                    SELECT count(*)
+                    FROM (SELECT DISTINCT {parent_id} AS parent_grid_id FROM grids) g
+                    ANTI JOIN parent_wind_candidates p USING (parent_grid_id)
+                ),
+                (
+                    SELECT count(*)
+                    FROM (
+                        SELECT parent_grid_id
+                        FROM parent_wind_candidates
+                        GROUP BY parent_grid_id
+                        HAVING count(DISTINCT cellid_wind) <> 1
+                    )
+                )
+            """
+        ).fetchone()
+    )
+    if missing_parents or multi_cell_parents:
+        raise ValueError(
+            "The parent-grid wind crosswalk must contain exactly one ERA5 "
+            f"point per parent {parent_id_column!r}: "
+            f"parents={parent_count:,}, matched={matched_parent_count:,}, "
+            f"missing={missing_parents:,}, multi-cell={multi_cell_parents:,}."
+        )
+
+    connection.execute(
+        """
+        CREATE TEMP TABLE parent_wind_crosswalk AS
+        SELECT
+            parent_grid_id,
+            min(cellid_wind)::BIGINT AS cellid_wind,
+            min(longitude)::DOUBLE AS longitude,
+            min(latitude)::DOUBLE AS latitude
+        FROM parent_wind_candidates
+        GROUP BY parent_grid_id
+        """
+    )
+
     attributes_sql = ""
     if grid_attributes:
         attributes_sql = ",\n            ".join(
@@ -505,14 +593,14 @@ def build_grid_crosswalk(
         f"""
         CREATE TABLE grid_wind_crosswalk AS
         SELECT
-            w.cellid_wind,
+            p.cellid_wind,
             {attributes_sql}
             g.unique_small_grid_id,
-            w.longitude,
-            w.latitude
+            p.longitude,
+            p.latitude
         FROM grids AS g
-        JOIN wind_cells AS w
-          ON ST_Intersects(g.geometry, w.geometry)
+        JOIN parent_wind_crosswalk AS p
+          ON g.{parent_id} IS NOT DISTINCT FROM p.parent_grid_id
         """
     )
     missing_grids, multi_cell_grids = connection.execute(
@@ -541,6 +629,11 @@ def build_grid_crosswalk(
             "The wind-grid crosswalk must contain exactly one wind point per grid: "
             f"missing grids={missing_grids:,}, multi-cell grids={multi_cell_grids:,}."
         )
+    logging.info(
+        "Wind crosswalk: %s parent grids mapped to %s small-grid splits",
+        f"{parent_count:,}",
+        f"{connection.execute('SELECT count(*) FROM grid_wind_crosswalk').fetchone()[0]:,}",
+    )
     connection.execute("ANALYZE grid_wind_crosswalk")
     return grid_attributes
 
