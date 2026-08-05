@@ -98,6 +98,7 @@ bys unique_small_grid_id: egen TREAT_down = max(downup_ac)
 ********************************************************************************
 * Regression Setup
 ********************************************************************************
+capture drop countk
 gen countk = count * 1000
 local dep_var countk
 local rhs "ib0.post_##ib0.treat wind_direction av_wind_speed"

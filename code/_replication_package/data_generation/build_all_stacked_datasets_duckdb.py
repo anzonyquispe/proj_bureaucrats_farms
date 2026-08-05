@@ -41,7 +41,9 @@ LOCAL_INTERMEDIATE = Path(
 
 
 # These source columns are required in every standard stacked output. Generated
-# columns (treat, post, cohort, relative_monthyear) are appended by the engine.
+# Base generated columns (treat, post, cohort, relative_monthyear) are appended
+# by the engine. Year-level specifications additionally receive relative_year
+# and control_type.
 COMMON_KEEP_COLUMNS = (
     "unique_small_grid_id",
     "province",
@@ -67,6 +69,11 @@ GENERATED_COLUMNS = (
     "relative_monthyear",
 )
 
+YEAR_CONTROL_COLUMNS = (
+    "relative_year",
+    "control_type",
+)
+
 
 @dataclass(frozen=True)
 class StackSpecification:
@@ -78,6 +85,7 @@ class StackSpecification:
     temp_directory: str
     description: str
     extra_columns: tuple[str, ...] = ()
+    year_level_controls: bool = False
 
 
 # Extending the pipeline normally requires only one additional entry here. The
@@ -104,6 +112,7 @@ STACK_SPECIFICATIONS = (
         database="politicians_characteristics.db",
         temp_directory="politicians_characteristics_duckdb_tmp",
         description="politician self-profession treatment without missing values",
+        year_level_controls=True,
     ),
     StackSpecification(
         treatment_col="protest5km",
@@ -111,6 +120,7 @@ STACK_SPECIFICATIONS = (
         database="stacked_data_protest5km.db",
         temp_directory="stacked_data_protest5km_duckdb_tmp",
         description="grid within 5 km of a protest treatment",
+        year_level_controls=True,
     ),
     StackSpecification(
         treatment_col="downup_13kmpl",
@@ -246,6 +256,13 @@ def columns_for(spec: StackSpecification) -> list[str]:
     )
 
 
+def generated_columns_for(spec: StackSpecification) -> list[str]:
+    columns = list(GENERATED_COLUMNS)
+    if spec.year_level_controls:
+        columns.extend(YEAR_CONTROL_COLUMNS)
+    return columns
+
+
 def preflight_input(
     input_path: Path,
     specifications: Sequence[StackSpecification],
@@ -364,6 +381,8 @@ def engine_arguments(
         argv.append("--sort-final")
     if args.write_manifest:
         argv.append("--write-manifest")
+    if spec.year_level_controls:
+        argv.append("--year-level-controls")
     return argv
 
 

@@ -3,12 +3,14 @@
 
 This is the fast, non-geometric first stage of the downwind/upwind pipeline.
 It merges the 2012-2024 grid panel with monthly wind data and classifies every
-other small grid in the focal grid's AC from centroid bearings. The focal grid
-is excluded because its centroid lies on the dividing line.
+other small grid in the focal grid's AC from centroid bearings. Every angle in
+the calculation uses one Cartesian convention: degrees counterclockwise from
+East, with East=0, North=90, West=180, and South=270 after normalization. The
+focal grid is excluded because its centroid lies on the dividing line.
 
 Output includes the requested panel/wind fields, the population measures, and
-two internal fields needed by the area stage: ``ac_uq_id`` and normalized
-``calculation_wind_direction``.
+two internal fields needed by the area stage: ``ac_uq_id`` and normalized,
+East-referenced ``calculation_wind_direction``.
 """
 
 from __future__ import annotations
@@ -29,7 +31,7 @@ except ImportError as exc:  # pragma: no cover
 ROOT = Path("/groups/sgulzar/sa_fires/proj_bureaucrats_farms")
 INTERMEDIATE = ROOT / "data_output" / "intermediate"
 DEFAULT_PANEL = INTERMEDIATE / "data_2012_2024_grid_ac.parquet"
-DEFAULT_WIND = INTERMEDIATE / "_2_wind_direction_grid.csv"
+DEFAULT_WIND = INTERMEDIATE / "_2_wind_direction_grid.parquet"
 DEFAULT_POPULATION = INTERMEDIATE / "small_grid_population_2010.parquet"
 DEFAULT_OUTPUT = INTERMEDIATE / "data_2012_2024_grid_ac_downup_pop.parquet"
 
@@ -40,7 +42,14 @@ def parse_args() -> argparse.Namespace:
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
     parser.add_argument("--panel", type=Path, default=DEFAULT_PANEL)
-    parser.add_argument("--wind-csv", type=Path, default=DEFAULT_WIND)
+    parser.add_argument(
+        "--wind-input",
+        "--wind-csv",
+        dest="wind_input",
+        type=Path,
+        default=DEFAULT_WIND,
+        help="Grid-month wind panel in Parquet (preferred) or CSV format.",
+    )
     parser.add_argument("--grid-population", type=Path, default=DEFAULT_POPULATION)
     parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
     parser.add_argument("--database", type=Path, default=None)
@@ -58,6 +67,21 @@ def parse_args() -> argparse.Namespace:
 
 def sql_string(value: str | Path) -> str:
     return "'" + str(value).replace("'", "''") + "'"
+
+
+def wind_relation(path: Path) -> str:
+    suffix = path.suffix.lower()
+    if suffix in {".parquet", ".pq"}:
+        return f"read_parquet({sql_string(path.resolve())})"
+    if suffix in {".csv", ".gz"}:
+        return (
+            "read_csv_auto("
+            f"{sql_string(path.resolve())}, "
+            "header=true, sample_size=1000000, all_varchar=false)"
+        )
+    raise ValueError(
+        f"Unsupported wind input format {path.suffix!r}; use Parquet or CSV."
+    )
 
 
 def derive_paths(args: argparse.Namespace) -> tuple[Path, Path, Path]:
@@ -92,7 +116,7 @@ def validate_paths(
     database: Path,
     temp_directory: Path,
 ) -> None:
-    for source in (args.panel, args.wind_csv, args.grid_population):
+    for source in (args.panel, args.wind_input, args.grid_population):
         if not source.is_file():
             raise FileNotFoundError(source)
     output.parent.mkdir(parents=True, exist_ok=True)
@@ -150,11 +174,7 @@ def import_inputs(
     connection: duckdb.DuckDBPyConnection, args: argparse.Namespace
 ) -> int:
     panel_relation = f"read_parquet({sql_string(args.panel.resolve())})"
-    wind_relation = (
-        "read_csv_auto("
-        f"{sql_string(args.wind_csv.resolve())}, "
-        "header=true, sample_size=1000000, all_varchar=false)"
-    )
+    wind_input_relation = wind_relation(args.wind_input)
     population_relation = (
         f"read_parquet({sql_string(args.grid_population.resolve())})"
     )
@@ -173,7 +193,7 @@ def import_inputs(
         "panel",
     )
     require_columns(
-        relation_columns(connection, wind_relation),
+        relation_columns(connection, wind_input_relation),
         {
             "unique_small_grid_id",
             "month",
@@ -183,7 +203,7 @@ def import_inputs(
             "rollav_wind_speed_cellid_month",
             "rollav_wind_direction_cellid_month",
         },
-        "wind CSV",
+        "wind input",
     )
     require_columns(
         relation_columns(connection, population_relation),
@@ -226,7 +246,7 @@ def import_inputs(
                 AS rollav_wind_speed_cellid_month,
             TRY_CAST(rollav_wind_direction_cellid_month AS DOUBLE)
                 AS rollav_wind_direction_cellid_month
-        FROM {wind_relation}
+        FROM {wind_input_relation}
         """
     )
     connection.execute(
@@ -275,6 +295,9 @@ def import_inputs(
             w.rollav_wind_direction_cellid_month,
             CASE
                 WHEN w.rollav_wind_direction_cellid_month IS NULL THEN NULL
+                -- The source is atan2(v, u): counterclockwise from East.
+                -- Normalize only its range; never reinterpret it as a
+                -- clockwise-from-North compass bearing.
                 ELSE fmod(
                     fmod(w.rollav_wind_direction_cellid_month, 360.0) + 360.0,
                     360.0
@@ -293,8 +316,28 @@ def import_inputs(
             """
         ).fetchone()[0]
     )
+    invalid_direction = int(
+        connection.execute(
+            """
+            SELECT count(*) FROM panel_wind
+            WHERE calculation_wind_direction IS NOT NULL
+              AND NOT (
+                  calculation_wind_direction >= 0.0
+                  AND calculation_wind_direction < 360.0
+              )
+            """
+        ).fetchone()[0]
+    )
+    if invalid_direction:
+        raise ValueError(
+            f"The normalized East-referenced direction has "
+            f"{invalid_direction:,} values outside [0, 360)."
+        )
     logging.info("Panel rows: %s", f"{rows:,}")
     logging.info("Rows missing rolling direction: %s", f"{missing:,}")
+    logging.info(
+        "Direction convention: counterclockwise from East, normalized [0, 360)"
+    )
     connection.execute("ANALYZE panel_wind")
     connection.execute("ANALYZE grid_population")
     return rows
@@ -367,11 +410,13 @@ def build_lookup(connection: duckdb.DuckDBPyConnection) -> None:
                 focal.ac_uq_id,
                 focal.unique_small_grid_id AS focal_grid_id,
                 comparison.population_2010 AS comparison_population,
+                -- Cartesian bearing, counterclockwise from East. This is the
+                -- same reference axis and rotation used by atan2(v10, u10).
                 fmod(
                     degrees(
                         atan2(
-                            comparison.centroid_x - focal.centroid_x,
-                            comparison.centroid_y - focal.centroid_y
+                            comparison.centroid_y - focal.centroid_y,
+                            comparison.centroid_x - focal.centroid_x
                         )
                     ) + 360.0,
                     360.0

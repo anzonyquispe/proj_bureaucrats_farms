@@ -1,6 +1,6 @@
 # Stacked dataset pipeline
 
-`build_stacked_downup_13kmpl_duckdb.py` is the public entry point. It reads
+`build_all_stacked_datasets_duckdb.py` is the public entry point. It reads
 `0_master_dataset.parquet`, validates the required schema before writing any
 output, and runs every registered treatment specification by default.
 
@@ -41,18 +41,49 @@ treat post cohort relative_monthyear
 `treat` is the stacked treated/control group indicator. `post` equals one when
 `monthyear >= cohort`. `relative_monthyear` equals `monthyear - cohort`.
 
+The `self_profession_nomiss` and `protest5km` specifications additionally
+append:
+
+```text
+relative_year control_type
+```
+
+`relative_year = floor(relative_monthyear / 12)`, so event months -12 through
+-1 are event year -1 and months 0 through 11 are event year 0. `control_type`
+is constant within each grid-cohort stack and is coded as:
+
+```text
+0 = treated cohort grid
+1 = control observed untreated throughout the retained cohort window
+2 = not-yet-treated control observed untreated for only part of that window
+```
+
+For Stata, keep treated grids plus only never-treated controls with:
+
+```stata
+keep if treat == 1 | control_type == 1
+```
+
+Keep treated grids plus only not-yet-treated controls with:
+
+```stata
+keep if treat == 1 | control_type == 2
+```
+
+No filter is required to use both control groups.
+
 ## Commands
 
 Run all specifications:
 
 ```bash
-python build_stacked_downup_13kmpl_duckdb.py --overwrite
+python build_all_stacked_datasets_duckdb.py --overwrite
 ```
 
 Run one or several:
 
 ```bash
-python build_stacked_downup_13kmpl_duckdb.py \
+python build_all_stacked_datasets_duckdb.py \
     --spec downup_ac \
     --spec self_profession_nomiss \
     --overwrite
@@ -61,13 +92,13 @@ python build_stacked_downup_13kmpl_duckdb.py \
 Inspect the configured mappings without reading the master dataset:
 
 ```bash
-python build_stacked_downup_13kmpl_duckdb.py --list-specs
+python build_all_stacked_datasets_duckdb.py --list-specs
 ```
 
 Validate the input and print the planned engine arguments without writing:
 
 ```bash
-python build_stacked_downup_13kmpl_duckdb.py --dry-run
+python build_all_stacked_datasets_duckdb.py --dry-run
 ```
 
 On the cluster, submit `build_stacked_datasets.sbatch`. It runs all treatments
@@ -76,6 +107,14 @@ by default. Set a comma-separated subset with, for example,
 outputs by default because its input master has just been regenerated. Set
 `STACK_OVERWRITE=0` only to resume an interrupted run against the unchanged
 master Parquet.
+
+To rebuild only the politician-profession and protest stacks with the
+year-level/control fields:
+
+```bash
+STACK_SPECS='self_profession_nomiss,protest5km' STACK_OVERWRITE=1 \
+    qsub -V build_stacked_datasets.sbatch
+```
 
 To build the master first and then all five stacked datasets in one cluster
 job, submit the combined shell script from the data-generation directory:
@@ -122,8 +161,9 @@ python -m unittest discover \
 ```
 
 The tests cover switch detection, treated and control clean spells, `treat`,
-`post`, full post-2022 time coverage, required `yeargov`, every registered
-output, and automatic treatment-column retention for new specifications.
+`post`, year-level bins, never-treated versus not-yet-treated control codes,
+full post-2022 time coverage, required `yeargov`, every registered output, and
+automatic treatment-column retention for new specifications.
 
 The existing protest dofiles still reference `stacked_data_protest.csv`; their
 filename migration is intentionally deferred.

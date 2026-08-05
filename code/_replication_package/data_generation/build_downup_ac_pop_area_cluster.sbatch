@@ -55,15 +55,16 @@ cd "${CODE_DIR}"
 
 echo "[$(date '+%F %T')] checking Python dependencies"
 "${PYTHON}" -c "from pathlib import Path; import duckdb, geopandas, numpy, pandas, pyarrow, pyproj, shapely; data=pyproj.datadir.get_data_dir(); print('pyproj:', pyproj.__version__, 'PROJ:', pyproj.proj_version_str, flush=True); print('PROJ data:', data, flush=True); assert (Path(data) / 'proj.db').is_file(); pyproj.datadir.set_data_dir(data); pyproj.CRS.from_epsg(4326); assert int(shapely.__version__.split('.')[0]) >= 2"
+"${PYTHON}" tests/test_downup_direction_convention.py -v
 
-echo "[$(date '+%F %T')] stage 1/2: downwind/upwind population"
+echo "[$(date '+%F %T')] stage 1/2: East-referenced downwind/upwind population"
 "${PYTHON}" build_downup_ac_pop_cluster.py \
     --threads "${NSLOTS:-60}" \
     --memory-limit "90GB" \
     --overwrite \
     > build_downup_ac_pop_cluster.out 2>&1
 
-echo "[$(date '+%F %T')] stage 2/2: exact parallel AC areas"
+echo "[$(date '+%F %T')] stage 2/2: East-referenced exact parallel AC areas"
 "${PYTHON}" build_downup_ac_area_cluster.py \
     --workers "${NSLOTS:-60}" \
     --threads "${NSLOTS:-60}" \

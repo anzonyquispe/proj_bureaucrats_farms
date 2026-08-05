@@ -15,8 +15,9 @@ Default behavior mirrors the R script:
 
 The source data must already contain the requested binary treatment column. The
 engine uses it to create ``treat``, ``post``, ``cohort``, and
-``relative_monthyear``. Project-specific treatment/output mappings live in
-``build_stacked_downup_13kmpl_duckdb.py``.
+``relative_monthyear``. Selected specifications can additionally request
+``relative_year`` and ``control_type``. Project-specific treatment/output
+mappings live in ``build_all_stacked_datasets_duckdb.py``.
 
 If monthyear is absent, it is created as:
     monthyear = year * 12 + month
@@ -191,6 +192,16 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
         "--allow-duplicate-unit-time",
         action="store_true",
         help="Allow duplicate unit-month rows. This is not recommended.",
+    )
+    parser.add_argument(
+        "--year-level-controls",
+        action="store_true",
+        help=(
+            "Add relative_year and control_type. control_type is 0 for "
+            "treated cohort grids, 1 for controls untreated throughout the "
+            "retained cohort window, and 2 for not-yet-treated controls that "
+            "cover only part of that window."
+        ),
     )
 
     parser.add_argument(
@@ -447,7 +458,7 @@ def build_config(
 ) -> dict:
     stat = args.input.stat()
     return {
-        "schema_version": 2,
+        "schema_version": 3,
         "input": str(args.input.resolve()),
         "input_size": stat.st_size,
         "input_mtime_ns": stat.st_mtime_ns,
@@ -459,11 +470,19 @@ def build_config(
         "month_col": args.month_col,
         "derive_time": bool(args.derive_time),
         "selected_cols": list(selected_cols),
-        "generated_cols": ["treat", "post", "cohort", "relative_monthyear"],
+        "generated_cols": generated_columns(args),
+        "year_level_controls": bool(args.year_level_controls),
         "window": effective_window(args),
         "cutoff_year": args.cutoff_year,
         "cutoff_month": args.cutoff_month,
     }
+
+
+def generated_columns(args: argparse.Namespace) -> list[str]:
+    columns = ["treat", "post", "cohort", "relative_monthyear"]
+    if args.year_level_controls:
+        columns.extend(["relative_year", "control_type"])
+    return columns
 
 
 def initialize_database(
@@ -513,6 +532,12 @@ def initialize_database(
             f"{month_sql} <= {int(args.cutoff_month)}))"
         )
 
+    optional_schema = ""
+    if args.year_level_controls:
+        optional_schema = (
+            ",\n            CAST(NULL AS BIGINT) AS relative_year"
+            ",\n            CAST(NULL AS TINYINT) AS control_type"
+        )
     con.execute(
         f"""
         CREATE TABLE panel AS
@@ -659,6 +684,7 @@ def initialize_database(
             CAST(NULL AS TINYINT) AS post,
             CAST(NULL AS BIGINT) AS cohort,
             CAST(NULL AS BIGINT) AS relative_monthyear
+            {optional_schema}
         FROM panel_enriched
         WHERE FALSE
         """
@@ -718,11 +744,20 @@ def process_cohort(
             f"{int(window['rel_min'])} AND {int(window['rel_max'])}"
         )
 
+    optional_relative_year = ""
+    if args.year_level_controls:
+        optional_relative_year = (
+            ",\n                floor("
+            f"(p.{time} - {int(cohort)}) / 12.0"
+            ")::BIGINT AS relative_year"
+        )
+
     con.execute("BEGIN TRANSACTION")
     try:
         con.execute("DROP TABLE IF EXISTS cohort_events")
         con.execute("DROP TABLE IF EXISTS cohort_rows")
         con.execute("DROP TABLE IF EXISTS eligible_units")
+        con.execute("DROP TABLE IF EXISTS control_types")
 
         con.execute(
             f"""
@@ -753,6 +788,22 @@ def process_cohort(
                 "total_rows": 0,
             }
 
+        analysis_min = int(t_min)
+        analysis_max = int(t_max)
+        if window is not None:
+            analysis_min = max(
+                analysis_min,
+                int(cohort) + int(window["rel_min"]),
+            )
+            analysis_max = min(
+                analysis_max,
+                int(cohort) + int(window["rel_max"]),
+            )
+        if analysis_min > analysis_max:
+            raise ValueError(
+                f"Cohort {cohort} has an empty retained analysis window."
+            )
+
         con.execute(
             f"""
             CREATE TEMP TABLE cohort_rows AS
@@ -767,6 +818,7 @@ def process_cohort(
                 END AS post,
                 {int(cohort)}::BIGINT AS cohort,
                 (p.{time} - {int(cohort)})::BIGINT AS relative_monthyear
+                {optional_relative_year}
             FROM panel_enriched p
             JOIN cohort_events e USING ({unit})
             WHERE p.{time} BETWEEN {int(t_min)} AND {int(t_max)}
@@ -786,6 +838,7 @@ def process_cohort(
                 END AS post,
                 {int(cohort)}::BIGINT AS cohort,
                 (p.{time} - {int(cohort)})::BIGINT AS relative_monthyear
+                {optional_relative_year}
             FROM panel_enriched p
             JOIN zero_spells z USING ({unit})
             WHERE ({int(cohort)} > z.d_pre OR z.d_pre IS NULL)
@@ -844,14 +897,48 @@ def process_cohort(
             """
         ).fetchone()
 
-        con.execute(
-            f"""
-            INSERT INTO final_stack
-            SELECT cr.*
-            FROM cohort_rows cr
-            JOIN eligible_units eu USING ({unit})
-            """
-        )
+        if args.year_level_controls:
+            expected_months = analysis_max - analysis_min + 1
+            con.execute(
+                f"""
+                CREATE TEMP TABLE control_types AS
+                SELECT
+                    {unit},
+                    CASE
+                        WHEN min({time}) = {analysis_min}
+                         AND max({time}) = {analysis_max}
+                         AND count(DISTINCT {time}) = {expected_months}
+                            THEN 1::TINYINT
+                        ELSE 2::TINYINT
+                    END AS control_type
+                FROM cohort_rows
+                WHERE treat = 0
+                GROUP BY {unit}
+                """
+            )
+            con.execute(
+                f"""
+                INSERT INTO final_stack
+                SELECT
+                    cr.*,
+                    CASE
+                        WHEN cr.treat = 1 THEN 0::TINYINT
+                        ELSE ct.control_type
+                    END AS control_type
+                FROM cohort_rows cr
+                JOIN eligible_units eu USING ({unit})
+                LEFT JOIN control_types ct USING ({unit})
+                """
+            )
+        else:
+            con.execute(
+                f"""
+                INSERT INTO final_stack
+                SELECT cr.*
+                FROM cohort_rows cr
+                JOIN eligible_units eu USING ({unit})
+                """
+            )
         con.execute(
             "INSERT INTO processed_cohorts VALUES (?, ?, ?, ?, ?, ?, ?)",
             [
@@ -880,6 +967,7 @@ def process_cohort(
         con.execute("DROP TABLE IF EXISTS cohort_events")
         con.execute("DROP TABLE IF EXISTS cohort_rows")
         con.execute("DROP TABLE IF EXISTS eligible_units")
+        con.execute("DROP TABLE IF EXISTS control_types")
 
 
 def get_cohorts(con: duckdb.DuckDBPyConnection, args: argparse.Namespace) -> list[int]:
@@ -969,6 +1057,52 @@ def validate_final_stack(
             f"nonzero controls={invalid_control_treatment:,}."
         )
 
+    if args.year_level_controls:
+        (
+            invalid_relative_year,
+            invalid_control_type,
+            mixed_control_types,
+        ) = con.execute(
+            f"""
+            SELECT
+                count_if(
+                    relative_year IS NULL
+                    OR relative_year
+                       <> floor(relative_monthyear / 12.0)::BIGINT
+                ),
+                count_if(
+                    control_type IS NULL
+                    OR control_type NOT IN (0, 1, 2)
+                    OR (treat = 1 AND control_type <> 0)
+                    OR (treat = 0 AND control_type NOT IN (1, 2))
+                ),
+                (
+                    SELECT count(*)
+                    FROM (
+                        SELECT {unit}, cohort
+                        FROM final_stack
+                        GROUP BY {unit}, cohort
+                        HAVING count(DISTINCT control_type) <> 1
+                    )
+                )
+            FROM final_stack
+            """
+        ).fetchone()
+        if any(
+            int(value)
+            for value in (
+                invalid_relative_year,
+                invalid_control_type,
+                mixed_control_types,
+            )
+        ):
+            raise ValueError(
+                "Year-level/control validation failed: "
+                f"invalid relative_year={invalid_relative_year:,}, "
+                f"invalid control_type={invalid_control_type:,}, "
+                f"mixed unit-cohort control types={mixed_control_types:,}."
+            )
+
     duplicate_keys, mixed_groups = con.execute(
         f"""
         SELECT
@@ -1001,13 +1135,7 @@ def export_final_csv(
     args: argparse.Namespace,
     selected_cols: Sequence[str],
 ) -> None:
-    output_cols = [
-        *selected_cols,
-        "treat",
-        "post",
-        "cohort",
-        "relative_monthyear",
-    ]
+    output_cols = [*selected_cols, *generated_columns(args)]
     selected = ", ".join(qid(c) for c in output_cols)
     order_sql = ""
     if args.sort_final:

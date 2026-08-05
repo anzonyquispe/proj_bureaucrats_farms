@@ -39,6 +39,7 @@ from pathlib import Path
 
 import duckdb
 import geopandas
+import netCDF4
 import numpy
 import pandas
 import pyarrow
@@ -57,12 +58,22 @@ projected = geopandas.GeoSeries(
     [shapely.Point(75.0, 30.0)], crs="EPSG:4326"
 ).to_crs("EPSG:7755")
 assert numpy.isfinite([projected.x.iloc[0], projected.y.iloc[0]]).all()
-duckdb.sql("SELECT 1").fetchone()
+connection = duckdb.connect()
+try:
+    connection.execute("LOAD spatial")
+except Exception:
+    connection.execute("INSTALL spatial")
+    connection.execute("LOAD spatial")
+assert connection.execute(
+    "SELECT ST_AsText(ST_Point(75.0, 30.0))"
+).fetchone()[0] == "POINT (75 30)"
+connection.close()
 
 print("Environment validation: PASS")
 print("Python environment:", Path(__import__("sys").prefix))
 print("DuckDB:", duckdb.__version__)
 print("GeoPandas:", geopandas.__version__)
+print("netCDF4:", netCDF4.__version__)
 print("GDAL:", pyogrio.__gdal_version__)
 print("pyproj:", pyproj.__version__)
 print("PROJ:", pyproj.proj_version_str)

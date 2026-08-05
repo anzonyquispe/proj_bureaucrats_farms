@@ -5,7 +5,7 @@ from __future__ import annotations
 
 import sys
 
-from build_stacked_downup_13kmpl_duckdb import main
+from build_all_stacked_datasets_duckdb import main
 
 
 if __name__ == "__main__":

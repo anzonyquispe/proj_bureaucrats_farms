@@ -73,6 +73,7 @@ if _rc {
 }
 
 * Create count in thousands
+capture drop countk
 gen countk = count * 1000
 
 * Filter data: year < 2022 or (year == 2022 & month <= 8)

@@ -14,7 +14,7 @@ library(panelView)
 ####################### Setting working directory ##############################
 
 # dbox_root <- 'C:/Users/rjbar/Saadgulzar Dropbox/rbarreraf@fen.uchile.cl/sa_fires'
-dbox_root <- '/Users/anzony.quisperojas/Library/CloudStorage/Dropbox/sa_fires'
+dbox_root <- 'C:/Users/eunic/Dropbox/sa_fires'
 shell_root <- '/groups/sgulzar/sa_fires'
 
 # Auto-detect environment: use shell if available, otherwise dbox
@@ -44,7 +44,7 @@ ncores <- max(1, parallel::detectCores() - 1)
 cl <- makeCluster(ncores)
 registerDoParallel(cl)
 
-tools_root <- "/Users/anzony.quisperojas/Documents/GitHub/proj_bureaucrats_farms/code/_replication_rural/tools"
+tools_root <- "C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/code/_replication_rural/tools"
 path.plot <- file.path( tools_root, "plot_event_studies.R" )
 source( path.plot )
 
@@ -57,18 +57,18 @@ source( path.plot )
 options(datatable.print.nrows = 100)
 
 # Inspecting the images event studies
-df <- fread(file.path(table_farms, "main_event_study_rural_acpop.csv"))
+df <- fread(file.path(table_farms, "stacked_event_study_pop_5pre_rural.csv"))
 kl <- 1
-file_base <- paste0("main_event_study_rural_acpop_", kl)
+file_base <- paste0("stacked_event_study_pop_5pre_rural_", kl)
 filterval <- paste0("evreg", kl)
-ev <- df[reg == filterval,][c(6:1, 7:12), c(  3, 4, 10:5, 11:16)  ]
-agregation_result(ev, numPrePeriods=6, numPostPeriods = 6, M = 1, 
+ev <- df[reg == filterval,][c(15:25), c(  3, 4, 19:29)  ]
+agregation_result(ev, numPrePeriods=5, numPostPeriods = 7, M = 1, 
                   xlab = "Time from Treatment (months)", 
                   ylab = "Effect on Number of Fires (in 1,000 units)",
-                  omitted_period = 0, honest = TRUE, 
+                  omitted_period = -1, honest = TRUE, 
                   ylim_ori = c(-30, 20), ylim_rot = c(-40, 30),
-                  extra_args_relativeMagnitudes = list(l_vec=rep(1/6,6)),         
-                  extra_args_sensitivityResults = list(l_vec=rep(1/6,6)))
+                  extra_args_relativeMagnitudes = list(l_vec=rep(1/7,7)),         
+                  extra_args_sensitivityResults = list(l_vec=rep(1/7,7)))
 mods <- c('riceA', 'riceHA', 'riceP')
 for (kl in 2:4){
   i <- kl-1

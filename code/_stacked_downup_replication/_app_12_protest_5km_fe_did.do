@@ -33,7 +33,7 @@ cd "${root}"
 * Import Data
 ********************************************************************************
 
-import delimited using "${root}/data_output/intermediate/stacked_data_protest${sample}.csv", clear varnames(1)
+import delimited using "${root}/data_output/intermediate/stacked_data_protest5km${sample}.csv", clear varnames(1)
 
 * Merge with rice moderators
 merge m:1 unique_small_grid_id ac_uq_id using "data_output/intermediate/rice_moderators.dta"
@@ -49,6 +49,10 @@ drop _merge
 keep if is_rural == 1
 
 display "Observations after rural filter: " _N
+
+* Express the fire-count outcome in thousands in every regression.
+capture drop countk
+gen countk = count * 1000
 
 ********************************************************************************
 * Generate Variables

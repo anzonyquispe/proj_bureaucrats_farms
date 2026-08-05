@@ -13,10 +13,14 @@ import re
 TABLE_SOURCES = {
     "tables/main_did_downup_area_ac_rural": "analysis/main_did_area.do; generate_tables.do",
     "tables/main_did_downup_area_ac_rural_acpop": "analysis/main_did_acpop_stacked.do; generate_tables.do",
+    "tables/main_did_downup_ac_rural_acpop": "code/_stacked_downup_replication/_main_1_did.do; code/_stacked_downup_replication/_generate_all_tables.do",
     "tables/_main_3_bureau_polisc_did_rural": "analysis/bureaucrat_politician_area.do; generate_tables.do",
     "tables/_main_3_bureau_polisc_did_rural_acpop": "analysis/bureaucrat_politician_acpop_stacked.do; generate_tables.do",
     "tables/_app_6_main_did_treat_definition_rural": "analysis/treatment_definitions_area.do; generate_tables.do",
     "tables/_app_6_main_did_treat_definition_rural_acpop": "analysis/treatment_definitions_acpop.do; generate_tables.do",
+    "tables/_app_6_main_did_treat_definition_rural_acpop_new": "code/_stacked_downup_replication/_app_6_main_did_treat_definition.do; code/_stacked_downup_replication/_generate_all_tables.do",
+    "tables/_app_6_main_did_treat_definition_rural_acpop_new2": "code/_stacked_downup_replication/_app_6_main_did_treat_definition.do; code/_stacked_downup_replication/_generate_all_tables.do",
+    "tables/_app_6_main_did_treat_definition_rural_acpop_new3": "code/_stacked_downup_replication/_app_6_main_did_treat_definition.do; code/_stacked_downup_replication/_generate_all_tables.do",
     "tables/_app_7_main_did_downup_area_ac_dv_rural": "analysis/alternative_outcomes_area.do; generate_tables.do",
     "tables/_app_7_main_did_downup_area_ac_dv_rural_acpop": "analysis/alternative_outcomes_acpop_stacked.do; generate_tables.do",
     "tables/_app_8_main_did_by_year_rural": "analysis/by_year_area.do; generate_tables.do",
@@ -88,6 +92,7 @@ STATIC_ASSETS = {
     ("figure", "figures/cnn.png"): "externally supplied illustration; not present in this repository snapshot",
     ("figure", "figures/2020_Indian_farmers_protest.jpg"): "externally supplied photograph; not present in this repository snapshot",
     ("figure", "figures/rices_grids_150dpi_q75.pdf"): "externally supplied/compressed map; not present in this repository snapshot",
+    ("figure", "figures/myneta_example2.png"): "externally supplied MyNeta example image; no generating script is expected",
 }
 
 
@@ -99,18 +104,86 @@ def parse_args() -> argparse.Namespace:
 
 
 def active_references(path: Path) -> list[tuple[int, str, str]]:
-    text = path.read_text(encoding="utf-8")
-    text = re.sub(r"\\begin\{comment\}.*?\\end\{comment\}", "", text, flags=re.DOTALL)
     patterns = {
         "input": re.compile(r"\\input\{([^}]+)\}"),
         "figure": re.compile(r"\\includegraphics(?:\[[^]]*\])?\{([^}]+)\}"),
         "bibliography": re.compile(r"\\bibliography\{([^}]+)\}"),
     }
+
+    def strip_line_comment(line: str) -> str:
+        """Remove a TeX comment while retaining escaped percent signs."""
+        for index, character in enumerate(line):
+            if character != "%":
+                continue
+            backslashes = 0
+            cursor = index - 1
+            while cursor >= 0 and line[cursor] == "\\":
+                backslashes += 1
+                cursor -= 1
+            if backslashes % 2 == 0:
+                return line[:index]
+        return line
+
     found: list[tuple[int, str, str]] = []
-    for line_number, line in enumerate(text.splitlines(), 1):
-        line = re.sub(r"(?<!\\)%.*$", "", line)
+    comment_depth = 0
+    false_depth = 0
+    begin_comment = r"\begin{comment}"
+    end_comment = r"\end{comment}"
+
+    for line_number, raw_line in enumerate(path.read_text(encoding="utf-8").splitlines(), 1):
+        line = strip_line_comment(raw_line)
+
+        # Remove comment-environment content without deleting physical lines,
+        # so reported main.tex line numbers remain exact.
+        active_parts: list[str] = []
+        cursor = 0
+        while cursor < len(line):
+            if comment_depth:
+                end = line.find(end_comment, cursor)
+                if end < 0:
+                    cursor = len(line)
+                    break
+                comment_depth -= 1
+                cursor = end + len(end_comment)
+                continue
+            begin = line.find(begin_comment, cursor)
+            if begin < 0:
+                active_parts.append(line[cursor:])
+                break
+            active_parts.append(line[cursor:begin])
+            comment_depth += 1
+            cursor = begin + len(begin_comment)
+        line = "".join(active_parts)
+        if comment_depth:
+            continue
+
+        # Treat \iffalse ... \fi as disabled code. This file currently does
+        # not rely on it, but respecting it keeps the audit TeX-aware.
+        if false_depth:
+            false_depth += len(re.findall(r"\\if(?:false|true)\b", line))
+            false_depth -= len(re.findall(r"\\fi\b", line))
+            if false_depth < 0:
+                raise ValueError(f"Unbalanced \\fi near {path}:{line_number}")
+            continue
+        if re.search(r"\\iffalse\b", line):
+            false_depth = 1
+            continue
+
+        # TeX ignores everything after the first active end-of-document (or
+        # end-of-input) command, even if more valid-looking LaTeX follows it.
+        end_match = re.search(r"\\(?:end\{document\}|endinput)", line)
+        if end_match:
+            line = line[:end_match.start()]
+
         for kind, pattern in patterns.items():
             found.extend((line_number, kind, match.group(1)) for match in pattern.finditer(line))
+        if end_match:
+            break
+
+    if comment_depth:
+        raise ValueError(f"Unclosed comment environment in {path}")
+    if false_depth:
+        raise ValueError(f"Unclosed \\iffalse block in {path}")
     return found
 
 
@@ -160,7 +233,7 @@ def main() -> None:
     report = [
         "# Active outputs without located generating code",
         "",
-        "This audit includes only uncommented `\\input`, `\\includegraphics`, and bibliography references in `code/_report/main.tex`. References inside `%` comments or `comment` environments are excluded.",
+        "This audit includes only executable `\\input`, `\\includegraphics`, and bibliography references in `code/_report/main.tex`. References in `%` comments, `comment` environments, disabled `\\iffalse` blocks, or after the first active `\\end{document}` are excluded.",
         "",
         f"- Unique active references: {len(rows)}",
         f"- Covered by this replication package: {counts['generated']}",

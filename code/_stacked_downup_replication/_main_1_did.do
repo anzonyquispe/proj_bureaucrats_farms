@@ -1,24 +1,24 @@
 ********************************************************************************
-* _main_did_rural.do
-* Replicates analysis from _main_did.R - RURAL GRIDS ONLY
-* Generates DiD table with downup_ac treatment
-********************************************************************************
-
-********************************************************************************
-* Setup - Only set globals if running standalone (not from master)
+* Main stacked DiD: assembly-constituency treatment
+*
+* The master runs this file twice:
+*   combined_dt.csv      / downup_ac      (area-weighted treatment)
+*   combined_dt_pop.csv  / downup_ac_pop  (population-weighted treatment)
 ********************************************************************************
 
 if "$root" == "" {
     clear all
     set more off
 
-    * Set toggles for standalone run
+    * Five sbatch-array parameters; defaults apply only to standalone runs.
     global location "shell"
     global sample ""
+    global is_rural_var "is_rural_area"
+    global fe_list "1/4"
+    global ster_suffix "_stacked"
 
     global shell "/groups/sgulzar/sa_fires/proj_bureaucrats_farms"
     global dbox "/Users/anzony.quisperojas/Library/CloudStorage/Dropbox/sa_fires/proj_bureaucrats_farms"
-
     if "$location" == "dbox" {
         global root "$dbox"
     }
@@ -27,50 +27,59 @@ if "$root" == "" {
     }
 }
 
-global int_farms "${root}/data_output/intermediate"
-global table_farms "${root}/tex/paper/tables"
-global figure_farms "${root}/tex/paper/figures"
+* Extra switches set by the master; the defaults reproduce the area treatment.
+if "$stacked_file" == "" {
+    global stacked_file "combined_dt"
+}
+if "$downup_var" == "" {
+    global downup_var "downup_ac"
+}
+if "$did_output" == "" {
+    global did_output "main_did_downup_area_ac"
+}
 
-********************************************************************************
-* Import Data
-********************************************************************************
+global int_data "${root}/data_output/intermediate"
+global tables "${root}/tex/paper/tables"
 
-import delimited "${root}/data_output/intermediate/combined_dt_pop.csv", clear
+import delimited "${int_data}/${stacked_file}${sample}.csv", clear varnames(1)
 
+* Always express the fire-count outcome in thousands.
+capture drop countk
+gen double countk = count * 1000
 
-* Merge with rural classification
-merge m:1 unique_small_grid_id using "${root}/data_output/intermediate/ghs_grid_classification_2000.dta", keepusing(is_rural)
-keep if _merge == 3
-drop _merge
+capture confirm variable relative_year_bin
+if _rc {
+    capture confirm variable relative_year
+    if !_rc {
+        gen relative_year_bin = relative_year
+    }
+    else {
+        gen relative_year_bin = floor(relative_monthyear / 12)
+    }
+}
 
-* Keep only rural grids
-keep if is_rural == 1
-keep if relative_monthyear >= -5 & relative_monthyear <= 6
-display "Observations after rural filter: " _N
+merge m:1 unique_small_grid_id using ///
+    "${int_data}/ghs_grid_classification_2000.dta", ///
+    keepusing(is_rural_area is_rural_farzad) keep(3) nogen
+keep if ${is_rural_var} == 1
 
-* Drop grids with more than 1 ac
-// merge m:1 unique_small_grid_id using "${root}/data_output/intermediate/grids_with_more_1_ac.dta"
-// drop if dpl_ac ==1
-// drop _merge
-
-* Create count in thousands
-gen countk = count * 1000
-
-* Filter data: year < 2022 or (year == 2022 & month <= 8)
+* Do not drop grids that intersect more than one assembly constituency.
+* capture confirm variable grids_with_more_1_ac
+* if _rc {
+*     merge m:1 unique_small_grid_id using ///
+*         "${int_data}/grids_with_more_1_ac.dta", keep(master match) nogen
+*     capture confirm variable dpl_ac
+*     if !_rc {
+*         drop if dpl_ac == 1
+*     }
+* }
 keep if year < 2022 | (year == 2022 & month <= 8)
 
-* Sort data
-sort unique_small_grid_id monthyear
-
-********************************************************************************
-* Create TREAT_abs variable (to identify pure control)
-********************************************************************************
-
-bysort unique_small_grid_id: egen TREAT_abs = max(downup_ac_pop)
-
-********************************************************************************
-* Encode string IDs if necessary
-********************************************************************************
+capture confirm variable treat
+if _rc {
+    bysort unique_small_grid_id: egen byte treat = max(${downup_var})
+}
+gen byte moderator = 0
 
 capture confirm numeric variable unique_small_grid_id
 if _rc {
@@ -88,106 +97,52 @@ else {
     gen ac_id = ac_uq_id
 }
 
-********************************************************************************
-* Calculate statistics for table footer
-********************************************************************************
+quietly summarize countk if treat == 1 & relative_year_bin <= -1
+local ymean = r(mean)
+quietly summarize countk if treat == 1 & relative_year_bin <= -1 & moderator == 1
+local ymean2 = r(mean)
+quietly levelsof ac_id, local(ac_levels)
+local numacs : word count `ac_levels'
 
-* FE
-global setfe ac_id#cohort ac_id#monthyear#cohort
+local controls wind_direction av_wind_speed
+local cluster ac_uq_id#cohort#monthyear unique_small_grid_id#cohort
+local fespec1 "No fixed effects"
+local fespec2 "AC and month-year"
+local fespec3 "AC x month-year"
+local fespec4 "Grid and AC x month-year"
+local estimates ""
 
-* Controls
-global controls av_wind_speed wind_direction
+foreach fe of numlist $fe_list {
+    if `fe' == 1 {
+        reg countk ${downup_var} `controls', vce(cluster grid_id)
+    }
+    else if `fe' == 2 {
+        reghdfejl countk ${downup_var} `controls', ///
+            absorb(ac_id#cohort monthyear#cohort) cluster(`cluster')
+    }
+    else if `fe' == 3 {
+        reghdfejl countk ${downup_var} `controls', ///
+            absorb(ac_id#monthyear#cohort) cluster(`cluster')
+    }
+    else if `fe' == 4 {
+        reghdfejl countk ${downup_var} `controls', ///
+            absorb(grid_id#cohort ac_id#monthyear#cohort) cluster(`cluster')
+    }
+    else {
+        display as error "Unsupported FE specification `fe'; use 1/4."
+        exit 198
+    }
 
-* Cluster variables
-global cluster ac_uq_id#cohort#monthyear unique_small_grid_id#cohort
+    estadd scalar ymean = `ymean'
+    estadd scalar ymean2 = `ymean2'
+    estadd scalar acq = `numacs'
+    estadd local smpl "Rural"
+    estadd local fespec "`fespec`fe''"
+    local estimates `estimates' eq`fe'
+    est store eq`fe'
+}
 
-qui reghdfejl countk downup_ac_pop $controls , ///
-    absorb(grid_id#cohort ac_id#monthyear#cohort) ///
-    cluster($cluster )
-	gen esample4 = e(sample)
-	
-qui reghdfejl countk downup_ac_pop $controls , ///
-    absorb(ac_id#monthyear#cohort) ///
-    cluster($cluster )
-	gen esample3 = e(sample)
-	
+estwrite `estimates' using ///
+    "${tables}/${did_output}${sample}_rural${ster_suffix}.ster", replace
 
-* Calculate mean DV for control group (downup_ac==0 & TREAT_abs==1)
-summarize countk if downup_ac_pop == 0 & TREAT_abs == 1 & esample3 == 1 & esample4 == 1
-local meandv = r(mean)
-local meandv_fmt = string(`meandv', "%9.3f")
-
-* Count unique ACs
-unique ac_id if esample3 == 1 & esample4 == 1
-local numacs = r(unique)
-
-********************************************************************************
-* DiD Regressions
-********************************************************************************
-
-* Specification 1: No FE (baseline with controls only)
-reghdfejl countk downup_ac_pop $controls if esample4 == 1 & esample3 == 1 , ///
-	cluster($cluster ) ///
-	absorb(cohort ) ///
-estadd local ymean `meandv_fmt'
-estadd local acq `numacs'
-estadd local cohortt "Y"
-estadd local monthyearfe "N"
-estadd local acfe "N"
-estadd local acmonthfe "N"
-estadd local gridfe "N"
-estimates store eq1
-
-* Specification 2: AC FE + MonthYear FE
-reghdfejl countk downup_ac_pop $controls if esample4 == 1 & esample3 == 1 , ///
-	cluster($cluster ) ///
-    absorb(ac_id#cohort monthyear#cohort) ///
-    cluster($cluster)
-estadd local ymean `meandv_fmt'
-estadd local acq `numacs'
-estadd local cohortt "N"
-estadd local monthyearfe "Y"
-estadd local acfe "Y"
-estadd local acmonthfe "N"
-estadd local gridfe "N"
-estimates store eq2
-
-* Specification 3: AC x MonthYear FE
-reghdfejl countk downup_ac_pop $controls if esample4 == 1 & esample3 == 1 , ///
-	cluster($cluster ) ///
-    absorb(ac_id#monthyear#cohort) ///
-    cluster($cluster)
-estadd local ymean `meandv_fmt'
-estadd local acq `numacs'
-estadd local cohortt "N"
-estadd local monthyearfe "N"
-estadd local acfe "N"
-estadd local acmonthfe "Y"
-estadd local gridfe "N"
-estimates store eq3
-
-* Specification 4: Grid FE + AC x MonthYear FE
-reghdfejl countk downup_ac_pop $controls if esample4 == 1 & esample3 == 1 , ///
-	cluster($cluster ) ///
-    absorb(grid_id#cohort ac_id#monthyear#cohort) ///
-    cluster($cluster )
-estadd local ymean `meandv_fmt'
-estadd local acq `numacs'
-estadd local cohortt "N"
-estadd local monthyearfe "N"
-estadd local acfe "N"
-estadd local acmonthfe "Y"
-estadd local gridfe "Y"
-estimates store eq4
-
-
-********************************************************************************
-* Save estimates to ster file
-********************************************************************************
-
-estwrite eq1 eq2 eq3 eq4 using "${table_farms}/main_did_downup_pop_ac_rural_stacked.ster", replace
-
-display "Estimates saved to: ${table_farms}/main_did_downup_pop_ac_rural_stacked.ster"
-
-********************************************************************************
-********************************************************************************
+display "Saved ${tables}/${did_output}${sample}_rural${ster_suffix}.ster"

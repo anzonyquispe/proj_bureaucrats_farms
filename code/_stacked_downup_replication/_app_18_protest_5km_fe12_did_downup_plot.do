@@ -49,6 +49,10 @@ keep if is_rural == 1
 
 display "Observations after rural filter: " _N
 
+* Express the fire-count outcome in thousands in every regression.
+capture drop countk
+gen countk = count * 1000
+
 ********************************************************************************
 * Generate Variables
 ********************************************************************************

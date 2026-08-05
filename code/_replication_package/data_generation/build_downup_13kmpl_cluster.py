@@ -6,7 +6,8 @@ panel. For every focal grid, all other small-grid centroids within 13,000
 metres are found in EPSG:7755 coordinates. Their 2010 populations are then
 classified by the half-plane pointing in the rolling wind direction, exactly
 as in the AC population stage. Wind-direction floats are never rounded,
-grouped, or deduplicated.
+grouped, or deduplicated. Wind and centroid bearings are both measured
+counterclockwise from East (East=0, North=90, West=180, South=270).
 
 The 13 km geometry is a circle centred on the focal grid. A perpendicular
 line through its centre is a diameter, so its exact downwind and upwind areas
@@ -337,7 +338,9 @@ def build_radius_lookup(
                 focal_grid_id,
                 comparison_grid_id,
                 comparison_population,
-                fmod(degrees(atan2(dx, dy)) + 360.0, 360.0) AS bearing
+                -- Cartesian bearing counterclockwise from East, matching
+                -- calculation_wind_direction = atan2(v10, u10).
+                fmod(degrees(atan2(dy, dx)) + 360.0, 360.0) AS bearing
             FROM candidates
         )
         SELECT

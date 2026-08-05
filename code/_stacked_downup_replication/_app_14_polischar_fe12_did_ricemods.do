@@ -98,6 +98,7 @@ bys unique_small_grid_id: egen TREAT_down = max(downup_ac)
 ********************************************************************************
 * Regression Setup
 ********************************************************************************
+capture drop countk
 gen countk = count * 1000
 local dep_var countk
 

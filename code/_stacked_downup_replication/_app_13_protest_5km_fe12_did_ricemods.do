@@ -33,7 +33,7 @@ cd "${root}"
 * Import Data
 ********************************************************************************
 
-import delimited using "${root}/data_output/intermediate/stacked_data_protest${sample}.csv", clear varnames(1)
+import delimited using "${root}/data_output/intermediate/stacked_data_protest5km${sample}.csv", clear varnames(1)
 
 * Merge with rice moderators
 merge m:1 unique_small_grid_id ac_uq_id using "data_output/intermediate/rice_moderators.dta"
@@ -54,11 +54,9 @@ display "Observations after rural filter: " _N
 * Generate Variables
 ********************************************************************************
 
-* Create count in thousands if not exists
-capture confirm variable countk
-if _rc {
-    gen countk = count * 1000
-}
+* Always express the fire-count outcome in thousands.
+capture drop countk
+gen countk = count * 1000
 
 * Post indicator
 gen post_ = relative_year_bin >= 0

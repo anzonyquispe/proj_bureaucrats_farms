@@ -97,7 +97,8 @@ gen moderator = 0
 *-------------------------------------
 * 1. Dep var and RHS
 *-------------------------------------
-gen countk = count*1000
+capture drop countk
+gen countk = count * 1000
 local dep_var countk
 
 *-------------------------------------
@@ -126,4 +127,3 @@ estwrite evreg* using "${root}/tex/paper/tables/_app_19_polischar_fe12_did_downu
 display "Ster: ${root}/tex/paper/tables/_app_19_polischar_fe12_did_downup_inter_plot${sample}_rural_stacked.ster"
 
 ********************************************************************************
-

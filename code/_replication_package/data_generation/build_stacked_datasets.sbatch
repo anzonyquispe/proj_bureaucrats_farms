@@ -60,7 +60,7 @@ case "${STACK_OVERWRITE:-1}" in
         ;;
 esac
 
-"${PYTHON}" build_stacked_downup_13kmpl_duckdb.py \
+"${PYTHON}" build_all_stacked_datasets_duckdb.py \
     --threads "${NSLOTS:-10}" \
     --memory-limit "${STACK_MEMORY_LIMIT:-90GB}" \
     "${SPEC_ARGS[@]}" \

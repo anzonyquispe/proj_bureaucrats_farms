@@ -68,7 +68,7 @@ if [[ -n "${STACK_SPECS:-}" && "${STACK_SPECS}" != "all" ]]; then
 fi
 
 echo "[$(date '+%F %T')] building stacked datasets"
-"${PYTHON}" build_stacked_downup_13kmpl_duckdb.py \
+"${PYTHON}" build_all_stacked_datasets_duckdb.py \
     --intermediate "${INTERMEDIATE}" \
     --threads "${NSLOTS:-10}" \
     --memory-limit "${MEMORY_LIMIT}" \

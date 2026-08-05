@@ -1,30 +1,18 @@
 ********************************************************************************
-* _app_11_placebo_pop_13km_rural.do
-* Placebo test: Does farmers' pro-sociality explain the results? - RURAL ONLY
-* Tests whether fires decrease when downwind population is larger in a 13km
-* radius circle (median size of assembly constituency)
-*
-* From paper Section 3.3.1: "Farmers' Pro-sociality and Political Enforcement"
-* "We test prosocial behavior of farmers. When a large number of people is
-*  affected by crop burning, farmers may reduce the number of fires given
-*  that it may affect population health."
+* Population placebo within 13 km, using the generated stacked placebo panel
 ********************************************************************************
 
-********************************************************************************
-* Setup - Only set globals if running standalone (not from master)
-********************************************************************************
-clear all
 if "$root" == "" {
     clear all
     set more off
-
-    * Set toggles for standalone run
-    global location "shell"
-    global sample ""
-
+    * Standalone defaults for the five sbatch-array parameters.
+    global location     "shell"
+    global sample       ""
+    global is_rural_var "is_rural_area"
+    global fe_list      "1"
+    global ster_suffix  ""
     global shell "/groups/sgulzar/sa_fires/proj_bureaucrats_farms"
-    global dbox "/Users/anzony.quisperojas/Library/CloudStorage/Dropbox/sa_fires/proj_bureaucrats_farms"
-
+    global dbox  "/Users/anzony.quisperojas/Library/CloudStorage/Dropbox/sa_fires/proj_bureaucrats_farms"
     if "$location" == "dbox" {
         global root "$dbox"
     }
@@ -33,45 +21,24 @@ if "$root" == "" {
     }
 }
 
+global int_data "${root}/data_output/intermediate"
+global tables   "${root}/tex/paper/tables"
 
-cd "${root}"
-global int_farms "${root}/data_output/intermediate"
-global table_farms "${root}/tex/paper/tables"
-global figure_farms "${root}/tex/paper/figures"
-********************************************************************************
-* Import Data
-********************************************************************************
+import delimited using "${int_data}/stacked_downup_13kmpl${sample}.csv", ///
+    clear varnames(1)
 
-import delimited "${int_farms}/0_master_dataset.csv", clear
-keep unique_small_grid_id month year downup_dummy
-duplicates drop unique_small_grid_id month year, force
-
-merge 1:m unique_small_grid_id month year using "${int_farms}/combined_dt_pop.dta"
-keep if _merge == 3
-drop _merge
-
-* Merge with rural classification
-merge m:1 unique_small_grid_id using "${root}/data_output/intermediate/ghs_grid_classification_2000.dta", keepusing(is_rural)
-keep if _merge == 3
-drop _merge
-
-* Keep only rural grids
-keep if is_rural == 1
-display "Observations after rural filter: " _N
-
-
-* Create count in thousands
+rename downup_13kmpl downup_pop_13km
+capture drop countk
 gen countk = count * 1000
+gen relative_year_bin = relative_monthyear
+gen moderator = 0
 
-* Filter data: year < 2022 or (year == 2022 & month <= 8)
+merge m:1 unique_small_grid_id using ///
+    "${int_data}/ghs_grid_classification_2000.dta", ///
+    keep(master match) keepusing(is_rural_area is_rural_farzad)
+drop _merge
+keep if ${is_rural_var} == 1
 keep if year < 2022 | (year == 2022 & month <= 8)
-
-* Sort data
-sort unique_small_grid_id monthyear
-
-********************************************************************************
-* Encode IDs
-********************************************************************************
 
 capture confirm numeric variable unique_small_grid_id
 if _rc {
@@ -89,65 +56,40 @@ else {
     gen ac_id = ac_uq_id
 }
 
-* Create cluster variable
 egen cluster_acmonth = group(ac_id monthyear)
-rename downup_13kmpl downup_pop_13km
-
-********************************************************************************
-* Create placebo treatment variable
-* downup_pop_13km should be in the data: 1 if population downwind > upwind
-* in a 13km radius circle around each grid
-********************************************************************************
-
-* Check if variable exists, if not create placeholder
-capture confirm variable downup_pop_13km
-if _rc {
-    display as error "Variable downup_pop_13km not found in data"
-    display as error "This variable should indicate whether downwind pop > upwind pop"
-    display as error "in a 13km radius circle around each grid"
-    exit 1
-}
-
-********************************************************************************
-* Calculate statistics
-********************************************************************************
-
-* Count unique ACs
 unique ac_id
 local numacs = r(unique)
-bysort unique_small_grid_id: egen treat = max(downup_pop_13km)
 
-global controls av_wind_speed wind_direction
+quietly summarize countk if treat == 1 & relative_year_bin <= -1
+local ymean = r(mean)
+quietly summarize countk if treat == 1 & relative_year_bin <= -1 & moderator == 1
+local ymean2 = r(mean)
 
-* Define sample conditions and labels
-local cond1 "downup_pop_13km == 0 & treat == 1"
-local cond2 "downup_pop_13km == 0 & downup_ac == 1 & treat == 1"
-local cond3 "downup_pop_13km == 0 & downup_ac == 0 & treat == 1"
-
+local if1 ""
 local if2 "if downup_ac == 1"
 local if3 "if downup_ac == 0"
+local fe1 "grid_id ac_id#monthyear#cohort"
 
-* Pre-compute means
-quietly summarize countk if downup_pop_13km == 0 & treat == 1
-local meandv = cond(r(N) == 0, ".", string(r(mean), "%9.3f"))
-
-* Run regressions
+est clear
 forvalues i = 1/3 {
-    reghdfejl countk downup_pop_13km $controls `if`i'', ///
-        absorb(grid_id ac_id#monthyear) cluster(grid_id cluster_acmonth)
-    estadd local gridfe    "Y"
-    estadd local acmonthfe "Y"
-    estadd local ymean     "`meandv'"
-    estadd local acq       "`numacs'"
-    est store eq`i'
+    foreach fe of numlist $fe_list {
+        if `fe' != 1 {
+            display as error "The placebo table defines FE specification 1 only."
+            exit 198
+        }
+        reghdfejl countk downup_pop_13km av_wind_speed wind_direction `if`i'', ///
+            absorb(`fe`fe'') cluster(grid_id cluster_acmonth)
+        estadd scalar ymean = `ymean'
+        estadd scalar ymean2 = `ymean2'
+        estadd scalar acq = `numacs'
+        estadd local smpl "Rural"
+        estadd local gridfe "Y"
+        estadd local acmonthfe "Y"
+        est store eq`i'
+    }
 }
 
-********************************************************************************
-* Save ster file
-********************************************************************************
-
-estwrite eq* using "${root}/tex/paper/tables/_app_11_placebo_pop_13km${sample}_rural.ster", replace
-
-display "Ster: ${root}/tex/paper/tables/_app_11_placebo_pop_13km${sample}_rural.ster"
+estwrite eq* using ///
+    "${tables}/_app_11_placebo_pop_13km${sample}_rural${ster_suffix}.ster", replace
 
 ********************************************************************************

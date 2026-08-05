@@ -14,7 +14,7 @@ if str(DATA_GENERATION) not in sys.path:
     sys.path.insert(0, str(DATA_GENERATION))
 
 import _stacked_duckdb_core as core  # noqa: E402
-import build_stacked_downup_13kmpl_duckdb as wrapper  # noqa: E402
+import build_all_stacked_datasets_duckdb as wrapper  # noqa: E402
 
 
 TREATMENT_PATHS = {
@@ -125,6 +125,7 @@ class StackedEngineTests(unittest.TestCase):
                     "--checkpoint-every",
                     "1",
                     "--write-manifest",
+                    "--year-level-controls",
                     "--overwrite",
                 ]
             )
@@ -157,15 +158,31 @@ class StackedEngineTests(unittest.TestCase):
                 [int(row["relative_monthyear"]) for row in switching_control],
                 [-2, -1, 0, 1],
             )
+            self.assertEqual(
+                [int(row["relative_year"]) for row in switching_control],
+                [-1, -1, 0, 0],
+            )
             self.assertEqual({int(row["downup_ac"]) for row in switching_control}, {0})
             self.assertEqual({int(row["treat"]) for row in switching_control}, {0})
             self.assertEqual(
                 [int(row["post"]) for row in switching_control],
                 [0, 0, 1, 1],
             )
+            self.assertEqual(
+                {int(row["control_type"]) for row in switching_control},
+                {2},
+            )
 
             never_treated = by_grid["never_treated"]
             self.assertEqual(len(never_treated), 7)
+            self.assertEqual(
+                {int(row["control_type"]) for row in never_treated},
+                {1},
+            )
+            self.assertEqual(
+                {int(row["control_type"]) for row in treated},
+                {0},
+            )
             self.assertTrue((work / "stack_manifest.csv").is_file())
 
     def test_wrapper_uses_full_time_span_and_required_schema(self) -> None:
@@ -207,8 +224,20 @@ class StackedEngineTests(unittest.TestCase):
                 self.assertTrue(spec_rows, spec.output_csv)
                 self.assertEqual(
                     list(spec_rows[0]),
-                    [*wrapper.columns_for(spec), *wrapper.GENERATED_COLUMNS],
+                    [
+                        *wrapper.columns_for(spec),
+                        *wrapper.generated_columns_for(spec),
+                    ],
                 )
+                if spec.treatment_col in {
+                    "self_profession_nomiss",
+                    "protest5km",
+                }:
+                    self.assertIn("relative_year", spec_rows[0])
+                    self.assertIn("control_type", spec_rows[0])
+                else:
+                    self.assertNotIn("relative_year", spec_rows[0])
+                    self.assertNotIn("control_type", spec_rows[0])
 
     def test_wrapper_requires_yeargov_from_master(self) -> None:
         with temporary_workspace() as work:

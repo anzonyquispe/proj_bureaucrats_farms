@@ -54,12 +54,13 @@ keep if is_rural == 1
 
 display "Observations after rural filter: " _N
 
-* Drop grids with more than 1 ac
-merge m:1 unique_small_grid_id using "${root}/data_output/intermediate/grids_with_more_1_ac.dta"
-drop if dpl_ac ==1
-drop _merge
+* Do not drop grids that intersect more than one assembly constituency.
+* merge m:1 unique_small_grid_id using "${root}/data_output/intermediate/grids_with_more_1_ac.dta"
+* drop if dpl_ac == 1
+* drop _merge
 
 * Create count in thousands
+capture drop countk
 gen countk = count * 1000
 
 * Filter data: year < 2022 or (year == 2022 & month <= 8)

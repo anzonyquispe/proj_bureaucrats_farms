@@ -9,6 +9,10 @@ constructs the downwind half-plane through the focal-grid centroid and
 intersects it with the assigned AC polygon using vectorized Shapely 2
 operations.
 
+``calculation_wind_direction`` is interpreted exclusively as a Cartesian
+angle measured counterclockwise from East: East=0, North=90, West=180, and
+South=270. No clockwise-from-North compass conversion is used in this stage.
+
 This is geometrically equivalent to splitting the AC with a line perpendicular
 to the wind direction, but avoids Python-level ``split`` calls for every row.
 The final Parquet contains exactly the requested 16 analysis columns.
@@ -270,6 +274,24 @@ def prepare_area_keys(
             raise ValueError(
                 f"Population input has {duplicate_keys:,} duplicate panel keys."
             )
+        invalid_direction = int(
+            connection.execute(
+                f"""
+                SELECT count(*)
+                FROM {pop_relation}
+                WHERE calculation_wind_direction IS NOT NULL
+                  AND NOT (
+                      calculation_wind_direction >= 0.0
+                      AND calculation_wind_direction < 360.0
+                  )
+                """
+            ).fetchone()[0]
+        )
+        if invalid_direction:
+            raise ValueError(
+                "Area input has "
+                f"{invalid_direction:,} directions outside [0, 360)."
+            )
 
         logging.info("Writing one geometry task per nonmissing-wind panel row")
         connection.execute(
@@ -379,10 +401,10 @@ def scalar_halfplane_area(
     focal_y: float,
     wind_degrees: float,
 ) -> tuple[float, float]:
-    """Robust scalar fallback for a failed vectorized GEOS batch."""
+    """Robust scalar fallback using counterclockwise degrees from East."""
     theta = np.radians(wind_degrees)
-    vx, vy = float(np.sin(theta)), float(np.cos(theta))
-    tx, ty = float(np.cos(theta)), float(-np.sin(theta))
+    vx, vy = float(np.cos(theta)), float(np.sin(theta))
+    tx, ty = float(np.sin(theta)), float(-np.cos(theta))
     minx, miny, maxx, maxy = bounds
     radius = (
         np.hypot(
@@ -413,7 +435,7 @@ def scalar_halfplane_area(
 
 
 def calculate_area_chunk(frame: pd.DataFrame) -> pd.DataFrame:
-    """Vectorized exact half-plane intersections for one worker batch."""
+    """Vectorized East-referenced half-plane intersections for one batch."""
     ac_ids = frame["ac_uq_id"].to_numpy(dtype=np.int64)
     x = frame["centroid_x"].to_numpy(dtype=np.float64)
     y = frame["centroid_y"].to_numpy(dtype=np.float64)
@@ -439,8 +461,9 @@ def calculate_area_chunk(frame: pd.DataFrame) -> pd.DataFrame:
         total[mask] = _WORKER_AC_AREAS[int(ac_id)]
 
     theta = np.radians(wind)
-    vx, vy = np.sin(theta), np.cos(theta)
-    tx, ty = np.cos(theta), -np.sin(theta)
+    # Cartesian convention used by atan2(v10, u10): 0=East, 90=North.
+    vx, vy = np.cos(theta), np.sin(theta)
+    tx, ty = np.sin(theta), -np.cos(theta)
     radius = (
         np.hypot(
             np.maximum(np.abs(x - minx), np.abs(x - maxx)),
