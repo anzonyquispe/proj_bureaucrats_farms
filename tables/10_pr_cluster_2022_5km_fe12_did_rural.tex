@@ -1,0 +1,19 @@
+{
+\def\sym#1{\ifmmode^{#1}\else\(^{#1}\)\fi}
+\begin{tabular}{l*{3}{c}}
+\hline
+            &\multicolumn{1}{c}{(1)}         &\multicolumn{1}{c}{(2)}         &\multicolumn{1}{c}{(3)}         \\
+            & \multicolumn{3}{c}{Number of Fires (x 1,000 units) - Rural Grids} \\ \hline
+
+Post $\\times$ Protest&      14.385\sym{*}  &      41.263\sym{***}&      45.602\sym{***}\\
+            &     (7.386)         &     (9.888)         &     (9.738)         \\
+\hline
+Observations& 184,558,651         & 184,558,651         & 184,558,651         \\
+Assembly    &         827         &         827         &         827         \\
+Mean DV     &     105.036         &     105.036         &     105.036         \\
+Grid FE     &           Y         &           Y         &           Y         \\
+Province Trend FE&           N         &           Y         &           Y         \\
+Legislature FE&           N         &           N         &           Y         \\
+\hline
+\end{tabular}
+}

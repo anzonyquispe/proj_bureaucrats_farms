@@ -1,0 +1,18 @@
+Loading CRC_default/1.1
+Loading CRC_default/1.1
+[2026-08-06 07:46:25] host=d32cepyc254.crc.nd.edu job=1333164 pwd=/users/aquisper/proj_bureaucrats_farms
+[2026-08-06 07:46:25] branch=replication_data environment=/groups/sgulzar/india_forest_land/downup_geo
+[2026-08-06 07:46:25] threads=10 memory=120GB
+[2026-08-06 07:46:25] intermediate=/groups/sgulzar/sa_fires/proj_bureaucrats_farms/data_output/intermediate
+From github.com:anzonyquispe/proj_bureaucrats_farms
+ * branch            replication_data -> FETCH_HEAD
+Already on 'replication_data'
+Your branch is up to date with 'origin/replication_data'.
+From github.com:anzonyquispe/proj_bureaucrats_farms
+ * branch            replication_data -> FETCH_HEAD
+Already up to date.
+[2026-08-06 07:46:27] git HEAD: f4530b5
+dependency check passed
+[2026-08-06 07:46:29] stage 1/3: preserve distr_id in population panel
+[2026-08-06 07:47:14] stage 2/3: rebuild master only
+Loading CRC_default/1.1

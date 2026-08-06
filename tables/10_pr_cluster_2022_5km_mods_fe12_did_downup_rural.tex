@@ -1,0 +1,30 @@
+{
+\def\sym#1{\ifmmode^{#1}\else\(^{#1}\)\fi}
+\begin{tabular}{l*{6}{c}}
+\hline
+            &\multicolumn{1}{c}{(1)}         &\multicolumn{1}{c}{(2)}         &\multicolumn{1}{c}{(3)}         &\multicolumn{1}{c}{(4)}         &\multicolumn{1}{c}{(5)}         &\multicolumn{1}{c}{(6)}         \\
+            & \multicolumn{6}{c}{Number of Fires (x 1,000 units) - Rural Grids} \\ \hline
+            &                     &                     &                     &                     &                     &                     \\
+
+Post $\\times$ Protest&      14.385\sym{*}  &      41.263\sym{***}&      45.602\sym{***}&      16.591\sym{*}  &      44.104\sym{***}&      48.798\sym{***}\\
+            &     (7.386)         &     (9.888)         &     (9.738)         &     (9.591)         &    (11.812)         &    (11.540)         \\
+Post $\\times$ Protest&                     &                     &                     &                     &                     &                     \\
+            &                     &                     &                     &                     &                     &                     \\
+Down $>$ Up &                     &                     &                     &      -9.570\sym{**} &      -9.604\sym{**} &      -9.642\sym{**} \\
+            &                     &                     &                     &     (3.779)         &     (3.773)         &     (3.752)         \\
+Post $\\times$ Down $>$ Up&                     &                     &                     &       5.080\sym{**} &       5.161\sym{**} &       5.211\sym{**} \\
+            &                     &                     &                     &     (2.304)         &     (2.314)         &     (2.296)         \\
+Protest $\\times$ Down $>$ Up&                     &                     &                     &      19.024         &      19.148         &      18.886         \\
+            &                     &                     &                     &    (23.944)         &    (23.872)         &    (23.703)         \\
+Post $\\times$ Protest $\\times$ Down $>$ Up&                     &                     &                     &      -4.409         &      -5.642         &      -6.339         \\
+            &                     &                     &                     &    (11.332)         &    (11.722)         &    (11.301)         \\
+\hline
+Observations& 184,558,651         & 184,558,651         & 184,558,651         & 184,558,651         & 184,558,651         & 184,558,651         \\
+Assembly    &         827         &         827         &         827         &         827         &         827         &         827         \\
+Mean DV     &     105.036         &     105.036         &     105.036         &     105.036         &     105.036         &     105.036         \\
+Grid FE     &           Y         &           Y         &           Y         &           Y         &           Y         &           Y         \\
+Province Trend FE&           N         &           Y         &           Y         &           N         &           Y         &           Y         \\
+Legislature FE&           N         &           N         &           Y         &           N         &           N         &           Y         \\
+\hline
+\end{tabular}
+}

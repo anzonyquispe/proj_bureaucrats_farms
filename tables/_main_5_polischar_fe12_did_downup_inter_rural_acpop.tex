@@ -1,0 +1,29 @@
+{
+\def\sym#1{\ifmmode^{#1}\else\(^{#1}\)\fi}
+\begin{tabular}{l*{6}{c}}
+\hline
+            &\multicolumn{1}{c}{(1)}         &\multicolumn{1}{c}{(2)}         &\multicolumn{1}{c}{(3)}         &\multicolumn{1}{c}{(4)}         &\multicolumn{1}{c}{(5)}         &\multicolumn{1}{c}{(6)}         \\
+            & \multicolumn{6}{c}{Number of Fires (in 1,000 units)} \\ \hline
+
+Post $\times$ Agriculturalist&      26.660\sym{***}&      11.300\sym{**} &      11.212\sym{**} &      25.908\sym{***}&       9.939\sym{*}  &       9.918         \\
+            &     (4.519)         &     (4.843)         &     (4.851)         &     (5.725)         &     (6.021)         &     (6.033)         \\
+Down $>$ Up (Pop)&                     &                     &                     &                     &                     &                     \\
+            &                     &                     &                     &                     &                     &                     \\
+Post $\times$ Down $>$ Up (Pop)&                     &                     &                     &                     &                     &                     \\
+            &                     &                     &                     &                     &                     &                     \\
+Agriculturalist $\times$ Down $>$ Up (Pop)&                     &                     &                     &                     &                     &                     \\
+            &                     &                     &                     &                     &                     &                     \\
+Post $\times$ Agriculturalist&                     &                     &                     &                     &                     &                     \\
+            &                     &                     &                     &                     &                     &                     \\
+\hline
+Observations&  25,625,039         &  25,625,039         &  25,625,039         &  25,625,039         &  25,625,039         &  25,625,039         \\
+N Assembly Constituencies&         689         &         689         &         689         &         689         &         689         &         689         \\
+Grid FE     &           Y         &           Y         &           Y         &           Y         &           Y         &           Y         \\
+Relative Time FE&           Y         &           Y         &           Y         &           Y         &           Y         &           Y         \\
+Legislature FE&           N         &           Y         &           Y         &           N         &           Y         &           Y         \\
+Province Linear Time Trend FE&           N         &           N         &           Y         &           N         &           N         &           Y         \\
+Mean DV     &     120.687         &     120.687         &     120.687         &     120.687         &     120.687         &     120.687         \\
+Mean DV (Down $>$ Up=1)&                     &                     &                     &     121.718         &     121.718         &     121.718         \\
+\hline
+\end{tabular}
+}

@@ -1,0 +1,1592 @@
+Starting _generate_all_tables.do with 1 CPU(s).
+Permanent Stata log: /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication/logs/rec_tables_1334077.stata.log
+
+  ___  ____  ____  ____  ____ ®
+ /__    /   ____/   /   ____/      StataNow 19.5
+___/   /   /___/   /   /___/       MP—Parallel Edition
+
+ Statistics and Data Science       Copyright 1985-2025 StataCorp LLC
+                                   StataCorp
+                                   4905 Lakeway Drive
+                                   College Station, Texas 77845 USA
+                                   800-782-8272        https://www.stata.com
+                                   979-696-4600        service@stata.com
+
+Stata license: 4-user 16-core network, expiring 14 Sep 2026
+Serial number: 501909301589
+  Licensed to: University of Notre Dame
+               Notre Dame, IN 46556
+
+Notes:
+      1. Stata is running in batch mode.
+      2. Unicode is supported; see help unicode_advice.
+      3. More than 2 billion observations are allowed; see help obs_advice.
+      4. Maximum number of variables is set to 5,000 but can be increased;
+          see help set_maxvar.
+
+. do /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication/sb
+> atch/_run_dofile.do 
+
+. *****************************************************************************
+> ***
+. * Environment bridge: one invocation runs exactly one result-generating dofil
+> e.
+. *****************************************************************************
+> ***
+. 
+. version 17
+
+. set more off
+
+. 
+. local dofile        : environment FARMS_DOFILE
+
+. local root          : environment FARMS_ROOT
+
+. local code          : environment FARMS_CODE
+
+. local location      : environment FARMS_LOCATION
+
+. local sample        : environment FARMS_SAMPLE
+
+. local is_rural_var  : environment FARMS_RURAL_VAR
+
+. local fe_list       : environment FARMS_FE_LIST
+
+. local ster_suffix   : environment FARMS_STER_SUFFIX
+
+. local downup_var    : environment FARMS_DOWNUP_VAR
+
+. local stacked_file  : environment FARMS_STACKED_FILE
+
+. local did_output    : environment FARMS_DID_OUTPUT
+
+. local processors    : environment FARMS_CPUS
+
+. 
+. if "`processors'" == "" local processors "1"
+
+. set processors `processors'
+    The maximum number of processors or cores being used is changed from 16
+    to 1.  It can be set to any number between 1 and 16
+
+. 
+. if "`dofile'" == "" {
+.     display as error "FARMS_DOFILE is empty; use sbatch/run_dofile.sbatch."
+.     exit 198
+. }
+
+. if "`root'" == "" {
+.     display as error "FARMS_ROOT is empty; use sbatch/run_dofile.sbatch."
+.     exit 198
+. }
+
+. if "`code'" == "" {
+.     display as error "FARMS_CODE is empty; use sbatch/run_dofile.sbatch."
+.     exit 198
+. }
+
+. 
+. if "`sample'" == "none" local sample ""
+
+. if "`ster_suffix'" == "none" local ster_suffix ""
+
+. if "`downup_var'" == "none" local downup_var ""
+
+. if "`stacked_file'" == "none" local stacked_file ""
+
+. if "`did_output'" == "none" local did_output ""
+
+. 
+. global root          "`root'"
+
+. global code          "`code'"
+
+. global location      "`location'"
+
+. global sample        "`sample'"
+
+. global is_rural_var  "`is_rural_var'"
+
+. global fe_list       "`fe_list'"
+
+. global ster_suffix   "`ster_suffix'"
+
+. global downup_var    "`downup_var'"
+
+. global stacked_file  "`stacked_file'"
+
+. global did_output    "`did_output'"
+
+. 
+. global int_data    "${root}/data_output/intermediate"
+
+. global int_farms   "${int_data}"
+
+. global tables      "${code}/../../tables"
+
+. global table_farms "${tables}"
+
+. global figures     "${code}/../../figures"
+
+. global figure_farms "${figures}"
+
+. 
+. capture mkdir "${tables}"
+
+. capture mkdir "${figures}"
+
+. capture mkdir "${code}/logs"
+
+. 
+. adopath ++ "${code}"
+  [1]              "/users/aquisper/proj_bureaucrats_farms/code/_stacked_downup
+> _replication"
+  [2]  (BASE)      "/software/s/stata/19.5/ado/base/"
+  [3]  (SITE)      "/software/s/stata/ado/"
+  [4]              "."
+  [5]  (PERSONAL)  "~/ado/personal/"
+  [6]  (PLUS)      "~/ado/plus/"
+  [7]  (OLDPLACE)  "~/ado/"
+
+. capture noisily do "${code}/estsave_csv.ado"
+
+. *! estsave_csv v1.2 - Export stored estimates and covariance matrices to CSV
+. program define estsave_csv
+  1.     version 14.0
+  2.     syntax namelist using/, [replace append]
+  3. 
+.     local outfile `"`using'"'
+  4.     tempfile coef_all coef_cur scalar_all scalar_cur
+  5.     local first = 1
+  6. 
+.     foreach est of local namelist {
+  7.         quietly estimates restore `est'
+  8.         matrix b = e(b)
+  9.         matrix V = e(V)
+ 10.         local k = colsof(b)
+ 11.         local cnames : colfullnames b
+ 12. 
+.         preserve
+ 13.         clear
+ 14.         quietly set obs `k'
+ 15.         gen strL reg = "`est'"
+ 16.         gen strL var = ""
+ 17.         gen double beta = .
+ 18.         capture local ymean_val `"`e(ymean)'"'
+ 19.         if !_rc & `"`ymean_val'"' != "" gen strL ymean = `"`ymean_val'"'
+ 20.         else gen strL ymean = ""
+ 21. 
+.         forvalues j = 1/`k' {
+ 22.             local nm : word `j' of `cnames'
+ 23.             quietly replace var = "`nm'" in `j'
+ 24.             quietly replace beta = b[1, `j'] in `j'
+ 25.             gen double cov`j' = .
+ 26.         }
+ 27.         forvalues i = 1/`k' {
+ 28.             forvalues j = 1/`k' {
+ 29.                 quietly replace cov`j' = V[`i', `j'] in `i'
+ 30.             }
+ 31.         }
+ 32.         quietly save `coef_cur', replace
+ 33.         if `first' quietly save `coef_all', replace
+ 34.         else {
+ 35.             quietly use `coef_all', clear
+ 36.             quietly append using `coef_cur'
+ 37.             quietly save `coef_all', replace
+ 38.         }
+ 39.         restore
+ 40. 
+.         preserve
+ 41.         clear
+ 42.         quietly set obs 1
+ 43.         gen strL reg = "`est'"
+ 44.         local escalars : e(scalars)
+ 45.         foreach sc of local escalars {
+ 46.             local scval = e(`sc')
+ 47.             local safe = subinstr("`sc'", "-", "_", .)
+ 48.             capture gen double `safe' = `scval'
+ 49.             if _rc capture gen double sc_`safe' = `scval'
+ 50.         }
+ 51.         local emacros : e(macros)
+ 52.         foreach mc of local emacros {
+ 53.             capture local mcval `"`e(`mc')'"'
+ 54.             if !_rc & `"`mcval'"' != "" {
+ 55.                 if strlen(`"`mcval'"') > 244 local mcval = substr(`"`mcval
+> '"', 1, 244)
+ 56.                 local safe = subinstr("`mc'", "-", "_", .)
+ 57.                 capture gen strL `safe' = `"`mcval'"'
+ 58.                 if _rc capture gen strL mc_`safe' = `"`mcval'"'
+ 59.             }
+ 60.         }
+ 61.         quietly save `scalar_cur', replace
+ 62.         if `first' {
+ 63.             quietly save `scalar_all', replace
+ 64.             local first = 0
+ 65.         }
+ 66.         else {
+ 67.             quietly use `scalar_all', clear
+ 68.             quietly append using `scalar_cur'
+ 69.             quietly save `scalar_all', replace
+ 70.         }
+ 71.         restore
+ 72.     }
+ 73. 
+.     local basefile = subinstr(`"`outfile'"', ".csv", "", .)
+ 74.     quietly use `coef_all', clear
+ 75.     order reg var beta ymean
+ 76.     quietly export delimited using "`basefile'.csv", `replace' `append'
+ 77.     quietly use `scalar_all', clear
+ 78.     quietly export delimited using "`basefile'_scalars.csv", `replace' `ap
+> pend'
+ 79.     display as result "Estimates exported to `basefile'.csv"
+ 80. end
+
+. 
+. 
+end of do-file
+
+. capture noisily do "${code}/estload_csv.ado"
+
+. *! estload_csv v1.0 - Reconstruct estimate objects exported by estsave_csv
+. program define estload_csv
+  1.     version 14.0
+  2.     syntax using/
+  3. 
+.     local infile `"`using'"'
+  4.     local basefile = subinstr(`"`infile'"', ".csv", "", .)
+  5.     preserve
+  6.     quietly import delimited using "`basefile'.csv", clear varnames(1)
+  7.     quietly levelsof reg, local(regs)
+  8. 
+.     foreach r of local regs {
+  9.         preserve
+ 10.         quietly keep if reg == "`r'"
+ 11.         local k = _N
+ 12.         matrix b = J(1, `k', .)
+ 13.         matrix V = J(`k', `k', .)
+ 14.         local varnames ""
+ 15.         forvalues i = 1/`k' {
+ 16.             local vname = var[`i']
+ 17.             local varnames `"`varnames' `vname'"'
+ 18.             matrix b[1, `i'] = beta[`i']
+ 19.             forvalues j = 1/`k' {
+ 20.                 matrix V[`i', `j'] = cov`j'[`i']
+ 21.             }
+ 22.         }
+ 23.         matrix colnames b = `varnames'
+ 24.         matrix rownames V = `varnames'
+ 25.         matrix colnames V = `varnames'
+ 26.         restore, preserve
+ 27.         quietly ereturn post b V
+ 28.         estimates store `r'
+ 29.         display as text "Loaded estimate: `r'"
+ 30.     }
+ 31.     restore
+ 32. end
+
+. 
+. 
+end of do-file
+
+. 
+. display "============================================================"
+============================================================
+
+. display "Independent dofile job: `dofile'"
+Independent dofile job: _generate_all_tables.do
+
+. display "Data root: ${root}"
+Data root: /groups/sgulzar/sa_fires/proj_bureaucrats_farms
+
+. display "Tables output: ${tables}"
+Tables output: /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_repl
+> ication/../../tables
+
+. display "Figures output: ${figures}"
+Figures output: /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_rep
+> lication/../../figures
+
+. display "Code root: ${code}"
+Code root: /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replicat
+> ion
+
+. display "Sample: ${sample}; rural: ${is_rural_var}; FE: ${fe_list}"
+Sample: ; rural: is_rural; FE: 1
+
+. display "Suffix: ${ster_suffix}; moderator: ${downup_var}"
+Suffix: ; moderator: 
+
+. display "Stata processors: " c(processors)
+Stata processors: 1
+
+. display "============================================================"
+============================================================
+
+. 
+. do "${code}/`dofile'"
+
+. *****************************************************************************
+> ***
+. * _generate_all_tables.do
+. * Single LaTeX-table entry point for rural area and population specifications
+. * Run this AFTER analysis do-files have produced .ster files.
+. *
+. * NOTE: the stacked analyses (main_1, main_3, app_7, app_8, app_9, app_10,
+. * app_20) now read the "_rural_stacked.ster" files those do-files write.
+. * The analyses not yet converted to the stacked design (main_4, main_5,
+. * app_14, app_15) still read their "_rural_acpop.ster" files.
+. * The .tex output filenames are unchanged (_rural_acpop.tex) so downstream
+. * \input's keep resolving.
+. *
+. * Also writes a single side-by-side comparison document:
+. *   ${tables}/_comparison_downup_ac_vs_acpop.tex
+. * which \input's BOTH the original (_rural.tex) and the new (_rural_acpop.tex
+> )
+. * tables so they can be eyeballed in one PDF.
+. *
+. * This dofile is intended to run LOCALLY (location="dbox") - it reads ster
+. * files and writes tex. The analysis dofiles handle the cluster work.
+. *****************************************************************************
+> ***
+. 
+. *****************************************************************************
+> ***
+. * Setup
+. *****************************************************************************
+> ***
+. 
+. if "$root" == "" {
+.     clear all
+.     set more off
+. 
+.     global location "shell"
+.     global sample ""
+. 
+.     global shell "/groups/sgulzar/sa_fires/proj_bureaucrats_farms"
+.     global dbox "/Users/anzony.quisperojas/Library/CloudStorage/Dropbox/sa_fi
+> res/proj_bureaucrats_farms"
+. 
+.     if "$location" == "dbox" {
+.         global root "$dbox"
+.     }
+.     else {
+.         global root "$shell"
+.     }
+. }
+
+. 
+. global tables "${code}/../../tables"
+
+. 
+. *****************************************************************************
+> ***
+. * Helper: strip trailing zeros from one or more e()-stored stats.
+. *****************************************************************************
+> ***
+. 
+. capture program drop _strip_zeros_stats
+
+. program define _strip_zeros_stats
+  1.     syntax , Models(string) Stats(string)
+  2.     foreach m of local models {
+  3.         capture estimates restore `m'
+  4.         if _rc continue
+  5.         foreach s of local stats {
+  6.             capture local rnum = e(`s')
+  7.             if _rc continue
+  8.             local raw = strtrim(string(`rnum', "%9.3f"))
+  9.             local cleaned = regexr(regexr("`raw'", "0+$", ""), "\.$", "")
+ 10.             estadd local `s'_clean "`cleaned'"
+ 11.         }
+ 12.         estimates store `m'
+ 13.     }
+ 14. end
+
+. 
+. *****************************************************************************
+> ***
+. * 0. Area-weighted tables generated by the new stacked master
+. *****************************************************************************
+> ***
+. 
+. est clear
+
+. capture noisily estread using ///
+>     "${tables}/main_did_downup_area_ac${sample}_rural_stacked.ster"
+
+-------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+-----------------------------------------------------------------
+         eq1 | regress      countk          4  Linear regression
+         eq2 | reghdfejl    countk          3  HDFE linear regression with
+             |                                 Julia
+         eq3 | reghdfejl    countk          3  HDFE linear regression with
+             |                                 Julia
+         eq4 | reghdfejl    countk          3  HDFE linear regression with
+             |                                 Julia
+-------------------------------------------------------------------------------
+
+. capture noisily esttab eq1 eq2 eq3 eq4 using ///
+>     "${tables}/main_did_downup_area_ac${sample}_rural.tex", ///
+>     replace cells(b(fmt(3) star) se(par fmt(3))) ///
+>     star(* 0.10 ** 0.05 *** 0.01) keep(downup_ac) ///
+>     stats(N acq ymean, fmt(%12.0fc %12.0fc 3) ///
+>           labels("Observations" "N Assembly Constituencies" "Mean DV")) ///
+>     nomtitles nonumbers collabels(none) nobaselevels
+(output written to /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_
+> replication/../../tables/main_did_downup_area_ac_rural.tex)
+
+. 
+. est clear
+
+. capture noisily estread using ///
+>     "${tables}/_main_4_protest_5km_fe12_did_downup${sample}_rural.ster"
+
+-------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+-----------------------------------------------------------------
+      evreg1 | reghdfejl    countk          5  HDFE linear regression with
+             |                                 Julia
+      evreg2 | reghdfejl    countk          5  HDFE linear regression with
+             |                                 Julia
+      evreg3 | reghdfejl    countk          5  HDFE linear regression with
+             |                                 Julia
+      evreg4 | reghdfejl    countk          9  HDFE linear regression with
+             |                                 Julia
+      evreg5 | reghdfejl    countk          9  HDFE linear regression with
+             |                                 Julia
+      evreg6 | reghdfejl    countk          9  HDFE linear regression with
+             |                                 Julia
+-------------------------------------------------------------------------------
+
+. capture noisily esttab evreg1 evreg2 evreg3 evreg4 evreg5 evreg6 using ///
+>     "${tables}/_main_4_protest_5km_fe12_did_downup${sample}_rural.tex", ///
+>     replace cells(b(fmt(3) star) se(par fmt(3))) ///
+>     star(* 0.10 ** 0.05 *** 0.01) keep(*post_*treat*) ///
+>     stats(N acq ymean ymean2, fmt(%12.0fc %12.0fc 3 3) ///
+>           labels("Observations" "N Assembly Constituencies" ///
+>                  "Mean DV" "Mean DV, moderator=1")) ///
+>     nomtitles nonumbers collabels(none) nobaselevels
+(output written to /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_
+> replication/../../tables/_main_4_protest_5km_fe12_did_downup_rural.tex)
+
+. 
+. est clear
+
+. capture noisily estread using ///
+>     "${tables}/_main_5_polischar_fe12_did_downup_inter${sample}_rural.ster"
+
+-------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+-----------------------------------------------------------------
+      evreg1 | reghdfejl    countk          5  HDFE linear regression with
+             |                                 Julia
+      evreg2 | reghdfejl    countk          5  HDFE linear regression with
+             |                                 Julia
+      evreg3 | reghdfejl    countk          5  HDFE linear regression with
+             |                                 Julia
+      evreg4 | reghdfejl    countk          9  HDFE linear regression with
+             |                                 Julia
+      evreg5 | reghdfejl    countk          9  HDFE linear regression with
+             |                                 Julia
+      evreg6 | reghdfejl    countk          9  HDFE linear regression with
+             |                                 Julia
+-------------------------------------------------------------------------------
+
+. capture noisily esttab evreg1 evreg2 evreg3 evreg4 evreg5 evreg6 using ///
+>     "${tables}/_main_5_polischar_fe12_did_downup_inter${sample}_rural.tex", /
+> //
+>     replace cells(b(fmt(3) star) se(par fmt(3))) ///
+>     star(* 0.10 ** 0.05 *** 0.01) keep(*post_*treat*) ///
+>     stats(N acq ymean ymean2, fmt(%12.0fc %12.0fc 3 3) ///
+>           labels("Observations" "N Assembly Constituencies" ///
+>                  "Mean DV" "Mean DV, moderator=1")) ///
+>     nomtitles nonumbers collabels(none) nobaselevels
+(output written to /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_
+> replication/../../tables/_main_5_polischar_fe12_did_downup_inter_rural.tex)
+
+. 
+. *****************************************************************************
+> ***
+. * 1. Main DiD Table (_main_1_did)
+. *****************************************************************************
+> ***
+. est clear
+
+. estread using "${tables}/main_did_downup_pop_ac${sample}_rural_stacked.ster"
+
+-------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+-----------------------------------------------------------------
+         eq1 | regress      countk          4  Linear regression
+         eq2 | reghdfejl    countk          3  HDFE linear regression with
+             |                                 Julia
+         eq3 | reghdfejl    countk          3  HDFE linear regression with
+             |                                 Julia
+         eq4 | reghdfejl    countk          3  HDFE linear regression with
+             |                                 Julia
+-------------------------------------------------------------------------------
+
+. _strip_zeros_stats, models(eq1 eq2 eq3 eq4) stats(ymean)
+
+added macro:
+        e(ymean_clean) : "153.216"
+
+added macro:
+        e(ymean_clean) : "153.216"
+
+added macro:
+        e(ymean_clean) : "153.216"
+
+added macro:
+        e(ymean_clean) : "153.216"
+
+. 
+. esttab eq1 eq2 eq3 eq4 using "${tables}/main_did_downup_ac${sample}_rural_acp
+> op.tex", ///
+>     replace ///
+>     cells(b(fmt(3) star) se(par fmt(3))) ///
+>     star(* 0.10 ** 0.05 *** 0.01) ///
+>     keep(downup_ac_pop) ///
+>     order(downup_ac_pop) ///
+>     varlabels(downup_ac_pop "Down \$>\$ Up Population") ///
+>     stats(N acq monthyearfe acfe acmonthfe gridfe ymean_clean, ///
+>           fmt(%12.0fc %12.0fc 0 0 0 0 0) ///
+>           labels("Observations" "N Assembly Constituencies" ///
+>                  "Month-Year FE" "AC FE" "AC \$\times\$ Month-Year FE" "Grid 
+> FE" "Mean DV")) ///
+>     nomtitles nonumbers ///
+>     collabels(none) ///
+>     nobaselevels ///
+>     prehead("{" ///
+>             "\def\sym#1{\ifmmode^{#1}\else\(^{#1}\)\fi}" ///
+>             "\begin{tabular}{l*{4}{c}}" ///
+>             "\hline" ///
+>             "            &\multicolumn{1}{c}{(1)}         &\multicolumn{1}{c}
+> {(2)}         &\multicolumn{1}{c}{(3)}         &\multicolumn{1}{c}{(4)}      
+>    \\" ///
+>             "            & \multicolumn{4}{c}{Number of Fires (in 1,000 units
+> )} \\ \hline") ///
+>     posthead("") ///
+>     postfoot("\hline" "\end{tabular}" "}")
+(output written to /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_
+> replication/../../tables/main_did_downup_ac_rural_acpop.tex)
+
+. 
+. display "Generated: main_did_downup_ac_rural_acpop.tex"
+Generated: main_did_downup_ac_rural_acpop.tex
+
+. 
+. *****************************************************************************
+> ***
+. * 2. Bureaucrat-Politician DiD (_main_3_bureau_polisc_did)
+. *****************************************************************************
+> ***
+. est clear
+
+. estread using "${tables}/_main_3_bureau_polisc_did${sample}_rural_stacked.ste
+> r"
+
+-------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+-----------------------------------------------------------------
+         eq1 | regress      countk          6  Linear regression
+         eq2 | reghdfejl    countk          5  HDFE linear regression with
+             |                                 Julia
+         eq3 | reghdfejl    countk          5  HDFE linear regression with
+             |                                 Julia
+         eq4 | reghdfejl    countk          5  HDFE linear regression with
+             |                                 Julia
+         eq5 | reghdfejl    countk          5  HDFE linear regression with
+             |                                 Julia
+-------------------------------------------------------------------------------
+
+. _strip_zeros_stats, models(eq1 eq2 eq3 eq4 eq5) stats(ymean ymean2)
+
+added macro:
+        e(ymean_clean) : "153.216"
+
+added macro:
+       e(ymean2_clean) : "151.037"
+
+added macro:
+        e(ymean_clean) : "153.216"
+
+added macro:
+       e(ymean2_clean) : "151.037"
+
+added macro:
+        e(ymean_clean) : "153.216"
+
+added macro:
+       e(ymean2_clean) : "151.037"
+
+added macro:
+        e(ymean_clean) : "153.216"
+
+added macro:
+       e(ymean2_clean) : "151.037"
+
+added macro:
+        e(ymean_clean) : "153.216"
+
+added macro:
+       e(ymean2_clean) : "151.037"
+
+. 
+. esttab eq1 eq2 eq3 eq4 eq5 using "${tables}/_main_3_bureau_polisc_did${sample
+> }_rural_acpop.tex", ///
+>     replace ///
+>     cells(b(fmt(3) star) se(par fmt(3))) ///
+>     star(* 0.10 ** 0.05 *** 0.01) ///
+>     keep(downup_ac_pop downup_dummy downup_interaction) ///
+>     order( downup_dummy downup_ac_pop downup_interaction) ///
+>     varlabels(downup_ac_pop "Down\$>\$ Up Politician (Pop)" ///
+>               downup_dummy "Down\$>\$ Up Bureaucrat" ///
+>               downup_interaction "Down\$>\$ Up Pol. (Pop) \$\times\$ Down\$>\
+> $ Up Bur.") ///
+>     stats(N nacs ndists monthyearfe acfe  acmonthfe distmonthfe gridfe ymean2
+> _clean, ///
+>           fmt(%12.0fc %12.0fc %12.0fc 0 0 0 0 0 0) ///
+>           labels("Observations" "N Assembly Constituencies" "N Districts" ///
+>                  "Month-Year FE" "AC FE" "AC \$\times\$ Month-Year FE" "Distr
+> ict \$\times\$ Month-Year FE" "Grid FE" "Mean DV")) ///
+>     nomtitles nonumbers ///
+>     collabels(none) ///
+>     nobaselevels ///
+>     prehead("{\def\sym#1{\ifmmode^{#1}\else\(^{#1}\)\fi}" ///
+>             "\begin{tabular}{l*{5}{c}}" ///
+>             "\hline" ///
+>             " & (1) & (2) & (3) & (4) & (5) \\" ///
+>             " & \multicolumn{5}{c}{Number of Fires (in 1,000 units)} \\ \hlin
+> e") ///
+>     posthead("") ///
+>     postfoot("\hline" "\end{tabular}" "}")
+(output written to /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_
+> replication/../../tables/_main_3_bureau_polisc_did_rural_acpop.tex)
+
+. 
+. display "Generated: _main_3_bureau_polisc_did_rural_acpop.tex"
+Generated: _main_3_bureau_polisc_did_rural_acpop.tex
+
+. 
+. *****************************************************************************
+> ***
+. * 3. Protest DiD with Downup (_main_4_protest_5km_fe12_did_downup)
+. *****************************************************************************
+> ***
+. est clear
+
+. estread using "${tables}/_main_4_protest_5km_fe12_did_downup${sample}_rural_a
+> cpop.ster"
+
+-------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+-----------------------------------------------------------------
+      evreg1 | reghdfejl    countk          5  HDFE linear regression with
+             |                                 Julia
+      evreg2 | reghdfejl    countk          5  HDFE linear regression with
+             |                                 Julia
+      evreg3 | reghdfejl    countk          5  HDFE linear regression with
+             |                                 Julia
+      evreg4 | reghdfejl    countk          9  HDFE linear regression with
+             |                                 Julia
+      evreg5 | reghdfejl    countk          9  HDFE linear regression with
+             |                                 Julia
+      evreg6 | reghdfejl    countk          9  HDFE linear regression with
+             |                                 Julia
+-------------------------------------------------------------------------------
+
+. _strip_zeros_stats, models(evreg1 evreg2 evreg3 evreg4 evreg5 evreg6) stats(y
+> mean ymean2 ymean3)
+
+added macro:
+        e(ymean_clean) : "446.213"
+
+added macro:
+       e(ymean2_clean) : ""
+
+added macro:
+       e(ymean3_clean) : ""
+
+added macro:
+        e(ymean_clean) : "446.213"
+
+added macro:
+       e(ymean2_clean) : ""
+
+added macro:
+       e(ymean3_clean) : ""
+
+added macro:
+        e(ymean_clean) : "446.213"
+
+added macro:
+       e(ymean2_clean) : ""
+
+added macro:
+       e(ymean3_clean) : ""
+
+added macro:
+        e(ymean_clean) : "446.213"
+
+added macro:
+       e(ymean2_clean) : "440.214"
+
+added macro:
+       e(ymean3_clean) : ""
+
+added macro:
+        e(ymean_clean) : "446.213"
+
+added macro:
+       e(ymean2_clean) : "440.214"
+
+added macro:
+       e(ymean3_clean) : ""
+
+added macro:
+        e(ymean_clean) : "446.213"
+
+added macro:
+       e(ymean2_clean) : "440.214"
+
+added macro:
+       e(ymean3_clean) : ""
+
+. 
+. esttab evreg1 evreg2 evreg3 evreg4 evreg5 evreg6 ///
+>     using "${tables}/_main_4_protest_5km_fe12_did_downup${sample}_rural_acpop
+> _new.tex", ///
+>     replace ///
+>     cells(b(fmt(3) star) se(par fmt(3))) ///
+>     star(* 0.10 ** 0.05 *** 0.01) ///
+>     keep(1.post_#1.treat ///
+>           1.moderator ///
+>           1.post_#1.moderator ///
+>           1.treat#1.moderator ///
+>           1.post_#1.treat#1.moderator) ///
+>     order(1.post_#1.treat ///
+>           1.moderator ///
+>           1.post_#1.moderator ///
+>           1.treat#1.moderator ///
+>           1.post_#1.treat#1.moderator) ///
+>     varlabels(1.post_#1.treat "Post \$\times\$ Protest" ///
+>               1.moderator "Down \$>\$ Up (Pop)" ///
+>               1.post_#1.moderator "Post \$\times\$ Down \$>\$ Up (Pop)" ///
+>               1.treat#1.moderator "Protest \$\times\$ Down \$>\$ Up (Pop)" //
+> /
+>               1.post_#1.treat#1.moderator "Post \$\times\$ Protest \$\times\$
+>  Down \$>\$ Up (Pop)") ///
+>     stats(      N    acq gridfe time electionfe provtrendfe ymean_clean ymean
+> 2_clean, ///
+>           fmt(%12.0fc  0    0 0    0         0          0          0) ///
+>           labels("Observations" "N Assembly Constituencies" ///
+>                  "Grid FE" "Relative Time FE" "Legislature FE" "Province Tren
+> d FE" ///
+>                  "Mean DV" "Mean DV2 (Down\$>\$Up=1)")) ///
+>     nomtitles nonumbers ///
+>     collabels(none) ///
+>     nobaselevels ///
+>     prehead("{" ///
+>             "\def\sym#1{\ifmmode^{#1}\else\(^{#1}\)\fi}" ///
+>             "\begin{tabular}{l*{6}{c}}" ///
+>             "\hline" ///
+>             "            &\multicolumn{1}{c}{(1)}         &\multicolumn{1}{c}
+> {(2)}         &\multicolumn{1}{c}{(3)}         &\multicolumn{1}{c}{(4)}      
+>    &\multicolumn{1}{c}{(5)}         &\multicolumn{1}{c}{(6)}         \\" ///
+>             "            & \multicolumn{6}{c}{Number of Fires (in 1,000 units
+> )} \\ \hline") ///
+>     posthead("") ///
+>     prefoot("\hline") ///
+>     postfoot("\hline" "\end{tabular}" "}")
+(file
+    /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication/.
+    > ./../tables/_main_4_protest_5km_fe12_did_downup_rural_acpop_new.tex not
+    found)
+(output written to /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_
+> replication/../../tables/_main_4_protest_5km_fe12_did_downup_rural_acpop_new.
+> tex)
+
+. 
+. display "Generated: _main_4_protest_5km_fe12_did_downup_rural_acpop_new.tex"
+Generated: _main_4_protest_5km_fe12_did_downup_rural_acpop_new.tex
+
+. 
+. *****************************************************************************
+> ***
+. * 4. Politician Char DiD with Downup (_main_5_polischar_fe12_did_downup_inter
+> )
+. *****************************************************************************
+> ***
+. est clear
+
+. estread using "${tables}/_main_5_polischar_fe12_did_downup_inter${sample}_rur
+> al_acpop.ster"
+
+-------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+-----------------------------------------------------------------
+      evreg1 | reghdfejl    countk          5  HDFE linear regression with
+             |                                 Julia
+      evreg2 | reghdfejl    countk          5  HDFE linear regression with
+             |                                 Julia
+      evreg3 | reghdfejl    countk          5  HDFE linear regression with
+             |                                 Julia
+      evreg4 | reghdfejl    countk          9  HDFE linear regression with
+             |                                 Julia
+      evreg5 | reghdfejl    countk          9  HDFE linear regression with
+             |                                 Julia
+      evreg6 | reghdfejl    countk          9  HDFE linear regression with
+             |                                 Julia
+-------------------------------------------------------------------------------
+
+. _strip_zeros_stats, models(evreg1 evreg2 evreg3 evreg4 evreg5 evreg6) stats(y
+> mean ymean2 ymean3)
+
+added macro:
+        e(ymean_clean) : "120.687"
+
+added macro:
+       e(ymean2_clean) : ""
+
+added macro:
+       e(ymean3_clean) : ""
+
+added macro:
+        e(ymean_clean) : "120.687"
+
+added macro:
+       e(ymean2_clean) : ""
+
+added macro:
+       e(ymean3_clean) : ""
+
+added macro:
+        e(ymean_clean) : "120.687"
+
+added macro:
+       e(ymean2_clean) : ""
+
+added macro:
+       e(ymean3_clean) : ""
+
+added macro:
+        e(ymean_clean) : "120.687"
+
+added macro:
+       e(ymean2_clean) : "121.718"
+
+added macro:
+       e(ymean3_clean) : ""
+
+added macro:
+        e(ymean_clean) : "120.687"
+
+added macro:
+       e(ymean2_clean) : "121.718"
+
+added macro:
+       e(ymean3_clean) : ""
+
+added macro:
+        e(ymean_clean) : "120.687"
+
+added macro:
+       e(ymean2_clean) : "121.718"
+
+added macro:
+       e(ymean3_clean) : ""
+
+. 
+. esttab evreg1 evreg2 evreg3 evreg4 evreg5 evreg6 ///
+>     using "${tables}/_main_5_polischar_fe12_did_downup_inter${sample}_rural_a
+> cpop.tex", ///
+>     replace ///
+>     cells(b(fmt(3) star) se(par fmt(3))) ///
+>     star(* 0.10 ** 0.05 *** 0.01) ///
+>     keep(1.post_#1.treat ///
+>          1.post_#1.treat#1.moderator ///
+>          1.moderator ///
+>          1.post_#1.moderator ///
+>          1.treat#1.moderator ///
+>          1.post_#1.treat#1.moderator) ///
+>     order(1.post_#1.treat ///
+>           1.moderator ///
+>           1.post_#1.moderator ///
+>           1.treat#1.moderator ///
+>           1.post_#1.treat#1.moderator) ///
+>     varlabels(1.post_#1.treat "Post \$\times\$ Agriculturalist" ///
+>               1.post_#1.treat#1.moderator "Post \$\times\$ Agriculturalist" /
+> //
+>               1.moderator "Down \$>\$ Up (Pop)" ///
+>               1.post_#1.moderator "Post \$\times\$ Down \$>\$ Up (Pop)" ///
+>               1.treat#1.moderator "Agriculturalist \$\times\$ Down \$>\$ Up (
+> Pop)" ///
+>               1.post_#1.treat#1.moderator "Post \$\times\$ Agric. \$\times\$ 
+> Down \$>\$ Up (Pop)") ///
+>     stats(      N        acq     gridfe time electionfe provtrendfe ymean_cle
+> an ymean2_clean, ///
+>           fmt( %12.0fc %12.0fc   0     0   0         0          0          0)
+>  ///
+>           labels("Observations" "N Assembly Constituencies" ///
+>                  "Grid FE" "Relative Time FE" "Legislature FE" ///
+>                  "Province Linear Time Trend FE" ///
+>                  "Mean DV" "Mean DV (Down \$>\$ Up=1)")) ///
+>     nomtitles nonumbers ///
+>     collabels(none) ///
+>     nobaselevels ///
+>     prehead("{" ///
+>             "\def\sym#1{\ifmmode^{#1}\else\(^{#1}\)\fi}" ///
+>             "\begin{tabular}{l*{6}{c}}" ///
+>             "\hline" ///
+>             "            &\multicolumn{1}{c}{(1)}         &\multicolumn{1}{c}
+> {(2)}         &\multicolumn{1}{c}{(3)}         &\multicolumn{1}{c}{(4)}      
+>    &\multicolumn{1}{c}{(5)}         &\multicolumn{1}{c}{(6)}         \\" ///
+>             "            & \multicolumn{6}{c}{Number of Fires (in 1,000 units
+> )} \\ \hline") ///
+>     posthead("") ///
+>     prefoot("\hline") ///
+>     postfoot("\hline" "\end{tabular}" "}")
+(file
+    /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication/.
+    > ./../tables/_main_5_polischar_fe12_did_downup_inter_rural_acpop.tex not
+    found)
+(output written to /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_
+> replication/../../tables/_main_5_polischar_fe12_did_downup_inter_rural_acpop.
+> tex)
+
+. 
+. display "Generated: _main_5_polischar_fe12_did_downup_inter_rural_acpop.tex"
+Generated: _main_5_polischar_fe12_did_downup_inter_rural_acpop.tex
+
+. 
+. *****************************************************************************
+> ***
+. * 5. Alternative DVs (_app_7_main_did_downup_area_ac_dv)
+. *****************************************************************************
+> ***
+. est clear
+
+. estread using "${tables}/_app_7_main_did_downup_area_ac_dv${sample}_rural_sta
+> cked.ster"
+
+-------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+-----------------------------------------------------------------
+         eq1 | reghdfejl   anyfire          3  HDFE linear regression with
+             |                                 Julia
+         eq2 | reghdfejl   logfire          3  HDFE linear regression with
+             |                                 Julia
+         eq3 | reghdfejl mean_brigh~s       3  HDFE linear regression with
+             |                                 Julia
+-------------------------------------------------------------------------------
+
+. _strip_zeros_stats, models(eq1 eq2 eq3) stats(ymean)
+
+added macro:
+        e(ymean_clean) : "0.05"
+
+added macro:
+        e(ymean_clean) : "0.059"
+
+added macro:
+        e(ymean_clean) : "16.548"
+
+. 
+. esttab eq1 eq2 eq3 ///
+>     using "${tables}/_app_7_main_did_downup_area_ac_dv${sample}_rural_acpop.t
+> ex", ///
+>     replace ///
+>     cells(b(fmt(4) star) se(par fmt(4))) ///
+>     star(* 0.10 ** 0.05 *** 0.01) ///
+>     keep(downup_ac_pop) ///
+>     varlabels(downup_ac_pop "Down \$>\$ Up (Pop)") ///
+>     stats(N acq gridfe acmonthfe ymean_clean, ///
+>           fmt(%12.0fc 0 0 0 0) ///
+>           labels("Observations" "N Assembly Constituencies" "Grid FE" "Assemb
+> ly \$\times\$ Month-Year FE" "Mean DV")) ///
+>     nomtitles nonumbers ///
+>     collabels(none) ///
+>     nobaselevels ///
+>     prehead("\begin{tabular}{lccc}" ///
+>             "\tabularnewline \hline" ///
+>             "& (1) & (2) & (3)\\" ///
+>             "& Any Fire & Log (N) Fires & Mean Brightness\\" ///
+>             "\hline") ///
+>     posthead("") ///
+>     prefoot("\hline") ///
+>     postfoot("\hline" "\end{tabular}")
+(file
+    /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication/.
+    > ./../tables/_app_7_main_did_downup_area_ac_dv_rural_acpop.tex not
+    found)
+(output written to /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_
+> replication/../../tables/_app_7_main_did_downup_area_ac_dv_rural_acpop.tex)
+
+. 
+. display "Generated: _app_7_main_did_downup_area_ac_dv_rural_acpop.tex"
+Generated: _app_7_main_did_downup_area_ac_dv_rural_acpop.tex
+
+. 
+. *****************************************************************************
+> ***
+. * 6. DiD by Year (_app_8_main_did_by_year)
+. *****************************************************************************
+> ***
+. est clear
+
+. estread using "${tables}/_app_8_main_did_by_year${sample}_rural_stacked.ster"
+
+-------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+-----------------------------------------------------------------
+         eq1 | reghdfejl    countk          3  HDFE linear regression with
+             |                                 Julia
+         eq2 | reghdfejl    countk          3  HDFE linear regression with
+             |                                 Julia
+         eq3 | reghdfejl    countk          3  HDFE linear regression with
+             |                                 Julia
+         eq4 | reghdfejl    countk          3  HDFE linear regression with
+             |                                 Julia
+         eq5 | reghdfejl    countk          3  HDFE linear regression with
+             |                                 Julia
+         eq6 | reghdfejl    countk          3  HDFE linear regression with
+             |                                 Julia
+         eq7 | reghdfejl    countk          3  HDFE linear regression with
+             |                                 Julia
+         eq8 | reghdfejl    countk          3  HDFE linear regression with
+             |                                 Julia
+         eq9 | reghdfejl    countk          3  HDFE linear regression with
+             |                                 Julia
+        eq10 | reghdfejl    countk          3  HDFE linear regression with
+             |                                 Julia
+-------------------------------------------------------------------------------
+
+. _strip_zeros_stats, models(eq1 eq2 eq3 eq4 eq5 eq6 eq7 eq8 eq9 eq10) stats(ym
+> ean)
+
+added macro:
+        e(ymean_clean) : "151.139"
+
+added macro:
+        e(ymean_clean) : "141.492"
+
+added macro:
+        e(ymean_clean) : "145.732"
+
+added macro:
+        e(ymean_clean) : "151.219"
+
+added macro:
+        e(ymean_clean) : "180.108"
+
+added macro:
+        e(ymean_clean) : "151.672"
+
+added macro:
+        e(ymean_clean) : "162.715"
+
+added macro:
+        e(ymean_clean) : "104.452"
+
+added macro:
+        e(ymean_clean) : "168.627"
+
+added macro:
+        e(ymean_clean) : "175.076"
+
+. 
+. esttab eq1 eq2 eq3 eq4 eq5 eq6 eq7 eq8 eq9 eq10 ///
+>     using "${tables}/_app_8_main_did_by_year${sample}_rural_acpop.tex", ///
+>     replace ///
+>     cells(b(fmt(3) star) se(par fmt(3))) ///
+>     star(* 0.10 ** 0.05 *** 0.01) ///
+>     keep(downup_ac_pop) ///
+>     varlabels(downup_ac_pop "Down\$>\$Up (Pop)") ///
+>     stats(N acq gridfe acmonthfe ymean_clean, ///
+>           fmt(%12.0fc 0 0 0 0) ///
+>           labels("Observations" "N Assembly Constituencies" "Grid FE" "Assemb
+> ly \$\times\$ Month-Year FE" "Mean DV")) ///
+>     nomtitles nonumbers ///
+>     collabels(none) ///
+>     nobaselevels ///
+>     prehead("\begin{tabular}{lcccccccccc} \hline" ///
+>             " & (1) & (2) & (3) & (4) & (5) & (6) & (7) & (8) & (9) & (10) \\
+> " ///
+>             " & \multicolumn{10}{c}{Number of Fires (in 1,000 units)}\\" ///
+>             " & 2012/2013 & 2013/2014 & 2014/2015 & 2015/2016 & 2016/2017 & 2
+> 017/2018 & 2018/2019 & 2019/2020 & 2020/2021 & 2021/2022 \\ \hline") ///
+>     posthead("") ///
+>     postfoot("\hline" "\end{tabular}")
+(file
+    /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication/.
+    > ./../tables/_app_8_main_did_by_year_rural_acpop.tex not found)
+(output written to /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_
+> replication/../../tables/_app_8_main_did_by_year_rural_acpop.tex)
+
+. 
+. display "Generated: _app_8_main_did_by_year_rural_acpop.tex"
+Generated: _app_8_main_did_by_year_rural_acpop.tex
+
+. 
+. *****************************************************************************
+> ***
+. * 7. DiD by State (_app_9_main_did_by_state)
+. *****************************************************************************
+> ***
+. est clear
+
+. estread using "${tables}/_app_9_main_did_by_state${sample}_rural_stacked.ster
+> "
+
+-------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+-----------------------------------------------------------------
+         eq1 | reghdfejl    countk          3  HDFE linear regression with
+             |                                 Julia
+         eq2 | reghdfejl    countk          3  HDFE linear regression with
+             |                                 Julia
+         eq3 | reghdfejl    countk          3  HDFE linear regression with
+             |                                 Julia
+         eq4 | reghdfejl    countk          3  HDFE linear regression with
+             |                                 Julia
+-------------------------------------------------------------------------------
+
+. _strip_zeros_stats, models(eq1 eq2 eq3 eq4) stats(ymean)
+
+added macro:
+        e(ymean_clean) : "50.911"
+
+added macro:
+        e(ymean_clean) : "155.027"
+
+added macro:
+        e(ymean_clean) : "764.769"
+
+added macro:
+        e(ymean_clean) : "47.208"
+
+. 
+. esttab eq1 eq2 eq3 eq4 ///
+>     using "${tables}/_app_9_main_did_by_state${sample}_rural_acpop.tex", ///
+>     replace ///
+>     cells(b(fmt(3) star) se(par fmt(3))) ///
+>     star(* 0.10 ** 0.05 *** 0.01) ///
+>     keep(downup_ac_pop) ///
+>     varlabels(downup_ac_pop "Down\$>\$Up (Pop)") ///
+>     stats(N acq gridfe acmonthfe ymean_clean, ///
+>           fmt(%12.0fc 0 0 0 0) ///
+>           labels("Observations" "N Assembly Constituencies" "Grid FE" "Assemb
+> ly \$\times\$ Month-Year FE" "Mean DV")) ///
+>     nomtitles nonumbers ///
+>     collabels(none) ///
+>     nobaselevels ///
+>     prehead("\begin{tabular}{lcccc} \hline" ///
+>             " & (1) & (2) & (3) & (4) \\" ///
+>             " & \multicolumn{4}{c}{Number of Fires (in 1,000 units)}\\" ///
+>             " & Bihar & Haryana & Punjab & Uttar Pradesh \\ \hline") ///
+>     posthead("") ///
+>     postfoot("\hline" "\end{tabular}")
+(file
+    /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication/.
+    > ./../tables/_app_9_main_did_by_state_rural_acpop.tex not found)
+(output written to /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_
+> replication/../../tables/_app_9_main_did_by_state_rural_acpop.tex)
+
+. 
+. display "Generated: _app_9_main_did_by_state_rural_acpop.tex"
+Generated: _app_9_main_did_by_state_rural_acpop.tex
+
+. 
+. *****************************************************************************
+> ***
+. * 8. Rice Moderators (_app_10_did_rice_moderators)
+. *****************************************************************************
+> ***
+. est clear
+
+. capture noisily estread using "${tables}/_app_10_did_rice_moderators_rural_st
+> acked.ster"
+
+-------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+-----------------------------------------------------------------
+         eq1 | reghdfejl    countk          5  HDFE linear regression with
+             |                                 Julia
+         eq2 | reghdfejl    countk          5  HDFE linear regression with
+             |                                 Julia
+         eq3 | reghdfejl    countk          5  HDFE linear regression with
+             |                                 Julia
+-------------------------------------------------------------------------------
+
+. _strip_zeros_stats, models(eq1 eq2 eq3) stats(ymean ymean2 ymean3)
+
+added macro:
+        e(ymean_clean) : "173.248"
+
+added macro:
+       e(ymean2_clean) : "130.75"
+
+added macro:
+       e(ymean3_clean) : "233.336"
+
+added macro:
+        e(ymean_clean) : "173.248"
+
+added macro:
+       e(ymean2_clean) : "61.101"
+
+added macro:
+       e(ymean3_clean) : "315.929"
+
+added macro:
+        e(ymean_clean) : "173.248"
+
+added macro:
+       e(ymean2_clean) : "48.534"
+
+added macro:
+       e(ymean3_clean) : "301.609"
+
+. 
+. capture noisily esttab eq1 eq2 eq3 ///
+>     using "${tables}/_app_10_did_rice_moderators${sample}_rural_acpop.tex", /
+> //
+>     replace ///
+>     cells(b(fmt(3) star) se(par fmt(3))) ///
+>     star(* 0.10 ** 0.05 *** 0.01) ///
+>     keep(1.downup_ac_pop ///
+>          1.downup_ac_pop#1.rice_area_aclvl_ahigh ///
+>          1.downup_ac_pop#1.rice_harvarea_aclvl_ahigh ///
+>          1.downup_ac_pop#1.rice_prod_aclvl_ahigh) ///
+>     order(1.downup_ac_pop ///
+>           1.downup_ac_pop#1.rice_area_aclvl_ahigh ///
+>           1.downup_ac_pop#1.rice_harvarea_aclvl_ahigh ///
+>           1.downup_ac_pop#1.rice_prod_aclvl_ahigh) ///
+>     varlabels(1.downup_ac_pop "Down\$>\$up AC (Pop)" ///
+>               1.downup_ac_pop#1.rice_area_aclvl_ahigh "Down\$>\$up AC (Pop) \
+> $\times\$ Above Median Rice Area" ///
+>               1.downup_ac_pop#1.rice_harvarea_aclvl_ahigh "Down\$>\$up AC (Po
+> p) \$\times\$ Above Median Harvested Rice Area" ///
+>               1.downup_ac_pop#1.rice_prod_aclvl_ahigh "Down\$>\$up AC (Pop) \
+> $\times\$ Above Median Rice Production") ///
+>     stats(N acq gridfe acmonthfe ymean_clean ymean2_clean ymean3_clean, ///
+>           fmt(%12.0fc %12.0fc 0 0 0 0 0) ///
+>           labels("Observations" "N Assembly Constituencies" "Grid FE" ///
+>                  "AC \$\times\$ Month-Year FE" "Mean DV" "Mean DV2" "Mean DV3
+> ")) ///
+>     nomtitles nonumbers ///
+>     collabels(none) ///
+>     nobaselevels ///
+>     prehead("\begin{tabular}{lccc}" ///
+>             "      \hline" ///
+>             "       & \multicolumn{3}{c}{Number of Fires (in 1,000 units) - R
+> ural Grids}\\" ///
+>             "                                                              & 
+> (1)            & (2)            & (3)\\\\  " ///
+>             "      \midrule") ///
+>     posthead("") ///
+>     prefoot("\hline") ///
+>     postfoot("\hline" "\end{tabular}")
+(file
+    /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication/.
+    > ./../tables/_app_10_did_rice_moderators_rural_acpop.tex not found)
+(output written to /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_
+> replication/../../tables/_app_10_did_rice_moderators_rural_acpop.tex)
+
+. 
+. display "Generated: _app_10_did_rice_moderators_rural_acpop.tex"
+Generated: _app_10_did_rice_moderators_rural_acpop.tex
+
+. 
+. *****************************************************************************
+> ***
+. * 9. Politician Rice Mods (_app_14_polischar_fe12_did_ricemods)
+. *****************************************************************************
+> ***
+. est clear
+
+. capture noisily estread using "${tables}/_app_14_polischar_fe12_did_ricemods$
+> {sample}_rural_stacked.ster"
+
+-------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+-----------------------------------------------------------------
+      evreg1 | reghdfejl    countk          5  HDFE linear regression with
+             |                                 Julia
+      evreg2 | reghdfejl    countk          9  HDFE linear regression with
+             |                                 Julia
+      evreg3 | reghdfejl    countk          9  HDFE linear regression with
+             |                                 Julia
+      evreg4 | reghdfejl    countk          9  HDFE linear regression with
+             |                                 Julia
+-------------------------------------------------------------------------------
+
+. _strip_zeros_stats, models(evreg1 evreg2 evreg3 evreg4) stats(ymean ymean2 ym
+> ean3)
+
+added macro:
+        e(ymean_clean) : "200.662"
+
+added macro:
+       e(ymean2_clean) : "200.662"
+
+added macro:
+       e(ymean3_clean) : ""
+
+added macro:
+        e(ymean_clean) : "200.662"
+
+added macro:
+       e(ymean2_clean) : "107.351"
+
+added macro:
+       e(ymean3_clean) : ""
+
+added macro:
+        e(ymean_clean) : "200.662"
+
+added macro:
+       e(ymean2_clean) : "44.741"
+
+added macro:
+       e(ymean3_clean) : ""
+
+added macro:
+        e(ymean_clean) : "200.662"
+
+added macro:
+       e(ymean2_clean) : "39.083"
+
+added macro:
+       e(ymean3_clean) : ""
+
+. 
+. capture noisily esttab evreg1 evreg2 evreg3 evreg4 ///
+>     using "${tables}/_app_14_polischar_fe12_did_ricemods${sample}_rural_acpop
+> .tex", ///
+>     replace ///
+>     cells(b(fmt(3) star) se(par fmt(3))) ///
+>     star(* 0.10 ** 0.05 *** 0.01) ///
+>     keep(1.post_#1.treat ///
+>          1.post_#1.treat#1.rice_area_aclvl_ahigh ///
+>          1.post_#1.treat#1.rice_harvarea_aclvl_ahigh ///
+>          1.post_#1.treat#1.rice_prod_aclvl_ahigh) ///
+>     order(1.post_#1.treat ///
+>           1.post_#1.treat#1.rice_area_aclvl_ahigh ///
+>           1.post_#1.treat#1.rice_harvarea_aclvl_ahigh ///
+>           1.post_#1.treat#1.rice_prod_aclvl_ahigh) ///
+>     varlabels(1.post_#1.treat "Post \$\times\$ Agriculturalist" ///
+>               1.post_#1.treat#1.rice_area_aclvl_ahigh "Post \$\times\$ Agricu
+> lturalist \$\times\$ Rice Areas" ///
+>               1.post_#1.treat#1.rice_harvarea_aclvl_ahigh "Post \$\times\$ Ag
+> riculturalist \$\times\$ Harvested Rice Area" ///
+>               1.post_#1.treat#1.rice_prod_aclvl_ahigh "Post \$\times\$ Agricu
+> lturalist \$\times\$ Rice Production") ///
+>     stats(N acq gridfe time electionfe provtrendfe ymean_clean ymean2_clean y
+> mean3_clean, ///
+>           fmt(%12.0fc %12.0fc 0 0 0 0 0 0 0) ///
+>           labels("Observations" "N Assembly Constituencies" ///
+>                  "Grid  \$\times\$ Cohort FE" "Relative Time FE" "Legislature
+>   \$\times\$ Cohort FE" "Province  \$\times\$ Cohort Trend FE" ///
+>                  "Mean DV" "Mean DV2" "Mean DV3")) ///
+>     nomtitles nonumbers ///
+>     collabels(none) ///
+>     nobaselevels ///
+>     prehead("{" ///
+>             "\def\sym#1{\ifmmode^{#1}\else\(^{#1}\)\fi}" ///
+>             "\begin{tabular}{l*{4}{c}}" ///
+>             "\hline" ///
+>             "            &\multicolumn{1}{c}{(1)}         &\multicolumn{1}{c}
+> {(2)}         &\multicolumn{1}{c}{(3)} &\multicolumn{1}{c}{(4)}         \\" /
+> //
+>             "            & \multicolumn{4}{c}{Number of Fires (in 1,000 units
+> )} \\ \hline") ///
+>     posthead("") ///
+>     prefoot("\hline") ///
+>     postfoot("\hline" "\end{tabular}" "}")
+(file
+    /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication/.
+    > ./../tables/_app_14_polischar_fe12_did_ricemods_rural_acpop.tex not
+    found)
+(output written to /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_
+> replication/../../tables/_app_14_polischar_fe12_did_ricemods_rural_acpop.tex)
+
+. 
+. display "Generated: _app_14_polischar_fe12_did_ricemods_rural_acpop.tex"
+Generated: _app_14_polischar_fe12_did_ricemods_rural_acpop.tex
+
+. 
+. *****************************************************************************
+> ***
+. * 10. Politician FE DiD (_app_15_polischar_fe12_did)
+. *****************************************************************************
+> ***
+. est clear
+
+. capture noisily estread using "${tables}/_app_15_polischar_fe12_did${sample}_
+> rural_stacked.ster"
+
+-------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+-----------------------------------------------------------------
+      evreg1 | reghdfejl    countk          5  HDFE linear regression with
+             |                                 Julia
+      evreg2 | reghdfejl    countk          5  HDFE linear regression with
+             |                                 Julia
+      evreg3 | reghdfejl    countk          5  HDFE linear regression with
+             |                                 Julia
+-------------------------------------------------------------------------------
+
+. _strip_zeros_stats, models(evreg1 evreg2 evreg3) stats(ymean)
+
+added macro:
+        e(ymean_clean) : "200.662"
+
+added macro:
+        e(ymean_clean) : "200.662"
+
+added macro:
+        e(ymean_clean) : "200.662"
+
+. 
+. capture noisily esttab evreg1 evreg2 evreg3 ///
+>     using "${tables}/_app_15_polischar_fe12_did${sample}_rural_acpop.tex", //
+> /
+>     replace ///
+>     cells(b(fmt(3) star) se(par fmt(3))) ///
+>     star(* 0.10 ** 0.05 *** 0.01) ///
+>     keep(1.post_#1.treat) ///
+>     order(1.post_#1.treat) ///
+>     varlabels(1.post_#1.treat "Post \$\times\$ Agriculturalist") ///
+>     stats(N acq gridfe time electionfe provtrendfe ymean_clean, ///
+>           fmt(%12.0fc %12.0fc 0 0 0 0 0) ///
+>           labels("Observations" "N Assembly Constituencies" ///
+>                  "Grid \$\times\$ Cohort FE" "Relative Time FE" "Legislature 
+>  \$\times\$ Cohort FE" "Province  \$\times\$ Cohort Trend FE" "Mean DV")) ///
+>     nomtitles nonumbers ///
+>     collabels(none) ///
+>     nobaselevels ///
+>     prehead("{" ///
+>             "\def\sym#1{\ifmmode^{#1}\else\(^{#1}\)\fi}" ///
+>             "\begin{tabular}{l*{3}{c}}" ///
+>             "\hline" ///
+>             "            &\multicolumn{1}{c}{(1)}         &\multicolumn{1}{c}
+> {(2)}         &\multicolumn{1}{c}{(3)}         \\" ///
+>             "            & \multicolumn{3}{c}{Number of Fires (in 1,000 units
+> ) } \\ \hline") ///
+>     posthead("") ///
+>     prefoot("\hline") ///
+>     postfoot("\hline" "\end{tabular}" "}")
+(file
+    /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication/.
+    > ./../tables/_app_15_polischar_fe12_did_rural_acpop.tex not found)
+(output written to /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_
+> replication/../../tables/_app_15_polischar_fe12_did_rural_acpop.tex)
+
+. 
+. display "Generated: _app_15_polischar_fe12_did_rural_acpop.tex"
+Generated: _app_15_polischar_fe12_did_rural_acpop.tex
+
+. 
+. *****************************************************************************
+> ***
+. * 11. Treatment-definition tables actively input by main.tex
+. *****************************************************************************
+> ***
+. est clear
+
+. estread using "${tables}/_app_6_main_did_treat_definition${sample}_rural_acpo
+> p.ster"
+
+-------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+-----------------------------------------------------------------
+         eq1 | reghdfejl    countk          3  HDFE linear regression with
+             |                                 Julia
+         eq2 | reghdfejl    countk          3  HDFE linear regression with
+             |                                 Julia
+         eq3 | reghdfejl    countk          3  HDFE linear regression with
+             |                                 Julia
+         eq4 | reghdfejl    countk          3  HDFE linear regression with
+             |                                 Julia
+         eq5 | reghdfejl    countk          3  HDFE linear regression with
+             |                                 Julia
+         eq6 | reghdfejl    countk          3  HDFE linear regression with
+             |                                 Julia
+         eq7 | reghdfejl    countk          5  HDFE linear regression with
+             |                                 Julia
+-------------------------------------------------------------------------------
+
+. 
+. esttab eq1 eq2 eq3 eq4 eq5 using ///
+>     "${tables}/_app_6_main_did_treat_definition${sample}_rural_acpop_new.tex"
+> , ///
+>     replace cells(b(fmt(3) star) se(par fmt(3))) ///
+>     star(* 0.10 ** 0.05 *** 0.01) ///
+>     keep(downup_ac_pop downup_ac downup_1sd_pop down_percent_pop downup_diff_
+> percent_pop) ///
+>     stats(N acq ymean, fmt(%12.0fc %12.0fc 3) ///
+>           labels("Observations" "N Assembly Constituencies" "Mean DV")) ///
+>     nomtitles nonumbers collabels(none) nobaselevels
+(file
+    /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication/.
+    > ./../tables/_app_6_main_did_treat_definition_rural_acpop_new.tex not
+    found)
+(output written to /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_
+> replication/../../tables/_app_6_main_did_treat_definition_rural_acpop_new.tex
+> )
+
+. 
+. esttab eq6 using ///
+>     "${tables}/_app_6_main_did_treat_definition${sample}_rural_acpop_new2.tex
+> ", ///
+>     replace cells(b(fmt(3) star) se(par fmt(3))) ///
+>     star(* 0.10 ** 0.05 *** 0.01) keep(down_percent) ///
+>     stats(N acq ymean, fmt(%12.0fc %12.0fc 3) ///
+>           labels("Observations" "N Assembly Constituencies" "Mean DV")) ///
+>     nomtitles nonumbers collabels(none) nobaselevels
+(file
+    /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication/.
+    > ./../tables/_app_6_main_did_treat_definition_rural_acpop_new2.tex not
+    found)
+(output written to /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_
+> replication/../../tables/_app_6_main_did_treat_definition_rural_acpop_new2.te
+> x)
+
+. 
+. esttab eq7 using ///
+>     "${tables}/_app_6_main_did_treat_definition${sample}_rural_acpop_new3.tex
+> ", ///
+>     replace cells(b(fmt(3) star) se(par fmt(3))) ///
+>     star(* 0.10 ** 0.05 *** 0.01) ///
+>     keep(downup_ac_pop 1.rice_prod_aclvl_ahigh 1.rice_prod_aclvl_ahigh#c.down
+> up_ac_pop) ///
+>     stats(N acq ymean, fmt(%12.0fc %12.0fc 3) ///
+>           labels("Observations" "N Assembly Constituencies" "Mean DV")) ///
+>     nomtitles nonumbers collabels(none) nobaselevels
+coefficient downup_ac_pop not found
+r(111);
+
+end of do-file
+r(111);
+
+end of do-file
+r(111);
+Stata exit status: 0

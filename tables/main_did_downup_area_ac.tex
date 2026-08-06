@@ -1,0 +1,21 @@
+{
+\def\sym#1{\ifmmode^{#1}\else\(^{#1}\)\fi}
+\begin{tabular}{l*{4}{c}}
+\hline
+            &\multicolumn{1}{c}{(1)}         &\multicolumn{1}{c}{(2)}         &\multicolumn{1}{c}{(3)}         &\multicolumn{1}{c}{(4)}         \\
+            & \multicolumn{4}{c}{Number of Fires (x 1,000 units)} \\ \hline
+            &\multicolumn{1}{c}{(1)}         &\multicolumn{1}{c}{(2)}         &\multicolumn{1}{c}{(3)}         &\multicolumn{1}{c}{(4)}         \\
+\hline
+Down $>$ Up &      -8.349\sym{***}&      -9.477\sym{***}&      -8.296\sym{***}&      -7.560\sym{***}\\
+            &     (1.849)         &     (1.605)         &     (1.437)         &     (1.203)         \\
+\hline
+Observations&  12,030,480         &  12,030,480         &  12,030,360         &  12,030,360         \\
+Assembly    &         853         &         853         &         853         &         853         \\
+Mean DV     &     155.470         &     155.470         &     155.470         &     155.470         \\
+Month Year FE&           N         &           Y         &           N         &           N         \\
+AC FE       &           N         &           Y         &           N         &           N         \\
+AC x Month FE&           N         &           N         &           Y         &           Y         \\
+Grid FE     &           N         &           N         &           N         &           Y         \\
+\hline
+\end{tabular}
+}

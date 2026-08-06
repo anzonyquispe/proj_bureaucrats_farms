@@ -1,0 +1,38 @@
+				(1)	(2)	(3)	(4)	(5)	(6)	(7)
+VARIABLES	LABELS	LABELS	LABELS	N Fires	N Fires	N Fires	N Fires	N Fires	N Fires	N Fires
+										
+0b.downup_dummy_ac#0b.downup_dummy#0b.rice_ahigh				0	0	0	0	0	0	0
+				(0)	(0)	(0)	(0)	(0)	(0)	(0)
+0b.downup_dummy_ac#0b.downup_dummy#1.rice_ahigh				0.153***	-0.0102**	0.00922**	-0.0111***	0.00239	0.00354	0.0195***
+				(0.00861)	(0.00437)	(0.00411)	(0.00418)	(0.00320)	(0.00426)	(0.00428)
+0b.downup_dummy_ac#1.downup_dummy#0b.rice_ahigh				-0.00910***	-0.0117***	-0.00766***	0.000846	-0.00711**	-0.0137***	-0.00969***
+				(0.00313)	(0.00293)	(0.00297)	(0.00381)	(0.00299)	(0.00303)	(0.00225)
+0b.downup_dummy_ac#1.downup_dummy#1.rice_ahigh				0.103***	-0.0362***	-0.0270***	-0.0166***	0.00825***	-0.0343***	-0.00239
+				(0.00757)	(0.00428)	(0.00412)	(0.00356)	(0.00220)	(0.00448)	(0.00232)
+1.downup_dummy_ac#0b.downup_dummy#0b.rice_ahigh				-0.0148***	-0.00980***	-0.00831***	-0.0101***	-0.00703***	-0.00958***	-0.00828***
+				(0.00249)	(0.00216)	(0.00205)	(0.00207)	(0.00198)	(0.00226)	(0.00202)
+1.downup_dummy_ac#0b.downup_dummy#1.rice_ahigh				0.131***	-0.0300***	-0.00161	-0.0332***	-0.00767**	-0.00917*	0.0131***
+				(0.00851)	(0.00476)	(0.00452)	(0.00439)	(0.00306)	(0.00473)	(0.00427)
+1.downup_dummy_ac#1.downup_dummy#0b.rice_ahigh				-0.00493	-0.00893**	-0.00489	0.00132	-0.00999***	-0.0118***	-0.00983***
+				(0.00417)	(0.00403)	(0.00394)	(0.00473)	(0.00311)	(0.00394)	(0.00258)
+1.downup_dummy_ac#1.downup_dummy#1.rice_ahigh				0.130***	-0.0271***	-0.0212***	-0.0184***		-0.0246***	
+				(0.00828)	(0.00415)	(0.00397)	(0.00360)		(0.00429)	
+av_wind_speed	av_wind_speed	av_wind_speed	av_wind_speed			-0.0657***	-0.0302***	0.0202		0.00605
+						(0.0141)	(0.0110)	(0.0172)		(0.0173)
+av_wind_direction	rollav_wind_direction_cellid_month	rollav_wind_direction_cellid_month	rollav_wind_direction_cellid_month			-2.47e-05	-5.86e-06	-0.000131		-0.000426***
+						(7.75e-05)	(7.09e-05)	(9.29e-05)		(9.66e-05)
+1o.downup_dummy_ac#1o.downup_dummy#1o.rice_ahigh								0		0
+								(0)		(0)
+										
+Observations				12,015,840	12,015,840	12,015,840	12,015,360	12,015,360	12,015,840	12,015,840
+Month year fe				N	Y	N	N	N	Y	N
+AC fe				N	Y	N	N	N	N	N
+Dist fe				N	N	N	N	N	Y	N
+Controls				N	N	Y	Y	Y	N	Y
+AC x Month fe				N	N	N	Y	Y	N	N
+Dist x Month fe				N	N	Y	N	N	N	Y
+AC x Month x Dist fe				N	N	N	N	N	N	N
+Grid fe				N	N	N	N	Y	N	Y
+Mean DV				0.0532	0.0532	0.0532	0.0532	0.0532	0.0532	0.0532
+Robust standard errors in parentheses										
+*** p<0.01, ** p<0.05, * p<0.1										

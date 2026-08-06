@@ -1,0 +1,332 @@
+2026-08-06 07:59:37,443 | INFO | Master input: /groups/sgulzar/sa_fires/proj_bureaucrats_farms/data_output/intermediate/0_master_dataset.parquet
+2026-08-06 07:59:37,444 | INFO | Master columns: 81
+2026-08-06 07:59:37,444 | INFO | Specifications: downup_ac, downup_ac_pop
+2026-08-06 07:59:37,444 | INFO | Time coverage: full master dataset (no cutoff)
+2026-08-06 07:59:37,444 | INFO | Stack 1/2: treatment=downup_ac output=/groups/sgulzar/sa_fires/proj_bureaucrats_farms/data_output/intermediate/combined_dt.csv
+2026-08-06 07:59:40,009 | INFO | Importing required columns into the DuckDB working database...
+2026-08-06 07:59:42,712 | INFO | Computing treatment lags and clean-spell boundaries...
+ 99% ▕█████████████████████████████████████▌▏ (<1 second remaining)     100% ▕██████████████████████████████████████▏ (00:00:02.21 elapsed)     
+2026-08-06 07:59:48,937 | INFO | Stored panel rows: 14,837,592
+2026-08-06 07:59:48,938 | INFO | Unique grids: 100,254
+2026-08-06 07:59:48,938 | INFO | Detected cohorts: 147
+2026-08-06 07:59:48,938 | INFO | Pending cohorts: 147
+2026-08-06 07:59:48,938 | INFO | Treatment variable: downup_ac
+2026-08-06 07:59:48,938 | INFO | Working database: /groups/sgulzar/sa_fires/proj_bureaucrats_farms/data_output/intermediate/combined_dt.db
+2026-08-06 07:59:49,813 | INFO | Cohort 24154 (1/147): 798,069 rows; 77,377 eligible grids
+2026-08-06 07:59:50,498 | INFO | Cohort 24155 (2/147): 614,757 rows; 56,060 eligible grids
+2026-08-06 07:59:51,202 | INFO | Cohort 24156 (3/147): 586,251 rows; 51,968 eligible grids
+2026-08-06 07:59:51,914 | INFO | Cohort 24157 (4/147): 582,245 rows; 51,507 eligible grids
+2026-08-06 07:59:52,598 | INFO | Cohort 24158 (5/147): 596,096 rows; 52,477 eligible grids
+2026-08-06 07:59:53,215 | INFO | Cohort 24159 (6/147): 598,093 rows; 51,698 eligible grids
+2026-08-06 07:59:53,961 | INFO | Cohort 24160 (7/147): 686,046 rows; 58,058 eligible grids
+2026-08-06 07:59:54,627 | INFO | Cohort 24161 (8/147): 695,590 rows; 60,724 eligible grids
+2026-08-06 07:59:55,320 | INFO | Cohort 24162 (9/147): 623,418 rows; 58,077 eligible grids
+2026-08-06 07:59:56,116 | INFO | Cohort 24163 (10/147): 638,910 rows; 68,111 eligible grids
+2026-08-06 07:59:56,614 | INFO | Cohort 24164 (11/147): 429,661 rows; 49,850 eligible grids
+2026-08-06 07:59:57,324 | INFO | Cohort 24165 (12/147): 636,218 rows; 61,640 eligible grids
+2026-08-06 07:59:58,219 | INFO | Cohort 24166 (13/147): 852,617 rows; 72,419 eligible grids
+2026-08-06 07:59:58,957 | INFO | Cohort 24167 (14/147): 710,429 rows; 60,887 eligible grids
+2026-08-06 07:59:59,580 | INFO | Cohort 24168 (15/147): 599,423 rows; 51,877 eligible grids
+2026-08-06 08:00:00,217 | INFO | Cohort 24169 (16/147): 589,361 rows; 51,461 eligible grids
+2026-08-06 08:00:00,926 | INFO | Cohort 24170 (17/147): 603,894 rows; 52,990 eligible grids
+2026-08-06 08:00:01,604 | INFO | Cohort 24171 (18/147): 604,212 rows; 51,907 eligible grids
+2026-08-06 08:00:02,403 | INFO | Cohort 24172 (19/147): 660,375 rows; 55,903 eligible grids
+2026-08-06 08:00:04,180 | INFO | Cohort 24173 (20/147): 721,039 rows; 62,928 eligible grids
+2026-08-06 08:00:04,801 | INFO | Cohort 24174 (21/147): 619,163 rows; 57,775 eligible grids
+2026-08-06 08:00:05,473 | INFO | Cohort 24175 (22/147): 661,422 rows; 70,764 eligible grids
+2026-08-06 08:00:05,912 | INFO | Cohort 24176 (23/147): 437,062 rows; 51,271 eligible grids
+2026-08-06 08:00:06,540 | INFO | Cohort 24177 (24/147): 619,805 rows; 61,327 eligible grids
+2026-08-06 08:00:07,394 | INFO | Cohort 24178 (25/147): 868,085 rows; 73,203 eligible grids
+2026-08-06 08:00:08,173 | INFO | Cohort 24179 (26/147): 725,609 rows; 61,484 eligible grids
+2026-08-06 08:00:08,846 | INFO | Cohort 24180 (27/147): 605,777 rows; 51,414 eligible grids
+2026-08-06 08:00:09,500 | INFO | Cohort 24181 (28/147): 600,471 rows; 51,460 eligible grids
+2026-08-06 08:00:10,250 | INFO | Cohort 24182 (29/147): 624,962 rows; 53,133 eligible grids
+2026-08-06 08:00:10,983 | INFO | Cohort 24183 (30/147): 619,245 rows; 51,883 eligible grids
+2026-08-06 08:00:11,659 | INFO | Cohort 24184 (31/147): 681,560 rows; 56,282 eligible grids
+2026-08-06 08:00:12,338 | INFO | Cohort 24185 (32/147): 740,065 rows; 63,340 eligible grids
+2026-08-06 08:00:12,939 | INFO | Cohort 24186 (33/147): 637,982 rows; 57,688 eligible grids
+2026-08-06 08:00:13,564 | INFO | Cohort 24187 (34/147): 662,967 rows; 69,336 eligible grids
+2026-08-06 08:00:14,452 | INFO | Cohort 24188 (35/147): 457,911 rows; 50,504 eligible grids
+2026-08-06 08:00:15,165 | INFO | Cohort 24189 (36/147): 716,685 rows; 64,053 eligible grids
+2026-08-06 08:00:15,930 | INFO | Cohort 24190 (37/147): 848,506 rows; 70,290 eligible grids
+2026-08-06 08:00:16,665 | INFO | Cohort 24191 (38/147): 723,422 rows; 59,748 eligible grids
+2026-08-06 08:00:17,352 | INFO | Cohort 24192 (39/147): 628,455 rows; 51,851 eligible grids
+2026-08-06 08:00:18,025 | INFO | Cohort 24193 (40/147): 620,323 rows; 51,395 eligible grids
+2026-08-06 08:00:18,761 | INFO | Cohort 24194 (41/147): 638,066 rows; 53,574 eligible grids
+2026-08-06 08:00:19,485 | INFO | Cohort 24195 (42/147): 644,952 rows; 52,431 eligible grids
+2026-08-06 08:00:20,198 | INFO | Cohort 24196 (43/147): 682,330 rows; 55,070 eligible grids
+2026-08-06 08:00:21,005 | INFO | Cohort 24197 (44/147): 765,640 rows; 64,038 eligible grids
+2026-08-06 08:00:21,789 | INFO | Cohort 24198 (45/147): 667,310 rows; 58,877 eligible grids
+2026-08-06 08:00:22,497 | INFO | Cohort 24199 (46/147): 653,128 rows; 67,283 eligible grids
+2026-08-06 08:00:23,040 | INFO | Cohort 24200 (47/147): 465,355 rows; 50,394 eligible grids
+2026-08-06 08:00:23,834 | INFO | Cohort 24201 (48/147): 740,737 rows; 64,644 eligible grids
+2026-08-06 08:00:24,694 | INFO | Cohort 24202 (49/147): 868,467 rows; 70,942 eligible grids
+2026-08-06 08:00:25,389 | INFO | Cohort 24203 (50/147): 715,108 rows; 57,992 eligible grids
+2026-08-06 08:00:26,055 | INFO | Cohort 24204 (51/147): 639,513 rows; 51,768 eligible grids
+2026-08-06 08:00:26,688 | INFO | Cohort 24205 (52/147): 636,777 rows; 51,616 eligible grids
+2026-08-06 08:00:27,318 | INFO | Cohort 24206 (53/147): 641,232 rows; 52,352 eligible grids
+2026-08-06 08:00:28,115 | INFO | Cohort 24207 (54/147): 648,994 rows; 52,190 eligible grids
+2026-08-06 08:00:28,877 | INFO | Cohort 24208 (55/147): 693,771 rows; 55,167 eligible grids
+2026-08-06 08:00:29,665 | INFO | Cohort 24209 (56/147): 779,789 rows; 64,257 eligible grids
+2026-08-06 08:00:30,408 | INFO | Cohort 24210 (57/147): 668,964 rows; 58,039 eligible grids
+2026-08-06 08:00:31,116 | INFO | Cohort 24211 (58/147): 668,964 rows; 68,443 eligible grids
+2026-08-06 08:00:31,674 | INFO | Cohort 24212 (59/147): 472,510 rows; 51,255 eligible grids
+2026-08-06 08:00:32,503 | INFO | Cohort 24213 (60/147): 763,972 rows; 65,529 eligible grids
+2026-08-06 08:00:33,252 | INFO | Cohort 24214 (61/147): 811,086 rows; 67,683 eligible grids
+2026-08-06 08:00:33,990 | INFO | Cohort 24215 (62/147): 749,192 rows; 62,188 eligible grids
+2026-08-06 08:00:34,589 | INFO | Cohort 24216 (63/147): 627,456 rows; 51,469 eligible grids
+2026-08-06 08:00:35,196 | INFO | Cohort 24217 (64/147): 623,551 rows; 51,427 eligible grids
+2026-08-06 08:00:35,797 | INFO | Cohort 24218 (65/147): 640,295 rows; 52,767 eligible grids
+2026-08-06 08:00:36,425 | INFO | Cohort 24219 (66/147): 642,870 rows; 52,146 eligible grids
+2026-08-06 08:00:37,121 | INFO | Cohort 24220 (67/147): 704,175 rows; 56,399 eligible grids
+2026-08-06 08:00:37,874 | INFO | Cohort 24221 (68/147): 764,886 rows; 64,518 eligible grids
+2026-08-06 08:00:38,471 | INFO | Cohort 24222 (69/147): 656,340 rows; 57,976 eligible grids
+2026-08-06 08:00:39,191 | INFO | Cohort 24223 (70/147): 690,425 rows; 69,859 eligible grids
+2026-08-06 08:00:39,701 | INFO | Cohort 24224 (71/147): 486,747 rows; 51,575 eligible grids
+2026-08-06 08:00:40,518 | INFO | Cohort 24225 (72/147): 776,075 rows; 64,649 eligible grids
+2026-08-06 08:00:41,399 | INFO | Cohort 24226 (73/147): 845,961 rows; 69,058 eligible grids
+2026-08-06 08:00:42,213 | INFO | Cohort 24227 (74/147): 756,464 rows; 61,268 eligible grids
+2026-08-06 08:00:42,927 | INFO | Cohort 24228 (75/147): 647,980 rows; 51,428 eligible grids
+2026-08-06 08:00:43,767 | INFO | Cohort 24229 (76/147): 647,259 rows; 51,431 eligible grids
+2026-08-06 08:00:44,551 | INFO | Cohort 24230 (77/147): 660,314 rows; 53,050 eligible grids
+2026-08-06 08:00:45,277 | INFO | Cohort 24231 (78/147): 661,073 rows; 52,419 eligible grids
+2026-08-06 08:00:46,233 | INFO | Cohort 24232 (79/147): 750,529 rows; 58,570 eligible grids
+2026-08-06 08:00:46,946 | INFO | Cohort 24233 (80/147): 752,255 rows; 60,155 eligible grids
+2026-08-06 08:00:47,713 | INFO | Cohort 24234 (81/147): 707,058 rows; 59,442 eligible grids
+2026-08-06 08:00:48,456 | INFO | Cohort 24235 (82/147): 693,837 rows; 67,174 eligible grids
+2026-08-06 08:00:48,951 | INFO | Cohort 24236 (83/147): 496,884 rows; 50,620 eligible grids
+2026-08-06 08:00:49,771 | INFO | Cohort 24237 (84/147): 716,229 rows; 61,747 eligible grids
+2026-08-06 08:00:50,636 | INFO | Cohort 24238 (85/147): 863,517 rows; 70,744 eligible grids
+2026-08-06 08:00:51,508 | INFO | Cohort 24239 (86/147): 762,443 rows; 62,741 eligible grids
+2026-08-06 08:00:52,236 | INFO | Cohort 24240 (87/147): 637,961 rows; 51,500 eligible grids
+2026-08-06 08:00:52,954 | INFO | Cohort 24241 (88/147): 635,468 rows; 51,583 eligible grids
+2026-08-06 08:00:53,624 | INFO | Cohort 24242 (89/147): 645,395 rows; 52,935 eligible grids
+2026-08-06 08:00:54,386 | INFO | Cohort 24243 (90/147): 648,004 rows; 52,396 eligible grids
+2026-08-06 08:00:55,185 | INFO | Cohort 24244 (91/147): 746,434 rows; 59,644 eligible grids
+2026-08-06 08:00:55,953 | INFO | Cohort 24245 (92/147): 733,784 rows; 59,931 eligible grids
+2026-08-06 08:00:56,680 | INFO | Cohort 24246 (93/147): 714,305 rows; 61,870 eligible grids
+2026-08-06 08:00:57,295 | INFO | Cohort 24247 (94/147): 641,073 rows; 63,919 eligible grids
+2026-08-06 08:00:57,772 | INFO | Cohort 24248 (95/147): 487,829 rows; 50,544 eligible grids
+2026-08-06 08:00:58,487 | INFO | Cohort 24249 (96/147): 758,639 rows; 64,525 eligible grids
+2026-08-06 08:00:59,279 | INFO | Cohort 24250 (97/147): 855,432 rows; 70,055 eligible grids
+2026-08-06 08:00:59,962 | INFO | Cohort 24251 (98/147): 755,972 rows; 61,540 eligible grids
+2026-08-06 08:01:00,592 | INFO | Cohort 24252 (99/147): 643,722 rows; 51,504 eligible grids
+2026-08-06 08:01:01,229 | INFO | Cohort 24253 (100/147): 642,471 rows; 51,659 eligible grids
+2026-08-06 08:01:01,994 | INFO | Cohort 24254 (101/147): 648,829 rows; 52,491 eligible grids
+2026-08-06 08:01:02,627 | INFO | Cohort 24255 (102/147): 654,927 rows; 52,407 eligible grids
+2026-08-06 08:01:03,410 | INFO | Cohort 24256 (103/147): 746,519 rows; 58,782 eligible grids
+2026-08-06 08:01:04,180 | INFO | Cohort 24257 (104/147): 741,825 rows; 59,887 eligible grids
+2026-08-06 08:01:04,842 | INFO | Cohort 24258 (105/147): 713,899 rows; 61,335 eligible grids
+2026-08-06 08:01:05,500 | INFO | Cohort 24259 (106/147): 675,167 rows; 65,638 eligible grids
+2026-08-06 08:01:05,983 | INFO | Cohort 24260 (107/147): 491,770 rows; 50,301 eligible grids
+2026-08-06 08:01:06,622 | INFO | Cohort 24261 (108/147): 646,244 rows; 58,027 eligible grids
+2026-08-06 08:01:07,478 | INFO | Cohort 24262 (109/147): 895,245 rows; 74,016 eligible grids
+2026-08-06 08:01:08,217 | INFO | Cohort 24263 (110/147): 739,521 rows; 62,077 eligible grids
+2026-08-06 08:01:08,841 | INFO | Cohort 24264 (111/147): 620,629 rows; 51,412 eligible grids
+2026-08-06 08:01:09,425 | INFO | Cohort 24265 (112/147): 617,829 rows; 51,601 eligible grids
+2026-08-06 08:01:10,073 | INFO | Cohort 24266 (113/147): 631,648 rows; 53,215 eligible grids
+2026-08-06 08:01:10,678 | INFO | Cohort 24267 (114/147): 634,582 rows; 52,852 eligible grids
+2026-08-06 08:01:11,395 | INFO | Cohort 24268 (115/147): 739,977 rows; 59,766 eligible grids
+2026-08-06 08:01:12,110 | INFO | Cohort 24269 (116/147): 748,916 rows; 62,436 eligible grids
+2026-08-06 08:01:12,773 | INFO | Cohort 24270 (117/147): 686,938 rows; 61,965 eligible grids
+2026-08-06 08:01:13,368 | INFO | Cohort 24271 (118/147): 616,443 rows; 61,739 eligible grids
+2026-08-06 08:01:13,861 | INFO | Cohort 24272 (119/147): 485,096 rows; 51,024 eligible grids
+2026-08-06 08:01:14,461 | INFO | Cohort 24273 (120/147): 624,160 rows; 57,529 eligible grids
+2026-08-06 08:01:15,264 | INFO | Cohort 24274 (121/147): 875,305 rows; 73,330 eligible grids
+2026-08-06 08:01:15,976 | INFO | Cohort 24275 (122/147): 750,747 rows; 64,022 eligible grids
+2026-08-06 08:01:16,561 | INFO | Cohort 24276 (123/147): 603,011 rows; 51,563 eligible grids
+2026-08-06 08:01:17,157 | INFO | Cohort 24277 (124/147): 600,665 rows; 51,922 eligible grids
+2026-08-06 08:01:17,784 | INFO | Cohort 24278 (125/147): 611,977 rows; 52,418 eligible grids
+2026-08-06 08:01:18,607 | INFO | Cohort 24279 (126/147): 612,483 rows; 51,991 eligible grids
+2026-08-06 08:01:19,276 | INFO | Cohort 24280 (127/147): 703,265 rows; 58,653 eligible grids
+2026-08-06 08:01:20,030 | INFO | Cohort 24281 (128/147): 722,163 rows; 63,885 eligible grids
+2026-08-06 08:01:20,727 | INFO | Cohort 24282 (129/147): 628,284 rows; 60,402 eligible grids
+2026-08-06 08:01:21,463 | INFO | Cohort 24283 (130/147): 623,305 rows; 68,145 eligible grids
+2026-08-06 08:01:22,005 | INFO | Cohort 24284 (131/147): 459,999 rows; 54,186 eligible grids
+2026-08-06 08:01:22,689 | INFO | Cohort 24285 (132/147): 585,332 rows; 61,078 eligible grids
+2026-08-06 08:01:23,552 | INFO | Cohort 24286 (133/147): 893,798 rows; 77,848 eligible grids
+2026-08-06 08:01:24,286 | INFO | Cohort 24287 (134/147): 649,918 rows; 57,713 eligible grids
+2026-08-06 08:01:24,974 | INFO | Cohort 24288 (135/147): 577,769 rows; 51,807 eligible grids
+2026-08-06 08:01:25,537 | INFO | Cohort 24289 (136/147): 576,277 rows; 52,198 eligible grids
+2026-08-06 08:01:26,219 | INFO | Cohort 24290 (137/147): 584,455 rows; 52,439 eligible grids
+2026-08-06 08:01:26,920 | INFO | Cohort 24291 (138/147): 584,290 rows; 51,924 eligible grids
+2026-08-06 08:01:27,644 | INFO | Cohort 24292 (139/147): 660,113 rows; 57,410 eligible grids
+2026-08-06 08:01:28,429 | INFO | Cohort 24293 (140/147): 716,451 rows; 67,723 eligible grids
+2026-08-06 08:01:29,140 | INFO | Cohort 24294 (141/147): 574,117 rows; 61,050 eligible grids
+2026-08-06 08:01:29,887 | INFO | Cohort 24295 (142/147): 581,961 rows; 68,016 eligible grids
+2026-08-06 08:01:30,411 | INFO | Cohort 24296 (143/147): 407,641 rows; 52,387 eligible grids
+2026-08-06 08:01:30,949 | INFO | Cohort 24297 (144/147): 466,118 rows; 60,429 eligible grids
+2026-08-06 08:01:31,536 | INFO | Cohort 24298 (145/147): 569,918 rows; 79,188 eligible grids
+2026-08-06 08:01:32,032 | INFO | Cohort 24299 (146/147): 391,210 rows; 56,478 eligible grids
+2026-08-06 08:01:32,522 | INFO | Cohort 24300 (147/147): 342,888 rows; 52,159 eligible grids
+  1% ▕▍                                     ▏ (~2.3 minutes remaining)    1% ▕▍                                     ▏ (~2.3 minutes remaining)    1% ▕▍                                     ▏ (~2.3 minutes remaining)    1% ▕▍                                     ▏ (~2.3 minutes remaining)    1% ▕▍                                     ▏ (~2.3 minutes remaining)    1% ▕▍                                     ▏ (~2.3 minutes remaining)    1% ▕▍                                     ▏ (~2.3 minutes remaining)    1% ▕▍                                     ▏ (~2.3 minutes remaining)    1% ▕▍                                     ▏ (~2.3 minutes remaining)    1% ▕▍                                     ▏ (~2.2 minutes remaining)  100% ▕██████████████████████████████████████▏ (00:00:03.03 elapsed)     
+2026-08-06 08:01:35,973 | INFO | Exporting final CSV with 96,776,774 rows...
+ 17% ▕██████▍                               ▏ (~9 seconds remaining)     18% ▕██████▊                               ▏ (~9 seconds remaining)     19% ▕███████▏                              ▏ (~9 seconds remaining)     20% ▕███████▌                              ▏ (~9 seconds remaining)     21% ▕███████▉                              ▏ (~9 seconds remaining)     22% ▕████████▎                             ▏ (~9 seconds remaining)     23% ▕████████▋                             ▏ (~9 seconds remaining)     25% ▕█████████▌                            ▏ (~9 seconds remaining)     26% ▕█████████▉                            ▏ (~9 seconds remaining)     26% ▕█████████▉                            ▏ (~8 seconds remaining)     28% ▕██████████▋                           ▏ (~8 seconds remaining)     29% ▕███████████                           ▏ (~8 seconds remaining)     30% ▕███████████▍                          ▏ (~8 seconds remaining)     31% ▕███████████▊                          ▏ (~8 seconds remaining)     32% ▕████████████▏                         ▏ (~8 seconds remaining)     33% ▕████████████▌                         ▏ (~8 seconds remaining)     34% ▕████████████▉                         ▏ (~8 seconds remaining)     35% ▕█████████████▎                        ▏ (~7 seconds remaining)     36% ▕█████████████▋                        ▏ (~7 seconds remaining)     37% ▕██████████████                        ▏ (~7 seconds remaining)     38% ▕██████████████▍                       ▏ (~7 seconds remaining)     39% ▕██████████████▊                       ▏ (~7 seconds remaining)     40% ▕███████████████▏                      ▏ (~7 seconds remaining)     41% ▕███████████████▌                      ▏ (~7 seconds remaining)     42% ▕███████████████▉                      ▏ (~7 seconds remaining)     44% ▕████████████████▋                     ▏ (~6 seconds remaining)     45% ▕█████████████████                     ▏ (~6 seconds remaining)     46% ▕█████████████████▍                    ▏ (~6 seconds remaining)     47% ▕█████████████████▊                    ▏ (~6 seconds remaining)     48% ▕██████████████████▏                   ▏ (~6 seconds remaining)     49% ▕██████████████████▌                   ▏ (~6 seconds remaining)     50% ▕███████████████████                   ▏ (~6 seconds remaining)     51% ▕███████████████████▍                  ▏ (~5 seconds remaining)     52% ▕███████████████████▊                  ▏ (~5 seconds remaining)     53% ▕████████████████████▏                 ▏ (~5 seconds remaining)     54% ▕████████████████████▌                 ▏ (~5 seconds remaining)     55% ▕████████████████████▉                 ▏ (~5 seconds remaining)     56% ▕█████████████████████▎                ▏ (~5 seconds remaining)     57% ▕█████████████████████▋                ▏ (~5 seconds remaining)     59% ▕██████████████████████▍               ▏ (~5 seconds remaining)     59% ▕██████████████████████▍               ▏ (~4 seconds remaining)     61% ▕███████████████████████▏              ▏ (~4 seconds remaining)     62% ▕███████████████████████▌              ▏ (~4 seconds remaining)     63% ▕███████████████████████▉              ▏ (~4 seconds remaining)     64% ▕████████████████████████▎             ▏ (~4 seconds remaining)     65% ▕████████████████████████▋             ▏ (~4 seconds remaining)     66% ▕█████████████████████████             ▏ (~4 seconds remaining)     67% ▕█████████████████████████▍            ▏ (~4 seconds remaining)     68% ▕█████████████████████████▊            ▏ (~3 seconds remaining)     69% ▕██████████████████████████▏           ▏ (~3 seconds remaining)     70% ▕██████████████████████████▌           ▏ (~3 seconds remaining)     71% ▕██████████████████████████▉           ▏ (~3 seconds remaining)     72% ▕███████████████████████████▎          ▏ (~3 seconds remaining)     73% ▕███████████████████████████▋          ▏ (~3 seconds remaining)     74% ▕████████████████████████████          ▏ (~3 seconds remaining)     75% ▕████████████████████████████▌         ▏ (~3 seconds remaining)     76% ▕████████████████████████████▉         ▏ (~2 seconds remaining)     78% ▕█████████████████████████████▋        ▏ (~2 seconds remaining)     79% ▕██████████████████████████████        ▏ (~2 seconds remaining)     80% ▕██████████████████████████████▍       ▏ (~2 seconds remaining)     82% ▕███████████████████████████████▏      ▏ (~2 seconds remaining)     83% ▕███████████████████████████████▌      ▏ (~2 seconds remaining)     84% ▕███████████████████████████████▉      ▏ (~1 second remaining)      85% ▕████████████████████████████████▎     ▏ (~1 second remaining)      86% ▕████████████████████████████████▋     ▏ (~1 second remaining)      87% ▕█████████████████████████████████     ▏ (~1 second remaining)      88% ▕█████████████████████████████████▍    ▏ (~1 second remaining)      89% ▕█████████████████████████████████▊    ▏ (~1 second remaining)      90% ▕██████████████████████████████████▏   ▏ (~1 second remaining)      91% ▕██████████████████████████████████▌   ▏ (~1 second remaining)      92% ▕██████████████████████████████████▉   ▏ (<1 second remaining)      93% ▕███████████████████████████████████▎  ▏ (<1 second remaining)      94% ▕███████████████████████████████████▋  ▏ (<1 second remaining)      95% ▕████████████████████████████████████  ▏ (<1 second remaining)      96% ▕████████████████████████████████████▍ ▏ (<1 second remaining)      97% ▕████████████████████████████████████▊ ▏ (<1 second remaining)      99% ▕█████████████████████████████████████▌▏ (<1 second remaining)     100% ▕██████████████████████████████████████▏ (00:01:04.16 elapsed)     
+2026-08-06 08:02:40,175 | INFO | Final CSV: /groups/sgulzar/sa_fires/proj_bureaucrats_farms/data_output/intermediate/combined_dt.csv
+2026-08-06 08:02:40,175 | INFO | Manifest: /groups/sgulzar/sa_fires/proj_bureaucrats_farms/data_output/intermediate/combined_dt_manifest.csv
+2026-08-06 08:02:40,175 | INFO | Working database: /groups/sgulzar/sa_fires/proj_bureaucrats_farms/data_output/intermediate/combined_dt.db
+2026-08-06 08:02:40,441 | INFO | Stack 2/2: treatment=downup_ac_pop output=/groups/sgulzar/sa_fires/proj_bureaucrats_farms/data_output/intermediate/combined_dt_pop.csv
+2026-08-06 08:02:42,272 | INFO | Importing required columns into the DuckDB working database...
+2026-08-06 08:02:45,117 | INFO | Computing treatment lags and clean-spell boundaries...
+ 99% ▕█████████████████████████████████████▌▏ (<1 second remaining)     100% ▕██████████████████████████████████████▏ (00:00:02.28 elapsed)     
+2026-08-06 08:02:49,119 | INFO | Stored panel rows: 14,837,592
+2026-08-06 08:02:49,119 | INFO | Unique grids: 100,254
+2026-08-06 08:02:49,119 | INFO | Detected cohorts: 147
+2026-08-06 08:02:49,119 | INFO | Pending cohorts: 147
+2026-08-06 08:02:49,119 | INFO | Treatment variable: downup_ac_pop
+2026-08-06 08:02:49,119 | INFO | Working database: /groups/sgulzar/sa_fires/proj_bureaucrats_farms/data_output/intermediate/combined_dt_pop.db
+2026-08-06 08:02:49,923 | INFO | Cohort 24154 (1/147): 795,486 rows; 77,528 eligible grids
+2026-08-06 08:02:50,492 | INFO | Cohort 24155 (2/147): 604,463 rows; 55,405 eligible grids
+2026-08-06 08:02:51,043 | INFO | Cohort 24156 (3/147): 577,013 rows; 51,480 eligible grids
+2026-08-06 08:02:51,647 | INFO | Cohort 24157 (4/147): 574,444 rows; 51,084 eligible grids
+2026-08-06 08:02:52,347 | INFO | Cohort 24158 (5/147): 587,947 rows; 52,133 eligible grids
+2026-08-06 08:02:53,021 | INFO | Cohort 24159 (6/147): 590,268 rows; 51,410 eligible grids
+2026-08-06 08:02:53,685 | INFO | Cohort 24160 (7/147): 678,352 rows; 57,888 eligible grids
+2026-08-06 08:02:54,351 | INFO | Cohort 24161 (8/147): 688,860 rows; 60,881 eligible grids
+2026-08-06 08:02:54,991 | INFO | Cohort 24162 (9/147): 621,045 rows; 58,560 eligible grids
+2026-08-06 08:02:55,652 | INFO | Cohort 24163 (10/147): 634,302 rows; 68,226 eligible grids
+2026-08-06 08:02:56,164 | INFO | Cohort 24164 (11/147): 424,958 rows; 50,000 eligible grids
+2026-08-06 08:02:56,861 | INFO | Cohort 24165 (12/147): 630,906 rows; 62,122 eligible grids
+2026-08-06 08:02:57,828 | INFO | Cohort 24166 (13/147): 850,320 rows; 72,552 eligible grids
+2026-08-06 08:02:58,609 | INFO | Cohort 24167 (14/147): 700,288 rows; 60,354 eligible grids
+2026-08-06 08:02:59,316 | INFO | Cohort 24168 (15/147): 590,043 rows; 51,397 eligible grids
+2026-08-06 08:02:59,909 | INFO | Cohort 24169 (16/147): 579,741 rows; 51,019 eligible grids
+2026-08-06 08:03:00,567 | INFO | Cohort 24170 (17/147): 597,155 rows; 52,648 eligible grids
+2026-08-06 08:03:01,224 | INFO | Cohort 24171 (18/147): 595,684 rows; 51,559 eligible grids
+2026-08-06 08:03:01,892 | INFO | Cohort 24172 (19/147): 652,728 rows; 55,701 eligible grids
+2026-08-06 08:03:02,751 | INFO | Cohort 24173 (20/147): 713,683 rows; 63,048 eligible grids
+2026-08-06 08:03:03,491 | INFO | Cohort 24174 (21/147): 616,673 rows; 58,184 eligible grids
+2026-08-06 08:03:04,256 | INFO | Cohort 24175 (22/147): 656,772 rows; 70,971 eligible grids
+2026-08-06 08:03:04,863 | INFO | Cohort 24176 (23/147): 432,488 rows; 51,420 eligible grids
+2026-08-06 08:03:05,578 | INFO | Cohort 24177 (24/147): 615,654 rows; 61,727 eligible grids
+2026-08-06 08:03:06,555 | INFO | Cohort 24178 (25/147): 866,773 rows; 73,239 eligible grids
+2026-08-06 08:03:07,591 | INFO | Cohort 24179 (26/147): 716,848 rows; 60,967 eligible grids
+100% ▕██████████████████████████████████████▏ (00:00:15.23 elapsed)     
+2026-08-06 08:03:23,393 | INFO | Cohort 24180 (27/147): 597,107 rows; 50,913 eligible grids
+2026-08-06 08:03:24,125 | INFO | Cohort 24181 (28/147): 592,151 rows; 51,033 eligible grids
+2026-08-06 08:03:24,838 | INFO | Cohort 24182 (29/147): 615,910 rows; 52,774 eligible grids
+2026-08-06 08:03:25,539 | INFO | Cohort 24183 (30/147): 609,995 rows; 51,518 eligible grids
+2026-08-06 08:03:26,306 | INFO | Cohort 24184 (31/147): 672,589 rows; 55,996 eligible grids
+2026-08-06 08:03:27,102 | INFO | Cohort 24185 (32/147): 732,200 rows; 63,464 eligible grids
+2026-08-06 08:03:27,879 | INFO | Cohort 24186 (33/147): 633,958 rows; 58,074 eligible grids
+2026-08-06 08:03:28,654 | INFO | Cohort 24187 (34/147): 658,821 rows; 69,509 eligible grids
+2026-08-06 08:03:29,214 | INFO | Cohort 24188 (35/147): 452,174 rows; 50,645 eligible grids
+2026-08-06 08:03:30,082 | INFO | Cohort 24189 (36/147): 710,638 rows; 64,275 eligible grids
+2026-08-06 08:03:31,034 | INFO | Cohort 24190 (37/147): 843,497 rows; 70,234 eligible grids
+2026-08-06 08:03:31,910 | INFO | Cohort 24191 (38/147): 713,636 rows; 59,206 eligible grids
+2026-08-06 08:03:32,568 | INFO | Cohort 24192 (39/147): 618,950 rows; 51,334 eligible grids
+2026-08-06 08:03:33,198 | INFO | Cohort 24193 (40/147): 610,946 rows; 50,919 eligible grids
+2026-08-06 08:03:33,874 | INFO | Cohort 24194 (41/147): 630,013 rows; 53,244 eligible grids
+2026-08-06 08:03:34,511 | INFO | Cohort 24195 (42/147): 636,055 rows; 52,065 eligible grids
+2026-08-06 08:03:35,284 | INFO | Cohort 24196 (43/147): 673,919 rows; 54,793 eligible grids
+2026-08-06 08:03:36,046 | INFO | Cohort 24197 (44/147): 758,245 rows; 64,162 eligible grids
+2026-08-06 08:03:36,963 | INFO | Cohort 24198 (45/147): 664,170 rows; 59,323 eligible grids
+2026-08-06 08:03:37,801 | INFO | Cohort 24199 (46/147): 647,863 rows; 67,392 eligible grids
+2026-08-06 08:03:38,375 | INFO | Cohort 24200 (47/147): 458,952 rows; 50,496 eligible grids
+2026-08-06 08:03:39,273 | INFO | Cohort 24201 (48/147): 734,403 rows; 64,881 eligible grids
+2026-08-06 08:03:40,257 | INFO | Cohort 24202 (49/147): 863,890 rows; 70,890 eligible grids
+2026-08-06 08:03:41,015 | INFO | Cohort 24203 (50/147): 705,597 rows; 57,473 eligible grids
+2026-08-06 08:03:41,776 | INFO | Cohort 24204 (51/147): 629,746 rows; 51,222 eligible grids
+2026-08-06 08:03:42,500 | INFO | Cohort 24205 (52/147): 626,728 rows; 51,164 eligible grids
+2026-08-06 08:03:43,235 | INFO | Cohort 24206 (53/147): 632,458 rows; 51,994 eligible grids
+2026-08-06 08:03:43,943 | INFO | Cohort 24207 (54/147): 639,420 rows; 51,881 eligible grids
+2026-08-06 08:03:44,659 | INFO | Cohort 24208 (55/147): 685,012 rows; 54,961 eligible grids
+2026-08-06 08:03:45,555 | INFO | Cohort 24209 (56/147): 771,533 rows; 64,353 eligible grids
+2026-08-06 08:03:46,283 | INFO | Cohort 24210 (57/147): 665,200 rows; 58,476 eligible grids
+2026-08-06 08:03:47,060 | INFO | Cohort 24211 (58/147): 663,679 rows; 68,671 eligible grids
+2026-08-06 08:03:47,542 | INFO | Cohort 24212 (59/147): 466,790 rows; 51,420 eligible grids
+2026-08-06 08:03:48,310 | INFO | Cohort 24213 (60/147): 757,508 rows; 65,612 eligible grids
+2026-08-06 08:03:49,110 | INFO | Cohort 24214 (61/147): 806,178 rows; 67,534 eligible grids
+2026-08-06 08:03:49,838 | INFO | Cohort 24215 (62/147): 739,559 rows; 61,657 eligible grids
+2026-08-06 08:03:50,419 | INFO | Cohort 24216 (63/147): 618,255 rows; 50,978 eligible grids
+2026-08-06 08:03:51,051 | INFO | Cohort 24217 (64/147): 613,711 rows; 50,919 eligible grids
+2026-08-06 08:03:51,673 | INFO | Cohort 24218 (65/147): 632,401 rows; 52,425 eligible grids
+2026-08-06 08:03:52,371 | INFO | Cohort 24219 (66/147): 635,921 rows; 51,844 eligible grids
+2026-08-06 08:03:53,184 | INFO | Cohort 24220 (67/147): 696,866 rows; 56,114 eligible grids
+2026-08-06 08:03:54,024 | INFO | Cohort 24221 (68/147): 759,302 rows; 64,772 eligible grids
+2026-08-06 08:03:54,782 | INFO | Cohort 24222 (69/147): 657,457 rows; 58,495 eligible grids
+2026-08-06 08:03:55,490 | INFO | Cohort 24223 (70/147): 688,533 rows; 70,107 eligible grids
+2026-08-06 08:03:55,981 | INFO | Cohort 24224 (71/147): 484,216 rows; 51,791 eligible grids
+2026-08-06 08:03:56,736 | INFO | Cohort 24225 (72/147): 769,172 rows; 64,700 eligible grids
+2026-08-06 08:03:57,531 | INFO | Cohort 24226 (73/147): 843,699 rows; 69,015 eligible grids
+2026-08-06 08:03:58,328 | INFO | Cohort 24227 (74/147): 747,520 rows; 60,716 eligible grids
+2026-08-06 08:03:59,000 | INFO | Cohort 24228 (75/147): 640,429 rows; 51,009 eligible grids
+2026-08-06 08:03:59,689 | INFO | Cohort 24229 (76/147): 639,385 rows; 50,946 eligible grids
+2026-08-06 08:04:00,448 | INFO | Cohort 24230 (77/147): 654,024 rows; 52,675 eligible grids
+2026-08-06 08:04:01,303 | INFO | Cohort 24231 (78/147): 654,390 rows; 52,102 eligible grids
+2026-08-06 08:04:02,257 | INFO | Cohort 24232 (79/147): 743,907 rows; 58,348 eligible grids
+2026-08-06 08:04:03,166 | INFO | Cohort 24233 (80/147): 746,730 rows; 60,274 eligible grids
+2026-08-06 08:04:03,970 | INFO | Cohort 24234 (81/147): 706,230 rows; 59,931 eligible grids
+2026-08-06 08:04:04,793 | INFO | Cohort 24235 (82/147): 690,673 rows; 67,421 eligible grids
+2026-08-06 08:04:05,351 | INFO | Cohort 24236 (83/147): 493,300 rows; 50,788 eligible grids
+2026-08-06 08:04:06,195 | INFO | Cohort 24237 (84/147): 711,263 rows; 61,865 eligible grids
+2026-08-06 08:04:07,142 | INFO | Cohort 24238 (85/147): 860,578 rows; 70,660 eligible grids
+2026-08-06 08:04:07,973 | INFO | Cohort 24239 (86/147): 754,747 rows; 62,265 eligible grids
+2026-08-06 08:04:08,701 | INFO | Cohort 24240 (87/147): 630,008 rows; 51,034 eligible grids
+2026-08-06 08:04:09,447 | INFO | Cohort 24241 (88/147): 627,188 rows; 51,074 eligible grids
+2026-08-06 08:04:10,211 | INFO | Cohort 24242 (89/147): 638,530 rows; 52,569 eligible grids
+2026-08-06 08:04:10,966 | INFO | Cohort 24243 (90/147): 641,185 rows; 52,075 eligible grids
+2026-08-06 08:04:11,835 | INFO | Cohort 24244 (91/147): 739,119 rows; 59,412 eligible grids
+2026-08-06 08:04:12,619 | INFO | Cohort 24245 (92/147): 728,544 rows; 60,165 eligible grids
+2026-08-06 08:04:13,512 | INFO | Cohort 24246 (93/147): 713,742 rows; 62,430 eligible grids
+2026-08-06 08:04:14,305 | INFO | Cohort 24247 (94/147): 637,236 rows; 64,067 eligible grids
+2026-08-06 08:04:14,929 | INFO | Cohort 24248 (95/147): 484,086 rows; 50,736 eligible grids
+2026-08-06 08:04:15,793 | INFO | Cohort 24249 (96/147): 753,620 rows; 64,641 eligible grids
+2026-08-06 08:04:16,847 | INFO | Cohort 24250 (97/147): 853,306 rows; 69,986 eligible grids
+2026-08-06 08:04:17,632 | INFO | Cohort 24251 (98/147): 746,759 rows; 60,996 eligible grids
+2026-08-06 08:04:18,314 | INFO | Cohort 24252 (99/147): 635,130 rows; 51,016 eligible grids
+2026-08-06 08:04:19,126 | INFO | Cohort 24253 (100/147): 634,159 rows; 51,178 eligible grids
+2026-08-06 08:04:19,893 | INFO | Cohort 24254 (101/147): 640,843 rows; 52,103 eligible grids
+2026-08-06 08:04:20,556 | INFO | Cohort 24255 (102/147): 646,904 rows; 52,111 eligible grids
+2026-08-06 08:04:21,380 | INFO | Cohort 24256 (103/147): 739,115 rows; 58,648 eligible grids
+2026-08-06 08:04:22,164 | INFO | Cohort 24257 (104/147): 735,536 rows; 60,028 eligible grids
+2026-08-06 08:04:22,919 | INFO | Cohort 24258 (105/147): 712,096 rows; 61,829 eligible grids
+2026-08-06 08:04:23,616 | INFO | Cohort 24259 (106/147): 670,989 rows; 65,794 eligible grids
+2026-08-06 08:04:24,133 | INFO | Cohort 24260 (107/147): 486,789 rows; 50,450 eligible grids
+2026-08-06 08:04:24,820 | INFO | Cohort 24261 (108/147): 641,735 rows; 58,303 eligible grids
+2026-08-06 08:04:25,653 | INFO | Cohort 24262 (109/147): 893,338 rows; 74,038 eligible grids
+2026-08-06 08:04:26,389 | INFO | Cohort 24263 (110/147): 731,968 rows; 61,526 eligible grids
+2026-08-06 08:04:27,044 | INFO | Cohort 24264 (111/147): 614,521 rows; 50,981 eligible grids
+2026-08-06 08:04:27,669 | INFO | Cohort 24265 (112/147): 611,589 rows; 51,126 eligible grids
+2026-08-06 08:04:28,366 | INFO | Cohort 24266 (113/147): 625,502 rows; 52,821 eligible grids
+2026-08-06 08:04:29,103 | INFO | Cohort 24267 (114/147): 628,872 rows; 52,618 eligible grids
+2026-08-06 08:04:29,919 | INFO | Cohort 24268 (115/147): 734,089 rows; 59,596 eligible grids
+2026-08-06 08:04:30,721 | INFO | Cohort 24269 (116/147): 744,586 rows; 62,758 eligible grids
+2026-08-06 08:04:31,445 | INFO | Cohort 24270 (117/147): 687,590 rows; 62,480 eligible grids
+2026-08-06 08:04:32,254 | INFO | Cohort 24271 (118/147): 614,098 rows; 61,905 eligible grids
+2026-08-06 08:04:32,752 | INFO | Cohort 24272 (119/147): 483,934 rows; 51,264 eligible grids
+2026-08-06 08:04:33,365 | INFO | Cohort 24273 (120/147): 622,125 rows; 57,791 eligible grids
+2026-08-06 08:04:34,238 | INFO | Cohort 24274 (121/147): 875,385 rows; 73,433 eligible grids
+2026-08-06 08:04:35,142 | INFO | Cohort 24275 (122/147): 745,142 rows; 63,604 eligible grids
+2026-08-06 08:04:35,768 | INFO | Cohort 24276 (123/147): 597,550 rows; 51,131 eligible grids
+2026-08-06 08:04:36,363 | INFO | Cohort 24277 (124/147): 595,430 rows; 51,494 eligible grids
+2026-08-06 08:04:36,976 | INFO | Cohort 24278 (125/147): 606,490 rows; 52,051 eligible grids
+2026-08-06 08:04:37,750 | INFO | Cohort 24279 (126/147): 607,136 rows; 51,733 eligible grids
+2026-08-06 08:04:38,495 | INFO | Cohort 24280 (127/147): 698,400 rows; 58,531 eligible grids
+2026-08-06 08:04:39,350 | INFO | Cohort 24281 (128/147): 718,006 rows; 64,094 eligible grids
+2026-08-06 08:04:40,101 | INFO | Cohort 24282 (129/147): 628,631 rows; 60,845 eligible grids
+2026-08-06 08:04:40,837 | INFO | Cohort 24283 (130/147): 620,862 rows; 68,249 eligible grids
+2026-08-06 08:04:41,369 | INFO | Cohort 24284 (131/147): 458,401 rows; 54,276 eligible grids
+2026-08-06 08:04:42,024 | INFO | Cohort 24285 (132/147): 583,737 rows; 61,263 eligible grids
+2026-08-06 08:04:42,970 | INFO | Cohort 24286 (133/147): 894,053 rows; 77,846 eligible grids
+2026-08-06 08:04:43,640 | INFO | Cohort 24287 (134/147): 644,716 rows; 57,204 eligible grids
+2026-08-06 08:04:44,200 | INFO | Cohort 24288 (135/147): 572,572 rows; 51,346 eligible grids
+2026-08-06 08:04:44,820 | INFO | Cohort 24289 (136/147): 571,213 rows; 51,751 eligible grids
+2026-08-06 08:04:45,593 | INFO | Cohort 24290 (137/147): 579,985 rows; 52,066 eligible grids
+2026-08-06 08:04:46,225 | INFO | Cohort 24291 (138/147): 579,616 rows; 51,620 eligible grids
+2026-08-06 08:04:47,017 | INFO | Cohort 24292 (139/147): 655,692 rows; 57,233 eligible grids
+2026-08-06 08:04:47,823 | INFO | Cohort 24293 (140/147): 713,601 rows; 68,046 eligible grids
+2026-08-06 08:04:48,424 | INFO | Cohort 24294 (141/147): 576,182 rows; 61,605 eligible grids
+2026-08-06 08:04:49,075 | INFO | Cohort 24295 (142/147): 580,656 rows; 68,080 eligible grids
+2026-08-06 08:04:49,559 | INFO | Cohort 24296 (143/147): 409,446 rows; 52,495 eligible grids
+2026-08-06 08:04:50,100 | INFO | Cohort 24297 (144/147): 468,379 rows; 60,659 eligible grids
+2026-08-06 08:04:50,717 | INFO | Cohort 24298 (145/147): 574,496 rows; 79,248 eligible grids
+2026-08-06 08:04:51,149 | INFO | Cohort 24299 (146/147): 392,454 rows; 55,957 eligible grids
+2026-08-06 08:04:51,537 | INFO | Cohort 24300 (147/147): 343,956 rows; 51,650 eligible grids
+  1% ▕▍                                     ▏ (~2.3 minutes remaining)    1% ▕▍                                     ▏ (~2.3 minutes remaining)    1% ▕▍                                     ▏ (~2.3 minutes remaining)    1% ▕▍                                     ▏ (~2.3 minutes remaining)    1% ▕▍                                     ▏ (~2.3 minutes remaining)    1% ▕▍                                     ▏ (~2.3 minutes remaining)    1% ▕▍                                     ▏ (~2.3 minutes remaining)    1% ▕▍                                     ▏ (~2.3 minutes remaining)    1% ▕▍                                     ▏ (~2.2 minutes remaining)    1% ▕▍                                     ▏ (~2.3 minutes remaining)    1% ▕▍                                     ▏ (~2.3 minutes remaining)    1% ▕▍                                     ▏ (~2.3 minutes remaining)    1% ▕▍                                     ▏ (~2.3 minutes remaining)    1% ▕▍                                     ▏ (~2.3 minutes remaining)    1% ▕▍                                     ▏ (~2.3 minutes remaining)    1% ▕▍                                     ▏ (~2.3 minutes remaining)    1% ▕▍                                     ▏ (~2.3 minutes remaining)    1% ▕▍                                     ▏ (~2.3 minutes remaining)    1% ▕▍                                     ▏ (~2.3 minutes remaining)    1% ▕▍                                     ▏ (~2.2 minutes remaining)    1% ▕▍                                     ▏ (~2.2 minutes remaining)    1% ▕▍                                     ▏ (~2.2 minutes remaining)    1% ▕▍                                     ▏ (~2.2 minutes remaining)    1% ▕▍                                     ▏ (~2.1 minutes remaining)    1% ▕▍                                     ▏ (~17.2 minutes remaining)   1% ▕▍                                     ▏ (~2.4 minutes remaining)    1% ▕▍                                     ▏ (~2.1 minutes remaining)    1% ▕▍                                     ▏ (~2.1 minutes remaining)    1% ▕▍                                     ▏ (~2.1 minutes remaining)    1% ▕▍                                     ▏ (~2.1 minutes remaining)    1% ▕▍                                     ▏ (~2.3 minutes remaining)    1% ▕▍                                     ▏ (~2.3 minutes remaining)  100% ▕██████████████████████████████████████▏ (00:00:03.09 elapsed)     
+2026-08-06 08:04:54,975 | INFO | Exporting final CSV with 95,976,111 rows...
+ 16% ▕██████                                ▏ (~10 seconds remaining)    17% ▕██████▍                               ▏ (~9 seconds remaining)     18% ▕██████▊                               ▏ (~9 seconds remaining)     20% ▕███████▌                              ▏ (~9 seconds remaining)     21% ▕███████▉                              ▏ (~9 seconds remaining)     23% ▕████████▋                             ▏ (~9 seconds remaining)     24% ▕█████████                             ▏ (~9 seconds remaining)     25% ▕█████████▌                            ▏ (~9 seconds remaining)     26% ▕█████████▉                            ▏ (~8 seconds remaining)     27% ▕██████████▎                           ▏ (~8 seconds remaining)     28% ▕██████████▋                           ▏ (~8 seconds remaining)     29% ▕███████████                           ▏ (~8 seconds remaining)     30% ▕███████████▍                          ▏ (~8 seconds remaining)     31% ▕███████████▊                          ▏ (~8 seconds remaining)     32% ▕████████████▏                         ▏ (~8 seconds remaining)     33% ▕████████████▌                         ▏ (~8 seconds remaining)     35% ▕█████████████▎                        ▏ (~7 seconds remaining)     36% ▕█████████████▋                        ▏ (~7 seconds remaining)     37% ▕██████████████                        ▏ (~7 seconds remaining)     38% ▕██████████████▍                       ▏ (~7 seconds remaining)     39% ▕██████████████▊                       ▏ (~7 seconds remaining)     40% ▕███████████████▏                      ▏ (~7 seconds remaining)     41% ▕███████████████▌                      ▏ (~7 seconds remaining)     42% ▕███████████████▉                      ▏ (~6 seconds remaining)     43% ▕████████████████▎                     ▏ (~6 seconds remaining)     44% ▕████████████████▋                     ▏ (~6 seconds remaining)     45% ▕█████████████████                     ▏ (~6 seconds remaining)     46% ▕█████████████████▍                    ▏ (~6 seconds remaining)     47% ▕█████████████████▊                    ▏ (~6 seconds remaining)     48% ▕██████████████████▏                   ▏ (~6 seconds remaining)     50% ▕███████████████████                   ▏ (~6 seconds remaining)     51% ▕███████████████████▍                  ▏ (~5 seconds remaining)     52% ▕███████████████████▊                  ▏ (~5 seconds remaining)     54% ▕████████████████████▌                 ▏ (~5 seconds remaining)     55% ▕████████████████████▉                 ▏ (~5 seconds remaining)     56% ▕█████████████████████▎                ▏ (~5 seconds remaining)     57% ▕█████████████████████▋                ▏ (~5 seconds remaining)     58% ▕██████████████████████                ▏ (~5 seconds remaining)     59% ▕██████████████████████▍               ▏ (~4 seconds remaining)     60% ▕██████████████████████▊               ▏ (~4 seconds remaining)     61% ▕███████████████████████▏              ▏ (~4 seconds remaining)     63% ▕███████████████████████▉              ▏ (~4 seconds remaining)     64% ▕████████████████████████▎             ▏ (~4 seconds remaining)     65% ▕████████████████████████▋             ▏ (~4 seconds remaining)     66% ▕█████████████████████████             ▏ (~4 seconds remaining)     67% ▕█████████████████████████▍            ▏ (~3 seconds remaining)     68% ▕█████████████████████████▊            ▏ (~3 seconds remaining)     69% ▕██████████████████████████▏           ▏ (~3 seconds remaining)     70% ▕██████████████████████████▌           ▏ (~3 seconds remaining)     71% ▕██████████████████████████▉           ▏ (~3 seconds remaining)     72% ▕███████████████████████████▎          ▏ (~3 seconds remaining)     73% ▕███████████████████████████▋          ▏ (~3 seconds remaining)     74% ▕████████████████████████████          ▏ (~3 seconds remaining)     76% ▕████████████████████████████▉         ▏ (~2 seconds remaining)     77% ▕█████████████████████████████▎        ▏ (~2 seconds remaining)     78% ▕█████████████████████████████▋        ▏ (~2 seconds remaining)     79% ▕██████████████████████████████        ▏ (~2 seconds remaining)     80% ▕██████████████████████████████▍       ▏ (~2 seconds remaining)     81% ▕██████████████████████████████▊       ▏ (~2 seconds remaining)     82% ▕███████████████████████████████▏      ▏ (~2 seconds remaining)     83% ▕███████████████████████████████▌      ▏ (~2 seconds remaining)     84% ▕███████████████████████████████▉      ▏ (~1 second remaining)      85% ▕████████████████████████████████▎     ▏ (~1 second remaining)      86% ▕████████████████████████████████▋     ▏ (~1 second remaining)      87% ▕█████████████████████████████████     ▏ (~1 second remaining)      88% ▕█████████████████████████████████▍    ▏ (~1 second remaining)      89% ▕█████████████████████████████████▊    ▏ (~1 second remaining)      90% ▕██████████████████████████████████▏   ▏ (~1 second remaining)      91% ▕██████████████████████████████████▌   ▏ (~1 second remaining)      92% ▕██████████████████████████████████▉   ▏ (<1 second remaining)      93% ▕███████████████████████████████████▎  ▏ (<1 second remaining)      94% ▕███████████████████████████████████▋  ▏ (<1 second remaining)      95% ▕████████████████████████████████████  ▏ (<1 second remaining)      96% ▕████████████████████████████████████▍ ▏ (<1 second remaining)      98% ▕█████████████████████████████████████▏▏ (<1 second remaining)      99% ▕█████████████████████████████████████▌▏ (<1 second remaining)     100% ▕██████████████████████████████████████▏ (00:01:03.96 elapsed)     
+2026-08-06 08:05:58,952 | INFO | Final CSV: /groups/sgulzar/sa_fires/proj_bureaucrats_farms/data_output/intermediate/combined_dt_pop.csv
+2026-08-06 08:05:58,952 | INFO | Manifest: /groups/sgulzar/sa_fires/proj_bureaucrats_farms/data_output/intermediate/combined_dt_pop_manifest.csv
+2026-08-06 08:05:58,952 | INFO | Working database: /groups/sgulzar/sa_fires/proj_bureaucrats_farms/data_output/intermediate/combined_dt_pop.db
+2026-08-06 08:05:59,284 | INFO | Completed 2 stacked dataset(s).

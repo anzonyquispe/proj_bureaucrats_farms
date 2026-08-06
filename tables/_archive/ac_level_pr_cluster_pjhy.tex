@@ -1,0 +1,38 @@
+
+\begin{table}[htbp]
+   \caption{\label{tab:protest_treat_main} Effect of Level of Protests on Number of Fires in Punjab and Haryana}
+   \centering
+   \begin{tabular}{lcccccc}
+      \tabularnewline \midrule \midrule
+       & \multicolumn{6}{c}{Number of Fires}\\
+                                                                 & (1)           & (2)           & (3)           & (4)           & (5)           & (6)\\  
+      \midrule
+      \emph{Variables}\\
+      Protest Absr $=$ 1                                         & 0.0898        & 0.0898        & 0.0897        & -0.0297       & -0.0298       & -0.0523\\   
+                                                                 & (0.0351)      & (0.0351)      & (0.0351)      & (0.1200)      & (0.1202)      & (0.1261)\\   
+      DownupAC                                                   &               & -0.0144       & -0.0144       &               & -0.0144       & -0.0500\\   
+                                                                 &               & (0.0084)      & (0.0087)      &               & (0.0087)      & (0.0304)\\   
+      Protest Absr $\times$ DownupAC                             &               &               & 0.0002        &               & 0.0002        & 0.0453\\   
+                                                                 &               &               & (0.0085)      &               & (0.0085)      & (0.0177)\\   
+      Protest Absr $\times$ National Highway                     &               &               &               & 0.1207        & 0.1207        & 0.1434\\   
+                                                                 &               &               &               & (0.1163)      & (0.1164)      & (0.1226)\\   
+      Protest Absr $\times$ DownupAC $\times$ National Highway   &               &               &               &               &               & -0.0455\\   
+                                                                 &               &               &               &               &               & (0.0198)\\   
+      DownupAC $\times$ National Highway                         &               &               &               &               &               & 0.0359\\   
+                                                                 &               &               &               &               &               & (0.0316)\\   
+      \hline Mean Y0                                             & 0.4432        & 0.4716        & 0.4593        & 0.3691        & 0.3691        & 0.3863\\  
+      \midrule
+      \emph{Fixed-effects}\\
+      Grid                                                       & $\checkmark$  & $\checkmark$  & $\checkmark$  & $\checkmark$  & $\checkmark$  & $\checkmark$\\   
+      MonthYear                                                  & $\checkmark$  & $\checkmark$  & $\checkmark$  & $\checkmark$  & $\checkmark$  & $\checkmark$\\   
+      \midrule
+      \emph{Fit statistics}\\
+      \# Grid                                                    & 22,601        & 22,601        & 22,601        & 22,601        & 22,601        & 22,601\\  
+      \# MonthYear                                               & 120           & 120           & 120           & 120           & 120           & 120\\  
+      Observations                                               & 2,712,120     & 2,712,120     & 2,712,120     & 2,712,120     & 2,712,120     & 2,712,120\\  
+      \midrule \midrule
+      \multicolumn{7}{l}{\emph{Clustered (ac\_uq\_id) standard-errors in parentheses}}\\
+   \end{tabular}
+\end{table}
+
+

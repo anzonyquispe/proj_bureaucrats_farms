@@ -1,0 +1,29 @@
+
+\begin{table}[htbp]
+   \caption{\label{tab:regs_all_main} Downup Population regression estimates}
+   \centering
+   \begin{tabular}{lcc}
+      \tabularnewline \midrule \midrule
+       & \multicolumn{2}{c}{Number of Fires (x 1,000 units)}\\
+                                    & (1)       & (2)\\  
+                                    &  Poisson  & Neg. Bin.\\  
+      \midrule 
+      Downup AC                     & -0.0068   & -0.0239\\   
+                                    & (0.0103)  & (0.0459)\\   
+      \hline Mean DV & 141.0 & 141.0 & 141.0 & 141.0\\
+      \midrule
+      \emph{Fixed-effects}\\
+      Grid FE                       & Y         & Y\\  
+      AC $\times$ MonthYear FE      & Y         & Y\\  
+      \midrule
+      \emph{Fit statistics}\\
+      \# Grid FE                    & 65,057    & 65,057\\  
+      \# AC $\times$ MonthYear FE   & 43,575    & 43,575\\  
+      Observations                  & 4,457,414 & 4,457,414\\  
+      \midrule \midrule
+      \multicolumn{3}{l}{\emph{Clustered (Grid FE \& AC $\times$ MonthYear FE) standard-errors in parentheses}}\\
+      \multicolumn{3}{l}{\emph{Signif. Codes: ***: 0.01, **: 0.05, *: 0.1}}\\
+   \end{tabular}
+\end{table}
+
+
