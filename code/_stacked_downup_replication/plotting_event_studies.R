@@ -11,6 +11,9 @@ suppressPackageStartupMessages({
   library(HonestDiD)
 })
 
+# Match the one-CPU scheduler allocation in sbatch/run_r.sbatch.
+data.table::setDTthreads(threads = 1L)
+
 parse_args <- function(args) {
   out <- list(
     root = Sys.getenv("REPLICATION_ROOT", unset = ""),

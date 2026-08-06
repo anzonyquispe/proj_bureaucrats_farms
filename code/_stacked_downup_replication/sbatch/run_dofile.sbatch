@@ -1,13 +1,12 @@
 #!/usr/bin/env bash
 #SBATCH --job-name=farms_do
-#SBATCH --cpus-per-task=4
+#SBATCH --cpus-per-task=1
 #SBATCH --mem=32G
 #SBATCH --time=24:00:00
 #SBATCH --output=/users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication/logs/%x_%j.out
 #SBATCH --error=/users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication/logs/%x_%j.err
 #$ -N farms_do
 #$ -q largemem
-#$ -pe smp 4
 #$ -cwd
 #$ -o /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication/logs
 #$ -e /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication/logs
@@ -26,15 +25,67 @@ DOWNUP_VAR="${9:-none}"
 STACKED_FILE="${10:-none}"
 DID_OUTPUT="${11:-none}"
 STATA_BIN="${STATA_BIN:-stata-mp}"
+ALLOCATED_CPUS="${SLURM_CPUS_PER_TASK:-${NSLOTS:-1}}"
+
+if ! [[ "${ALLOCATED_CPUS}" =~ ^[1-9][0-9]*$ ]]; then
+  echo "Invalid scheduler CPU allocation: ${ALLOCATED_CPUS}" >&2
+  exit 64
+fi
 
 mkdir -p "${REPLICATION_CODE}/logs"
-cd "${REPLICATION_CODE}"
+
+# Pass parameters through the environment.  Supplying them after `stata -b do`
+# makes Stata concatenate every argument into its automatic .log filename.
+export FARMS_DOFILE="${DOFILE}"
+export FARMS_ROOT="${REPLICATION_ROOT}"
+export FARMS_CODE="${REPLICATION_CODE}"
+export FARMS_LOCATION="${LOCATION}"
+export FARMS_SAMPLE="${SAMPLE}"
+export FARMS_RURAL_VAR="${RURAL_VAR}"
+export FARMS_FE_LIST="${FE_LIST}"
+export FARMS_STER_SUFFIX="${STER_SUFFIX}"
+export FARMS_DOWNUP_VAR="${DOWNUP_VAR}"
+export FARMS_STACKED_FILE="${STACKED_FILE}"
+export FARMS_DID_OUTPUT="${DID_OUTPUT}"
+export FARMS_CPUS="${ALLOCATED_CPUS}"
+
+SCHEDULER_JOB_NAME="${SLURM_JOB_NAME:-${JOB_NAME:-farms_do}}"
+SCHEDULER_JOB_ID="${SLURM_JOB_ID:-${JOB_ID:-$$}}"
+STATA_WORK_DIR="${REPLICATION_CODE}/logs/stata_work/${SCHEDULER_JOB_NAME}_${SCHEDULER_JOB_ID}"
+STATA_SAVED_LOG="${REPLICATION_CODE}/logs/${SCHEDULER_JOB_NAME}_${SCHEDULER_JOB_ID}.stata.log"
+mkdir -p "${STATA_WORK_DIR}"
+cd "${STATA_WORK_DIR}"
 
 module purge 2>/dev/null || true
 module load stata gcc
 
-"${STATA_BIN}" -b do "${REPLICATION_CODE}/sbatch/_run_dofile.do" \
-  "${DOFILE}" "${REPLICATION_ROOT}" "${REPLICATION_CODE}" "${LOCATION}" \
-  "${SAMPLE}" "${RURAL_VAR}" "${FE_LIST}" "${STER_SUFFIX}" \
-  "${DOWNUP_VAR}" "${STACKED_FILE}" "${DID_OUTPUT}"
+# Match Stata and linked numerical libraries to the scheduler allocation.
+# Protest-stack jobs receive 10; every other job receives 1.
+export OMP_NUM_THREADS="${ALLOCATED_CPUS}"
+export OPENBLAS_NUM_THREADS="${ALLOCATED_CPUS}"
+export MKL_NUM_THREADS="${ALLOCATED_CPUS}"
+export NUMEXPR_NUM_THREADS="${ALLOCATED_CPUS}"
+export VECLIB_MAXIMUM_THREADS="${ALLOCATED_CPUS}"
+export BLIS_NUM_THREADS="${ALLOCATED_CPUS}"
 
+echo "Starting ${DOFILE} with ${ALLOCATED_CPUS} CPU(s)."
+echo "Permanent Stata log: ${STATA_SAVED_LOG}"
+
+set +e
+"${STATA_BIN}" -b do "${REPLICATION_CODE}/sbatch/_run_dofile.do"
+stata_status=$?
+set -e
+
+# Stata batch output normally goes to this automatic log instead of stdout.
+# Preserve it under a scheduler-specific name and mirror it into .out/.o so
+# either logging location can be inspected.
+STATA_AUTOMATIC_LOG="${STATA_WORK_DIR}/_run_dofile.log"
+if [[ -f "${STATA_AUTOMATIC_LOG}" ]]; then
+  cp "${STATA_AUTOMATIC_LOG}" "${STATA_SAVED_LOG}"
+  cat "${STATA_AUTOMATIC_LOG}"
+else
+  echo "ERROR: Stata did not create ${STATA_AUTOMATIC_LOG}." >&2
+  exit 66
+fi
+
+exit "${stata_status}"

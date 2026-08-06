@@ -27,6 +27,14 @@ event-plot, interaction-plot, neighbour-plot, and final-audit jobs wait for the
 estimates they consume. The final audit uses `afterany`, so it still inventories
 missing outputs if an upstream job fails.
 
+Jobs that read `stacked_data_protest5km.csv` request 10 CPUs. This includes its
+descriptive table, DiD, event-study, and interaction-estimate jobs. Every other
+job requests one CPU, including all jobs based on `politicians_characteristics`,
+`combined_dt`, or `combined_dt_pop`, plus table and plot generation. The Stata
+processor setting and common BLAS/OpenMP thread limits follow the scheduler
+allocation; R and Python post-processing remain single-threaded. On SGE, only
+the protest-stack jobs request the `smp` parallel environment.
+
 The old `sbatch/_master_replication.sbatch` name is retained only as a
 compatibility dispatcher to `submit_all.sh`.
 
@@ -78,6 +86,14 @@ sbatch sbatch/run_dofile.sbatch \
 Use the same arguments after `qsub -V sbatch/run_dofile.sbatch` on SGE. The
 argument bridge sets the five standard globals (`location`, `sample`,
 `is_rural_var`, `fe_list`, and `ster_suffix`) before running exactly one dofile.
+
+Stata parameters are passed through environment variables, not appended to the
+Stata command. This prevents automatic log filenames containing the code path
+and every parameter. Each Stata job now saves its full log as
+`logs/<job_name>_<job_id>.stata.log` and mirrors that log to the scheduler's
+`.out`, `.o<jobid>`, or SGE parallel-environment `.po<jobid>` stream after
+Stata exits. The isolated automatic log remains under
+`logs/stata_work/<job_name>_<job_id>/_run_dofile.log` for diagnosis.
 
 ## Table and event-plot structure
 

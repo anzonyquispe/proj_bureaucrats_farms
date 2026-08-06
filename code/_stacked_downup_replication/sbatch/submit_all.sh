@@ -10,6 +10,7 @@ LOCATION="${LOCATION:-shell}"
 SAMPLE="${SAMPLE:-none}"
 RURAL_VAR="${RURAL_VAR:-is_rural_area}"
 EVENT_FE_LIST="${EVENT_FE_LIST:-1}"
+PROTEST_CPUS=10
 
 mkdir -p "${REPLICATION_CODE}/logs"
 cd "${REPLICATION_CODE}"
@@ -39,26 +40,32 @@ submit_job() {
   local name="$1"
   local script="$2"
   local dependency="$3"
-  shift 3
+  local cpus="$4"
+  shift 4
   local id
   if [[ "${scheduler}" == "slurm" ]]; then
-    local -a options=(--parsable --job-name="${name}")
+    local -a options=(--parsable --job-name="${name}" --cpus-per-task="${cpus}")
     [[ -n "${dependency}" ]] && options+=(--dependency="afterok:${dependency}")
     id=$(sbatch "${options[@]}" "${script}" "$@")
     id="${id%%;*}"
   else
     local -a options=(-terse -V -N "${name}")
+    if (( cpus > 1 )); then options+=(-pe smp "${cpus}"); fi
     [[ -n "${dependency}" ]] && options+=(-hold_jid "${dependency}")
     id=$(qsub "${options[@]}" "${script}" "$@")
   fi
-  echo "Submitted ${name}: ${id}" >&2
+  echo "Submitted ${name} (${cpus} CPU(s)): ${id}" >&2
   printf '%s' "${id}"
 }
 
 submit_stata() {
   local name="$1" dofile="$2" fe_list="$3" suffix="$4"
   local downup="${5:-none}" stacked="${6:-none}" output="${7:-none}"
-  submit_job "${name}" "sbatch/run_dofile.sbatch" "" \
+  local cpus=1
+  if [[ "${stacked}" == "stacked_data_protest5km" ]]; then
+    cpus="${PROTEST_CPUS}"
+  fi
+  submit_job "${name}" "sbatch/run_dofile.sbatch" "" "${cpus}" \
     "${dofile}" "${REPLICATION_ROOT}" "${REPLICATION_CODE}" "${LOCATION}" \
     "${SAMPLE}" "${RURAL_VAR}" "${fe_list}" "${suffix}" \
     "${downup}" "${stacked}" "${output}"
@@ -68,7 +75,7 @@ submit_final_audit() {
   local dependency="$1"
   local id
   if [[ "${scheduler}" == "slurm" ]]; then
-    id=$(sbatch --parsable --job-name=verify_main_outputs \
+    id=$(sbatch --parsable --job-name=verify_main_outputs --cpus-per-task=1 \
       --dependency="afterany:${dependency}" sbatch/run_python.sbatch \
       audit_main_outputs.py "${REPLICATION_ROOT}" "${REPLICATION_CODE}" \
       "${SAMPLE}" "${RURAL_VAR}")
@@ -93,14 +100,14 @@ table_ids+=("$(submit_stata alternative_dv _app_7_main_did_downup_area_ac_dv.do 
 table_ids+=("$(submit_stata did_by_year _app_8_main_did_by_year.do 1/10 none)")
 table_ids+=("$(submit_stata did_by_state _app_9_main_did_by_state.do 1/4 none)")
 table_ids+=("$(submit_stata placebo_13km _app_11_placebo_pop_13km.do 1 none)")
-table_ids+=("$(submit_stata protest_did_area _main_4_protest_5km_fe12_did_downup.do 1/3 none downup_ac)")
-table_ids+=("$(submit_stata protest_did_pop _main_4_protest_5km_fe12_did_downup.do 1/3 _acpop downup_ac_pop)")
+table_ids+=("$(submit_stata protest_did_area _main_4_protest_5km_fe12_did_downup.do 1/3 none downup_ac stacked_data_protest5km)")
+table_ids+=("$(submit_stata protest_did_pop _main_4_protest_5km_fe12_did_downup.do 1/3 _acpop downup_ac_pop stacked_data_protest5km)")
 table_ids+=("$(submit_stata politician_did_area _main_5_polischar_fe12_did_downup_inter.do 1/3 none downup_ac)")
 table_ids+=("$(submit_stata politician_did_pop _main_5_polischar_fe12_did_downup_inter.do 1/3 _acpop downup_ac_pop)")
 
 # Descriptive tables are also separate Stata jobs.
 table_ids+=("$(submit_stata descriptives_main app_main_descriptive.do 1 none)")
-table_ids+=("$(submit_stata descriptives_protest app_5km_descriptive.do 1 none)")
+table_ids+=("$(submit_stata descriptives_protest app_5km_descriptive.do 1 none none stacked_data_protest5km)")
 table_ids+=("$(submit_stata descriptives_politician app_polischar_descriptive.do 1 none)")
 
 # Event-study estimates. app16/app17 each create never, both, and not-yet files.
@@ -108,12 +115,12 @@ event_ids+=("$(submit_stata event_5pre_area _main_2_stacked_event_study_5pre_are
 event_ids+=("$(submit_stata event_5pre_pop _main_2_stacked_event_study_5pre.do "${EVENT_FE_LIST}" none)")
 event_ids+=("$(submit_stata politician_event_area _app_16_polischar_fe12_evst_all.do "${EVENT_FE_LIST}" none downup_ac)")
 event_ids+=("$(submit_stata politician_event_pop _app_16_polischar_fe12_evst_all.do "${EVENT_FE_LIST}" _acpop downup_ac_pop)")
-event_ids+=("$(submit_stata protest_event_area _app_17_5km_fe12_evst_all.do "${EVENT_FE_LIST}" none downup_ac)")
-event_ids+=("$(submit_stata protest_event_pop _app_17_5km_fe12_evst_all.do "${EVENT_FE_LIST}" _acpop downup_ac_pop)")
+event_ids+=("$(submit_stata protest_event_area _app_17_5km_fe12_evst_all.do "${EVENT_FE_LIST}" none downup_ac stacked_data_protest5km)")
+event_ids+=("$(submit_stata protest_event_pop _app_17_5km_fe12_evst_all.do "${EVENT_FE_LIST}" _acpop downup_ac_pop stacked_data_protest5km)")
 
 # Interaction estimates used by the two active interaction figures.
-interaction_ids+=("$(submit_stata protest_inter_area _app_18_protest_5km_fe12_did_downup_plot.do 1 none downup_ac)")
-interaction_ids+=("$(submit_stata protest_inter_pop _app_18_protest_5km_fe12_did_downup_plot.do 1 _acpop downup_ac_pop)")
+interaction_ids+=("$(submit_stata protest_inter_area _app_18_protest_5km_fe12_did_downup_plot.do 1 none downup_ac stacked_data_protest5km)")
+interaction_ids+=("$(submit_stata protest_inter_pop _app_18_protest_5km_fe12_did_downup_plot.do 1 _acpop downup_ac_pop stacked_data_protest5km)")
 interaction_ids+=("$(submit_stata politician_inter_area _app_19_polischar_fe12_did_downup_inter_plot.do 1 none downup_ac)")
 interaction_ids+=("$(submit_stata politician_inter_pop _app_19_polischar_fe12_did_downup_inter_plot.do 1 _acpop downup_ac_pop)")
 
@@ -131,24 +138,24 @@ if [[ "${scheduler}" == "sge" ]]; then
   neighbour_dep=$(join_ids , "${neighbour_ids[@]}")
 fi
 
-tables_job=$(submit_job generate_tables sbatch/run_dofile.sbatch "${table_dep}" \
+tables_job=$(submit_job generate_tables sbatch/run_dofile.sbatch "${table_dep}" 1 \
   _generate_all_tables.do "${REPLICATION_ROOT}" "${REPLICATION_CODE}" "${LOCATION}" \
   "${SAMPLE}" "${RURAL_VAR}" 1 none none none none)
-event_plot_job=$(submit_job event_plots sbatch/run_r.sbatch "${event_dep}" \
+event_plot_job=$(submit_job event_plots sbatch/run_r.sbatch "${event_dep}" 1 \
   "${REPLICATION_ROOT}" "${REPLICATION_CODE}" "${SAMPLE}")
-interaction_plot_job=$(submit_job interaction_plots sbatch/run_dofile.sbatch "${interaction_dep}" \
+interaction_plot_job=$(submit_job interaction_plots sbatch/run_dofile.sbatch "${interaction_dep}" 1 \
   _generate_interaction_plots.do "${REPLICATION_ROOT}" "${REPLICATION_CODE}" "${LOCATION}" \
   "${SAMPLE}" "${RURAL_VAR}" 1 none none none none)
-neighbour_plot_job=$(submit_job neighbour_plot sbatch/run_dofile.sbatch "${neighbour_dep}" \
+neighbour_plot_job=$(submit_job neighbour_plot sbatch/run_dofile.sbatch "${neighbour_dep}" 1 \
   _main_6_neighbour_plot.do "${REPLICATION_ROOT}" "${REPLICATION_CODE}" "${LOCATION}" \
   "${SAMPLE}" "${RURAL_VAR}" 1 none none none none)
 
 # Non-regression figures extracted from the source notebooks.
-design_job=$(submit_job design_maps sbatch/run_python.sbatch "" \
+design_job=$(submit_job design_maps sbatch/run_python.sbatch "" 1 \
   generate_design_maps.py "${REPLICATION_ROOT}" "${REPLICATION_CODE}" "${SAMPLE}" "${RURAL_VAR}")
-desc_fig_job=$(submit_job descriptive_figures sbatch/run_python.sbatch "" \
+desc_fig_job=$(submit_job descriptive_figures sbatch/run_python.sbatch "" 1 \
   generate_descriptive_figures.py "${REPLICATION_ROOT}" "${REPLICATION_CODE}" "${SAMPLE}" "${RURAL_VAR}")
-protest_fig_job=$(submit_job protest_figures sbatch/run_python.sbatch "" \
+protest_fig_job=$(submit_job protest_figures sbatch/run_python.sbatch "" 1 \
   generate_protest_figures.py "${REPLICATION_ROOT}" "${REPLICATION_CODE}" "${SAMPLE}" "${RURAL_VAR}")
 
 final_ids=("${tables_job}" "${event_plot_job}" "${interaction_plot_job}" \

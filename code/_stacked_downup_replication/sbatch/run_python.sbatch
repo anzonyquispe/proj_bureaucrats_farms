@@ -1,13 +1,12 @@
 #!/usr/bin/env bash
 #SBATCH --job-name=farms_python
-#SBATCH --cpus-per-task=4
+#SBATCH --cpus-per-task=1
 #SBATCH --mem=32G
 #SBATCH --time=08:00:00
 #SBATCH --output=/users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication/logs/%x_%j.out
 #SBATCH --error=/users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication/logs/%x_%j.err
 #$ -N farms_python
 #$ -q largemem
-#$ -pe smp 4
 #$ -cwd
 #$ -o /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication/logs
 #$ -e /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication/logs
@@ -24,6 +23,12 @@ if [[ "${SAMPLE}" == "none" ]]; then SAMPLE=""; fi
 
 module purge 2>/dev/null || true
 module load python 2>/dev/null || true
+export OMP_NUM_THREADS=1
+export OPENBLAS_NUM_THREADS=1
+export MKL_NUM_THREADS=1
+export NUMEXPR_NUM_THREADS=1
+export VECLIB_MAXIMUM_THREADS=1
+export BLIS_NUM_THREADS=1
 
 case "${SCRIPT}" in
   generate_descriptive_figures.py)
