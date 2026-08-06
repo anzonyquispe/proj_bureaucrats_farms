@@ -99,12 +99,17 @@ and every parameter. Each Stata job now saves its full log as
 Stata exits. The temporary `logs/stata_work` copy is removed after the
 permanent log has been preserved.
 
-To copy all previously generated outputs into the repository and rerun the
-failed `.ster` producers plus the revised main event studies, submit:
+To copy all previously generated outputs into the repository and submit the
+failed `.ster` producers plus the revised main event studies as independent,
+parallel scheduler jobs, run the launcher from the code directory:
 
 ```bash
-qsub -V sbatch/recover_outputs_to_repo.sbatch
+bash sbatch/recover_outputs_to_repo.sbatch
 ```
+
+Do not submit this launcher itself with `qsub` or `sbatch`. It submits nine
+independent Stata jobs immediately, then creates scheduler dependencies so the
+table, event-CSV, and event-plot stages start only when their inputs exist.
 
 ## Table and event-plot structure
 
