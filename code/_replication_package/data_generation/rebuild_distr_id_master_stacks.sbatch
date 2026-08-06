@@ -58,16 +58,41 @@ flock -u 9
 cd "${CODE_DIR}"
 "${PYTHON}" -c "import duckdb, numpy, pandas, pyarrow; print('dependency check passed')"
 
-echo "[$(date '+%F %T')] stage 1/3: preserve distr_id in population panel"
-"${PYTHON}" build_downup_ac_pop_cluster.py \
-    --panel "${INTERMEDIATE}/data_2012_2024_grid_ac.parquet" \
-    --wind-input "${INTERMEDIATE}/_2_wind_direction_grid.parquet" \
-    --grid-population "${INTERMEDIATE}/small_grid_population_2010.parquet" \
-    --output "${INTERMEDIATE}/data_2012_2024_grid_ac_downup_pop.parquet" \
-    --threads "${THREADS}" \
-    --memory-limit "${MEMORY_LIMIT}" \
-    --overwrite \
-    > rebuild_distr_id_population.out 2>&1
+case "${REBUILD_POPULATION:-1}" in
+    1)
+        echo "[$(date '+%F %T')] stage 1/3: preserve distr_id in population panel"
+        "${PYTHON}" build_downup_ac_pop_cluster.py \
+            --panel "${INTERMEDIATE}/data_2012_2024_grid_ac.parquet" \
+            --wind-input "${INTERMEDIATE}/_2_wind_direction_grid.parquet" \
+            --grid-population "${INTERMEDIATE}/small_grid_population_2010.parquet" \
+            --output "${INTERMEDIATE}/data_2012_2024_grid_ac_downup_pop.parquet" \
+            --threads "${THREADS}" \
+            --memory-limit "${MEMORY_LIMIT}" \
+            --overwrite \
+            > rebuild_distr_id_population.out 2>&1
+        ;;
+    0)
+        echo "[$(date '+%F %T')] stage 1/3 skipped; validating existing population panel"
+        "${PYTHON}" -c '
+import sys
+import duckdb
+path = sys.argv[1]
+columns = {
+    row[0]
+    for row in duckdb.connect().execute(
+        "DESCRIBE SELECT * FROM read_parquet(?)", [path]
+    ).fetchall()
+}
+if "distr_id" not in columns:
+    raise SystemExit(f"ERROR: distr_id is absent from {path}")
+print(f"Existing population panel contains distr_id: {path}")
+' "${INTERMEDIATE}/data_2012_2024_grid_ac_downup_pop.parquet"
+        ;;
+    *)
+        echo "ERROR: REBUILD_POPULATION must be 0 or 1." >&2
+        exit 1
+        ;;
+esac
 
 echo "[$(date '+%F %T')] stage 2/3: rebuild master only"
 "${PYTHON}" build_0_master_dataset.py \

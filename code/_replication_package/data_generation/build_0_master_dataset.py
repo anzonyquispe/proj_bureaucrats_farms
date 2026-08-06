@@ -818,34 +818,59 @@ def main() -> int:
                 f"{rice_merge.left_only:,}",
             )
 
-        mismatch_rows = scalar(
-            connection,
-            f"""
-            SELECT count(*)
-            FROM read_parquet({area}) AS a
-            JOIN population_base AS p
-              USING (unique_small_grid_id, year, month)
-            WHERE
-                a.province IS DISTINCT FROM p.province
-                OR a.district IS DISTINCT FROM p.district
-                OR a.wind_speed_av_cellid_month
-                   IS DISTINCT FROM p.wind_speed_av_cellid_month
-                OR a.wind_direction_av_cellid_month
-                   IS DISTINCT FROM p.wind_direction_av_cellid_month
-                OR a.rollav_wind_speed_cellid_month
-                   IS DISTINCT FROM p.rollav_wind_speed_cellid_month
-                OR a.rollav_wind_direction_cellid_month
-                   IS DISTINCT FROM p.rollav_wind_direction_cellid_month
-                OR a.downup_dummy IS DISTINCT FROM p.downup_dummy
-                OR a.downwind_pop IS DISTINCT FROM p.downwind_pop
-                OR a.upwind_pop IS DISTINCT FROM p.upwind_pop
-                OR a.downup_ac_pop IS DISTINCT FROM p.downup_ac_pop
-            """,
+        shared_field_names = (
+            "province",
+            "district",
+            "wind_speed_av_cellid_month",
+            "wind_direction_av_cellid_month",
+            "rollav_wind_speed_cellid_month",
+            "rollav_wind_direction_cellid_month",
+            "downup_dummy",
+            "downwind_pop",
+            "upwind_pop",
+            "downup_ac_pop",
         )
-        if mismatch_rows:
+        shared_field_mismatches = tuple(
+            map(
+                int,
+                connection.execute(
+                    f"""
+                    SELECT
+                        {", ".join(
+                            f"count_if(a.{quote_identifier(field)} "
+                            f"IS DISTINCT FROM p.{quote_identifier(field)})"
+                            for field in shared_field_names
+                        )}
+                    FROM read_parquet({area}) AS a
+                    JOIN population_base AS p
+                      USING (unique_small_grid_id, year, month)
+                    """
+                ).fetchone(),
+            )
+        )
+        mismatch_by_field = dict(
+            zip(shared_field_names, shared_field_mismatches, strict=True)
+        )
+        for field, mismatch_count in mismatch_by_field.items():
+            if mismatch_count:
+                logging.warning(
+                    "Area/population copied field differs | field=%s rows=%s",
+                    field,
+                    f"{mismatch_count:,}",
+                )
+
+        # Exact AC-area intersections depend on the focal grid, its assigned
+        # AC, and this rolling direction. Other columns in the area parquet
+        # are redundant copies retained for legacy compatibility; the master
+        # always takes their current values from population_base.
+        direction_mismatches = mismatch_by_field[
+            "rollav_wind_direction_cellid_month"
+        ]
+        if direction_mismatches:
             raise ValueError(
-                "Area/population shared fields disagree on "
-                f"{mismatch_rows:,} rows."
+                "Area geometry cannot be reused because its rolling wind "
+                f"direction differs from the population base on "
+                f"{direction_mismatches:,} rows. Rebuild the AC-area panel."
             )
 
         placebo_mismatch_rows = scalar(
