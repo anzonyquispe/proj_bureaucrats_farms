@@ -54,15 +54,9 @@ program define _strip_zeros_stats
         capture estimates restore `m'
         if _rc continue
         foreach s of local stats {
-            local raw "`e(`s')'"
-            if "`raw'" == "" continue
-            local rnum = real("`raw'")
-            if !missing(`rnum') {
-                local raw = strtrim(string(`rnum', "%9.3f"))
-            }
-            else {
-                local raw = strtrim("`raw'")
-            }
+            capture local rnum = e(`s')
+            if _rc continue
+            local raw = strtrim(string(`rnum', "%9.3f"))
             local cleaned = regexr(regexr("`raw'", "0+$", ""), "\.$", "")
             estadd local `s'_clean "`cleaned'"
         }
@@ -113,10 +107,10 @@ capture noisily esttab evreg1 evreg2 evreg3 evreg4 evreg5 evreg6 using ///
 * 1. Main DiD Table (_main_1_did)
 ********************************************************************************
 est clear
-capture noisily estread using "${tables}/main_did_downup_pop_ac${sample}_rural_stacked.ster"
+estread using "${tables}/main_did_downup_pop_ac${sample}_rural_stacked.ster"
 _strip_zeros_stats, models(eq1 eq2 eq3 eq4) stats(ymean)
 
-capture noisily esttab eq1 eq2 eq3 eq4 using "${tables}/main_did_downup_ac${sample}_rural_acpop.tex", ///
+esttab eq1 eq2 eq3 eq4 using "${tables}/main_did_downup_ac${sample}_rural_acpop.tex", ///
     replace ///
     cells(b(fmt(3) star) se(par fmt(3))) ///
     star(* 0.10 ** 0.05 *** 0.01) ///
@@ -145,10 +139,10 @@ display "Generated: main_did_downup_ac_rural_acpop.tex"
 * 2. Bureaucrat-Politician DiD (_main_3_bureau_polisc_did)
 ********************************************************************************
 est clear
-capture noisily estread using "${tables}/_main_3_bureau_polisc_did_rural_stacked.ster"
+estread using "${tables}/_main_3_bureau_polisc_did${sample}_rural_stacked.ster"
 _strip_zeros_stats, models(eq1 eq2 eq3 eq4 eq5) stats(ymean ymean2)
 
-capture noisily esttab eq1 eq2 eq3 eq4 eq5 using "${tables}/_main_3_bureau_polisc_did${sample}_rural_acpop.tex", ///
+esttab eq1 eq2 eq3 eq4 eq5 using "${tables}/_main_3_bureau_polisc_did${sample}_rural_acpop.tex", ///
     replace ///
     cells(b(fmt(3) star) se(par fmt(3))) ///
     star(* 0.10 ** 0.05 *** 0.01) ///
@@ -178,10 +172,10 @@ display "Generated: _main_3_bureau_polisc_did_rural_acpop.tex"
 * 3. Protest DiD with Downup (_main_4_protest_5km_fe12_did_downup)
 ********************************************************************************
 est clear
-capture noisily estread using "${tables}/_main_4_protest_5km_fe12_did_downup${sample}_rural_acpop.ster"
+estread using "${tables}/_main_4_protest_5km_fe12_did_downup${sample}_rural_acpop.ster"
 _strip_zeros_stats, models(evreg1 evreg2 evreg3 evreg4 evreg5 evreg6) stats(ymean ymean2 ymean3)
 
-capture noisily esttab evreg1 evreg2 evreg3 evreg4 evreg5 evreg6 ///
+esttab evreg1 evreg2 evreg3 evreg4 evreg5 evreg6 ///
     using "${tables}/_main_4_protest_5km_fe12_did_downup${sample}_rural_acpop_new.tex", ///
     replace ///
     cells(b(fmt(3) star) se(par fmt(3))) ///
@@ -225,10 +219,10 @@ display "Generated: _main_4_protest_5km_fe12_did_downup_rural_acpop_new.tex"
 * 4. Politician Char DiD with Downup (_main_5_polischar_fe12_did_downup_inter)
 ********************************************************************************
 est clear
-capture noisily estread using "${tables}/_main_5_polischar_fe12_did_downup_inter${sample}_rural_acpop.ster"
+estread using "${tables}/_main_5_polischar_fe12_did_downup_inter${sample}_rural_acpop.ster"
 _strip_zeros_stats, models(evreg1 evreg2 evreg3 evreg4 evreg5 evreg6) stats(ymean ymean2 ymean3)
 
-capture noisily esttab evreg1 evreg2 evreg3 evreg4 evreg5 evreg6 ///
+esttab evreg1 evreg2 evreg3 evreg4 evreg5 evreg6 ///
     using "${tables}/_main_5_polischar_fe12_did_downup_inter${sample}_rural_acpop.tex", ///
     replace ///
     cells(b(fmt(3) star) se(par fmt(3))) ///
@@ -275,10 +269,10 @@ display "Generated: _main_5_polischar_fe12_did_downup_inter_rural_acpop.tex"
 * 5. Alternative DVs (_app_7_main_did_downup_area_ac_dv)
 ********************************************************************************
 est clear
-capture noisily estread using "${tables}/_app_7_main_did_downup_area_ac_dv_rural_stacked.ster"
+estread using "${tables}/_app_7_main_did_downup_area_ac_dv${sample}_rural_stacked.ster"
 _strip_zeros_stats, models(eq1 eq2 eq3) stats(ymean)
 
-capture noisily esttab eq1 eq2 eq3 ///
+esttab eq1 eq2 eq3 ///
     using "${tables}/_app_7_main_did_downup_area_ac_dv${sample}_rural_acpop.tex", ///
     replace ///
     cells(b(fmt(4) star) se(par fmt(4))) ///
@@ -306,10 +300,10 @@ display "Generated: _app_7_main_did_downup_area_ac_dv_rural_acpop.tex"
 * 6. DiD by Year (_app_8_main_did_by_year)
 ********************************************************************************
 est clear
-capture noisily estread using "${tables}/_app_8_main_did_by_year_rural_stacked.ster"
+estread using "${tables}/_app_8_main_did_by_year${sample}_rural_stacked.ster"
 _strip_zeros_stats, models(eq1 eq2 eq3 eq4 eq5 eq6 eq7 eq8 eq9 eq10) stats(ymean)
 
-capture noisily esttab eq1 eq2 eq3 eq4 eq5 eq6 eq7 eq8 eq9 eq10 ///
+esttab eq1 eq2 eq3 eq4 eq5 eq6 eq7 eq8 eq9 eq10 ///
     using "${tables}/_app_8_main_did_by_year${sample}_rural_acpop.tex", ///
     replace ///
     cells(b(fmt(3) star) se(par fmt(3))) ///
@@ -335,10 +329,10 @@ display "Generated: _app_8_main_did_by_year_rural_acpop.tex"
 * 7. DiD by State (_app_9_main_did_by_state)
 ********************************************************************************
 est clear
-capture noisily estread using "${tables}/_app_9_main_did_by_state_rural_stacked.ster"
+estread using "${tables}/_app_9_main_did_by_state${sample}_rural_stacked.ster"
 _strip_zeros_stats, models(eq1 eq2 eq3 eq4) stats(ymean)
 
-capture noisily esttab eq1 eq2 eq3 eq4 ///
+esttab eq1 eq2 eq3 eq4 ///
     using "${tables}/_app_9_main_did_by_state${sample}_rural_acpop.tex", ///
     replace ///
     cells(b(fmt(3) star) se(par fmt(3))) ///
@@ -484,9 +478,9 @@ display "Generated: _app_15_polischar_fe12_did_rural_acpop.tex"
 * 11. Treatment-definition tables actively input by main.tex
 ********************************************************************************
 est clear
-capture noisily estread using "${tables}/_app_6_main_did_treat_definition${sample}_rural_acpop.ster"
+estread using "${tables}/_app_6_main_did_treat_definition${sample}_rural_acpop.ster"
 
-capture noisily esttab eq1 eq2 eq3 eq4 eq5 using ///
+esttab eq1 eq2 eq3 eq4 eq5 using ///
     "${tables}/_app_6_main_did_treat_definition${sample}_rural_acpop_new.tex", ///
     replace cells(b(fmt(3) star) se(par fmt(3))) ///
     star(* 0.10 ** 0.05 *** 0.01) ///
@@ -495,7 +489,7 @@ capture noisily esttab eq1 eq2 eq3 eq4 eq5 using ///
           labels("Observations" "N Assembly Constituencies" "Mean DV")) ///
     nomtitles nonumbers collabels(none) nobaselevels
 
-capture noisily esttab eq6 using ///
+esttab eq6 using ///
     "${tables}/_app_6_main_did_treat_definition${sample}_rural_acpop_new2.tex", ///
     replace cells(b(fmt(3) star) se(par fmt(3))) ///
     star(* 0.10 ** 0.05 *** 0.01) keep(down_percent) ///
@@ -503,7 +497,7 @@ capture noisily esttab eq6 using ///
           labels("Observations" "N Assembly Constituencies" "Mean DV")) ///
     nomtitles nonumbers collabels(none) nobaselevels
 
-capture noisily esttab eq7 using ///
+esttab eq7 using ///
     "${tables}/_app_6_main_did_treat_definition${sample}_rural_acpop_new3.tex", ///
     replace cells(b(fmt(3) star) se(par fmt(3))) ///
     star(* 0.10 ** 0.05 *** 0.01) ///
@@ -518,8 +512,8 @@ display "Generated: _app_6_main_did_treat_definition_rural_acpop_new[1-3].tex"
 * 12. Population placebo within 13 km
 ********************************************************************************
 est clear
-capture noisily estread using "${tables}/_app_11_placebo_pop_13km${sample}_rural.ster"
-capture noisily esttab eq1 eq2 eq3 using ///
+estread using "${tables}/_app_11_placebo_pop_13km${sample}_rural.ster"
+esttab eq1 eq2 eq3 using ///
     "${tables}/_app_11_placebo_pop_13km${sample}_rural.tex", ///
     replace cells(b(fmt(3) star) se(par fmt(3))) ///
     star(* 0.10 ** 0.05 *** 0.01) keep(downup_pop_13km) ///

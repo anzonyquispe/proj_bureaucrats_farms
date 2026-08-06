@@ -45,7 +45,7 @@ import delimited "${int_data}/${stacked_file}${sample}.csv", clear varnames(1)
 
 * Always express the fire-count outcome in thousands.
 capture drop countk
-gen double countk = count * 1000
+gen countk = count * 1000
 
 capture confirm variable relative_year_bin
 if _rc {

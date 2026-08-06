@@ -5,7 +5,7 @@
 ********************************************************************************
 
 version 17
-clear all
+clear
 set more off
 
 if "$root" == "" {
@@ -17,8 +17,12 @@ if "$root" == "" {
     global ster_suffix  ""
     global shell "/groups/sgulzar/sa_fires/proj_bureaucrats_farms"
     global dbox  "/Users/anzony.quisperojas/Library/CloudStorage/Dropbox/sa_fires/proj_bureaucrats_farms"
-    if "$location" == "dbox" global root "$dbox"
-    else global root "$shell"
+    if "$location" == "dbox" {
+        global root "$dbox"
+    }
+    else {
+        global root "$shell"
+    }
 }
 
 global int_data "${root}/data_output/intermediate"
@@ -28,7 +32,9 @@ import delimited using "${int_data}/stacked_data_protest5km${sample}.csv", ///
     clear varnames(1) case(preserve)
 
 capture confirm variable relative_year_bin
-if _rc rename relative_year relative_year_bin
+if _rc {
+    rename relative_year relative_year_bin
+}
 
 * Prefer raw count and rebuild the scaled regression outcome.
 capture drop countk
@@ -69,18 +75,22 @@ program define _fmt_num, rclass
     while substr("`out'", -1, 1) == "0" & strpos("`out'", ".") > 0 {
         local out = substr("`out'", 1, strlen("`out'") - 1)
     }
-    if substr("`out'", -1, 1) == "." local out = substr("`out'", 1, strlen("`out'") - 1)
+    if substr("`out'", -1, 1) == "." {
+        local out = substr("`out'", 1, strlen("`out'") - 1)
+    }
     return local out "`out'"
 end
 
 capture program drop _fmt_int
 program define _fmt_int, rclass
     args x
-    if missing(`x') return local out ""
-    else {
-        local out : display %20.0fc `x'
-        return local out = strtrim("`out'")
+    if missing(`x') {
+        return local out ""
+        exit
     }
+    local out : display %20.0fc `x'
+    local out = strtrim("`out'")
+    return local out "`out'"
 end
 
 capture program drop _unique_count
@@ -153,4 +163,3 @@ file write texout "\bottomrule" _n
 file write texout "\end{tabular}" _n
 file close texout
 display as result "Generated: ${tables}/_protest_stacked_descriptive${sample}.tex"
-

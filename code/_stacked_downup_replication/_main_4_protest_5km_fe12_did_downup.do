@@ -54,6 +54,9 @@ local fe1 "unique_small_grid_id_cohort relative_year_bin"
 local fe2 "unique_small_grid_id_cohort relative_year_bin province_cohort#election_year"
 local fe3 "unique_small_grid_id_cohort relative_year_bin province_cohort#election_year province_cohort#c.monthyear"
 local moderators_list moderator ${downup_var}
+egen tag_ac = tag(ac_uq_id)
+count if tag_ac == 1
+local numacs = r(N)
 
 est clear
 local i = 1
@@ -64,9 +67,6 @@ foreach mod of local moderators_list {
     local ymean = r(mean)
     quietly summarize countk if treat == 1 & relative_year_bin <= -1 & moderator == 1
     local ymean2 = r(mean)
-    unique ac_uq_id
-    local numacs = r(unique)
-
     foreach fe of numlist $fe_list {
         reghdfejl countk `rhs', absorb(`fe`fe'') vce(cluster ac_elec_yr)
         estadd scalar ymean = `ymean'
@@ -75,8 +75,10 @@ foreach mod of local moderators_list {
         estadd local smpl "Rural"
         estadd local gridfe "Y"
         estadd local time "Y"
-        estadd local electionfe = cond(`fe' >= 2, "Y", "N")
-        estadd local provtrendfe = cond(`fe' == 3, "Y", "N")
+        local election_label = cond(`fe' >= 2, "Y", "N")
+        local provtrend_label = cond(`fe' == 3, "Y", "N")
+        estadd local electionfe "`election_label'"
+        estadd local provtrendfe "`provtrend_label'"
         estadd local mod "`mod'"
         local estname evreg`i'
         local i = `i' + 1

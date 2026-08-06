@@ -1,0 +1,66 @@
+********************************************************************************
+* Generate every interaction figure from independently produced .ster files
+********************************************************************************
+
+version 17
+set more off
+
+if "$root" == "" {
+    clear all
+    global location     "shell"
+    global sample       ""
+    global is_rural_var "is_rural_area"
+    global fe_list      "1"
+    global ster_suffix  ""
+    global shell "/groups/sgulzar/sa_fires/proj_bureaucrats_farms"
+    global dbox  "/Users/anzony.quisperojas/Library/CloudStorage/Dropbox/sa_fires/proj_bureaucrats_farms"
+    global code_shell "/users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication"
+    global code_dbox "/Users/anzony.quisperojas/Documents/GitHub/proj_bureaucrats_farms/code/_stacked_downup_replication"
+    if "$location" == "dbox" {
+        global root "$dbox"
+        global code "$code_dbox"
+    }
+    else {
+        global root "$shell"
+        global code "$code_shell"
+    }
+}
+
+global tables  "${root}/tex/paper/tables"
+global figures "${root}/tex/paper/figures"
+capture mkdir "${figures}/Interaction_downwind"
+quietly do "${code}/interaction_graph.ado"
+
+* Population-weighted figures actively referenced by main.tex.
+est clear
+interaction_graph using ///
+    "${tables}/_app_18_protest_5km_fe12_did_downup_plot${sample}_rural_acpop.ster", ///
+    estimates(1) ///
+    output("${figures}/_app_18_protest_5km_fe12_did_downup_plot_rural_acpop") ///
+    type(protest) modvar(downup_ac_pop)
+
+est clear
+interaction_graph using ///
+    "${tables}/_app_19_polischar_fe12_did_downup_inter_plot${sample}_rural_acpop.ster", ///
+    estimates(1) ///
+    output("${figures}/_app_19_polischar_fe12_did_downup_inter_plot_rural_acpop") ///
+    type(politician) modvar(downup_ac_pop)
+
+* Area-weighted counterparts retained under their historical names.
+est clear
+interaction_graph using ///
+    "${tables}/_app_18_protest_5km_fe12_did_downup_plot${sample}_rural.ster", ///
+    estimates(1) ///
+    output("${figures}/Interaction_downwind/_app_downup_rel_protest") ///
+    type(protest) modvar(downup_ac)
+copy "${figures}/Interaction_downwind/_app_downup_rel_protest_1.png" ///
+     "${figures}/Interaction_downwind/_app_downup_rel_protest.png", replace
+
+est clear
+interaction_graph using ///
+    "${tables}/_app_19_polischar_fe12_did_downup_inter_plot${sample}_rural.ster", ///
+    estimates(1) ///
+    output("${figures}/Interaction_downwind/_app_downup_rel_polischar") ///
+    type(politician) modvar(downup_ac)
+copy "${figures}/Interaction_downwind/_app_downup_rel_polischar_1.png" ///
+     "${figures}/Interaction_downwind/_app_downup_rel_polischar.png", replace

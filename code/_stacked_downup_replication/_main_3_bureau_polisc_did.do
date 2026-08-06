@@ -7,8 +7,6 @@
 ********************************************************************************
 * Setup - Only set globals if running standalone (not from master)
 ********************************************************************************
-clear all 
-macro drop _all
 if "$root" == "" {
     clear all
     set more off
@@ -16,6 +14,9 @@ if "$root" == "" {
     * Set toggles for standalone run
     global location "shell"
     global sample ""
+    global is_rural_var "is_rural_area"
+    global fe_list "1/5"
+    global ster_suffix ""
 
     global shell "/groups/sgulzar/sa_fires/proj_bureaucrats_farms"
     global dbox "/Users/anzony.quisperojas/Library/CloudStorage/Dropbox/sa_fires/proj_bureaucrats_farms"
@@ -37,14 +38,12 @@ global figure_farms "${root}/tex/paper/figures"
 ********************************************************************************
 
 * Getting downup_dummy & mean_brigthness
-import delimited "${root}/data_output/intermediate/combined_dt_pop.csv", clear
+import delimited "${root}/data_output/intermediate/combined_dt_pop${sample}.csv", clear
 
 preserve
-		import delimited using "${root}/data_output/intermediate/0_master_dataset.csv", ///
+		import delimited using "${root}/data_output/intermediate/0_master_dataset${sample}.csv", ///
     clear varnames(1)
-	d*
-	
-		keep ac_uq_id unique_small_grid_id year month downup_dummy mean_brightness 
+		keep ac_uq_id unique_small_grid_id year month downup_dummy distr_id mean_brightness
 
 		tempfile dta
 		save `dta'
@@ -55,12 +54,12 @@ preserve
 
 
 * Merge with rural classification
-merge m:1 unique_small_grid_id using "${root}/data_output/intermediate/ghs_grid_classification_2000.dta", keepusing(is_rural)
+merge m:1 unique_small_grid_id using "${root}/data_output/intermediate/ghs_grid_classification_2000.dta", keepusing(is_rural_area is_rural_farzad)
 keep if _merge == 3
 drop _merge
 
 * Keep only rural grids
-keep if is_rural == 1
+keep if ${is_rural_var} == 1
 
 display "Observations after rural filter: " _N
 
@@ -139,21 +138,16 @@ egen tag_district = tag(district_id)
 count if tag_district == 1
 local n_districts = r(N)
 
-* Calculate mean DV for control group (downup_ac_pop==0 & downup_dummy==0)
-drop treat
-bysort unique_small_grid_id: egen treat = max(downup_ac_pop)
-summarize countk if downup_ac_pop == 0 & treat == 1
+* Project-standard treated-group pre-treatment means.
+gen relative_year_bin = floor(relative_monthyear / 12)
+gen moderator = downup_dummy
+quietly summarize countk if treat == 1 & relative_year_bin <= -1
 local meandv = r(mean)
-
-
-summarize countk if downup_ac_pop == 0 & downup_dummy == 0 & treat == 1
+quietly summarize countk if treat == 1 & relative_year_bin <= -1 & moderator == 1
 local meandv2 = r(mean)
 
-
-unique ac_uq_id
-local numacs = r(unique)
-unique district_id
-local numdist = r(unique)
+local numacs = `n_assemblies'
+local numdist = `n_districts'
 
 ********************************************************************************
 * DiD Regressions
@@ -166,7 +160,7 @@ global setfe ac_id#cohort ac_id#monthyear#cohort
 global controls av_wind_speed wind_direction
 
 * Cluster variables (stacked: interact with cohort)
-global cluster unique_small_grid_id#cohort distr_id#cohort#monthyear
+global cluster unique_small_grid_id#cohort district_id#cohort#monthyear
 
 
 ** Equalizing sample
@@ -178,10 +172,10 @@ qui reghdfejl countk downup_dummy downup_ac_pop downup_interaction $controls , /
 * Specification 1: No FE (baseline) 
 reg countk downup_dummy downup_ac_pop downup_interaction $controls if esample3 == 1 , ///
     vce(cluster grid_id)
-estadd scalar ymean `meandv'
-estadd scalar ymean2 `meandv2'
-estadd scalar nacs `numacs'
-estadd scalar ndists `numdist'
+estadd scalar ymean = `meandv'
+estadd scalar ymean2 = `meandv2'
+estadd scalar nacs = `numacs'
+estadd scalar ndists = `numdist'
 estadd local monthyearfe "N"
 estadd local acfe "N"
 estadd local acmonthfe "N"
@@ -193,10 +187,10 @@ estimates store eq1
 reghdfejl countk downup_dummy downup_ac_pop downup_interaction $controls if esample3 == 1 , ///
     absorb(monthyear#cohort assembly_id#cohort) ///
     cluster($cluster )
-estadd scalar ymean `meandv'
-estadd scalar ymean2 `meandv2'
-estadd scalar nacs `numacs'
-estadd scalar ndists `numdist'
+estadd scalar ymean = `meandv'
+estadd scalar ymean2 = `meandv2'
+estadd scalar nacs = `numacs'
+estadd scalar ndists = `numdist'
 estadd local monthyearfe "Y"
 estadd local acfe "Y"
 estadd local acmonthfe "N"
@@ -208,10 +202,10 @@ estimates store eq2
 reghdfejl countk downup_dummy downup_ac_pop downup_interaction $controls if esample3 == 1 , ///
     absorb(assembly_id#monthyear#cohort) ///
     cluster($cluster )
-estadd scalar ymean `meandv'
-estadd scalar ymean2 `meandv2'
-estadd scalar nacs `numacs'
-estadd scalar ndists `numdist'
+estadd scalar ymean = `meandv'
+estadd scalar ymean2 = `meandv2'
+estadd scalar nacs = `numacs'
+estadd scalar ndists = `numdist'
 estadd local monthyearfe "N"
 estadd local acfe "N"
 estadd local acmonthfe "Y"
@@ -223,10 +217,10 @@ estimates store eq3
 reghdfejl countk downup_dummy downup_ac_pop downup_interaction $controls if esample3 == 1  , ///
     absorb(grid_id#cohort assembly_id#monthyear#cohort) ///
     cluster($cluster )
-estadd scalar ymean `meandv'
-estadd scalar ymean2 `meandv2'
-estadd scalar nacs `numacs'
-estadd scalar ndists `numdist'
+estadd scalar ymean = `meandv'
+estadd scalar ymean2 = `meandv2'
+estadd scalar nacs = `numacs'
+estadd scalar ndists = `numdist'
 estadd local monthyearfe "N"
 estadd local acfe "N"
 estadd local acmonthfe "Y"
@@ -238,10 +232,10 @@ estimates store eq4
 reghdfejl countk downup_dummy downup_ac_pop downup_interaction $controls if esample3 == 1 , ///
     absorb(grid_id#cohort district_id#monthyear#cohort) ///
     cluster($cluster )
-estadd scalar ymean `meandv'
-estadd scalar ymean2 `meandv2'
-estadd scalar nacs `numacs'
-estadd scalar ndists `numdist'
+estadd scalar ymean = `meandv'
+estadd scalar ymean2 = `meandv2'
+estadd scalar nacs = `numacs'
+estadd scalar ndists = `numdist'
 estadd local monthyearfe "N"
 estadd local acfe "N"
 estadd local acmonthfe "N"
@@ -254,8 +248,9 @@ estimates store eq5
 * Save estimates
 ********************************************************************************
 
-estwrite eq1 eq2 eq3 eq4 eq5 using "${table_farms}/_main_3_bureau_polisc_did_rural_stacked.ster", replace
+estwrite eq1 eq2 eq3 eq4 eq5 using ///
+    "${table_farms}/_main_3_bureau_polisc_did${sample}_rural_stacked${ster_suffix}.ster", replace
 
-display "Estimates saved to: ${table_farms}/_main_3_bureau_polisc_did_rural_stacked.ster"
+display "Estimates saved to: ${table_farms}/_main_3_bureau_polisc_did${sample}_rural_stacked${ster_suffix}.ster"
 
 ********************************************************************************

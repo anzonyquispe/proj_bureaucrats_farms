@@ -1,35 +1,18 @@
-#!/bin/bash
-#$ -M anzony.quispe@gmail.com
-#$ -m abe
-#$ -q largemem
-#$ -N stacked_replication
-#$ -pe smp 4
+#!/usr/bin/env bash
+# Compatibility entry point. It dispatches the independent jobs registered in
+# submit_all.sh; the preferred login-node command is: bash sbatch/submit_all.sh
+#SBATCH --job-name=dispatch_farms
+#SBATCH --cpus-per-task=1
+#SBATCH --mem=1G
+#SBATCH --time=00:15:00
+#SBATCH --output=/users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication/logs/%x_%j.out
+#SBATCH --error=/users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication/logs/%x_%j.err
+#$ -N dispatch_farms
 #$ -cwd
+#$ -o /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication/logs
+#$ -e /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication/logs
 
 set -euo pipefail
 
-module purge 2>/dev/null || true
-module load stata gcc
-
-REPLICATION_ROOT="${REPLICATION_ROOT:-/groups/sgulzar/sa_fires/proj_bureaucrats_farms}"
 REPLICATION_CODE="${REPLICATION_CODE:-/users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication}"
-LOCATION="${LOCATION:-shell}"
-SAMPLE="${SAMPLE:-none}"
-IS_RURAL_VAR="${IS_RURAL_VAR:-is_rural_area}"
-FE_LIST="${FE_LIST:-1/4}"
-STER_SUFFIX="${STER_SUFFIX:-none}"
-
-stata-mp -b do "${REPLICATION_CODE}/sbatch/_run_master.do" \
-  "${REPLICATION_ROOT}" "${REPLICATION_CODE}" "${LOCATION}" "${SAMPLE}" \
-  "${IS_RURAL_VAR}" "${FE_LIST}" "${STER_SUFFIX}"
-
-module unload stata 2>/dev/null || true
-module load R
-
-R_SAMPLE="${SAMPLE}"
-if [[ "${R_SAMPLE}" == "none" ]]; then
-  R_SAMPLE=""
-fi
-
-Rscript "${REPLICATION_CODE}/plotting_event_studies.R" \
-  --root "${REPLICATION_ROOT}" --sample "${R_SAMPLE}"
+exec bash "${REPLICATION_CODE}/sbatch/submit_all.sh"

@@ -14,6 +14,9 @@ if "$root" == "" {
 
     global location "shell"
     global sample ""
+    global is_rural_var "is_rural_area"
+    global fe_list "1/3"
+    global ster_suffix ""
 
     global shell "/groups/sgulzar/sa_fires/proj_bureaucrats_farms"
     global dbox "/Users/anzony.quisperojas/Library/CloudStorage/Dropbox/sa_fires/proj_bureaucrats_farms"
@@ -34,23 +37,17 @@ global figure_farms "${root}/tex/paper/figures"
 * Import Data
 ********************************************************************************
 
-* Getting downup_dummy & mean_brigthness
-import delimited "${root}/data_output/intermediate/0_master_dataset.csv", clear
-keep ac_uq_id unique_small_grid_id year month downup_dummy mean_brigthness 
-duplicates drop unique_small_grid_id month year, force
-
-merge 1:m unique_small_grid_id month year using "${root}/data_output/intermediate/combined_dt_pop.dta"
-keep if _merge == 3
-drop _merge
+* The new stack is CSV and already retains mean_brightness.
+import delimited "${root}/data_output/intermediate/combined_dt_pop${sample}.csv", clear
 
 
 * Merge with rural classification
-merge m:1 unique_small_grid_id using "${root}/data_output/intermediate/ghs_grid_classification_2000.dta", keepusing(is_rural)
+merge m:1 unique_small_grid_id using "${root}/data_output/intermediate/ghs_grid_classification_2000.dta", keepusing(is_rural_area is_rural_farzad)
 keep if _merge == 3
 drop _merge
 
 * Keep only rural grids
-keep if is_rural == 1
+keep if ${is_rural_var} == 1
 
 display "Observations after rural filter: " _N
 
@@ -102,22 +99,27 @@ else {
 
 
 * Count unique ACs
-unique ac_id
-local numacs = r(unique)
+egen tag_ac = tag(ac_id)
+count if tag_ac == 1
+local numacs = r(N)
 
 ********************************************************************************
-* Calculate Mean DV for control group (downup_ac_pop == 0)
+* Project-standard treated-group pre-treatment means for each dependent variable.
 ********************************************************************************
-drop treat
-bys unique_small_grid_id: egen treat = max(downup_ac_pop)
-summarize anyfire if downup_ac_pop == 0 & treat == 1
-local meandv1 = string(r(mean), "%9.4f")
-
-summarize logfire if downup_ac_pop == 0  & treat == 1
-local meandv2 = string(r(mean), "%9.4f")
-
-summarize mean_brightness if downup_ac_pop == 0  & treat == 1
-local meandv3 = string(r(mean), "%9.2f")
+gen relative_year_bin = floor(relative_monthyear / 12)
+gen moderator = 0
+quietly summarize anyfire if treat == 1 & relative_year_bin <= -1
+local meandv1 = r(mean)
+quietly summarize anyfire if treat == 1 & relative_year_bin <= -1 & moderator == 1
+local meandv1_mod = r(mean)
+quietly summarize logfire if treat == 1 & relative_year_bin <= -1
+local meandv2 = r(mean)
+quietly summarize logfire if treat == 1 & relative_year_bin <= -1 & moderator == 1
+local meandv2_mod = r(mean)
+quietly summarize mean_brightness if treat == 1 & relative_year_bin <= -1
+local meandv3 = r(mean)
+quietly summarize mean_brightness if treat == 1 & relative_year_bin <= -1 & moderator == 1
+local meandv3_mod = r(mean)
 
 ********************************************************************************
 * Run Regressions
@@ -139,8 +141,9 @@ reghdfejl anyfire downup_ac_pop $controls , ///
     absorb($setfe ) cluster($cluster )
 estadd local gridfe "Y"
 estadd local acmonthfe "Y"
-estadd local ymean "`meandv1'"
-estadd local acq "`numacs'"
+estadd scalar ymean = `meandv1'
+estadd scalar ymean2 = `meandv1_mod'
+estadd scalar acq = `numacs'
 est store eq1
 
 * Eq2: Log Fires
@@ -148,8 +151,9 @@ reghdfejl logfire downup_ac_pop $controls , ///
     absorb($setfe ) cluster($cluster )
 estadd local gridfe "Y"
 estadd local acmonthfe "Y"
-estadd local ymean "`meandv2'"
-estadd local acq "`numacs'"
+estadd scalar ymean = `meandv2'
+estadd scalar ymean2 = `meandv2_mod'
+estadd scalar acq = `numacs'
 est store eq2
 
 * Eq3: Mean Brightness
@@ -157,16 +161,18 @@ reghdfejl mean_brightness downup_ac_pop $controls , ///
     absorb($setfe ) cluster($cluster )
 estadd local gridfe "Y"
 estadd local acmonthfe "Y"
-estadd local ymean "`meandv3'"
-estadd local acq "`numacs'"
+estadd scalar ymean = `meandv3'
+estadd scalar ymean2 = `meandv3_mod'
+estadd scalar acq = `numacs'
 est store eq3
 
 ********************************************************************************
 * Save ster file
 ********************************************************************************
 
-estwrite eq* using "${root}/tex/paper/tables/_app_7_main_did_downup_area_ac_dv_rural_stacked.ster", replace
+estwrite eq* using ///
+    "${root}/tex/paper/tables/_app_7_main_did_downup_area_ac_dv${sample}_rural_stacked${ster_suffix}.ster", replace
 
-display "Ster: ${root}/tex/paper/tables/_app_7_main_did_downup_area_ac_dv_rural_stacked.ster"
+display "Ster: ${root}/tex/paper/tables/_app_7_main_did_downup_area_ac_dv${sample}_rural_stacked${ster_suffix}.ster"
 
 ********************************************************************************

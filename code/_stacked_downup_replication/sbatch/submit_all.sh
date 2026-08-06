@@ -1,0 +1,163 @@
+#!/usr/bin/env bash
+# Submit every active-result dofile as its own job, then dependency-controlled
+# Stata/R/Python post-processing and the final main.tex output verification.
+
+set -euo pipefail
+
+REPLICATION_ROOT="${REPLICATION_ROOT:-/groups/sgulzar/sa_fires/proj_bureaucrats_farms}"
+REPLICATION_CODE="${REPLICATION_CODE:-/users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication}"
+LOCATION="${LOCATION:-shell}"
+SAMPLE="${SAMPLE:-none}"
+RURAL_VAR="${RURAL_VAR:-is_rural_area}"
+EVENT_FE_LIST="${EVENT_FE_LIST:-1}"
+
+mkdir -p "${REPLICATION_CODE}/logs"
+cd "${REPLICATION_CODE}"
+
+if command -v sbatch >/dev/null 2>&1; then
+  scheduler="slurm"
+elif command -v qsub >/dev/null 2>&1; then
+  scheduler="sge"
+else
+  echo "Neither sbatch nor qsub is available on this cluster." >&2
+  exit 69
+fi
+
+join_ids() {
+  local separator="$1"
+  shift
+  local result=""
+  local item
+  for item in "$@"; do
+    [[ -z "${item}" ]] && continue
+    if [[ -z "${result}" ]]; then result="${item}"; else result+="${separator}${item}"; fi
+  done
+  printf '%s' "${result}"
+}
+
+submit_job() {
+  local name="$1"
+  local script="$2"
+  local dependency="$3"
+  shift 3
+  local id
+  if [[ "${scheduler}" == "slurm" ]]; then
+    local -a options=(--parsable --job-name="${name}")
+    [[ -n "${dependency}" ]] && options+=(--dependency="afterok:${dependency}")
+    id=$(sbatch "${options[@]}" "${script}" "$@")
+    id="${id%%;*}"
+  else
+    local -a options=(-terse -V -N "${name}")
+    [[ -n "${dependency}" ]] && options+=(-hold_jid "${dependency}")
+    id=$(qsub "${options[@]}" "${script}" "$@")
+  fi
+  echo "Submitted ${name}: ${id}" >&2
+  printf '%s' "${id}"
+}
+
+submit_stata() {
+  local name="$1" dofile="$2" fe_list="$3" suffix="$4"
+  local downup="${5:-none}" stacked="${6:-none}" output="${7:-none}"
+  submit_job "${name}" "sbatch/run_dofile.sbatch" "" \
+    "${dofile}" "${REPLICATION_ROOT}" "${REPLICATION_CODE}" "${LOCATION}" \
+    "${SAMPLE}" "${RURAL_VAR}" "${fe_list}" "${suffix}" \
+    "${downup}" "${stacked}" "${output}"
+}
+
+submit_final_audit() {
+  local dependency="$1"
+  local id
+  if [[ "${scheduler}" == "slurm" ]]; then
+    id=$(sbatch --parsable --job-name=verify_main_outputs \
+      --dependency="afterany:${dependency}" sbatch/run_python.sbatch \
+      audit_main_outputs.py "${REPLICATION_ROOT}" "${REPLICATION_CODE}" \
+      "${SAMPLE}" "${RURAL_VAR}")
+    id="${id%%;*}"
+  else
+    id=$(qsub -terse -V -N verify_main_outputs -hold_jid "${dependency}" \
+      sbatch/run_python.sbatch audit_main_outputs.py "${REPLICATION_ROOT}" \
+      "${REPLICATION_CODE}" "${SAMPLE}" "${RURAL_VAR}")
+  fi
+  echo "Submitted verify_main_outputs: ${id}" >&2
+  printf '%s' "${id}"
+}
+
+declare -a table_ids event_ids interaction_ids neighbour_ids final_ids
+
+# Main and appendix table estimates. Each call is a distinct scheduler job.
+table_ids+=("$(submit_stata main_did_area _main_1_did.do 1/4 _stacked downup_ac combined_dt main_did_downup_area_ac)")
+table_ids+=("$(submit_stata main_did_pop _main_1_did.do 1/4 _stacked downup_ac_pop combined_dt_pop main_did_downup_pop_ac)")
+table_ids+=("$(submit_stata bureau_polisc _main_3_bureau_polisc_did.do 1/5 none)")
+table_ids+=("$(submit_stata treatment_defs _app_6_main_did_treat_definition.do 1/7 none)")
+table_ids+=("$(submit_stata alternative_dv _app_7_main_did_downup_area_ac_dv.do 1/3 none)")
+table_ids+=("$(submit_stata did_by_year _app_8_main_did_by_year.do 1/10 none)")
+table_ids+=("$(submit_stata did_by_state _app_9_main_did_by_state.do 1/4 none)")
+table_ids+=("$(submit_stata placebo_13km _app_11_placebo_pop_13km.do 1 none)")
+table_ids+=("$(submit_stata protest_did_area _main_4_protest_5km_fe12_did_downup.do 1/3 none downup_ac)")
+table_ids+=("$(submit_stata protest_did_pop _main_4_protest_5km_fe12_did_downup.do 1/3 _acpop downup_ac_pop)")
+table_ids+=("$(submit_stata politician_did_area _main_5_polischar_fe12_did_downup_inter.do 1/3 none downup_ac)")
+table_ids+=("$(submit_stata politician_did_pop _main_5_polischar_fe12_did_downup_inter.do 1/3 _acpop downup_ac_pop)")
+
+# Descriptive tables are also separate Stata jobs.
+table_ids+=("$(submit_stata descriptives_main app_main_descriptive.do 1 none)")
+table_ids+=("$(submit_stata descriptives_protest app_5km_descriptive.do 1 none)")
+table_ids+=("$(submit_stata descriptives_politician app_polischar_descriptive.do 1 none)")
+
+# Event-study estimates. app16/app17 each create never, both, and not-yet files.
+event_ids+=("$(submit_stata event_5pre_area _main_2_stacked_event_study_5pre_area.do "${EVENT_FE_LIST}" none)")
+event_ids+=("$(submit_stata event_5pre_pop _main_2_stacked_event_study_5pre.do "${EVENT_FE_LIST}" none)")
+event_ids+=("$(submit_stata politician_event_area _app_16_polischar_fe12_evst_all.do "${EVENT_FE_LIST}" none downup_ac)")
+event_ids+=("$(submit_stata politician_event_pop _app_16_polischar_fe12_evst_all.do "${EVENT_FE_LIST}" _acpop downup_ac_pop)")
+event_ids+=("$(submit_stata protest_event_area _app_17_5km_fe12_evst_all.do "${EVENT_FE_LIST}" none downup_ac)")
+event_ids+=("$(submit_stata protest_event_pop _app_17_5km_fe12_evst_all.do "${EVENT_FE_LIST}" _acpop downup_ac_pop)")
+
+# Interaction estimates used by the two active interaction figures.
+interaction_ids+=("$(submit_stata protest_inter_area _app_18_protest_5km_fe12_did_downup_plot.do 1 none downup_ac)")
+interaction_ids+=("$(submit_stata protest_inter_pop _app_18_protest_5km_fe12_did_downup_plot.do 1 _acpop downup_ac_pop)")
+interaction_ids+=("$(submit_stata politician_inter_area _app_19_polischar_fe12_did_downup_inter_plot.do 1 none downup_ac)")
+interaction_ids+=("$(submit_stata politician_inter_pop _app_19_polischar_fe12_did_downup_inter_plot.do 1 _acpop downup_ac_pop)")
+
+# Neighbour estimate is one job; its graph is a dependent second dofile job.
+neighbour_ids+=("$(submit_stata neighbour_estimate _main_6_neighbour.do 1 none)")
+
+table_dep=$(join_ids : "${table_ids[@]}")
+event_dep=$(join_ids : "${event_ids[@]}")
+interaction_dep=$(join_ids : "${interaction_ids[@]}")
+neighbour_dep=$(join_ids : "${neighbour_ids[@]}")
+if [[ "${scheduler}" == "sge" ]]; then
+  table_dep=$(join_ids , "${table_ids[@]}")
+  event_dep=$(join_ids , "${event_ids[@]}")
+  interaction_dep=$(join_ids , "${interaction_ids[@]}")
+  neighbour_dep=$(join_ids , "${neighbour_ids[@]}")
+fi
+
+tables_job=$(submit_job generate_tables sbatch/run_dofile.sbatch "${table_dep}" \
+  _generate_all_tables.do "${REPLICATION_ROOT}" "${REPLICATION_CODE}" "${LOCATION}" \
+  "${SAMPLE}" "${RURAL_VAR}" 1 none none none none)
+event_plot_job=$(submit_job event_plots sbatch/run_r.sbatch "${event_dep}" \
+  "${REPLICATION_ROOT}" "${REPLICATION_CODE}" "${SAMPLE}")
+interaction_plot_job=$(submit_job interaction_plots sbatch/run_dofile.sbatch "${interaction_dep}" \
+  _generate_interaction_plots.do "${REPLICATION_ROOT}" "${REPLICATION_CODE}" "${LOCATION}" \
+  "${SAMPLE}" "${RURAL_VAR}" 1 none none none none)
+neighbour_plot_job=$(submit_job neighbour_plot sbatch/run_dofile.sbatch "${neighbour_dep}" \
+  _main_6_neighbour_plot.do "${REPLICATION_ROOT}" "${REPLICATION_CODE}" "${LOCATION}" \
+  "${SAMPLE}" "${RURAL_VAR}" 1 none none none none)
+
+# Non-regression figures extracted from the source notebooks.
+design_job=$(submit_job design_maps sbatch/run_python.sbatch "" \
+  generate_design_maps.py "${REPLICATION_ROOT}" "${REPLICATION_CODE}" "${SAMPLE}" "${RURAL_VAR}")
+desc_fig_job=$(submit_job descriptive_figures sbatch/run_python.sbatch "" \
+  generate_descriptive_figures.py "${REPLICATION_ROOT}" "${REPLICATION_CODE}" "${SAMPLE}" "${RURAL_VAR}")
+protest_fig_job=$(submit_job protest_figures sbatch/run_python.sbatch "" \
+  generate_protest_figures.py "${REPLICATION_ROOT}" "${REPLICATION_CODE}" "${SAMPLE}" "${RURAL_VAR}")
+
+final_ids=("${tables_job}" "${event_plot_job}" "${interaction_plot_job}" \
+  "${neighbour_plot_job}" "${design_job}" "${desc_fig_job}" "${protest_fig_job}")
+final_dep=$(join_ids : "${final_ids[@]}")
+if [[ "${scheduler}" == "sge" ]]; then final_dep=$(join_ids , "${final_ids[@]}"); fi
+
+audit_job=$(submit_final_audit "${final_dep}")
+
+echo "Scheduler: ${scheduler}"
+echo "Final verification job: ${audit_job}"
+echo "Logs: ${REPLICATION_CODE}/logs"

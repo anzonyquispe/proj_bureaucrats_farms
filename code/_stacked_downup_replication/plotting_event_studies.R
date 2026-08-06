@@ -188,11 +188,13 @@ extract_event <- function(csv_name, model, rows, columns) {
 }
 
 run_case <- function(csv, model, rows, columns, base, pre, post, omitted,
-                     xlab, ylim_original = NULL, ylim_rotated = NULL) {
+                     xlab, ylim_original = NULL, ylim_rotated = NULL,
+                     required = TRUE) {
   event <- extract_event(csv, model, rows, columns)
   if (is.null(event)) {
-    warning("Skipping missing estimate file: ", file.path(table_dir, csv),
-            call. = FALSE)
+    message <- paste0("Missing estimate file: ", file.path(table_dir, csv))
+    if (required) stop(message, call. = FALSE)
+    warning("Skipping ", message, call. = FALSE)
     return(invisible(FALSE))
   }
   plot_event(event, base, pre, post, omitted, xlab,
@@ -211,13 +213,14 @@ run_case(
   paste0("main_event_study", s, "_rural.csv"), "evreg1",
   c(6:1, 7:12), c(3, 4, 10:5, 11:16),
   "main_event_study_rural_1", 6, 6, 0, "Time from Treatment (months)",
-  c(-30, 20), c(-40, 30)
+  c(-30, 20), c(-40, 30), required = FALSE
 )
 run_case(
   paste0("main_event_study", s, "_rural.csv"), "evreg4",
   c(18:13, 19:24), c(3, 4, 22:17, 23:28),
   "main_event_study_rural_riceP", 6, 6, 0,
-  "Time from Treatment (months)", c(-80, 50), c(-80, 50)
+  "Time from Treatment (months)", c(-80, 50), c(-80, 50),
+  required = FALSE
 )
 run_case(
   paste0("stacked_event_study_5pre", s, "_rural.csv"), "evreg1",

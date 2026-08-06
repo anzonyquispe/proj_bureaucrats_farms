@@ -57,8 +57,9 @@ quietly summarize countk if treat == 1 & relative_year_bin <= -1
 local ymean = r(mean)
 quietly summarize countk if treat == 1 & relative_year_bin <= -1 & moderator == 1
 local ymean2 = r(mean)
-unique ac_uq_id
-local numacs = r(unique)
+egen tag_ac = tag(ac_uq_id)
+count if tag_ac == 1
+local numacs = r(N)
 
 local fe1 "ac_uq_id#ac_uq_id_neighbor#month#year#cohort unique_small_grid_id#cohort"
 foreach fe of numlist $fe_list {

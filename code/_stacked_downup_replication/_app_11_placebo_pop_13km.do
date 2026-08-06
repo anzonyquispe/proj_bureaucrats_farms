@@ -57,8 +57,9 @@ else {
 }
 
 egen cluster_acmonth = group(ac_id monthyear)
-unique ac_id
-local numacs = r(unique)
+egen tag_ac = tag(ac_id)
+count if tag_ac == 1
+local numacs = r(N)
 
 quietly summarize countk if treat == 1 & relative_year_bin <= -1
 local ymean = r(mean)

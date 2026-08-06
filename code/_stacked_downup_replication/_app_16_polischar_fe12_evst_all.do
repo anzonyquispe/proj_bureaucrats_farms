@@ -123,6 +123,10 @@ foreach control_sample in never both notyet {
 
     display as text "Politician event study: controls=`control_sample', downup=${downup_var}, N=" _N
 
+    egen tag_ac = tag(ac_uq_id)
+    count if tag_ac == 1
+    local numacs = r(N)
+
     est clear
     local i = 1
     foreach mod of local moderators_list {
@@ -134,9 +138,6 @@ foreach control_sample in never both notyet {
         local ymean = r(mean)
         quietly summarize countk if treat == 1 & relative_year_bin <= -1 & moderator == 1 & `fcond'
         local ymean2 = r(mean)
-
-        unique ac_uq_id if `fcond'
-        local numacs = r(unique)
 
         foreach fe of numlist $fe_list {
             local fespec `fe`fe''

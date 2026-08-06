@@ -1,5 +1,6 @@
 ********************************************************************************
-* Master replication workflow for the newly generated stacked datasets
+* Sequential Stata fallback. Cluster runs should use sbatch/submit_all.sh,
+* which submits every dofile below as an independent job.
 ********************************************************************************
 
 version 17
@@ -76,7 +77,32 @@ global ster_suffix "_stacked"
 do "${code}/_main_1_did.do"
 
 ********************************************************************************
-* 2. Five-pre-period event studies from the two main stacks
+* 2. Remaining active-result table estimates and descriptive tables
+********************************************************************************
+
+global ster_suffix ""
+global fe_list "1/5"
+do "${code}/_main_3_bureau_polisc_did.do"
+
+global fe_list "1/7"
+do "${code}/_app_6_main_did_treat_definition.do"
+
+global fe_list "1/3"
+do "${code}/_app_7_main_did_downup_area_ac_dv.do"
+
+global fe_list "1/10"
+do "${code}/_app_8_main_did_by_year.do"
+
+global fe_list "1/4"
+do "${code}/_app_9_main_did_by_state.do"
+
+global fe_list "1"
+do "${code}/app_main_descriptive.do"
+do "${code}/app_5km_descriptive.do"
+do "${code}/app_polischar_descriptive.do"
+
+********************************************************************************
+* 3. Five-pre-period event studies from the two main stacks
 ********************************************************************************
 
 global fe_list "1"
@@ -85,7 +111,7 @@ do "${code}/_main_2_stacked_event_study_5pre_area.do"
 do "${code}/_main_2_stacked_event_study_5pre.do"
 
 ********************************************************************************
-* 3. Protest and politician-characteristic analyses
+* 4. Protest and politician-characteristic analyses
 *
 * Event studies write three control-sample versions:
 *   baseline             treated + never treated
@@ -100,10 +126,18 @@ global ster_suffix ""
 do "${code}/_main_4_protest_5km_fe12_did_downup.do"
 do "${code}/_main_5_polischar_fe12_did_downup_inter.do"
 
+global fe_list "1"
+do "${code}/_app_18_protest_5km_fe12_did_downup_plot.do"
+do "${code}/_app_19_polischar_fe12_did_downup_inter_plot.do"
+
 global downup_var "downup_ac_pop"
 global ster_suffix "_acpop"
 do "${code}/_main_4_protest_5km_fe12_did_downup.do"
 do "${code}/_main_5_polischar_fe12_did_downup_inter.do"
+
+global fe_list "1"
+do "${code}/_app_18_protest_5km_fe12_did_downup_plot.do"
+do "${code}/_app_19_polischar_fe12_did_downup_inter_plot.do"
 
 global fe_list "1"
 
@@ -118,26 +152,25 @@ do "${code}/_app_16_polischar_fe12_evst_all.do"
 do "${code}/_app_17_5km_fe12_evst_all.do"
 
 ********************************************************************************
-* 4. New 13 km placebo stack and neighbour-border analysis
+* 5. New 13 km placebo stack and neighbour-border analysis
 ********************************************************************************
 
 global fe_list "1"
 global ster_suffix ""
 do "${code}/_app_11_placebo_pop_13km.do"
 
-* This input is produced by the separate neighbour-stack builder.
-capture confirm file "${int_data}/stacked_downup_neigh${sample}.csv"
-if !_rc {
-    global fe_list "1"
-    do "${code}/_main_6_neighbour.do"
-    do "${code}/_main_6_neighbour_plot.do"
-}
-else {
-    display as text "Skipping neighbour analysis: stacked_downup_neigh${sample}.csv not found."
-}
+* This input is produced by the separate neighbour-stack builder. Missing it
+* is a hard error because neighbor_output.pdf is active in main.tex.
+confirm file "${int_data}/stacked_downup_neigh${sample}.csv"
+global fe_list "1"
+do "${code}/_main_6_neighbour.do"
+do "${code}/_main_6_neighbour_plot.do"
+
+* Interaction plots consume the four area/population .ster files above.
+do "${code}/_generate_interaction_plots.do"
 
 ********************************************************************************
-* 5. Render all LaTeX tables from .ster files
+* 6. Render all LaTeX tables from .ster files
 ********************************************************************************
 
 do "${code}/_generate_all_tables.do"

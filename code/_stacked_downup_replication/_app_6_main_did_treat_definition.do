@@ -15,6 +15,9 @@ if "$root" == "" {
     * Set toggles for standalone run
     global location "shell"
     global sample ""
+    global is_rural_var "is_rural_area"
+    global fe_list "1/7"
+    global ster_suffix ""
 
     global shell "/groups/sgulzar/sa_fires/proj_bureaucrats_farms"
     global dbox "/Users/anzony.quisperojas/Library/CloudStorage/Dropbox/sa_fires/proj_bureaucrats_farms"
@@ -36,13 +39,11 @@ global figure_farms "${root}/tex/paper/figures"
 ********************************************************************************
 
 * Getting downup_dummy & mean_brigthness
-import delimited "${root}/data_output/intermediate/combined_dt_pop.csv", clear
+import delimited "${root}/data_output/intermediate/combined_dt_pop${sample}.csv", clear
 
 preserve
-		import delimited using "${root}/data_output/intermediate/0_master_dataset.csv", ///
+		import delimited using "${root}/data_output/intermediate/0_master_dataset${sample}.csv", ///
     clear varnames(1)
-	d*
-	
 		keep ac_uq_id unique_small_grid_id downup_ac down_percent_pop downup_diff_percent_pop downwind_pop_ac_nosmall upwind_pop_ac_nosmall downup_1sd_pop year month
 		tempfile dta
 		save `dta'
@@ -52,7 +53,7 @@ preserve
 
 
 * Merge with rural classification
-merge m:1 unique_small_grid_id using "${root}/data_output/intermediate/ghs_grid_classification_2000.dta", keepusing(is_rural)
+merge m:1 unique_small_grid_id using "${root}/data_output/intermediate/ghs_grid_classification_2000.dta", keepusing(is_rural_area is_rural_farzad)
 keep if _merge == 3
 drop _merge
 
@@ -62,7 +63,7 @@ merge m:1 ac_uq_id using "${root}/data_output/intermediate/AC_total_pop.dta" , k
 
 
 * Keep only rural grids
-keep if is_rural == 1
+keep if ${is_rural_var} == 1
 
 display "Observations after rural filter: " _N
 
@@ -95,14 +96,10 @@ keep if year < 2022 | (year == 2022 & month <= 8)
 * Total area
 // gen total_area = downwind_pop_ac_nosmall + upwind_pop_ac_nosmall
 
-* Difference: downwind - upwind
-// gen downup_diff = downwind_pop_ac_nosmall - upwind_pop_ac_nosmall
-
-* 1 std threshold
+* Difference: downwind - upwind and its one-standard-deviation threshold.
+gen downup_diff = downwind_pop_ac_nosmall - upwind_pop_ac_nosmall
 summarize downup_diff
 local sd_val = r(sd)
-  
-gen downup_diff = downwind_pop_ac_nosmall - upwind_pop_ac_nosmall
 
 
 // gen downup_1sd = .
@@ -153,42 +150,23 @@ gen esample = e(sample)
 * Calculate Mean DV for each treatment definition
 ********************************************************************************
 
-* Count unique ACs
-unique ac_id if esample == 1
-local numacs = r(unique)
-
-* Mean DV for downup_ac == 0
-bys unique_small_grid_id: egen treat = max(downup_ac)
-summarize countk if downup_ac == 0 & treat == 1 & esample == 1
-local meandv1 = r(mean)
-drop treat
-
-* Mean DV for downup_ac_pop == 0
-bys unique_small_grid_id: egen treat = max(downup_ac_pop)
-summarize countk if downup_ac_pop == 0 & treat == 1 & esample == 1
+* Project-standard treated-group pre-treatment means and AC count.
+egen tag_ac = tag(ac_id) if esample == 1
+count if tag_ac == 1
+local numacs = r(N)
+gen relative_year_bin = floor(relative_monthyear / 12)
+gen moderator = rice_prod_aclvl_ahigh
+quietly summarize countk if treat == 1 & relative_year_bin <= -1 & esample == 1
+local meandv = r(mean)
+quietly summarize countk if treat == 1 & relative_year_bin <= -1 & moderator == 1 & esample == 1
 local meandv2 = r(mean)
-drop treat
-
-* Mean DV for downup_1sd == 0
-bys unique_small_grid_id: egen treat = max(downup_1sd)
-summarize countk if downup_1sd == 0 & treat == 1 & esample == 1
-local meandv3 = r(mean)
-drop treat
-
-* Mean DV for down_percent == 0 (or close to 0)
-summarize countk  if esample == 1
-local meandv4 = r(mean)
-
-
-* Mean DV for all (downup_diff_percent is continuous)
-summarize countk if  esample == 1
-local meandv5 = r(mean)
 }
 
 estadd local gridfe "Y"
 estadd local acmonthfe "Y"
-estadd scalar ymean `meandv1'
-estadd local acq "`numacs'"
+estadd scalar ymean = `meandv'
+estadd scalar ymean2 = `meandv2'
+estadd scalar acq = `numacs'
 est store eq1
 
 * Eq2: downup_ac
@@ -196,8 +174,9 @@ reghdfejl countk downup_ac $controls if  esample == 1, ///
     absorb(grid_id ac_id#monthyear) cluster(grid_id cluster_acmonth)
 estadd local gridfe "Y"
 estadd local acmonthfe "Y"
-estadd scalar ymean `meandv2'
-estadd local acq "`numacs'"
+estadd scalar ymean = `meandv'
+estadd scalar ymean2 = `meandv2'
+estadd scalar acq = `numacs'
 est store eq2
 
 * Eq3: downup_1sd
@@ -205,8 +184,9 @@ reghdfejl countk downup_1sd_pop $controls if  esample == 1, ///
     absorb(grid_id ac_id#monthyear) cluster(grid_id cluster_acmonth)
 estadd local gridfe "Y"
 estadd local acmonthfe "Y"
-estadd scalar ymean `meandv3'
-estadd local acq "`numacs'"
+estadd scalar ymean = `meandv'
+estadd scalar ymean2 = `meandv2'
+estadd scalar acq = `numacs'
 est store eq3
 
 * Eq4: down_percent
@@ -214,8 +194,9 @@ reghdfejl countk down_percent_pop $controls if  esample == 1, ///
     absorb(grid_id ac_id#monthyear) cluster(grid_id cluster_acmonth)
 estadd local gridfe "Y"
 estadd local acmonthfe "Y"
-estadd scalar ymean `meandv4'
-estadd local acq "`numacs'"
+estadd scalar ymean = `meandv'
+estadd scalar ymean2 = `meandv2'
+estadd scalar acq = `numacs'
 est store eq4
 
 * Eq5: downup_diff_percent
@@ -223,8 +204,9 @@ reghdfejl countk downup_diff_percent_pop $controls if  esample == 1, ///
     absorb(grid_id ac_id#monthyear) cluster(grid_id cluster_acmonth)
 estadd local gridfe "Y"
 estadd local acmonthfe "Y"
-estadd scalar ymean `meandv5'
-estadd local acq "`numacs'"
+estadd scalar ymean = `meandv'
+estadd scalar ymean2 = `meandv2'
+estadd scalar acq = `numacs'
 est store eq5
 
 
@@ -233,8 +215,9 @@ reghdfejl countk down_percent $controls if  esample == 1, ///
     absorb(grid_id#i.cohort ac_id#monthyear#i.cohort) cluster(grid_id cluster_acmonth)
 estadd local gridfe "Y"
 estadd local acmonthfe "Y"
-estadd scalar ymean `meandv4'
-estadd local acq "`numacs'"
+estadd scalar ymean = `meandv'
+estadd scalar ymean2 = `meandv2'
+estadd scalar acq = `numacs'
 est store eq6
 
 * Eq7: X Rice
@@ -242,18 +225,18 @@ reghdfejl countk downup_ac_pop##ib0.rice_prod_aclvl_ahigh $controls if  esample 
     absorb(grid_id#i.cohort ac_id#monthyear#i.cohort) cluster(grid_id cluster_acmonth)
 estadd local gridfe "Y"
 estadd local acmonthfe "Y"
-estadd scalar ymean  `meandv1'
-
-
-estadd local acq "`numacs'"
+estadd scalar ymean = `meandv'
+estadd scalar ymean2 = `meandv2'
+estadd scalar acq = `numacs'
 est store eq7
 
 ********************************************************************************
 * Save ster file
 ********************************************************************************
 
-estwrite eq* using "${root}/tex/paper/tables/_app_6_main_did_treat_definition${sample}_rural_acpop.ster", replace
+estwrite eq* using ///
+    "${root}/tex/paper/tables/_app_6_main_did_treat_definition${sample}_rural_acpop${ster_suffix}.ster", replace
 
-display "Ster: ${root}/tex/paper/tables/_app_6_main_did_treat_definition${sample}_rural_acpop.ster"
+display "Ster: ${root}/tex/paper/tables/_app_6_main_did_treat_definition${sample}_rural_acpop${ster_suffix}.ster"
 
 ********************************************************************************

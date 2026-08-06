@@ -14,6 +14,9 @@ if "$root" == "" {
 
     global location "shell"
     global sample ""
+    global is_rural_var "is_rural_area"
+    global fe_list "1/4"
+    global ster_suffix ""
 
     global shell "/groups/sgulzar/sa_fires/proj_bureaucrats_farms"
     global dbox "/Users/anzony.quisperojas/Library/CloudStorage/Dropbox/sa_fires/proj_bureaucrats_farms"
@@ -34,15 +37,15 @@ global figure_farms "${root}/tex/paper/figures"
 * Import Data
 ********************************************************************************
 
-use  "${int_farms}/combined_dt_pop.dta", clear
+import delimited using "${int_farms}/combined_dt_pop${sample}.csv", clear varnames(1)
 
 * Merge with rural classification
-merge m:1 unique_small_grid_id using "${root}/data_output/intermediate/ghs_grid_classification_2000.dta", keepusing(is_rural)
+merge m:1 unique_small_grid_id using "${root}/data_output/intermediate/ghs_grid_classification_2000.dta", keepusing(is_rural_area is_rural_farzad)
 keep if _merge == 3
 drop _merge
 
 * Keep only rural grids
-keep if is_rural == 1
+keep if ${is_rural_var} == 1
 
 display "Observations after rural filter: " _N
 
@@ -123,12 +126,17 @@ forvalues prov_num = 1/`nstates' {
     keep if province_id == `prov_num'
 
     * Count unique ACs for this state
-    unique ac_id
-    local numacs`i' = r(unique)
+    egen tag_ac = tag(ac_id)
+    count if tag_ac == 1
+    local numacs`i' = r(N)
 
-    * Calculate mean DV for this state
-    summarize countk if treat_wind == 1 & downup_ac_pop == 0
-    local meandv`i' = string(r(mean), "%9.3f")
+    * Project-standard treated-group pre-treatment means for this state.
+    gen relative_year_bin = floor(relative_monthyear / 12)
+    gen moderator = 0
+    quietly summarize countk if treat == 1 & relative_year_bin <= -1
+    local meandv`i' = r(mean)
+    quietly summarize countk if treat == 1 & relative_year_bin <= -1 & moderator == 1
+    local meandv2`i' = r(mean)
 
     * Run regression
     reghdfejl countk downup_ac_pop $controls, ///
@@ -137,8 +145,9 @@ forvalues prov_num = 1/`nstates' {
     * Store statistics
     estadd local gridfe "Y"
     estadd local acmonthfe "Y"
-    estadd local ymean "`meandv`i''"
-    estadd local acq "`numacs`i''"
+    estadd scalar ymean = `meandv`i''
+    estadd scalar ymean2 = `meandv2`i''
+    estadd scalar acq = `numacs`i''
 
     est store eq`i'
 
@@ -158,8 +167,9 @@ local nregs = `i' - 1
 * Save ster file
 ********************************************************************************
 
-estwrite eq* using "${root}/tex/paper/tables/_app_9_main_did_by_state_rural_stacked.ster", replace
+estwrite eq* using ///
+    "${root}/tex/paper/tables/_app_9_main_did_by_state${sample}_rural_stacked${ster_suffix}.ster", replace
 
-display "Ster: ${root}/tex/paper/tables/_app_9_main_did_by_state_rural_stacked.ster"
+display "Ster: ${root}/tex/paper/tables/_app_9_main_did_by_state${sample}_rural_stacked${ster_suffix}.ster"
 
 ********************************************************************************
