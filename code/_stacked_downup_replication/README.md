@@ -101,15 +101,17 @@ permanent log has been preserved.
 
 To copy all previously generated outputs into the repository and submit the
 failed `.ster` producers plus the revised main event studies as independent,
-parallel scheduler jobs, run the launcher from the code directory:
+parallel SGE jobs, run the launcher from the code directory:
 
 ```bash
-bash sbatch/recover_outputs_to_repo.sbatch
+bash sbatch/submit_recovery_jobs.sh
 ```
 
-Do not submit this launcher itself with `qsub` or `sbatch`. It submits nine
-independent Stata jobs immediately, then creates scheduler dependencies so the
-table, event-CSV, and event-plot stages start only when their inputs exist.
+Do not submit this launcher itself with `qsub`. It calls `qsub` on twelve
+separate, fixed-stage files named `recover_01_...sbatch` through
+`recover_12_...sbatch`. Nine independent Stata estimations are submitted
+immediately; `-hold_jid` dependencies ensure that table generation, event-CSV
+export, and event plotting start only when their respective inputs exist.
 
 ## Table and event-plot structure
 
