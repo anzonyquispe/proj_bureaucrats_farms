@@ -1,0 +1,4 @@
+Traceback (most recent call last):
+  File "/users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication/python/generate_protest_figures.py", line 9, in <module>
+    import geopandas as gpd
+ModuleNotFoundError: No module named 'geopandas'

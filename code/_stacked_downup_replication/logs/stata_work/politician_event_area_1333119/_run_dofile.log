@@ -1,0 +1,437 @@
+
+  ___  ____  ____  ____  ____ ®
+ /__    /   ____/   /   ____/      StataNow 19.5
+___/   /   /___/   /   /___/       MP—Parallel Edition
+
+ Statistics and Data Science       Copyright 1985-2025 StataCorp LLC
+                                   StataCorp
+                                   4905 Lakeway Drive
+                                   College Station, Texas 77845 USA
+                                   800-782-8272        https://www.stata.com
+                                   979-696-4600        service@stata.com
+
+Stata license: 4-user 16-core network, expiring 14 Sep 2026
+Serial number: 501909301589
+  Licensed to: University of Notre Dame
+               Notre Dame, IN 46556
+
+Notes:
+      1. Stata is running in batch mode.
+      2. Unicode is supported; see help unicode_advice.
+      3. More than 2 billion observations are allowed; see help obs_advice.
+      4. Maximum number of variables is set to 5,000 but can be increased;
+          see help set_maxvar.
+
+. do /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication/sb
+> atch/_run_dofile.do 
+
+. *****************************************************************************
+> ***
+. * Environment bridge: one invocation runs exactly one result-generating dofil
+> e.
+. *****************************************************************************
+> ***
+. 
+. version 17
+
+. set more off
+
+. 
+. local dofile        : environment FARMS_DOFILE
+
+. local root          : environment FARMS_ROOT
+
+. local code          : environment FARMS_CODE
+
+. local location      : environment FARMS_LOCATION
+
+. local sample        : environment FARMS_SAMPLE
+
+. local is_rural_var  : environment FARMS_RURAL_VAR
+
+. local fe_list       : environment FARMS_FE_LIST
+
+. local ster_suffix   : environment FARMS_STER_SUFFIX
+
+. local downup_var    : environment FARMS_DOWNUP_VAR
+
+. local stacked_file  : environment FARMS_STACKED_FILE
+
+. local did_output    : environment FARMS_DID_OUTPUT
+
+. local processors    : environment FARMS_CPUS
+
+. 
+. if "`processors'" == "" local processors "1"
+
+. set processors `processors'
+    The maximum number of processors or cores being used is changed from 16
+    to 1.  It can be set to any number between 1 and 16
+
+. 
+. if "`dofile'" == "" {
+.     display as error "FARMS_DOFILE is empty; use sbatch/run_dofile.sbatch."
+.     exit 198
+. }
+
+. if "`root'" == "" {
+.     display as error "FARMS_ROOT is empty; use sbatch/run_dofile.sbatch."
+.     exit 198
+. }
+
+. if "`code'" == "" {
+.     display as error "FARMS_CODE is empty; use sbatch/run_dofile.sbatch."
+.     exit 198
+. }
+
+. 
+. if "`sample'" == "none" local sample ""
+
+. if "`ster_suffix'" == "none" local ster_suffix ""
+
+. if "`downup_var'" == "none" local downup_var ""
+
+. if "`stacked_file'" == "none" local stacked_file ""
+
+. if "`did_output'" == "none" local did_output ""
+
+. 
+. global root          "`root'"
+
+. global code          "`code'"
+
+. global location      "`location'"
+
+. global sample        "`sample'"
+
+. global is_rural_var  "`is_rural_var'"
+
+. global fe_list       "`fe_list'"
+
+. global ster_suffix   "`ster_suffix'"
+
+. global downup_var    "`downup_var'"
+
+. global stacked_file  "`stacked_file'"
+
+. global did_output    "`did_output'"
+
+. 
+. global int_data    "${root}/data_output/intermediate"
+
+. global int_farms   "${int_data}"
+
+. global tables      "${root}/tex/paper/tables"
+
+. global table_farms "${tables}"
+
+. global figures     "${root}/tex/paper/figures"
+
+. global figure_farms "${figures}"
+
+. 
+. capture mkdir "${root}/tex"
+
+. capture mkdir "${root}/tex/paper"
+
+. capture mkdir "${tables}"
+
+. capture mkdir "${figures}"
+
+. capture mkdir "${code}/logs"
+
+. 
+. adopath ++ "${code}"
+  [1]              "/users/aquisper/proj_bureaucrats_farms/code/_stacked_downup
+> _replication"
+  [2]  (BASE)      "/software/s/stata/19.5/ado/base/"
+  [3]  (SITE)      "/software/s/stata/ado/"
+  [4]              "."
+  [5]  (PERSONAL)  "~/ado/personal/"
+  [6]  (PLUS)      "~/ado/plus/"
+  [7]  (OLDPLACE)  "~/ado/"
+
+. capture noisily do "${code}/estsave_csv.ado"
+
+. *! estsave_csv v1.2 - Export stored estimates and covariance matrices to CSV
+. program define estsave_csv
+  1.     version 14.0
+  2.     syntax namelist using/, [replace append]
+  3. 
+.     local outfile `"`using'"'
+  4.     tempfile coef_all coef_cur scalar_all scalar_cur
+  5.     local first = 1
+  6. 
+.     foreach est of local namelist {
+  7.         quietly estimates restore `est'
+  8.         matrix b = e(b)
+  9.         matrix V = e(V)
+ 10.         local k = colsof(b)
+ 11.         local cnames : colfullnames b
+ 12. 
+.         preserve
+ 13.         clear
+ 14.         quietly set obs `k'
+ 15.         gen strL reg = "`est'"
+ 16.         gen strL var = ""
+ 17.         gen double beta = .
+ 18.         capture local ymean_val `"`e(ymean)'"'
+ 19.         if !_rc & `"`ymean_val'"' != "" gen strL ymean = `"`ymean_val'"'
+ 20.         else gen strL ymean = ""
+ 21. 
+.         forvalues j = 1/`k' {
+ 22.             local nm : word `j' of `cnames'
+ 23.             quietly replace var = "`nm'" in `j'
+ 24.             quietly replace beta = b[1, `j'] in `j'
+ 25.             gen double cov`j' = .
+ 26.         }
+ 27.         forvalues i = 1/`k' {
+ 28.             forvalues j = 1/`k' {
+ 29.                 quietly replace cov`j' = V[`i', `j'] in `i'
+ 30.             }
+ 31.         }
+ 32.         quietly save `coef_cur', replace
+ 33.         if `first' quietly save `coef_all', replace
+ 34.         else {
+ 35.             quietly use `coef_all', clear
+ 36.             quietly append using `coef_cur'
+ 37.             quietly save `coef_all', replace
+ 38.         }
+ 39.         restore
+ 40. 
+.         preserve
+ 41.         clear
+ 42.         quietly set obs 1
+ 43.         gen strL reg = "`est'"
+ 44.         local escalars : e(scalars)
+ 45.         foreach sc of local escalars {
+ 46.             local scval = e(`sc')
+ 47.             local safe = subinstr("`sc'", "-", "_", .)
+ 48.             capture gen double `safe' = `scval'
+ 49.             if _rc capture gen double sc_`safe' = `scval'
+ 50.         }
+ 51.         local emacros : e(macros)
+ 52.         foreach mc of local emacros {
+ 53.             capture local mcval `"`e(`mc')'"'
+ 54.             if !_rc & `"`mcval'"' != "" {
+ 55.                 if strlen(`"`mcval'"') > 244 local mcval = substr(`"`mcval
+> '"', 1, 244)
+ 56.                 local safe = subinstr("`mc'", "-", "_", .)
+ 57.                 capture gen strL `safe' = `"`mcval'"'
+ 58.                 if _rc capture gen strL mc_`safe' = `"`mcval'"'
+ 59.             }
+ 60.         }
+ 61.         quietly save `scalar_cur', replace
+ 62.         if `first' {
+ 63.             quietly save `scalar_all', replace
+ 64.             local first = 0
+ 65.         }
+ 66.         else {
+ 67.             quietly use `scalar_all', clear
+ 68.             quietly append using `scalar_cur'
+ 69.             quietly save `scalar_all', replace
+ 70.         }
+ 71.         restore
+ 72.     }
+ 73. 
+.     local basefile = subinstr(`"`outfile'"', ".csv", "", .)
+ 74.     quietly use `coef_all', clear
+ 75.     order reg var beta ymean
+ 76.     quietly export delimited using "`basefile'.csv", `replace' `append'
+ 77.     quietly use `scalar_all', clear
+ 78.     quietly export delimited using "`basefile'_scalars.csv", `replace' `ap
+> pend'
+ 79.     display as result "Estimates exported to `basefile'.csv"
+ 80. end
+
+. 
+. 
+end of do-file
+
+. capture noisily do "${code}/estload_csv.ado"
+
+. *! estload_csv v1.0 - Reconstruct estimate objects exported by estsave_csv
+. program define estload_csv
+  1.     version 14.0
+  2.     syntax using/
+  3. 
+.     local infile `"`using'"'
+  4.     local basefile = subinstr(`"`infile'"', ".csv", "", .)
+  5.     preserve
+  6.     quietly import delimited using "`basefile'.csv", clear varnames(1)
+  7.     quietly levelsof reg, local(regs)
+  8. 
+.     foreach r of local regs {
+  9.         preserve
+ 10.         quietly keep if reg == "`r'"
+ 11.         local k = _N
+ 12.         matrix b = J(1, `k', .)
+ 13.         matrix V = J(`k', `k', .)
+ 14.         local varnames ""
+ 15.         forvalues i = 1/`k' {
+ 16.             local vname = var[`i']
+ 17.             local varnames `"`varnames' `vname'"'
+ 18.             matrix b[1, `i'] = beta[`i']
+ 19.             forvalues j = 1/`k' {
+ 20.                 matrix V[`i', `j'] = cov`j'[`i']
+ 21.             }
+ 22.         }
+ 23.         matrix colnames b = `varnames'
+ 24.         matrix rownames V = `varnames'
+ 25.         matrix colnames V = `varnames'
+ 26.         restore, preserve
+ 27.         quietly ereturn post b V
+ 28.         estimates store `r'
+ 29.         display as text "Loaded estimate: `r'"
+ 30.     }
+ 31.     restore
+ 32. end
+
+. 
+. 
+end of do-file
+
+. 
+. display "============================================================"
+============================================================
+
+. display "Independent dofile job: `dofile'"
+Independent dofile job: _app_16_polischar_fe12_evst_all.do
+
+. display "Data/output root: ${root}"
+Data/output root: /groups/sgulzar/sa_fires/proj_bureaucrats_farms
+
+. display "Code root: ${code}"
+Code root: /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replicat
+> ion
+
+. display "Sample: ${sample}; rural: ${is_rural_var}; FE: ${fe_list}"
+Sample: ; rural: is_rural_area; FE: 1
+
+. display "Suffix: ${ster_suffix}; moderator: ${downup_var}"
+Suffix: ; moderator: downup_ac
+
+. display "Stata processors: " c(processors)
+Stata processors: 1
+
+. display "============================================================"
+============================================================
+
+. 
+. do "${code}/`dofile'"
+
+. *****************************************************************************
+> ***
+. * Politician-characteristics event study (rural stacked sample)
+. *
+. * Input:  politicians_characteristics${sample}.csv
+. * Output: one .ster and one plotting .csv for each control definition:
+. *   <no control suffix>  = treated + never-treated controls (paper baseline)
+. *   _controls_both       = treated + never- and not-yet-treated controls
+. *   _controls_notyet     = treated + not-yet-treated controls only
+. *
+. * The caller selects downup_ac or downup_ac_pop through $downup_var and uses
+. * $ster_suffix (normally "" or "_acpop") to keep the two result families apar
+> t.
+. *****************************************************************************
+> ***
+. 
+. if "$root" == "" {
+.     clear all
+.     set more off
+. 
+.     * Standalone defaults for the five sbatch-array parameters:
+.     * location, sample, is_rural_var, fe_list, and ster_suffix.
+.     global location     "shell"
+.     global sample       ""
+.     global is_rural_var "is_rural_area"
+.     global fe_list      "1"
+.     global ster_suffix  ""
+. 
+.     global shell "/groups/sgulzar/sa_fires/proj_bureaucrats_farms"
+.     global dbox  "/Users/anzony.quisperojas/Library/CloudStorage/Dropbox/sa_f
+> ires/proj_bureaucrats_farms"
+.     global code_shell "/users/aquisper/proj_bureaucrats_farms/code/_stacked_d
+> ownup_replication"
+.     global code_dbox  "/Users/anzony.quisperojas/Documents/GitHub/proj_bureau
+> crats_farms/code/_stacked_downup_replication"
+. 
+.     if "$location" == "dbox" {
+.         global root "$dbox"
+.         global code "$code_dbox"
+.     }
+.     else {
+.         global root "$shell"
+.         global code "$code_shell"
+.     }
+.     quietly do "${code}/estsave_csv.ado"
+. }
+
+. 
+. if "$downup_var" == "" {
+.     global downup_var "downup_ac_pop"
+. }
+
+. 
+. global int_data "${root}/data_output/intermediate"
+
+. global tables   "${root}/tex/paper/tables"
+
+. 
+. import delimited using "${int_data}/politicians_characteristics${sample}.csv"
+> , ///
+>     clear varnames(1)
+(encoding automatically selected: ISO-8859-1)
+(22 vars, 42,159,947 obs)
+
+. 
+. * The new stack stores relative_year; retain the established analysis name.
+. capture confirm variable relative_year_bin
+
+. if _rc {
+.     confirm variable relative_year
+.     rename relative_year relative_year_bin
+. }
+
+. 
+. * Always express the fire-count outcome in thousands.
+. capture drop countk
+
+. gen countk = count * 1000
+
+. 
+. * Only the two rice indicators absent from the standard stacked schema are
+. * attached. This is a left merge, so it cannot implicitly shrink the stack.
+. capture confirm variable rice_area_aclvl_ahigh
+
+. if _rc {
+.     merge m:1 unique_small_grid_id ac_uq_id using ///
+>         "${int_data}/rice_moderators.dta", ///
+>         keep(master match) ///
+>         keepusing(rice_area_aclvl_ahigh rice_harvarea_aclvl_ahigh)
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                        13,566
+        from master                    13,566  (_merge==1)
+        from using                          0  (_merge==2)
+
+    Matched                        42,146,381  (_merge==3)
+    -----------------------------------------
+.     drop _merge
+. }
+
+. 
+. merge m:1 unique_small_grid_id using ///
+>     "${int_data}/ghs_grid_classification_2000.dta", ///
+>     keep(master match) keepusing(is_rural_area is_rural_farzad)
+variable is_rural_area not found
+    You specified the keep(varlist) option.  The above error was the result
+    of parsing the list of variables you supplied against the using data.
+r(111);
+
+end of do-file
+r(111);
+
+end of do-file
+r(111);
