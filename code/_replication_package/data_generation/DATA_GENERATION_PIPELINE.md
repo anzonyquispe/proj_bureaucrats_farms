@@ -54,7 +54,7 @@ checks a 179/-179 degree wraparound.
 | Intermediate | Producer in this folder | Producer status |
 | --- | --- | --- |
 | `data_2012_2024_grid_ac_downup_pop.parquet` | `build_downup_ac_pop_cluster.py` | Present |
-| `data_2012_2024_grid_ac_downup.parquet` | `build_downup_ac_area_cluster.py` | Present |
+| `data_2012_2024_grid_ac_downup.parquet` | `build_downup_ac_area_cluster.py` | Present; canonical seven-column area panel |
 | `data_2012_2024_grid_ac_13kmpl.parquet` | `build_downup_13kmpl_cluster.py` | Present |
 | `8_grids_ac_pr_5km.csv` | `8_grids_ac_pr_5km.ipynb` | Present; local-path notebook |
 | `panel_data_election_year.parquet` | `panel_data_election_year.ipynb` | Present; local-path notebook |
@@ -62,7 +62,11 @@ checks a 179/-179 degree wraparound.
 | `9_rice_info_ac_lvl.parquet` | `9_rice_info_ac_lvl.ipynb` | Present; local-path notebook |
 
 `build_0_master_dataset.py` left-joins all seven files above to the retained
-wind-complete population base.
+wind-complete population base. The population Parquet is the sole source of
+population, wind, and base-panel columns. The AC-area Parquet contains only
+the four merge keys and `downup_ac_area`, `downwind_area`, and `upwind_area`.
+`normalize_downup_ac_area_panel.py` migrates a legacy wide area Parquet to
+this schema without recalculating geometry.
 
 ## Inputs to each direct-input producer
 

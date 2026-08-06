@@ -60,7 +60,7 @@ cd "${CODE_DIR}"
 
 case "${REBUILD_POPULATION:-1}" in
     1)
-        echo "[$(date '+%F %T')] stage 1/3: preserve distr_id in population panel"
+        echo "[$(date '+%F %T')] stage 1/4: preserve distr_id in population panel"
         "${PYTHON}" build_downup_ac_pop_cluster.py \
             --panel "${INTERMEDIATE}/data_2012_2024_grid_ac.parquet" \
             --wind-input "${INTERMEDIATE}/_2_wind_direction_grid.parquet" \
@@ -72,7 +72,7 @@ case "${REBUILD_POPULATION:-1}" in
             > rebuild_distr_id_population.out 2>&1
         ;;
     0)
-        echo "[$(date '+%F %T')] stage 1/3 skipped; validating existing population panel"
+        echo "[$(date '+%F %T')] stage 1/4 skipped; validating existing population panel"
         "${PYTHON}" -c '
 import sys
 import duckdb
@@ -94,7 +94,16 @@ print(f"Existing population panel contains distr_id: {path}")
         ;;
 esac
 
-echo "[$(date '+%F %T')] stage 2/3: rebuild master only"
+echo "[$(date '+%F %T')] stage 2/4: normalize AC-area panel schema"
+"${PYTHON}" normalize_downup_ac_area_panel.py \
+    --population "${INTERMEDIATE}/data_2012_2024_grid_ac_downup_pop.parquet" \
+    --area "${INTERMEDIATE}/data_2012_2024_grid_ac_downup.parquet" \
+    --threads "${THREADS}" \
+    --memory-limit "${MEMORY_LIMIT}" \
+    --overwrite \
+    > normalize_downup_ac_area_panel.out 2>&1
+
+echo "[$(date '+%F %T')] stage 3/4: rebuild master only"
 "${PYTHON}" build_0_master_dataset.py \
     --intermediate "${INTERMEDIATE}" \
     --threads "${THREADS}" \
@@ -102,7 +111,7 @@ echo "[$(date '+%F %T')] stage 2/3: rebuild master only"
     --overwrite \
     > rebuild_distr_id_master.out 2>&1
 
-echo "[$(date '+%F %T')] stage 3/3: rebuild downup area/pop stacks only"
+echo "[$(date '+%F %T')] stage 4/4: rebuild downup area/pop stacks only"
 "${PYTHON}" build_all_stacked_datasets_duckdb.py \
     --intermediate "${INTERMEDIATE}" \
     --spec downup_ac \

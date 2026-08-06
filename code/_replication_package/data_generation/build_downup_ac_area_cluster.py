@@ -15,7 +15,10 @@ South=270. No clockwise-from-North compass conversion is used in this stage.
 
 This is geometrically equivalent to splitting the AC with a line perpendicular
 to the wind direction, but avoids Python-level ``split`` calls for every row.
-The final Parquet contains exactly the requested 16 analysis columns.
+The final Parquet is deliberately narrow: it contains the four merge keys
+(``unique_small_grid_id``, ``ac_uq_id``, ``year``, and ``month``) plus the
+three area outputs. Population and wind fields remain authoritative in the
+population-stage Parquet and are never copied into this file.
 """
 
 from __future__ import annotations
@@ -224,18 +227,8 @@ def prepare_area_keys(
             "unique_small_grid_id",
             "ac_uq_id",
             "calculation_wind_direction",
-            "province",
-            "district",
             "month",
             "year",
-            "wind_speed_av_cellid_month",
-            "wind_direction_av_cellid_month",
-            "rollav_wind_speed_cellid_month",
-            "rollav_wind_direction_cellid_month",
-            "downup_dummy",
-            "downup_ac_pop",
-            "downwind_pop",
-            "upwind_pop",
         }
         missing = sorted(required_pop - relation_columns(connection, pop_relation))
         if missing:
@@ -516,6 +509,7 @@ def calculate_area_chunk(frame: pd.DataFrame) -> pd.DataFrame:
     result = frame[
         [
             "unique_small_grid_id",
+            "ac_uq_id",
             "year",
             "month",
         ]
@@ -596,6 +590,7 @@ def calculate_areas_parallel(
         empty_schema = pa.schema(
             [
                 ("unique_small_grid_id", pa.int64()),
+                ("ac_uq_id", pa.int64()),
                 ("year", pa.int16()),
                 ("month", pa.int8()),
                 ("downwind_area", pa.float64()),
@@ -630,24 +625,16 @@ def merge_final_output(
         final_query = f"""
             SELECT
                 pop.unique_small_grid_id,
-                pop.province,
-                pop.district,
-                pop.month,
+                pop.ac_uq_id,
                 pop.year,
-                pop.wind_speed_av_cellid_month,
-                pop.wind_direction_av_cellid_month,
-                pop.rollav_wind_speed_cellid_month,
-                pop.rollav_wind_direction_cellid_month,
-                pop.downup_dummy,
-                pop.downup_ac_pop,
+                pop.month,
                 area.downup_ac_area,
-                pop.downwind_pop,
-                pop.upwind_pop,
                 area.downwind_area,
                 area.upwind_area
             FROM {pop_relation} AS pop
             LEFT JOIN {area_relation} AS area
                 ON pop.unique_small_grid_id = area.unique_small_grid_id
+               AND pop.ac_uq_id = area.ac_uq_id
                AND pop.year = area.year
                AND pop.month = area.month
         """
@@ -662,16 +649,21 @@ def merge_final_output(
             f"""
             SELECT
                 count(*) AS row_count,
-                count(DISTINCT unique_small_grid_id) AS grids,
-                count(DISTINCT (year, month)) AS months,
+                count(DISTINCT pop.unique_small_grid_id) AS grids,
+                count(DISTINCT (pop.year, pop.month)) AS months,
                 count(*) FILTER (
-                    WHERE rollav_wind_direction_cellid_month IS NULL
+                    WHERE pop.calculation_wind_direction IS NULL
                 ) AS missing_wind,
                 count(*) FILTER (
-                    WHERE rollav_wind_direction_cellid_month IS NOT NULL
-                      AND downwind_area IS NULL
+                    WHERE pop.calculation_wind_direction IS NOT NULL
+                      AND area.downwind_area IS NULL
                 ) AS missing_area_with_wind
-            FROM ({final_query})
+            FROM {pop_relation} AS pop
+            LEFT JOIN {area_relation} AS area
+                ON pop.unique_small_grid_id = area.unique_small_grid_id
+               AND pop.ac_uq_id = area.ac_uq_id
+               AND pop.year = area.year
+               AND pop.month = area.month
             """
         ).fetchone()
         duplicate_keys = int(
@@ -679,7 +671,7 @@ def merge_final_output(
                 f"""
                 SELECT count(*)
                 FROM (
-                    SELECT unique_small_grid_id, year, month
+                    SELECT unique_small_grid_id, ac_uq_id, year, month
                     FROM ({final_query})
                     GROUP BY ALL
                     HAVING count(*) <> 1

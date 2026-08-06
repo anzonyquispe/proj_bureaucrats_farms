@@ -18,6 +18,38 @@ import build_downup_ac_pop_cluster as population_builder  # noqa: E402
 
 
 class DownupDirectionConventionTests(unittest.TestCase):
+    def test_area_worker_returns_only_keys_and_area_outputs(self) -> None:
+        polygon = box(-1.0, -1.0, 3.0, 1.0)
+        area_builder.initialize_worker({10: polygon.wkb})
+        frame = pd.DataFrame(
+            {
+                "unique_small_grid_id": [1],
+                "ac_uq_id": [10],
+                "year": [2022],
+                "month": [8],
+                "calculation_wind_direction": [0.0],
+                "centroid_x": [0.0],
+                "centroid_y": [0.0],
+            }
+        )
+
+        result = area_builder.calculate_area_chunk(frame)
+
+        self.assertEqual(
+            list(result.columns),
+            [
+                "unique_small_grid_id",
+                "ac_uq_id",
+                "year",
+                "month",
+                "downwind_area",
+                "upwind_area",
+                "downup_ac_area",
+            ],
+        )
+        self.assertNotIn("downwind_pop", result.columns)
+        self.assertNotIn("rollav_wind_direction_cellid_month", result.columns)
+
     def test_area_halfplanes_use_counterclockwise_degrees_from_east(self) -> None:
         # The focal point is at the origin. The AC has 6 square units East of
         # the dividing line and 2 square units West of it.

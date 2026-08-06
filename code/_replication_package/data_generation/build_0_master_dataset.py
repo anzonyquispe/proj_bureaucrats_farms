@@ -608,10 +608,31 @@ def main() -> int:
         population_base = create_population_base(connection, population_relation)
 
         logging.info("Validating large-panel keys")
+        expected_area_columns = (
+            "unique_small_grid_id",
+            "ac_uq_id",
+            "year",
+            "month",
+            "downup_ac_area",
+            "downwind_area",
+            "upwind_area",
+        )
+        area_columns = tuple(
+            row[0]
+            for row in connection.execute(
+                f"DESCRIBE SELECT * FROM read_parquet({area})"
+            ).fetchall()
+        )
+        if area_columns != expected_area_columns:
+            raise ValueError(
+                "The AC-area panel must use the canonical seven-column "
+                "schema. Run normalize_downup_ac_area_panel.py first. "
+                f"Found: {', '.join(area_columns)}"
+            )
         area_rows, area_keys = connection.execute(
             f"""
             SELECT count(*), count(DISTINCT (
-                unique_small_grid_id, year, month
+                unique_small_grid_id, ac_uq_id, year, month
             ))
             FROM read_parquet({area})
             """
@@ -656,16 +677,18 @@ def main() -> int:
 
         population_area_merge = check_merge(
             connection,
-            name="population base x area panel [grid-month]",
+            name="population base x area panel [grid-AC-month]",
             left_query="""
-                SELECT unique_small_grid_id, year, month
+                SELECT unique_small_grid_id, ac_uq_id, year, month
                 FROM population_base
             """,
             right_query=f"""
-                SELECT unique_small_grid_id, year, month
+                SELECT unique_small_grid_id, ac_uq_id, year, month
                 FROM read_parquet({area})
             """,
-            using_columns=("unique_small_grid_id", "year", "month"),
+            using_columns=(
+                "unique_small_grid_id", "ac_uq_id", "year", "month"
+            ),
             require_all_left=True,
         )
         if (
@@ -818,61 +841,6 @@ def main() -> int:
                 f"{rice_merge.left_only:,}",
             )
 
-        shared_field_names = (
-            "province",
-            "district",
-            "wind_speed_av_cellid_month",
-            "wind_direction_av_cellid_month",
-            "rollav_wind_speed_cellid_month",
-            "rollav_wind_direction_cellid_month",
-            "downup_dummy",
-            "downwind_pop",
-            "upwind_pop",
-            "downup_ac_pop",
-        )
-        shared_field_mismatches = tuple(
-            map(
-                int,
-                connection.execute(
-                    f"""
-                    SELECT
-                        {", ".join(
-                            f"count_if(a.{quote_identifier(field)} "
-                            f"IS DISTINCT FROM p.{quote_identifier(field)})"
-                            for field in shared_field_names
-                        )}
-                    FROM read_parquet({area}) AS a
-                    JOIN population_base AS p
-                      USING (unique_small_grid_id, year, month)
-                    """
-                ).fetchone(),
-            )
-        )
-        mismatch_by_field = dict(
-            zip(shared_field_names, shared_field_mismatches, strict=True)
-        )
-        for field, mismatch_count in mismatch_by_field.items():
-            if mismatch_count:
-                logging.warning(
-                    "Area/population copied field differs | field=%s rows=%s",
-                    field,
-                    f"{mismatch_count:,}",
-                )
-
-        # Exact AC-area intersections depend on the focal grid, its assigned
-        # AC, and this rolling direction. Other columns in the area parquet
-        # are redundant copies retained for legacy compatibility; the master
-        # always takes their current values from population_base.
-        direction_mismatches = mismatch_by_field[
-            "rollav_wind_direction_cellid_month"
-        ]
-        if direction_mismatches:
-            raise ValueError(
-                "Area geometry cannot be reused because its rolling wind "
-                f"direction differs from the population base on "
-                f"{direction_mismatches:,} rows. Rebuild the AC-area panel."
-            )
-
         placebo_mismatch_rows = scalar(
             connection,
             f"""
@@ -995,6 +963,7 @@ def main() -> int:
             FROM population_base AS p
             LEFT JOIN read_parquet({area}) AS a
               ON p.unique_small_grid_id = a.unique_small_grid_id
+             AND p.ac_uq_id = a.ac_uq_id
              AND p.year = a.year
              AND p.month = a.month
             LEFT JOIN read_parquet({placebo_13km}) AS q
