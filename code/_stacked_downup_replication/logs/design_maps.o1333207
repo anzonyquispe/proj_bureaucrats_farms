@@ -1,0 +1,12 @@
+Python environment: /groups/sgulzar/india_forest_land/downup_geo
+Python executable: /groups/sgulzar/india_forest_land/downup_geo/bin/python
+Python version: 3.11.15
+Traceback (most recent call last):
+  File "/users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication/python/generate_design_maps.py", line 270, in <module>
+    main()
+  File "/users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication/python/generate_design_maps.py", line 258, in main
+    intermediate, data, grid, acs, boundaries = read_inputs(
+                                                ^^^^^^^^^^^^
+  File "/users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication/python/generate_design_maps.py", line 61, in read_inputs
+    raise FileNotFoundError("Constituencies_Boundaries_Post_2008.shp was not found")
+FileNotFoundError: Constituencies_Boundaries_Post_2008.shp was not found
