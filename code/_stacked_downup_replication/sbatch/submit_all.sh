@@ -8,7 +8,7 @@ REPLICATION_ROOT="${REPLICATION_ROOT:-/groups/sgulzar/sa_fires/proj_bureaucrats_
 REPLICATION_CODE="${REPLICATION_CODE:-/users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication}"
 LOCATION="${LOCATION:-shell}"
 SAMPLE="${SAMPLE:-none}"
-RURAL_VAR="${RURAL_VAR:-is_rural_area}"
+RURAL_VAR="is_rural"
 EVENT_FE_LIST="${EVENT_FE_LIST:-1}"
 PROTEST_CPUS=10
 

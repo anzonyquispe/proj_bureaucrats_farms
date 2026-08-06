@@ -32,6 +32,7 @@ def panel_rows() -> list[dict[str, object]]:
                 {
                     "unique_small_grid_id": grid_id,
                     "province": "Punjab",
+                    "distr_id": 22,
                     "ac_uq_id": 101,
                     "count": month,
                     "mean_brightness": 300.0 + month,
@@ -216,6 +217,7 @@ class StackedEngineTests(unittest.TestCase):
                 [*wrapper.COMMON_KEEP_COLUMNS, *wrapper.GENERATED_COLUMNS],
             )
             self.assertIn("mean_brightness", rows[0])
+            self.assertEqual({int(row["distr_id"]) for row in rows}, {22})
             self.assertTrue(all(row["mean_brightness"] for row in rows))
             for spec in wrapper.STACK_SPECIFICATIONS:
                 spec_output = work / spec.output_csv

@@ -9,7 +9,7 @@ if "$root" == "" {
     clear all
     global location     "shell"
     global sample       ""
-    global is_rural_var "is_rural_area"
+    global is_rural_var "is_rural"
     global fe_list      "1"
     global ster_suffix  ""
     global shell "/groups/sgulzar/sa_fires/proj_bureaucrats_farms"

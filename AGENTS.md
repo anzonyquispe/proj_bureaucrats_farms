@@ -131,14 +131,13 @@ should be preserved when writing new scripts or editing existing ones.
    | ---------------- | --------------------------------------- | -------------------------------------------------- |
    | `$location`      | `"shell"` \| `"dbox"`                   | selects the data root (`$shell` or `$dbox`)        |
    | `$sample`        | `""` \| `"_sample"`                     | suffix on input CSVs and output ster filenames     |
-   | `$is_rural_var`  | `"is_rural_area"` \| `"is_rural_farzad"`| which rural classifier is used to filter the data  |
+   | `$is_rural_var`  | `"is_rural"`                              | rural indicator used to filter the data            |
    | `$fe_list`       | any Stata numlist (e.g. `"1/32"`, `"12 13 19"`) | FE specs the regression loop iterates over |
    | `$ster_suffix`   | free-form string, default `""`          | appended to the output ster filename               |
 
    Implementation conventions:
-   - Load **both** rural classifiers in the merge
-     (`keepusing(is_rural_area is_rural_farzad)`) so either choice of
-     `$is_rural_var` works without re-merging.
+   - Load the single rural classifier from `ghs_grid_classification_2000.dta`
+     with `keepusing(is_rural)`.
    - Filter with `keep if ${is_rural_var} == 1`.
    - The FE loop is `foreach fe of numlist $fe_list { ... }`.
    - The output path is

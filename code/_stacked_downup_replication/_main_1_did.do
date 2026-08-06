@@ -13,7 +13,7 @@ if "$root" == "" {
     * Five sbatch-array parameters; defaults apply only to standalone runs.
     global location "shell"
     global sample ""
-    global is_rural_var "is_rural_area"
+    global is_rural_var "is_rural"
     global fe_list "1/4"
     global ster_suffix "_stacked"
 
@@ -60,7 +60,7 @@ if _rc {
 
 merge m:1 unique_small_grid_id using ///
     "${int_data}/ghs_grid_classification_2000.dta", ///
-    keepusing(is_rural_area is_rural_farzad) keep(3) nogen
+    keepusing(is_rural) keep(3) nogen
 keep if ${is_rural_var} == 1
 
 * Do not drop grids that intersect more than one assembly constituency.

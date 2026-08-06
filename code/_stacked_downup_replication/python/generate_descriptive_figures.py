@@ -17,7 +17,7 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser()
     parser.add_argument("--root", required=True, type=Path)
     parser.add_argument("--sample", default="")
-    parser.add_argument("--rural-var", default="is_rural_area")
+    parser.add_argument("--rural-var", default="is_rural")
     return parser.parse_args()
 
 
@@ -29,8 +29,6 @@ def require(path: Path) -> Path:
 
 def merge_rural(data: pd.DataFrame, intermediate: Path, rural_var: str) -> pd.DataFrame:
     rural = pd.read_stata(require(intermediate / "ghs_grid_classification_2000.dta"))
-    if rural_var not in rural and rural_var == "is_rural_area" and "is_rural" in rural:
-        rural = rural.rename(columns={"is_rural": rural_var})
     if rural_var not in rural:
         raise KeyError(f"{rural_var!r} is absent from ghs_grid_classification_2000.dta")
     rural = rural[["unique_small_grid_id", rural_var]].drop_duplicates()

@@ -1019,6 +1019,7 @@ def main() -> int:
             output_rows,
             output_keys,
             missing_ac,
+            missing_distr_id,
             missing_election,
             missing_yeargov,
             missing_self_profession_nomiss,
@@ -1039,6 +1040,7 @@ def main() -> int:
                         unique_small_grid_id, year, month
                     )),
                     count_if(ac_uq_id IS NULL),
+                    count_if(distr_id IS NULL),
                     count_if(election_year IS NULL),
                     count_if(yeargov IS NULL),
                     count_if(self_profession_nomiss IS NULL),
@@ -1071,6 +1073,8 @@ def main() -> int:
             raise ValueError("The output does not preserve the base panel key.")
         if missing_ac:
             raise ValueError("The output contains missing ac_uq_id values.")
+        if missing_distr_id:
+            raise ValueError("The output contains missing distr_id values.")
         if missing_yeargov:
             raise ValueError(
                 f"The output contains {missing_yeargov:,} missing yeargov values."

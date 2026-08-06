@@ -13,7 +13,7 @@ if "$root" == "" {
     * Five sbatch-array parameters; defaults apply only to standalone runs.
     global location "shell"
     global sample ""
-    global is_rural_var "is_rural_area"
+    global is_rural_var "is_rural"
     global fe_list "1/4"
     global ster_suffix ""
 

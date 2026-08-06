@@ -14,7 +14,7 @@ if "$root" == "" {
     * location, sample, is_rural_var, fe_list, and ster_suffix.
     global location     "shell"
     global sample       ""
-    global is_rural_var "is_rural_area"
+    global is_rural_var "is_rural"
     global fe_list      "1"
     global ster_suffix  ""
 
@@ -65,7 +65,7 @@ if _rc {
 
 merge m:1 unique_small_grid_id using ///
     "${int_data}/ghs_grid_classification_2000.dta", ///
-    keep(master match) keepusing(is_rural_area is_rural_farzad)
+    keep(master match) keepusing(is_rural)
 drop _merge
 keep if ${is_rural_var} == 1
 keep if year < 2022 | (year == 2022 & month <= 8)

@@ -18,7 +18,7 @@ REPLICATION_ROOT="${2:-/groups/sgulzar/sa_fires/proj_bureaucrats_farms}"
 REPLICATION_CODE="${3:-/users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication}"
 LOCATION="${4:-shell}"
 SAMPLE="${5:-none}"
-RURAL_VAR="${6:-is_rural_area}"
+RURAL_VAR="${6:-is_rural}"
 FE_LIST="${7:-1}"
 STER_SUFFIX="${8:-none}"
 DOWNUP_VAR="${9:-none}"
@@ -53,8 +53,19 @@ SCHEDULER_JOB_NAME="${SLURM_JOB_NAME:-${JOB_NAME:-farms_do}}"
 SCHEDULER_JOB_ID="${SLURM_JOB_ID:-${JOB_ID:-$$}}"
 STATA_WORK_DIR="${REPLICATION_CODE}/logs/stata_work/${SCHEDULER_JOB_NAME}_${SCHEDULER_JOB_ID}"
 STATA_SAVED_LOG="${REPLICATION_CODE}/logs/${SCHEDULER_JOB_NAME}_${SCHEDULER_JOB_ID}.stata.log"
+STATA_AUTOMATIC_LOG="${STATA_WORK_DIR}/_run_dofile.log"
 mkdir -p "${STATA_WORK_DIR}"
 cd "${STATA_WORK_DIR}"
+
+preserve_stata_log() {
+  if [[ -f "${STATA_AUTOMATIC_LOG}" ]]; then
+    cp "${STATA_AUTOMATIC_LOG}" "${STATA_SAVED_LOG}" || true
+  fi
+}
+trap preserve_stata_log EXIT
+trap 'preserve_stata_log; exit 143' TERM
+trap 'preserve_stata_log; exit 130' INT
+trap 'preserve_stata_log; exit 129' HUP
 
 module purge 2>/dev/null || true
 module load stata gcc
@@ -79,13 +90,13 @@ set -e
 # Stata batch output normally goes to this automatic log instead of stdout.
 # Preserve it under a scheduler-specific name and mirror it into .out/.o so
 # either logging location can be inspected.
-STATA_AUTOMATIC_LOG="${STATA_WORK_DIR}/_run_dofile.log"
 if [[ -f "${STATA_AUTOMATIC_LOG}" ]]; then
-  cp "${STATA_AUTOMATIC_LOG}" "${STATA_SAVED_LOG}"
+  preserve_stata_log
   cat "${STATA_AUTOMATIC_LOG}"
 else
   echo "ERROR: Stata did not create ${STATA_AUTOMATIC_LOG}." >&2
   exit 66
 fi
 
+echo "Stata exit status: ${stata_status}"
 exit "${stata_status}"

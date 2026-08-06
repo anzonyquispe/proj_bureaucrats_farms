@@ -55,17 +55,17 @@ already be present in `data_output/intermediate`. Rural classification, rice
 moderators, population totals, and map shapefiles are also read from the shared
 project input/intermediate trees.
 
-All active analysis dofiles merge both rural classifiers and filter with
-`$is_rural_var`. The former `grids_with_more_1_ac.dta` exclusion is commented
-out. Fire-count regressions rebuild `countk = count * 1000` and use `countk`,
-not raw `count`.
+All active analysis dofiles merge the single `is_rural` variable from
+`ghs_grid_classification_2000.dta` and retain observations with `is_rural == 1`.
+The former `grids_with_more_1_ac.dta` exclusion is commented out. Fire-count
+regressions rebuild `countk = count * 1000` and use `countk`, not raw `count`.
 
 ## Parameters and resubmitting one dofile
 
 The launcher accepts environment overrides:
 
 ```bash
-SAMPLE=_sample RURAL_VAR=is_rural_farzad EVENT_FE_LIST=1 \
+SAMPLE=_sample EVENT_FE_LIST=1 \
   bash sbatch/submit_all.sh
 ```
 
@@ -80,7 +80,7 @@ sbatch sbatch/run_dofile.sbatch \
   _main_1_did.do \
   /groups/sgulzar/sa_fires/proj_bureaucrats_farms \
   /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication \
-  shell none is_rural_area 1/4 _stacked downup_ac combined_dt main_did_downup_area_ac
+  shell none is_rural 1/4 _stacked downup_ac combined_dt main_did_downup_area_ac
 ```
 
 Use the same arguments after `qsub -V sbatch/run_dofile.sbatch` on SGE. The
@@ -118,17 +118,16 @@ Stata needs the project commands already used by the original package,
 including `reghdfejl`, `estout`/`esttab`, and their dependencies. R needs
 `data.table`, `ggplot2`, and `HonestDiD`.
 
-The Python map/description jobs need the packages in
-`python/requirements.txt`. If the cluster Python module does not provide them,
-create a persistent virtual environment once and expose it to the launcher:
+The Python map/description jobs use the existing geospatial conda environment
+at `/groups/sgulzar/india_forest_land/downup_geo`. The launcher calls its Python
+executable directly and adds its `bin`, PROJ, and GDAL locations to the job
+environment. Override `PYTHON_ENV` or `PYTHON_BIN` only if that environment is
+moved. Its packages should cover `python/requirements.txt`; they can be checked
+with:
 
 ```bash
-module load python
-python3 -m venv /users/aquisper/proj_bureaucrats_farms/.venv_replication
-/users/aquisper/proj_bureaucrats_farms/.venv_replication/bin/pip install \
-  -r python/requirements.txt
-PYTHON_BIN=/users/aquisper/proj_bureaucrats_farms/.venv_replication/bin/python \
-  bash sbatch/submit_all.sh
+/groups/sgulzar/india_forest_land/downup_geo/bin/python -c \
+  "import geopandas, matplotlib, numpy, pandas, pyarrow, scipy; print('OK')"
 ```
 
 ## Active `main.tex` coverage audit

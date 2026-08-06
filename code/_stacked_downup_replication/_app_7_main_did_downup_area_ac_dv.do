@@ -14,7 +14,7 @@ if "$root" == "" {
 
     global location "shell"
     global sample ""
-    global is_rural_var "is_rural_area"
+    global is_rural_var "is_rural"
     global fe_list "1/3"
     global ster_suffix ""
 
@@ -42,7 +42,7 @@ import delimited "${root}/data_output/intermediate/combined_dt_pop${sample}.csv"
 
 
 * Merge with rural classification
-merge m:1 unique_small_grid_id using "${root}/data_output/intermediate/ghs_grid_classification_2000.dta", keepusing(is_rural_area is_rural_farzad)
+merge m:1 unique_small_grid_id using "${root}/data_output/intermediate/ghs_grid_classification_2000.dta", keepusing(is_rural)
 keep if _merge == 3
 drop _merge
 

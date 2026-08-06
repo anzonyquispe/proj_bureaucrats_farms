@@ -47,6 +47,7 @@ LOCAL_INTERMEDIATE = Path(
 COMMON_KEEP_COLUMNS = (
     "unique_small_grid_id",
     "province",
+    "distr_id",
     "ac_uq_id",
     "count",
     "mean_brightness",
