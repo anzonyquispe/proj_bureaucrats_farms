@@ -16,6 +16,7 @@ set -euo pipefail
 REPLICATION_ROOT="${1:-/groups/sgulzar/sa_fires/proj_bureaucrats_farms}"
 REPLICATION_CODE="${2:-/users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication}"
 SAMPLE="${3:-none}"
+REPOSITORY_ROOT="${4:-$(cd "${REPLICATION_CODE}/../.." && pwd)}"
 RSCRIPT_BIN="${RSCRIPT_BIN:-Rscript}"
 if [[ "${SAMPLE}" == "none" ]]; then SAMPLE=""; fi
 
@@ -29,4 +30,5 @@ export VECLIB_MAXIMUM_THREADS=1
 export BLIS_NUM_THREADS=1
 
 "${RSCRIPT_BIN}" "${REPLICATION_CODE}/plotting_event_studies.R" \
-  --root "${REPLICATION_ROOT}" --sample "${SAMPLE}"
+  --root "${REPLICATION_ROOT}" --output-root "${REPOSITORY_ROOT}" \
+  --sample "${SAMPLE}"

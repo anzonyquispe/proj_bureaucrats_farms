@@ -19,6 +19,7 @@ from shapely.geometry import LineString, Point, Polygon
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser()
     parser.add_argument("--root", required=True, type=Path)
+    parser.add_argument("--output-root", required=True, type=Path)
     parser.add_argument("--sample", default="")
     parser.add_argument(
         "--shared-root",
@@ -253,7 +254,7 @@ def treatment_panels(intermediate: Path, shared: Path, figures: Path,
 def main() -> None:
     options = parse_args()
     shared = options.shared_root or options.root.parent
-    figures = options.root / "tex" / "paper" / "figures"
+    figures = options.output_root / "figures"
     figures.mkdir(parents=True, exist_ok=True)
     intermediate, data, grid, acs, boundaries = read_inputs(
         options.root, shared, options.sample

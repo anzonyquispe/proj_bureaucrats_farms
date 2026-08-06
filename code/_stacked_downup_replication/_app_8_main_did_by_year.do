@@ -31,8 +31,8 @@ if "$root" == "" {
 
 cd "${root}"
 global int_farms "${root}/data_output/intermediate"
-global table_farms "${root}/tex/paper/tables"
-global figure_farms "${root}/tex/paper/figures"
+global table_farms "${code}/../../tables"
+global figure_farms "${code}/../../figures"
 ********************************************************************************
 * Import Data
 ********************************************************************************
@@ -146,8 +146,8 @@ forvalues yr = 2012/2021 {
 ********************************************************************************
 
 estwrite eq* using ///
-    "${root}/tex/paper/tables/_app_8_main_did_by_year${sample}_rural_stacked${ster_suffix}.ster", replace
+    "${code}/../../tables/_app_8_main_did_by_year${sample}_rural_stacked${ster_suffix}.ster", replace
 
-display "Ster: ${root}/tex/paper/tables/_app_8_main_did_by_year${sample}_rural_stacked${ster_suffix}.ster"
+display "Ster: ${code}/../../tables/_app_8_main_did_by_year${sample}_rural_stacked${ster_suffix}.ster"
 
 ********************************************************************************

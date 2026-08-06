@@ -34,8 +34,8 @@ cd "${root}"
 
 cd "${root}"
 global int_farms "${root}/data_output/intermediate"
-global table_farms "${root}/tex/paper/tables"
-global figure_farms "${root}/tex/paper/figures"
+global table_farms "${code}/../../tables"
+global figure_farms "${code}/../../figures"
 ********************************************************************************
 * Import Data
 ********************************************************************************
@@ -167,8 +167,8 @@ foreach mod of local moderators {
 * Save ster file
 ********************************************************************************
 
-estwrite eq* using "${root}/tex/paper/tables/_app_10_did_rice_moderators_rural_stacked.ster", replace
+estwrite eq* using "${code}/../../tables/_app_10_did_rice_moderators_rural_stacked.ster", replace
 
-display "Ster: ${root}/tex/paper/tables/_app_10_did_rice_moderators_rural_stacked.ster"
+display "Ster: ${code}/../../tables/_app_10_did_rice_moderators_rural_stacked.ster"
 
 ********************************************************************************

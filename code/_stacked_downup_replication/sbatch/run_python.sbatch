@@ -18,6 +18,7 @@ REPLICATION_ROOT="${2:-/groups/sgulzar/sa_fires/proj_bureaucrats_farms}"
 REPLICATION_CODE="${3:-/users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication}"
 SAMPLE="${4:-none}"
 RURAL_VAR="${5:-is_rural}"
+REPOSITORY_ROOT="${6:-$(cd "${REPLICATION_CODE}/../.." && pwd)}"
 PYTHON_ENV="${PYTHON_ENV:-/groups/sgulzar/india_forest_land/downup_geo}"
 PYTHON_BIN="${PYTHON_BIN:-${PYTHON_ENV}/bin/python}"
 if [[ "${SAMPLE}" == "none" ]]; then SAMPLE=""; fi
@@ -51,20 +52,23 @@ echo "Python environment: ${PYTHON_ENV}"
 case "${SCRIPT}" in
   generate_descriptive_figures.py)
     "${PYTHON_BIN}" "${REPLICATION_CODE}/python/${SCRIPT}" \
-      --root "${REPLICATION_ROOT}" --sample "${SAMPLE}" --rural-var "${RURAL_VAR}"
+      --root "${REPLICATION_ROOT}" --output-root "${REPOSITORY_ROOT}" \
+      --sample "${SAMPLE}" --rural-var "${RURAL_VAR}"
     ;;
   generate_design_maps.py)
     "${PYTHON_BIN}" "${REPLICATION_CODE}/python/${SCRIPT}" \
-      --root "${REPLICATION_ROOT}" --sample "${SAMPLE}"
+      --root "${REPLICATION_ROOT}" --output-root "${REPOSITORY_ROOT}" \
+      --sample "${SAMPLE}"
     ;;
   generate_protest_figures.py)
     "${PYTHON_BIN}" "${REPLICATION_CODE}/python/${SCRIPT}" \
-      --root "${REPLICATION_ROOT}"
+      --root "${REPLICATION_ROOT}" --output-root "${REPOSITORY_ROOT}"
     ;;
   audit_main_outputs.py)
     "${PYTHON_BIN}" "${REPLICATION_CODE}/python/${SCRIPT}" \
       --tex "/users/aquisper/proj_bureaucrats_farms/code/_report/main.tex" \
       --package "${REPLICATION_CODE}" --root "${REPLICATION_ROOT}" \
+      --output-root "${REPOSITORY_ROOT}" \
       --check-files --strict
     ;;
   *)

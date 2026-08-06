@@ -106,8 +106,8 @@ foreach mod of local modlist{
 * Save ster file
 ********************************************************************************
 
-estwrite eq1 eq2 eq3 using "${root}/tex/paper/tables/_app_13_protest_5km_fe12_did_ricemods${sample}_rural.ster", replace
+estwrite eq1 eq2 eq3 using "${code}/../../tables/_app_13_protest_5km_fe12_did_ricemods${sample}_rural.ster", replace
 
-display "Ster: ${root}/tex/paper/tables/_app_13_protest_5km_fe12_did_ricemods${sample}_rural.ster"
+display "Ster: ${code}/../../tables/_app_13_protest_5km_fe12_did_ricemods${sample}_rural.ster"
 
 ********************************************************************************

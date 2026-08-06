@@ -39,7 +39,7 @@ if "$downup_var" == "" {
 }
 
 global int_data "${root}/data_output/intermediate"
-global tables   "${root}/tex/paper/tables"
+global tables   "${code}/../../tables"
 
 import delimited using "${int_data}/stacked_data_protest5km${sample}.csv", ///
     clear varnames(1)
@@ -117,6 +117,7 @@ foreach control_sample in never both notyet {
 
     est clear
     local i = 1
+    local estimate_names ""
     foreach mod of local moderators_list {
         replace moderator = `mod'
         local rhs "ib`base'.relative_year_bin_aux##ib0.treat##ib0.`mod' wind_direction av_wind_speed"
@@ -142,12 +143,13 @@ foreach control_sample in never both notyet {
             local estname evreg`i'
             local i = `i' + 1
             est store `estname'
+            local estimate_names "`estimate_names' `estname'"
         }
     }
 
     local outbase "${tables}/_app_17_5km_fe12_evst_all${sample}_rural${ster_suffix}`control_suffix'"
     estwrite evreg* using "`outbase'.ster", replace
-    estsave_csv evreg* using "`outbase'.csv", replace
+    estsave_csv `estimate_names' using "`outbase'.csv", replace
     display as result "Saved: `outbase'.ster and `outbase'.csv"
 }
 

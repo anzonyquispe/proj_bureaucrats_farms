@@ -147,8 +147,8 @@ forvalues feval = 1/3 {
 * Save ster file
 ********************************************************************************
 
-estwrite evreg* using "${root}/tex/paper/tables/_app_15_polischar_fe12_did${sample}_rural_stacked.ster", replace
+estwrite evreg* using "${code}/../../tables/_app_15_polischar_fe12_did${sample}_rural_stacked.ster", replace
 
-display "Ster: ${root}/tex/paper/tables/_app_15_polischar_fe12_did${sample}_rural_stacked.ster"
+display "Ster: ${code}/../../tables/_app_15_polischar_fe12_did${sample}_rural_stacked.ster"
 
 ********************************************************************************

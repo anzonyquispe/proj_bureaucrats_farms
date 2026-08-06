@@ -16,6 +16,7 @@ import pandas as pd
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser()
     parser.add_argument("--root", required=True, type=Path)
+    parser.add_argument("--output-root", required=True, type=Path)
     parser.add_argument("--sample", default="")
     parser.add_argument("--rural-var", default="is_rural")
     return parser.parse_args()
@@ -165,7 +166,7 @@ def politician_panel(intermediate: Path, figures: Path, sample: str) -> None:
 def main() -> None:
     options = parse_args()
     intermediate = options.root / "data_output" / "intermediate"
-    figures = options.root / "tex" / "paper" / "figures"
+    figures = options.output_root / "figures"
     figures.mkdir(parents=True, exist_ok=True)
     monthly_figures(intermediate, figures, options.sample, options.rural_var)
     relative_time_histogram(intermediate, figures, options.sample, options.rural_var)

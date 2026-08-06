@@ -141,7 +141,10 @@ fi
 tables_job=$(submit_job generate_tables sbatch/run_dofile.sbatch "${table_dep}" 1 \
   _generate_all_tables.do "${REPLICATION_ROOT}" "${REPLICATION_CODE}" "${LOCATION}" \
   "${SAMPLE}" "${RURAL_VAR}" 1 none none none none)
-event_plot_job=$(submit_job event_plots sbatch/run_r.sbatch "${event_dep}" 1 \
+event_export_job=$(submit_job export_event_csv sbatch/run_dofile.sbatch "${event_dep}" 1 \
+  _export_event_study_csv.do "${REPLICATION_ROOT}" "${REPLICATION_CODE}" "${LOCATION}" \
+  "${SAMPLE}" "${RURAL_VAR}" 1 none none none none)
+event_plot_job=$(submit_job event_plots sbatch/run_r.sbatch "${event_export_job}" 1 \
   "${REPLICATION_ROOT}" "${REPLICATION_CODE}" "${SAMPLE}")
 interaction_plot_job=$(submit_job interaction_plots sbatch/run_dofile.sbatch "${interaction_dep}" 1 \
   _generate_interaction_plots.do "${REPLICATION_ROOT}" "${REPLICATION_CODE}" "${LOCATION}" \

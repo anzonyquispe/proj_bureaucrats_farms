@@ -93,6 +93,11 @@ set -e
 if [[ -f "${STATA_AUTOMATIC_LOG}" ]]; then
   preserve_stata_log
   cat "${STATA_AUTOMATIC_LOG}"
+  # The permanent copy above and scheduler output contain the diagnostics.
+  # Remove the per-job working copy so logs/stata_work does not accumulate a
+  # third duplicate of every Stata log.
+  rm -f -- "${STATA_AUTOMATIC_LOG}"
+  rmdir -- "${STATA_WORK_DIR}" 2>/dev/null || true
 else
   echo "ERROR: Stata did not create ${STATA_AUTOMATIC_LOG}." >&2
   exit 66

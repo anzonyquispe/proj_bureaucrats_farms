@@ -25,7 +25,7 @@ if "$downup_var" == "" {
 }
 
 global int_data "${root}/data_output/intermediate"
-global tables   "${root}/tex/paper/tables"
+global tables   "${code}/../../tables"
 
 import delimited using "${int_data}/politicians_characteristics${sample}.csv", ///
     clear varnames(1)

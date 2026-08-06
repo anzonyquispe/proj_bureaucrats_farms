@@ -86,6 +86,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--tex", required=True, type=Path)
     parser.add_argument("--package", required=True, type=Path)
     parser.add_argument("--root", type=Path)
+    parser.add_argument("--output-root", required=True, type=Path)
     parser.add_argument("--check-files", action="store_true")
     parser.add_argument("--strict", action="store_true")
     return parser.parse_args()
@@ -183,9 +184,8 @@ def generator_files_exist(package: Path, source: str) -> bool:
     return all((package / item.strip()).is_file() for item in source.split(";") if item.strip())
 
 
-def output_candidates(root: Path, kind: str, reference: str) -> list[Path]:
-    paper = root / "tex" / "paper"
-    base = paper / reference
+def output_candidates(output_root: Path, kind: str, reference: str) -> list[Path]:
+    base = output_root / reference
     if kind == "table":
         return [base] if base.suffix else [base.with_suffix(".tex")]
     if base.suffix:
@@ -212,7 +212,7 @@ def main() -> int:
             if options.root is None:
                 raise ValueError("--root is required with --check-files")
             output_ok = str(any(path.is_file() for path in output_candidates(
-                options.root, kind, reference
+                options.output_root, kind, reference
             ))).lower()
         rows.append({
             "type": kind,

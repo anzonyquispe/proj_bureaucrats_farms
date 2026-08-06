@@ -26,7 +26,7 @@ if "$root" == "" {
 }
 
 global int_data "${root}/data_output/intermediate"
-global tables   "${root}/tex/paper/tables"
+global tables   "${code}/../../tables"
 
 import delimited "${int_data}/stacked_downup_neigh${sample}.csv", clear varnames(1)
 merge m:1 unique_small_grid_id using "${int_data}/ghs_grid_classification_2000.dta", ///

@@ -12,6 +12,8 @@ The defaults already match the project cluster:
 ```text
 data/output root: /groups/sgulzar/sa_fires/proj_bureaucrats_farms
 code root:        /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication
+tables output:    /users/aquisper/proj_bureaucrats_farms/tables
+figures output:   /users/aquisper/proj_bureaucrats_farms/figures
 ```
 
 From the login node:
@@ -69,7 +71,9 @@ SAMPLE=_sample EVENT_FE_LIST=1 \
   bash sbatch/submit_all.sh
 ```
 
-The exact root overrides are `REPLICATION_ROOT` and `REPLICATION_CODE`.
+The exact root overrides are `REPLICATION_ROOT`, `REPLICATION_CODE`, and
+`REPOSITORY_ROOT`. The first is the shared data root; the last is the Git
+checkout that receives all generated tables and figures.
 `STATA_BIN`, `RSCRIPT_BIN`, and `PYTHON_BIN` can select non-default executables.
 SGE submissions use `-V`, so these executable overrides reach the jobs.
 
@@ -92,8 +96,15 @@ Stata command. This prevents automatic log filenames containing the code path
 and every parameter. Each Stata job now saves its full log as
 `logs/<job_name>_<job_id>.stata.log` and mirrors that log to the scheduler's
 `.out`, `.o<jobid>`, or SGE parallel-environment `.po<jobid>` stream after
-Stata exits. The isolated automatic log remains under
-`logs/stata_work/<job_name>_<job_id>/_run_dofile.log` for diagnosis.
+Stata exits. The temporary `logs/stata_work` copy is removed after the
+permanent log has been preserved.
+
+To copy all previously generated outputs into the repository and rerun the
+failed `.ster` producers plus the revised main event studies, submit:
+
+```bash
+qsub -V sbatch/recover_outputs_to_repo.sbatch
+```
 
 ## Table and event-plot structure
 

@@ -1,5 +1,6 @@
 ********************************************************************************
-* Area-based stacked event study with five pre-treatment periods
+* Area-based stacked event study over relative months -6 through 5.
+* Period -1 remains the omitted reference category.
 ********************************************************************************
 
 if "$root" == "" {
@@ -28,13 +29,13 @@ if "$root" == "" {
 }
 
 global int_data "${root}/data_output/intermediate"
-global tables   "${root}/tex/paper/tables"
+global tables   "${code}/../../tables"
 
 import delimited using "${int_data}/combined_dt${sample}.csv", clear varnames(1)
-keep if inrange(relative_monthyear, -5, 6)
+keep if inrange(relative_monthyear, -6, 5)
 gen relative_year_bin = relative_monthyear
-gen relative_year_bin_aux = relative_year_bin + 6
-local base = 5
+gen relative_year_bin_aux = relative_year_bin + 7
+local base = 6
 capture drop countk
 gen countk = count * 1000
 
@@ -62,6 +63,7 @@ local numacs = r(N)
 
 est clear
 local i = 1
+local estimate_names ""
 foreach mod of local moderators_list {
     replace moderator = `mod'
     local rhs "ib`base'.relative_year_bin_aux##ib0.treat##ib0.`mod' wind_direction av_wind_speed"
@@ -81,11 +83,12 @@ foreach mod of local moderators_list {
         local estname evreg`i'
         local i = `i' + 1
         est store `estname'
+        local estimate_names "`estimate_names' `estname'"
     }
 }
 
 local outbase "${tables}/stacked_event_study_5pre${sample}_rural${ster_suffix}"
 estwrite evreg* using "`outbase'.ster", replace
-estsave_csv evreg* using "`outbase'.csv", replace
+estsave_csv `estimate_names' using "`outbase'.csv", replace
 
 ********************************************************************************

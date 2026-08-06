@@ -146,8 +146,8 @@ foreach mod of local mods_list {
 * Save ster file
 ********************************************************************************
 
-estwrite evreg* using "${root}/tex/paper/tables/_app_14_polischar_fe12_did_ricemods${sample}_rural_stacked.ster", replace
+estwrite evreg* using "${code}/../../tables/_app_14_polischar_fe12_did_ricemods${sample}_rural_stacked.ster", replace
 
-display "Ster: ${root}/tex/paper/tables/_app_14_polischar_fe12_did_ricemods${sample}_rural_stacked.ster"
+display "Ster: ${code}/../../tables/_app_14_polischar_fe12_did_ricemods${sample}_rural_stacked.ster"
 
 ********************************************************************************

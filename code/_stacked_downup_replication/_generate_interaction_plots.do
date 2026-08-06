@@ -26,8 +26,8 @@ if "$root" == "" {
     }
 }
 
-global tables  "${root}/tex/paper/tables"
-global figures "${root}/tex/paper/figures"
+global tables  "${code}/../../tables"
+global figures "${code}/../../figures"
 capture mkdir "${figures}/Interaction_downwind"
 quietly do "${code}/interaction_graph.ado"
 

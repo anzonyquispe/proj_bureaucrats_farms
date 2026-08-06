@@ -22,7 +22,7 @@ if "$root" == "" {
 }
 
 global int_data "${root}/data_output/intermediate"
-global tables   "${root}/tex/paper/tables"
+global tables   "${code}/../../tables"
 
 import delimited using "${int_data}/stacked_downup_13kmpl${sample}.csv", ///
     clear varnames(1)

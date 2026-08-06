@@ -41,7 +41,7 @@ if "$root" == "" {
     }
 }
 
-global tables "${root}/tex/paper/tables"
+global tables "${code}/../../tables"
 
 ********************************************************************************
 * Helper: strip trailing zeros from one or more e()-stored stats.
@@ -118,7 +118,7 @@ esttab eq1 eq2 eq3 eq4 using "${tables}/main_did_downup_ac${sample}_rural_acpop.
     order(downup_ac_pop) ///
     varlabels(downup_ac_pop "Down \$>\$ Up Population") ///
     stats(N acq monthyearfe acfe acmonthfe gridfe ymean_clean, ///
-          fmt(%12.0fc %12.0fc %s %s %s %s %s) ///
+          fmt(%12.0fc %12.0fc 0 0 0 0 0) ///
           labels("Observations" "N Assembly Constituencies" ///
                  "Month-Year FE" "AC FE" "AC \$\times\$ Month-Year FE" "Grid FE" "Mean DV")) ///
     nomtitles nonumbers ///
@@ -152,7 +152,7 @@ esttab eq1 eq2 eq3 eq4 eq5 using "${tables}/_main_3_bureau_polisc_did${sample}_r
               downup_dummy "Down\$>\$ Up Bureaucrat" ///
               downup_interaction "Down\$>\$ Up Pol. (Pop) \$\times\$ Down\$>\$ Up Bur.") ///
     stats(N nacs ndists monthyearfe acfe  acmonthfe distmonthfe gridfe ymean2_clean, ///
-          fmt(%12.0fc %12.0fc %12.0fc %s %s %s %s %s %s) ///
+          fmt(%12.0fc %12.0fc %12.0fc 0 0 0 0 0 0) ///
           labels("Observations" "N Assembly Constituencies" "N Districts" ///
                  "Month-Year FE" "AC FE" "AC \$\times\$ Month-Year FE" "District \$\times\$ Month-Year FE" "Grid FE" "Mean DV")) ///
     nomtitles nonumbers ///
@@ -196,7 +196,7 @@ esttab evreg1 evreg2 evreg3 evreg4 evreg5 evreg6 ///
               1.treat#1.moderator "Protest \$\times\$ Down \$>\$ Up (Pop)" ///
               1.post_#1.treat#1.moderator "Post \$\times\$ Protest \$\times\$ Down \$>\$ Up (Pop)") ///
     stats(      N    acq gridfe time electionfe provtrendfe ymean_clean ymean2_clean, ///
-          fmt(%12.0fc  %s    %s %s    %s         %s          %s          %s) ///
+          fmt(%12.0fc  0    0 0    0         0          0          0) ///
           labels("Observations" "N Assembly Constituencies" ///
                  "Grid FE" "Relative Time FE" "Legislature FE" "Province Trend FE" ///
                  "Mean DV" "Mean DV2 (Down\$>\$Up=1)")) ///
@@ -245,7 +245,7 @@ esttab evreg1 evreg2 evreg3 evreg4 evreg5 evreg6 ///
               1.treat#1.moderator "Agriculturalist \$\times\$ Down \$>\$ Up (Pop)" ///
               1.post_#1.treat#1.moderator "Post \$\times\$ Agric. \$\times\$ Down \$>\$ Up (Pop)") ///
     stats(      N        acq     gridfe time electionfe provtrendfe ymean_clean ymean2_clean, ///
-          fmt( %12.0fc %12.0fc   %s     %s   %s         %s          %s          %s) ///
+          fmt( %12.0fc %12.0fc   0     0   0         0          0          0) ///
           labels("Observations" "N Assembly Constituencies" ///
                  "Grid FE" "Relative Time FE" "Legislature FE" ///
                  "Province Linear Time Trend FE" ///
@@ -280,7 +280,7 @@ esttab eq1 eq2 eq3 ///
     keep(downup_ac_pop) ///
     varlabels(downup_ac_pop "Down \$>\$ Up (Pop)") ///
     stats(N acq gridfe acmonthfe ymean_clean, ///
-          fmt(%12.0fc %s %s %s %s) ///
+          fmt(%12.0fc 0 0 0 0) ///
           labels("Observations" "N Assembly Constituencies" "Grid FE" "Assembly \$\times\$ Month-Year FE" "Mean DV")) ///
     nomtitles nonumbers ///
     collabels(none) ///
@@ -311,7 +311,7 @@ esttab eq1 eq2 eq3 eq4 eq5 eq6 eq7 eq8 eq9 eq10 ///
     keep(downup_ac_pop) ///
     varlabels(downup_ac_pop "Down\$>\$Up (Pop)") ///
     stats(N acq gridfe acmonthfe ymean_clean, ///
-          fmt(%12.0fc %s %s %s %s) ///
+          fmt(%12.0fc 0 0 0 0) ///
           labels("Observations" "N Assembly Constituencies" "Grid FE" "Assembly \$\times\$ Month-Year FE" "Mean DV")) ///
     nomtitles nonumbers ///
     collabels(none) ///
@@ -340,7 +340,7 @@ esttab eq1 eq2 eq3 eq4 ///
     keep(downup_ac_pop) ///
     varlabels(downup_ac_pop "Down\$>\$Up (Pop)") ///
     stats(N acq gridfe acmonthfe ymean_clean, ///
-          fmt(%12.0fc %s %s %s %s) ///
+          fmt(%12.0fc 0 0 0 0) ///
           labels("Observations" "N Assembly Constituencies" "Grid FE" "Assembly \$\times\$ Month-Year FE" "Mean DV")) ///
     nomtitles nonumbers ///
     collabels(none) ///
@@ -379,7 +379,7 @@ capture noisily esttab eq1 eq2 eq3 ///
               1.downup_ac_pop#1.rice_harvarea_aclvl_ahigh "Down\$>\$up AC (Pop) \$\times\$ Above Median Harvested Rice Area" ///
               1.downup_ac_pop#1.rice_prod_aclvl_ahigh "Down\$>\$up AC (Pop) \$\times\$ Above Median Rice Production") ///
     stats(N acq gridfe acmonthfe ymean_clean ymean2_clean ymean3_clean, ///
-          fmt(%12.0fc %12.0fc %s %s %s %s %s) ///
+          fmt(%12.0fc %12.0fc 0 0 0 0 0) ///
           labels("Observations" "N Assembly Constituencies" "Grid FE" ///
                  "AC \$\times\$ Month-Year FE" "Mean DV" "Mean DV2" "Mean DV3")) ///
     nomtitles nonumbers ///
@@ -421,7 +421,7 @@ capture noisily esttab evreg1 evreg2 evreg3 evreg4 ///
               1.post_#1.treat#1.rice_harvarea_aclvl_ahigh "Post \$\times\$ Agriculturalist \$\times\$ Harvested Rice Area" ///
               1.post_#1.treat#1.rice_prod_aclvl_ahigh "Post \$\times\$ Agriculturalist \$\times\$ Rice Production") ///
     stats(N acq gridfe time electionfe provtrendfe ymean_clean ymean2_clean ymean3_clean, ///
-          fmt(%12.0fc %12.0fc %s %s %s %s %s %s %s) ///
+          fmt(%12.0fc %12.0fc 0 0 0 0 0 0 0) ///
           labels("Observations" "N Assembly Constituencies" ///
                  "Grid  \$\times\$ Cohort FE" "Relative Time FE" "Legislature  \$\times\$ Cohort FE" "Province  \$\times\$ Cohort Trend FE" ///
                  "Mean DV" "Mean DV2" "Mean DV3")) ///
@@ -456,7 +456,7 @@ capture noisily esttab evreg1 evreg2 evreg3 ///
     order(1.post_#1.treat) ///
     varlabels(1.post_#1.treat "Post \$\times\$ Agriculturalist") ///
     stats(N acq gridfe time electionfe provtrendfe ymean_clean, ///
-          fmt(%12.0fc %12.0fc %s %s %s %s %s) ///
+          fmt(%12.0fc %12.0fc 0 0 0 0 0) ///
           labels("Observations" "N Assembly Constituencies" ///
                  "Grid \$\times\$ Cohort FE" "Relative Time FE" "Legislature  \$\times\$ Cohort FE" "Province  \$\times\$ Cohort Trend FE" "Mean DV")) ///
     nomtitles nonumbers ///
@@ -519,7 +519,7 @@ esttab eq1 eq2 eq3 using ///
     star(* 0.10 ** 0.05 *** 0.01) keep(downup_pop_13km) ///
     varlabels(downup_pop_13km "Down\$>\$Up (13 km placebo)") ///
     stats(N acq gridfe acmonthfe ymean, ///
-          fmt(%12.0fc %12.0fc %s %s 3) ///
+          fmt(%12.0fc %12.0fc 0 0 3) ///
           labels("Observations" "N Assembly Constituencies" ///
                  "Grid FE" "AC \$\times\$ Month-Year \$\times\$ Cohort FE" "Mean DV")) ///
     nomtitles nonumbers collabels(none) nobaselevels
@@ -542,7 +542,7 @@ capture noisily esttab eq1 eq2 eq3 eq4 using "${tables}/_app_20_did_downwind_hm$
     order(1.downup_ac_pop 1.downup_ac_pop#1.rice_prod_aclvl_ahigh) ///
     varlabels(1.downup_ac_pop "Down \$>\$ Up (Pop)" 1.downup_ac_pop#1.rice_prod_aclvl_ahigh "Down \$>\$ Up (Pop) \$\times\$ Rice Production" ) ///
     stats(N acq monthyearfe acfe acmonthfe gridfe ymean_clean ymean2_clean, ///
-          fmt(%12.0fc %12.0fc %s %s %s %s %s %s) ///
+          fmt(%12.0fc %12.0fc 0 0 0 0 0 0) ///
           labels("Observations" "N Assembly Constituencies" ///
                  "Month-Year FE" "AC FE" "AC \$\times\$ Month-Year FE" "Grid FE" "Mean DV")) ///
     nomtitles nonumbers ///

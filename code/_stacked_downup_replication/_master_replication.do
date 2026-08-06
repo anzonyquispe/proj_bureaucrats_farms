@@ -38,8 +38,8 @@ if "$code" == "" {
 }
 
 global int_data "${root}/data_output/intermediate"
-global tables "${root}/tex/paper/tables"
-global figures "${root}/tex/paper/figures"
+global tables "${code}/../../tables"
+global figures "${code}/../../figures"
 
 capture log close _all
 log using "${code}/_master_replication_log${sample}.txt", replace text
@@ -102,7 +102,7 @@ do "${code}/app_5km_descriptive.do"
 do "${code}/app_polischar_descriptive.do"
 
 ********************************************************************************
-* 3. Five-pre-period event studies from the two main stacks
+* 3. Main-stack event studies over relative months -6 through 5
 ********************************************************************************
 
 global fe_list "1"
@@ -150,6 +150,10 @@ global downup_var "downup_ac_pop"
 global ster_suffix "_acpop"
 do "${code}/_app_16_polischar_fe12_evst_all.do"
 do "${code}/_app_17_5km_fe12_evst_all.do"
+
+* Re-export every event-study result from its .ster file using explicit stored
+* estimate names. This also provides a single recovery step for CSV outputs.
+do "${code}/_export_event_study_csv.do"
 
 ********************************************************************************
 * 5. New 13 km placebo stack and neighbour-border analysis

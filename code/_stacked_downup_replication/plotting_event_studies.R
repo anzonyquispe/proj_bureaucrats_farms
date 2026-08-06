@@ -17,6 +17,7 @@ data.table::setDTthreads(threads = 1L)
 parse_args <- function(args) {
   out <- list(
     root = Sys.getenv("REPLICATION_ROOT", unset = ""),
+    output_root = Sys.getenv("REPLICATION_OUTPUT_ROOT", unset = ""),
     sample = Sys.getenv("REPLICATION_SAMPLE", unset = "")
   )
   i <- 1L
@@ -28,11 +29,15 @@ parse_args <- function(args) {
       out$sample <- args[[i + 1L]]
       if (identical(out$sample, "none")) out$sample <- ""
       i <- i + 2L
+    } else if (args[[i]] == "--output-root" && i < length(args)) {
+      out$output_root <- args[[i + 1L]]
+      i <- i + 2L
     } else {
       stop("Unknown or incomplete argument: ", args[[i]])
     }
   }
   if (!nzchar(out$root)) stop("Supply --root PATH or set REPLICATION_ROOT")
+  if (!nzchar(out$output_root)) stop("Supply --output-root PATH")
   out
 }
 
@@ -206,8 +211,8 @@ run_case <- function(csv, model, rows, columns, base, pre, post, omitted,
 }
 
 args <- parse_args(commandArgs(trailingOnly = TRUE))
-table_dir <- file.path(args$root, "tex", "paper", "tables")
-figure_dir <- file.path(args$root, "tex", "paper", "figures")
+table_dir <- file.path(args$output_root, "tables")
+figure_dir <- file.path(args$output_root, "figures")
 dir.create(figure_dir, recursive = TRUE, showWarnings = FALSE)
 s <- args$sample
 
@@ -228,17 +233,17 @@ run_case(
 run_case(
   paste0("stacked_event_study_5pre", s, "_rural.csv"), "evreg1",
   15:25, c(3, 4, 19:29), "stacked_event_study_5pre_rural_1",
-  5, 7, -1, "Time from Treatment (months)", c(-40, 20), c(-40, 30)
+  6, 6, -1, "Time from Treatment (months)", c(-40, 20), c(-40, 30)
 )
 run_case(
   paste0("stacked_event_study_pop_5pre", s, "_rural.csv"), "evreg1",
   15:25, c(3, 4, 19:29), "stacked_event_study_pop_5pre_rural_1",
-  5, 7, -1, "Time from Treatment (months)", c(-40, 20), c(-40, 30)
+  6, 6, -1, "Time from Treatment (months)", c(-40, 20), c(-40, 30)
 )
 run_case(
   paste0("stacked_event_study_pop_5pre", s, "_rural.csv"), "evreg2",
   39:49, c(3, 4, 43:53), "stacked_event_study_pop_5pre_rural_riceP",
-  5, 7, -1, "Time from Treatment (months)", c(-80, 50), c(-80, 50)
+  6, 6, -1, "Time from Treatment (months)", c(-80, 50), c(-80, 50)
 )
 
 # All politician/protest moderators, area/population definitions, and controls.

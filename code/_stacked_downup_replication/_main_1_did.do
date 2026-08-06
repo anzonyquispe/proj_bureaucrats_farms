@@ -39,7 +39,7 @@ if "$did_output" == "" {
 }
 
 global int_data "${root}/data_output/intermediate"
-global tables "${root}/tex/paper/tables"
+global tables "${code}/../../tables"
 
 import delimited "${int_data}/${stacked_file}${sample}.csv", clear varnames(1)
 

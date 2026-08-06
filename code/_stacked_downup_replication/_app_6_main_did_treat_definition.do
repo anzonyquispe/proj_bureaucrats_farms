@@ -31,8 +31,8 @@ if "$root" == "" {
 }
 
 global int_farms "${root}/data_output/intermediate"
-global table_farms "${root}/tex/paper/tables"
-global figure_farms "${root}/tex/paper/figures"
+global table_farms "${code}/../../tables"
+global figure_farms "${code}/../../figures"
 
 ********************************************************************************
 * Import Data
@@ -235,8 +235,8 @@ est store eq7
 ********************************************************************************
 
 estwrite eq* using ///
-    "${root}/tex/paper/tables/_app_6_main_did_treat_definition${sample}_rural_acpop${ster_suffix}.ster", replace
+    "${code}/../../tables/_app_6_main_did_treat_definition${sample}_rural_acpop${ster_suffix}.ster", replace
 
-display "Ster: ${root}/tex/paper/tables/_app_6_main_did_treat_definition${sample}_rural_acpop${ster_suffix}.ster"
+display "Ster: ${code}/../../tables/_app_6_main_did_treat_definition${sample}_rural_acpop${ster_suffix}.ster"
 
 ********************************************************************************

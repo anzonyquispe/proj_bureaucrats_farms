@@ -27,8 +27,8 @@ if "$root" == "" {
 }
 
 global int_farms "${root}/data_output/intermediate"
-global table_farms "${root}/tex/paper/tables"
-global figure_farms "${root}/tex/paper/figures"
+global table_farms "${code}/../../tables"
+global figure_farms "${code}/../../figures"
 
 
 *-------------------------------------------------------------------------------
@@ -162,8 +162,8 @@ foreach mod of local modlist{
 	local i = `i' + 1
 }
 
-estwrite evreg* using "${root}/tex/paper/tables/main_event_study${sample}_rural_area_stacked.ster", replace
-estsave_csv evreg1  evreg2  evreg3  evreg4 using "${root}/tex/paper/tables/main_event_study${sample}_rural_stacked.csv", replace
+estwrite evreg* using "${code}/../../tables/main_event_study${sample}_rural_area_stacked.ster", replace
+estsave_csv evreg1  evreg2  evreg3  evreg4 using "${code}/../../tables/main_event_study${sample}_rural_stacked.csv", replace
 
 
 *-------------------------------------------------------------------------------

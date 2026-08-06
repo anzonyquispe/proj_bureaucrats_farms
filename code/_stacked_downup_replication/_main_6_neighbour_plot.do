@@ -20,8 +20,8 @@ if "$root" == "" {
     }
 }
 
-global tables  "${root}/tex/paper/tables"
-global figures "${root}/tex/paper/figures"
+global tables  "${code}/../../tables"
+global figures "${code}/../../figures"
 
 est clear
 estread using "${tables}/main_figure4_neighbour${sample}_rural${ster_suffix}.ster"

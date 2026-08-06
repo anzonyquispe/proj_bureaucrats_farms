@@ -15,6 +15,7 @@ import pandas as pd
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser()
     parser.add_argument("--root", required=True, type=Path)
+    parser.add_argument("--output-root", required=True, type=Path)
     parser.add_argument(
         "--shared-root",
         type=Path,
@@ -34,7 +35,7 @@ def main() -> None:
     root = options.root
     shared = options.shared_root or root.parent
     intermediate = root / "data_output" / "intermediate"
-    figures = root / "tex" / "paper" / "figures"
+    figures = options.output_root / "figures"
     figures.mkdir(parents=True, exist_ok=True)
 
     states = gpd.read_file(require(

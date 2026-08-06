@@ -102,8 +102,8 @@ foreach fe of numlist 1/3 {
 * Save ster file
 ********************************************************************************
 
-estwrite evreg* using "${root}/tex/paper/tables/_app_12_protest_5km_fe_did${sample}_rural.ster", replace
+estwrite evreg* using "${code}/../../tables/_app_12_protest_5km_fe_did${sample}_rural.ster", replace
 
-display "Ster: ${root}/tex/paper/tables/_app_12_protest_5km_fe_did${sample}_rural.ster"
+display "Ster: ${code}/../../tables/_app_12_protest_5km_fe_did${sample}_rural.ster"
 
 ********************************************************************************
