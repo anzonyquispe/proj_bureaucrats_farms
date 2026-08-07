@@ -6,7 +6,7 @@
 ********************************************************************************
 
 version 17
-do "_main_2_stacked_event_study_5pre_grid_monthyear_pop.do" ///
+do "exploratory_analysis/event_study/_main_2_stacked_event_study_5pre_grid_monthyear_pop.do" ///
     controls grid_monthyear ///
     stacked_event_study_pop_5pre_grid_monthyear_fe_gridmonth_cluster
 
