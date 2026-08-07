@@ -2,7 +2,14 @@
 * Population-weighted stacked event study, relative months -6 through 5.
 * Fixed effects: grid x cohort and month-year x cohort only.
 * Period -1 remains the omitted reference category.
+*
+* Optional direct-call arguments:
+*   controls_mode: controls | nocontrols
+*   cluster_mode:  cohort | grid_monthyear
+*   output_stem:   filename stem written under tables/
 ********************************************************************************
+
+args controls_mode cluster_mode output_stem
 
 if "$root" == "" {
     clear all
@@ -32,6 +39,40 @@ if "$root" == "" {
 
 global int_data "${root}/data_output/intermediate"
 global tables   "${code}/../../tables"
+
+if "`controls_mode'" == "" local controls_mode "controls"
+if "`cluster_mode'" == "" local cluster_mode "cohort"
+if "`output_stem'" == "" {
+    local output_stem "stacked_event_study_pop_5pre_grid_monthyear_fe"
+}
+
+if !inlist("`controls_mode'", "controls", "nocontrols") {
+    display as error "controls_mode must be controls or nocontrols."
+    exit 198
+}
+if !inlist("`cluster_mode'", "cohort", "grid_monthyear") {
+    display as error "cluster_mode must be cohort or grid_monthyear."
+    exit 198
+}
+
+if "`controls_mode'" == "controls" {
+    local weather_controls "wind_direction av_wind_speed"
+    local controls_tag "Y"
+}
+else {
+    local weather_controls ""
+    local controls_tag "N"
+}
+
+if "`cluster_mode'" == "cohort" {
+    local cluster_variables ///
+        "ac_uq_id#cohort#monthyear unique_small_grid_id#cohort"
+    local cluster_tag "AC x cohort x month-year; grid x cohort"
+}
+else {
+    local cluster_variables "unique_small_grid_id monthyear"
+    local cluster_tag "Grid; month-year"
+}
 
 import delimited using "${int_data}/combined_dt_pop${sample}.csv", clear varnames(1)
 keep if inrange(relative_monthyear, -6, 5)
@@ -68,7 +109,8 @@ local i = 1
 local estimate_names ""
 foreach mod of local moderators_list {
     replace moderator = `mod'
-    local rhs "ib`base'.relative_year_bin_aux##ib0.treat##ib0.`mod' wind_direction av_wind_speed"
+    local rhs ///
+        "ib`base'.relative_year_bin_aux##ib0.treat##ib0.`mod' `weather_controls'"
 
     quietly summarize `dep_var' if treat == 1 & relative_year_bin <= -1
     local ymean = r(mean)
@@ -82,7 +124,7 @@ foreach mod of local moderators_list {
         }
 
         reghdfejl `dep_var' `rhs', absorb(`fe`fe'') ///
-            cluster(ac_uq_id#cohort#monthyear unique_small_grid_id#cohort)
+            cluster(`cluster_variables')
         estadd scalar ymean = `ymean'
         estadd scalar ymean2 = `ymean2'
         estadd scalar acq = `numacs'
@@ -93,6 +135,8 @@ foreach mod of local moderators_list {
         estadd local acfe "N"
         estadd local acmonthfe "N"
         estadd local gridfe "Y"
+        estadd local weathercontrols "`controls_tag'"
+        estadd local clusterspec "`cluster_tag'"
         local estname evreg`i'
         local i = `i' + 1
         est store `estname'
@@ -100,9 +144,8 @@ foreach mod of local moderators_list {
     }
 }
 
-local outbase "${tables}/stacked_event_study_pop_5pre_grid_monthyear_fe${sample}_rural${ster_suffix}"
+local outbase "${tables}/`output_stem'${sample}_rural${ster_suffix}"
 estwrite `estimate_names' using "`outbase'.ster", replace
 estsave_csv `estimate_names' using "`outbase'.csv", replace
 
 display as result "Saved `outbase'.ster and `outbase'.csv"
-

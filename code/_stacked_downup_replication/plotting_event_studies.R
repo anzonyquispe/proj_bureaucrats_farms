@@ -4,6 +4,12 @@
 # stacked/down-up replication package. The politician and protest families are
 # rendered for never-treated, pooled never/not-yet-treated, and not-yet-treated
 # control samples. Baseline (never-treated) filenames remain unchanged.
+#
+# RStudio use:
+#   1. Open this file in RStudio.
+#   2. Edit RSTUDIO_CONFIG below only if the repository is not detected.
+#   3. Click Source. Results are read from <repo>/tables and written to
+#      <repo>/figures.
 
 suppressPackageStartupMessages({
   library(data.table)
@@ -14,30 +20,136 @@ suppressPackageStartupMessages({
 # Match the one-CPU scheduler allocation in sbatch/run_r.sbatch.
 data.table::setDTthreads(threads = 1L)
 
+get_script_path <- function() {
+  file_arg <- grep("^--file=", commandArgs(trailingOnly = FALSE), value = TRUE)
+  if (length(file_arg)) {
+    return(sub("^--file=", "", file_arg[[1L]]))
+  }
+  if (interactive() && requireNamespace("rstudioapi", quietly = TRUE)) {
+    path <- tryCatch(
+      rstudioapi::getSourceEditorContext()$path,
+      error = function(...) ""
+    )
+    if (nzchar(path)) return(path)
+  }
+  ""
+}
+
+find_repo_root <- function(start) {
+  current <- normalizePath(start, winslash = "/", mustWork = FALSE)
+  if (file.exists(current)) current <- dirname(current)
+  repeat {
+    marker <- file.path(
+      current, "code", "_stacked_downup_replication",
+      "plotting_event_studies.R"
+    )
+    if (file.exists(marker)) return(current)
+    parent <- dirname(current)
+    if (identical(parent, current)) break
+    current <- parent
+  }
+  ""
+}
+
+script_path <- get_script_path()
+repo_start <- if (nzchar(script_path)) script_path else getwd()
+detected_repo_root <- find_repo_root(repo_start)
+
+# --------------------------- RSTUDIO SETTINGS ---------------------------
+# Usually no edits are needed. Set either path explicitly only if automatic
+# repository detection fails. `sample` is the optional filename suffix.
+RSTUDIO_CONFIG <- list(
+  root = detected_repo_root,
+  output_root = detected_repo_root,
+  sample = "",
+  # Choose any of: "main", "politician", "protest".
+  families = c("main", "politician", "protest"),
+  # For the main family, optionally list registry IDs; empty means all cases.
+  cases = character(),
+  # Set FALSE for fast original/detrended plots while developing.
+  honest = TRUE
+)
+# -----------------------------------------------------------------------
+
 parse_args <- function(args) {
   out <- list(
-    root = Sys.getenv("REPLICATION_ROOT", unset = ""),
-    output_root = Sys.getenv("REPLICATION_OUTPUT_ROOT", unset = ""),
-    sample = Sys.getenv("REPLICATION_SAMPLE", unset = "")
+    root = Sys.getenv("REPLICATION_ROOT", unset = RSTUDIO_CONFIG$root),
+    output_root = Sys.getenv(
+      "REPLICATION_OUTPUT_ROOT", unset = RSTUDIO_CONFIG$output_root
+    ),
+    sample = Sys.getenv("REPLICATION_SAMPLE", unset = RSTUDIO_CONFIG$sample),
+    families = Sys.getenv(
+      "REPLICATION_PLOT_FAMILIES",
+      unset = paste(RSTUDIO_CONFIG$families, collapse = ",")
+    ),
+    cases = Sys.getenv(
+      "REPLICATION_PLOT_CASES",
+      unset = paste(RSTUDIO_CONFIG$cases, collapse = ",")
+    ),
+    honest = RSTUDIO_CONFIG$honest
   )
   i <- 1L
   while (i <= length(args)) {
     if (args[[i]] == "--root" && i < length(args)) {
       out$root <- args[[i + 1L]]
       i <- i + 2L
-    } else if (args[[i]] == "--sample" && i < length(args)) {
-      out$sample <- args[[i + 1L]]
+    } else if (args[[i]] == "--sample") {
+      # Treat a trailing --sample, or --sample followed by another option, as
+      # an explicitly empty suffix. This is convenient in PowerShell.
+      has_value <- i < length(args) && !startsWith(args[[i + 1L]], "--")
+      out$sample <- if (has_value) args[[i + 1L]] else ""
       if (identical(out$sample, "none")) out$sample <- ""
-      i <- i + 2L
+      i <- i + if (has_value) 2L else 1L
     } else if (args[[i]] == "--output-root" && i < length(args)) {
       out$output_root <- args[[i + 1L]]
       i <- i + 2L
+    } else if (args[[i]] == "--families" && i < length(args)) {
+      out$families <- args[[i + 1L]]
+      i <- i + 2L
+    } else if (args[[i]] == "--cases" && i < length(args)) {
+      out$cases <- args[[i + 1L]]
+      i <- i + 2L
+    } else if (args[[i]] == "--skip-honest") {
+      out$honest <- FALSE
+      i <- i + 1L
     } else {
       stop("Unknown or incomplete argument: ", args[[i]])
     }
   }
-  if (!nzchar(out$root)) stop("Supply --root PATH or set REPLICATION_ROOT")
-  if (!nzchar(out$output_root)) stop("Supply --output-root PATH")
+  if (!nzchar(out$root)) {
+    stop(
+      "Repository root not detected. Set RSTUDIO_CONFIG$root or supply --root.",
+      call. = FALSE
+    )
+  }
+  if (!nzchar(out$output_root)) {
+    stop(
+      paste0(
+        "Output root not detected. Set RSTUDIO_CONFIG$output_root or supply ",
+        "--output-root."
+      ),
+      call. = FALSE
+    )
+  }
+  out$root <- normalizePath(out$root, winslash = "/", mustWork = FALSE)
+  out$output_root <- normalizePath(
+    out$output_root, winslash = "/", mustWork = FALSE
+  )
+  out$families <- trimws(strsplit(out$families, ",", fixed = TRUE)[[1L]])
+  allowed_families <- c("main", "politician", "protest")
+  invalid_families <- setdiff(out$families, allowed_families)
+  if (length(invalid_families)) {
+    stop(
+      "Unknown plot family: ", paste(invalid_families, collapse = ", "),
+      ". Use main, politician, and/or protest.",
+      call. = FALSE
+    )
+  }
+  out$cases <- if (nzchar(out$cases)) {
+    trimws(strsplit(out$cases, ",", fixed = TRUE)[[1L]])
+  } else {
+    character()
+  }
   out
 }
 
@@ -176,9 +288,15 @@ plot_event <- function(event_data, file_base, num_pre, num_post,
   ggsave(rotated_path, rotated_plot, width = 8, height = 4, dpi = 300)
   message("Generated: ", rotated_path)
 
-  save_honest(event_data$beta, vcov, file_base, "_honest2", honest_pre, num_post)
-  rotated_beta <- full[time != omitted, rotated]
-  save_honest(rotated_beta, vcov, file_base, "_rot_honest2", honest_pre, num_post)
+  if (isTRUE(generate_honest)) {
+    save_honest(
+      event_data$beta, vcov, file_base, "_honest2", honest_pre, num_post
+    )
+    rotated_beta <- full[time != omitted, rotated]
+    save_honest(
+      rotated_beta, vcov, file_base, "_rot_honest2", honest_pre, num_post
+    )
+  }
 }
 
 extract_event <- function(csv_name, model, rows, columns) {
@@ -210,41 +328,230 @@ run_case <- function(csv, model, rows, columns, base, pre, post, omitted,
   invisible(TRUE)
 }
 
+event_case <- function(id, csv_stem, model, rows, columns, figure_base,
+                       pre, post, omitted = -1,
+                       xlab = "Time from Treatment (months)",
+                       ylim_original = NULL, ylim_rotated = NULL,
+                       required = TRUE) {
+  list(
+    id = id,
+    csv_stem = csv_stem,
+    model = model,
+    rows = rows,
+    columns = columns,
+    figure_base = figure_base,
+    pre = pre,
+    post = post,
+    omitted = omitted,
+    xlab = xlab,
+    ylim_original = ylim_original,
+    ylim_rotated = ylim_rotated,
+    required = required
+  )
+}
+
+run_registered_case <- function(spec, sample_suffix) {
+  message("Running registered result: ", spec$id)
+  run_case(
+    csv = paste0(spec$csv_stem, sample_suffix, "_rural.csv"),
+    model = spec$model,
+    rows = spec$rows,
+    columns = spec$columns,
+    base = paste0(spec$figure_base, sample_suffix),
+    pre = spec$pre,
+    post = spec$post,
+    omitted = spec$omitted,
+    xlab = spec$xlab,
+    ylim_original = spec$ylim_original,
+    ylim_rotated = spec$ylim_rotated,
+    required = spec$required
+  )
+}
+
 args <- parse_args(commandArgs(trailingOnly = TRUE))
+generate_honest <- args$honest
 table_dir <- file.path(args$output_root, "tables")
 figure_dir <- file.path(args$output_root, "figures")
 dir.create(figure_dir, recursive = TRUE, showWarnings = FALSE)
 s <- args$sample
 
-# Main area and stacked down/up event studies.
-run_case(
-  paste0("main_event_study", s, "_rural.csv"), "evreg1",
-  c(6:1, 7:12), c(3, 4, 10:5, 11:16),
-  "main_event_study_rural_1", 6, 6, 0, "Time from Treatment (months)",
-  c(-30, 20), c(-40, 30), required = FALSE
+# --------------------------- RESULT REGISTRY ----------------------------
+# To add a result, copy one event_case() block and change:
+#   id, csv_stem, model, rows, columns, and figure_base.
+# csv_stem excludes the optional sample suffix and trailing "_rural.csv".
+event_cases <- list(
+  event_case(
+    id = "legacy_main_baseline",
+    csv_stem = "main_event_study", model = "evreg1",
+    rows = c(6:1, 7:12), columns = c(3, 4, 10:5, 11:16),
+    figure_base = "main_event_study_rural_1",
+    pre = 6, post = 6, omitted = 0,
+    ylim_original = c(-30, 20), ylim_rotated = c(-40, 30),
+    required = FALSE
+  ),
+  event_case(
+    id = "legacy_main_rice",
+    csv_stem = "main_event_study", model = "evreg4",
+    rows = c(18:13, 19:24), columns = c(3, 4, 22:17, 23:28),
+    figure_base = "main_event_study_rural_riceP",
+    pre = 6, post = 6, omitted = 0,
+    ylim_original = c(-80, 50), ylim_rotated = c(-80, 50),
+    required = FALSE
+  ),
+  event_case(
+    id = "stacked_area_baseline",
+    csv_stem = "stacked_event_study_5pre", model = "evreg1",
+    rows = 15:25, columns = c(3, 4, 19:29),
+    figure_base = "stacked_event_study_5pre_rural_1",
+    pre = 6, post = 6,
+    ylim_original = c(-40, 20), ylim_rotated = c(-40, 30)
+  ),
+  event_case(
+    id = "stacked_population_baseline",
+    csv_stem = "stacked_event_study_pop_5pre", model = "evreg1",
+    rows = 15:25, columns = c(3, 4, 19:29),
+    figure_base = "stacked_event_study_pop_5pre_rural_1",
+    pre = 6, post = 6,
+    ylim_original = c(-40, 20), ylim_rotated = c(-40, 30)
+  ),
+  event_case(
+    id = "stacked_population_rice",
+    csv_stem = "stacked_event_study_pop_5pre", model = "evreg2",
+    rows = 39:49, columns = c(3, 4, 43:53),
+    figure_base = "stacked_event_study_pop_5pre_rural_riceP",
+    pre = 6, post = 6,
+    ylim_original = c(-80, 50), ylim_rotated = c(-80, 50)
+  ),
+
+  # Latest specification: grid x cohort and month-year x cohort FEs only.
+  event_case(
+    id = "grid_monthyear_area_baseline",
+    csv_stem = "stacked_event_study_5pre_grid_monthyear_fe",
+    model = "evreg1", rows = 15:25, columns = c(3, 4, 19:29),
+    figure_base = "stacked_event_study_5pre_grid_monthyear_fe_rural_1",
+    pre = 6, post = 6
+  ),
+  event_case(
+    id = "grid_monthyear_area_rice",
+    csv_stem = "stacked_event_study_5pre_grid_monthyear_fe",
+    model = "evreg2", rows = 39:49, columns = c(3, 4, 43:53),
+    figure_base = "stacked_event_study_5pre_grid_monthyear_fe_rural_riceP",
+    pre = 6, post = 6
+  ),
+  event_case(
+    id = "grid_monthyear_population_baseline",
+    csv_stem = "stacked_event_study_pop_5pre_grid_monthyear_fe",
+    model = "evreg1", rows = 15:25, columns = c(3, 4, 19:29),
+    figure_base = "stacked_event_study_pop_5pre_grid_monthyear_fe_rural_1",
+    pre = 6, post = 6
+  ),
+  event_case(
+    id = "grid_monthyear_population_rice",
+    csv_stem = "stacked_event_study_pop_5pre_grid_monthyear_fe",
+    model = "evreg2", rows = 39:49, columns = c(3, 4, 43:53),
+    figure_base = "stacked_event_study_pop_5pre_grid_monthyear_fe_rural_riceP",
+    pre = 6, post = 6
+  ),
+
+  # Robustness 1: no controls; grid and month-year two-way clustering.
+  event_case(
+    id = "gm_pop_nocontrols_gridmonth_cluster_baseline",
+    csv_stem = paste0(
+      "stacked_event_study_pop_5pre_grid_monthyear_fe_",
+      "nocontrols_gridmonth_cluster"
+    ),
+    model = "evreg1", rows = 15:25, columns = c(3, 4, 19:29),
+    figure_base = paste0(
+      "stacked_event_study_pop_5pre_grid_monthyear_fe_",
+      "nocontrols_gridmonth_cluster_rural_1"
+    ),
+    pre = 6, post = 6, required = FALSE
+  ),
+  event_case(
+    id = "gm_pop_nocontrols_gridmonth_cluster_rice",
+    csv_stem = paste0(
+      "stacked_event_study_pop_5pre_grid_monthyear_fe_",
+      "nocontrols_gridmonth_cluster"
+    ),
+    model = "evreg2", rows = 39:49, columns = c(3, 4, 43:53),
+    figure_base = paste0(
+      "stacked_event_study_pop_5pre_grid_monthyear_fe_",
+      "nocontrols_gridmonth_cluster_rural_riceP"
+    ),
+    pre = 6, post = 6, required = FALSE
+  ),
+
+  # Robustness 2: no controls; original cohort-interacted clustering.
+  event_case(
+    id = "gm_pop_nocontrols_cohort_cluster_baseline",
+    csv_stem = "stacked_event_study_pop_5pre_grid_monthyear_fe_nocontrols",
+    model = "evreg1", rows = 15:25, columns = c(3, 4, 19:29),
+    figure_base = paste0(
+      "stacked_event_study_pop_5pre_grid_monthyear_fe_",
+      "nocontrols_rural_1"
+    ),
+    pre = 6, post = 6, required = FALSE
+  ),
+  event_case(
+    id = "gm_pop_nocontrols_cohort_cluster_rice",
+    csv_stem = "stacked_event_study_pop_5pre_grid_monthyear_fe_nocontrols",
+    model = "evreg2", rows = 39:49, columns = c(3, 4, 43:53),
+    figure_base = paste0(
+      "stacked_event_study_pop_5pre_grid_monthyear_fe_",
+      "nocontrols_rural_riceP"
+    ),
+    pre = 6, post = 6, required = FALSE
+  ),
+
+  # Robustness 3: controls retained; grid/month-year two-way clustering.
+  event_case(
+    id = "gm_pop_controls_gridmonth_cluster_baseline",
+    csv_stem = paste0(
+      "stacked_event_study_pop_5pre_grid_monthyear_fe_",
+      "gridmonth_cluster"
+    ),
+    model = "evreg1", rows = 15:25, columns = c(3, 4, 19:29),
+    figure_base = paste0(
+      "stacked_event_study_pop_5pre_grid_monthyear_fe_",
+      "gridmonth_cluster_rural_1"
+    ),
+    pre = 6, post = 6, required = FALSE
+  ),
+  event_case(
+    id = "gm_pop_controls_gridmonth_cluster_rice",
+    csv_stem = paste0(
+      "stacked_event_study_pop_5pre_grid_monthyear_fe_",
+      "gridmonth_cluster"
+    ),
+    model = "evreg2", rows = 39:49, columns = c(3, 4, 43:53),
+    figure_base = paste0(
+      "stacked_event_study_pop_5pre_grid_monthyear_fe_",
+      "gridmonth_cluster_rural_riceP"
+    ),
+    pre = 6, post = 6, required = FALSE
+  )
 )
-run_case(
-  paste0("main_event_study", s, "_rural.csv"), "evreg4",
-  c(18:13, 19:24), c(3, 4, 22:17, 23:28),
-  "main_event_study_rural_riceP", 6, 6, 0,
-  "Time from Treatment (months)", c(-80, 50), c(-80, 50),
-  required = FALSE
-)
-run_case(
-  paste0("stacked_event_study_5pre", s, "_rural.csv"), "evreg1",
-  15:25, c(3, 4, 19:29), "stacked_event_study_5pre_rural_1",
-  6, 6, -1, "Time from Treatment (months)", c(-40, 20), c(-40, 30)
-)
-run_case(
-  paste0("stacked_event_study_pop_5pre", s, "_rural.csv"), "evreg1",
-  15:25, c(3, 4, 19:29), "stacked_event_study_pop_5pre_rural_1",
-  6, 6, -1, "Time from Treatment (months)", c(-40, 20), c(-40, 30)
-)
-run_case(
-  paste0("stacked_event_study_pop_5pre", s, "_rural.csv"), "evreg2",
-  39:49, c(3, 4, 43:53), "stacked_event_study_pop_5pre_rural_riceP",
-  6, 6, -1, "Time from Treatment (months)", c(-80, 50), c(-80, 50)
-)
+# -----------------------------------------------------------------------
+
+selected_event_cases <- event_cases
+if (length(args$cases)) {
+  known_case_ids <- vapply(event_cases, `[[`, character(1L), "id")
+  unknown_case_ids <- setdiff(args$cases, known_case_ids)
+  if (length(unknown_case_ids)) {
+    stop(
+      "Unknown main-result registry ID: ",
+      paste(unknown_case_ids, collapse = ", "),
+      call. = FALSE
+    )
+  }
+  selected_event_cases <- event_cases[known_case_ids %in% args$cases]
+}
+
+if ("main" %in% args$families) {
+  invisible(lapply(
+    selected_event_cases, run_registered_case, sample_suffix = s
+  ))
+}
 
 # All politician/protest moderators, area/population definitions, and controls.
 control_suffixes <- c(never = "", both = "_controls_both", notyet = "_controls_notyet")
@@ -268,21 +575,31 @@ for (analysis_suffix in c("", "_acpop")) {
         rows <- 33:41
         columns <- c(3, 4, 37:45)
       }
-      run_case(
-        paste0(politician_stem, ".csv"), paste0("evreg", model_index),
-        rows, columns, paste0(politician_stem, "_", moderator_names[[model_index]]),
-        5, 5, -1, "Time from Treatment (years)",
-        if (model_index == 1L) c(-20, 50) else NULL, NULL,
-        required = identical(control_suffix, "")
-      )
-      run_case(
-        paste0(protest_stem, ".csv"), paste0("evreg", model_index),
-        rows, columns, paste0(protest_stem, "_", moderator_names[[model_index]]),
-        8, 2, -1, "Time from Treatment (years)",
-        required = identical(control_suffix, "")
-      )
+      if ("politician" %in% args$families) {
+        run_case(
+          paste0(politician_stem, ".csv"), paste0("evreg", model_index),
+          rows, columns,
+          paste0(politician_stem, "_", moderator_names[[model_index]]),
+          5, 5, -1, "Time from Treatment (years)",
+          if (model_index == 1L) c(-20, 50) else NULL, NULL,
+          required = identical(control_suffix, "")
+        )
+      }
+      if ("protest" %in% args$families) {
+        run_case(
+          paste0(protest_stem, ".csv"), paste0("evreg", model_index),
+          rows, columns,
+          paste0(protest_stem, "_", moderator_names[[model_index]]),
+          8, 2, -1, "Time from Treatment (years)",
+          required = identical(control_suffix, "")
+        )
+      }
     }
   }
 }
 
-message("All event-study and HonestDiD plots completed.")
+if (isTRUE(generate_honest)) {
+  message("All requested event-study and HonestDiD plots completed.")
+} else {
+  message("All requested original and detrended event-study plots completed.")
+}
