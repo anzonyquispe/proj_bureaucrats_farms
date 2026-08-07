@@ -258,3 +258,221 @@ added macro:
 added macro:
              e(gridfe) : "Y"
 (16,806,097 real changes made)
+(dropped 88721 singleton observations)
+(MWFE estimator converged in 14 iterations)
+
+HDFE linear regression with Julia                 Number of obs   = 37,020,656
+Absorbing 2 HDFE groups                           F(  35, 980483) =     361.24
+Statistics cluster-robust                         Prob > F        =     0.0000
+                                                  R-squared       =     0.2371
+                                                  Adj R-squared   =     0.1094
+Number of clusters (ac_uq_id#cohort#monthyear) =     980483Within R-sq.=     0.
+> 0138
+Number of clusters (unique_small_grid_id#cohort) =    5303579Root MSE=   969.64
+> 52
+
+(Std. err. adjusted for 980,483 clusters in ac_uq_id#cohort#monthyear unique_sm
+> all_grid_id#cohort)
+------------------------------------------------------------------------------
+             |               Robust
+      countk | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+relative_y~x |
+          1  |          0  (omitted)
+          2  |          0  (omitted)
+          3  |          0  (omitted)
+          4  |          0  (omitted)
+          5  |          0  (omitted)
+          7  |          0  (omitted)
+          8  |          0  (omitted)
+          9  |          0  (omitted)
+         10  |          0  (omitted)
+         11  |          0  (omitted)
+         12  |          0  (omitted)
+             |
+     1.treat |          0  (omitted)
+1.rice_pro~h |          0  (omitted)
+wind_direc~n |   -.282621   .0073767   -38.31   0.000    -.2970791   -.2681628
+av_wind_sp~d |   371.5205    3.67348   101.14   0.000     364.3206    378.7204
+             |
+relative_y~x#|
+       treat |
+        1 1  |  -160.2362   8.128148   -19.71   0.000    -176.1671   -144.3053
+        2 1  |  -12.50348   5.988874    -2.09   0.037    -24.24147   -.7654857
+        3 1  |   52.73387   6.317363     8.35   0.000     40.35205    65.11569
+        4 1  |   10.50515   5.911461     1.78   0.076    -1.081112    22.09142
+        5 1  |   18.76538   5.512211     3.40   0.001     7.961633    29.56913
+        7 1  |  -113.2866   4.562089   -24.83   0.000    -122.2282   -104.3451
+        8 1  |  -213.2955   6.664942   -32.00   0.000    -226.3585   -200.2324
+        9 1  |  -181.6489   5.945035   -30.55   0.000     -193.301   -169.9969
+       10 1  |  -102.5941   5.078465   -20.20   0.000    -112.5477   -92.64045
+       11 1  |  -77.52717   5.600088   -13.84   0.000    -88.50316   -66.55119
+       12 1  |  -68.96571   7.281947    -9.47   0.000    -83.23808   -54.69334
+             |
+relative_y~x#|
+rice_prod_~h |
+        1 1  |   552.6049   18.56631    29.76   0.000     516.2155    588.9942
+        2 1  |   344.1053   14.24961    24.15   0.000     316.1765     372.034
+        3 1  |   212.7803   11.63939    18.28   0.000     189.9675    235.5931
+        4 1  |   110.7686   9.918447    11.17   0.000     91.32879    130.2084
+        5 1  |   43.16755   8.962834     4.82   0.000     25.60069     60.7344
+        7 1  |  -7.496989    7.82703    -0.96   0.338    -22.83771    7.843727
+        8 1  |   -56.4409   8.071875    -6.99   0.000     -72.2615   -40.62029
+        9 1  |  -155.1561   7.913573   -19.61   0.000    -170.6665   -139.6458
+       10 1  |  -202.2749   8.326837   -24.29   0.000    -218.5952   -185.9546
+       11 1  |  -221.8738   9.163668   -24.21   0.000    -239.8343   -203.9133
+       12 1  |  -230.2919   10.10206   -22.80   0.000    -250.0916   -210.4922
+             |
+       treat#|
+rice_prod_~h |
+        1 1  |          0  (omitted)
+             |
+relative_y~x#|
+       treat#|
+rice_prod_~h |
+      1 1 1  |  -606.0415   19.85249   -30.53   0.000    -644.9517   -567.1313
+      2 1 1  |  -404.0845   14.93327   -27.06   0.000    -433.3532   -374.8158
+      3 1 1  |  -381.8539    13.0047   -29.36   0.000    -407.3426   -356.3651
+      4 1 1  |  -278.8714   11.36851   -24.53   0.000    -301.1533   -256.5895
+      5 1 1  |  -196.4245   11.20308   -17.53   0.000    -218.3821   -174.4668
+      7 1 1  |    32.5509   9.936668     3.28   0.001     13.07536    52.02643
+      8 1 1  |   256.2257   14.57292    17.58   0.000     227.6633    284.7881
+      9 1 1  |   125.5819   12.03176    10.44   0.000          102    149.1637
+     10 1 1  |   34.14685   10.36835     3.29   0.001     13.82523    54.46847
+     11 1 1  |   26.55463   11.07871     2.40   0.017     4.840731    48.26853
+     12 1 1  |  -73.49634   12.44398    -5.91   0.000    -97.88612   -49.10656
+------------------------------------------------------------------------------
+
+added scalar:
+              e(ymean) =  92.885683
+
+added scalar:
+             e(ymean2) =  151.68116
+
+added scalar:
+                e(acq) =  807
+
+added macro:
+               e(smpl) : "Rural"
+
+added macro:
+             e(fespec) : "Grid x cohort and month-year x cohort"
+
+added macro:
+                e(mod) : "rice_prod_aclvl_ahigh"
+
+added macro:
+        e(monthyearfe) : "Y"
+
+added macro:
+               e(acfe) : "N"
+
+added macro:
+          e(acmonthfe) : "N"
+
+added macro:
+             e(gridfe) : "Y"
+
+. 
+. local outbase "${tables}/stacked_event_study_5pre_grid_monthyear_fe${sample}_
+> rural${ster_suffix}"
+
+. estwrite `estimate_names' using "`outbase'.ster", replace
+(saving evreg1)
+(saving evreg2)
+(file /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication/.
+> ./../tables/stacked_event_study_5pre_grid_monthyear_fe_rural.ster saved)
+
+. estsave_csv `estimate_names' using "`outbase'.csv", replace
+(25 missing values generated)
+(25 missing values generated)
+(25 missing values generated)
+(25 missing values generated)
+(25 missing values generated)
+(25 missing values generated)
+(25 missing values generated)
+(25 missing values generated)
+(25 missing values generated)
+(25 missing values generated)
+(25 missing values generated)
+(25 missing values generated)
+(25 missing values generated)
+(25 missing values generated)
+(25 missing values generated)
+(25 missing values generated)
+(25 missing values generated)
+(25 missing values generated)
+(25 missing values generated)
+(25 missing values generated)
+(25 missing values generated)
+(25 missing values generated)
+(25 missing values generated)
+(25 missing values generated)
+(25 missing values generated)
+(25 missing values generated)
+(25 missing values generated)
+(49 missing values generated)
+(49 missing values generated)
+(49 missing values generated)
+(49 missing values generated)
+(49 missing values generated)
+(49 missing values generated)
+(49 missing values generated)
+(49 missing values generated)
+(49 missing values generated)
+(49 missing values generated)
+(49 missing values generated)
+(49 missing values generated)
+(49 missing values generated)
+(49 missing values generated)
+(49 missing values generated)
+(49 missing values generated)
+(49 missing values generated)
+(49 missing values generated)
+(49 missing values generated)
+(49 missing values generated)
+(49 missing values generated)
+(49 missing values generated)
+(49 missing values generated)
+(49 missing values generated)
+(49 missing values generated)
+(49 missing values generated)
+(49 missing values generated)
+(49 missing values generated)
+(49 missing values generated)
+(49 missing values generated)
+(49 missing values generated)
+(49 missing values generated)
+(49 missing values generated)
+(49 missing values generated)
+(49 missing values generated)
+(49 missing values generated)
+(49 missing values generated)
+(49 missing values generated)
+(49 missing values generated)
+(49 missing values generated)
+(49 missing values generated)
+(49 missing values generated)
+(49 missing values generated)
+(49 missing values generated)
+(49 missing values generated)
+(49 missing values generated)
+(49 missing values generated)
+(49 missing values generated)
+(49 missing values generated)
+(49 missing values generated)
+(49 missing values generated)
+Estimates exported to /users/aquisper/proj_bureaucrats_farms/code/_stacked_down
+> up_replication/../../tables/stacked_event_study_5pre_grid_monthyear_fe_rural.
+> csv
+
+. 
+. display as result "Saved `outbase'.ster and `outbase'.csv"
+Saved /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication/.
+> ./../tables/stacked_event_study_5pre_grid_monthyear_fe_rural.ster and /users/
+> aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication/../../tables
+> /stacked_event_study_5pre_grid_monthyear_fe_rural.csv
+
+. 
+. 
+end of do-file
