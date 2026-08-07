@@ -22,56 +22,170 @@ Notes:
       4. Maximum number of variables is set to 5,000 but can be increased;
           see help set_maxvar.
 
-. do _main_1_did.do 
+. do /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication/_m
+> ain_1_did.do combined_dt downup_ac main_did_downup_area_ac _stacked 
 
 . *****************************************************************************
 > ***
-. * _main_did_rural.do
-. * Replicates analysis from _main_did.R - RURAL GRIDS ONLY
-. * Generates DiD table with downup_ac treatment
+. * Main stacked DiD: assembly-constituency treatment
+. *
+. * The master runs this file twice:
+. *   combined_dt.csv      / downup_ac      (area-weighted treatment)
+. *   combined_dt_pop.csv  / downup_ac_pop  (population-weighted treatment)
 . *****************************************************************************
 > ***
 . 
-. *****************************************************************************
-> ***
-. * Setup - Only set globals if running standalone (not from master)
-. *****************************************************************************
-> ***
+. * Optional direct-call arguments:
+. *   stacked input stem, treatment variable, output stem, output suffix.
+. args stacked_file_arg downup_var_arg did_output_arg ster_suffix_arg
+
 . 
 . if "$root" == "" {
 .     clear all
 .     set more off
 . 
-.     * Set toggles for standalone run
+.     * Five sbatch-array parameters; defaults apply only to standalone runs.
 .     global location "shell"
 .     global sample ""
+.     global is_rural_var "is_rural"
+.     global fe_list "1/4"
+.     global ster_suffix "_stacked"
 . 
 .     global shell "/groups/sgulzar/sa_fires/proj_bureaucrats_farms"
 .     global dbox "/Users/anzony.quisperojas/Library/CloudStorage/Dropbox/sa_fi
 > res/proj_bureaucrats_farms"
-. 
+.     global code_shell "/users/aquisper/proj_bureaucrats_farms/code/_stacked_d
+> ownup_replication"
+.     global code_dbox "/Users/anzony.quisperojas/Documents/GitHub/proj_bureauc
+> rats_farms/code/_stacked_downup_replication"
 .     if "$location" == "dbox" {
 .         global root "$dbox"
+.         global code "$code_dbox"
 .     }
 .     else {
 .         global root "$shell"
+.         global code "$code_shell"
 .     }
 . }
 
 . 
-. global int_farms "${root}/data_output/intermediate"
+. * Extra switches set by the master; the defaults reproduce the area treatment
+> .
+. if "$stacked_file" == "" {
+.     global stacked_file "combined_dt"
+. }
 
-. global table_farms "${root}/tex/paper/tables"
+. if "$downup_var" == "" {
+.     global downup_var "downup_ac"
+. }
 
-. global figure_farms "${root}/tex/paper/figures"
+. if "$did_output" == "" {
+.     global did_output "main_did_downup_area_ac"
+. }
 
 . 
-. *****************************************************************************
-> ***
-. * Import Data
-. *****************************************************************************
-> ***
+. * Command-line arguments override the defaults when this dofile is launched
+. * directly from a dedicated scheduler script.
+. if "`stacked_file_arg'" != "" {
+.     global stacked_file "`stacked_file_arg'"
+. }
+
+. if "`downup_var_arg'" != "" {
+.     global downup_var "`downup_var_arg'"
+. }
+
+. if "`did_output_arg'" != "" {
+.     global did_output "`did_output_arg'"
+. }
+
+. if "`ster_suffix_arg'" != "" {
+.     global ster_suffix "`ster_suffix_arg'"
+. }
+
 . 
-. import delimited "${root}/data_output/intermediate/combined_dt_pop.csv", clea
-> r
-(encoding automatically selected: ISO-8859-9)
+. global int_data "${root}/data_output/intermediate"
+
+. global tables "${code}/../../tables"
+
+. 
+. import delimited "${int_data}/${stacked_file}${sample}.csv", clear varnames(1
+> )
+(encoding automatically selected: ISO-8859-1)
+(20 vars, 96,776,774 obs)
+
+. 
+. * Always express the fire-count outcome in thousands.
+. capture drop countk
+
+. gen countk = count * 1000
+
+. keep if inrange(relative_monthyear, -6, 5)
+(37,888,683 observations deleted)
+
+. 
+. 
+. merge m:1 unique_small_grid_id using ///
+>     "${int_data}/ghs_grid_classification_2000.dta", ///
+>     keepusing(is_rural) keep(3) nogen
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                             0
+    Matched                        58,888,091  
+    -----------------------------------------
+
+. keep if ${is_rural_var} == 1
+(13,715,376 observations deleted)
+
+. 
+. * Do not drop grids that intersect more than one assembly constituency.
+. * capture confirm variable grids_with_more_1_ac
+. * if _rc {
+. *     merge m:1 unique_small_grid_id using ///
+> *         "${int_data}/grids_with_more_1_ac.dta", keep(master match) nogen
+. *     capture confirm variable dpl_ac
+. *     if !_rc {
+. *         drop if dpl_ac == 1
+. *     }
+. * }
+. keep if year < 2022 | (year == 2022 & month <= 8)
+(8,063,338 observations deleted)
+
+. 
+. capture confirm variable treat
+
+. if _rc {
+.     bysort unique_small_grid_id: egen byte treat = max(${downup_var})
+. }
+
+. gen byte moderator = 0
+
+. 
+. capture confirm numeric variable unique_small_grid_id
+
+. if _rc {
+.     encode unique_small_grid_id, gen(grid_id)
+. }
+
+. else {
+.     gen grid_id = unique_small_grid_id
+. }
+
+. 
+. capture confirm numeric variable ac_uq_id
+
+. if _rc {
+.     encode ac_uq_id, gen(ac_id)
+. }
+
+. else {
+.     gen ac_id = ac_uq_id
+. }
+
+. 
+. quietly summarize countk if treat == 1 & relative_year_bin <= -1
+relative_year_bin not found
+r(111);
+
+end of do-file
+r(111);
