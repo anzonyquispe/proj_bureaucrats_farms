@@ -19,6 +19,11 @@ month-year-by-cohort fixed effects. The population variants currently cover:
 All use `downup_ac_pop`, event months -6 through +5, omit -1, and retain six
 pretreatment coefficients.
 
+The `event_study/omit_period_0` subdirectory contains a parallel five-model
+population family that instead omits relative month 0. It includes the main
+AC-by-month-year specification and every grid/month-year robustness listed
+above, without modifying the period--1-normalized results.
+
 ## de Chaisemartin population analyses
 
 The `dcdh_pop` directory is a population-only copy of the earlier

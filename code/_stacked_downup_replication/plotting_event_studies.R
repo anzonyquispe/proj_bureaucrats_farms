@@ -380,78 +380,78 @@ s <- args$sample
 #   id, csv_stem, model, rows, columns, and figure_base.
 # csv_stem excludes the optional sample suffix and trailing "_rural.csv".
 event_cases <- list(
-  event_case(
-    id = "legacy_main_baseline",
-    csv_stem = "main_event_study", model = "evreg1",
-    rows = c(6:1, 7:12), columns = c(3, 4, 10:5, 11:16),
-    figure_base = "main_event_study_rural_1",
-    pre = 6, post = 6, omitted = 0,
-    ylim_original = c(-30, 20), ylim_rotated = c(-40, 30),
-    required = FALSE
-  ),
-  event_case(
-    id = "legacy_main_rice",
-    csv_stem = "main_event_study", model = "evreg4",
-    rows = c(18:13, 19:24), columns = c(3, 4, 22:17, 23:28),
-    figure_base = "main_event_study_rural_riceP",
-    pre = 6, post = 6, omitted = 0,
-    ylim_original = c(-80, 50), ylim_rotated = c(-80, 50),
-    required = FALSE
-  ),
-  event_case(
-    id = "stacked_area_baseline",
-    csv_stem = "stacked_event_study_5pre", model = "evreg1",
-    rows = 15:25, columns = c(3, 4, 19:29),
-    figure_base = "stacked_event_study_5pre_rural_1",
-    pre = 6, post = 6,
-    ylim_original = c(-40, 20), ylim_rotated = c(-40, 30)
-  ),
-  event_case(
-    id = "stacked_population_baseline",
-    csv_stem = "stacked_event_study_pop_5pre", model = "evreg1",
-    rows = 15:25, columns = c(3, 4, 19:29),
-    figure_base = "stacked_event_study_pop_5pre_rural_1",
-    pre = 6, post = 6,
-    ylim_original = c(-40, 20), ylim_rotated = c(-40, 30)
-  ),
-  event_case(
-    id = "stacked_population_rice",
-    csv_stem = "stacked_event_study_pop_5pre", model = "evreg2",
-    rows = 39:49, columns = c(3, 4, 43:53),
-    figure_base = "stacked_event_study_pop_5pre_rural_riceP",
-    pre = 6, post = 6,
-    ylim_original = c(-80, 50), ylim_rotated = c(-80, 50)
-  ),
-
-  # Latest specification: grid x cohort and month-year x cohort FEs only.
-  event_case(
-    id = "grid_monthyear_area_baseline",
-    csv_stem = "stacked_event_study_5pre_grid_monthyear_fe",
-    model = "evreg1", rows = 15:25, columns = c(3, 4, 19:29),
-    figure_base = "stacked_event_study_5pre_grid_monthyear_fe_rural_1",
-    pre = 6, post = 6
-  ),
-  event_case(
-    id = "grid_monthyear_area_rice",
-    csv_stem = "stacked_event_study_5pre_grid_monthyear_fe",
-    model = "evreg2", rows = 39:49, columns = c(3, 4, 43:53),
-    figure_base = "stacked_event_study_5pre_grid_monthyear_fe_rural_riceP",
-    pre = 6, post = 6
-  ),
-  event_case(
-    id = "grid_monthyear_population_baseline",
-    csv_stem = "stacked_event_study_pop_5pre_grid_monthyear_fe",
-    model = "evreg1", rows = 15:25, columns = c(3, 4, 19:29),
-    figure_base = "stacked_event_study_pop_5pre_grid_monthyear_fe_rural_1",
-    pre = 6, post = 6
-  ),
-  event_case(
-    id = "grid_monthyear_population_rice",
-    csv_stem = "stacked_event_study_pop_5pre_grid_monthyear_fe",
-    model = "evreg2", rows = 39:49, columns = c(3, 4, 43:53),
-    figure_base = "stacked_event_study_pop_5pre_grid_monthyear_fe_rural_riceP",
-    pre = 6, post = 6
-  ),
+  # event_case(
+  #   id = "legacy_main_baseline",
+  #   csv_stem = "main_event_study", model = "evreg1",
+  #   rows = c(6:1, 7:12), columns = c(3, 4, 10:5, 11:16),
+  #   figure_base = "main_event_study_rural_1",
+  #   pre = 6, post = 6, omitted = 0,
+  #   ylim_original = c(-30, 20), ylim_rotated = c(-40, 30),
+  #   required = FALSE
+  # ),
+  # event_case(
+  #   id = "legacy_main_rice",
+  #   csv_stem = "main_event_study", model = "evreg4",
+  #   rows = c(18:13, 19:24), columns = c(3, 4, 22:17, 23:28),
+  #   figure_base = "main_event_study_rural_riceP",
+  #   pre = 6, post = 6, omitted = 0,
+  #   ylim_original = c(-80, 50), ylim_rotated = c(-80, 50),
+  #   required = FALSE
+  # ),
+  # event_case(
+  #   id = "stacked_area_baseline",
+  #   csv_stem = "stacked_event_study_5pre", model = "evreg1",
+  #   rows = 15:25, columns = c(3, 4, 19:29),
+  #   figure_base = "stacked_event_study_5pre_rural_1",
+  #   pre = 6, post = 6,
+  #   ylim_original = c(-40, 20), ylim_rotated = c(-40, 30)
+  # ),
+  # event_case(
+  #   id = "stacked_population_baseline",
+  #   csv_stem = "stacked_event_study_pop_5pre", model = "evreg1",
+  #   rows = 15:25, columns = c(3, 4, 19:29),
+  #   figure_base = "stacked_event_study_pop_5pre_rural_1",
+  #   pre = 6, post = 6,
+  #   ylim_original = c(-40, 20), ylim_rotated = c(-40, 30)
+  # ),
+  # event_case(
+  #   id = "stacked_population_rice",
+  #   csv_stem = "stacked_event_study_pop_5pre", model = "evreg2",
+  #   rows = 39:49, columns = c(3, 4, 43:53),
+  #   figure_base = "stacked_event_study_pop_5pre_rural_riceP",
+  #   pre = 6, post = 6,
+  #   ylim_original = c(-80, 50), ylim_rotated = c(-80, 50)
+  # ),
+  #
+  # # Latest specification: grid x cohort and month-year x cohort FEs only.
+  # event_case(
+  #   id = "grid_monthyear_area_baseline",
+  #   csv_stem = "stacked_event_study_5pre_grid_monthyear_fe",
+  #   model = "evreg1", rows = 15:25, columns = c(3, 4, 19:29),
+  #   figure_base = "stacked_event_study_5pre_grid_monthyear_fe_rural_1",
+  #   pre = 6, post = 6
+  # ),
+  # event_case(
+  #   id = "grid_monthyear_area_rice",
+  #   csv_stem = "stacked_event_study_5pre_grid_monthyear_fe",
+  #   model = "evreg2", rows = 39:49, columns = c(3, 4, 43:53),
+  #   figure_base = "stacked_event_study_5pre_grid_monthyear_fe_rural_riceP",
+  #   pre = 6, post = 6
+  # ),
+  # event_case(
+  #   id = "grid_monthyear_population_baseline",
+  #   csv_stem = "stacked_event_study_pop_5pre_grid_monthyear_fe",
+  #   model = "evreg1", rows = 15:25, columns = c(3, 4, 19:29),
+  #   figure_base = "stacked_event_study_pop_5pre_grid_monthyear_fe_rural_1",
+  #   pre = 6, post = 6
+  # ),
+  # event_case(
+  #   id = "grid_monthyear_population_rice",
+  #   csv_stem = "stacked_event_study_pop_5pre_grid_monthyear_fe",
+  #   model = "evreg2", rows = 39:49, columns = c(3, 4, 43:53),
+  #   figure_base = "stacked_event_study_pop_5pre_grid_monthyear_fe_rural_riceP",
+  #   pre = 6, post = 6
+  # ),
 
   # Robustness 1: no controls; grid and month-year two-way clustering.
   event_case(
@@ -460,7 +460,7 @@ event_cases <- list(
       "stacked_event_study_pop_5pre_grid_monthyear_fe_",
       "nocontrols_gridmonth_cluster"
     ),
-    model = "evreg1", rows = 15:25, columns = c(3, 4, 19:29),
+    model = "evreg1", rows = 13:23, columns = c(3, 4, 17:27),
     figure_base = paste0(
       "stacked_event_study_pop_5pre_grid_monthyear_fe_",
       "nocontrols_gridmonth_cluster_rural_1"
@@ -473,7 +473,7 @@ event_cases <- list(
       "stacked_event_study_pop_5pre_grid_monthyear_fe_",
       "nocontrols_gridmonth_cluster"
     ),
-    model = "evreg2", rows = 39:49, columns = c(3, 4, 43:53),
+    model = "evreg2", rows = 37:47, columns = c(3, 4, 41:51),
     figure_base = paste0(
       "stacked_event_study_pop_5pre_grid_monthyear_fe_",
       "nocontrols_gridmonth_cluster_rural_riceP"
@@ -485,7 +485,7 @@ event_cases <- list(
   event_case(
     id = "gm_pop_nocontrols_cohort_cluster_baseline",
     csv_stem = "stacked_event_study_pop_5pre_grid_monthyear_fe_nocontrols",
-    model = "evreg1", rows = 15:25, columns = c(3, 4, 19:29),
+    model = "evreg1", rows = 13:23, columns = c(3, 4, 17:27),
     figure_base = paste0(
       "stacked_event_study_pop_5pre_grid_monthyear_fe_",
       "nocontrols_rural_1"
@@ -495,7 +495,7 @@ event_cases <- list(
   event_case(
     id = "gm_pop_nocontrols_cohort_cluster_rice",
     csv_stem = "stacked_event_study_pop_5pre_grid_monthyear_fe_nocontrols",
-    model = "evreg2", rows = 39:49, columns = c(3, 4, 43:53),
+    model = "evreg2", rows = 37:47, columns = c(3, 4, 41:51),
     figure_base = paste0(
       "stacked_event_study_pop_5pre_grid_monthyear_fe_",
       "nocontrols_rural_riceP"
