@@ -46,17 +46,8 @@ import delimited "${int_data}/${stacked_file}${sample}.csv", clear varnames(1)
 * Always express the fire-count outcome in thousands.
 capture drop countk
 gen countk = count * 1000
+keep if inrange(relative_monthyear, -6, 5)
 
-capture confirm variable relative_year_bin
-if _rc {
-    capture confirm variable relative_year
-    if !_rc {
-        gen relative_year_bin = relative_year
-    }
-    else {
-        gen relative_year_bin = floor(relative_monthyear / 12)
-    }
-}
 
 merge m:1 unique_small_grid_id using ///
     "${int_data}/ghs_grid_classification_2000.dta", ///
@@ -115,18 +106,34 @@ local estimates ""
 foreach fe of numlist $fe_list {
     if `fe' == 1 {
         reg countk ${downup_var} `controls', vce(cluster grid_id)
+        local monthyearfe "N"
+        local acfe "N"
+        local acmonthfe "N"
+        local gridfe "N"
     }
     else if `fe' == 2 {
         reghdfejl countk ${downup_var} `controls', ///
             absorb(ac_id#cohort monthyear#cohort) cluster(`cluster')
+        local monthyearfe "Y"
+        local acfe "Y"
+        local acmonthfe "N"
+        local gridfe "N"
     }
     else if `fe' == 3 {
         reghdfejl countk ${downup_var} `controls', ///
             absorb(ac_id#monthyear#cohort) cluster(`cluster')
+        local monthyearfe "N"
+        local acfe "N"
+        local acmonthfe "Y"
+        local gridfe "N"
     }
     else if `fe' == 4 {
         reghdfejl countk ${downup_var} `controls', ///
             absorb(grid_id#cohort ac_id#monthyear#cohort) cluster(`cluster')
+        local monthyearfe "N"
+        local acfe "N"
+        local acmonthfe "Y"
+        local gridfe "Y"
     }
     else {
         display as error "Unsupported FE specification `fe'; use 1/4."
@@ -138,6 +145,10 @@ foreach fe of numlist $fe_list {
     estadd scalar acq = `numacs'
     estadd local smpl "Rural"
     estadd local fespec "`fespec`fe''"
+    estadd local monthyearfe "`monthyearfe'"
+    estadd local acfe "`acfe'"
+    estadd local acmonthfe "`acmonthfe'"
+    estadd local gridfe "`gridfe'"
     local estimates `estimates' eq`fe'
     est store eq`fe'
 }

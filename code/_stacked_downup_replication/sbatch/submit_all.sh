@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Submit every active-result dofile as its own job, then dependency-controlled
-# Stata/R/Python post-processing and the final main.tex output verification.
+# Submit cluster estimation and data-dependent figure jobs. Ster-to-CSV export,
+# LaTeX tables, and event-study R plots are intentionally run locally.
 
 set -euo pipefail
 
@@ -71,25 +71,7 @@ submit_stata() {
     "${downup}" "${stacked}" "${output}"
 }
 
-submit_final_audit() {
-  local dependency="$1"
-  local id
-  if [[ "${scheduler}" == "slurm" ]]; then
-    id=$(sbatch --parsable --job-name=verify_main_outputs --cpus-per-task=1 \
-      --dependency="afterany:${dependency}" sbatch/run_python.sbatch \
-      audit_main_outputs.py "${REPLICATION_ROOT}" "${REPLICATION_CODE}" \
-      "${SAMPLE}" "${RURAL_VAR}")
-    id="${id%%;*}"
-  else
-    id=$(qsub -terse -V -N verify_main_outputs -hold_jid "${dependency}" \
-      sbatch/run_python.sbatch audit_main_outputs.py "${REPLICATION_ROOT}" \
-      "${REPLICATION_CODE}" "${SAMPLE}" "${RURAL_VAR}")
-  fi
-  echo "Submitted verify_main_outputs: ${id}" >&2
-  printf '%s' "${id}"
-}
-
-declare -a table_ids event_ids interaction_ids neighbour_ids final_ids
+declare -a table_ids event_ids interaction_ids neighbour_ids
 
 # Main and appendix table estimates. Each call is a distinct scheduler job.
 table_ids+=("$(submit_stata main_did_area _main_1_did.do 1/4 _stacked downup_ac combined_dt main_did_downup_area_ac)")
@@ -127,25 +109,16 @@ interaction_ids+=("$(submit_stata politician_inter_pop _app_19_polischar_fe12_di
 # Neighbour estimate is one job; its graph is a dependent second dofile job.
 neighbour_ids+=("$(submit_stata neighbour_estimate _main_6_neighbour.do 1 none)")
 
-table_dep=$(join_ids : "${table_ids[@]}")
-event_dep=$(join_ids : "${event_ids[@]}")
 interaction_dep=$(join_ids : "${interaction_ids[@]}")
 neighbour_dep=$(join_ids : "${neighbour_ids[@]}")
 if [[ "${scheduler}" == "sge" ]]; then
-  table_dep=$(join_ids , "${table_ids[@]}")
-  event_dep=$(join_ids , "${event_ids[@]}")
   interaction_dep=$(join_ids , "${interaction_ids[@]}")
   neighbour_dep=$(join_ids , "${neighbour_ids[@]}")
 fi
 
-tables_job=$(submit_job generate_tables sbatch/run_dofile.sbatch "${table_dep}" 1 \
-  _generate_all_tables.do "${REPLICATION_ROOT}" "${REPLICATION_CODE}" "${LOCATION}" \
-  "${SAMPLE}" "${RURAL_VAR}" 1 none none none none)
-event_export_job=$(submit_job export_event_csv sbatch/run_dofile.sbatch "${event_dep}" 1 \
-  _export_event_study_csv.do "${REPLICATION_ROOT}" "${REPLICATION_CODE}" "${LOCATION}" \
-  "${SAMPLE}" "${RURAL_VAR}" 1 none none none none)
-event_plot_job=$(submit_job event_plots sbatch/run_r.sbatch "${event_export_job}" 1 \
-  "${REPLICATION_ROOT}" "${REPLICATION_CODE}" "${SAMPLE}")
+# LaTeX tables, event-study CSV export, and event-study R figures are local
+# post-processing steps. They consume the synchronized repository-level .ster
+# files through _run_local_ster_postprocessing.do and plotting_event_studies.R.
 interaction_plot_job=$(submit_job interaction_plots sbatch/run_dofile.sbatch "${interaction_dep}" 1 \
   _generate_interaction_plots.do "${REPLICATION_ROOT}" "${REPLICATION_CODE}" "${LOCATION}" \
   "${SAMPLE}" "${RURAL_VAR}" 1 none none none none)
@@ -161,13 +134,7 @@ desc_fig_job=$(submit_job descriptive_figures sbatch/run_python.sbatch "" 1 \
 protest_fig_job=$(submit_job protest_figures sbatch/run_python.sbatch "" 1 \
   generate_protest_figures.py "${REPLICATION_ROOT}" "${REPLICATION_CODE}" "${SAMPLE}" "${RURAL_VAR}")
 
-final_ids=("${tables_job}" "${event_plot_job}" "${interaction_plot_job}" \
-  "${neighbour_plot_job}" "${design_job}" "${desc_fig_job}" "${protest_fig_job}")
-final_dep=$(join_ids : "${final_ids[@]}")
-if [[ "${scheduler}" == "sge" ]]; then final_dep=$(join_ids , "${final_ids[@]}"); fi
-
-audit_job=$(submit_final_audit "${final_dep}")
-
 echo "Scheduler: ${scheduler}"
-echo "Final verification job: ${audit_job}"
+echo "Cluster estimation jobs submitted."
+echo "Run local .ster post-processing after synchronizing the tables folder."
 echo "Logs: ${REPLICATION_CODE}/logs"

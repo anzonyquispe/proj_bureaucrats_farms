@@ -151,9 +151,8 @@ global ster_suffix "_acpop"
 do "${code}/_app_16_polischar_fe12_evst_all.do"
 do "${code}/_app_17_5km_fe12_evst_all.do"
 
-* Re-export every event-study result from its .ster file using explicit stored
-* estimate names. This also provides a single recovery step for CSV outputs.
-do "${code}/_export_event_study_csv.do"
+* Event-study CSV export is local post-processing after .ster synchronization:
+* _run_local_ster_postprocessing.do
 
 ********************************************************************************
 * 5. New 13 km placebo stack and neighbour-border analysis
@@ -174,17 +173,20 @@ do "${code}/_main_6_neighbour_plot.do"
 do "${code}/_generate_interaction_plots.do"
 
 ********************************************************************************
-* 6. Render all LaTeX tables from .ster files
+* 6. Local post-processing handoff
 ********************************************************************************
 
-do "${code}/_generate_all_tables.do"
+* LaTeX table generation is intentionally not part of the cluster pipeline.
+* Run _run_local_ster_postprocessing.do on the local computer after all .ster
+* files have been synchronized into the repository-level tables folder.
 
 global fe_list "`requested_fe_list'"
 global ster_suffix "`requested_ster_suffix'"
 
 display "============================================================"
 display "STATA REPLICATION COMPLETED: $S_DATE $S_TIME"
-display "Run plotting_event_studies.R next for all event-study and HonestDiD figures."
+display "Synchronize .ster files, then run _run_local_ster_postprocessing.do locally."
+display "Run plotting_event_studies.R locally after the CSV export."
 display "============================================================"
 
 log close

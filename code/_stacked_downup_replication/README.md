@@ -107,11 +107,27 @@ parallel SGE jobs, run the launcher from the code directory:
 bash sbatch/submit_recovery_jobs.sh
 ```
 
-Do not submit this launcher itself with `qsub`. It calls `qsub` on twelve
+Do not submit this launcher itself with `qsub`. It calls `qsub` on nine
 separate, fixed-stage files named `recover_01_...sbatch` through
-`recover_12_...sbatch`. Nine independent Stata estimations are submitted
-immediately; `-hold_jid` dependencies ensure that table generation, event-CSV
-export, and event plotting start only when their respective inputs exist.
+`recover_09_...sbatch`. These cluster jobs only generate `.ster` estimates.
+
+After copying or synchronizing all `.ster` files into the repository-level
+`tables` folder, run the CSV and LaTeX post-processing locally in Stata:
+
+```stata
+do "C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/code/_stacked_downup_replication/_run_local_ster_postprocessing.do"
+```
+
+Then generate the event-study figures locally from PowerShell:
+
+```powershell
+& "C:\Users\eunic\OneDrive\Documents\GitHub\proj_bureaucrats_farms\code\_stacked_downup_replication\run_local_event_plots.ps1"
+```
+
+The plotting runner generates every figure supported by the CSV files present
+locally. Missing `controls_both` or `controls_notyet` files are reported and
+skipped; after those `.ster` files are synchronized and the local Stata export
+is rerun, invoking the same PowerShell script automatically adds their figures.
 
 ## Table and event-plot structure
 

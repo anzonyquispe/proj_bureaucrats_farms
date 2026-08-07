@@ -12,15 +12,16 @@ set more off
 
 if "$root" == "" {
     clear all
-    global location "shell"
+    set more off
+    global location "dbox"
     global sample ""
     global is_rural_var "is_rural"
     global fe_list "1"
     global ster_suffix ""
     global shell "/groups/sgulzar/sa_fires/proj_bureaucrats_farms"
-    global dbox "/Users/anzony.quisperojas/Library/CloudStorage/Dropbox/sa_fires/proj_bureaucrats_farms"
+    global dbox "C:/Users/eunic/Dropbox/sa_fires/proj_bureaucrats_farms"
     global code_shell "/users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication"
-    global code_dbox "/Users/anzony.quisperojas/Documents/GitHub/proj_bureaucrats_farms/code/_stacked_downup_replication"
+    global code_dbox "C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/code/_stacked_downup_replication"
     if "$location" == "dbox" {
         global root "$dbox"
         global code "$code_dbox"
@@ -32,6 +33,11 @@ if "$root" == "" {
 }
 
 global tables "${code}/../../tables"
+
+* The common cluster bridge may already have defined the program. Dropping it
+* makes this dofile safe both as a standalone local job and after another
+* dofile has loaded the same ado in the current Stata session.
+capture program drop estsave_csv
 quietly do "${code}/estsave_csv.ado"
 
 capture which estread

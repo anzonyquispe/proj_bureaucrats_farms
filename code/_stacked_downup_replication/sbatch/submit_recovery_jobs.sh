@@ -28,14 +28,6 @@ submit() {
   printf '%s' "${id}"
 }
 
-submit_after() {
-  local dependency="$1" script="$2"
-  local id
-  id=$(qsub -terse -V -hold_jid "${dependency}" "${SBATCH_DIR}/${script}")
-  echo "Submitted ${script} after ${dependency}: ${id}" >&2
-  printf '%s' "${id}"
-}
-
 # These nine jobs are independent. They are all submitted without holds.
 table_1=$(submit recover_01_main_did_area.sbatch)
 table_2=$(submit recover_02_main_did_pop.sbatch)
@@ -47,17 +39,8 @@ table_7=$(submit recover_07_did_by_state.sbatch)
 event_1=$(submit recover_08_event_main_area.sbatch)
 event_2=$(submit recover_09_event_main_pop.sbatch)
 
-table_dependency="${table_1},${table_2},${table_3},${table_4},${table_5},${table_6},${table_7}"
-event_dependency="${event_1},${event_2}"
-
-# Post-processing waits only for the files it consumes.
-table_job=$(submit_after "${table_dependency}" recover_10_generate_tables.sbatch)
-event_csv_job=$(submit_after "${event_dependency}" recover_11_export_event_csv.sbatch)
-event_plot_job=$(submit_after "${event_csv_job}" recover_12_event_plots.sbatch)
-
 echo
 echo "Nine independent estimation jobs were submitted in parallel."
-echo "Table job (held): ${table_job}"
-echo "Event CSV job (held): ${event_csv_job}"
-echo "Event plot job (held): ${event_plot_job}"
+echo "This cluster workflow stops after producing .ster files."
+echo "Run _run_local_ster_postprocessing.do and plotting_event_studies.R locally."
 echo "Inspect them with: qstat -u ${USER:-your_username}"

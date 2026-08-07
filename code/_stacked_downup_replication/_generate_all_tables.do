@@ -27,17 +27,21 @@ if "$root" == "" {
     clear all
     set more off
 
-    global location "shell"
+    global location "dbox"
     global sample ""
 
     global shell "/groups/sgulzar/sa_fires/proj_bureaucrats_farms"
-    global dbox "/Users/anzony.quisperojas/Library/CloudStorage/Dropbox/sa_fires/proj_bureaucrats_farms"
+    global dbox "C:/Users/eunic/Dropbox/sa_fires/proj_bureaucrats_farms"
+    global code_shell "/users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication"
+    global code_dbox "C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/code/_stacked_downup_replication"
 
     if "$location" == "dbox" {
         global root "$dbox"
+        global code "$code_dbox"
     }
     else {
         global root "$shell"
+        global code "$code_shell"
     }
 }
 
@@ -501,7 +505,8 @@ esttab eq7 using ///
     "${tables}/_app_6_main_did_treat_definition${sample}_rural_acpop_new3.tex", ///
     replace cells(b(fmt(3) star) se(par fmt(3))) ///
     star(* 0.10 ** 0.05 *** 0.01) ///
-    keep(downup_ac_pop 1.rice_prod_aclvl_ahigh 1.rice_prod_aclvl_ahigh#c.downup_ac_pop) ///
+    keep(1.downup_ac_pop 1.rice_prod_aclvl_ahigh ///
+         1.downup_ac_pop#1.rice_prod_aclvl_ahigh) ///
     stats(N acq ymean, fmt(%12.0fc %12.0fc 3) ///
           labels("Observations" "N Assembly Constituencies" "Mean DV")) ///
     nomtitles nonumbers collabels(none) nobaselevels

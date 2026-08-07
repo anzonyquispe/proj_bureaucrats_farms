@@ -272,12 +272,14 @@ for (analysis_suffix in c("", "_acpop")) {
         paste0(politician_stem, ".csv"), paste0("evreg", model_index),
         rows, columns, paste0(politician_stem, "_", moderator_names[[model_index]]),
         5, 5, -1, "Time from Treatment (years)",
-        if (model_index == 1L) c(-20, 50) else NULL, NULL
+        if (model_index == 1L) c(-20, 50) else NULL, NULL,
+        required = identical(control_suffix, "")
       )
       run_case(
         paste0(protest_stem, ".csv"), paste0("evreg", model_index),
         rows, columns, paste0(protest_stem, "_", moderator_names[[model_index]]),
-        8, 2, -1, "Time from Treatment (years)"
+        8, 2, -1, "Time from Treatment (years)",
+        required = identical(control_suffix, "")
       )
     }
   }
