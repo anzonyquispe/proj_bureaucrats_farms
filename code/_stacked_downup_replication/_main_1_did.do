@@ -6,6 +6,10 @@
 *   combined_dt_pop.csv  / downup_ac_pop  (population-weighted treatment)
 ********************************************************************************
 
+* Optional direct-call arguments:
+*   stacked input stem, treatment variable, output stem, output suffix.
+args stacked_file_arg downup_var_arg did_output_arg ster_suffix_arg
+
 if "$root" == "" {
     clear all
     set more off
@@ -19,11 +23,15 @@ if "$root" == "" {
 
     global shell "/groups/sgulzar/sa_fires/proj_bureaucrats_farms"
     global dbox "/Users/anzony.quisperojas/Library/CloudStorage/Dropbox/sa_fires/proj_bureaucrats_farms"
+    global code_shell "/users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication"
+    global code_dbox "/Users/anzony.quisperojas/Documents/GitHub/proj_bureaucrats_farms/code/_stacked_downup_replication"
     if "$location" == "dbox" {
         global root "$dbox"
+        global code "$code_dbox"
     }
     else {
         global root "$shell"
+        global code "$code_shell"
     }
 }
 
@@ -36,6 +44,21 @@ if "$downup_var" == "" {
 }
 if "$did_output" == "" {
     global did_output "main_did_downup_area_ac"
+}
+
+* Command-line arguments override the defaults when this dofile is launched
+* directly from a dedicated scheduler script.
+if "`stacked_file_arg'" != "" {
+    global stacked_file "`stacked_file_arg'"
+}
+if "`downup_var_arg'" != "" {
+    global downup_var "`downup_var_arg'"
+}
+if "`did_output_arg'" != "" {
+    global did_output "`did_output_arg'"
+}
+if "`ster_suffix_arg'" != "" {
+    global ster_suffix "`ster_suffix_arg'"
 }
 
 global int_data "${root}/data_output/intermediate"
