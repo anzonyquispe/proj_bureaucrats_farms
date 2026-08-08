@@ -229,9 +229,16 @@ plot_event <- function(event_data, file_base, num_pre, num_post,
   full[, `:=`(lower = beta - 1.96 * se, upper = beta + 1.96 * se)]
   pre <- mean_test(event_data$beta, vcov, pre_idx)
   post <- mean_test(event_data$beta, vcov, post_idx)
-  annotation <- sprintf(
-    "Mean DV = %.3f\nPre Avg = %.3f (%.3f)\nPost Avg = %.3f (%.3f)",
-    dep_mean, pre[["estimate"]], pre[["se"]], post[["estimate"]], post[["se"]]
+  annotation_labels <- c(
+    sprintf("Mean DV = %.3f", dep_mean),
+    sprintf("Pre Avg = %.3f (%.3f)", pre[["estimate"]], pre[["se"]]),
+    sprintf("Post Avg = %.3f (%.3f)", post[["estimate"]], post[["se"]])
+  )
+  original_range <- diff(range(c(full$lower, full$upper), na.rm = TRUE))
+  annotation_data <- data.table(
+    time = min(full$time),
+    value = max(full$upper, na.rm = TRUE) - (0:2) * original_range * 0.07,
+    label = annotation_labels
   )
 
   plot_theme <- theme_classic(base_size = 12) +
@@ -248,9 +255,10 @@ plot_event <- function(event_data, file_base, num_pre, num_post,
     geom_hline(yintercept = 0, linetype = "dashed", colour = "purple") +
     scale_x_continuous(breaks = seq(min(full$time), max(full$time))) +
     labs(x = xlab, y = "Effect on Number of Fires (in 1,000 units)") +
-    annotate(
-      "text", x = -Inf, y = Inf, hjust = -0.1, vjust = 1.1,
-      label = annotation, size = 4
+    geom_text(
+      data = annotation_data,
+      aes(x = time, y = value, label = label),
+      inherit.aes = FALSE, hjust = 0, vjust = 1, size = 4
     ) +
     plot_theme
   if (!is.null(ylim_original)) original <- original + coord_cartesian(ylim = ylim_original)
@@ -265,6 +273,12 @@ plot_event <- function(event_data, file_base, num_pre, num_post,
     lower_rot = rotated - 1.96 * se,
     upper_rot = rotated + 1.96 * se
   )]
+  rotated_range <- diff(range(c(full$lower_rot, full$upper_rot), na.rm = TRUE))
+  rotated_annotation_data <- data.table(
+    time = min(full$time),
+    value = max(full$upper_rot, na.rm = TRUE) - (0:2) * rotated_range * 0.07,
+    label = annotation_labels
+  )
   rotated_plot <- ggplot(full, aes(time, rotated)) +
     geom_ribbon(
       aes(ymin = lower_rot, ymax = upper_rot),
@@ -276,9 +290,10 @@ plot_event <- function(event_data, file_base, num_pre, num_post,
     geom_hline(yintercept = 0, linetype = "dashed", colour = "purple") +
     scale_x_continuous(breaks = seq(min(full$time), max(full$time))) +
     labs(x = xlab, y = "Detrended Effect on Number of Fires (in 1,000 units)") +
-    annotate(
-      "text", x = -Inf, y = Inf, hjust = -0.1, vjust = 1.1,
-      label = annotation, size = 4
+    geom_text(
+      data = rotated_annotation_data,
+      aes(x = time, y = value, label = label),
+      inherit.aes = FALSE, hjust = 0, vjust = 1, size = 4
     ) +
     plot_theme
   if (!is.null(ylim_rotated)) {
@@ -529,6 +544,128 @@ event_cases <- list(
       "gridmonth_cluster_rural_riceP"
     ),
     pre = 6, post = 6, required = FALSE
+  ),
+
+  # Omit-period-0 family: main AC x month-year specification.
+  event_case(
+    id = "omit0_main_population_baseline",
+    csv_stem = "stacked_event_study_pop_5pre_omit0",
+    model = "evreg1", rows = 15:25, columns = c(3, 4, 19:29),
+    figure_base = "stacked_event_study_pop_5pre_omit0_rural_1",
+    pre = 6, post = 5, omitted = 0, required = FALSE
+  ),
+  event_case(
+    id = "omit0_main_population_rice",
+    csv_stem = "stacked_event_study_pop_5pre_omit0",
+    model = "evreg2", rows = 39:49, columns = c(3, 4, 43:53),
+    figure_base = "stacked_event_study_pop_5pre_omit0_rural_riceP",
+    pre = 6, post = 5, omitted = 0, required = FALSE
+  ),
+
+  # Omit-period-0 family: grid and month-year FEs, original clustering.
+  event_case(
+    id = "omit0_grid_monthyear_population_baseline",
+    csv_stem = "stacked_event_study_pop_5pre_grid_monthyear_fe_omit0",
+    model = "evreg1", rows = 15:25, columns = c(3, 4, 19:29),
+    figure_base = paste0(
+      "stacked_event_study_pop_5pre_grid_monthyear_fe_",
+      "omit0_rural_1"
+    ),
+    pre = 6, post = 5, omitted = 0, required = FALSE
+  ),
+  event_case(
+    id = "omit0_grid_monthyear_population_rice",
+    csv_stem = "stacked_event_study_pop_5pre_grid_monthyear_fe_omit0",
+    model = "evreg2", rows = 39:49, columns = c(3, 4, 43:53),
+    figure_base = paste0(
+      "stacked_event_study_pop_5pre_grid_monthyear_fe_",
+      "omit0_rural_riceP"
+    ),
+    pre = 6, post = 5, omitted = 0, required = FALSE
+  ),
+
+  # Omit-period-0 family: no controls, original clustering.
+  event_case(
+    id = "omit0_gm_nocontrols_cohort_cluster_baseline",
+    csv_stem = paste0(
+      "stacked_event_study_pop_5pre_grid_monthyear_fe_",
+      "nocontrols_omit0"
+    ),
+    model = "evreg1", rows = 13:23, columns = c(3, 4, 17:27),
+    figure_base = paste0(
+      "stacked_event_study_pop_5pre_grid_monthyear_fe_",
+      "nocontrols_omit0_rural_1"
+    ),
+    pre = 6, post = 5, omitted = 0, required = FALSE
+  ),
+  event_case(
+    id = "omit0_gm_nocontrols_cohort_cluster_rice",
+    csv_stem = paste0(
+      "stacked_event_study_pop_5pre_grid_monthyear_fe_",
+      "nocontrols_omit0"
+    ),
+    model = "evreg2", rows = 37:47, columns = c(3, 4, 41:51),
+    figure_base = paste0(
+      "stacked_event_study_pop_5pre_grid_monthyear_fe_",
+      "nocontrols_omit0_rural_riceP"
+    ),
+    pre = 6, post = 5, omitted = 0, required = FALSE
+  ),
+
+  # Omit-period-0 family: controls, grid/month-year clustering.
+  event_case(
+    id = "omit0_gm_controls_gridmonth_cluster_baseline",
+    csv_stem = paste0(
+      "stacked_event_study_pop_5pre_grid_monthyear_fe_",
+      "gridmonth_cluster_omit0"
+    ),
+    model = "evreg1", rows = 15:25, columns = c(3, 4, 19:29),
+    figure_base = paste0(
+      "stacked_event_study_pop_5pre_grid_monthyear_fe_",
+      "gridmonth_cluster_omit0_rural_1"
+    ),
+    pre = 6, post = 5, omitted = 0, required = FALSE
+  ),
+  event_case(
+    id = "omit0_gm_controls_gridmonth_cluster_rice",
+    csv_stem = paste0(
+      "stacked_event_study_pop_5pre_grid_monthyear_fe_",
+      "gridmonth_cluster_omit0"
+    ),
+    model = "evreg2", rows = 39:49, columns = c(3, 4, 43:53),
+    figure_base = paste0(
+      "stacked_event_study_pop_5pre_grid_monthyear_fe_",
+      "gridmonth_cluster_omit0_rural_riceP"
+    ),
+    pre = 6, post = 5, omitted = 0, required = FALSE
+  ),
+
+  # Omit-period-0 family: no controls, grid/month-year clustering.
+  event_case(
+    id = "omit0_gm_nocontrols_gridmonth_cluster_baseline",
+    csv_stem = paste0(
+      "stacked_event_study_pop_5pre_grid_monthyear_fe_",
+      "nocontrols_gridmonth_cluster_omit0"
+    ),
+    model = "evreg1", rows = 13:23, columns = c(3, 4, 17:27),
+    figure_base = paste0(
+      "stacked_event_study_pop_5pre_grid_monthyear_fe_",
+      "nocontrols_gridmonth_cluster_omit0_rural_1"
+    ),
+    pre = 6, post = 5, omitted = 0, required = FALSE
+  ),
+  event_case(
+    id = "omit0_gm_nocontrols_gridmonth_cluster_rice",
+    csv_stem = paste0(
+      "stacked_event_study_pop_5pre_grid_monthyear_fe_",
+      "nocontrols_gridmonth_cluster_omit0"
+    ),
+    model = "evreg2", rows = 37:47, columns = c(3, 4, 41:51),
+    figure_base = paste0(
+      "stacked_event_study_pop_5pre_grid_monthyear_fe_",
+      "nocontrols_gridmonth_cluster_omit0_rural_riceP"
+    ),
+    pre = 6, post = 5, omitted = 0, required = FALSE
   )
 )
 # -----------------------------------------------------------------------

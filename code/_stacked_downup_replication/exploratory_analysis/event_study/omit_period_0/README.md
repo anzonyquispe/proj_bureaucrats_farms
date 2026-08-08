@@ -21,3 +21,7 @@ Submit all five jobs on the cluster with:
 cd /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication/exploratory_analysis/event_study/omit_period_0/sbatch
 bash submit_all_omit0.sh
 ```
+
+The `alternative_windows` subdirectory adds the `-6…+6` and `-5…+6`
+normalizations requested for robustness. Each window is run for the same five
+specifications and continues to omit relative month 0.

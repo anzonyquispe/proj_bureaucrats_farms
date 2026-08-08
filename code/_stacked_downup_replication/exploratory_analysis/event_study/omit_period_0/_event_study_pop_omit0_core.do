@@ -1,5 +1,5 @@
 ********************************************************************************
-* Population-weighted stacked event study over relative months -6 through 5.
+* Population-weighted stacked event study with a configurable event window.
 * Exploratory normalization: relative month 0 is the omitted reference period.
 *
 * Arguments:
@@ -7,10 +7,12 @@
 *   controls_mode: controls | nocontrols
 *   cluster_mode:  cohort | grid_monthyear
 *   output_stem:   filename stem written under tables/
+*   window_min:    first retained relative month; default -6
+*   window_max:    last retained relative month; default +5
 ********************************************************************************
 
 version 17
-args fe_mode controls_mode cluster_mode output_stem
+args fe_mode controls_mode cluster_mode output_stem window_min window_max
 
 if "$root" == "" {
     clear all
@@ -57,6 +59,16 @@ if "`output_stem'" == "" {
     display as error "output_stem is required."
     exit 198
 }
+if "`window_min'" == "" local window_min = -6
+if "`window_max'" == "" local window_max = 5
+if `window_min' >= 0 | `window_max' <= 0 {
+    display as error "The event window must contain negative periods, 0, and positive periods."
+    exit 198
+}
+if `window_min' != floor(`window_min') | `window_max' != floor(`window_max') {
+    display as error "window_min and window_max must be integers."
+    exit 198
+}
 
 if "`fe_mode'" == "main" {
     local fe1 "unique_small_grid_id#cohort ac_uq_id#monthyear#cohort"
@@ -95,11 +107,12 @@ else {
 }
 
 import delimited using "${int_data}/combined_dt_pop${sample}.csv", clear varnames(1)
-keep if inrange(relative_monthyear, -6, 5)
+keep if inrange(relative_monthyear, `window_min', `window_max')
 gen relative_year_bin = relative_monthyear
-gen relative_year_bin_aux = relative_year_bin + 7
-* relative month 0 maps to 7 and is the omitted category.
-local base = 7
+local shift = 1 - `window_min'
+gen relative_year_bin_aux = relative_year_bin + `shift'
+* Relative month 0 maps to `shift' and is the omitted category.
+local base = `shift'
 capture drop countk
 gen countk = count * 1000
 
@@ -158,6 +171,7 @@ foreach mod of local moderators_list {
         estadd local weathercontrols "`controls_tag'"
         estadd local clusterspec "`cluster_tag'"
         estadd local omittedperiod "0"
+        estadd local eventwindow "`window_min' to `window_max'"
         local estname evreg`i'
         local i = `i' + 1
         est store `estname'
