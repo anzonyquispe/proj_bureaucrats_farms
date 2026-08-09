@@ -33,12 +33,16 @@ display as text "Local .ster input folder: ${tables}"
 * never-treated, pooled, and not-yet-treated control definitions. Warn without
 * blocking unrelated CSV and table generation.
 local control_sters ///
+    "_app_16_polischar_fe12_evst_all_rural_controls_never.ster" ///
     "_app_16_polischar_fe12_evst_all_rural_controls_both.ster" ///
     "_app_16_polischar_fe12_evst_all_rural_controls_notyet.ster" ///
+    "_app_16_polischar_fe12_evst_all_rural_acpop_controls_never.ster" ///
     "_app_16_polischar_fe12_evst_all_rural_acpop_controls_both.ster" ///
     "_app_16_polischar_fe12_evst_all_rural_acpop_controls_notyet.ster" ///
+    "_app_17_5km_fe12_evst_all_rural_controls_never.ster" ///
     "_app_17_5km_fe12_evst_all_rural_controls_both.ster" ///
     "_app_17_5km_fe12_evst_all_rural_controls_notyet.ster" ///
+    "_app_17_5km_fe12_evst_all_rural_acpop_controls_never.ster" ///
     "_app_17_5km_fe12_evst_all_rural_acpop_controls_both.ster" ///
     "_app_17_5km_fe12_evst_all_rural_acpop_controls_notyet.ster"
 

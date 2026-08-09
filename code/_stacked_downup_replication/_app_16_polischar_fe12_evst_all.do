@@ -3,9 +3,9 @@
 *
 * Input:  politicians_characteristics${sample}.csv
 * Output: one .ster and one plotting .csv for each control definition:
-*   <no control suffix>  = treated + never-treated controls (paper baseline)
+*   _controls_never      = treated + never-treated controls (paper baseline)
 *   _controls_both       = treated + never- and not-yet-treated controls
-*   _controls_notyet     = treated + not-yet-treated controls only
+*   _controls_notyet     = treated + legacy type-2 controls only
 *
 * The caller selects downup_ac or downup_ac_pop through $downup_var and uses
 * $ster_suffix (normally "" or "_acpop") to keep the two result families apart.
@@ -22,6 +22,7 @@ if "$root" == "" {
     global is_rural_var "is_rural"
     global fe_list      "1"
     global ster_suffix  ""
+    global control_samples "never both notyet"
 
     global shell "/groups/sgulzar/sa_fires/proj_bureaucrats_farms"
     global dbox  "/Users/anzony.quisperojas/Library/CloudStorage/Dropbox/sa_fires/proj_bureaucrats_farms"
@@ -41,6 +42,9 @@ if "$root" == "" {
 
 if "$downup_var" == "" {
     global downup_var "downup_ac_pop"
+}
+if "$control_samples" == "" {
+    global control_samples "never both notyet"
 }
 
 global int_data "${root}/data_output/intermediate"
@@ -106,10 +110,14 @@ local moderators_list moderator ${downup_var} rice_area_aclvl_ahigh rice_harvare
 tempfile analysis_base
 save `analysis_base'
 
-foreach control_sample in never both notyet {
+foreach control_sample in $control_samples {
+    if !inlist("`control_sample'", "never", "both", "notyet") {
+        display as error "Unknown control sample: `control_sample'"
+        exit 198
+    }
     use `analysis_base', clear
 
-    local control_suffix ""
+    local control_suffix "_controls_never"
     if "`control_sample'" == "never" {
         keep if treat == 1 | control_type == 1
     }
@@ -119,6 +127,9 @@ foreach control_sample in never both notyet {
     else if "`control_sample'" == "notyet" {
         keep if treat == 1 | control_type == 2
         local control_suffix "_controls_notyet"
+        display as error ///
+            "CAUTION: control_type 2 is the legacy partial-zero-spell group; " ///
+            "it is not a pure not-yet-treated sample."
     }
 
     display as text "Politician event study: controls=`control_sample', downup=${downup_var}, N=" _N
@@ -162,6 +173,9 @@ foreach control_sample in never both notyet {
     local outbase "${tables}/_app_16_polischar_fe12_evst_all${sample}_rural${ster_suffix}`control_suffix'"
     estwrite evreg* using "`outbase'.ster", replace
     estsave_csv `estimate_names' using "`outbase'.csv", replace
+    confirm file "`outbase'.ster"
+    confirm file "`outbase'.csv"
+    confirm file "`outbase'_scalars.csv"
     display as result "Saved: `outbase'.ster and `outbase'.csv"
 }
 

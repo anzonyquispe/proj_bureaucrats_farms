@@ -16,12 +16,16 @@ if (-not (Test-Path -LiteralPath $tablesPath)) {
 }
 
 $requiredControlCsv = @(
+    "_app_16_polischar_fe12_evst_all_rural_controls_never.csv",
     "_app_16_polischar_fe12_evst_all_rural_controls_both.csv",
     "_app_16_polischar_fe12_evst_all_rural_controls_notyet.csv",
+    "_app_16_polischar_fe12_evst_all_rural_acpop_controls_never.csv",
     "_app_16_polischar_fe12_evst_all_rural_acpop_controls_both.csv",
     "_app_16_polischar_fe12_evst_all_rural_acpop_controls_notyet.csv",
+    "_app_17_5km_fe12_evst_all_rural_controls_never.csv",
     "_app_17_5km_fe12_evst_all_rural_controls_both.csv",
     "_app_17_5km_fe12_evst_all_rural_controls_notyet.csv",
+    "_app_17_5km_fe12_evst_all_rural_acpop_controls_never.csv",
     "_app_17_5km_fe12_evst_all_rural_acpop_controls_both.csv",
     "_app_17_5km_fe12_evst_all_rural_acpop_controls_notyet.csv"
 )

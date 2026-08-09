@@ -289,7 +289,7 @@ plot_event <- function(event_data, file_base, num_pre, num_post,
     geom_vline(xintercept = omitted, linetype = "dashed", colour = "blue") +
     geom_hline(yintercept = 0, linetype = "dashed", colour = "purple") +
     scale_x_continuous(breaks = seq(min(full$time), max(full$time))) +
-    labs(x = xlab, y = "Detrended Effect on Number of Fires (in 1,000 units)") +
+    labs(x = xlab, y = "Detrended Effect on Fires (in 1,000 units)") +
     geom_text(
       data = rotated_annotation_data,
       aes(x = time, y = value, label = label),
@@ -668,6 +668,110 @@ event_cases <- list(
     pre = 6, post = 5, omitted = 0, required = FALSE
   )
 )
+
+# Alternative omit-0 windows. These cases share the same five specifications,
+# while coefficient and covariance positions change with the retained window
+# and with the inclusion of weather controls.
+alternative_window_specs <- list(
+  list(
+    id = "main_population",
+    stem = "stacked_event_study_pop_{window}_omit0",
+    controls = TRUE
+  ),
+  list(
+    id = "grid_monthyear_population",
+    stem = paste0(
+      "stacked_event_study_pop_grid_monthyear_fe_{window}_omit0"
+    ),
+    controls = TRUE
+  ),
+  list(
+    id = "gm_nocontrols_cohort_cluster",
+    stem = paste0(
+      "stacked_event_study_pop_grid_monthyear_fe_nocontrols_",
+      "{window}_omit0"
+    ),
+    controls = FALSE
+  ),
+  list(
+    id = "gm_controls_gridmonth_cluster",
+    stem = paste0(
+      "stacked_event_study_pop_grid_monthyear_fe_gridmonth_cluster_",
+      "{window}_omit0"
+    ),
+    controls = TRUE
+  ),
+  list(
+    id = "gm_nocontrols_gridmonth_cluster",
+    stem = paste0(
+      "stacked_event_study_pop_grid_monthyear_fe_nocontrols_",
+      "gridmonth_cluster_{window}_omit0"
+    ),
+    controls = FALSE
+  )
+)
+
+alternative_windows <- list(
+  list(id = "m6p6", token = "m6_p6", pre = 6L, post = 6L),
+  list(id = "m5p6", token = "m5_p6", pre = 5L, post = 6L)
+)
+
+alternative_window_cases <- list()
+for (window in alternative_windows) {
+  for (spec in alternative_window_specs) {
+    stem <- gsub("{window}", window$token, spec$stem, fixed = TRUE)
+
+    if (window$pre == 6L && spec$controls) {
+      baseline_rows <- 16:27
+      baseline_columns <- c(3, 4, 20:31)
+      rice_rows <- 42:53
+      rice_columns <- c(3, 4, 46:57)
+    } else if (window$pre == 6L) {
+      baseline_rows <- 14:25
+      baseline_columns <- c(3, 4, 18:29)
+      rice_rows <- 40:51
+      rice_columns <- c(3, 4, 44:55)
+    } else if (spec$controls) {
+      baseline_rows <- 15:25
+      baseline_columns <- c(3, 4, 19:29)
+      rice_rows <- 39:49
+      rice_columns <- c(3, 4, 43:53)
+    } else {
+      baseline_rows <- 13:23
+      baseline_columns <- c(3, 4, 17:27)
+      rice_rows <- 37:47
+      rice_columns <- c(3, 4, 41:51)
+    }
+
+    alternative_window_cases[[length(alternative_window_cases) + 1L]] <-
+      event_case(
+        id = paste(window$id, spec$id, "baseline", sep = "_"),
+        csv_stem = stem,
+        model = "evreg1",
+        rows = baseline_rows,
+        columns = baseline_columns,
+        figure_base = paste0(stem, "_rural_1"),
+        pre = window$pre,
+        post = window$post,
+        omitted = 0,
+        required = FALSE
+      )
+    alternative_window_cases[[length(alternative_window_cases) + 1L]] <-
+      event_case(
+        id = paste(window$id, spec$id, "rice", sep = "_"),
+        csv_stem = stem,
+        model = "evreg2",
+        rows = rice_rows,
+        columns = rice_columns,
+        figure_base = paste0(stem, "_rural_riceP"),
+        pre = window$pre,
+        post = window$post,
+        omitted = 0,
+        required = FALSE
+      )
+  }
+}
+event_cases <- c(event_cases, alternative_window_cases)
 # -----------------------------------------------------------------------
 
 selected_event_cases <- event_cases
@@ -691,18 +795,29 @@ if ("main" %in% args$families) {
 }
 
 # All politician/protest moderators, area/population definitions, and controls.
-control_suffixes <- c(never = "", both = "_controls_both", notyet = "_controls_notyet")
+politician_control_suffixes <- c(
+  never = "_controls_never",
+  both = "_controls_both",
+  notyet = "_controls_notyet"
+)
+protest_control_suffixes <- c(
+  never = "_controls_never",
+  both = "_controls_both",
+  notyet = "_controls_notyet"
+)
 moderator_names <- c("1", "downup_2", "riceA_3", "riceHA_4", "riceP_5")
 
 for (analysis_suffix in c("", "_acpop")) {
-  for (control_suffix in unname(control_suffixes)) {
+  for (control_name in names(politician_control_suffixes)) {
+    politician_control_suffix <- politician_control_suffixes[[control_name]]
+    protest_control_suffix <- protest_control_suffixes[[control_name]]
     politician_stem <- paste0(
       "_app_16_polischar_fe12_evst_all", s, "_rural",
-      analysis_suffix, control_suffix
+      analysis_suffix, politician_control_suffix
     )
     protest_stem <- paste0(
       "_app_17_5km_fe12_evst_all", s, "_rural",
-      analysis_suffix, control_suffix
+      analysis_suffix, protest_control_suffix
     )
     for (model_index in seq_along(moderator_names)) {
       if (model_index == 1L) {
@@ -719,7 +834,7 @@ for (analysis_suffix in c("", "_acpop")) {
           paste0(politician_stem, "_", moderator_names[[model_index]]),
           5, 5, -1, "Time from Treatment (years)",
           if (model_index == 1L) c(-20, 50) else NULL, NULL,
-          required = identical(control_suffix, "")
+          required = identical(control_name, "never")
         )
       }
       if ("protest" %in% args$families) {
@@ -728,7 +843,7 @@ for (analysis_suffix in c("", "_acpop")) {
           rows, columns,
           paste0(protest_stem, "_", moderator_names[[model_index]]),
           8, 2, -1, "Time from Treatment (years)",
-          required = identical(control_suffix, "")
+          required = identical(control_name, "never")
         )
       }
     }

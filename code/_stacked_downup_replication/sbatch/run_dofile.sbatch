@@ -24,6 +24,7 @@ STER_SUFFIX="${8:-none}"
 DOWNUP_VAR="${9:-none}"
 STACKED_FILE="${10:-none}"
 DID_OUTPUT="${11:-none}"
+CONTROL_SAMPLES="${12:-all}"
 STATA_BIN="${STATA_BIN:-stata-mp}"
 ALLOCATED_CPUS="${SLURM_CPUS_PER_TASK:-${NSLOTS:-1}}"
 
@@ -47,6 +48,7 @@ export FARMS_STER_SUFFIX="${STER_SUFFIX}"
 export FARMS_DOWNUP_VAR="${DOWNUP_VAR}"
 export FARMS_STACKED_FILE="${STACKED_FILE}"
 export FARMS_DID_OUTPUT="${DID_OUTPUT}"
+export FARMS_CONTROL_SAMPLES="${CONTROL_SAMPLES}"
 export FARMS_CPUS="${ALLOCATED_CPUS}"
 
 SCHEDULER_JOB_NAME="${SLURM_JOB_NAME:-${JOB_NAME:-farms_do}}"
@@ -67,6 +69,14 @@ trap 'preserve_stata_log; exit 143' TERM
 trap 'preserve_stata_log; exit 130' INT
 trap 'preserve_stata_log; exit 129' HUP
 
+if ! type module >/dev/null 2>&1; then
+  if [[ "${FARMS_LOGIN_RETRY:-0}" == "1" ]]; then
+    echo "ERROR: the module command is unavailable even in a login shell." >&2
+    exit 127
+  fi
+  export FARMS_LOGIN_RETRY=1
+  exec /bin/bash -l "$0" "$@"
+fi
 module purge 2>/dev/null || true
 module load stata gcc
 

@@ -16,6 +16,7 @@ local ster_suffix   : environment FARMS_STER_SUFFIX
 local downup_var    : environment FARMS_DOWNUP_VAR
 local stacked_file  : environment FARMS_STACKED_FILE
 local did_output    : environment FARMS_DID_OUTPUT
+local control_samples : environment FARMS_CONTROL_SAMPLES
 local processors    : environment FARMS_CPUS
 
 if "`processors'" == "" local processors "1"
@@ -39,6 +40,7 @@ if "`ster_suffix'" == "none" local ster_suffix ""
 if "`downup_var'" == "none" local downup_var ""
 if "`stacked_file'" == "none" local stacked_file ""
 if "`did_output'" == "none" local did_output ""
+if "`control_samples'" == "all" local control_samples ""
 
 global root          "`root'"
 global code          "`code'"
@@ -50,6 +52,7 @@ global ster_suffix   "`ster_suffix'"
 global downup_var    "`downup_var'"
 global stacked_file  "`stacked_file'"
 global did_output    "`did_output'"
+global control_samples "`control_samples'"
 
 global int_data    "${root}/data_output/intermediate"
 global int_farms   "${int_data}"
@@ -74,6 +77,7 @@ display "Figures output: ${figures}"
 display "Code root: ${code}"
 display "Sample: ${sample}; rural: ${is_rural_var}; FE: ${fe_list}"
 display "Suffix: ${ster_suffix}; moderator: ${downup_var}"
+display "Control samples: ${control_samples}"
 display "Stata processors: " c(processors)
 display "============================================================"
 

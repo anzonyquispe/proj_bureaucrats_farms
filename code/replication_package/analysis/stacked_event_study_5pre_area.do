@@ -64,6 +64,6 @@ foreach mod of local moderators_list {
 }
 
 estwrite evreg* using "${tables}/stacked_event_study_5pre${sample}_rural${ster_suffix}.ster", replace
-estsave_csv evreg* using "${tables}/stacked_event_study_5pre${sample}_rural${ster_suffix}.csv", replace
+estsave_csv evreg1 evreg2 using "${tables}/stacked_event_study_5pre${sample}_rural${ster_suffix}.csv", replace
 
 ********************************************************************************
