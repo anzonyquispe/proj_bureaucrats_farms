@@ -9,6 +9,9 @@ version 17
 clear all
 set more off
 
+* Optional first argument: alternative input/output folder for local testing.
+args tables_arg
+
 if "$code" == "" {
     if "`c(os)'" == "Windows" {
         global code "C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/code/_stacked_downup_replication"
@@ -18,7 +21,12 @@ if "$code" == "" {
     }
 }
 
-global tables "${code}/../../tables/exploratory_analysis"
+if "`tables_arg'" == "" {
+    global tables "${code}/../../tables/exploratory_analysis"
+}
+else {
+    global tables "`tables_arg'"
+}
 capture mkdir "${code}/../../tables"
 capture mkdir "${tables}"
 

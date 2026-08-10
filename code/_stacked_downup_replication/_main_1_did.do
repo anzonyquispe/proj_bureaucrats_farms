@@ -88,6 +88,13 @@ gen countk = count * 1000
 keep if inrange(relative_monthyear, `window_min', `window_max')
 display as text "Exploration window: relative_monthyear in [`window_min', `window_max']"
 
+* Preserve the stacked-analysis convention used by the event-study templates:
+* relative_year_bin is the analysis-period copy of relative_monthyear.
+capture confirm variable relative_year_bin
+if _rc {
+    gen relative_year_bin = relative_monthyear
+}
+
 
 merge m:1 unique_small_grid_id using ///
     "${int_data}/ghs_grid_classification_2000.dta", ///

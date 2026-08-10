@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.25 (MiKTeX 24.1) (preloaded format=pdflatex 2026.7.19)  10 AUG 2026 09:44
+This is pdfTeX, Version 3.141592653-2.6-1.40.25 (MiKTeX 24.1) (preloaded format=pdflatex 2026.7.19)  10 AUG 2026 10:22
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -1400,7 +1400,44 @@ Package natbib Warning: Citation `dipoppa2024bureaucrat' on page 8 undefined on
 Package natbib Warning: Citation `fao_maps' on page 9 undefined on input line 3
 60.
 
-[9] [10]
+<../../figures/map_grids.png, id=287, 581.5326pt x 395.3169pt>
+File: ../../figures/map_grids.png Graphic file (type png)
+<use ../../figures/map_grids.png>
+Package pdftex.def Info: ../../figures/map_grids.png  used on input line 394.
+(pdftex.def)             Requested size: 164.88263pt x 112.0874pt.
+<../../figures/panel_A_downwind.png, id=289, 462.2871pt x 401.5803pt>
+File: ../../figures/panel_A_downwind.png Graphic file (type png)
+<use ../../figures/panel_A_downwind.png>
+Package pdftex.def Info: ../../figures/panel_A_downwind.png  used on input line
+ 403.
+(pdftex.def)             Requested size: 75.1625pt x 65.28972pt.
+<../../figures/panel_C_upwind.png, id=290, 462.2871pt x 401.5803pt>
+File: ../../figures/panel_C_upwind.png Graphic file (type png)
+<use ../../figures/panel_C_upwind.png>
+Package pdftex.def Info: ../../figures/panel_C_upwind.png  used on input line 4
+03.
+(pdftex.def)             Requested size: 75.1625pt x 65.28972pt.
+<../../figures/panel_B_downwind.png, id=291, 462.2871pt x 401.5803pt>
+File: ../../figures/panel_B_downwind.png Graphic file (type png)
+<use ../../figures/panel_B_downwind.png>
+Package pdftex.def Info: ../../figures/panel_B_downwind.png  used on input line
+ 403.
+(pdftex.def)             Requested size: 75.1625pt x 65.28972pt.
+<../../figures/march2013_plot.png, id=292, 462.2871pt x 334.3692pt>
+File: ../../figures/march2013_plot.png Graphic file (type png)
+<use ../../figures/march2013_plot.png>
+Package pdftex.def Info: ../../figures/march2013_plot.png  used on input line 4
+08.
+(pdftex.def)             Requested size: 108.18607pt x 78.25023pt.
+<../../figures/october2013_plot.png, id=293, 462.2871pt x 334.3692pt>
+File: ../../figures/october2013_plot.png Graphic file (type png)
+<use ../../figures/october2013_plot.png>
+Package pdftex.def Info: ../../figures/october2013_plot.png  used on input line
+ 408.
+(pdftex.def)             Requested size: 108.18607pt x 78.25023pt.
+[9] [10 <../../figures/map_grids.png> <../../figures/panel_A_downwind.png> <../
+../figures/panel_C_upwind.png> <../../figures/panel_B_downwind.png> <../../figu
+res/march2013_plot.png> <../../figures/october2013_plot.png>]
 
 Package natbib Warning: Citation `cengiz2019effect' on page 11 undefined on inp
 ut line 439.
@@ -1437,7 +1474,7 @@ Overfull \hbox (3.78018pt too wide) in paragraph at lines 465--465
  []
 
 [12] (../../tables/main_did_downup_ac_rural_acpop.tex)
-<../../figures/stacked_event_study_pop_5pre_rural_1_rotated.png, id=333, 578.16
+<../../figures/stacked_event_study_pop_5pre_rural_1_rotated.png, id=346, 578.16
 pt x 289.08pt>
 File: ../../figures/stacked_event_study_pop_5pre_rural_1_rotated.png Graphic fi
 le (type png)
@@ -1572,7 +1609,12 @@ d on input line 738.
 Package natbib Warning: Citation `rambachan2023more' on page 24 undefined on in
 put line 738.
 
-<../../figures/_app_17_5km_fe12_evst_all_rural_acpop_1_rotated.png, id=444, 578
+<../../figures/5km_plot.png, id=457, 462.2871pt x 320.8788pt>
+File: ../../figures/5km_plot.png Graphic file (type png)
+<use ../../figures/5km_plot.png>
+Package pdftex.def Info: ../../figures/5km_plot.png  used on input line 749.
+(pdftex.def)             Requested size: 180.385pt x 125.20587pt.
+<../../figures/_app_17_5km_fe12_evst_all_rural_acpop_1_rotated.png, id=458, 578
 .16pt x 289.08pt>
 File: ../../figures/_app_17_5km_fe12_evst_all_rural_acpop_1_rotated.png Graphic
  file (type png)
@@ -1581,7 +1623,7 @@ Package pdftex.def Info: ../../figures/_app_17_5km_fe12_evst_all_rural_acpop_1_
 rotated.png  used on input line 760.
 (pdftex.def)             Requested size: 225.4804pt x 112.73633pt.
 <../../figures/_app_18_protest_5km_fe12_did_downup_plot_rural_acpop_1.png, id=4
-45, 542.025pt x 325.215pt>
+59, 542.025pt x 325.215pt>
 File: ../../figures/_app_18_protest_5km_fe12_did_downup_plot_rural_acpop_1.png 
 Graphic file (type png)
 <use ../../figures/_app_18_protest_5km_fe12_did_downup_plot_rural_acpop_1.png>
@@ -1592,8 +1634,9 @@ _rural_acpop_1.png  used on input line 764.
 Package natbib Warning: Citation `maddoke2020art' on page 24 undefined on input
  line 773.
 
-[24] [25 <../../figures/_app_17_5km_fe12_evst_all_rural_acpop_1_rotated.png> <.
-./../figures/_app_18_protest_5km_fe12_did_downup_plot_rural_acpop_1.png>]
+[24] [25 <../../figures/5km_plot.png> <../../figures/_app_17_5km_fe12_evst_all_
+rural_acpop_1_rotated.png> <../../figures/_app_18_protest_5km_fe12_did_downup_p
+lot_rural_acpop_1.png>]
 
 Package natbib Warning: Citation `myneta' on page 26 undefined on input line 80
 4.
@@ -1614,14 +1657,14 @@ put line 833.
 
 
 pdfTeX warning: pdflatex: arithmetic: number too big
-<../../figures/panelview_self_profession.png, id=485, 715.2321pt x 0.0pt>
+<../../figures/panelview_self_profession.png, id=499, 715.2321pt x 0.0pt>
 File: ../../figures/panelview_self_profession.png Graphic file (type png)
 <use ../../figures/panelview_self_profession.png>
 Package pdftex.def Info: ../../figures/panelview_self_profession.png  used on i
 nput line 879.
 (pdftex.def)             Requested size: 225.4804pt x 0.0pt.
-<../../figures/_app_16_polischar_fe12_evst_all_rural_acpop_1_rotated.png, id=48
-6, 578.16pt x 289.08pt>
+<../../figures/_app_16_polischar_fe12_evst_all_rural_acpop_1_rotated.png, id=50
+0, 578.16pt x 289.08pt>
 File: ../../figures/_app_16_polischar_fe12_evst_all_rural_acpop_1_rotated.png G
 raphic file (type png)
 <use ../../figures/_app_16_polischar_fe12_evst_all_rural_acpop_1_rotated.png>
@@ -1629,7 +1672,7 @@ Package pdftex.def Info: ../../figures/_app_16_polischar_fe12_evst_all_rural_ac
 pop_1_rotated.png  used on input line 887.
 (pdftex.def)             Requested size: 225.4804pt x 112.73633pt.
 <../../figures/_app_19_polischar_fe12_did_downup_inter_plot_rural_acpop_1.png, 
-id=487, 542.025pt x 325.215pt>
+id=501, 542.025pt x 325.215pt>
 File: ../../figures/_app_19_polischar_fe12_did_downup_inter_plot_rural_acpop_1.
 png Graphic file (type png)
 <use ../../figures/_app_19_polischar_fe12_did_downup_inter_plot_rural_acpop_1.p
@@ -1714,29 +1757,36 @@ been already used, duplicate ignored
                    \relax 
 l.1080 \clearpage
                   [5] (../../tables/descriptives_main.tex)
-<../../figures/monthly_fires.png, id=560, 714.9912pt x 426.393pt>
+<../../figures/monthly_fires.png, id=574, 714.9912pt x 426.393pt>
 File: ../../figures/monthly_fires.png Graphic file (type png)
 <use ../../figures/monthly_fires.png>
 Package pdftex.def Info: ../../figures/monthly_fires.png  used on input line 11
 02.
 (pdftex.def)             Requested size: 190.8355pt x 113.81102pt.
-<../../figures/monthly_wind_direction.png, id=561, 714.7503pt x 428.0793pt>
+<../../figures/monthly_wind_direction.png, id=575, 714.7503pt x 428.0793pt>
 File: ../../figures/monthly_wind_direction.png Graphic file (type png)
 <use ../../figures/monthly_wind_direction.png>
 Package pdftex.def Info: ../../figures/monthly_wind_direction.png  used on inpu
 t line 1103.
 (pdftex.def)             Requested size: 190.01868pt x 113.81102pt.
-
-Overfull \hbox (76.58693pt too wide) in paragraph at lines 1113--1114
- [][] 
- []
-
-<../../figures/downup_evtime_hist.png, id=562, 578.16pt x 361.35pt>
+<../../figures/rices_grids_150dpi_q75.pdf, id=576, 854.59277pt x 585.98642pt>
+File: ../../figures/rices_grids_150dpi_q75.pdf Graphic file (type pdf)
+<use ../../figures/rices_grids_150dpi_q75.pdf>
+Package pdftex.def Info: ../../figures/rices_grids_150dpi_q75.pdf  used on inpu
+t line 1113.
+(pdftex.def)             Requested size: 248.96004pt x 170.71652pt.
+<../../figures/downup_evtime_hist.png, id=577, 578.16pt x 361.35pt>
 File: ../../figures/downup_evtime_hist.png Graphic file (type png)
 <use ../../figures/downup_evtime_hist.png>
 Package pdftex.def Info: ../../figures/downup_evtime_hist.png  used on input li
 ne 1129.
 (pdftex.def)             Requested size: 273.14676pt x 170.71652pt.
+<../../figures/acs_grids_radius12km.png, id=578, 715.473pt x 514.8033pt>
+File: ../../figures/acs_grids_radius12km.png Graphic file (type png)
+<use ../../figures/acs_grids_radius12km.png>
+Package pdftex.def Info: ../../figures/acs_grids_radius12km.png  used on input 
+line 1136.
+(pdftex.def)             Requested size: 234.8775pt x 168.99797pt.
 
 pdfTeX warning (ext4): destination with the same identifier (name{page.6}) has 
 been already used, duplicate ignored
@@ -1751,24 +1801,25 @@ been already used, duplicate ignored
 <to be read again> 
                    \relax 
 l.1157 \FloatBarrier
-                     [7 <../../figures/downup_evtime_hist.png>]
+                     [7 <../../figures/rices_grids_150dpi_q75.pdf> <../../figur
+es/downup_evtime_hist.png> <../../figures/acs_grids_radius12km.png>]
 
 Package natbib Warning: Citation `lan2022air' on page 8 undefined on input line
  1160.
 
 
-pdfTeX warning (ext4): destination with the same identifier (name{page.8}) has 
-been already used, duplicate ignored
-<to be read again> 
-                   \relax 
-l.1165 
-        [8]
 Underfull \hbox (badness 1221) in paragraph at lines 1166--1167
 \OT1/cmr/m/n/12 at-tributable to am-bi-ent PM2.5 ex-po-sure from crop burn-ing 
 across In-dia (95% CI:
  []
 
 
+pdfTeX warning (ext4): destination with the same identifier (name{page.8}) has 
+been already used, duplicate ignored
+<to be read again> 
+                   \relax 
+l.1167 
+        [8]
 pdfTeX warning (ext4): destination with the same identifier (name{page.9}) has 
 been already used, duplicate ignored
 <to be read again> 
@@ -1793,7 +1844,7 @@ pdfTeX warning (ext4): destination with the same identifier (name{page.11}) has
                    \relax 
 l.1257  \end{table}
                     [11]
-<../../figures/stacked_event_study_pop_5pre_rural_1_ori.png, id=592, 578.16pt x
+<../../figures/stacked_event_study_pop_5pre_rural_1_ori.png, id=631, 578.16pt x
  289.08pt>
 File: ../../figures/stacked_event_study_pop_5pre_rural_1_ori.png Graphic file (
 type png)
@@ -1807,7 +1858,7 @@ le (type png)
 Package pdftex.def Info: ../../figures/stacked_event_study_pop_5pre_rural_1_rot
 ated.png  used on input line 1270.
 (pdftex.def)             Requested size: 140.92793pt x 70.4613pt.
-<../../figures/stacked_event_study_pop_5pre_rural_1_rot_honest2.png, id=593, 57
+<../../figures/stacked_event_study_pop_5pre_rural_1_rot_honest2.png, id=632, 57
 8.16pt x 289.08pt>
 File: ../../figures/stacked_event_study_pop_5pre_rural_1_rot_honest2.png Graphi
 c file (type png)
@@ -1824,7 +1875,7 @@ d on input line 1276.
 Package natbib Warning: Citation `rambachan2023more' on page 12 undefined on in
 put line 1276.
 
-<../../figures/stacked_event_study_5pre_rural_1_rotated.png, id=596, 578.16pt x
+<../../figures/stacked_event_study_5pre_rural_1_rotated.png, id=635, 578.16pt x
  289.08pt>
 File: ../../figures/stacked_event_study_5pre_rural_1_rotated.png Graphic file (
 type png)
@@ -1832,7 +1883,7 @@ type png)
 Package pdftex.def Info: ../../figures/stacked_event_study_5pre_rural_1_rotated
 .png  used on input line 1301.
 (pdftex.def)             Requested size: 469.75502pt x 234.8769pt.
-<../../figures/stacked_event_study_pop_5pre_rural_riceP_rotated.png, id=598, 57
+<../../figures/stacked_event_study_pop_5pre_rural_riceP_rotated.png, id=637, 57
 8.16pt x 289.08pt>
 File: ../../figures/stacked_event_study_pop_5pre_rural_riceP_rotated.png Graphi
 c file (type png)
@@ -1870,6 +1921,19 @@ pdfTeX warning (ext4): destination with the same identifier (name{page.14}) has
 l.1365 \subsection
                   {Descriptives} [14 <../../figures/stacked_event_study_pop_5pr
 e_rural_riceP_rotated.png>] (../../tables/_protest_stacked_descriptive.tex)
+<../../figures/protests_monthly_bars.png, id=655, 722.7pt x 361.35pt>
+File: ../../figures/protests_monthly_bars.png Graphic file (type png)
+<use ../../figures/protests_monthly_bars.png>
+Package pdftex.def Info: ../../figures/protests_monthly_bars.png  used on input
+ line 1406.
+(pdftex.def)             Requested size: 234.8775pt x 117.43735pt.
+<../../figures/ac_protest_plot.png, id=656, 570.933pt x 360.8682pt>
+File: ../../figures/ac_protest_plot.png Graphic file (type png)
+<use ../../figures/ac_protest_plot.png>
+Package pdftex.def Info: ../../figures/ac_protest_plot.png  used on input line 
+1426.
+(pdftex.def)             Requested size: 234.8775pt x 148.458pt.
+
 pdfTeX warning (ext4): destination with the same identifier (name{page.15}) has
  been already used, duplicate ignored
 <to be read again> 
@@ -1881,7 +1945,8 @@ pdfTeX warning (ext4): destination with the same identifier (name{page.16}) has
 <to be read again> 
                    \relax 
 l.1432 \clearpage
-                  [16]
+                  [16 <../../figures/protests_monthly_bars.png> <../../figures/
+ac_protest_plot.png>]
 pdfTeX warning (ext4): destination with the same identifier (name{page.17}) has
  been already used, duplicate ignored
 <to be read again> 
@@ -1891,7 +1956,7 @@ l.1461 \clearpage
 
 ]
 (../../tables/_main_4_protest_5km_fe12_did_downup_rural_acpop_new.tex)
-<../../figures/_app_17_5km_fe12_evst_all_rural_acpop_1_ori.png, id=628, 578.16p
+<../../figures/_app_17_5km_fe12_evst_all_rural_acpop_1_ori.png, id=671, 578.16p
 t x 289.08pt>
 File: ../../figures/_app_17_5km_fe12_evst_all_rural_acpop_1_ori.png Graphic fil
 e (type png)
@@ -1905,7 +1970,7 @@ File: ../../figures/_app_17_5km_fe12_evst_all_rural_acpop_1_rotated.png Graphic
 Package pdftex.def Info: ../../figures/_app_17_5km_fe12_evst_all_rural_acpop_1_
 rotated.png  used on input line 1504.
 (pdftex.def)             Requested size: 140.92793pt x 70.4613pt.
-<../../figures/_app_17_5km_fe12_evst_all_rural_acpop_1_honest2.png, id=629, 578
+<../../figures/_app_17_5km_fe12_evst_all_rural_acpop_1_honest2.png, id=672, 578
 .16pt x 289.08pt>
 File: ../../figures/_app_17_5km_fe12_evst_all_rural_acpop_1_honest2.png Graphic
  file (type png)
@@ -1937,7 +2002,7 @@ Package natbib Warning: Citation `rambachan2023more' on page 19 undefined on in
 put line 1521.
 
 (../../tables/_politicians_stacked_descriptive.tex)
-<../../figures/_app_16_polischar_fe12_evst_all_rural_acpop_1_ori.png, id=639, 5
+<../../figures/_app_16_polischar_fe12_evst_all_rural_acpop_1_ori.png, id=682, 5
 78.16pt x 289.08pt>
 File: ../../figures/_app_16_polischar_fe12_evst_all_rural_acpop_1_ori.png Graph
 ic file (type png)
@@ -1952,7 +2017,7 @@ Package pdftex.def Info: ../../figures/_app_16_polischar_fe12_evst_all_rural_ac
 pop_1_rotated.png  used on input line 1570.
 (pdftex.def)             Requested size: 140.92793pt x 70.4613pt.
 <../../figures/_app_16_polischar_fe12_evst_all_rural_acpop_1_rot_honest2.png, i
-d=640, 578.16pt x 289.08pt>
+d=683, 578.16pt x 289.08pt>
 File: ../../figures/_app_16_polischar_fe12_evst_all_rural_acpop_1_rot_honest2.p
 ng Graphic file (type png)
 <use ../../figures/_app_16_polischar_fe12_evst_all_rural_acpop_1_rot_honest2.pn
@@ -1977,7 +2042,7 @@ pdfTeX warning (ext4): destination with the same identifier (name{page.19}) has
 l.1582 \FloatBarrier
                      [19]
 <../../figures/_app_16_polischar_fe12_evst_all_rural_acpop_riceP_5_rotated.png,
- id=648, 578.16pt x 289.08pt>
+ id=691, 578.16pt x 289.08pt>
 File: ../../figures/_app_16_polischar_fe12_evst_all_rural_acpop_riceP_5_rotated
 .png Graphic file (type png)
 <use ../../figures/_app_16_polischar_fe12_evst_all_rural_acpop_riceP_5_rotated.
@@ -2026,10 +2091,10 @@ Package rerunfilecheck Info: File `main.out' has not changed.
 (rerunfilecheck)             Checksum: E391EF39F89FE4F0EB815A886F9AE3C2;7631.
  ) 
 Here is how much of TeX's memory you used:
- 28123 strings out of 474486
- 532335 string characters out of 5743755
+ 28090 strings out of 474486
+ 530746 string characters out of 5743755
  2128542 words of memory out of 5000000
- 49719 multiletter control sequences out of 15000+600000
+ 49686 multiletter control sequences out of 15000+600000
  572196 words of font info for 90 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
  99i,13n,101p,1952b,1132s stack positions out of 10000i,1000n,20000p,200000b,200000s
@@ -2153,9 +2218,9 @@ c/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmtt10.pfb><C:/U
 sers/eunic/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmtt12.
 pfb>
 Output written on C:\Users\eunic\OneDrive\Documents\GitHub\proj_bureaucrats_far
-ms\code\_report\output\main.pdf (52 pages, 12747662 bytes).
+ms\code\_report\output\main.pdf (52 pages, 17427534 bytes).
 PDF statistics:
- 791 PDF objects out of 1000 (max. 8388607)
+ 834 PDF objects out of 1000 (max. 8388607)
  180 named destinations out of 1000 (max. 500000)
- 463 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 518 words of extra memory for PDF output out of 10000 (max. 10000000)
 

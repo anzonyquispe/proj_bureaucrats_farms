@@ -31,7 +31,7 @@ DEFAULT_PROJECT = Path(
 DEFAULT_MASTER = DEFAULT_PROJECT / "data_output/intermediate/0_master_dataset.parquet"
 DEFAULT_ACS = DEFAULT_PROJECT / "data_output/intermediate/_0_2_3_ACs_right_shapefile.shp"
 DEFAULT_GRID = DEFAULT_PROJECT / "data_output/intermediate/1-grid-generation.shp"
-DEFAULT_OUTPUT = DEFAULT_PROJECT / "tex/paper/figures"
+DEFAULT_OUTPUT = Path(r"C:\Users\eunic\OneDrive\Documents\GitHub\proj_bureaucrats_farms\figures")
 DEFAULT_FIRE = (
     DEFAULT_PROJECT.parent / "proj_downwind/tex/paper/figures/fire.png"
 )

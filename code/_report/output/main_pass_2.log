@@ -899,9 +899,6 @@ been already used, duplicate ignored
                    \relax 
 l.1080 \clearpage
                   [5] (../../tables/descriptives_main.tex)
-Overfull \hbox (76.58693pt too wide) in paragraph at lines 1113--1114
- [][] 
-
 pdfTeX warning (ext4): destination with the same identifier (name{page.6}) has 
 been already used, duplicate ignored
 <to be read again> 
@@ -919,16 +916,16 @@ Package natbib Warning: Citation `lan2022air' on page 8 undefined on input line
  1160.
 
 
-pdfTeX warning (ext4): destination with the same identifier (name{page.8}) has 
-been already used, duplicate ignored
-<to be read again> 
-                   \relax 
-l.1165 
-        [8]
 Underfull \hbox (badness 1221) in paragraph at lines 1166--1167
 \OT1/cmr/m/n/12 at-tributable to am-bi-ent PM2.5 ex-po-sure from crop burn-ing 
 across In-dia (95% CI:
 
+pdfTeX warning (ext4): destination with the same identifier (name{page.8}) has 
+been already used, duplicate ignored
+<to be read again> 
+                   \relax 
+l.1167 
+        [8]
 pdfTeX warning (ext4): destination with the same identifier (name{page.9}) has 
 been already used, duplicate ignored
 <to be read again> 

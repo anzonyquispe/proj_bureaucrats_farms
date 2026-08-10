@@ -677,7 +677,9 @@ Package natbib Warning: Citation `dipoppa2024bureaucrat' on page 8 undefined on
 Package natbib Warning: Citation `fao_maps' on page 9 undefined on input line 3
 60.
 
-[9] [10]
+[9] [10 <../../figures/map_grids.png> <../../figures/panel_A_downwind.png> <../
+../figures/panel_C_upwind.png> <../../figures/panel_B_downwind.png> <../../figu
+res/march2013_plot.png> <../../figures/october2013_plot.png>]
 
 Package natbib Warning: Citation `cengiz2019effect' on page 11 undefined on inp
 ut line 439.
@@ -814,8 +816,9 @@ put line 738.
 Package natbib Warning: Citation `maddoke2020art' on page 24 undefined on input
  line 773.
 
-[24] [25 <../../figures/_app_17_5km_fe12_evst_all_rural_acpop_1_rotated.png> <.
-./../figures/_app_18_protest_5km_fe12_did_downup_plot_rural_acpop_1.png>]
+[24] [25 <../../figures/5km_plot.png> <../../figures/_app_17_5km_fe12_evst_all_
+rural_acpop_1_rotated.png> <../../figures/_app_18_protest_5km_fe12_did_downup_p
+lot_rural_acpop_1.png>]
 
 Package natbib Warning: Citation `myneta' on page 26 undefined on input line 80
 4.
@@ -906,9 +909,6 @@ been already used, duplicate ignored
                    \relax 
 l.1080 \clearpage
                   [5] (../../tables/descriptives_main.tex)
-Overfull \hbox (76.58693pt too wide) in paragraph at lines 1113--1114
- [][] 
-
 pdfTeX warning (ext4): destination with the same identifier (name{page.6}) has 
 been already used, duplicate ignored
 <to be read again> 
@@ -921,22 +921,23 @@ been already used, duplicate ignored
 <to be read again> 
                    \relax 
 l.1157 \FloatBarrier
-                     [7 <../../figures/downup_evtime_hist.png>]
+                     [7 <../../figures/rices_grids_150dpi_q75.pdf> <../../figur
+es/downup_evtime_hist.png> <../../figures/acs_grids_radius12km.png>]
 
 Package natbib Warning: Citation `lan2022air' on page 8 undefined on input line
  1160.
 
 
-pdfTeX warning (ext4): destination with the same identifier (name{page.8}) has 
-been already used, duplicate ignored
-<to be read again> 
-                   \relax 
-l.1165 
-        [8]
 Underfull \hbox (badness 1221) in paragraph at lines 1166--1167
 \OT1/cmr/m/n/12 at-tributable to am-bi-ent PM2.5 ex-po-sure from crop burn-ing 
 across In-dia (95% CI:
 
+pdfTeX warning (ext4): destination with the same identifier (name{page.8}) has 
+been already used, duplicate ignored
+<to be read again> 
+                   \relax 
+l.1167 
+        [8]
 pdfTeX warning (ext4): destination with the same identifier (name{page.9}) has 
 been already used, duplicate ignored
 <to be read again> 
@@ -1010,7 +1011,8 @@ pdfTeX warning (ext4): destination with the same identifier (name{page.16}) has
 <to be read again> 
                    \relax 
 l.1432 \clearpage
-                  [16]
+                  [16 <../../figures/protests_monthly_bars.png> <../../figures/
+ac_protest_plot.png>]
 pdfTeX warning (ext4): destination with the same identifier (name{page.17}) has
  been already used, duplicate ignored
 <to be read again> 
@@ -1206,7 +1208,7 @@ c/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmtt10.pfb><C:/U
 sers/eunic/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmtt12.
 pfb>
 Output written on C:\Users\eunic\OneDrive\Documents\GitHub\proj_bureaucrats_far
-ms\code\_report\output\main.pdf (52 pages, 12747662 bytes).
+ms\code\_report\output\main.pdf (52 pages, 17427534 bytes).
 Transcript written on C:\Users\eunic\OneDrive\Documents\GitHub\proj_bureaucrats
 _farms\code\_report\output\main.log.
 pdflatex: major issue: So far, you have not checked for MiKTeX updates.
