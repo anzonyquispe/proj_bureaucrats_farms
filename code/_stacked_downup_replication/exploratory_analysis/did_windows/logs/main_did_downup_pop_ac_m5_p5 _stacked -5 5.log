@@ -1,0 +1,219 @@
+
+  ___  ____  ____  ____  ____ ®
+ /__    /   ____/   /   ____/      StataNow 19.5
+___/   /   /___/   /   /___/       MP—Parallel Edition
+
+ Statistics and Data Science       Copyright 1985-2025 StataCorp LLC
+                                   StataCorp
+                                   4905 Lakeway Drive
+                                   College Station, Texas 77845 USA
+                                   800-782-8272        https://www.stata.com
+                                   979-696-4600        service@stata.com
+
+Stata license: 4-user 16-core network, expiring 14 Sep 2026
+Serial number: 501909301589
+  Licensed to: University of Notre Dame
+               Notre Dame, IN 46556
+
+Notes:
+      1. Stata is running in batch mode.
+      2. Unicode is supported; see help unicode_advice.
+      3. More than 2 billion observations are allowed; see help obs_advice.
+      4. Maximum number of variables is set to 5,000 but can be increased;
+          see help set_maxvar.
+
+. do /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication/_m
+> ain_1_did.do combined_dt_pop downup_ac_pop exploratory_analysis/main_did_down
+> up_pop_ac_m5_p5 _stacked -5 5 
+
+. *****************************************************************************
+> ***
+. * Main stacked DiD: assembly-constituency treatment
+. *
+. * The master runs this file twice:
+. *   combined_dt.csv      / downup_ac      (area-weighted treatment)
+. *   combined_dt_pop.csv  / downup_ac_pop  (population-weighted treatment)
+. *****************************************************************************
+> ***
+. 
+. * Optional direct-call arguments:
+. *   stacked input stem, treatment variable, output stem, output suffix,
+. *   minimum relative month, maximum relative month.
+. * The final two arguments default to the production window [-6, 5].
+. args stacked_file_arg downup_var_arg did_output_arg ster_suffix_arg ///
+>     window_min_arg window_max_arg
+
+. 
+. if "$root" == "" {
+.     clear all
+.     set more off
+. 
+.     * Five sbatch-array parameters; defaults apply only to standalone runs.
+.     global location "shell"
+.     global sample ""
+.     global is_rural_var "is_rural"
+.     global fe_list "1/4"
+.     global ster_suffix "_stacked"
+. 
+.     global shell "/groups/sgulzar/sa_fires/proj_bureaucrats_farms"
+.     global dbox "/Users/anzony.quisperojas/Library/CloudStorage/Dropbox/sa_fi
+> res/proj_bureaucrats_farms"
+.     global code_shell "/users/aquisper/proj_bureaucrats_farms/code/_stacked_d
+> ownup_replication"
+.     global code_dbox "/Users/anzony.quisperojas/Documents/GitHub/proj_bureauc
+> rats_farms/code/_stacked_downup_replication"
+.     if "$location" == "dbox" {
+.         global root "$dbox"
+.         global code "$code_dbox"
+.     }
+.     else {
+.         global root "$shell"
+.         global code "$code_shell"
+.     }
+. }
+
+. 
+. * Extra switches set by the master; the defaults reproduce the area treatment
+> .
+. if "$stacked_file" == "" {
+.     global stacked_file "combined_dt"
+. }
+
+. if "$downup_var" == "" {
+.     global downup_var "downup_ac"
+. }
+
+. if "$did_output" == "" {
+.     global did_output "main_did_downup_area_ac"
+. }
+
+. 
+. * Command-line arguments override the defaults when this dofile is launched
+. * directly from a dedicated scheduler script.
+. if "`stacked_file_arg'" != "" {
+.     global stacked_file "`stacked_file_arg'"
+. }
+
+. if "`downup_var_arg'" != "" {
+.     global downup_var "`downup_var_arg'"
+. }
+
+. if "`did_output_arg'" != "" {
+.     global did_output "`did_output_arg'"
+. }
+
+. if "`ster_suffix_arg'" != "" {
+.     global ster_suffix "`ster_suffix_arg'"
+. }
+
+. 
+. local window_min = -6
+
+. local window_max = 5
+
+. if "`window_min_arg'" != "" {
+.     local window_min = real("`window_min_arg'")
+. }
+
+. if "`window_max_arg'" != "" {
+.     local window_max = real("`window_max_arg'")
+. }
+
+. if missing(`window_min') | missing(`window_max') | `window_min' > `window_max
+> ' {
+.     display as error "Invalid relative-month window: [`window_min_arg', `wind
+> ow_max_arg']"
+.     exit 198
+. }
+
+. 
+. global int_data "${root}/data_output/intermediate"
+
+. global tables "${code}/../../tables"
+
+. 
+. import delimited "${int_data}/${stacked_file}${sample}.csv", clear varnames(1
+> )
+(encoding automatically selected: ISO-8859-9)
+(20 vars, 95,976,111 obs)
+
+. 
+. * Always express the fire-count outcome in thousands.
+. capture drop countk
+
+. gen countk = count * 1000
+
+. keep if inrange(relative_monthyear, `window_min', `window_max')
+(39,333,653 observations deleted)
+
+. display as text "Exploration window: relative_monthyear in [`window_min', `wi
+> ndow_max']"
+Exploration window: relative_monthyear in [-5, 5]
+
+. 
+. 
+. merge m:1 unique_small_grid_id using ///
+>     "${int_data}/ghs_grid_classification_2000.dta", ///
+>     keepusing(is_rural) keep(3) nogen
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                             0
+    Matched                        56,642,458  
+    -----------------------------------------
+
+. keep if ${is_rural_var} == 1
+(13,222,999 observations deleted)
+
+. 
+. * Do not drop grids that intersect more than one assembly constituency.
+. * capture confirm variable grids_with_more_1_ac
+. * if _rc {
+. *     merge m:1 unique_small_grid_id using ///
+> *         "${int_data}/grids_with_more_1_ac.dta", keep(master match) nogen
+. *     capture confirm variable dpl_ac
+. *     if !_rc {
+. *         drop if dpl_ac == 1
+. *     }
+. * }
+. keep if year < 2022 | (year == 2022 & month <= 8)
+(7,801,913 observations deleted)
+
+. 
+. capture confirm variable treat
+
+. if _rc {
+.     bysort unique_small_grid_id: egen byte treat = max(${downup_var})
+. }
+
+. gen byte moderator = 0
+
+. 
+. capture confirm numeric variable unique_small_grid_id
+
+. if _rc {
+.     encode unique_small_grid_id, gen(grid_id)
+. }
+
+. else {
+.     gen grid_id = unique_small_grid_id
+. }
+
+. 
+. capture confirm numeric variable ac_uq_id
+
+. if _rc {
+.     encode ac_uq_id, gen(ac_id)
+. }
+
+. else {
+.     gen ac_id = ac_uq_id
+. }
+
+. 
+. quietly summarize countk if treat == 1 & relative_year_bin <= -1
+relative_year_bin not found
+r(111);
+
+end of do-file
+r(111);
