@@ -7,8 +7,11 @@
 ********************************************************************************
 
 * Optional direct-call arguments:
-*   stacked input stem, treatment variable, output stem, output suffix.
-args stacked_file_arg downup_var_arg did_output_arg ster_suffix_arg
+*   stacked input stem, treatment variable, output stem, output suffix,
+*   minimum relative month, maximum relative month.
+* The final two arguments default to the production window [-6, 5].
+args stacked_file_arg downup_var_arg did_output_arg ster_suffix_arg ///
+    window_min_arg window_max_arg
 
 if "$root" == "" {
     clear all
@@ -61,6 +64,19 @@ if "`ster_suffix_arg'" != "" {
     global ster_suffix "`ster_suffix_arg'"
 }
 
+local window_min = -6
+local window_max = 5
+if "`window_min_arg'" != "" {
+    local window_min = real("`window_min_arg'")
+}
+if "`window_max_arg'" != "" {
+    local window_max = real("`window_max_arg'")
+}
+if missing(`window_min') | missing(`window_max') | `window_min' > `window_max' {
+    display as error "Invalid relative-month window: [`window_min_arg', `window_max_arg']"
+    exit 198
+}
+
 global int_data "${root}/data_output/intermediate"
 global tables "${code}/../../tables"
 
@@ -69,7 +85,8 @@ import delimited "${int_data}/${stacked_file}${sample}.csv", clear varnames(1)
 * Always express the fire-count outcome in thousands.
 capture drop countk
 gen countk = count * 1000
-keep if inrange(relative_monthyear, -6, 5)
+keep if inrange(relative_monthyear, `window_min', `window_max')
+display as text "Exploration window: relative_monthyear in [`window_min', `window_max']"
 
 
 merge m:1 unique_small_grid_id using ///
@@ -166,6 +183,8 @@ foreach fe of numlist $fe_list {
     estadd scalar ymean = `ymean'
     estadd scalar ymean2 = `ymean2'
     estadd scalar acq = `numacs'
+    estadd scalar window_min = `window_min'
+    estadd scalar window_max = `window_max'
     estadd local smpl "Rural"
     estadd local fespec "`fespec`fe''"
     estadd local monthyearfe "`monthyearfe'"

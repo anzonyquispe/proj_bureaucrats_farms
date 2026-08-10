@@ -507,6 +507,9 @@ esttab eq7 using ///
     star(* 0.10 ** 0.05 *** 0.01) ///
     keep(1.downup_ac_pop 1.rice_prod_aclvl_ahigh ///
          1.downup_ac_pop#1.rice_prod_aclvl_ahigh) ///
+    varlabels(1.downup_ac_pop "Down \$>\$ Up (Pop)" ///
+              1.rice_prod_aclvl_ahigh "Above Median Rice Production" ///
+              1.downup_ac_pop#1.rice_prod_aclvl_ahigh "Down \$>\$ Up (Pop) \$\times\$ Above Median Rice Production") ///
     stats(N acq ymean, fmt(%12.0fc %12.0fc 3) ///
           labels("Observations" "N Assembly Constituencies" "Mean DV")) ///
     nomtitles nonumbers collabels(none) nobaselevels
