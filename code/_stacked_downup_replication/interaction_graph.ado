@@ -84,7 +84,7 @@ program define interaction_graph
         matrix `lincoms_treat'[4,5] = r(lb)
 
         if "`type'" == "politician" {
-            quietly lincom (`treated_expr')
+            quietly lincom (`treated_expr') - (`control_expr')
         }
         else {
             quietly lincom (`treated_expr') - (`control_expr')
