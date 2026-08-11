@@ -153,39 +153,40 @@ local fe32 "unique_small_grid_id_cohort monthyearco province_cohort#c.monthyear 
 tempfile full_analysis_sample
 save `full_analysis_sample'
 
-foreach selected_fe of numlist $fe_list {
-    local fespec "`fe`selected_fe''"
-    local fe_tag : display %02.0f `selected_fe'
-    local fe_tag = strtrim("`fe_tag'")
-    local prefix "protest_original_fe`fe_tag'_controls_`control_sample'"
-    display as result "FE `selected_fe': `fespec'"
+* Prepare the event-study sample once and loop over the requested FEs.
+use `full_analysis_sample', clear
+keep if inrange(relative_year_bin, -8, 1)
+quietly summarize relative_year_bin
+assert r(min) == -8
+assert r(max) == 1
+gen int relative_year_bin_aux = relative_year_bin + 9
+local base = 8
+gen byte moderator = 0
+* local moderators_list moderator downup_ac rice_area_aclvl_ahigh rice_harvarea_aclvl_ahigh rice_prod_aclvl_ahigh
+local moderators_list moderator
+count if treat == 1
+local event_n_treated = r(N)
+count if treat == 0
+local event_n_control = r(N)
+egen byte event_tag_ac = tag(ac_uq_id)
+count if event_tag_ac
+local event_numacs = r(N)
+drop event_tag_ac
+quietly summarize countk if treat == 1 & relative_year_bin <= -1
+local event_ymean = r(mean)
+quietly summarize countk if treat == 1 & relative_year_bin <= -1 & moderator == 1
+local event_ymean2 = r(mean)
 
-    * Baseline event study.
-    use `full_analysis_sample', clear
-    keep if inrange(relative_year_bin, -8, 1)
-    quietly summarize relative_year_bin
-    assert r(min) == -8
-    assert r(max) == 1
-    gen int relative_year_bin_aux = relative_year_bin + 9
-    local base = 8
-    gen byte moderator = 0
-    * local moderators_list moderator downup_ac rice_area_aclvl_ahigh rice_harvarea_aclvl_ahigh rice_prod_aclvl_ahigh
-    local moderators_list moderator
-    count if treat == 1
-    local event_n_treated = r(N)
-    count if treat == 0
-    local event_n_control = r(N)
-    egen byte event_tag_ac = tag(ac_uq_id)
-    count if event_tag_ac
-    local event_numacs = r(N)
-    quietly summarize countk if treat == 1 & relative_year_bin <= -1
-    local event_ymean = r(mean)
-    quietly summarize countk if treat == 1 & relative_year_bin <= -1 & moderator == 1
-    local event_ymean2 = r(mean)
-    est clear
-    foreach mod of local moderators_list {
-        replace moderator = `mod'
-        local rhs "ib`base'.relative_year_bin_aux##ib0.treat##ib0.`mod' wind_direction av_wind_speed"
+foreach mod of local moderators_list {
+    replace moderator = `mod'
+    local rhs "ib`base'.relative_year_bin_aux##ib0.treat##ib0.`mod' wind_direction av_wind_speed"
+    foreach selected_fe of numlist $fe_list {
+        local fespec "`fe`selected_fe''"
+        local fe_tag : display %02.0f `selected_fe'
+        local fe_tag = strtrim("`fe_tag'")
+        local prefix "protest_original_fe`fe_tag'_controls_`control_sample'"
+        display as result "EVENT controls=`control_sample' FE=`selected_fe': `fespec'"
+        est clear
         reghdfejl countk `rhs', absorb(`fespec') vce(cluster ac_elec_yr)
         estadd scalar ymean = `event_ymean'
         estadd scalar ymean2 = `event_ymean2'
@@ -198,31 +199,40 @@ foreach selected_fe of numlist $fe_list {
         estadd local mod "`mod'"
         estadd local controls "`control_sample'"
         est store evreg1
+        local event_out "${tables}/`prefix'_event_rural_acpop_all"
+        estwrite evreg1 using "`event_out'.ster", replace
+        estsave_csv evreg1 using "`event_out'.csv", replace
+        confirm file "`event_out'_scalars.csv"
     }
-    local event_out "${tables}/`prefix'_event_rural_acpop_all"
-    estwrite evreg1 using "`event_out'.ster", replace
-    estsave_csv evreg1 using "`event_out'.csv", replace
-    confirm file "`event_out'_scalars.csv"
+}
 
-    * DiD interaction with downup_ac_pop.
-    use `full_analysis_sample', clear
-    gen byte post_ = relative_year_bin >= 0
-    gen byte moderator = downup_ac_pop
-    local moderators_list downup_ac_pop
-    count if treat == 1
-    local did_n_treated = r(N)
-    count if treat == 0
-    local did_n_control = r(N)
-    egen byte did_tag_ac = tag(ac_uq_id)
-    count if did_tag_ac
-    local did_numacs = r(N)
-    quietly summarize countk if treat == 1 & relative_year_bin <= -1
-    local did_ymean = r(mean)
-    quietly summarize countk if treat == 1 & relative_year_bin <= -1 & moderator == 1
-    local did_ymean2 = r(mean)
-    est clear
-    foreach mod of local moderators_list {
-        local rhs "ib0.post_##ib0.treat##ib0.`mod' wind_direction av_wind_speed"
+* Reload the prepared full sample once and loop over the DiD specifications.
+use `full_analysis_sample', clear
+gen byte post_ = relative_year_bin >= 0
+gen byte moderator = downup_ac_pop
+local moderators_list downup_ac_pop
+count if treat == 1
+local did_n_treated = r(N)
+count if treat == 0
+local did_n_control = r(N)
+egen byte did_tag_ac = tag(ac_uq_id)
+count if did_tag_ac
+local did_numacs = r(N)
+drop did_tag_ac
+quietly summarize countk if treat == 1 & relative_year_bin <= -1
+local did_ymean = r(mean)
+quietly summarize countk if treat == 1 & relative_year_bin <= -1 & moderator == 1
+local did_ymean2 = r(mean)
+
+foreach mod of local moderators_list {
+    local rhs "ib0.post_##ib0.treat##ib0.`mod' wind_direction av_wind_speed"
+    foreach selected_fe of numlist $fe_list {
+        local fespec "`fe`selected_fe''"
+        local fe_tag : display %02.0f `selected_fe'
+        local fe_tag = strtrim("`fe_tag'")
+        local prefix "protest_original_fe`fe_tag'_controls_`control_sample'"
+        display as result "DID controls=`control_sample' FE=`selected_fe': `fespec'"
+        est clear
         reghdfejl countk `rhs', absorb(`fespec') vce(cluster ac_elec_yr)
         estadd scalar ymean = `did_ymean'
         estadd scalar ymean2 = `did_ymean2'
@@ -235,11 +245,11 @@ foreach selected_fe of numlist $fe_list {
         estadd local mod "`mod'"
         estadd local controls "`control_sample'"
         est store evreg1
+        local did_out "${tables}/`prefix'_did_interaction_rural_acpop_all"
+        estwrite evreg1 using "`did_out'.ster", replace
+        estsave_csv evreg1 using "`did_out'.csv", replace
+        confirm file "`did_out'_scalars.csv"
     }
-    local did_out "${tables}/`prefix'_did_interaction_rural_acpop_all"
-    estwrite evreg1 using "`did_out'.ster", replace
-    estsave_csv evreg1 using "`did_out'.csv", replace
-    display as result "COMPLETED protest FE `selected_fe', controls=`control_sample'"
 }
 
 * Render interactions only after every requested regression has been saved.

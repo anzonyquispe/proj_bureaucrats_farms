@@ -3,8 +3,8 @@
 #$ -q largemem
 #$ -pe smp 5
 #$ -cwd
-#$ -j y
-#$ -o /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication/exploratory_analysis/protest_original_controls_fe_sweep/logs
+#$ -o /dev/null
+#$ -e /dev/null
 
 # One scheduler job and one Stata process run one FE chunk for one control group.
 set -euo pipefail
@@ -48,8 +48,9 @@ set +e
 status=$?
 set -e
 LOG="_protest_original_controls_fe_sweep.log"
-[[ -f "${LOG}" ]] && cp "${LOG}" "${LOG_DIR}/protest_original_${CONTROL_SAMPLE}_${TAG}_${JOB_ID:-manual}.stata.log"
-[[ -f "${LOG}" ]] && cat "${LOG}"
+FINAL_LOG_DIR="${LOG_DIR}/${CONTROL_SAMPLE}_${TAG}"
+mkdir -p "${FINAL_LOG_DIR}"
+[[ -f "${LOG}" ]] && cp "${LOG}" "${FINAL_LOG_DIR}/${LOG}"
 
 case "${FE_LIST}" in 1/15) first=1; last=15 ;; 16/32) first=16; last=32 ;; esac
 TABLE_DIR="${REPO}/tables/exploratory_analysis/protest_original_controls_fe_sweep"

@@ -3,8 +3,8 @@
 #$ -q largemem
 #$ -pe smp 1
 #$ -cwd
-#$ -j y
-#$ -o /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication/exploratory_analysis/politician_original_controls_fe_sweep/logs
+#$ -o /dev/null
+#$ -e /dev/null
 
 # One scheduler job and one Stata process run all 32 FEs for one control group.
 set -euo pipefail
@@ -45,8 +45,9 @@ set +e
 status=$?
 set -e
 LOG="_run_politician_original_control_all32.log"
-[[ -f "${LOG}" ]] && cp "${LOG}" "${LOG_DIR}/politician_original_${CONTROL_SAMPLE}_all32_${JOB_ID:-manual}.stata.log"
-[[ -f "${LOG}" ]] && cat "${LOG}"
+FINAL_LOG_DIR="${LOG_DIR}/${CONTROL_SAMPLE}"
+mkdir -p "${FINAL_LOG_DIR}"
+[[ -f "${LOG}" ]] && cp "${LOG}" "${FINAL_LOG_DIR}/${LOG}"
 
 TABLE_DIR="${REPO}/tables/exploratory_analysis/politician_original_controls_fe_sweep"
 FIGURE_DIR="${REPO}/figures/exploratory_analysis/politician_original_controls_fe_sweep"

@@ -3,13 +3,17 @@
 #$ -q largemem
 #$ -pe smp 1
 #$ -cwd
-#$ -j y
-#$ -o /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication/exploratory_analysis/politician_original_controls_fe_sweep/logs
+#$ -o /dev/null
+#$ -e /dev/null
 
 set -euo pipefail
 
 REPO="${REPLICATION_REPO:-/users/aquisper/proj_bureaucrats_farms}"
 ANALYSIS_DIR="${REPO}/code/_stacked_downup_replication/exploratory_analysis/politician_original_controls_fe_sweep"
+LOG_DIR="${ANALYSIS_DIR}/logs"
+mkdir -p "${LOG_DIR}"
+RUN_LOG="${LOG_DIR}/postprocess_politician_original_controls.log"
+exec > >(tee -a "${RUN_LOG}") 2>&1
 PLOT_SCRIPT="${ANALYSIS_DIR}/plot_politician_original_controls_fe_sweep.R"
 REPORT_SCRIPT="${ANALYSIS_DIR}/build_politician_original_controls_reports.R"
 PDF_DIR="${REPO}/code/_report"

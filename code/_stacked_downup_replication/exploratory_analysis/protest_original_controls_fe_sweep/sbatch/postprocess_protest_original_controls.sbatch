@@ -3,12 +3,16 @@
 #$ -q largemem
 #$ -pe smp 1
 #$ -cwd
-#$ -j y
-#$ -o /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication/exploratory_analysis/protest_original_controls_fe_sweep/logs
+#$ -o /dev/null
+#$ -e /dev/null
 
 set -euo pipefail
 REPO="${REPLICATION_REPO:-/users/aquisper/proj_bureaucrats_farms}"
 ANALYSIS_DIR="${REPO}/code/_stacked_downup_replication/exploratory_analysis/protest_original_controls_fe_sweep"
+LOG_DIR="${ANALYSIS_DIR}/logs"
+mkdir -p "${LOG_DIR}"
+RUN_LOG="${LOG_DIR}/postprocess_protest_original_controls.log"
+exec > >(tee -a "${RUN_LOG}") 2>&1
 
 if ! type module >/dev/null 2>&1; then
     for module_init in /etc/profile.d/modules.sh /usr/share/Modules/init/bash; do
