@@ -3,18 +3,13 @@ set -euo pipefail
 
 REPO="${REPLICATION_REPO:-/users/aquisper/proj_bureaucrats_farms}"
 ANALYSIS_DIR="${REPO}/code/_stacked_downup_replication/exploratory_analysis/politician_byprov_fe_sweep"
-RUNNER="${ANALYSIS_DIR}/sbatch/run_politician_byprov_fe.sbatch"
+ARRAY_RUNNER="${ANALYSIS_DIR}/sbatch/run_all_politician_byprov_fe.sbatch"
 LOG_DIR="${ANALYSIS_DIR}/logs"
 
 mkdir -p "${LOG_DIR}"
-test -f "${RUNNER}"
+test -f "${ARRAY_RUNNER}"
 
-for fe_id in $(seq 1 32); do
-    fe_tag=$(printf '%02d' "${fe_id}")
-    job_id=$(qsub -terse \
-        -N "polbp_fe${fe_tag}" \
-        -v "FE_ID=${fe_id},REPLICATION_REPO=${REPO}" \
-        "${RUNNER}")
-    echo "Submitted FE ${fe_tag}: ${job_id}"
-done
-
+job_id=$(qsub -terse \
+    -v "REPLICATION_REPO=${REPO}" \
+    "${ARRAY_RUNNER}")
+echo "Submitted politician-by-province FE array 1-32: ${job_id}"

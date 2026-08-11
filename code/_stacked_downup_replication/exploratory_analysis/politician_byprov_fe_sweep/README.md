@@ -10,7 +10,10 @@ subdivision by `control_type`. Each of the 32 independent one-core jobs uses the
 full eligible rural sample and estimates:
 
 - the baseline event study using a zero-valued `moderator` stub; and
-- the interaction event study using `downup_ac_pop`.
+- the DiD interaction `post x treat x downup_ac_pop`, following
+  `_app_19_polischar_fe12_did_downup_inter_plot.do`.
+
+The old event-time interaction with `downup_ac_pop` is not part of this report.
 
 The Stata script uses one common complete-case sample for all FE ingredients so
 the 32 specifications remain comparable.
@@ -37,19 +40,41 @@ Outputs are saved in:
 tables/exploratory_analysis/politician_byprov_fe_sweep/
 ```
 
-Each FE produces one `.ster`, one coefficient `.csv`, and one scalar
-`_scalars.csv` file. Logs are kept inside this module's `logs/` directory.
+Each FE produces separate event-study and DiD-interaction `.ster`, coefficient
+`.csv`, and scalar `_scalars.csv` files. It also generates the DiD interaction
+plot with the established `interaction_graph.ado` format. Logs are kept inside
+this module's `logs/` directory.
 
 ## Plot locally
 
-After copying the CSV outputs to the local tables folder, either source
-`plot_politician_byprov_fe_sweep.R` in RStudio or run:
+After copying the corrected outputs to the local tables folder, generate the
+baseline event-study panels with the repository's original plotting format:
 
 ```powershell
-& "code\_stacked_downup_replication\exploratory_analysis\politician_byprov_fe_sweep\run_local_plots.ps1"
+& "C:\Program Files\R\R-4.5.0\bin\Rscript.exe" `
+  "code\_stacked_downup_replication\plotting_event_studies.R" `
+  --root (Get-Location).Path `
+  --output-root (Get-Location).Path `
+  --families politician_sweep `
+  --skip-honest
 ```
 
-This creates original and detrended baseline/interaction plots and a
-politician-only two-column LaTeX atlas. Protest analysis is intentionally not
-included in this stage.
+Regenerate any missing DiD interaction figures in local Stata with:
 
+```stata
+do "code/_stacked_downup_replication/exploratory_analysis/politician_byprov_fe_sweep/generate_politician_byprov_did_interaction_plots.do"
+```
+
+Then rebuild the report source:
+
+```powershell
+& "C:\Program Files\R\R-4.5.0\bin\Rscript.exe" `
+  "code\_stacked_downup_replication\exploratory_analysis\politician_byprov_fe_sweep\build_politician_byprov_fe_sweep_report.R" `
+  --root (Get-Location).Path
+```
+
+The report places the original and rotated baseline event studies above the
+corresponding DiD interaction plot. If a corrected DiD figure is absent, it
+shows an explicit missing-result panel instead of substituting the obsolete
+event-time interaction. Rotated pre/post averages use the rotated coefficient
+vector and transformed covariance matrix.

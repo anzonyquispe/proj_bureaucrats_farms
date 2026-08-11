@@ -5,9 +5,9 @@
 *   politicians_characteristics_byprov.csv
 *
 * One invocation estimates exactly one FE specification on the input dataset's
-* unchanged control composition and for two moderators:
-*   moderator     = baseline event study
-*   downup_ac_pop = interaction event study
+* unchanged control composition for two distinct analyses:
+*   1. Baseline politician event study, years -5,...,4, omitting -1.
+*   2. DiD interaction: post x treat x downup_ac_pop, following _app_19.
 *
 * The first command-line argument selects FE 1,...,32. If absent, $fe_list is
 * used; standalone runs default to FE 1.
@@ -66,8 +66,12 @@ if !inrange(real("`selected_fe'"), 1, 32) | real("`selected_fe'") != floor(real(
 global int_data "${root}/data_output/intermediate"
 global tables_root "${code}/../../tables"
 global tables "${tables_root}/exploratory_analysis/politician_byprov_fe_sweep"
+global figures_root "${code}/../../figures"
+global figures "${figures_root}/exploratory_analysis/politician_byprov_fe_sweep"
 capture mkdir "${tables_root}/exploratory_analysis"
 capture mkdir "${tables}"
+capture mkdir "${figures_root}/exploratory_analysis"
+capture mkdir "${figures}"
 
 local input_file "${int_data}/politicians_characteristics_byprov${sample}.csv"
 confirm file "`input_file'"
@@ -105,7 +109,6 @@ display as text "Rows without rural classification: " r(N)
 drop _merge
 keep if ${is_rural_var} == 1
 keep if year < 2022 | (year == 2022 & month <= 8)
-keep if inrange(relative_year_bin, -5, 4)
 
 * Enforce a common complete-case sample before the FE sweep. This makes all 32
 * specifications directly comparable rather than allowing FE-specific samples.
@@ -126,14 +129,6 @@ egen long unique_small_grid_id_cohort = group(unique_small_grid_id cohort)
 egen long province_cohort = group(province cohort)
 egen long monthyearco = group(month year cohort)
 egen long ac_elec_yr = group(ac_uq_id election_year cohort)
-
-quietly summarize relative_year_bin
-local rmin = r(min)
-local rmax = r(max)
-assert `rmin' == -5
-assert `rmax' == 4
-gen int relative_year_bin_aux = relative_year_bin - `rmin' + 1
-local base = -1 - `rmin' + 1
 
 * Exact exploratory FE grid supplied for this analysis.
 local fe1  "unique_small_grid_id_cohort"
@@ -172,59 +167,126 @@ local fe32 "unique_small_grid_id_cohort monthyearco province_cohort#c.monthyear 
 local fespec "`fe`selected_fe''"
 display as result "FE `selected_fe': `fespec'"
 
+local fe_tag : display %02.0f `selected_fe'
+local fe_tag = strtrim("`fe_tag'")
+
+tempfile full_analysis_sample
+save `full_analysis_sample'
+
+********************************************************************************
+* 1. Baseline event study. The moderator stub preserves the standard triple-
+* interaction wiring while collapsing to the unmoderated event study.
+********************************************************************************
+
+use `full_analysis_sample', clear
+keep if inrange(relative_year_bin, -5, 4)
+quietly summarize relative_year_bin
+local rmin = r(min)
+local rmax = r(max)
+assert `rmin' == -5
+assert `rmax' == 4
+gen int relative_year_bin_aux = relative_year_bin - `rmin' + 1
+local base = -1 - `rmin' + 1
 gen byte moderator = 0
 * local moderators_list moderator downup_ac rice_area_aclvl_ahigh rice_harvarea_aclvl_ahigh rice_prod_aclvl_ahigh
-local moderators_list moderator downup_ac_pop
+local moderators_list moderator
 
 count if treat == 1
-local n_treated = r(N)
+local event_n_treated = r(N)
 count if treat == 0
-local n_control = r(N)
-egen byte tag_ac = tag(ac_uq_id)
-count if tag_ac == 1
-local numacs = r(N)
-drop tag_ac
-display as result "FE=`selected_fe' full unchanged sample N=" _N ///
-    " treated=" `n_treated' " controls=" `n_control' " ACs=" `numacs'
+local event_n_control = r(N)
+egen byte event_tag_ac = tag(ac_uq_id)
+count if event_tag_ac == 1
+local event_numacs = r(N)
+drop event_tag_ac
+
+quietly summarize countk if treat == 1 & relative_year_bin <= -1
+local event_ymean = r(mean)
+quietly summarize countk if treat == 1 & relative_year_bin <= -1 & moderator == 1
+local event_ymean2 = r(mean)
 
 est clear
-local i = 1
-local estimate_names ""
+local event_i = 1
 foreach mod of local moderators_list {
     replace moderator = `mod'
-    local rhs "ib`base'.relative_year_bin_aux##ib0.treat##ib0.`mod' wind_direction av_wind_speed"
+    local event_rhs "ib`base'.relative_year_bin_aux##ib0.treat##ib0.`mod' wind_direction av_wind_speed"
+    local event_estname evreg`event_i'
+    local event_i = `event_i' + 1
 
-    quietly summarize countk if treat == 1 & relative_year_bin <= -1
-    local ymean = r(mean)
-    quietly summarize countk if treat == 1 & relative_year_bin <= -1 & moderator == 1
-    local ymean2 = r(mean)
-
-    reghdfejl countk `rhs', absorb(`fespec') vce(cluster ac_elec_yr)
-
-    estadd scalar ymean = `ymean'
-    estadd scalar ymean2 = `ymean2'
-    estadd scalar acq = `numacs'
+    reghdfejl countk `event_rhs', absorb(`fespec') vce(cluster ac_elec_yr)
+    estadd scalar ymean = `event_ymean'
+    estadd scalar ymean2 = `event_ymean2'
+    estadd scalar acq = `event_numacs'
     estadd scalar fe_id = `selected_fe'
-    estadd scalar n_treated = `n_treated'
-    estadd scalar n_control = `n_control'
+    estadd scalar n_treated = `event_n_treated'
+    estadd scalar n_control = `event_n_control'
     estadd local smpl "Rural"
     estadd local fespec "`fespec'"
     estadd local mod "`mod'"
-    estadd local controls "unchanged full sample"
-    local estname evreg`i'
-    local estimate_names "`estimate_names' `estname'"
-    local i = `i' + 1
-    est store `estname'
+    estadd local controls "unchanged full control composition"
+    est store `event_estname'
 }
 
-local fe_tag : display %02.0f `selected_fe'
-local fe_tag = strtrim("`fe_tag'")
-local outbase "${tables}/politician_byprov_fe`fe_tag'${sample}_rural${ster_suffix}_all"
-estwrite `estimate_names' using "`outbase'.ster", replace
-estsave_csv `estimate_names' using "`outbase'.csv", replace
-confirm file "`outbase'.ster"
-confirm file "`outbase'.csv"
-confirm file "`outbase'_scalars.csv"
-display as result "Saved: `outbase'.ster, .csv, and _scalars.csv"
+local event_outbase "${tables}/politician_byprov_fe`fe_tag'_event${sample}_rural${ster_suffix}_all"
+estwrite evreg1 using "`event_outbase'.ster", replace
+estsave_csv evreg1 using "`event_outbase'.csv", replace
+confirm file "`event_outbase'.ster"
+confirm file "`event_outbase'.csv"
+confirm file "`event_outbase'_scalars.csv"
+display as result "Saved event study: `event_outbase'"
+
+********************************************************************************
+* 2. DiD interaction, following _app_19_polischar_fe12_did_downup_inter_plot.
+* Unlike the event study, this uses the full eligible relative-year sample.
+********************************************************************************
+
+use `full_analysis_sample', clear
+gen byte post_ = relative_year_bin >= 0
+gen byte moderator = downup_ac_pop
+
+count if treat == 1
+local did_n_treated = r(N)
+count if treat == 0
+local did_n_control = r(N)
+egen byte did_tag_ac = tag(ac_uq_id)
+count if did_tag_ac == 1
+local did_numacs = r(N)
+drop did_tag_ac
+
+quietly summarize countk if treat == 1 & relative_year_bin <= -1
+local did_ymean = r(mean)
+quietly summarize countk if treat == 1 & relative_year_bin <= -1 & moderator == 1
+local did_ymean2 = r(mean)
+local did_rhs "ib0.post_##ib0.treat##ib0.downup_ac_pop wind_direction av_wind_speed"
+
+est clear
+reghdfejl countk `did_rhs', absorb(`fespec') vce(cluster ac_elec_yr)
+estadd scalar ymean = `did_ymean'
+estadd scalar ymean2 = `did_ymean2'
+estadd scalar acq = `did_numacs'
+estadd scalar fe_id = `selected_fe'
+estadd scalar n_treated = `did_n_treated'
+estadd scalar n_control = `did_n_control'
+estadd local smpl "Rural"
+estadd local fespec "`fespec'"
+estadd local mod "downup_ac_pop"
+estadd local controls "unchanged full control composition"
+est store evreg1
+
+local did_outbase "${tables}/politician_byprov_fe`fe_tag'_did_interaction${sample}_rural${ster_suffix}_all"
+estwrite evreg1 using "`did_outbase'.ster", replace
+estsave_csv evreg1 using "`did_outbase'.csv", replace
+confirm file "`did_outbase'.ster"
+confirm file "`did_outbase'.csv"
+confirm file "`did_outbase'_scalars.csv"
+display as result "Saved DiD interaction: `did_outbase'"
+
+* Preserve the established interaction-plot format exactly.
+quietly do "${code}/interaction_graph.ado"
+interaction_graph using "`did_outbase'.ster", ///
+    estimates(1) ///
+    output("${figures}/politician_byprov_fe`fe_tag'_did_interaction_rural_acpop_all") ///
+    type(politician) modvar(downup_ac_pop)
+confirm file "${figures}/politician_byprov_fe`fe_tag'_did_interaction_rural_acpop_all_1.png"
 
 display as result "COMPLETED politician by-province FE `selected_fe'"

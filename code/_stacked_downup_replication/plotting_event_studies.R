@@ -62,7 +62,7 @@ RSTUDIO_CONFIG <- list(
   root = detected_repo_root,
   output_root = detected_repo_root,
   sample = "",
-  # Choose any of: "main", "politician", "protest".
+  # Choose any of: "main", "politician", "protest", "politician_sweep".
   families = c("main", "politician", "protest"),
   # For the main family, optionally list registry IDs; empty means all cases.
   cases = character(),
@@ -136,12 +136,14 @@ parse_args <- function(args) {
     out$output_root, winslash = "/", mustWork = FALSE
   )
   out$families <- trimws(strsplit(out$families, ",", fixed = TRUE)[[1L]])
-  allowed_families <- c("main", "politician", "protest")
+  allowed_families <- c(
+    "main", "politician", "protest", "politician_sweep"
+  )
   invalid_families <- setdiff(out$families, allowed_families)
   if (length(invalid_families)) {
     stop(
       "Unknown plot family: ", paste(invalid_families, collapse = ", "),
-      ". Use main, politician, and/or protest.",
+      ". Use main, politician, protest, and/or politician_sweep.",
       call. = FALSE
     )
   }
@@ -269,6 +271,32 @@ plot_event <- function(event_data, file_base, num_pre, num_post,
   full[, shifted_time := time - omitted]
   pretrend <- lm(beta ~ shifted_time - 1, data = full[shifted_time <= 0])
   full[, rotated := beta - predict(pretrend, newdata = full)]
+
+  # Recompute the pre/post average annotations from the rotated treatment
+  # coefficients. The visual format and pointwise confidence intervals remain
+  # unchanged. For the average standard errors, propagate the original
+  # covariance through the same linear pretrend-removal transformation.
+  estimated_shifted_time <- event_data$time - omitted
+  slope_weights <- numeric(length(event_data$beta))
+  slope_weights[pre_idx] <- estimated_shifted_time[pre_idx] /
+    sum(estimated_shifted_time[pre_idx]^2)
+  rotation <- diag(length(event_data$beta)) -
+    outer(estimated_shifted_time, slope_weights)
+  rotated_beta <- drop(rotation %*% event_data$beta)
+  rotated_vcov <- rotation %*% vcov %*% t(rotation)
+  rotated_pre <- mean_test(rotated_beta, rotated_vcov, pre_idx)
+  rotated_post <- mean_test(rotated_beta, rotated_vcov, post_idx)
+  rotated_annotation_labels <- c(
+    sprintf("Mean DV = %.3f", dep_mean),
+    sprintf(
+      "Pre Avg = %.3f (%.3f)",
+      rotated_pre[["estimate"]], rotated_pre[["se"]]
+    ),
+    sprintf(
+      "Post Avg = %.3f (%.3f)",
+      rotated_post[["estimate"]], rotated_post[["se"]]
+    )
+  )
   full[, `:=`(
     lower_rot = rotated - 1.96 * se,
     upper_rot = rotated + 1.96 * se
@@ -277,7 +305,7 @@ plot_event <- function(event_data, file_base, num_pre, num_post,
   rotated_annotation_data <- data.table(
     time = min(full$time),
     value = max(full$upper_rot, na.rm = TRUE) - (0:2) * rotated_range * 0.07,
-    label = annotation_labels
+    label = rotated_annotation_labels
   )
   rotated_plot <- ggplot(full, aes(time, rotated)) +
     geom_ribbon(
@@ -792,6 +820,66 @@ if ("main" %in% args$families) {
   invisible(lapply(
     selected_event_cases, run_registered_case, sample_suffix = s
   ))
+}
+
+# Exploratory politician-by-province FE sweep. These panels deliberately use
+# this script's established event-study format rather than a separate plotting
+# implementation. The corrected pipeline writes one event-study CSV and one
+# DiD-interaction CSV per FE; legacy combined CSVs are accepted only as a
+# fallback for the unchanged baseline event-study estimate.
+if ("politician_sweep" %in% args$families) {
+  sweep_rel_dir <- file.path(
+    "exploratory_analysis", "politician_byprov_fe_sweep"
+  )
+  dir.create(
+    file.path(figure_dir, sweep_rel_dir),
+    recursive = TRUE, showWarnings = FALSE
+  )
+  for (fe_id in 1:32) {
+    fe_tag <- sprintf("%02d", fe_id)
+    corrected_csv <- file.path(
+      sweep_rel_dir,
+      paste0(
+        "politician_byprov_fe", fe_tag,
+        "_event", s, "_rural_acpop_all.csv"
+      )
+    )
+    legacy_csv <- file.path(
+      sweep_rel_dir,
+      paste0(
+        "politician_byprov_fe", fe_tag,
+        s, "_rural_acpop_all.csv"
+      )
+    )
+    selected_csv <- if (file.exists(file.path(table_dir, corrected_csv))) {
+      corrected_csv
+    } else {
+      legacy_csv
+    }
+    event <- extract_event(
+      selected_csv, "evreg1", 13:21, c(3, 4, 17:25)
+    )
+    if (is.null(event)) {
+      warning(
+        "Skipping missing politician FE-sweep event result: ",
+        file.path(table_dir, selected_csv),
+        call. = FALSE
+      )
+      next
+    }
+    figure_base <- file.path(
+      sweep_rel_dir,
+      paste0(
+        "politician_byprov_fe", fe_tag,
+        "_rural_acpop_all_baseline"
+      )
+    )
+    plot_event(
+      event, figure_base,
+      num_pre = 5, num_post = 5, omitted = -1,
+      xlab = "Years from Election"
+    )
+  }
 }
 
 # All politician/protest moderators, area/population definitions, and controls.

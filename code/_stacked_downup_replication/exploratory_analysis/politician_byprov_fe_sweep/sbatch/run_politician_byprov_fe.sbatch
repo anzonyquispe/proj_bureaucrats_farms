@@ -23,6 +23,15 @@ mkdir -p "${LOG_DIR}" "${WORK_DIR}"
 cd "${WORK_DIR}"
 
 if ! type module >/dev/null 2>&1; then
+    for module_init in /etc/profile.d/modules.sh /usr/share/Modules/init/bash; do
+        if [[ -r "${module_init}" ]]; then
+            # shellcheck disable=SC1090
+            source "${module_init}"
+            break
+        fi
+    done
+fi
+if ! type module >/dev/null 2>&1; then
     if [[ "${FARMS_LOGIN_RETRY:-0}" == "1" ]]; then
         echo "The module command is unavailable even in a login shell." >&2
         exit 127
