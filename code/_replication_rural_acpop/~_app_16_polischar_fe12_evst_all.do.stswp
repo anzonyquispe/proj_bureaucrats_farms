@@ -42,7 +42,8 @@ if "$root" == "" {
 *-------------------------------------------------------------------------------
 * Import and Merge Data
 *-------------------------------------------------------------------------------
-
+ global root "C:/Users/eunic/Dropbox/sa_fires/proj_bureaucrats_farms"
+ 
 * Import politician characteristics data
 import delimited using "C:\Users\eunic\OneDrive\Documents\stacked_prof.csv", clear varnames(1)
 
@@ -122,7 +123,7 @@ local fe12 "unique_small_grid_id_cohort province_cohort#c.monthyear province_coh
 local filter1 "1"   // all sample
 
 * Moderator variables
-local moderators_list moderator downup_ac_pop rice_area_aclvl_ahigh rice_harvarea_aclvl_ahigh rice_prod_aclvl_ahigh
+local moderators_list moderator 
 
 *-------------------------------------------------------------------------------
 * Loop over moderators

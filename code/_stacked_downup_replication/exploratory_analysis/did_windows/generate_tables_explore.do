@@ -1,8 +1,8 @@
 ********************************************************************************
 * Render exploratory main-DiD tables for alternative relative-month windows.
 *
-* Inputs:  tables/exploratory_analysis/*.ster
-* Outputs: tables/exploratory_analysis/*.tex
+* Inputs:  .ster files in tables/exploratory_analysis
+* Outputs: .tex files in tables/exploratory_analysis
 ********************************************************************************
 
 version 17
@@ -12,60 +12,69 @@ set more off
 * Optional first argument: alternative input/output folder for local testing.
 args tables_arg
 
-if "$code" == "" {
-    if "`c(os)'" == "Windows" {
-        global code "C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/code/_stacked_downup_replication"
-    }
-    else {
-        global code "/users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication"
-    }
+local windows_code "C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/code/_stacked_downup_replication"
+local cluster_code "/users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication"
+global code "`windows_code'"
+if "`c(os)'" != "Windows" {
+    global code "`cluster_code'"
 }
 
-if "`tables_arg'" == "" {
-    global tables "${code}/../../tables/exploratory_analysis"
-}
-else {
+global tables "${code}/../../tables/exploratory_analysis"
+if "`tables_arg'" != "" {
     global tables "`tables_arg'"
 }
 capture mkdir "${code}/../../tables"
 capture mkdir "${tables}"
+display as text "Exploratory table folder: ${tables}"
 
 capture which estread
-if _rc {
+local estread_rc = _rc
+if `estread_rc' {
     display as error "estread is required to restore the exploratory .ster files."
     exit 199
 }
 capture which esttab
-if _rc {
+local esttab_rc = _rc
+if `esttab_rc' {
     display as error "esttab is required to render the exploratory tables."
     exit 199
 }
 
 local windows "m6_p6 m6_p5 m5_p5 m5_p6"
+local rendered = 0
 
 foreach treatment in area pop {
-    if "`treatment'" == "area" {
-        local input_stem "main_did_downup_area_ac"
-        local treatment_var "downup_ac"
-        local treatment_label "Down \$>\$ Up Area"
-    }
-    else {
+    local input_stem "main_did_downup_area_ac"
+    local treatment_var "downup_ac"
+    local treatment_label "Down \$>\$ Up Area"
+    if "`treatment'" == "pop" {
         local input_stem "main_did_downup_pop_ac"
         local treatment_var "downup_ac_pop"
         local treatment_label "Down \$>\$ Up Population"
     }
 
     foreach window of local windows {
-        if "`window'" == "m6_p6" local window_label "-6 to +6"
-        if "`window'" == "m6_p5" local window_label "-6 to +5"
-        if "`window'" == "m5_p5" local window_label "-5 to +5"
-        if "`window'" == "m5_p6" local window_label "-5 to +6"
+        local window_label "-6 to +6"
+        if "`window'" == "m6_p5" {
+            local window_label "-6 to +5"
+        }
+        if "`window'" == "m5_p5" {
+            local window_label "-5 to +5"
+        }
+        if "`window'" == "m5_p6" {
+            local window_label "-5 to +6"
+        }
+
+        local ster_file "${tables}/`input_stem'_`window'_rural_stacked.ster"
+        local tex_file "${tables}/`input_stem'_`window'_rural.tex"
+        confirm file "`ster_file'"
+        display as text "Reading `ster_file'"
 
         est clear
-        estread using "${tables}/`input_stem'_`window'_rural_stacked.ster"
+        estread using "`ster_file'"
 
         esttab eq1 eq2 eq3 eq4 using ///
-            "${tables}/`input_stem'_`window'_rural.tex", ///
+            "`tex_file'", ///
             replace cells(b(fmt(3) star) se(par fmt(3))) ///
             star(* 0.10 ** 0.05 *** 0.01) ///
             keep(`treatment_var') order(`treatment_var') ///
@@ -87,8 +96,14 @@ foreach treatment in area pop {
                     "&\multicolumn{4}{c}{Relative-month window: `window_label'} \\ \hline") ///
             postfoot("\hline" "\end{tabular}" "}")
 
-        display as result "Generated ${tables}/`input_stem'_`window'_rural.tex"
+        confirm file "`tex_file'"
+        local ++rendered
+        display as result "Generated `tex_file'"
     }
 }
 
+if `rendered' != 8 {
+    display as error "Expected 8 exploratory tables; generated `rendered'."
+    exit 459
+}
 display as result "ALL EXPLORATORY DID TABLES COMPLETED"

@@ -67,4 +67,25 @@ esac
     "${OVERWRITE_ARGS[@]}" \
     > build_stacked_datasets.out 2>&1
 
+case "${BUILD_BYPROV:-1}" in
+    1)
+        echo "[$(date '+%F %T')] building province-election politician stack"
+        "${PYTHON}" build_politicians_characteristics_byprov.py \
+            --threads "${NSLOTS:-10}" \
+            --memory-limit "${STACK_MEMORY_LIMIT:-90GB}" \
+            --last-cohort-year 2022 \
+            --last-cohort-month 12 \
+            --expected-cohorts 8 \
+            "${OVERWRITE_ARGS[@]}" \
+            > build_politicians_characteristics_byprov.out 2>&1
+        ;;
+    0)
+        echo "[$(date '+%F %T')] province-election politician stack skipped"
+        ;;
+    *)
+        echo "ERROR: BUILD_BYPROV must be 0 or 1." >&2
+        exit 1
+        ;;
+esac
+
 echo "[$(date '+%F %T')] completed configured stacked datasets"

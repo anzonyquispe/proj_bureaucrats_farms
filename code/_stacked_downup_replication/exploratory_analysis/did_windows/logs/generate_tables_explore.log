@@ -1,19 +1,19 @@
 
   ___  ____  ____  ____  ____ ®
- /__    /   ____/   /   ____/      StataNow 19.5
+ /__    /   ____/   /   ____/      18.0
 ___/   /   /___/   /   /___/       MP—Parallel Edition
 
- Statistics and Data Science       Copyright 1985-2025 StataCorp LLC
+ Statistics and Data Science       Copyright 1985-2023 StataCorp LLC
                                    StataCorp
                                    4905 Lakeway Drive
                                    College Station, Texas 77845 USA
-                                   800-782-8272        https://www.stata.com
-                                   979-696-4600        service@stata.com
+                                   800-STATA-PC        https://www.stata.com
+                                   979-696-4600        stata@stata.com
 
-Stata license: 4-user 16-core network, expiring 14 Sep 2026
-Serial number: 501909301589
-  Licensed to: University of Notre Dame
-               Notre Dame, IN 46556
+Stata license: Single-user 4-core  perpetual
+Serial number: 501806366048
+  Licensed to: Any Name
+               Any Name
 
 Notes:
       1. Stata is running in batch mode.
@@ -22,82 +22,115 @@ Notes:
       4. Maximum number of variables is set to 5,000 but can be increased;
           see help set_maxvar.
 
-. do /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication/ex
-> ploratory_analysis/did_windows/generate_tables_explore.do 
+. do C:\Users\eunic\OneDrive\Documents\GitHub\proj_bureaucrats_farms\code\_stac
+> ked_downup_replication\exploratory_analysis\did_windows\generate_tables_explo
+> re.do 
 
 . *****************************************************************************
 > ***
 . * Render exploratory main-DiD tables for alternative relative-month windows.
 . *
-. * Inputs:  tables/exploratory_analysis/*.ster
-> * Outputs: tables/exploratory_analysis/*.tex
-> *****************************************************************************
+. * Inputs:  .ster files in tables/exploratory_analysis
+. * Outputs: .tex files in tables/exploratory_analysis
+. *****************************************************************************
 > ***
-> 
-> version 17
-> clear all
-> set more off
-> 
-> * Optional first argument: alternative input/output folder for local testing.
-> args tables_arg
-> 
-> if "$code" == "" {
->     if "`c(os)'" == "Windows" {
->         global code "C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrat
-> s_farms/code/_stacked_downup_replication"
->     }
->     else {
->         global code "/users/aquisper/proj_bureaucrats_farms/code/_stacked_dow
-> nup_replication"
->     }
-> }
-> 
-> if "`tables_arg'" == "" {
->     global tables "${code}/../../tables/exploratory_analysis"
-> }
-> else {
->     global tables "`tables_arg'"
-> }
-> capture mkdir "${code}/../../tables"
-> capture mkdir "${tables}"
-> 
-> capture which estread
-> if _rc {
->     display as error "estread is required to restore the exploratory .ster fi
+. 
+. version 17
+
+. clear all
+
+. set more off
+
+. 
+. * Optional first argument: alternative input/output folder for local testing.
+. args tables_arg
+
+. 
+. local windows_code "C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats
+> _farms/code/_stacked_downup_replication"
+
+. local cluster_code "/users/aquisper/proj_bureaucrats_farms/code/_stacked_down
+> up_replication"
+
+. global code "`windows_code'"
+
+. if "`c(os)'" != "Windows" {
+.     global code "`cluster_code'"
+. }
+
+. 
+. global tables "${code}/../../tables/exploratory_analysis"
+
+. if "`tables_arg'" != "" {
+.     global tables "`tables_arg'"
+. }
+
+. capture mkdir "${code}/../../tables"
+
+. capture mkdir "${tables}"
+
+. display as text "Exploratory table folder: ${tables}"
+Exploratory table folder: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureauc
+> rats_farms/code/_stacked_downup_replication/../../tables/exploratory_analysis
+
+. 
+. capture which estread
+
+. local estread_rc = _rc
+
+. if `estread_rc' {
+.     display as error "estread is required to restore the exploratory .ster fi
 > les."
->     exit 199
-> }
-> capture which esttab
-> if _rc {
->     display as error "esttab is required to render the exploratory tables."
->     exit 199
-> }
-> 
-> local windows "m6_p6 m6_p5 m5_p5 m5_p6"
-> 
-> foreach treatment in area pop {
->     if "`treatment'" == "area" {
->         local input_stem "main_did_downup_area_ac"
->         local treatment_var "downup_ac"
->         local treatment_label "Down \$>\$ Up Area"
->     }
->     else {
->         local input_stem "main_did_downup_pop_ac"
->         local treatment_var "downup_ac_pop"
->         local treatment_label "Down \$>\$ Up Population"
->     }
-> 
->     foreach window of local windows {
->         if "`window'" == "m6_p6" local window_label "-6 to +6"
->         if "`window'" == "m6_p5" local window_label "-6 to +5"
->         if "`window'" == "m5_p5" local window_label "-5 to +5"
->         if "`window'" == "m5_p6" local window_label "-5 to +6"
-> 
->         est clear
->         estread using "${tables}/`input_stem'_`window'_rural_stacked.ster"
-> 
->         esttab eq1 eq2 eq3 eq4 using ///
->             "${tables}/`input_stem'_`window'_rural.tex", ///
+.     exit 199
+. }
+
+. capture which esttab
+
+. local esttab_rc = _rc
+
+. if `esttab_rc' {
+.     display as error "esttab is required to render the exploratory tables."
+.     exit 199
+. }
+
+. 
+. local windows "m6_p6 m6_p5 m5_p5 m5_p6"
+
+. local rendered = 0
+
+. 
+. foreach treatment in area pop {
+  2.     local input_stem "main_did_downup_area_ac"
+  3.     local treatment_var "downup_ac"
+  4.     local treatment_label "Down \$>\$ Up Area"
+  5.     if "`treatment'" == "pop" {
+  6.         local input_stem "main_did_downup_pop_ac"
+  7.         local treatment_var "downup_ac_pop"
+  8.         local treatment_label "Down \$>\$ Up Population"
+  9.     }
+ 10. 
+.     foreach window of local windows {
+ 11.         local window_label "-6 to +6"
+ 12.         if "`window'" == "m6_p5" {
+ 13.             local window_label "-6 to +5"
+ 14.         }
+ 15.         if "`window'" == "m5_p5" {
+ 16.             local window_label "-5 to +5"
+ 17.         }
+ 18.         if "`window'" == "m5_p6" {
+ 19.             local window_label "-5 to +6"
+ 20.         }
+ 21. 
+.         local ster_file "${tables}/`input_stem'_`window'_rural_stacked.ster"
+ 22.         local tex_file "${tables}/`input_stem'_`window'_rural.tex"
+ 23.         confirm file "`ster_file'"
+ 24.         display as text "Reading `ster_file'"
+ 25. 
+.         est clear
+ 26.         estread using "`ster_file'"
+ 27. 
+.         esttab eq1 eq2 eq3 eq4 using ///
+>             "`tex_file'", ///
 >             replace cells(b(fmt(3) star) se(par fmt(3))) ///
 >             star(* 0.10 ** 0.05 *** 0.01) ///
 >             keep(`treatment_var') order(`treatment_var') ///
@@ -119,12 +152,229 @@ Notes:
 >                     "&\multicolumn{4}{c}{Relative-month window: `window_label
 > '} \\ \hline") ///
 >             postfoot("\hline" "\end{tabular}" "}")
-> 
->         display as result "Generated ${tables}/`input_stem'_`window'_rural.te
-> x"
->     }
-> }
-> 
-> display as result "ALL EXPLORATORY DID TABLES COMPLETED"
+ 28. 
+.         confirm file "`tex_file'"
+ 29.         local ++rendered
+ 30.         display as result "Generated `tex_file'"
+ 31.     }
+ 32. }
+Reading C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/code/_s
+> tacked_downup_replication/../../tables/exploratory_analysis/main_did_downup_a
+> rea_ac_m6_p6_rural_stacked.ster
 
+-------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+-----------------------------------------------------------------
+         eq1 | regress      countk          4  Linear regression
+         eq2 | reghdfejl    countk          3  HDFE linear regression with
+             |                                 Julia
+         eq3 | reghdfejl    countk          3  HDFE linear regression with
+             |                                 Julia
+         eq4 | reghdfejl    countk          3  HDFE linear regression with
+             |                                 Julia
+-------------------------------------------------------------------------------
+(file
+    C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/code/_sta
+    > cked_downup_replication/../../tables/exploratory_analysis/main_did_down
+    > up_area_ac_m6_p6_rural.tex not found)
+(output written to C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_fa
+> rms/code/_stacked_downup_replication/../../tables/exploratory_analysis/main_d
+> id_downup_area_ac_m6_p6_rural.tex)
+Generated C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/code/
+> _stacked_downup_replication/../../tables/exploratory_analysis/main_did_downup
+> _area_ac_m6_p6_rural.tex
+Reading C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/code/_s
+> tacked_downup_replication/../../tables/exploratory_analysis/main_did_downup_a
+> rea_ac_m6_p5_rural_stacked.ster
+
+-------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+-----------------------------------------------------------------
+         eq1 | regress      countk          4  Linear regression
+         eq2 | reghdfejl    countk          3  HDFE linear regression with
+             |                                 Julia
+         eq3 | reghdfejl    countk          3  HDFE linear regression with
+             |                                 Julia
+         eq4 | reghdfejl    countk          3  HDFE linear regression with
+             |                                 Julia
+-------------------------------------------------------------------------------
+(file
+    C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/code/_sta
+    > cked_downup_replication/../../tables/exploratory_analysis/main_did_down
+    > up_area_ac_m6_p5_rural.tex not found)
+(output written to C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_fa
+> rms/code/_stacked_downup_replication/../../tables/exploratory_analysis/main_d
+> id_downup_area_ac_m6_p5_rural.tex)
+Generated C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/code/
+> _stacked_downup_replication/../../tables/exploratory_analysis/main_did_downup
+> _area_ac_m6_p5_rural.tex
+Reading C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/code/_s
+> tacked_downup_replication/../../tables/exploratory_analysis/main_did_downup_a
+> rea_ac_m5_p5_rural_stacked.ster
+
+-------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+-----------------------------------------------------------------
+         eq1 | regress      countk          4  Linear regression
+         eq2 | reghdfejl    countk          3  HDFE linear regression with
+             |                                 Julia
+         eq3 | reghdfejl    countk          3  HDFE linear regression with
+             |                                 Julia
+         eq4 | reghdfejl    countk          3  HDFE linear regression with
+             |                                 Julia
+-------------------------------------------------------------------------------
+(file
+    C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/code/_sta
+    > cked_downup_replication/../../tables/exploratory_analysis/main_did_down
+    > up_area_ac_m5_p5_rural.tex not found)
+(output written to C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_fa
+> rms/code/_stacked_downup_replication/../../tables/exploratory_analysis/main_d
+> id_downup_area_ac_m5_p5_rural.tex)
+Generated C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/code/
+> _stacked_downup_replication/../../tables/exploratory_analysis/main_did_downup
+> _area_ac_m5_p5_rural.tex
+Reading C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/code/_s
+> tacked_downup_replication/../../tables/exploratory_analysis/main_did_downup_a
+> rea_ac_m5_p6_rural_stacked.ster
+
+-------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+-----------------------------------------------------------------
+         eq1 | regress      countk          4  Linear regression
+         eq2 | reghdfejl    countk          3  HDFE linear regression with
+             |                                 Julia
+         eq3 | reghdfejl    countk          3  HDFE linear regression with
+             |                                 Julia
+         eq4 | reghdfejl    countk          3  HDFE linear regression with
+             |                                 Julia
+-------------------------------------------------------------------------------
+(file
+    C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/code/_sta
+    > cked_downup_replication/../../tables/exploratory_analysis/main_did_down
+    > up_area_ac_m5_p6_rural.tex not found)
+(output written to C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_fa
+> rms/code/_stacked_downup_replication/../../tables/exploratory_analysis/main_d
+> id_downup_area_ac_m5_p6_rural.tex)
+Generated C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/code/
+> _stacked_downup_replication/../../tables/exploratory_analysis/main_did_downup
+> _area_ac_m5_p6_rural.tex
+Reading C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/code/_s
+> tacked_downup_replication/../../tables/exploratory_analysis/main_did_downup_p
+> op_ac_m6_p6_rural_stacked.ster
+
+-------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+-----------------------------------------------------------------
+         eq1 | regress      countk          4  Linear regression
+         eq2 | reghdfejl    countk          3  HDFE linear regression with
+             |                                 Julia
+         eq3 | reghdfejl    countk          3  HDFE linear regression with
+             |                                 Julia
+         eq4 | reghdfejl    countk          3  HDFE linear regression with
+             |                                 Julia
+-------------------------------------------------------------------------------
+(file
+    C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/code/_sta
+    > cked_downup_replication/../../tables/exploratory_analysis/main_did_down
+    > up_pop_ac_m6_p6_rural.tex not found)
+(output written to C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_fa
+> rms/code/_stacked_downup_replication/../../tables/exploratory_analysis/main_d
+> id_downup_pop_ac_m6_p6_rural.tex)
+Generated C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/code/
+> _stacked_downup_replication/../../tables/exploratory_analysis/main_did_downup
+> _pop_ac_m6_p6_rural.tex
+Reading C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/code/_s
+> tacked_downup_replication/../../tables/exploratory_analysis/main_did_downup_p
+> op_ac_m6_p5_rural_stacked.ster
+
+-------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+-----------------------------------------------------------------
+         eq1 | regress      countk          4  Linear regression
+         eq2 | reghdfejl    countk          3  HDFE linear regression with
+             |                                 Julia
+         eq3 | reghdfejl    countk          3  HDFE linear regression with
+             |                                 Julia
+         eq4 | reghdfejl    countk          3  HDFE linear regression with
+             |                                 Julia
+-------------------------------------------------------------------------------
+(file
+    C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/code/_sta
+    > cked_downup_replication/../../tables/exploratory_analysis/main_did_down
+    > up_pop_ac_m6_p5_rural.tex not found)
+(output written to C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_fa
+> rms/code/_stacked_downup_replication/../../tables/exploratory_analysis/main_d
+> id_downup_pop_ac_m6_p5_rural.tex)
+Generated C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/code/
+> _stacked_downup_replication/../../tables/exploratory_analysis/main_did_downup
+> _pop_ac_m6_p5_rural.tex
+Reading C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/code/_s
+> tacked_downup_replication/../../tables/exploratory_analysis/main_did_downup_p
+> op_ac_m5_p5_rural_stacked.ster
+
+-------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+-----------------------------------------------------------------
+         eq1 | regress      countk          4  Linear regression
+         eq2 | reghdfejl    countk          3  HDFE linear regression with
+             |                                 Julia
+         eq3 | reghdfejl    countk          3  HDFE linear regression with
+             |                                 Julia
+         eq4 | reghdfejl    countk          3  HDFE linear regression with
+             |                                 Julia
+-------------------------------------------------------------------------------
+(file
+    C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/code/_sta
+    > cked_downup_replication/../../tables/exploratory_analysis/main_did_down
+    > up_pop_ac_m5_p5_rural.tex not found)
+(output written to C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_fa
+> rms/code/_stacked_downup_replication/../../tables/exploratory_analysis/main_d
+> id_downup_pop_ac_m5_p5_rural.tex)
+Generated C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/code/
+> _stacked_downup_replication/../../tables/exploratory_analysis/main_did_downup
+> _pop_ac_m5_p5_rural.tex
+Reading C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/code/_s
+> tacked_downup_replication/../../tables/exploratory_analysis/main_did_downup_p
+> op_ac_m5_p6_rural_stacked.ster
+
+-------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+-----------------------------------------------------------------
+         eq1 | regress      countk          4  Linear regression
+         eq2 | reghdfejl    countk          3  HDFE linear regression with
+             |                                 Julia
+         eq3 | reghdfejl    countk          3  HDFE linear regression with
+             |                                 Julia
+         eq4 | reghdfejl    countk          3  HDFE linear regression with
+             |                                 Julia
+-------------------------------------------------------------------------------
+(file
+    C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/code/_sta
+    > cked_downup_replication/../../tables/exploratory_analysis/main_did_down
+    > up_pop_ac_m5_p6_rural.tex not found)
+(output written to C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_fa
+> rms/code/_stacked_downup_replication/../../tables/exploratory_analysis/main_d
+> id_downup_pop_ac_m5_p6_rural.tex)
+Generated C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/code/
+> _stacked_downup_replication/../../tables/exploratory_analysis/main_did_downup
+> _pop_ac_m5_p6_rural.tex
+
+. 
+. if `rendered' != 8 {
+.     display as error "Expected 8 exploratory tables; generated `rendered'."
+.     exit 459
+. }
+
+. display as result "ALL EXPLORATORY DID TABLES COMPLETED"
+ALL EXPLORATORY DID TABLES COMPLETED
+
+. 
 end of do-file

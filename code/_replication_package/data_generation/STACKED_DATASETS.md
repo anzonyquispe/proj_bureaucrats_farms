@@ -26,7 +26,7 @@ only when `--cutoff-year` is explicitly supplied.
 Every standard output keeps these source columns:
 
 ```text
-unique_small_grid_id province ac_uq_id count mean_brightness month year monthyear
+unique_small_grid_id province distr_id ac_uq_id count mean_brightness month year monthyear
 downup_ac downup_ac_pop av_wind_speed wind_direction
 rice_prod_aclvl_ahigh election_year yeargov
 ```
@@ -101,12 +101,14 @@ Validate the input and print the planned engine arguments without writing:
 python build_all_stacked_datasets_duckdb.py --dry-run
 ```
 
-On the cluster, submit `build_stacked_datasets.sbatch`. It runs all treatments
-by default. Set a comma-separated subset with, for example,
+On the cluster, submit `build_stacked_datasets.sbatch`. It runs all five
+standard treatments and the province-election politician stack by default.
+Set a comma-separated standard subset with, for example,
 `STACK_SPECS=downup_ac,downup_ac_pop`. It rebuilds the work databases and
 outputs by default because its input master has just been regenerated. Set
 `STACK_OVERWRITE=0` only to resume an interrupted run against the unchanged
-master Parquet.
+master Parquet. Set `BUILD_BYPROV=0` only when the alternative politician
+stack should be skipped.
 
 To rebuild only the politician-profession and protest stacks with the
 year-level/control fields:
@@ -124,12 +126,48 @@ qsub build_master_and_stacked_datasets.sh
 ```
 
 The shell uses `set -euo pipefail`, so the stacked stage will not start if the
-master stage fails. Both stages overwrite their existing outputs. By default,
-the stacked stage runs all five registered treatments.
+master stage fails. All stages overwrite their existing outputs. By default,
+it runs all five registered treatments and the province-election politician
+stack.
 
 The master job reads `9_rice_info_ac_lvl.parquet` and
 `panel_data_election_year.parquet` by default. The stack job reads the resulting
 `0_master_dataset.parquet` and generates all five standard CSVs.
+
+## Politician stack by province and election
+
+`build_politicians_characteristics_byprov.py` creates the alternative
+`politicians_characteristics_byprov.csv`. It runs the
+`self_profession_nomiss` clean-spell algorithm separately within each province,
+so treated and control grids in a stack always share the same province and
+election month.
+
+The standard configuration generates these eight province-election cohorts:
+
+```text
+Haryana 2014-11
+Bihar 2015-12
+Punjab 2017-04
+Uttar Pradesh 2017-04
+Haryana 2019-11
+Bihar 2020-12
+Punjab 2022-04
+Uttar Pradesh 2022-04
+```
+
+The November 2024 Haryana switch is not opened as a new cohort. The full master
+time span, including 2023-2024, remains available as post-treatment observations
+for earlier cohorts. The output retains the calendar switch in `cohort` and
+adds `cohort_id`, `cohort_year`, `cohort_month`, and `cohort_province`.
+
+Submit the dedicated cluster job with:
+
+```bash
+qsub build_politicians_characteristics_byprov.sbatch
+```
+
+The job overwrites the alternative output and writes a cohort audit file named
+`politicians_characteristics_byprov_manifest.csv`.
 
 ## Adding another treatment
 

@@ -24,7 +24,9 @@ raw/curated sources
     -> population, area, placebo, protest, election, fire, and rice inputs
     -> build_0_master_dataset.py
     -> 0_master_dataset.parquet / 0_master_dataset.csv
-    -> build_all_stacked_datasets_duckdb.py
+    -> build_all_stacked_datasets_duckdb.py -> five standard stacked datasets
+    -> build_politicians_characteristics_byprov.py
+       -> politicians_characteristics_byprov.csv / cohort manifest
 ```
 
 ## Wind-direction convention
@@ -67,6 +69,26 @@ population, wind, and base-panel columns. The AC-area Parquet contains only
 the four merge keys and `downup_ac_area`, `downwind_area`, and `upwind_area`.
 `normalize_downup_ac_area_panel.py` migrates a legacy wide area Parquet to
 this schema without recalculating geometry.
+
+## Derived stacked datasets
+
+All stacked-data producers and their cluster launchers are contained in this
+folder. `build_all_stacked_datasets_duckdb.py` creates the five standard
+treatment stacks. `build_politicians_characteristics_byprov.py` creates the
+alternative politician-characteristics stack within province-election
+cohorts from the same `0_master_dataset.parquet`.
+
+The province-election stack is part of both shared rebuild entry points:
+
+```bash
+qsub build_stacked_datasets.sbatch
+qsub build_master_and_stacked_datasets.sh
+```
+
+The first command rebuilds all stacks from an existing master. The second
+rebuilds the master first and then all standard and province-election stacks.
+The dedicated `build_politicians_characteristics_byprov.sbatch` remains
+available when only the alternative stack needs to be rebuilt.
 
 ## Inputs to each direct-input producer
 

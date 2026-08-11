@@ -2,7 +2,7 @@
 #$ -M anzony.quispe@gmail.com
 #$ -m abe
 #$ -q largemem
-#$ -N master_and_stacks
+#$ -N polischar_byprov
 #$ -pe smp 10
 #$ -cwd
 
@@ -49,34 +49,6 @@ echo "[$(date '+%F %T')] git HEAD: $(git rev-parse --short HEAD)"
 flock -u 9
 
 cd "${CODE_DIR}"
-
-echo "[$(date '+%F %T')] building 0_master_dataset.parquet and CSV"
-"${PYTHON}" build_0_master_dataset.py \
-    --intermediate "${INTERMEDIATE}" \
-    --threads "${NSLOTS:-10}" \
-    --memory-limit "${MEMORY_LIMIT}" \
-    --overwrite \
-    > build_0_master_dataset.out 2>&1
-echo "[$(date '+%F %T')] master dataset completed"
-
-SPEC_ARGS=()
-if [[ -n "${STACK_SPECS:-}" && "${STACK_SPECS}" != "all" ]]; then
-    IFS=',' read -r -a REQUESTED_SPECS <<< "${STACK_SPECS}"
-    for spec in "${REQUESTED_SPECS[@]}"; do
-        SPEC_ARGS+=(--spec "${spec}")
-    done
-fi
-
-echo "[$(date '+%F %T')] building stacked datasets"
-"${PYTHON}" build_all_stacked_datasets_duckdb.py \
-    --intermediate "${INTERMEDIATE}" \
-    --threads "${NSLOTS:-10}" \
-    --memory-limit "${MEMORY_LIMIT}" \
-    --overwrite \
-    "${SPEC_ARGS[@]}" \
-    > build_stacked_datasets.out 2>&1
-
-echo "[$(date '+%F %T')] building politician stack by province-election cohort"
 "${PYTHON}" build_politicians_characteristics_byprov.py \
     --intermediate "${INTERMEDIATE}" \
     --threads "${NSLOTS:-10}" \
@@ -87,4 +59,4 @@ echo "[$(date '+%F %T')] building politician stack by province-election cohort"
     --overwrite \
     > build_politicians_characteristics_byprov.out 2>&1
 
-echo "[$(date '+%F %T')] completed master and all stacked datasets"
+echo "[$(date '+%F %T')] completed politicians_characteristics_byprov.csv"
