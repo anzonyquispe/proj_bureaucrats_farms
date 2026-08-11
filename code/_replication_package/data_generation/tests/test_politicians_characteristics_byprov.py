@@ -13,6 +13,7 @@ if str(DATA_GENERATION) not in sys.path:
     sys.path.insert(0, str(DATA_GENERATION))
 
 import build_politicians_characteristics_byprov as byprov  # noqa: E402
+import duckdb  # noqa: E402
 
 
 def make_rows() -> list[dict[str, object]]:
@@ -131,6 +132,26 @@ class PoliticianCharacteristicsByProvinceTests(unittest.TestCase):
                 {row["province"] for row in manifest},
                 {"Punjab", "Haryana"},
             )
+
+            database_path = work / byprov.DATABASE_NAME
+            self.assertTrue(database_path.is_file())
+            connection = duckdb.connect(str(database_path), read_only=True)
+            try:
+                stack_rows = connection.execute(
+                    "SELECT count(*) FROM politicians_characteristics_byprov"
+                ).fetchone()[0]
+                manifest_rows = connection.execute(
+                    "SELECT count(*) "
+                    "FROM politicians_characteristics_byprov_manifest"
+                ).fetchone()[0]
+                view_rows = connection.execute(
+                    "SELECT count(*) FROM final_stack"
+                ).fetchone()[0]
+            finally:
+                connection.close()
+            self.assertEqual(stack_rows, len(rows))
+            self.assertEqual(view_rows, len(rows))
+            self.assertEqual(manifest_rows, 2)
         finally:
             shutil.rmtree(work)
 

@@ -26,7 +26,7 @@ raw/curated sources
     -> 0_master_dataset.parquet / 0_master_dataset.csv
     -> build_all_stacked_datasets_duckdb.py -> five standard stacked datasets
     -> build_politicians_characteristics_byprov.py
-       -> politicians_characteristics_byprov.csv / cohort manifest
+       -> politicians_characteristics_byprov.csv / DuckDB / cohort manifest
 ```
 
 ## Wind-direction convention

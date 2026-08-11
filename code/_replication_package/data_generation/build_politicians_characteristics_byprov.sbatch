@@ -59,4 +59,4 @@ cd "${CODE_DIR}"
     --overwrite \
     > build_politicians_characteristics_byprov.out 2>&1
 
-echo "[$(date '+%F %T')] completed politicians_characteristics_byprov.csv"
+echo "[$(date '+%F %T')] completed politicians_characteristics_byprov.csv and .db"

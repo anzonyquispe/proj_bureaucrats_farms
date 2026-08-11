@@ -44,6 +44,7 @@ from build_all_stacked_datasets_duckdb import (
 
 TREATMENT_COLUMN = "self_profession_nomiss"
 OUTPUT_NAME = "politicians_characteristics_byprov.csv"
+DATABASE_NAME = "politicians_characteristics_byprov.db"
 MANIFEST_NAME = "politicians_characteristics_byprov_manifest.csv"
 WORK_DIRECTORY_NAME = "politicians_characteristics_byprov_work"
 DEFAULT_LAST_COHORT_YEAR = 2022
@@ -69,6 +70,12 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
         help="Master Parquet/CSV; defaults to INTERMEDIATE/0_master_dataset.parquet.",
     )
     parser.add_argument("--output", type=Path, default=None)
+    parser.add_argument(
+        "--database",
+        type=Path,
+        default=None,
+        help="Final DuckDB containing the combined stack and cohort manifest.",
+    )
     parser.add_argument("--work-directory", type=Path, default=None)
     parser.add_argument(
         "--threads",
@@ -345,6 +352,7 @@ def combined_union(database_aliases: Sequence[str]) -> str:
 def combine_stacks(
     database_paths: Sequence[tuple[str, Path]],
     output_path: Path,
+    database_path: Path,
     manifest_path: Path,
     expected_pairs: set[tuple[str, int]],
     expected_cohorts: int,
@@ -353,11 +361,12 @@ def combine_stacks(
     temp_directory: Path,
 ) -> None:
     output_temp = output_path.with_name(output_path.name + ".tmp")
+    database_temp = database_path.with_name(database_path.name + ".tmp")
     manifest_temp = manifest_path.with_name(manifest_path.name + ".tmp")
-    for temp_path in (output_temp, manifest_temp):
+    for temp_path in (output_temp, database_temp, manifest_temp):
         if temp_path.exists():
             temp_path.unlink()
-    connection = duckdb.connect()
+    connection = duckdb.connect(str(database_temp))
     try:
         configure_connection(
             connection,
@@ -366,10 +375,10 @@ def combine_stacks(
             temp_directory=temp_directory,
         )
         aliases: list[str] = []
-        for index, (_, database_path) in enumerate(database_paths):
+        for index, (_, province_database_path) in enumerate(database_paths):
             alias = f"province_{index}"
             connection.execute(
-                f"ATTACH {qstr(database_path)} AS {qid(alias)} (READ_ONLY)"
+                f"ATTACH {qstr(province_database_path)} AS {qid(alias)} (READ_ONLY)"
             )
             aliases.append(alias)
 
@@ -389,7 +398,7 @@ def combine_stacks(
         )
         connection.execute(
             f"""
-            CREATE TEMP VIEW combined_stack AS
+            CREATE TABLE politicians_characteristics_byprov AS
             SELECT
                 stacks.*,
                 cohort_map.cohort_id,
@@ -418,7 +427,7 @@ def combine_stacks(
                     AS treated_grids,
                 count(DISTINCT unique_small_grid_id) FILTER (WHERE treat = 0)
                     AS control_grids
-            FROM combined_stack
+            FROM politicians_characteristics_byprov
             GROUP BY province, cohort
             ORDER BY cohort, province
             """
@@ -437,41 +446,57 @@ def combine_stacks(
 
         connection.execute(
             f"""
-            COPY (SELECT * FROM combined_stack)
+            COPY (SELECT * FROM politicians_characteristics_byprov)
             TO {qstr(output_temp)}
             (FORMAT CSV, HEADER TRUE)
             """
         )
         connection.execute(
             f"""
+            CREATE TABLE politicians_characteristics_byprov_manifest AS
+            SELECT
+                cohort_id,
+                cohort_province,
+                province,
+                cohort,
+                cast(floor((cohort - 1) / 12.0) AS INTEGER) AS cohort_year,
+                cast(((cohort - 1) % 12) + 1 AS INTEGER) AS cohort_month,
+                count(DISTINCT unique_small_grid_id)
+                    FILTER (WHERE treat = 1) AS treated_grids,
+                count(DISTINCT unique_small_grid_id)
+                    FILTER (WHERE treat = 0) AS control_grids,
+                count(*) FILTER (WHERE treat = 1) AS treated_rows,
+                count(*) FILTER (WHERE treat = 0) AS control_rows,
+                min(relative_monthyear) AS relative_month_min,
+                max(relative_monthyear) AS relative_month_max
+            FROM politicians_characteristics_byprov
+            GROUP BY
+                cohort_id, cohort_province, province, cohort
+            ORDER BY cohort_id
+            """
+        )
+        connection.execute(
+            """
+            CREATE VIEW final_stack AS
+            SELECT * FROM politicians_characteristics_byprov
+            """
+        )
+        connection.execute(
+            f"""
             COPY (
                 SELECT
-                    cohort_id,
-                    cohort_province,
-                    province,
-                    cohort,
-                    cast(floor((cohort - 1) / 12.0) AS INTEGER) AS cohort_year,
-                    cast(((cohort - 1) % 12) + 1 AS INTEGER) AS cohort_month,
-                    count(DISTINCT unique_small_grid_id)
-                        FILTER (WHERE treat = 1) AS treated_grids,
-                    count(DISTINCT unique_small_grid_id)
-                        FILTER (WHERE treat = 0) AS control_grids,
-                    count(*) FILTER (WHERE treat = 1) AS treated_rows,
-                    count(*) FILTER (WHERE treat = 0) AS control_rows,
-                    min(relative_monthyear) AS relative_month_min,
-                    max(relative_monthyear) AS relative_month_max
-                FROM combined_stack
-                GROUP BY
-                    cohort_id, cohort_province, province, cohort
-                ORDER BY cohort_id
+                    *
+                FROM politicians_characteristics_byprov_manifest
             )
             TO {qstr(manifest_temp)}
             (FORMAT CSV, HEADER TRUE)
             """
         )
+        connection.execute("CHECKPOINT")
     finally:
         connection.close()
 
+    os.replace(database_temp, database_path)
     os.replace(output_temp, output_path)
     os.replace(manifest_temp, manifest_path)
 
@@ -490,6 +515,11 @@ def main(argv: Sequence[str] | None = None) -> int:
         else intermediate / "0_master_dataset.parquet"
     )
     output_path = args.output.resolve() if args.output else intermediate / OUTPUT_NAME
+    database_path = (
+        args.database.resolve()
+        if args.database
+        else intermediate / DATABASE_NAME
+    )
     manifest_path = output_path.with_name(MANIFEST_NAME)
     work_directory = (
         args.work_directory.resolve()
@@ -520,6 +550,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     )
     logging.info("Input: %s", input_path)
     logging.info("Output: %s", output_path)
+    logging.info("Database: %s", database_path)
     logging.info("Detected province-election cohorts: %s", len(cohorts))
     for province, cohort, switching_grids in cohorts:
         logging.info(
@@ -535,6 +566,7 @@ def main(argv: Sequence[str] | None = None) -> int:
 
     intermediate.mkdir(parents=True, exist_ok=True)
     output_path.parent.mkdir(parents=True, exist_ok=True)
+    database_path.parent.mkdir(parents=True, exist_ok=True)
     if args.overwrite:
         remove_work_directory(work_directory, intermediate)
     work_directory.mkdir(parents=True, exist_ok=True)
@@ -582,7 +614,7 @@ def main(argv: Sequence[str] | None = None) -> int:
                 work_directory / f"source_tmp_{slug}",
             )
         logging.info("Stacking province: %s", province)
-        database_path = run_province_stack(
+        province_database_path = run_province_stack(
             args,
             province,
             source_path,
@@ -590,11 +622,12 @@ def main(argv: Sequence[str] | None = None) -> int:
             selected_columns,
             maximum_cohort,
         )
-        database_paths.append((province, database_path))
+        database_paths.append((province, province_database_path))
 
     combine_stacks(
         database_paths,
         output_path,
+        database_path,
         manifest_path,
         {(province, cohort) for province, cohort, _ in cohorts},
         args.expected_cohorts,
@@ -604,6 +637,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     )
     logging.info("Completed province-election politician stack")
     logging.info("CSV: %s", output_path)
+    logging.info("DuckDB: %s", database_path)
     logging.info("Manifest: %s", manifest_path)
     return 0
 

@@ -137,7 +137,8 @@ The master job reads `9_rice_info_ac_lvl.parquet` and
 ## Politician stack by province and election
 
 `build_politicians_characteristics_byprov.py` creates the alternative
-`politicians_characteristics_byprov.csv`. It runs the
+`politicians_characteristics_byprov.csv` and
+`politicians_characteristics_byprov.db`. It runs the
 `self_profession_nomiss` clean-spell algorithm separately within each province,
 so treated and control grids in a stack always share the same province and
 election month.
@@ -168,6 +169,14 @@ qsub build_politicians_characteristics_byprov.sbatch
 
 The job overwrites the alternative output and writes a cohort audit file named
 `politicians_characteristics_byprov_manifest.csv`.
+
+The final DuckDB contains:
+
+```text
+politicians_characteristics_byprov           combined 8-cohort observations
+politicians_characteristics_byprov_manifest  one audit row per cohort
+final_stack                                  view of the combined observations
+```
 
 ## Adding another treatment
 
