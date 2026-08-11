@@ -3,6 +3,15 @@
 This directory contains specifications that are still being evaluated and are
 therefore excluded from the main replication-package submission scripts.
 
+## Politician by-province FE sweep
+
+The `politician_byprov_fe_sweep` directory contains the 32-specification
+politician event-study sweep based only on
+`politicians_characteristics_byprov.csv`. Each FE runs independently with one
+core on the input dataset's unchanged control composition and produces both the
+baseline and `downup_ac_pop` interaction event studies. Protest analysis is
+deferred to a later stage.
+
 ## Grid/month-year event studies
 
 The `event_study` directory contains the population and area event studies that
