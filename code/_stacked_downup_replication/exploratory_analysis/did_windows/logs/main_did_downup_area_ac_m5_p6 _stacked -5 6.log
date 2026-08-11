@@ -151,6 +151,15 @@ Notes:
 Exploration window: relative_monthyear in [-5, 6]
 
 . 
+. * Preserve the stacked-analysis convention used by the event-study templates:
+. * relative_year_bin is the analysis-period copy of relative_monthyear.
+. capture confirm variable relative_year_bin
+
+. if _rc {
+.     gen relative_year_bin = relative_monthyear
+. }
+
+. 
 . 
 . merge m:1 unique_small_grid_id using ///
 >     "${int_data}/ghs_grid_classification_2000.dta", ///
@@ -212,8 +221,320 @@ Exploration window: relative_monthyear in [-5, 6]
 
 . 
 . quietly summarize countk if treat == 1 & relative_year_bin <= -1
-relative_year_bin not found
-r(111);
 
+. local ymean = r(mean)
+
+. quietly summarize countk if treat == 1 & relative_year_bin <= -1 & moderator 
+> == 1
+
+. local ymean2 = r(mean)
+
+. quietly levelsof ac_id, local(ac_levels)
+
+. local numacs : word count `ac_levels'
+
+. 
+. local controls wind_direction av_wind_speed
+
+. local cluster ac_uq_id#cohort#monthyear unique_small_grid_id#cohort
+
+. local fespec1 "No fixed effects"
+
+. local fespec2 "AC and month-year"
+
+. local fespec3 "AC x month-year"
+
+. local fespec4 "Grid and AC x month-year"
+
+. local estimates ""
+
+. 
+. foreach fe of numlist $fe_list {
+  2.     if `fe' == 1 {
+  3.         reg countk ${downup_var} `controls', vce(cluster grid_id)
+  4.         local monthyearfe "N"
+  5.         local acfe "N"
+  6.         local acmonthfe "N"
+  7.         local gridfe "N"
+  8.     }
+  9.     else if `fe' == 2 {
+ 10.         reghdfejl countk ${downup_var} `controls', ///
+>             absorb(ac_id#cohort monthyear#cohort) cluster(`cluster')
+ 11.         local monthyearfe "Y"
+ 12.         local acfe "Y"
+ 13.         local acmonthfe "N"
+ 14.         local gridfe "N"
+ 15.     }
+ 16.     else if `fe' == 3 {
+ 17.         reghdfejl countk ${downup_var} `controls', ///
+>             absorb(ac_id#monthyear#cohort) cluster(`cluster')
+ 18.         local monthyearfe "N"
+ 19.         local acfe "N"
+ 20.         local acmonthfe "Y"
+ 21.         local gridfe "N"
+ 22.     }
+ 23.     else if `fe' == 4 {
+ 24.         reghdfejl countk ${downup_var} `controls', ///
+>             absorb(grid_id#cohort ac_id#monthyear#cohort) cluster(`cluster')
+ 25.         local monthyearfe "N"
+ 26.         local acfe "N"
+ 27.         local acmonthfe "Y"
+ 28.         local gridfe "Y"
+ 29.     }
+ 30.     else {
+ 31.         display as error "Unsupported FE specification `fe'; use 1/4."
+ 32.         exit 198
+ 33.     }
+ 34. 
+.     estadd scalar ymean = `ymean'
+ 35.     estadd scalar ymean2 = `ymean2'
+ 36.     estadd scalar acq = `numacs'
+ 37.     estadd scalar window_min = `window_min'
+ 38.     estadd scalar window_max = `window_max'
+ 39.     estadd local smpl "Rural"
+ 40.     estadd local fespec "`fespec`fe''"
+ 41.     estadd local monthyearfe "`monthyearfe'"
+ 42.     estadd local acfe "`acfe'"
+ 43.     estadd local acmonthfe "`acmonthfe'"
+ 44.     estadd local gridfe "`gridfe'"
+ 45.     local estimates `estimates' eq`fe'
+ 46.     est store eq`fe'
+ 47. }
+
+Linear regression                               Number of obs     =   37002775
+                                                F(3, 75304)       =    3760.75
+                                                Prob > F          =     0.0000
+                                                R-squared         =     0.0058
+                                                Root MSE          =      997.5
+
+                           (Std. err. adjusted for 75,305 clusters in grid_id)
+------------------------------------------------------------------------------
+             |               Robust
+      countk | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+   downup_ac |   5.848508   2.076629     2.82   0.005     1.778324    9.918691
+wind_direc~n |  -.7772219   .0084677   -91.79   0.000    -.7938186   -.7606252
+av_wind_sp~d |  -45.64565   1.868027   -24.44   0.000    -49.30697   -41.98433
+       _cons |   200.5155   3.365193    59.59   0.000     193.9197    207.1113
+------------------------------------------------------------------------------
+
+added scalar:
+              e(ymean) =  91.110349
+
+added scalar:
+             e(ymean2) =  .
+
+added scalar:
+                e(acq) =  807
+
+added scalar:
+         e(window_min) =  -5
+
+added scalar:
+         e(window_max) =  6
+
+added macro:
+               e(smpl) : "Rural"
+
+added macro:
+             e(fespec) : "No fixed effects"
+
+added macro:
+        e(monthyearfe) : "N"
+
+added macro:
+               e(acfe) : "N"
+
+added macro:
+          e(acmonthfe) : "N"
+
+added macro:
+             e(gridfe) : "N"
+(dropped 127 singleton observations)
+(MWFE estimator converged in 11 iterations)
+
+HDFE linear regression with Julia                 Number of obs   = 37,002,648
+Absorbing 2 HDFE groups                           F(   3, 971313) =    3013.00
+Statistics cluster-robust                         Prob > F        =     0.0000
+                                                  R-squared       =     0.1601
+                                                  Adj R-squared   =     0.1579
+Number of clusters (ac_uq_id#cohort#monthyear) =     971313Within R-sq.=     0.
+> 0056
+Number of clusters (unique_small_grid_id#cohort) =    5389260Root MSE=   918.04
+> 12
+
+(Std. err. adjusted for 971,313 clusters in ac_uq_id#cohort#monthyear unique_sm
+> all_grid_id#cohort)
+------------------------------------------------------------------------------
+             |               Robust
+      countk | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+   downup_ac |  -.9386016    1.21447    -0.77   0.440    -3.318922    1.441718
+wind_direc~n |  -.2898006   .0073027   -39.68   0.000    -.3041136   -.2754876
+av_wind_sp~d |    315.194   3.419737    92.17   0.000     308.4915    321.8966
+------------------------------------------------------------------------------
+
+added scalar:
+              e(ymean) =  91.110349
+
+added scalar:
+             e(ymean2) =  .
+
+added scalar:
+                e(acq) =  807
+
+added scalar:
+         e(window_min) =  -5
+
+added scalar:
+         e(window_max) =  6
+
+added macro:
+               e(smpl) : "Rural"
+
+added macro:
+             e(fespec) : "AC and month-year"
+
+added macro:
+        e(monthyearfe) : "Y"
+
+added macro:
+               e(acfe) : "Y"
+
+added macro:
+          e(acmonthfe) : "N"
+
+added macro:
+             e(gridfe) : "N"
+(dropped 47734 singleton observations)
+(MWFE estimator converged in 1 iterations)
+
+HDFE linear regression with Julia                 Number of obs   = 36,955,041
+Absorbing 1 HDFE group                            F(   3, 923705) =      64.20
+Statistics cluster-robust                         Prob > F        =     0.0000
+                                                  R-squared       =     0.6113
+                                                  Adj R-squared   =     0.6013
+Number of clusters (ac_uq_id#cohort#monthyear) =     923706Within R-sq.=     0.
+> 0000
+Number of clusters (unique_small_grid_id#cohort) =    5387971Root MSE=   631.93
+> 28
+
+(Std. err. adjusted for 923,706 clusters in ac_uq_id#cohort#monthyear unique_sm
+> all_grid_id#cohort)
+------------------------------------------------------------------------------
+             |               Robust
+      countk | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+   downup_ac |    6.76042   1.175822     5.75   0.000     4.455847    9.064992
+wind_direc~n |   .0175899   .0045154     3.90   0.000       .00874    .0264399
+av_wind_sp~d |   -60.4472   4.704585   -12.85   0.000    -69.66803   -51.22637
+------------------------------------------------------------------------------
+
+added scalar:
+              e(ymean) =  91.110349
+
+added scalar:
+             e(ymean2) =  .
+
+added scalar:
+                e(acq) =  807
+
+added scalar:
+         e(window_min) =  -5
+
+added scalar:
+         e(window_max) =  6
+
+added macro:
+               e(smpl) : "Rural"
+
+added macro:
+             e(fespec) : "AC x month-year"
+
+added macro:
+        e(monthyearfe) : "N"
+
+added macro:
+               e(acfe) : "N"
+
+added macro:
+          e(acmonthfe) : "Y"
+
+added macro:
+             e(gridfe) : "N"
+(dropped 136410 singleton observations)
+(MWFE estimator converged in 28 iterations)
+
+HDFE linear regression with Julia                 Number of obs   = 36,866,365
+Absorbing 2 HDFE groups                           F(   3, 923279) =       4.58
+Statistics cluster-robust                         Prob > F        =     0.0033
+                                                  R-squared       =     0.6669
+                                                  Adj R-squared   =     0.5992
+Number of clusters (ac_uq_id#cohort#monthyear) =     923279Within R-sq.=     0.
+> 0000
+Number of clusters (unique_small_grid_id#cohort) =    5299295Root MSE=   634.20
+> 55
+
+(Std. err. adjusted for 923,279 clusters in ac_uq_id#cohort#monthyear unique_sm
+> all_grid_id#cohort)
+------------------------------------------------------------------------------
+             |               Robust
+      countk | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+   downup_ac |  -2.913936   1.638374    -1.78   0.075    -6.125095    .2972229
+wind_direc~n |    -.00853   .0052025    -1.64   0.101    -.0187268    .0016668
+av_wind_sp~d |  -24.43612   8.514459    -2.87   0.004    -41.12417   -7.748062
+------------------------------------------------------------------------------
+
+added scalar:
+              e(ymean) =  91.110349
+
+added scalar:
+             e(ymean2) =  .
+
+added scalar:
+                e(acq) =  807
+
+added scalar:
+         e(window_min) =  -5
+
+added scalar:
+         e(window_max) =  6
+
+added macro:
+               e(smpl) : "Rural"
+
+added macro:
+             e(fespec) : "Grid and AC x month-year"
+
+added macro:
+        e(monthyearfe) : "N"
+
+added macro:
+               e(acfe) : "N"
+
+added macro:
+          e(acmonthfe) : "Y"
+
+added macro:
+             e(gridfe) : "Y"
+
+. 
+. estwrite `estimates' using ///
+>     "${tables}/${did_output}${sample}_rural${ster_suffix}.ster", replace
+(saving eq1)
+(saving eq2)
+(saving eq3)
+(saving eq4)
+(file /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication/.
+> ./../tables/exploratory_analysis/main_did_downup_area_ac_m5_p6_rural_stacked.
+> ster saved)
+
+. 
+. display "Saved ${tables}/${did_output}${sample}_rural${ster_suffix}.ster"
+Saved /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication/.
+> ./../tables/exploratory_analysis/main_did_downup_area_ac_m5_p6_rural_stacked.
+> ster
+
+. 
 end of do-file
-r(111);
