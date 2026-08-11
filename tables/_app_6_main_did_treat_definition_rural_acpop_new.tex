@@ -1,22 +1,24 @@
-{
-\def\sym#1{\ifmmode^{#1}\else\(^{#1}\)\fi}
-\begin{tabular}{l*{5}{c}}
-\hline\hline
+\begin{tabular}{lccccc}
 \hline
-downup\_ac\_pop&       2.890\sym{**} &                     &                     &                     &                     \\
-            &     (1.334)         &                     &                     &                     &                     \\
-downup\_ac   &                     &       4.803\sym{***}&                     &                     &                     \\
-            &                     &     (1.803)         &                     &                     &                     \\
-downup\_1sd\_pop&                     &                     &       2.590         &                     &                     \\
-            &                     &                     &     (1.619)         &                     &                     \\
-down\_percent\_pop&                     &                     &                     &      -0.070\sym{*}  &                     \\
-            &                     &                     &                     &     (0.036)         &                     \\
-downup\_diff\_percent\_pop&                     &                     &                     &                     &      -0.035\sym{*}  \\
-            &                     &                     &                     &                     &     (0.018)         \\
+& (1) & (2) & (3) & (4) & (5)\\
+& \multicolumn{5}{c}{Number of Fires (in 1,000 units) }\\
+\hline
+
+Down$>$Up (Pop)&      2.8899\sym{**} &                     &                     &                     &                     \\
+            &    (1.3339)         &                     &                     &                     &                     \\
+Down$>$Up (Area)&                     &      4.8028\sym{***}&                     &                     &                     \\
+            &                     &    (1.8026)         &                     &                     &                     \\
+Down$>$Up by 1std&                     &                     &      2.5898         &                     &                     \\
+            &                     &                     &    (1.6187)         &                     &                     \\
+Downwind over total Population&                     &                     &                     &     -0.0701\sym{*}  &                     \\
+            &                     &                     &                     &    (0.0361)         &                     \\
+Down-Up Percent&                     &                     &                     &                     &     -0.0350\sym{*}  \\
+            &                     &                     &                     &                     &    (0.0181)         \\
 \hline
 Observations&  63,530,478         &  63,530,478         &  63,530,478         &  63,530,478         &  63,530,478         \\
 N Assembly Constituencies&         808         &         808         &         808         &         808         &         808         \\
+Grid $\times$ Cohort FE&           Y         &           Y         &           Y         &           Y         &           Y         \\
+Assembly $\times$ Month-Year $\times$ Cohort FE&           Y         &           Y         &           Y         &           Y         &           Y         \\
 Mean DV     &     153.264         &     153.264         &     153.264         &     153.264         &     153.264         \\
-\hline\hline
+\hline
 \end{tabular}
-}

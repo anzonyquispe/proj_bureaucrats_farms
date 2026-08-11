@@ -1,16 +1,17 @@
-{
-\def\sym#1{\ifmmode^{#1}\else\(^{#1}\)\fi}
-\begin{tabular}{l*{3}{c}}
-\hline\hline
+\begin{tabular}{lccc}
 \hline
-Down$>$Up (13 km placebo)&       4.899\sym{***}&      -3.909         &       5.863\sym{**} \\
+& \multicolumn{3}{c}{Number of Fires (in 1,000 units)}\\
+& Full Sample & Treated for Politicians & Control for Politicians \\
+& (1) & (2) & (3) \\
+\midrule
+
+Down$>$Up (Placebo)&       4.899\sym{***}&      -3.909         &       5.863\sym{**} \\
             &     (1.546)         &     (2.547)         &     (2.592)         \\
 \hline
 Observations& 133,548,526         &  64,854,771         &  67,925,304         \\
 N Assembly Constituencies&         808         &         808         &         808         \\
-Grid FE     &           Y         &           Y         &           Y         \\
+Grid $\times$ Cohort FE&           Y         &           Y         &           Y         \\
 AC $\times$ Month-Year $\times$ Cohort FE&           Y         &           Y         &           Y         \\
 Mean DV     &     182.464         &     182.464         &     182.464         \\
-\hline\hline
+\hline
 \end{tabular}
-}

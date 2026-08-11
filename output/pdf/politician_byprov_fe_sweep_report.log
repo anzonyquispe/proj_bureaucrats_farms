@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.25 (MiKTeX 24.1) (preloaded format=pdflatex 2026.7.19)  11 AUG 2026 10:44
+This is pdfTeX, Version 3.141592653-2.6-1.40.25 (MiKTeX 24.1) (preloaded format=pdflatex 2026.7.19)  11 AUG 2026 11:08
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -412,14 +412,29 @@ prov_fe01_rural_acpop_all_baseline_rotated.png  used on input line 29.
 (pdftex.def)             Requested size: 343.42375pt x 171.7114pt.
 LaTeX Font Info:    External font `cmex10' loaded for size
 (Font)              <7> on input line 31.
+<C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/explor
+atory_analysis/politician_byprov_fe_sweep/politician_byprov_fe01_did_interactio
+n_rural_acpop_all_1.png, id=185, 960.58875pt x 640.3925pt>
+File: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/e
+xploratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe01_did_inter
+action_rural_acpop_all_1.png Graphic file (type png)
+<use C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/ex
+ploratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe01_did_intera
+ction_rural_acpop_all_1.png>
+Package pdftex.def Info: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucr
+ats_farms/figures/exploratory_analysis/politician_byprov_fe_sweep/politician_by
+prov_fe01_did_interaction_rural_acpop_all_1.png  used on input line 32.
+(pdftex.def)             Requested size: 386.35037pt x 257.56934pt.
  [3
 
  <C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/explo
 ratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe01_rural_acpop_a
 ll_baseline_ori.png> <C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats
 _farms/figures/exploratory_analysis/politician_byprov_fe_sweep/politician_bypro
-v_fe01_rural_acpop_all_baseline_rotated.png>]
-[4
+v_fe01_rural_acpop_all_baseline_rotated.png> <C:/Users/eunic/OneDrive/Documents
+/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/politician_byprov_f
+e_sweep/politician_byprov_fe01_did_interaction_rural_acpop_all_1.png (PNG copy)
+>] [4
 
 ]
 <C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/explor
@@ -433,7 +448,7 @@ ploratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe02_rural_acpo
 p_all_baseline_ori.png>
 Package pdftex.def Info: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucr
 ats_farms/figures/exploratory_analysis/politician_byprov_fe_sweep/politician_by
-prov_fe02_rural_acpop_all_baseline_ori.png  used on input line 67.
+prov_fe02_rural_acpop_all_baseline_ori.png  used on input line 65.
 (pdftex.def)             Requested size: 343.42375pt x 171.7114pt.
 <C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/explor
 atory_analysis/politician_byprov_fe_sweep/politician_byprov_fe02_rural_acpop_al
@@ -446,20 +461,36 @@ ploratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe02_rural_acpo
 p_all_baseline_rotated.png>
 Package pdftex.def Info: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucr
 ats_farms/figures/exploratory_analysis/politician_byprov_fe_sweep/politician_by
-prov_fe02_rural_acpop_all_baseline_rotated.png  used on input line 71.
+prov_fe02_rural_acpop_all_baseline_rotated.png  used on input line 69.
 (pdftex.def)             Requested size: 343.42375pt x 171.7114pt.
+<C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/explor
+atory_analysis/politician_byprov_fe_sweep/politician_byprov_fe02_did_interactio
+n_rural_acpop_all_1.png, id=202, 960.58875pt x 640.3925pt>
+File: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/e
+xploratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe02_did_inter
+action_rural_acpop_all_1.png Graphic file (type png)
+<use C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/ex
+ploratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe02_did_intera
+ction_rural_acpop_all_1.png>
+Package pdftex.def Info: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucr
+ats_farms/figures/exploratory_analysis/politician_byprov_fe_sweep/politician_by
+prov_fe02_did_interaction_rural_acpop_all_1.png  used on input line 72.
+(pdftex.def)             Requested size: 386.35037pt x 257.56934pt.
  [5
 
  <C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/explo
 ratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe02_rural_acpop_a
 ll_baseline_ori.png> <C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats
 _farms/figures/exploratory_analysis/politician_byprov_fe_sweep/politician_bypro
-v_fe02_rural_acpop_all_baseline_rotated.png>] [6
+v_fe02_rural_acpop_all_baseline_rotated.png> <C:/Users/eunic/OneDrive/Documents
+/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/politician_byprov_f
+e_sweep/politician_byprov_fe02_did_interaction_rural_acpop_all_1.png (PNG copy)
+>] [6
 
 ]
 <C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/explor
 atory_analysis/politician_byprov_fe_sweep/politician_byprov_fe03_rural_acpop_al
-l_baseline_ori.png, id=211, 578.16pt x 289.08pt>
+l_baseline_ori.png, id=212, 578.16pt x 289.08pt>
 File: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/e
 xploratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe03_rural_acp
 op_all_baseline_ori.png Graphic file (type png)
@@ -468,11 +499,11 @@ ploratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe03_rural_acpo
 p_all_baseline_ori.png>
 Package pdftex.def Info: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucr
 ats_farms/figures/exploratory_analysis/politician_byprov_fe_sweep/politician_by
-prov_fe03_rural_acpop_all_baseline_ori.png  used on input line 109.
+prov_fe03_rural_acpop_all_baseline_ori.png  used on input line 105.
 (pdftex.def)             Requested size: 343.42375pt x 171.7114pt.
 <C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/explor
 atory_analysis/politician_byprov_fe_sweep/politician_byprov_fe03_rural_acpop_al
-l_baseline_rotated.png, id=212, 578.16pt x 289.08pt>
+l_baseline_rotated.png, id=213, 578.16pt x 289.08pt>
 File: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/e
 xploratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe03_rural_acp
 op_all_baseline_rotated.png Graphic file (type png)
@@ -481,20 +512,36 @@ ploratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe03_rural_acpo
 p_all_baseline_rotated.png>
 Package pdftex.def Info: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucr
 ats_farms/figures/exploratory_analysis/politician_byprov_fe_sweep/politician_by
-prov_fe03_rural_acpop_all_baseline_rotated.png  used on input line 113.
+prov_fe03_rural_acpop_all_baseline_rotated.png  used on input line 109.
 (pdftex.def)             Requested size: 343.42375pt x 171.7114pt.
+<C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/explor
+atory_analysis/politician_byprov_fe_sweep/politician_byprov_fe03_did_interactio
+n_rural_acpop_all_1.png, id=214, 960.58875pt x 640.3925pt>
+File: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/e
+xploratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe03_did_inter
+action_rural_acpop_all_1.png Graphic file (type png)
+<use C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/ex
+ploratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe03_did_intera
+ction_rural_acpop_all_1.png>
+Package pdftex.def Info: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucr
+ats_farms/figures/exploratory_analysis/politician_byprov_fe_sweep/politician_by
+prov_fe03_did_interaction_rural_acpop_all_1.png  used on input line 112.
+(pdftex.def)             Requested size: 386.35037pt x 257.56934pt.
  [7
 
  <C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/explo
 ratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe03_rural_acpop_a
 ll_baseline_ori.png> <C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats
 _farms/figures/exploratory_analysis/politician_byprov_fe_sweep/politician_bypro
-v_fe03_rural_acpop_all_baseline_rotated.png>] [8
+v_fe03_rural_acpop_all_baseline_rotated.png> <C:/Users/eunic/OneDrive/Documents
+/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/politician_byprov_f
+e_sweep/politician_byprov_fe03_did_interaction_rural_acpop_all_1.png (PNG copy)
+>] [8
 
 ]
 <C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/explor
 atory_analysis/politician_byprov_fe_sweep/politician_byprov_fe04_rural_acpop_al
-l_baseline_ori.png, id=223, 578.16pt x 289.08pt>
+l_baseline_ori.png, id=225, 578.16pt x 289.08pt>
 File: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/e
 xploratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe04_rural_acp
 op_all_baseline_ori.png Graphic file (type png)
@@ -503,11 +550,11 @@ ploratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe04_rural_acpo
 p_all_baseline_ori.png>
 Package pdftex.def Info: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucr
 ats_farms/figures/exploratory_analysis/politician_byprov_fe_sweep/politician_by
-prov_fe04_rural_acpop_all_baseline_ori.png  used on input line 151.
+prov_fe04_rural_acpop_all_baseline_ori.png  used on input line 145.
 (pdftex.def)             Requested size: 343.42375pt x 171.7114pt.
 <C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/explor
 atory_analysis/politician_byprov_fe_sweep/politician_byprov_fe04_rural_acpop_al
-l_baseline_rotated.png, id=224, 578.16pt x 289.08pt>
+l_baseline_rotated.png, id=226, 578.16pt x 289.08pt>
 File: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/e
 xploratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe04_rural_acp
 op_all_baseline_rotated.png Graphic file (type png)
@@ -516,21 +563,36 @@ ploratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe04_rural_acpo
 p_all_baseline_rotated.png>
 Package pdftex.def Info: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucr
 ats_farms/figures/exploratory_analysis/politician_byprov_fe_sweep/politician_by
-prov_fe04_rural_acpop_all_baseline_rotated.png  used on input line 155.
+prov_fe04_rural_acpop_all_baseline_rotated.png  used on input line 149.
 (pdftex.def)             Requested size: 343.42375pt x 171.7114pt.
+<C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/explor
+atory_analysis/politician_byprov_fe_sweep/politician_byprov_fe04_did_interactio
+n_rural_acpop_all_1.png, id=227, 960.58875pt x 640.3925pt>
+File: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/e
+xploratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe04_did_inter
+action_rural_acpop_all_1.png Graphic file (type png)
+<use C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/ex
+ploratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe04_did_intera
+ction_rural_acpop_all_1.png>
+Package pdftex.def Info: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucr
+ats_farms/figures/exploratory_analysis/politician_byprov_fe_sweep/politician_by
+prov_fe04_did_interaction_rural_acpop_all_1.png  used on input line 152.
+(pdftex.def)             Requested size: 386.35037pt x 257.56934pt.
  [9
 
  <C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/explo
 ratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe04_rural_acpop_a
 ll_baseline_ori.png> <C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats
 _farms/figures/exploratory_analysis/politician_byprov_fe_sweep/politician_bypro
-v_fe04_rural_acpop_all_baseline_rotated.png>]
-[10
+v_fe04_rural_acpop_all_baseline_rotated.png> <C:/Users/eunic/OneDrive/Documents
+/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/politician_byprov_f
+e_sweep/politician_byprov_fe04_did_interaction_rural_acpop_all_1.png (PNG copy)
+>] [10
 
 ]
 <C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/explor
 atory_analysis/politician_byprov_fe_sweep/politician_byprov_fe05_rural_acpop_al
-l_baseline_ori.png, id=234, 578.16pt x 289.08pt>
+l_baseline_ori.png, id=237, 578.16pt x 289.08pt>
 File: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/e
 xploratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe05_rural_acp
 op_all_baseline_ori.png Graphic file (type png)
@@ -539,11 +601,11 @@ ploratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe05_rural_acpo
 p_all_baseline_ori.png>
 Package pdftex.def Info: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucr
 ats_farms/figures/exploratory_analysis/politician_byprov_fe_sweep/politician_by
-prov_fe05_rural_acpop_all_baseline_ori.png  used on input line 193.
+prov_fe05_rural_acpop_all_baseline_ori.png  used on input line 185.
 (pdftex.def)             Requested size: 343.42375pt x 171.7114pt.
 <C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/explor
 atory_analysis/politician_byprov_fe_sweep/politician_byprov_fe05_rural_acpop_al
-l_baseline_rotated.png, id=235, 578.16pt x 289.08pt>
+l_baseline_rotated.png, id=238, 578.16pt x 289.08pt>
 File: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/e
 xploratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe05_rural_acp
 op_all_baseline_rotated.png Graphic file (type png)
@@ -552,20 +614,37 @@ ploratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe05_rural_acpo
 p_all_baseline_rotated.png>
 Package pdftex.def Info: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucr
 ats_farms/figures/exploratory_analysis/politician_byprov_fe_sweep/politician_by
-prov_fe05_rural_acpop_all_baseline_rotated.png  used on input line 197.
+prov_fe05_rural_acpop_all_baseline_rotated.png  used on input line 189.
 (pdftex.def)             Requested size: 343.42375pt x 171.7114pt.
+<C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/explor
+atory_analysis/politician_byprov_fe_sweep/politician_byprov_fe05_did_interactio
+n_rural_acpop_all_1.png, id=239, 960.58875pt x 640.3925pt>
+File: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/e
+xploratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe05_did_inter
+action_rural_acpop_all_1.png Graphic file (type png)
+<use C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/ex
+ploratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe05_did_intera
+ction_rural_acpop_all_1.png>
+Package pdftex.def Info: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucr
+ats_farms/figures/exploratory_analysis/politician_byprov_fe_sweep/politician_by
+prov_fe05_did_interaction_rural_acpop_all_1.png  used on input line 192.
+(pdftex.def)             Requested size: 386.35037pt x 257.56934pt.
  [11
 
  <C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/explo
 ratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe05_rural_acpop_a
 ll_baseline_ori.png> <C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats
 _farms/figures/exploratory_analysis/politician_byprov_fe_sweep/politician_bypro
-v_fe05_rural_acpop_all_baseline_rotated.png>] [12
+v_fe05_rural_acpop_all_baseline_rotated.png> <C:/Users/eunic/OneDrive/Documents
+/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/politician_byprov_f
+e_sweep/politician_byprov_fe05_did_interaction_rural_acpop_all_1.png (PNG copy)
+>]
+[12
 
 ]
 <C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/explor
 atory_analysis/politician_byprov_fe_sweep/politician_byprov_fe06_rural_acpop_al
-l_baseline_ori.png, id=245, 578.16pt x 289.08pt>
+l_baseline_ori.png, id=249, 578.16pt x 289.08pt>
 File: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/e
 xploratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe06_rural_acp
 op_all_baseline_ori.png Graphic file (type png)
@@ -574,11 +653,11 @@ ploratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe06_rural_acpo
 p_all_baseline_ori.png>
 Package pdftex.def Info: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucr
 ats_farms/figures/exploratory_analysis/politician_byprov_fe_sweep/politician_by
-prov_fe06_rural_acpop_all_baseline_ori.png  used on input line 235.
+prov_fe06_rural_acpop_all_baseline_ori.png  used on input line 225.
 (pdftex.def)             Requested size: 343.42375pt x 171.7114pt.
 <C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/explor
 atory_analysis/politician_byprov_fe_sweep/politician_byprov_fe06_rural_acpop_al
-l_baseline_rotated.png, id=246, 578.16pt x 289.08pt>
+l_baseline_rotated.png, id=250, 578.16pt x 289.08pt>
 File: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/e
 xploratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe06_rural_acp
 op_all_baseline_rotated.png Graphic file (type png)
@@ -587,20 +666,36 @@ ploratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe06_rural_acpo
 p_all_baseline_rotated.png>
 Package pdftex.def Info: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucr
 ats_farms/figures/exploratory_analysis/politician_byprov_fe_sweep/politician_by
-prov_fe06_rural_acpop_all_baseline_rotated.png  used on input line 239.
+prov_fe06_rural_acpop_all_baseline_rotated.png  used on input line 229.
 (pdftex.def)             Requested size: 343.42375pt x 171.7114pt.
+<C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/explor
+atory_analysis/politician_byprov_fe_sweep/politician_byprov_fe06_did_interactio
+n_rural_acpop_all_1.png, id=251, 960.58875pt x 640.3925pt>
+File: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/e
+xploratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe06_did_inter
+action_rural_acpop_all_1.png Graphic file (type png)
+<use C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/ex
+ploratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe06_did_intera
+ction_rural_acpop_all_1.png>
+Package pdftex.def Info: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucr
+ats_farms/figures/exploratory_analysis/politician_byprov_fe_sweep/politician_by
+prov_fe06_did_interaction_rural_acpop_all_1.png  used on input line 232.
+(pdftex.def)             Requested size: 386.35037pt x 257.56934pt.
  [13
 
  <C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/explo
 ratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe06_rural_acpop_a
 ll_baseline_ori.png> <C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats
 _farms/figures/exploratory_analysis/politician_byprov_fe_sweep/politician_bypro
-v_fe06_rural_acpop_all_baseline_rotated.png>] [14
+v_fe06_rural_acpop_all_baseline_rotated.png> <C:/Users/eunic/OneDrive/Documents
+/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/politician_byprov_f
+e_sweep/politician_byprov_fe06_did_interaction_rural_acpop_all_1.png (PNG copy)
+>] [14
 
 ]
 <C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/explor
 atory_analysis/politician_byprov_fe_sweep/politician_byprov_fe07_rural_acpop_al
-l_baseline_ori.png, id=257, 578.16pt x 289.08pt>
+l_baseline_ori.png, id=262, 578.16pt x 289.08pt>
 File: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/e
 xploratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe07_rural_acp
 op_all_baseline_ori.png Graphic file (type png)
@@ -609,11 +704,11 @@ ploratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe07_rural_acpo
 p_all_baseline_ori.png>
 Package pdftex.def Info: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucr
 ats_farms/figures/exploratory_analysis/politician_byprov_fe_sweep/politician_by
-prov_fe07_rural_acpop_all_baseline_ori.png  used on input line 277.
+prov_fe07_rural_acpop_all_baseline_ori.png  used on input line 265.
 (pdftex.def)             Requested size: 343.42375pt x 171.7114pt.
 <C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/explor
 atory_analysis/politician_byprov_fe_sweep/politician_byprov_fe07_rural_acpop_al
-l_baseline_rotated.png, id=258, 578.16pt x 289.08pt>
+l_baseline_rotated.png, id=263, 578.16pt x 289.08pt>
 File: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/e
 xploratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe07_rural_acp
 op_all_baseline_rotated.png Graphic file (type png)
@@ -622,20 +717,36 @@ ploratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe07_rural_acpo
 p_all_baseline_rotated.png>
 Package pdftex.def Info: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucr
 ats_farms/figures/exploratory_analysis/politician_byprov_fe_sweep/politician_by
-prov_fe07_rural_acpop_all_baseline_rotated.png  used on input line 281.
+prov_fe07_rural_acpop_all_baseline_rotated.png  used on input line 269.
 (pdftex.def)             Requested size: 343.42375pt x 171.7114pt.
+<C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/explor
+atory_analysis/politician_byprov_fe_sweep/politician_byprov_fe07_did_interactio
+n_rural_acpop_all_1.png, id=264, 960.58875pt x 640.3925pt>
+File: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/e
+xploratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe07_did_inter
+action_rural_acpop_all_1.png Graphic file (type png)
+<use C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/ex
+ploratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe07_did_intera
+ction_rural_acpop_all_1.png>
+Package pdftex.def Info: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucr
+ats_farms/figures/exploratory_analysis/politician_byprov_fe_sweep/politician_by
+prov_fe07_did_interaction_rural_acpop_all_1.png  used on input line 272.
+(pdftex.def)             Requested size: 386.35037pt x 257.56934pt.
  [15
 
  <C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/explo
 ratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe07_rural_acpop_a
 ll_baseline_ori.png> <C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats
 _farms/figures/exploratory_analysis/politician_byprov_fe_sweep/politician_bypro
-v_fe07_rural_acpop_all_baseline_rotated.png>] [16
+v_fe07_rural_acpop_all_baseline_rotated.png> <C:/Users/eunic/OneDrive/Documents
+/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/politician_byprov_f
+e_sweep/politician_byprov_fe07_did_interaction_rural_acpop_all_1.png (PNG copy)
+>] [16
 
 ]
 <C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/explor
 atory_analysis/politician_byprov_fe_sweep/politician_byprov_fe08_rural_acpop_al
-l_baseline_ori.png, id=268, 578.16pt x 289.08pt>
+l_baseline_ori.png, id=274, 578.16pt x 289.08pt>
 File: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/e
 xploratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe08_rural_acp
 op_all_baseline_ori.png Graphic file (type png)
@@ -644,11 +755,11 @@ ploratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe08_rural_acpo
 p_all_baseline_ori.png>
 Package pdftex.def Info: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucr
 ats_farms/figures/exploratory_analysis/politician_byprov_fe_sweep/politician_by
-prov_fe08_rural_acpop_all_baseline_ori.png  used on input line 319.
+prov_fe08_rural_acpop_all_baseline_ori.png  used on input line 305.
 (pdftex.def)             Requested size: 343.42375pt x 171.7114pt.
 <C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/explor
 atory_analysis/politician_byprov_fe_sweep/politician_byprov_fe08_rural_acpop_al
-l_baseline_rotated.png, id=269, 578.16pt x 289.08pt>
+l_baseline_rotated.png, id=275, 578.16pt x 289.08pt>
 File: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/e
 xploratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe08_rural_acp
 op_all_baseline_rotated.png Graphic file (type png)
@@ -657,20 +768,36 @@ ploratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe08_rural_acpo
 p_all_baseline_rotated.png>
 Package pdftex.def Info: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucr
 ats_farms/figures/exploratory_analysis/politician_byprov_fe_sweep/politician_by
-prov_fe08_rural_acpop_all_baseline_rotated.png  used on input line 323.
+prov_fe08_rural_acpop_all_baseline_rotated.png  used on input line 309.
 (pdftex.def)             Requested size: 343.42375pt x 171.7114pt.
+<C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/explor
+atory_analysis/politician_byprov_fe_sweep/politician_byprov_fe08_did_interactio
+n_rural_acpop_all_1.png, id=276, 960.58875pt x 640.3925pt>
+File: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/e
+xploratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe08_did_inter
+action_rural_acpop_all_1.png Graphic file (type png)
+<use C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/ex
+ploratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe08_did_intera
+ction_rural_acpop_all_1.png>
+Package pdftex.def Info: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucr
+ats_farms/figures/exploratory_analysis/politician_byprov_fe_sweep/politician_by
+prov_fe08_did_interaction_rural_acpop_all_1.png  used on input line 312.
+(pdftex.def)             Requested size: 386.35037pt x 257.56934pt.
  [17
 
  <C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/explo
 ratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe08_rural_acpop_a
 ll_baseline_ori.png> <C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats
 _farms/figures/exploratory_analysis/politician_byprov_fe_sweep/politician_bypro
-v_fe08_rural_acpop_all_baseline_rotated.png>] [18
+v_fe08_rural_acpop_all_baseline_rotated.png> <C:/Users/eunic/OneDrive/Documents
+/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/politician_byprov_f
+e_sweep/politician_byprov_fe08_did_interaction_rural_acpop_all_1.png (PNG copy)
+>] [18
 
 ]
 <C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/explor
 atory_analysis/politician_byprov_fe_sweep/politician_byprov_fe09_rural_acpop_al
-l_baseline_ori.png, id=279, 578.16pt x 289.08pt>
+l_baseline_ori.png, id=286, 578.16pt x 289.08pt>
 File: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/e
 xploratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe09_rural_acp
 op_all_baseline_ori.png Graphic file (type png)
@@ -679,11 +806,11 @@ ploratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe09_rural_acpo
 p_all_baseline_ori.png>
 Package pdftex.def Info: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucr
 ats_farms/figures/exploratory_analysis/politician_byprov_fe_sweep/politician_by
-prov_fe09_rural_acpop_all_baseline_ori.png  used on input line 361.
+prov_fe09_rural_acpop_all_baseline_ori.png  used on input line 345.
 (pdftex.def)             Requested size: 343.42375pt x 171.7114pt.
 <C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/explor
 atory_analysis/politician_byprov_fe_sweep/politician_byprov_fe09_rural_acpop_al
-l_baseline_rotated.png, id=280, 578.16pt x 289.08pt>
+l_baseline_rotated.png, id=287, 578.16pt x 289.08pt>
 File: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/e
 xploratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe09_rural_acp
 op_all_baseline_rotated.png Graphic file (type png)
@@ -692,20 +819,36 @@ ploratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe09_rural_acpo
 p_all_baseline_rotated.png>
 Package pdftex.def Info: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucr
 ats_farms/figures/exploratory_analysis/politician_byprov_fe_sweep/politician_by
-prov_fe09_rural_acpop_all_baseline_rotated.png  used on input line 365.
+prov_fe09_rural_acpop_all_baseline_rotated.png  used on input line 349.
 (pdftex.def)             Requested size: 343.42375pt x 171.7114pt.
+<C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/explor
+atory_analysis/politician_byprov_fe_sweep/politician_byprov_fe09_did_interactio
+n_rural_acpop_all_1.png, id=288, 960.58875pt x 640.3925pt>
+File: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/e
+xploratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe09_did_inter
+action_rural_acpop_all_1.png Graphic file (type png)
+<use C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/ex
+ploratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe09_did_intera
+ction_rural_acpop_all_1.png>
+Package pdftex.def Info: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucr
+ats_farms/figures/exploratory_analysis/politician_byprov_fe_sweep/politician_by
+prov_fe09_did_interaction_rural_acpop_all_1.png  used on input line 352.
+(pdftex.def)             Requested size: 386.35037pt x 257.56934pt.
  [19
 
  <C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/explo
 ratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe09_rural_acpop_a
 ll_baseline_ori.png> <C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats
 _farms/figures/exploratory_analysis/politician_byprov_fe_sweep/politician_bypro
-v_fe09_rural_acpop_all_baseline_rotated.png>] [20
+v_fe09_rural_acpop_all_baseline_rotated.png> <C:/Users/eunic/OneDrive/Documents
+/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/politician_byprov_f
+e_sweep/politician_byprov_fe09_did_interaction_rural_acpop_all_1.png (PNG copy)
+>] [20
 
 ]
 <C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/explor
 atory_analysis/politician_byprov_fe_sweep/politician_byprov_fe10_rural_acpop_al
-l_baseline_ori.png, id=291, 578.16pt x 289.08pt>
+l_baseline_ori.png, id=299, 578.16pt x 289.08pt>
 File: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/e
 xploratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe10_rural_acp
 op_all_baseline_ori.png Graphic file (type png)
@@ -714,11 +857,11 @@ ploratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe10_rural_acpo
 p_all_baseline_ori.png>
 Package pdftex.def Info: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucr
 ats_farms/figures/exploratory_analysis/politician_byprov_fe_sweep/politician_by
-prov_fe10_rural_acpop_all_baseline_ori.png  used on input line 403.
+prov_fe10_rural_acpop_all_baseline_ori.png  used on input line 385.
 (pdftex.def)             Requested size: 343.42375pt x 171.7114pt.
 <C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/explor
 atory_analysis/politician_byprov_fe_sweep/politician_byprov_fe10_rural_acpop_al
-l_baseline_rotated.png, id=292, 578.16pt x 289.08pt>
+l_baseline_rotated.png, id=300, 578.16pt x 289.08pt>
 File: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/e
 xploratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe10_rural_acp
 op_all_baseline_rotated.png Graphic file (type png)
@@ -727,20 +870,36 @@ ploratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe10_rural_acpo
 p_all_baseline_rotated.png>
 Package pdftex.def Info: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucr
 ats_farms/figures/exploratory_analysis/politician_byprov_fe_sweep/politician_by
-prov_fe10_rural_acpop_all_baseline_rotated.png  used on input line 407.
+prov_fe10_rural_acpop_all_baseline_rotated.png  used on input line 389.
 (pdftex.def)             Requested size: 343.42375pt x 171.7114pt.
+<C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/explor
+atory_analysis/politician_byprov_fe_sweep/politician_byprov_fe10_did_interactio
+n_rural_acpop_all_1.png, id=301, 960.58875pt x 640.3925pt>
+File: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/e
+xploratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe10_did_inter
+action_rural_acpop_all_1.png Graphic file (type png)
+<use C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/ex
+ploratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe10_did_intera
+ction_rural_acpop_all_1.png>
+Package pdftex.def Info: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucr
+ats_farms/figures/exploratory_analysis/politician_byprov_fe_sweep/politician_by
+prov_fe10_did_interaction_rural_acpop_all_1.png  used on input line 392.
+(pdftex.def)             Requested size: 386.35037pt x 257.56934pt.
  [21
 
  <C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/explo
 ratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe10_rural_acpop_a
 ll_baseline_ori.png> <C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats
 _farms/figures/exploratory_analysis/politician_byprov_fe_sweep/politician_bypro
-v_fe10_rural_acpop_all_baseline_rotated.png>] [22
+v_fe10_rural_acpop_all_baseline_rotated.png> <C:/Users/eunic/OneDrive/Documents
+/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/politician_byprov_f
+e_sweep/politician_byprov_fe10_did_interaction_rural_acpop_all_1.png (PNG copy)
+>] [22
 
 ]
 <C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/explor
 atory_analysis/politician_byprov_fe_sweep/politician_byprov_fe11_rural_acpop_al
-l_baseline_ori.png, id=302, 578.16pt x 289.08pt>
+l_baseline_ori.png, id=311, 578.16pt x 289.08pt>
 File: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/e
 xploratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe11_rural_acp
 op_all_baseline_ori.png Graphic file (type png)
@@ -749,11 +908,11 @@ ploratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe11_rural_acpo
 p_all_baseline_ori.png>
 Package pdftex.def Info: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucr
 ats_farms/figures/exploratory_analysis/politician_byprov_fe_sweep/politician_by
-prov_fe11_rural_acpop_all_baseline_ori.png  used on input line 445.
+prov_fe11_rural_acpop_all_baseline_ori.png  used on input line 425.
 (pdftex.def)             Requested size: 343.42375pt x 171.7114pt.
 <C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/explor
 atory_analysis/politician_byprov_fe_sweep/politician_byprov_fe11_rural_acpop_al
-l_baseline_rotated.png, id=303, 578.16pt x 289.08pt>
+l_baseline_rotated.png, id=312, 578.16pt x 289.08pt>
 File: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/e
 xploratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe11_rural_acp
 op_all_baseline_rotated.png Graphic file (type png)
@@ -762,20 +921,36 @@ ploratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe11_rural_acpo
 p_all_baseline_rotated.png>
 Package pdftex.def Info: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucr
 ats_farms/figures/exploratory_analysis/politician_byprov_fe_sweep/politician_by
-prov_fe11_rural_acpop_all_baseline_rotated.png  used on input line 449.
+prov_fe11_rural_acpop_all_baseline_rotated.png  used on input line 429.
 (pdftex.def)             Requested size: 343.42375pt x 171.7114pt.
+<C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/explor
+atory_analysis/politician_byprov_fe_sweep/politician_byprov_fe11_did_interactio
+n_rural_acpop_all_1.png, id=313, 960.58875pt x 640.3925pt>
+File: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/e
+xploratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe11_did_inter
+action_rural_acpop_all_1.png Graphic file (type png)
+<use C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/ex
+ploratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe11_did_intera
+ction_rural_acpop_all_1.png>
+Package pdftex.def Info: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucr
+ats_farms/figures/exploratory_analysis/politician_byprov_fe_sweep/politician_by
+prov_fe11_did_interaction_rural_acpop_all_1.png  used on input line 432.
+(pdftex.def)             Requested size: 386.35037pt x 257.56934pt.
  [23
 
  <C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/explo
 ratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe11_rural_acpop_a
 ll_baseline_ori.png> <C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats
 _farms/figures/exploratory_analysis/politician_byprov_fe_sweep/politician_bypro
-v_fe11_rural_acpop_all_baseline_rotated.png>] [24
+v_fe11_rural_acpop_all_baseline_rotated.png> <C:/Users/eunic/OneDrive/Documents
+/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/politician_byprov_f
+e_sweep/politician_byprov_fe11_did_interaction_rural_acpop_all_1.png (PNG copy)
+>] [24
 
 ]
 <C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/explor
 atory_analysis/politician_byprov_fe_sweep/politician_byprov_fe12_rural_acpop_al
-l_baseline_ori.png, id=313, 578.16pt x 289.08pt>
+l_baseline_ori.png, id=323, 578.16pt x 289.08pt>
 File: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/e
 xploratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe12_rural_acp
 op_all_baseline_ori.png Graphic file (type png)
@@ -784,11 +959,11 @@ ploratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe12_rural_acpo
 p_all_baseline_ori.png>
 Package pdftex.def Info: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucr
 ats_farms/figures/exploratory_analysis/politician_byprov_fe_sweep/politician_by
-prov_fe12_rural_acpop_all_baseline_ori.png  used on input line 487.
+prov_fe12_rural_acpop_all_baseline_ori.png  used on input line 465.
 (pdftex.def)             Requested size: 343.42375pt x 171.7114pt.
 <C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/explor
 atory_analysis/politician_byprov_fe_sweep/politician_byprov_fe12_rural_acpop_al
-l_baseline_rotated.png, id=314, 578.16pt x 289.08pt>
+l_baseline_rotated.png, id=324, 578.16pt x 289.08pt>
 File: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/e
 xploratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe12_rural_acp
 op_all_baseline_rotated.png Graphic file (type png)
@@ -797,20 +972,37 @@ ploratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe12_rural_acpo
 p_all_baseline_rotated.png>
 Package pdftex.def Info: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucr
 ats_farms/figures/exploratory_analysis/politician_byprov_fe_sweep/politician_by
-prov_fe12_rural_acpop_all_baseline_rotated.png  used on input line 491.
+prov_fe12_rural_acpop_all_baseline_rotated.png  used on input line 469.
 (pdftex.def)             Requested size: 343.42375pt x 171.7114pt.
+<C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/explor
+atory_analysis/politician_byprov_fe_sweep/politician_byprov_fe12_did_interactio
+n_rural_acpop_all_1.png, id=325, 960.58875pt x 640.3925pt>
+File: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/e
+xploratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe12_did_inter
+action_rural_acpop_all_1.png Graphic file (type png)
+<use C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/ex
+ploratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe12_did_intera
+ction_rural_acpop_all_1.png>
+Package pdftex.def Info: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucr
+ats_farms/figures/exploratory_analysis/politician_byprov_fe_sweep/politician_by
+prov_fe12_did_interaction_rural_acpop_all_1.png  used on input line 472.
+(pdftex.def)             Requested size: 386.35037pt x 257.56934pt.
  [25
 
  <C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/explo
 ratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe12_rural_acpop_a
 ll_baseline_ori.png> <C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats
 _farms/figures/exploratory_analysis/politician_byprov_fe_sweep/politician_bypro
-v_fe12_rural_acpop_all_baseline_rotated.png>] [26
+v_fe12_rural_acpop_all_baseline_rotated.png> <C:/Users/eunic/OneDrive/Documents
+/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/politician_byprov_f
+e_sweep/politician_byprov_fe12_did_interaction_rural_acpop_all_1.png (PNG copy)
+>]
+[26
 
 ]
 <C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/explor
 atory_analysis/politician_byprov_fe_sweep/politician_byprov_fe13_rural_acpop_al
-l_baseline_ori.png, id=325, 578.16pt x 289.08pt>
+l_baseline_ori.png, id=336, 578.16pt x 289.08pt>
 File: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/e
 xploratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe13_rural_acp
 op_all_baseline_ori.png Graphic file (type png)
@@ -819,11 +1011,11 @@ ploratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe13_rural_acpo
 p_all_baseline_ori.png>
 Package pdftex.def Info: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucr
 ats_farms/figures/exploratory_analysis/politician_byprov_fe_sweep/politician_by
-prov_fe13_rural_acpop_all_baseline_ori.png  used on input line 529.
+prov_fe13_rural_acpop_all_baseline_ori.png  used on input line 505.
 (pdftex.def)             Requested size: 343.42375pt x 171.7114pt.
 <C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/explor
 atory_analysis/politician_byprov_fe_sweep/politician_byprov_fe13_rural_acpop_al
-l_baseline_rotated.png, id=326, 578.16pt x 289.08pt>
+l_baseline_rotated.png, id=337, 578.16pt x 289.08pt>
 File: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/e
 xploratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe13_rural_acp
 op_all_baseline_rotated.png Graphic file (type png)
@@ -832,20 +1024,36 @@ ploratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe13_rural_acpo
 p_all_baseline_rotated.png>
 Package pdftex.def Info: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucr
 ats_farms/figures/exploratory_analysis/politician_byprov_fe_sweep/politician_by
-prov_fe13_rural_acpop_all_baseline_rotated.png  used on input line 533.
+prov_fe13_rural_acpop_all_baseline_rotated.png  used on input line 509.
 (pdftex.def)             Requested size: 343.42375pt x 171.7114pt.
+<C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/explor
+atory_analysis/politician_byprov_fe_sweep/politician_byprov_fe13_did_interactio
+n_rural_acpop_all_1.png, id=338, 960.58875pt x 640.3925pt>
+File: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/e
+xploratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe13_did_inter
+action_rural_acpop_all_1.png Graphic file (type png)
+<use C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/ex
+ploratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe13_did_intera
+ction_rural_acpop_all_1.png>
+Package pdftex.def Info: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucr
+ats_farms/figures/exploratory_analysis/politician_byprov_fe_sweep/politician_by
+prov_fe13_did_interaction_rural_acpop_all_1.png  used on input line 512.
+(pdftex.def)             Requested size: 386.35037pt x 257.56934pt.
  [27
 
  <C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/explo
 ratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe13_rural_acpop_a
 ll_baseline_ori.png> <C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats
 _farms/figures/exploratory_analysis/politician_byprov_fe_sweep/politician_bypro
-v_fe13_rural_acpop_all_baseline_rotated.png>] [28
+v_fe13_rural_acpop_all_baseline_rotated.png> <C:/Users/eunic/OneDrive/Documents
+/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/politician_byprov_f
+e_sweep/politician_byprov_fe13_did_interaction_rural_acpop_all_1.png (PNG copy)
+>] [28
 
 ]
 <C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/explor
 atory_analysis/politician_byprov_fe_sweep/politician_byprov_fe14_rural_acpop_al
-l_baseline_ori.png, id=336, 578.16pt x 289.08pt>
+l_baseline_ori.png, id=348, 578.16pt x 289.08pt>
 File: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/e
 xploratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe14_rural_acp
 op_all_baseline_ori.png Graphic file (type png)
@@ -854,11 +1062,11 @@ ploratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe14_rural_acpo
 p_all_baseline_ori.png>
 Package pdftex.def Info: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucr
 ats_farms/figures/exploratory_analysis/politician_byprov_fe_sweep/politician_by
-prov_fe14_rural_acpop_all_baseline_ori.png  used on input line 571.
+prov_fe14_rural_acpop_all_baseline_ori.png  used on input line 545.
 (pdftex.def)             Requested size: 343.42375pt x 171.7114pt.
 <C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/explor
 atory_analysis/politician_byprov_fe_sweep/politician_byprov_fe14_rural_acpop_al
-l_baseline_rotated.png, id=337, 578.16pt x 289.08pt>
+l_baseline_rotated.png, id=349, 578.16pt x 289.08pt>
 File: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/e
 xploratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe14_rural_acp
 op_all_baseline_rotated.png Graphic file (type png)
@@ -867,20 +1075,36 @@ ploratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe14_rural_acpo
 p_all_baseline_rotated.png>
 Package pdftex.def Info: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucr
 ats_farms/figures/exploratory_analysis/politician_byprov_fe_sweep/politician_by
-prov_fe14_rural_acpop_all_baseline_rotated.png  used on input line 575.
+prov_fe14_rural_acpop_all_baseline_rotated.png  used on input line 549.
 (pdftex.def)             Requested size: 343.42375pt x 171.7114pt.
+<C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/explor
+atory_analysis/politician_byprov_fe_sweep/politician_byprov_fe14_did_interactio
+n_rural_acpop_all_1.png, id=350, 960.58875pt x 640.3925pt>
+File: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/e
+xploratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe14_did_inter
+action_rural_acpop_all_1.png Graphic file (type png)
+<use C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/ex
+ploratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe14_did_intera
+ction_rural_acpop_all_1.png>
+Package pdftex.def Info: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucr
+ats_farms/figures/exploratory_analysis/politician_byprov_fe_sweep/politician_by
+prov_fe14_did_interaction_rural_acpop_all_1.png  used on input line 552.
+(pdftex.def)             Requested size: 386.35037pt x 257.56934pt.
  [29
 
  <C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/explo
 ratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe14_rural_acpop_a
 ll_baseline_ori.png> <C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats
 _farms/figures/exploratory_analysis/politician_byprov_fe_sweep/politician_bypro
-v_fe14_rural_acpop_all_baseline_rotated.png>] [30
+v_fe14_rural_acpop_all_baseline_rotated.png> <C:/Users/eunic/OneDrive/Documents
+/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/politician_byprov_f
+e_sweep/politician_byprov_fe14_did_interaction_rural_acpop_all_1.png (PNG copy)
+>] [30
 
 ]
 <C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/explor
 atory_analysis/politician_byprov_fe_sweep/politician_byprov_fe15_rural_acpop_al
-l_baseline_ori.png, id=347, 578.16pt x 289.08pt>
+l_baseline_ori.png, id=360, 578.16pt x 289.08pt>
 File: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/e
 xploratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe15_rural_acp
 op_all_baseline_ori.png Graphic file (type png)
@@ -889,11 +1113,11 @@ ploratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe15_rural_acpo
 p_all_baseline_ori.png>
 Package pdftex.def Info: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucr
 ats_farms/figures/exploratory_analysis/politician_byprov_fe_sweep/politician_by
-prov_fe15_rural_acpop_all_baseline_ori.png  used on input line 613.
+prov_fe15_rural_acpop_all_baseline_ori.png  used on input line 585.
 (pdftex.def)             Requested size: 343.42375pt x 171.7114pt.
 <C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/explor
 atory_analysis/politician_byprov_fe_sweep/politician_byprov_fe15_rural_acpop_al
-l_baseline_rotated.png, id=348, 578.16pt x 289.08pt>
+l_baseline_rotated.png, id=361, 578.16pt x 289.08pt>
 File: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/e
 xploratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe15_rural_acp
 op_all_baseline_rotated.png Graphic file (type png)
@@ -902,20 +1126,36 @@ ploratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe15_rural_acpo
 p_all_baseline_rotated.png>
 Package pdftex.def Info: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucr
 ats_farms/figures/exploratory_analysis/politician_byprov_fe_sweep/politician_by
-prov_fe15_rural_acpop_all_baseline_rotated.png  used on input line 617.
+prov_fe15_rural_acpop_all_baseline_rotated.png  used on input line 589.
 (pdftex.def)             Requested size: 343.42375pt x 171.7114pt.
+<C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/explor
+atory_analysis/politician_byprov_fe_sweep/politician_byprov_fe15_did_interactio
+n_rural_acpop_all_1.png, id=362, 960.58875pt x 640.3925pt>
+File: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/e
+xploratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe15_did_inter
+action_rural_acpop_all_1.png Graphic file (type png)
+<use C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/ex
+ploratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe15_did_intera
+ction_rural_acpop_all_1.png>
+Package pdftex.def Info: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucr
+ats_farms/figures/exploratory_analysis/politician_byprov_fe_sweep/politician_by
+prov_fe15_did_interaction_rural_acpop_all_1.png  used on input line 592.
+(pdftex.def)             Requested size: 386.35037pt x 257.56934pt.
  [31
 
  <C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/explo
 ratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe15_rural_acpop_a
 ll_baseline_ori.png> <C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats
 _farms/figures/exploratory_analysis/politician_byprov_fe_sweep/politician_bypro
-v_fe15_rural_acpop_all_baseline_rotated.png>] [32
+v_fe15_rural_acpop_all_baseline_rotated.png> <C:/Users/eunic/OneDrive/Documents
+/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/politician_byprov_f
+e_sweep/politician_byprov_fe15_did_interaction_rural_acpop_all_1.png (PNG copy)
+>] [32
 
 ]
 <C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/explor
 atory_analysis/politician_byprov_fe_sweep/politician_byprov_fe16_rural_acpop_al
-l_baseline_ori.png, id=359, 578.16pt x 289.08pt>
+l_baseline_ori.png, id=373, 578.16pt x 289.08pt>
 File: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/e
 xploratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe16_rural_acp
 op_all_baseline_ori.png Graphic file (type png)
@@ -924,11 +1164,11 @@ ploratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe16_rural_acpo
 p_all_baseline_ori.png>
 Package pdftex.def Info: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucr
 ats_farms/figures/exploratory_analysis/politician_byprov_fe_sweep/politician_by
-prov_fe16_rural_acpop_all_baseline_ori.png  used on input line 655.
+prov_fe16_rural_acpop_all_baseline_ori.png  used on input line 625.
 (pdftex.def)             Requested size: 343.42375pt x 171.7114pt.
 <C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/explor
 atory_analysis/politician_byprov_fe_sweep/politician_byprov_fe16_rural_acpop_al
-l_baseline_rotated.png, id=360, 578.16pt x 289.08pt>
+l_baseline_rotated.png, id=374, 578.16pt x 289.08pt>
 File: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/e
 xploratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe16_rural_acp
 op_all_baseline_rotated.png Graphic file (type png)
@@ -937,20 +1177,36 @@ ploratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe16_rural_acpo
 p_all_baseline_rotated.png>
 Package pdftex.def Info: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucr
 ats_farms/figures/exploratory_analysis/politician_byprov_fe_sweep/politician_by
-prov_fe16_rural_acpop_all_baseline_rotated.png  used on input line 659.
+prov_fe16_rural_acpop_all_baseline_rotated.png  used on input line 629.
 (pdftex.def)             Requested size: 343.42375pt x 171.7114pt.
+<C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/explor
+atory_analysis/politician_byprov_fe_sweep/politician_byprov_fe16_did_interactio
+n_rural_acpop_all_1.png, id=375, 960.58875pt x 640.3925pt>
+File: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/e
+xploratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe16_did_inter
+action_rural_acpop_all_1.png Graphic file (type png)
+<use C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/ex
+ploratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe16_did_intera
+ction_rural_acpop_all_1.png>
+Package pdftex.def Info: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucr
+ats_farms/figures/exploratory_analysis/politician_byprov_fe_sweep/politician_by
+prov_fe16_did_interaction_rural_acpop_all_1.png  used on input line 632.
+(pdftex.def)             Requested size: 386.35037pt x 257.56934pt.
  [33
 
  <C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/explo
 ratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe16_rural_acpop_a
 ll_baseline_ori.png> <C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats
 _farms/figures/exploratory_analysis/politician_byprov_fe_sweep/politician_bypro
-v_fe16_rural_acpop_all_baseline_rotated.png>] [34
+v_fe16_rural_acpop_all_baseline_rotated.png> <C:/Users/eunic/OneDrive/Documents
+/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/politician_byprov_f
+e_sweep/politician_byprov_fe16_did_interaction_rural_acpop_all_1.png (PNG copy)
+>] [34
 
 ]
 <C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/explor
 atory_analysis/politician_byprov_fe_sweep/politician_byprov_fe17_rural_acpop_al
-l_baseline_ori.png, id=370, 578.16pt x 289.08pt>
+l_baseline_ori.png, id=385, 578.16pt x 289.08pt>
 File: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/e
 xploratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe17_rural_acp
 op_all_baseline_ori.png Graphic file (type png)
@@ -959,11 +1215,11 @@ ploratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe17_rural_acpo
 p_all_baseline_ori.png>
 Package pdftex.def Info: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucr
 ats_farms/figures/exploratory_analysis/politician_byprov_fe_sweep/politician_by
-prov_fe17_rural_acpop_all_baseline_ori.png  used on input line 697.
+prov_fe17_rural_acpop_all_baseline_ori.png  used on input line 665.
 (pdftex.def)             Requested size: 343.42375pt x 171.7114pt.
 <C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/explor
 atory_analysis/politician_byprov_fe_sweep/politician_byprov_fe17_rural_acpop_al
-l_baseline_rotated.png, id=371, 578.16pt x 289.08pt>
+l_baseline_rotated.png, id=386, 578.16pt x 289.08pt>
 File: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/e
 xploratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe17_rural_acp
 op_all_baseline_rotated.png Graphic file (type png)
@@ -972,20 +1228,36 @@ ploratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe17_rural_acpo
 p_all_baseline_rotated.png>
 Package pdftex.def Info: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucr
 ats_farms/figures/exploratory_analysis/politician_byprov_fe_sweep/politician_by
-prov_fe17_rural_acpop_all_baseline_rotated.png  used on input line 701.
+prov_fe17_rural_acpop_all_baseline_rotated.png  used on input line 669.
 (pdftex.def)             Requested size: 343.42375pt x 171.7114pt.
+<C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/explor
+atory_analysis/politician_byprov_fe_sweep/politician_byprov_fe17_did_interactio
+n_rural_acpop_all_1.png, id=387, 960.58875pt x 640.3925pt>
+File: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/e
+xploratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe17_did_inter
+action_rural_acpop_all_1.png Graphic file (type png)
+<use C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/ex
+ploratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe17_did_intera
+ction_rural_acpop_all_1.png>
+Package pdftex.def Info: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucr
+ats_farms/figures/exploratory_analysis/politician_byprov_fe_sweep/politician_by
+prov_fe17_did_interaction_rural_acpop_all_1.png  used on input line 672.
+(pdftex.def)             Requested size: 386.35037pt x 257.56934pt.
  [35
 
  <C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/explo
 ratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe17_rural_acpop_a
 ll_baseline_ori.png> <C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats
 _farms/figures/exploratory_analysis/politician_byprov_fe_sweep/politician_bypro
-v_fe17_rural_acpop_all_baseline_rotated.png>] [36
+v_fe17_rural_acpop_all_baseline_rotated.png> <C:/Users/eunic/OneDrive/Documents
+/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/politician_byprov_f
+e_sweep/politician_byprov_fe17_did_interaction_rural_acpop_all_1.png (PNG copy)
+>] [36
 
 ]
 <C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/explor
 atory_analysis/politician_byprov_fe_sweep/politician_byprov_fe18_rural_acpop_al
-l_baseline_ori.png, id=381, 578.16pt x 289.08pt>
+l_baseline_ori.png, id=397, 578.16pt x 289.08pt>
 File: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/e
 xploratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe18_rural_acp
 op_all_baseline_ori.png Graphic file (type png)
@@ -994,11 +1266,11 @@ ploratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe18_rural_acpo
 p_all_baseline_ori.png>
 Package pdftex.def Info: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucr
 ats_farms/figures/exploratory_analysis/politician_byprov_fe_sweep/politician_by
-prov_fe18_rural_acpop_all_baseline_ori.png  used on input line 739.
+prov_fe18_rural_acpop_all_baseline_ori.png  used on input line 705.
 (pdftex.def)             Requested size: 343.42375pt x 171.7114pt.
 <C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/explor
 atory_analysis/politician_byprov_fe_sweep/politician_byprov_fe18_rural_acpop_al
-l_baseline_rotated.png, id=382, 578.16pt x 289.08pt>
+l_baseline_rotated.png, id=398, 578.16pt x 289.08pt>
 File: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/e
 xploratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe18_rural_acp
 op_all_baseline_rotated.png Graphic file (type png)
@@ -1007,21 +1279,36 @@ ploratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe18_rural_acpo
 p_all_baseline_rotated.png>
 Package pdftex.def Info: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucr
 ats_farms/figures/exploratory_analysis/politician_byprov_fe_sweep/politician_by
-prov_fe18_rural_acpop_all_baseline_rotated.png  used on input line 743.
+prov_fe18_rural_acpop_all_baseline_rotated.png  used on input line 709.
 (pdftex.def)             Requested size: 343.42375pt x 171.7114pt.
-
-[37
+<C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/explor
+atory_analysis/politician_byprov_fe_sweep/politician_byprov_fe18_did_interactio
+n_rural_acpop_all_1.png, id=399, 960.58875pt x 640.3925pt>
+File: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/e
+xploratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe18_did_inter
+action_rural_acpop_all_1.png Graphic file (type png)
+<use C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/ex
+ploratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe18_did_intera
+ction_rural_acpop_all_1.png>
+Package pdftex.def Info: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucr
+ats_farms/figures/exploratory_analysis/politician_byprov_fe_sweep/politician_by
+prov_fe18_did_interaction_rural_acpop_all_1.png  used on input line 712.
+(pdftex.def)             Requested size: 386.35037pt x 257.56934pt.
+ [37
 
  <C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/explo
 ratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe18_rural_acpop_a
 ll_baseline_ori.png> <C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats
 _farms/figures/exploratory_analysis/politician_byprov_fe_sweep/politician_bypro
-v_fe18_rural_acpop_all_baseline_rotated.png>] [38
+v_fe18_rural_acpop_all_baseline_rotated.png> <C:/Users/eunic/OneDrive/Documents
+/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/politician_byprov_f
+e_sweep/politician_byprov_fe18_did_interaction_rural_acpop_all_1.png (PNG copy)
+>] [38
 
 ]
 <C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/explor
 atory_analysis/politician_byprov_fe_sweep/politician_byprov_fe19_rural_acpop_al
-l_baseline_ori.png, id=393, 578.16pt x 289.08pt>
+l_baseline_ori.png, id=410, 578.16pt x 289.08pt>
 File: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/e
 xploratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe19_rural_acp
 op_all_baseline_ori.png Graphic file (type png)
@@ -1030,11 +1317,11 @@ ploratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe19_rural_acpo
 p_all_baseline_ori.png>
 Package pdftex.def Info: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucr
 ats_farms/figures/exploratory_analysis/politician_byprov_fe_sweep/politician_by
-prov_fe19_rural_acpop_all_baseline_ori.png  used on input line 781.
+prov_fe19_rural_acpop_all_baseline_ori.png  used on input line 745.
 (pdftex.def)             Requested size: 343.42375pt x 171.7114pt.
 <C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/explor
 atory_analysis/politician_byprov_fe_sweep/politician_byprov_fe19_rural_acpop_al
-l_baseline_rotated.png, id=394, 578.16pt x 289.08pt>
+l_baseline_rotated.png, id=411, 578.16pt x 289.08pt>
 File: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/e
 xploratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe19_rural_acp
 op_all_baseline_rotated.png Graphic file (type png)
@@ -1043,20 +1330,37 @@ ploratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe19_rural_acpo
 p_all_baseline_rotated.png>
 Package pdftex.def Info: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucr
 ats_farms/figures/exploratory_analysis/politician_byprov_fe_sweep/politician_by
-prov_fe19_rural_acpop_all_baseline_rotated.png  used on input line 785.
+prov_fe19_rural_acpop_all_baseline_rotated.png  used on input line 749.
 (pdftex.def)             Requested size: 343.42375pt x 171.7114pt.
+<C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/explor
+atory_analysis/politician_byprov_fe_sweep/politician_byprov_fe19_did_interactio
+n_rural_acpop_all_1.png, id=412, 960.58875pt x 640.3925pt>
+File: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/e
+xploratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe19_did_inter
+action_rural_acpop_all_1.png Graphic file (type png)
+<use C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/ex
+ploratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe19_did_intera
+ction_rural_acpop_all_1.png>
+Package pdftex.def Info: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucr
+ats_farms/figures/exploratory_analysis/politician_byprov_fe_sweep/politician_by
+prov_fe19_did_interaction_rural_acpop_all_1.png  used on input line 752.
+(pdftex.def)             Requested size: 386.35037pt x 257.56934pt.
  [39
 
  <C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/explo
 ratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe19_rural_acpop_a
 ll_baseline_ori.png> <C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats
 _farms/figures/exploratory_analysis/politician_byprov_fe_sweep/politician_bypro
-v_fe19_rural_acpop_all_baseline_rotated.png>] [40
+v_fe19_rural_acpop_all_baseline_rotated.png> <C:/Users/eunic/OneDrive/Documents
+/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/politician_byprov_f
+e_sweep/politician_byprov_fe19_did_interaction_rural_acpop_all_1.png (PNG copy)
+>]
+[40
 
 ]
 <C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/explor
 atory_analysis/politician_byprov_fe_sweep/politician_byprov_fe20_rural_acpop_al
-l_baseline_ori.png, id=404, 578.16pt x 289.08pt>
+l_baseline_ori.png, id=422, 578.16pt x 289.08pt>
 File: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/e
 xploratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe20_rural_acp
 op_all_baseline_ori.png Graphic file (type png)
@@ -1065,11 +1369,11 @@ ploratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe20_rural_acpo
 p_all_baseline_ori.png>
 Package pdftex.def Info: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucr
 ats_farms/figures/exploratory_analysis/politician_byprov_fe_sweep/politician_by
-prov_fe20_rural_acpop_all_baseline_ori.png  used on input line 823.
+prov_fe20_rural_acpop_all_baseline_ori.png  used on input line 785.
 (pdftex.def)             Requested size: 343.42375pt x 171.7114pt.
 <C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/explor
 atory_analysis/politician_byprov_fe_sweep/politician_byprov_fe20_rural_acpop_al
-l_baseline_rotated.png, id=405, 578.16pt x 289.08pt>
+l_baseline_rotated.png, id=423, 578.16pt x 289.08pt>
 File: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/e
 xploratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe20_rural_acp
 op_all_baseline_rotated.png Graphic file (type png)
@@ -1078,21 +1382,36 @@ ploratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe20_rural_acpo
 p_all_baseline_rotated.png>
 Package pdftex.def Info: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucr
 ats_farms/figures/exploratory_analysis/politician_byprov_fe_sweep/politician_by
-prov_fe20_rural_acpop_all_baseline_rotated.png  used on input line 827.
+prov_fe20_rural_acpop_all_baseline_rotated.png  used on input line 789.
 (pdftex.def)             Requested size: 343.42375pt x 171.7114pt.
+<C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/explor
+atory_analysis/politician_byprov_fe_sweep/politician_byprov_fe20_did_interactio
+n_rural_acpop_all_1.png, id=424, 960.58875pt x 640.3925pt>
+File: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/e
+xploratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe20_did_inter
+action_rural_acpop_all_1.png Graphic file (type png)
+<use C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/ex
+ploratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe20_did_intera
+ction_rural_acpop_all_1.png>
+Package pdftex.def Info: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucr
+ats_farms/figures/exploratory_analysis/politician_byprov_fe_sweep/politician_by
+prov_fe20_did_interaction_rural_acpop_all_1.png  used on input line 792.
+(pdftex.def)             Requested size: 386.35037pt x 257.56934pt.
  [41
 
  <C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/explo
 ratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe20_rural_acpop_a
 ll_baseline_ori.png> <C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats
 _farms/figures/exploratory_analysis/politician_byprov_fe_sweep/politician_bypro
-v_fe20_rural_acpop_all_baseline_rotated.png>]
-[42
+v_fe20_rural_acpop_all_baseline_rotated.png> <C:/Users/eunic/OneDrive/Documents
+/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/politician_byprov_f
+e_sweep/politician_byprov_fe20_did_interaction_rural_acpop_all_1.png (PNG copy)
+>] [42
 
 ]
 <C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/explor
 atory_analysis/politician_byprov_fe_sweep/politician_byprov_fe21_rural_acpop_al
-l_baseline_ori.png, id=415, 578.16pt x 289.08pt>
+l_baseline_ori.png, id=434, 578.16pt x 289.08pt>
 File: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/e
 xploratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe21_rural_acp
 op_all_baseline_ori.png Graphic file (type png)
@@ -1101,11 +1420,11 @@ ploratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe21_rural_acpo
 p_all_baseline_ori.png>
 Package pdftex.def Info: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucr
 ats_farms/figures/exploratory_analysis/politician_byprov_fe_sweep/politician_by
-prov_fe21_rural_acpop_all_baseline_ori.png  used on input line 865.
+prov_fe21_rural_acpop_all_baseline_ori.png  used on input line 825.
 (pdftex.def)             Requested size: 343.42375pt x 171.7114pt.
 <C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/explor
 atory_analysis/politician_byprov_fe_sweep/politician_byprov_fe21_rural_acpop_al
-l_baseline_rotated.png, id=416, 578.16pt x 289.08pt>
+l_baseline_rotated.png, id=435, 578.16pt x 289.08pt>
 File: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/e
 xploratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe21_rural_acp
 op_all_baseline_rotated.png Graphic file (type png)
@@ -1114,20 +1433,36 @@ ploratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe21_rural_acpo
 p_all_baseline_rotated.png>
 Package pdftex.def Info: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucr
 ats_farms/figures/exploratory_analysis/politician_byprov_fe_sweep/politician_by
-prov_fe21_rural_acpop_all_baseline_rotated.png  used on input line 869.
+prov_fe21_rural_acpop_all_baseline_rotated.png  used on input line 829.
 (pdftex.def)             Requested size: 343.42375pt x 171.7114pt.
+<C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/explor
+atory_analysis/politician_byprov_fe_sweep/politician_byprov_fe21_did_interactio
+n_rural_acpop_all_1.png, id=436, 960.58875pt x 640.3925pt>
+File: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/e
+xploratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe21_did_inter
+action_rural_acpop_all_1.png Graphic file (type png)
+<use C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/ex
+ploratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe21_did_intera
+ction_rural_acpop_all_1.png>
+Package pdftex.def Info: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucr
+ats_farms/figures/exploratory_analysis/politician_byprov_fe_sweep/politician_by
+prov_fe21_did_interaction_rural_acpop_all_1.png  used on input line 832.
+(pdftex.def)             Requested size: 386.35037pt x 257.56934pt.
  [43
 
  <C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/explo
 ratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe21_rural_acpop_a
 ll_baseline_ori.png> <C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats
 _farms/figures/exploratory_analysis/politician_byprov_fe_sweep/politician_bypro
-v_fe21_rural_acpop_all_baseline_rotated.png>] [44
+v_fe21_rural_acpop_all_baseline_rotated.png> <C:/Users/eunic/OneDrive/Documents
+/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/politician_byprov_f
+e_sweep/politician_byprov_fe21_did_interaction_rural_acpop_all_1.png (PNG copy)
+>] [44
 
 ]
 <C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/explor
 atory_analysis/politician_byprov_fe_sweep/politician_byprov_fe22_rural_acpop_al
-l_baseline_ori.png, id=427, 578.16pt x 289.08pt>
+l_baseline_ori.png, id=447, 578.16pt x 289.08pt>
 File: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/e
 xploratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe22_rural_acp
 op_all_baseline_ori.png Graphic file (type png)
@@ -1136,11 +1471,11 @@ ploratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe22_rural_acpo
 p_all_baseline_ori.png>
 Package pdftex.def Info: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucr
 ats_farms/figures/exploratory_analysis/politician_byprov_fe_sweep/politician_by
-prov_fe22_rural_acpop_all_baseline_ori.png  used on input line 907.
+prov_fe22_rural_acpop_all_baseline_ori.png  used on input line 865.
 (pdftex.def)             Requested size: 343.42375pt x 171.7114pt.
 <C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/explor
 atory_analysis/politician_byprov_fe_sweep/politician_byprov_fe22_rural_acpop_al
-l_baseline_rotated.png, id=428, 578.16pt x 289.08pt>
+l_baseline_rotated.png, id=448, 578.16pt x 289.08pt>
 File: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/e
 xploratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe22_rural_acp
 op_all_baseline_rotated.png Graphic file (type png)
@@ -1149,20 +1484,36 @@ ploratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe22_rural_acpo
 p_all_baseline_rotated.png>
 Package pdftex.def Info: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucr
 ats_farms/figures/exploratory_analysis/politician_byprov_fe_sweep/politician_by
-prov_fe22_rural_acpop_all_baseline_rotated.png  used on input line 911.
+prov_fe22_rural_acpop_all_baseline_rotated.png  used on input line 869.
 (pdftex.def)             Requested size: 343.42375pt x 171.7114pt.
+<C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/explor
+atory_analysis/politician_byprov_fe_sweep/politician_byprov_fe22_did_interactio
+n_rural_acpop_all_1.png, id=449, 960.58875pt x 640.3925pt>
+File: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/e
+xploratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe22_did_inter
+action_rural_acpop_all_1.png Graphic file (type png)
+<use C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/ex
+ploratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe22_did_intera
+ction_rural_acpop_all_1.png>
+Package pdftex.def Info: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucr
+ats_farms/figures/exploratory_analysis/politician_byprov_fe_sweep/politician_by
+prov_fe22_did_interaction_rural_acpop_all_1.png  used on input line 872.
+(pdftex.def)             Requested size: 386.35037pt x 257.56934pt.
  [45
 
  <C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/explo
 ratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe22_rural_acpop_a
 ll_baseline_ori.png> <C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats
 _farms/figures/exploratory_analysis/politician_byprov_fe_sweep/politician_bypro
-v_fe22_rural_acpop_all_baseline_rotated.png>] [46
+v_fe22_rural_acpop_all_baseline_rotated.png> <C:/Users/eunic/OneDrive/Documents
+/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/politician_byprov_f
+e_sweep/politician_byprov_fe22_did_interaction_rural_acpop_all_1.png (PNG copy)
+>] [46
 
 ]
 <C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/explor
 atory_analysis/politician_byprov_fe_sweep/politician_byprov_fe23_rural_acpop_al
-l_baseline_ori.png, id=438, 578.16pt x 289.08pt>
+l_baseline_ori.png, id=459, 578.16pt x 289.08pt>
 File: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/e
 xploratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe23_rural_acp
 op_all_baseline_ori.png Graphic file (type png)
@@ -1171,11 +1522,11 @@ ploratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe23_rural_acpo
 p_all_baseline_ori.png>
 Package pdftex.def Info: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucr
 ats_farms/figures/exploratory_analysis/politician_byprov_fe_sweep/politician_by
-prov_fe23_rural_acpop_all_baseline_ori.png  used on input line 949.
+prov_fe23_rural_acpop_all_baseline_ori.png  used on input line 905.
 (pdftex.def)             Requested size: 343.42375pt x 171.7114pt.
 <C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/explor
 atory_analysis/politician_byprov_fe_sweep/politician_byprov_fe23_rural_acpop_al
-l_baseline_rotated.png, id=439, 578.16pt x 289.08pt>
+l_baseline_rotated.png, id=460, 578.16pt x 289.08pt>
 File: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/e
 xploratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe23_rural_acp
 op_all_baseline_rotated.png Graphic file (type png)
@@ -1184,20 +1535,36 @@ ploratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe23_rural_acpo
 p_all_baseline_rotated.png>
 Package pdftex.def Info: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucr
 ats_farms/figures/exploratory_analysis/politician_byprov_fe_sweep/politician_by
-prov_fe23_rural_acpop_all_baseline_rotated.png  used on input line 953.
+prov_fe23_rural_acpop_all_baseline_rotated.png  used on input line 909.
 (pdftex.def)             Requested size: 343.42375pt x 171.7114pt.
+<C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/explor
+atory_analysis/politician_byprov_fe_sweep/politician_byprov_fe23_did_interactio
+n_rural_acpop_all_1.png, id=461, 960.58875pt x 640.3925pt>
+File: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/e
+xploratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe23_did_inter
+action_rural_acpop_all_1.png Graphic file (type png)
+<use C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/ex
+ploratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe23_did_intera
+ction_rural_acpop_all_1.png>
+Package pdftex.def Info: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucr
+ats_farms/figures/exploratory_analysis/politician_byprov_fe_sweep/politician_by
+prov_fe23_did_interaction_rural_acpop_all_1.png  used on input line 912.
+(pdftex.def)             Requested size: 386.35037pt x 257.56934pt.
  [47
 
  <C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/explo
 ratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe23_rural_acpop_a
 ll_baseline_ori.png> <C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats
 _farms/figures/exploratory_analysis/politician_byprov_fe_sweep/politician_bypro
-v_fe23_rural_acpop_all_baseline_rotated.png>] [48
+v_fe23_rural_acpop_all_baseline_rotated.png> <C:/Users/eunic/OneDrive/Documents
+/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/politician_byprov_f
+e_sweep/politician_byprov_fe23_did_interaction_rural_acpop_all_1.png (PNG copy)
+>] [48
 
 ]
 <C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/explor
 atory_analysis/politician_byprov_fe_sweep/politician_byprov_fe24_rural_acpop_al
-l_baseline_ori.png, id=449, 578.16pt x 289.08pt>
+l_baseline_ori.png, id=471, 578.16pt x 289.08pt>
 File: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/e
 xploratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe24_rural_acp
 op_all_baseline_ori.png Graphic file (type png)
@@ -1206,11 +1573,11 @@ ploratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe24_rural_acpo
 p_all_baseline_ori.png>
 Package pdftex.def Info: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucr
 ats_farms/figures/exploratory_analysis/politician_byprov_fe_sweep/politician_by
-prov_fe24_rural_acpop_all_baseline_ori.png  used on input line 991.
+prov_fe24_rural_acpop_all_baseline_ori.png  used on input line 945.
 (pdftex.def)             Requested size: 343.42375pt x 171.7114pt.
 <C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/explor
 atory_analysis/politician_byprov_fe_sweep/politician_byprov_fe24_rural_acpop_al
-l_baseline_rotated.png, id=450, 578.16pt x 289.08pt>
+l_baseline_rotated.png, id=472, 578.16pt x 289.08pt>
 File: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/e
 xploratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe24_rural_acp
 op_all_baseline_rotated.png Graphic file (type png)
@@ -1219,20 +1586,36 @@ ploratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe24_rural_acpo
 p_all_baseline_rotated.png>
 Package pdftex.def Info: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucr
 ats_farms/figures/exploratory_analysis/politician_byprov_fe_sweep/politician_by
-prov_fe24_rural_acpop_all_baseline_rotated.png  used on input line 995.
+prov_fe24_rural_acpop_all_baseline_rotated.png  used on input line 949.
 (pdftex.def)             Requested size: 343.42375pt x 171.7114pt.
+<C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/explor
+atory_analysis/politician_byprov_fe_sweep/politician_byprov_fe24_did_interactio
+n_rural_acpop_all_1.png, id=473, 960.58875pt x 640.3925pt>
+File: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/e
+xploratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe24_did_inter
+action_rural_acpop_all_1.png Graphic file (type png)
+<use C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/ex
+ploratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe24_did_intera
+ction_rural_acpop_all_1.png>
+Package pdftex.def Info: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucr
+ats_farms/figures/exploratory_analysis/politician_byprov_fe_sweep/politician_by
+prov_fe24_did_interaction_rural_acpop_all_1.png  used on input line 952.
+(pdftex.def)             Requested size: 386.35037pt x 257.56934pt.
  [49
 
  <C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/explo
 ratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe24_rural_acpop_a
 ll_baseline_ori.png> <C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats
 _farms/figures/exploratory_analysis/politician_byprov_fe_sweep/politician_bypro
-v_fe24_rural_acpop_all_baseline_rotated.png>] [50
+v_fe24_rural_acpop_all_baseline_rotated.png> <C:/Users/eunic/OneDrive/Documents
+/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/politician_byprov_f
+e_sweep/politician_byprov_fe24_did_interaction_rural_acpop_all_1.png (PNG copy)
+>] [50
 
 ]
 <C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/explor
 atory_analysis/politician_byprov_fe_sweep/politician_byprov_fe25_rural_acpop_al
-l_baseline_ori.png, id=461, 578.16pt x 289.08pt>
+l_baseline_ori.png, id=484, 578.16pt x 289.08pt>
 File: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/e
 xploratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe25_rural_acp
 op_all_baseline_ori.png Graphic file (type png)
@@ -1241,11 +1624,11 @@ ploratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe25_rural_acpo
 p_all_baseline_ori.png>
 Package pdftex.def Info: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucr
 ats_farms/figures/exploratory_analysis/politician_byprov_fe_sweep/politician_by
-prov_fe25_rural_acpop_all_baseline_ori.png  used on input line 1033.
+prov_fe25_rural_acpop_all_baseline_ori.png  used on input line 985.
 (pdftex.def)             Requested size: 343.42375pt x 171.7114pt.
 <C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/explor
 atory_analysis/politician_byprov_fe_sweep/politician_byprov_fe25_rural_acpop_al
-l_baseline_rotated.png, id=462, 578.16pt x 289.08pt>
+l_baseline_rotated.png, id=485, 578.16pt x 289.08pt>
 File: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/e
 xploratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe25_rural_acp
 op_all_baseline_rotated.png Graphic file (type png)
@@ -1254,20 +1637,36 @@ ploratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe25_rural_acpo
 p_all_baseline_rotated.png>
 Package pdftex.def Info: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucr
 ats_farms/figures/exploratory_analysis/politician_byprov_fe_sweep/politician_by
-prov_fe25_rural_acpop_all_baseline_rotated.png  used on input line 1037.
+prov_fe25_rural_acpop_all_baseline_rotated.png  used on input line 989.
 (pdftex.def)             Requested size: 343.42375pt x 171.7114pt.
+<C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/explor
+atory_analysis/politician_byprov_fe_sweep/politician_byprov_fe25_did_interactio
+n_rural_acpop_all_1.png, id=486, 960.58875pt x 640.3925pt>
+File: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/e
+xploratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe25_did_inter
+action_rural_acpop_all_1.png Graphic file (type png)
+<use C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/ex
+ploratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe25_did_intera
+ction_rural_acpop_all_1.png>
+Package pdftex.def Info: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucr
+ats_farms/figures/exploratory_analysis/politician_byprov_fe_sweep/politician_by
+prov_fe25_did_interaction_rural_acpop_all_1.png  used on input line 992.
+(pdftex.def)             Requested size: 386.35037pt x 257.56934pt.
  [51
 
  <C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/explo
 ratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe25_rural_acpop_a
 ll_baseline_ori.png> <C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats
 _farms/figures/exploratory_analysis/politician_byprov_fe_sweep/politician_bypro
-v_fe25_rural_acpop_all_baseline_rotated.png>] [52
+v_fe25_rural_acpop_all_baseline_rotated.png> <C:/Users/eunic/OneDrive/Documents
+/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/politician_byprov_f
+e_sweep/politician_byprov_fe25_did_interaction_rural_acpop_all_1.png (PNG copy)
+>] [52
 
 ]
 <C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/explor
 atory_analysis/politician_byprov_fe_sweep/politician_byprov_fe26_rural_acpop_al
-l_baseline_ori.png, id=472, 578.16pt x 289.08pt>
+l_baseline_ori.png, id=496, 578.16pt x 289.08pt>
 File: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/e
 xploratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe26_rural_acp
 op_all_baseline_ori.png Graphic file (type png)
@@ -1276,11 +1675,11 @@ ploratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe26_rural_acpo
 p_all_baseline_ori.png>
 Package pdftex.def Info: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucr
 ats_farms/figures/exploratory_analysis/politician_byprov_fe_sweep/politician_by
-prov_fe26_rural_acpop_all_baseline_ori.png  used on input line 1075.
+prov_fe26_rural_acpop_all_baseline_ori.png  used on input line 1025.
 (pdftex.def)             Requested size: 343.42375pt x 171.7114pt.
 <C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/explor
 atory_analysis/politician_byprov_fe_sweep/politician_byprov_fe26_rural_acpop_al
-l_baseline_rotated.png, id=473, 578.16pt x 289.08pt>
+l_baseline_rotated.png, id=497, 578.16pt x 289.08pt>
 File: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/e
 xploratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe26_rural_acp
 op_all_baseline_rotated.png Graphic file (type png)
@@ -1289,20 +1688,37 @@ ploratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe26_rural_acpo
 p_all_baseline_rotated.png>
 Package pdftex.def Info: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucr
 ats_farms/figures/exploratory_analysis/politician_byprov_fe_sweep/politician_by
-prov_fe26_rural_acpop_all_baseline_rotated.png  used on input line 1079.
+prov_fe26_rural_acpop_all_baseline_rotated.png  used on input line 1029.
 (pdftex.def)             Requested size: 343.42375pt x 171.7114pt.
+<C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/explor
+atory_analysis/politician_byprov_fe_sweep/politician_byprov_fe26_did_interactio
+n_rural_acpop_all_1.png, id=498, 960.58875pt x 640.3925pt>
+File: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/e
+xploratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe26_did_inter
+action_rural_acpop_all_1.png Graphic file (type png)
+<use C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/ex
+ploratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe26_did_intera
+ction_rural_acpop_all_1.png>
+Package pdftex.def Info: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucr
+ats_farms/figures/exploratory_analysis/politician_byprov_fe_sweep/politician_by
+prov_fe26_did_interaction_rural_acpop_all_1.png  used on input line 1032.
+(pdftex.def)             Requested size: 386.35037pt x 257.56934pt.
  [53
 
  <C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/explo
 ratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe26_rural_acpop_a
 ll_baseline_ori.png> <C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats
 _farms/figures/exploratory_analysis/politician_byprov_fe_sweep/politician_bypro
-v_fe26_rural_acpop_all_baseline_rotated.png>] [54
+v_fe26_rural_acpop_all_baseline_rotated.png> <C:/Users/eunic/OneDrive/Documents
+/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/politician_byprov_f
+e_sweep/politician_byprov_fe26_did_interaction_rural_acpop_all_1.png (PNG copy)
+>]
+[54
 
 ]
 <C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/explor
 atory_analysis/politician_byprov_fe_sweep/politician_byprov_fe27_rural_acpop_al
-l_baseline_ori.png, id=483, 578.16pt x 289.08pt>
+l_baseline_ori.png, id=508, 578.16pt x 289.08pt>
 File: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/e
 xploratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe27_rural_acp
 op_all_baseline_ori.png Graphic file (type png)
@@ -1311,11 +1727,11 @@ ploratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe27_rural_acpo
 p_all_baseline_ori.png>
 Package pdftex.def Info: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucr
 ats_farms/figures/exploratory_analysis/politician_byprov_fe_sweep/politician_by
-prov_fe27_rural_acpop_all_baseline_ori.png  used on input line 1117.
+prov_fe27_rural_acpop_all_baseline_ori.png  used on input line 1065.
 (pdftex.def)             Requested size: 343.42375pt x 171.7114pt.
 <C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/explor
 atory_analysis/politician_byprov_fe_sweep/politician_byprov_fe27_rural_acpop_al
-l_baseline_rotated.png, id=484, 578.16pt x 289.08pt>
+l_baseline_rotated.png, id=509, 578.16pt x 289.08pt>
 File: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/e
 xploratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe27_rural_acp
 op_all_baseline_rotated.png Graphic file (type png)
@@ -1324,20 +1740,36 @@ ploratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe27_rural_acpo
 p_all_baseline_rotated.png>
 Package pdftex.def Info: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucr
 ats_farms/figures/exploratory_analysis/politician_byprov_fe_sweep/politician_by
-prov_fe27_rural_acpop_all_baseline_rotated.png  used on input line 1121.
+prov_fe27_rural_acpop_all_baseline_rotated.png  used on input line 1069.
 (pdftex.def)             Requested size: 343.42375pt x 171.7114pt.
+<C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/explor
+atory_analysis/politician_byprov_fe_sweep/politician_byprov_fe27_did_interactio
+n_rural_acpop_all_1.png, id=510, 960.58875pt x 640.3925pt>
+File: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/e
+xploratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe27_did_inter
+action_rural_acpop_all_1.png Graphic file (type png)
+<use C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/ex
+ploratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe27_did_intera
+ction_rural_acpop_all_1.png>
+Package pdftex.def Info: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucr
+ats_farms/figures/exploratory_analysis/politician_byprov_fe_sweep/politician_by
+prov_fe27_did_interaction_rural_acpop_all_1.png  used on input line 1072.
+(pdftex.def)             Requested size: 386.35037pt x 257.56934pt.
  [55
 
  <C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/explo
 ratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe27_rural_acpop_a
 ll_baseline_ori.png> <C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats
 _farms/figures/exploratory_analysis/politician_byprov_fe_sweep/politician_bypro
-v_fe27_rural_acpop_all_baseline_rotated.png>] [56
+v_fe27_rural_acpop_all_baseline_rotated.png> <C:/Users/eunic/OneDrive/Documents
+/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/politician_byprov_f
+e_sweep/politician_byprov_fe27_did_interaction_rural_acpop_all_1.png (PNG copy)
+>] [56
 
 ]
 <C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/explor
 atory_analysis/politician_byprov_fe_sweep/politician_byprov_fe28_rural_acpop_al
-l_baseline_ori.png, id=495, 578.16pt x 289.08pt>
+l_baseline_ori.png, id=521, 578.16pt x 289.08pt>
 File: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/e
 xploratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe28_rural_acp
 op_all_baseline_ori.png Graphic file (type png)
@@ -1346,11 +1778,11 @@ ploratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe28_rural_acpo
 p_all_baseline_ori.png>
 Package pdftex.def Info: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucr
 ats_farms/figures/exploratory_analysis/politician_byprov_fe_sweep/politician_by
-prov_fe28_rural_acpop_all_baseline_ori.png  used on input line 1159.
+prov_fe28_rural_acpop_all_baseline_ori.png  used on input line 1105.
 (pdftex.def)             Requested size: 343.42375pt x 171.7114pt.
 <C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/explor
 atory_analysis/politician_byprov_fe_sweep/politician_byprov_fe28_rural_acpop_al
-l_baseline_rotated.png, id=496, 578.16pt x 289.08pt>
+l_baseline_rotated.png, id=522, 578.16pt x 289.08pt>
 File: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/e
 xploratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe28_rural_acp
 op_all_baseline_rotated.png Graphic file (type png)
@@ -1359,20 +1791,36 @@ ploratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe28_rural_acpo
 p_all_baseline_rotated.png>
 Package pdftex.def Info: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucr
 ats_farms/figures/exploratory_analysis/politician_byprov_fe_sweep/politician_by
-prov_fe28_rural_acpop_all_baseline_rotated.png  used on input line 1163.
+prov_fe28_rural_acpop_all_baseline_rotated.png  used on input line 1109.
 (pdftex.def)             Requested size: 343.42375pt x 171.7114pt.
+<C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/explor
+atory_analysis/politician_byprov_fe_sweep/politician_byprov_fe28_did_interactio
+n_rural_acpop_all_1.png, id=523, 960.58875pt x 640.3925pt>
+File: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/e
+xploratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe28_did_inter
+action_rural_acpop_all_1.png Graphic file (type png)
+<use C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/ex
+ploratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe28_did_intera
+ction_rural_acpop_all_1.png>
+Package pdftex.def Info: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucr
+ats_farms/figures/exploratory_analysis/politician_byprov_fe_sweep/politician_by
+prov_fe28_did_interaction_rural_acpop_all_1.png  used on input line 1112.
+(pdftex.def)             Requested size: 386.35037pt x 257.56934pt.
  [57
 
  <C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/explo
 ratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe28_rural_acpop_a
 ll_baseline_ori.png> <C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats
 _farms/figures/exploratory_analysis/politician_byprov_fe_sweep/politician_bypro
-v_fe28_rural_acpop_all_baseline_rotated.png>] [58
+v_fe28_rural_acpop_all_baseline_rotated.png> <C:/Users/eunic/OneDrive/Documents
+/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/politician_byprov_f
+e_sweep/politician_byprov_fe28_did_interaction_rural_acpop_all_1.png (PNG copy)
+>] [58
 
 ]
 <C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/explor
 atory_analysis/politician_byprov_fe_sweep/politician_byprov_fe29_rural_acpop_al
-l_baseline_ori.png, id=506, 578.16pt x 289.08pt>
+l_baseline_ori.png, id=533, 578.16pt x 289.08pt>
 File: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/e
 xploratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe29_rural_acp
 op_all_baseline_ori.png Graphic file (type png)
@@ -1381,11 +1829,11 @@ ploratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe29_rural_acpo
 p_all_baseline_ori.png>
 Package pdftex.def Info: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucr
 ats_farms/figures/exploratory_analysis/politician_byprov_fe_sweep/politician_by
-prov_fe29_rural_acpop_all_baseline_ori.png  used on input line 1201.
+prov_fe29_rural_acpop_all_baseline_ori.png  used on input line 1145.
 (pdftex.def)             Requested size: 343.42375pt x 171.7114pt.
 <C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/explor
 atory_analysis/politician_byprov_fe_sweep/politician_byprov_fe29_rural_acpop_al
-l_baseline_rotated.png, id=507, 578.16pt x 289.08pt>
+l_baseline_rotated.png, id=534, 578.16pt x 289.08pt>
 File: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/e
 xploratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe29_rural_acp
 op_all_baseline_rotated.png Graphic file (type png)
@@ -1394,20 +1842,36 @@ ploratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe29_rural_acpo
 p_all_baseline_rotated.png>
 Package pdftex.def Info: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucr
 ats_farms/figures/exploratory_analysis/politician_byprov_fe_sweep/politician_by
-prov_fe29_rural_acpop_all_baseline_rotated.png  used on input line 1205.
+prov_fe29_rural_acpop_all_baseline_rotated.png  used on input line 1149.
 (pdftex.def)             Requested size: 343.42375pt x 171.7114pt.
+<C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/explor
+atory_analysis/politician_byprov_fe_sweep/politician_byprov_fe29_did_interactio
+n_rural_acpop_all_1.png, id=535, 960.58875pt x 640.3925pt>
+File: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/e
+xploratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe29_did_inter
+action_rural_acpop_all_1.png Graphic file (type png)
+<use C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/ex
+ploratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe29_did_intera
+ction_rural_acpop_all_1.png>
+Package pdftex.def Info: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucr
+ats_farms/figures/exploratory_analysis/politician_byprov_fe_sweep/politician_by
+prov_fe29_did_interaction_rural_acpop_all_1.png  used on input line 1152.
+(pdftex.def)             Requested size: 386.35037pt x 257.56934pt.
  [59
 
  <C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/explo
 ratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe29_rural_acpop_a
 ll_baseline_ori.png> <C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats
 _farms/figures/exploratory_analysis/politician_byprov_fe_sweep/politician_bypro
-v_fe29_rural_acpop_all_baseline_rotated.png>] [60
+v_fe29_rural_acpop_all_baseline_rotated.png> <C:/Users/eunic/OneDrive/Documents
+/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/politician_byprov_f
+e_sweep/politician_byprov_fe29_did_interaction_rural_acpop_all_1.png (PNG copy)
+>] [60
 
 ]
 <C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/explor
 atory_analysis/politician_byprov_fe_sweep/politician_byprov_fe30_rural_acpop_al
-l_baseline_ori.png, id=517, 578.16pt x 289.08pt>
+l_baseline_ori.png, id=545, 578.16pt x 289.08pt>
 File: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/e
 xploratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe30_rural_acp
 op_all_baseline_ori.png Graphic file (type png)
@@ -1416,11 +1880,11 @@ ploratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe30_rural_acpo
 p_all_baseline_ori.png>
 Package pdftex.def Info: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucr
 ats_farms/figures/exploratory_analysis/politician_byprov_fe_sweep/politician_by
-prov_fe30_rural_acpop_all_baseline_ori.png  used on input line 1243.
+prov_fe30_rural_acpop_all_baseline_ori.png  used on input line 1185.
 (pdftex.def)             Requested size: 343.42375pt x 171.7114pt.
 <C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/explor
 atory_analysis/politician_byprov_fe_sweep/politician_byprov_fe30_rural_acpop_al
-l_baseline_rotated.png, id=518, 578.16pt x 289.08pt>
+l_baseline_rotated.png, id=546, 578.16pt x 289.08pt>
 File: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/e
 xploratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe30_rural_acp
 op_all_baseline_rotated.png Graphic file (type png)
@@ -1429,20 +1893,36 @@ ploratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe30_rural_acpo
 p_all_baseline_rotated.png>
 Package pdftex.def Info: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucr
 ats_farms/figures/exploratory_analysis/politician_byprov_fe_sweep/politician_by
-prov_fe30_rural_acpop_all_baseline_rotated.png  used on input line 1247.
+prov_fe30_rural_acpop_all_baseline_rotated.png  used on input line 1189.
 (pdftex.def)             Requested size: 343.42375pt x 171.7114pt.
+<C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/explor
+atory_analysis/politician_byprov_fe_sweep/politician_byprov_fe30_did_interactio
+n_rural_acpop_all_1.png, id=547, 960.58875pt x 640.3925pt>
+File: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/e
+xploratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe30_did_inter
+action_rural_acpop_all_1.png Graphic file (type png)
+<use C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/ex
+ploratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe30_did_intera
+ction_rural_acpop_all_1.png>
+Package pdftex.def Info: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucr
+ats_farms/figures/exploratory_analysis/politician_byprov_fe_sweep/politician_by
+prov_fe30_did_interaction_rural_acpop_all_1.png  used on input line 1192.
+(pdftex.def)             Requested size: 386.35037pt x 257.56934pt.
  [61
 
  <C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/explo
 ratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe30_rural_acpop_a
 ll_baseline_ori.png> <C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats
 _farms/figures/exploratory_analysis/politician_byprov_fe_sweep/politician_bypro
-v_fe30_rural_acpop_all_baseline_rotated.png>] [62
+v_fe30_rural_acpop_all_baseline_rotated.png> <C:/Users/eunic/OneDrive/Documents
+/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/politician_byprov_f
+e_sweep/politician_byprov_fe30_did_interaction_rural_acpop_all_1.png (PNG copy)
+>] [62
 
 ]
 <C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/explor
 atory_analysis/politician_byprov_fe_sweep/politician_byprov_fe31_rural_acpop_al
-l_baseline_ori.png, id=529, 578.16pt x 289.08pt>
+l_baseline_ori.png, id=558, 578.16pt x 289.08pt>
 File: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/e
 xploratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe31_rural_acp
 op_all_baseline_ori.png Graphic file (type png)
@@ -1451,11 +1931,11 @@ ploratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe31_rural_acpo
 p_all_baseline_ori.png>
 Package pdftex.def Info: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucr
 ats_farms/figures/exploratory_analysis/politician_byprov_fe_sweep/politician_by
-prov_fe31_rural_acpop_all_baseline_ori.png  used on input line 1285.
+prov_fe31_rural_acpop_all_baseline_ori.png  used on input line 1225.
 (pdftex.def)             Requested size: 343.42375pt x 171.7114pt.
 <C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/explor
 atory_analysis/politician_byprov_fe_sweep/politician_byprov_fe31_rural_acpop_al
-l_baseline_rotated.png, id=530, 578.16pt x 289.08pt>
+l_baseline_rotated.png, id=559, 578.16pt x 289.08pt>
 File: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/e
 xploratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe31_rural_acp
 op_all_baseline_rotated.png Graphic file (type png)
@@ -1464,20 +1944,36 @@ ploratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe31_rural_acpo
 p_all_baseline_rotated.png>
 Package pdftex.def Info: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucr
 ats_farms/figures/exploratory_analysis/politician_byprov_fe_sweep/politician_by
-prov_fe31_rural_acpop_all_baseline_rotated.png  used on input line 1289.
+prov_fe31_rural_acpop_all_baseline_rotated.png  used on input line 1229.
 (pdftex.def)             Requested size: 343.42375pt x 171.7114pt.
+<C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/explor
+atory_analysis/politician_byprov_fe_sweep/politician_byprov_fe31_did_interactio
+n_rural_acpop_all_1.png, id=560, 960.58875pt x 640.3925pt>
+File: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/e
+xploratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe31_did_inter
+action_rural_acpop_all_1.png Graphic file (type png)
+<use C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/ex
+ploratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe31_did_intera
+ction_rural_acpop_all_1.png>
+Package pdftex.def Info: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucr
+ats_farms/figures/exploratory_analysis/politician_byprov_fe_sweep/politician_by
+prov_fe31_did_interaction_rural_acpop_all_1.png  used on input line 1232.
+(pdftex.def)             Requested size: 386.35037pt x 257.56934pt.
  [63
 
  <C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/explo
 ratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe31_rural_acpop_a
 ll_baseline_ori.png> <C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats
 _farms/figures/exploratory_analysis/politician_byprov_fe_sweep/politician_bypro
-v_fe31_rural_acpop_all_baseline_rotated.png>] [64
+v_fe31_rural_acpop_all_baseline_rotated.png> <C:/Users/eunic/OneDrive/Documents
+/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/politician_byprov_f
+e_sweep/politician_byprov_fe31_did_interaction_rural_acpop_all_1.png (PNG copy)
+>] [64
 
 ]
 <C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/explor
 atory_analysis/politician_byprov_fe_sweep/politician_byprov_fe32_rural_acpop_al
-l_baseline_ori.png, id=540, 578.16pt x 289.08pt>
+l_baseline_ori.png, id=570, 578.16pt x 289.08pt>
 File: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/e
 xploratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe32_rural_acp
 op_all_baseline_ori.png Graphic file (type png)
@@ -1486,11 +1982,11 @@ ploratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe32_rural_acpo
 p_all_baseline_ori.png>
 Package pdftex.def Info: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucr
 ats_farms/figures/exploratory_analysis/politician_byprov_fe_sweep/politician_by
-prov_fe32_rural_acpop_all_baseline_ori.png  used on input line 1327.
+prov_fe32_rural_acpop_all_baseline_ori.png  used on input line 1265.
 (pdftex.def)             Requested size: 343.42375pt x 171.7114pt.
 <C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/explor
 atory_analysis/politician_byprov_fe_sweep/politician_byprov_fe32_rural_acpop_al
-l_baseline_rotated.png, id=541, 578.16pt x 289.08pt>
+l_baseline_rotated.png, id=571, 578.16pt x 289.08pt>
 File: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/e
 xploratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe32_rural_acp
 op_all_baseline_rotated.png Graphic file (type png)
@@ -1499,15 +1995,31 @@ ploratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe32_rural_acpo
 p_all_baseline_rotated.png>
 Package pdftex.def Info: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucr
 ats_farms/figures/exploratory_analysis/politician_byprov_fe_sweep/politician_by
-prov_fe32_rural_acpop_all_baseline_rotated.png  used on input line 1331.
+prov_fe32_rural_acpop_all_baseline_rotated.png  used on input line 1269.
 (pdftex.def)             Requested size: 343.42375pt x 171.7114pt.
+<C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/explor
+atory_analysis/politician_byprov_fe_sweep/politician_byprov_fe32_did_interactio
+n_rural_acpop_all_1.png, id=572, 960.58875pt x 640.3925pt>
+File: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/e
+xploratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe32_did_inter
+action_rural_acpop_all_1.png Graphic file (type png)
+<use C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/ex
+ploratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe32_did_intera
+ction_rural_acpop_all_1.png>
+Package pdftex.def Info: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucr
+ats_farms/figures/exploratory_analysis/politician_byprov_fe_sweep/politician_by
+prov_fe32_did_interaction_rural_acpop_all_1.png  used on input line 1272.
+(pdftex.def)             Requested size: 386.35037pt x 257.56934pt.
  [65
 
  <C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/explo
 ratory_analysis/politician_byprov_fe_sweep/politician_byprov_fe32_rural_acpop_a
 ll_baseline_ori.png> <C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats
 _farms/figures/exploratory_analysis/politician_byprov_fe_sweep/politician_bypro
-v_fe32_rural_acpop_all_baseline_rotated.png>] [66
+v_fe32_rural_acpop_all_baseline_rotated.png> <C:/Users/eunic/OneDrive/Documents
+/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/politician_byprov_f
+e_sweep/politician_byprov_fe32_did_interaction_rural_acpop_all_1.png (PNG copy)
+>] [66
 
 ] [67
 
@@ -1523,11 +2035,11 @@ ot changed.
 (rerunfilecheck)             Checksum: 40C8A74E78244F64E03695510BF820BD;6209.
  ) 
 Here is how much of TeX's memory you used:
- 10096 strings out of 474486
- 234362 string characters out of 5743755
+ 10317 strings out of 474486
+ 276185 string characters out of 5743755
  1936542 words of memory out of 5000000
- 32139 multiletter control sequences out of 15000+600000
- 564562 words of font info for 59 fonts, out of 8000000 for 9000
+ 32361 multiletter control sequences out of 15000+600000
+ 564394 words of font info for 58 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
  75i,7n,79p,550b,450s stack positions out of 10000i,1000n,20000p,200000b,200000s
 <C:/Users/eunic/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/
@@ -1545,13 +2057,12 @@ ppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr17.pfb><C:/Users
 cm/cmsy10.pfb><C:/Users/eunic/AppData/Local/Programs/MiKTeX/fonts/type1/public/
 amsfonts/cm/cmsy9.pfb><C:/Users/eunic/AppData/Local/Programs/MiKTeX/fonts/type1
 /public/amsfonts/cm/cmti10.pfb><C:/Users/eunic/AppData/Local/Programs/MiKTeX/fo
-nts/type1/public/amsfonts/cm/cmtt10.pfb><C:/Users/eunic/AppData/Local/Programs/
-MiKTeX/fonts/type1/public/amsfonts/cm/cmtt12.pfb><C:/Users/eunic/AppData/Local/
-Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmtt9.pfb>
+nts/type1/public/amsfonts/cm/cmtt12.pfb><C:/Users/eunic/AppData/Local/Programs/
+MiKTeX/fonts/type1/public/amsfonts/cm/cmtt9.pfb>
 Output written on C:\Users\eunic\OneDrive\Documents\GitHub\proj_bureaucrats_far
-ms\output\pdf\politician_byprov_fe_sweep_report.pdf (67 pages, 8498804 bytes).
+ms\output\pdf\politician_byprov_fe_sweep_report.pdf (67 pages, 9964578 bytes).
 PDF statistics:
- 655 PDF objects out of 1000 (max. 8388607)
+ 682 PDF objects out of 1000 (max. 8388607)
  134 named destinations out of 1000 (max. 500000)
- 577 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 737 words of extra memory for PDF output out of 10000 (max. 10000000)
 

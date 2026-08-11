@@ -1,14 +1,26 @@
-{
-\def\sym#1{\ifmmode^{#1}\else\(^{#1}\)\fi}
-\begin{tabular}{l*{1}{c}}
-\hline\hline
+\begin{tabular}{lcccccc}
 \hline
-down\_percent&      -0.032\sym{***}\\
-            &     (0.007)         \\
+& (1) & (2) & (3) & (4) & (5) & (6)\\
+& \multicolumn{6}{c}{Number of Fires (in 1,000 units) }\\
 \hline
-Observations&  62,442,572         \\
-N Assembly Constituencies&         808         \\
-Mean DV     &     153.264         \\
-\hline\hline
+
+Down$>$Up (Pop)&      2.8899\sym{**} &                     &                     &                     &                     &                     \\
+            &    (1.3339)         &                     &                     &                     &                     &                     \\
+Down$>$Up (Area)&                     &      4.8028\sym{***}&                     &                     &                     &                     \\
+            &                     &    (1.8026)         &                     &                     &                     &                     \\
+Down$>$Up by 1std&                     &                     &      2.5898         &                     &                     &                     \\
+            &                     &                     &    (1.6187)         &                     &                     &                     \\
+Downwind over total Population&                     &                     &                     &     -0.0701\sym{*}  &                     &                     \\
+            &                     &                     &                     &    (0.0361)         &                     &                     \\
+Downwind over total Population V2&                     &                     &                     &                     &     -0.0316\sym{***}&                     \\
+            &                     &                     &                     &                     &    (0.0066)         &                     \\
+Down-Up Percent&                     &                     &                     &                     &                     &     -0.0350\sym{*}  \\
+            &                     &                     &                     &                     &                     &    (0.0181)         \\
+\hline
+Observations&  63,530,478         &  63,530,478         &  63,530,478         &  63,530,478         &  62,442,572         &  63,530,478         \\
+N Assembly Constituencies&         808         &         808         &         808         &         808         &         808         &         808         \\
+Grid $\times$ Cohort FE&           Y         &           Y         &           Y         &           Y         &           Y         &           Y         \\
+Assembly $\times$ Month-Year $\times$ Cohort FE&           Y         &           Y         &           Y         &           Y         &           Y         &           Y         \\
+Mean DV     &     153.264         &     153.264         &     153.264         &     153.264         &     153.264         &     153.264         \\
+\hline
 \end{tabular}
-}

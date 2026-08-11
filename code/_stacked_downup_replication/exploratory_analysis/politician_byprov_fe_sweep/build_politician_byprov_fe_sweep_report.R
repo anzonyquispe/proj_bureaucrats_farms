@@ -156,7 +156,7 @@ for (fe_id in 1:32) {
     lines <- c(
       lines,
       paste0(
-        "\\includegraphics[width=0.68\\textwidth]{", latex_path(did_plot), "}"
+        "\\includegraphics[width=0.54\\textwidth]{", latex_path(did_plot), "}"
       )
     )
   } else {

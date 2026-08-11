@@ -1,17 +1,29 @@
 {
 \def\sym#1{\ifmmode^{#1}\else\(^{#1}\)\fi}
 \begin{tabular}{l*{6}{c}}
-\hline\hline
 \hline
-1.post\_#1.treat&      15.614         &      82.424\sym{***}&      74.022\sym{***}&      18.862         &      85.296\sym{***}&      76.774\sym{***}\\
+            &\multicolumn{1}{c}{(1)}         &\multicolumn{1}{c}{(2)}         &\multicolumn{1}{c}{(3)}         &\multicolumn{1}{c}{(4)}         &\multicolumn{1}{c}{(5)}         &\multicolumn{1}{c}{(6)}         \\
+            & \multicolumn{6}{c}{Number of Fires (in 1,000 units)} \\ \hline
+
+Post $\times$ Protest&      15.614         &      82.424\sym{***}&      74.022\sym{***}&      18.862         &      85.296\sym{***}&      76.774\sym{***}\\
             &    (11.924)         &    (10.920)         &    (10.813)         &    (15.637)         &    (14.764)         &    (14.692)         \\
-1.post\_#1.treat#1.downup\_ac&                     &                     &                     &      -6.596         &      -5.886         &      -5.621         \\
+Down $>$ Up &                     &                     &                     &       6.067\sym{***}&       5.927\sym{***}&       5.923\sym{***}\\
+            &                     &                     &                     &     (0.616)         &     (0.615)         &     (0.615)         \\
+Post $\times$ Down $>$ Up&                     &                     &                     &       0.236         &       0.065         &       0.078         \\
+            &                     &                     &                     &     (0.925)         &     (0.926)         &     (0.926)         \\
+Protest $\times$ Down $>$ Up&                     &                     &                     &     -17.451         &     -17.051         &     -17.083         \\
+            &                     &                     &                     &    (18.622)         &    (18.539)         &    (18.528)         \\
+Post $\times$ Protest $\times$ Down $>$ Up&                     &                     &                     &      -6.596         &      -5.886         &      -5.621         \\
             &                     &                     &                     &    (22.156)         &    (21.590)         &    (21.673)         \\
 \hline
 Observations& 163,523,814         & 163,523,814         & 163,523,814         & 163,523,814         & 163,523,814         & 163,523,814         \\
 N Assembly Constituencies&         808         &         808         &         808         &         808         &         808         &         808         \\
+Grid FE     &           Y         &           Y         &           Y         &           Y         &           Y         &           Y         \\
+Relative Time FE&           Y         &           Y         &           Y         &           Y         &           Y         &           Y         \\
+Legislature FE&           N         &           Y         &           Y         &           N         &           Y         &           Y         \\
+Province Trend FE&           N         &           N         &           Y         &           N         &           N         &           Y         \\
 Mean DV     &     446.213         &     446.213         &     446.213         &     446.213         &     446.213         &     446.213         \\
-Mean DV, moderator=1&           .         &           .         &           .         &     439.722         &     439.722         &     439.722         \\
-\hline\hline
+Mean DV2 (Down$>$Up=1)&                     &                     &                     &     439.722         &     439.722         &     439.722         \\
+\hline
 \end{tabular}
 }
