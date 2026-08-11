@@ -1,0 +1,1081 @@
+Loading CRC_default/1.1
+[2026-08-11 15:14:20] one Stata process: controls=notyet, FE=1/32
+
+[2803957] signal 11 (1): Segmentation fault
+in expression starting at none:0
+Allocations: 93931335 (Pool: 93928002; Big: 3333); GC: 67
+/opt/sge/crc/spool/d32cepyc257/job_scripts/1350314: line 44: 2803957 Segmentation fault      (core dumped) "${STATA_BIN}" -b do "${DOFILE}"
+
+  ___  ____  ____  ____  ____ ®
+ /__    /   ____/   /   ____/      StataNow 19.5
+___/   /   /___/   /   /___/       MP—Parallel Edition
+
+ Statistics and Data Science       Copyright 1985-2025 StataCorp LLC
+                                   StataCorp
+                                   4905 Lakeway Drive
+                                   College Station, Texas 77845 USA
+                                   800-782-8272        https://www.stata.com
+                                   979-696-4600        service@stata.com
+
+Stata license: 4-user 16-core network, expiring 14 Sep 2026
+Serial number: 501909301589
+  Licensed to: University of Notre Dame
+               Notre Dame, IN 46556
+
+Notes:
+      1. Stata is running in batch mode.
+      2. Unicode is supported; see help unicode_advice.
+      3. More than 2 billion observations are allowed; see help obs_advice.
+      4. Maximum number of variables is set to 5,000 but can be increased;
+          see help set_maxvar.
+
+. do /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication/ex
+> ploratory_analysis/politician_original_controls_fe_sweep/_run_politician_orig
+> inal_control_all32.do 
+
+. *****************************************************************************
+> ***
+. * One Stata process, one control definition, all 32 politician FE models.
+. * Every FE is saved independently by the adapted template dofile.
+. *****************************************************************************
+> ***
+. version 17
+
+. clear all
+
+. set more off
+
+. args control_arg
+
+. local control_env : environment POL_ORIGINAL_CONTROL_SAMPLE
+
+. local control_sample "`control_arg'"
+
+. if "`control_sample'" == "" local control_sample "`control_env'"
+
+. if !inlist("`control_sample'", "never", "both", "notyet") exit 198
+
+. 
+. set processors 1
+    The maximum number of processors or cores being used is changed from 16
+    to 1.  It can be set to any number between 1 and 16
+
+. global location     "shell"
+
+. global sample       ""
+
+. global is_rural_var "is_rural"
+
+. global fe_list      "1/32"
+
+. global ster_suffix  "_acpop"
+
+. global root "/groups/sgulzar/sa_fires/proj_bureaucrats_farms"
+
+. global code "/users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_repl
+> ication"
+
+. quietly do "${code}/estsave_csv.ado"
+
+. 
+. forvalues fe = 1/32 {
+  2.     display as result "POLITICIAN controls=`control_sample' FE=`fe'/32"
+  3.     do "${code}/exploratory_analysis/politician_original_controls_fe_sweep
+> /_politician_original_controls_fe_sweep.do" `fe' `control_sample'
+  4. }
+POLITICIAN controls=notyet FE=1/32
+
+. *****************************************************************************
+> ***
+. * Original politician dataset: 32 FE x 3 control-sample sweep
+. *
+. * Input:
+. *   politicians_characteristics.csv
+. *
+. * One invocation receives exactly one FE id and one control definition and
+. * estimates both:
+. *   1. Baseline event study, years -5,...,4, omitting -1.
+. *   2. DiD interaction post x treat x downup_ac_pop, following _app_19.
+. *
+. * Control definitions reproduce _app_16 exactly:
+. *   never  = treated + control_type 1
+. *   both   = treated + control_type 1 or 2
+. *   notyet = treated + control_type 2 (legacy partial-zero-spell group)
+. *****************************************************************************
+> ***
+. 
+. version 17
+
+. set processors 1
+    The maximum number of processors or cores being used is 1.  It can be set
+    to any number between 1 and 16.
+
+. 
+. args fe_arg control_arg
+
+. local fe_env : environment POL_ORIGINAL_FE_ID
+
+. local control_env : environment POL_ORIGINAL_CONTROL_SAMPLE
+
+. 
+. if "$root" == "" {
+.     clear all
+.     set more off
+. 
+.     * Standalone defaults for the five standard parameters.
+.     global location     "shell"
+.     global sample       ""
+.     global is_rural_var "is_rural"
+.     global fe_list      "1"
+.     global ster_suffix  "_acpop"
+. 
+.     global shell "/groups/sgulzar/sa_fires/proj_bureaucrats_farms"
+.     global dbox  "C:/Users/eunic/Dropbox/sa_fires/proj_bureaucrats_farms"
+.     global code_shell "/users/aquisper/proj_bureaucrats_farms/code/_stacked_d
+> ownup_replication"
+.     global code_dbox  "C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucr
+> ats_farms/code/_stacked_downup_replication"
+. 
+.     if "$location" == "dbox" {
+.         global root "$dbox"
+.         global code "$code_dbox"
+.     }
+.     else {
+.         global root "$shell"
+.         global code "$code_shell"
+.     }
+.     quietly do "${code}/estsave_csv.ado"
+. }
+
+. 
+. if "`fe_arg'" != "" {
+.     global fe_list "`fe_arg'"
+. }
+
+. else if "`fe_env'" != "" {
+.     global fe_list "`fe_env'"
+. }
+
+. local n_fe : word count $fe_list
+
+. if `n_fe' != 1 {
+.     display as error "Exactly one FE id is required; received: $fe_list"
+.     exit 198
+. }
+
+. local selected_fe : word 1 of $fe_list
+
+. if !inrange(real("`selected_fe'"), 1, 32) | ///
+>         real("`selected_fe'") != floor(real("`selected_fe'")) {
+.     display as error "FE id must be an integer from 1 through 32."
+.     exit 198
+. }
+
+. 
+. local control_sample "`control_arg'"
+
+. if "`control_sample'" == "" local control_sample "`control_env'"
+
+. if "`control_sample'" == "" local control_sample "never"
+
+. if !inlist("`control_sample'", "never", "both", "notyet") {
+.     display as error "Control sample must be never, both, or notyet."
+.     exit 198
+. }
+
+. 
+. global int_data "${root}/data_output/intermediate"
+
+. global tables_root "${code}/../../tables"
+
+. global tables "${tables_root}/exploratory_analysis/politician_original_contro
+> ls_fe_sweep"
+
+. global figures_root "${code}/../../figures"
+
+. global figures "${figures_root}/exploratory_analysis/politician_original_cont
+> rols_fe_sweep"
+
+. capture mkdir "${tables_root}/exploratory_analysis"
+
+. capture mkdir "${tables}"
+
+. capture mkdir "${figures_root}/exploratory_analysis"
+
+. capture mkdir "${figures}"
+
+. 
+. local input_file "${int_data}/politicians_characteristics${sample}.csv"
+
+. confirm file "`input_file'"
+
+. display as text "Input: `input_file'"
+Input: /groups/sgulzar/sa_fires/proj_bureaucrats_farms/data_output/intermediate
+> /politicians_characteristics.csv
+
+. display as text "FE: `selected_fe' | controls: `control_sample'"
+FE: 1 | controls: notyet
+
+. import delimited using "`input_file'", clear varnames(1)
+(encoding automatically selected: ISO-8859-1)
+(22 vars, 42,159,947 obs)
+
+. 
+. capture confirm variable relative_year_bin
+
+. if _rc {
+.     confirm variable relative_year
+.     rename relative_year relative_year_bin
+. }
+
+. 
+. local required ///
+>     unique_small_grid_id province ac_uq_id count month year monthyear ///
+>     downup_ac_pop av_wind_speed wind_direction election_year yeargov ///
+>     treat cohort relative_year_bin control_type
+
+. foreach variable of local required {
+  2.     capture confirm variable `variable'
+  3.     if _rc {
+  4.         display as error "Required variable absent from original politicia
+> n dataset: `variable'"
+  5.         exit 111
+  6.     }
+  7. }
+
+. 
+. assert control_type == 0 if treat == 1
+
+. assert inlist(control_type, 1, 2) if treat == 0
+
+. 
+. capture drop countk
+
+. gen double countk = count * 1000
+
+. 
+. merge m:1 unique_small_grid_id using ///
+>     "${int_data}/ghs_grid_classification_2000.dta", ///
+>     keep(master match) keepusing(is_rural)
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                             0
+    Matched                        42,159,947  (_merge==3)
+    -----------------------------------------
+
+. count if _merge == 1
+  0
+
+. display as text "Rows without rural classification: " r(N)
+Rows without rural classification: 0
+
+. drop _merge
+
+. keep if ${is_rural_var} == 1
+(11,013,790 observations deleted)
+
+. keep if year < 2022 | (year == 2022 & month <= 8)
+(5,521,118 observations deleted)
+
+. 
+. if "`control_sample'" == "never" {
+.     keep if treat == 1 | control_type == 1
+. }
+
+. else if "`control_sample'" == "notyet" {
+.     keep if treat == 1 | control_type == 2
+(13,308,960 observations deleted)
+.     display as error ///
+>         "CAUTION: control_type 2 is the legacy partial-zero-spell group; " //
+> /
+>         "it is not a pure not-yet-treated sample."
+CAUTION: control_type 2 is the legacy partial-zero-spell group; it is not a pur
+> e not-yet-treated sample.
+. }
+
+. 
+. * Use one complete-case sample for both analyses and all 32 FE definitions.
+. gen byte fe_complete = 1
+
+. local complete_vars ///
+>     unique_small_grid_id province ac_uq_id month year monthyear election_year
+>  ///
+>     yeargov cohort countk downup_ac_pop av_wind_speed wind_direction treat //
+> /
+>     relative_year_bin control_type
+
+. foreach variable of local complete_vars {
+  2.     replace fe_complete = 0 if missing(`variable')
+  3. }
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+
+. count if fe_complete == 0
+  0
+
+. display as text "Rows removed by common complete-case restriction: " r(N)
+Rows removed by common complete-case restriction: 0
+
+. drop if fe_complete == 0
+(0 observations deleted)
+
+. drop fe_complete
+
+. 
+. egen long unique_small_grid_id_cohort = group(unique_small_grid_id cohort)
+
+. egen long province_cohort = group(province cohort)
+
+. egen long monthyearco = group(month year cohort)
+
+. egen long ac_elec_yr = group(ac_uq_id election_year cohort)
+
+. 
+. local fe1  "unique_small_grid_id_cohort"
+
+. local fe2  "unique_small_grid_id_cohort monthyearco"
+
+. local fe3  "unique_small_grid_id_cohort province_cohort#c.monthyear"
+
+. local fe4  "unique_small_grid_id_cohort yeargov"
+
+. local fe5  "unique_small_grid_id_cohort province_cohort#election_year"
+
+. local fe6  "unique_small_grid_id_cohort province_cohort#election_year#yeargov
+> "
+
+. local fe7  "unique_small_grid_id_cohort monthyearco province_cohort#c.monthye
+> ar"
+
+. local fe8  "unique_small_grid_id_cohort monthyearco yeargov"
+
+. local fe9  "unique_small_grid_id_cohort monthyearco province_cohort#election_
+> year"
+
+. local fe10 "unique_small_grid_id_cohort monthyearco province_cohort#election_
+> year#yeargov"
+
+. local fe11 "unique_small_grid_id_cohort province_cohort#c.monthyear yeargov"
+
+. local fe12 "unique_small_grid_id_cohort province_cohort#c.monthyear province_
+> cohort#election_year"
+
+. local fe13 "unique_small_grid_id_cohort province_cohort#c.monthyear province_
+> cohort#election_year#yeargov"
+
+. local fe14 "unique_small_grid_id_cohort yeargov province_cohort#election_year
+> "
+
+. local fe15 "unique_small_grid_id_cohort yeargov province_cohort#election_year
+> #yeargov"
+
+. local fe16 "unique_small_grid_id_cohort province_cohort#election_year provinc
+> e_cohort#election_year#yeargov"
+
+. local fe17 "unique_small_grid_id_cohort monthyearco province_cohort#c.monthye
+> ar yeargov"
+
+. local fe18 "unique_small_grid_id_cohort monthyearco province_cohort#c.monthye
+> ar province_cohort#election_year"
+
+. local fe19 "unique_small_grid_id_cohort monthyearco province_cohort#c.monthye
+> ar province_cohort#election_year#yeargov"
+
+. local fe20 "unique_small_grid_id_cohort monthyearco yeargov province_cohort#e
+> lection_year"
+
+. local fe21 "unique_small_grid_id_cohort monthyearco yeargov province_cohort#e
+> lection_year#yeargov"
+
+. local fe22 "unique_small_grid_id_cohort monthyearco province_cohort#election_
+> year province_cohort#election_year#yeargov"
+
+. local fe23 "unique_small_grid_id_cohort province_cohort#c.monthyear yeargov p
+> rovince_cohort#election_year"
+
+. local fe24 "unique_small_grid_id_cohort province_cohort#c.monthyear yeargov p
+> rovince_cohort#election_year#yeargov"
+
+. local fe25 "unique_small_grid_id_cohort province_cohort#c.monthyear province_
+> cohort#election_year province_cohort#election_year#yeargov"
+
+. local fe26 "unique_small_grid_id_cohort yeargov province_cohort#election_year
+>  province_cohort#election_year#yeargov"
+
+. local fe27 "unique_small_grid_id_cohort monthyearco province_cohort#c.monthye
+> ar yeargov province_cohort#election_year"
+
+. local fe28 "unique_small_grid_id_cohort monthyearco province_cohort#c.monthye
+> ar yeargov province_cohort#election_year#yeargov"
+
+. local fe29 "unique_small_grid_id_cohort monthyearco province_cohort#c.monthye
+> ar province_cohort#election_year province_cohort#election_year#yeargov"
+
+. local fe30 "unique_small_grid_id_cohort monthyearco yeargov province_cohort#e
+> lection_year province_cohort#election_year#yeargov"
+
+. local fe31 "unique_small_grid_id_cohort province_cohort#c.monthyear yeargov p
+> rovince_cohort#election_year province_cohort#election_year#yeargov"
+
+. local fe32 "unique_small_grid_id_cohort monthyearco province_cohort#c.monthye
+> ar yeargov province_cohort#election_year province_cohort#election_year#yeargo
+> v"
+
+. 
+. local fespec "`fe`selected_fe''"
+
+. local fe_tag : display %02.0f `selected_fe'
+
+. local fe_tag = strtrim("`fe_tag'")
+
+. local output_prefix "politician_original_fe`fe_tag'_controls_`control_sample'
+> "
+
+. display as result "FE `selected_fe': `fespec'"
+FE 1: unique_small_grid_id_cohort
+
+. 
+. tempfile full_analysis_sample
+
+. save `full_analysis_sample'
+file /tmp/1350314.1.largemem/St2803957.000001 saved as .dta format
+
+. 
+. *****************************************************************************
+> ***
+. * 1. Baseline event study.
+. *****************************************************************************
+> ***
+. 
+. use `full_analysis_sample', clear
+
+. keep if inrange(relative_year_bin, -5, 4)
+(1,383,389 observations deleted)
+
+. quietly summarize relative_year_bin
+
+. local rmin = r(min)
+
+. local rmax = r(max)
+
+. assert `rmin' == -5
+
+. assert `rmax' == 4
+
+. gen int relative_year_bin_aux = relative_year_bin - `rmin' + 1
+
+. local base = -1 - `rmin' + 1
+
+. gen byte moderator = 0
+
+. * local moderators_list moderator downup_ac rice_area_aclvl_ahigh rice_harvar
+> ea_aclvl_ahigh rice_prod_aclvl_ahigh
+. local moderators_list moderator
+
+. 
+. count if treat == 1
+  3,356,320
+
+. local event_n_treated = r(N)
+
+. count if treat == 0
+  7,576,370
+
+. local event_n_control = r(N)
+
+. egen byte event_tag_ac = tag(ac_uq_id)
+
+. count if event_tag_ac == 1
+  472
+
+. local event_numacs = r(N)
+
+. drop event_tag_ac
+
+. 
+. quietly summarize countk if treat == 1 & relative_year_bin <= -1
+
+. local event_ymean = r(mean)
+
+. quietly summarize countk if treat == 1 & relative_year_bin <= -1 & moderator 
+> == 1
+
+. local event_ymean2 = r(mean)
+
+. 
+. est clear
+
+. local event_i = 1
+
+. foreach mod of local moderators_list {
+  2.     replace moderator = `mod'
+  3.     local event_rhs "ib`base'.relative_year_bin_aux##ib0.treat##ib0.`mod' 
+> wind_direction av_wind_speed"
+  4. 
+.     reghdfejl countk `event_rhs', absorb(`fespec') vce(cluster ac_elec_yr)
+  5.     estadd scalar ymean = `event_ymean'
+  6.     estadd scalar ymean2 = `event_ymean2'
+  7.     estadd scalar acq = `event_numacs'
+  8.     estadd scalar fe_id = `selected_fe'
+  9.     estadd scalar n_treated = `event_n_treated'
+ 10.     estadd scalar n_control = `event_n_control'
+ 11.     estadd local smpl "Rural"
+ 12.     estadd local fespec "`fespec'"
+ 13.     estadd local mod "`mod'"
+ 14.     estadd local controls "`control_sample'"
+ 15.     est store evreg`event_i'
+ 16.     local event_i = `event_i' + 1
+ 17. }
+(0 real changes made)
+(MWFE estimator converged in 1 iterations)
+
+HDFE linear regression with Julia                 Number of obs   = 10,932,690
+Absorbing 1 HDFE group                            F(  20,   2823) =      25.46
+Statistics cluster-robust                         Prob > F        =     0.0000
+                                                  R-squared       =     0.1048
+                                                  Adj R-squared   =     0.0905
+Number of clusters (ac_elec_yr) =       2824      Within R-sq.    =     0.0065
+                                                  Root MSE        =   821.3396
+
+                         (Std. err. adjusted for 2,824 clusters in ac_elec_yr)
+------------------------------------------------------------------------------
+             |               Robust
+      countk | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+relative_y~x |
+          1  |   18.03877   8.694252     2.07   0.038     .9910437     35.0865
+          2  |    43.2422    8.72477     4.96   0.000     26.13463    60.34977
+          3  |   12.28663   4.471753     2.75   0.006       3.5184    21.05487
+          4  |   3.179331   3.109335     1.02   0.307    -2.917468     9.27613
+          6  |   4.906124   3.470444     1.41   0.158    -1.898739    11.71099
+          7  |  -4.386069   4.513625    -0.97   0.331    -13.23641    4.464268
+          8  |   7.094092    6.79165     1.04   0.296    -6.223007    20.41119
+          9  |  -5.181475   6.913367    -0.75   0.454    -18.73724    8.374289
+         10  |   3.942953   6.325442     0.62   0.533    -8.460004    16.34591
+             |
+     1.treat |          0  (omitted)
+wind_direc~n |  -.6486169   .0336246   -19.29   0.000    -.7145482   -.5826855
+av_wind_sp~d |   55.89434   5.081733    11.00   0.000     45.93005    65.85862
+             |
+relative_y~x#|
+       treat |
+        1 1  |  -20.80641   10.77209    -1.93   0.054    -41.92837    .3155499
+        2 1  |  -57.43425   10.33485    -5.56   0.000    -77.69888   -37.16962
+        3 1  |  -7.688689   8.069845    -0.95   0.341    -23.51208    8.134701
+        4 1  |  -9.667909   6.797793    -1.42   0.155    -22.99705    3.661235
+        6 1  |  -.3765256    6.50455    -0.06   0.954    -13.13068    12.37763
+        7 1  |   7.032377   6.916243     1.02   0.309    -6.529026    20.59378
+        8 1  |   1.942429   9.271008     0.21   0.834    -16.23621    20.12106
+        9 1  |   16.47868   9.595633     1.72   0.086    -2.336482    35.29384
+       10 1  |   8.446275   9.794066     0.86   0.389    -10.75798    27.65053
+------------------------------------------------------------------------------
+
+added scalar:
+              e(ymean) =  112.47989
+
+added scalar:
+             e(ymean2) =  .
+
+added scalar:
+                e(acq) =  472
+
+added scalar:
+              e(fe_id) =  1
+
+added scalar:
+          e(n_treated) =  3356320
+
+added scalar:
+          e(n_control) =  7576370
+
+added macro:
+               e(smpl) : "Rural"
+
+added macro:
+             e(fespec) : "unique_small_grid_id_cohort"
+
+added macro:
+                e(mod) : "moderator"
+
+added macro:
+           e(controls) : "notyet"
+
+. 
+. local event_outbase "${tables}/`output_prefix'_event_rural_acpop_all"
+
+. estwrite evreg1 using "`event_outbase'.ster", replace
+(saving evreg1)
+(file /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication/.
+> ./../tables/exploratory_analysis/politician_original_controls_fe_sweep/politi
+> cian_original_fe01_controls_notyet_event_rural_acpop_all.ster saved)
+
+. estsave_csv evreg1 using "`event_outbase'.csv", replace
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+Estimates exported to /users/aquisper/proj_bureaucrats_farms/code/_stacked_down
+> up_replication/../../tables/exploratory_analysis/politician_original_controls
+> _fe_sweep/politician_original_fe01_controls_notyet_event_rural_acpop_all.csv
+
+. confirm file "`event_outbase'.ster"
+
+. confirm file "`event_outbase'.csv"
+
+. confirm file "`event_outbase'_scalars.csv"
+
+. display as result "Saved event study: `event_outbase'"
+Saved event study: /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_
+> replication/../../tables/exploratory_analysis/politician_original_controls_fe
+> _sweep/politician_original_fe01_controls_notyet_event_rural_acpop_all
+
+. 
+. *****************************************************************************
+> ***
+. * 2. DiD interaction following _app_19.
+. *****************************************************************************
+> ***
+. 
+. use `full_analysis_sample', clear
+
+. gen byte post_ = relative_year_bin >= 0
+
+. gen byte moderator = downup_ac_pop
+
+. 
+. count if treat == 1
+  3,965,599
+
+. local did_n_treated = r(N)
+
+. count if treat == 0
+  8,350,480
+
+. local did_n_control = r(N)
+
+. egen byte did_tag_ac = tag(ac_uq_id)
+
+. count if did_tag_ac == 1
+  472
+
+. local did_numacs = r(N)
+
+. drop did_tag_ac
+
+. 
+. quietly summarize countk if treat == 1 & relative_year_bin <= -1
+
+. local did_ymean = r(mean)
+
+. quietly summarize countk if treat == 1 & relative_year_bin <= -1 & moderator 
+> == 1
+
+. local did_ymean2 = r(mean)
+
+. local did_rhs "ib0.post_##ib0.treat##ib0.downup_ac_pop wind_direction av_wind
+> _speed"
+
+. 
+. est clear
+
+. reghdfejl countk `did_rhs', absorb(`fespec') vce(cluster ac_elec_yr)
+(MWFE estimator converged in 1 iterations)
+
+HDFE linear regression with Julia                 Number of obs   = 12,316,079
+Absorbing 1 HDFE group                            F(   8,   3149) =      64.92
+Statistics cluster-robust                         Prob > F        =     0.0000
+                                                  R-squared       =     0.1034
+                                                  Adj R-squared   =     0.0907
+Number of clusters (ac_elec_yr) =       3150      Within R-sq.    =     0.0064
+                                                  Root MSE        =   827.3291
+
+                         (Std. err. adjusted for 3,150 clusters in ac_elec_yr)
+------------------------------------------------------------------------------
+             |               Robust
+      countk | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+     1.post_ |  -6.982473   3.465438    -2.01   0.044    -13.77722    -.187728
+     1.treat |          0  (omitted)
+1.downup_a~p |    5.46798   2.445345     2.24   0.025     .6733491    10.26261
+wind_direc~n |  -.6482411   .0314233   -20.63   0.000    -.7098533   -.5866288
+av_wind_sp~d |   58.15481     4.9552    11.74   0.000     48.43906    67.87056
+             |
+ post_#treat |
+        1 1  |   18.90812   6.053494     3.12   0.002     7.038926    30.77731
+             |
+       post_#|
+downup_ac_~p |
+        1 1  |  -2.547639   2.843702    -0.90   0.370    -8.123335    3.028057
+             |
+       treat#|
+downup_ac_~p |
+        1 1  |  -2.961919   4.755991    -0.62   0.533    -12.28707    6.363236
+             |
+ post_#treat#|
+downup_ac_~p |
+      1 1 1  |   2.739597   6.622082     0.41   0.679    -10.24443    15.72363
+------------------------------------------------------------------------------
+
+. estadd scalar ymean = `did_ymean'
+
+added scalar:
+              e(ymean) =  120.68671
+
+. estadd scalar ymean2 = `did_ymean2'
+
+added scalar:
+             e(ymean2) =  121.71761
+
+. estadd scalar acq = `did_numacs'
+
+added scalar:
+                e(acq) =  472
+
+. estadd scalar fe_id = `selected_fe'
+
+added scalar:
+              e(fe_id) =  1
+
+. estadd scalar n_treated = `did_n_treated'
+
+added scalar:
+          e(n_treated) =  3965599
+
+. estadd scalar n_control = `did_n_control'
+
+added scalar:
+          e(n_control) =  8350480
+
+. estadd local smpl "Rural"
+
+added macro:
+               e(smpl) : "Rural"
+
+. estadd local fespec "`fespec'"
+
+added macro:
+             e(fespec) : "unique_small_grid_id_cohort"
+
+. estadd local mod "downup_ac_pop"
+
+added macro:
+                e(mod) : "downup_ac_pop"
+
+. estadd local controls "`control_sample'"
+
+added macro:
+           e(controls) : "notyet"
+
+. est store evreg1
+
+. 
+. local did_outbase "${tables}/`output_prefix'_did_interaction_rural_acpop_all"
+
+. estwrite evreg1 using "`did_outbase'.ster", replace
+(saving evreg1)
+(file /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication/.
+> ./../tables/exploratory_analysis/politician_original_controls_fe_sweep/politi
+> cian_original_fe01_controls_notyet_did_interaction_rural_acpop_all.ster saved
+> )
+
+. estsave_csv evreg1 using "`did_outbase'.csv", replace
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+Estimates exported to /users/aquisper/proj_bureaucrats_farms/code/_stacked_down
+> up_replication/../../tables/exploratory_analysis/politician_original_controls
+> _fe_sweep/politician_original_fe01_controls_notyet_did_interaction_rural_acpo
+> p_all.csv
+
+. confirm file "`did_outbase'.ster"
+
+. confirm file "`did_outbase'.csv"
+
+. confirm file "`did_outbase'_scalars.csv"
+
+. display as result "Saved DiD interaction: `did_outbase'"
+Saved DiD interaction: /users/aquisper/proj_bureaucrats_farms/code/_stacked_dow
+> nup_replication/../../tables/exploratory_analysis/politician_original_control
+> s_fe_sweep/politician_original_fe01_controls_notyet_did_interaction_rural_acp
+> op_all
+
+. 
+. display as result ///
+>     "COMPLETED original politician FE `selected_fe', controls=`control_sample
+> '"
+COMPLETED original politician FE 1, controls=notyet
+
+. 
+end of do-file
+POLITICIAN controls=notyet FE=2/32
+
+. *****************************************************************************
+> ***
+. * Original politician dataset: 32 FE x 3 control-sample sweep
+. *
+. * Input:
+. *   politicians_characteristics.csv
+. *
+. * One invocation receives exactly one FE id and one control definition and
+. * estimates both:
+. *   1. Baseline event study, years -5,...,4, omitting -1.
+. *   2. DiD interaction post x treat x downup_ac_pop, following _app_19.
+. *
+. * Control definitions reproduce _app_16 exactly:
+. *   never  = treated + control_type 1
+. *   both   = treated + control_type 1 or 2
+. *   notyet = treated + control_type 2 (legacy partial-zero-spell group)
+. *****************************************************************************
+> ***
+. 
+. version 17
+
+. set processors 1
+    The maximum number of processors or cores being used is 1.  It can be set
+    to any number between 1 and 16.
+
+. 
+. args fe_arg control_arg
+
+. local fe_env : environment POL_ORIGINAL_FE_ID
+
+. local control_env : environment POL_ORIGINAL_CONTROL_SAMPLE
+
+. 
+. if "$root" == "" {
+.     clear all
+.     set more off
+. 
+.     * Standalone defaults for the five standard parameters.
+.     global location     "shell"
+.     global sample       ""
+.     global is_rural_var "is_rural"
+.     global fe_list      "1"
+.     global ster_suffix  "_acpop"
+. 
+.     global shell "/groups/sgulzar/sa_fires/proj_bureaucrats_farms"
+.     global dbox  "C:/Users/eunic/Dropbox/sa_fires/proj_bureaucrats_farms"
+.     global code_shell "/users/aquisper/proj_bureaucrats_farms/code/_stacked_d
+> ownup_replication"
+.     global code_dbox  "C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucr
+> ats_farms/code/_stacked_downup_replication"
+. 
+.     if "$location" == "dbox" {
+.         global root "$dbox"
+.         global code "$code_dbox"
+.     }
+.     else {
+.         global root "$shell"
+.         global code "$code_shell"
+.     }
+.     quietly do "${code}/estsave_csv.ado"
+. }
+
+. 
+. if "`fe_arg'" != "" {
+.     global fe_list "`fe_arg'"
+. }
+
+. else if "`fe_env'" != "" {
+.     global fe_list "`fe_env'"
+. }
+
+. local n_fe : word count $fe_list
+
+. if `n_fe' != 1 {
+.     display as error "Exactly one FE id is required; received: $fe_list"
+.     exit 198
+. }
+
+. local selected_fe : word 1 of $fe_list
+
+. if !inrange(real("`selected_fe'"), 1, 32) | ///
+>         real("`selected_fe'") != floor(real("`selected_fe'")) {
+.     display as error "FE id must be an integer from 1 through 32."
+.     exit 198
+. }
+
+. 
+. local control_sample "`control_arg'"
+
+. if "`control_sample'" == "" local control_sample "`control_env'"
+
+. if "`control_sample'" == "" local control_sample "never"
+
+. if !inlist("`control_sample'", "never", "both", "notyet") {
+.     display as error "Control sample must be never, both, or notyet."
+.     exit 198
+. }
+
+. 
+. global int_data "${root}/data_output/intermediate"
+
+. global tables_root "${code}/../../tables"
+
+. global tables "${tables_root}/exploratory_analysis/politician_original_contro
+> ls_fe_sweep"
+
+. global figures_root "${code}/../../figures"
+
+. global figures "${figures_root}/exploratory_analysis/politician_original_cont
+> rols_fe_sweep"
+
+. capture mkdir "${tables_root}/exploratory_analysis"
+
+. capture mkdir "${tables}"
+
+. capture mkdir "${figures_root}/exploratory_analysis"
+
+. capture mkdir "${figures}"
+
+. 
+. local input_file "${int_data}/politicians_characteristics${sample}.csv"
+
+. confirm file "`input_file'"
+
+. display as text "Input: `input_file'"
+Input: /groups/sgulzar/sa_fires/proj_bureaucrats_farms/data_output/intermediate
+> /politicians_characteristics.csv
+
+. display as text "FE: `selected_fe' | controls: `control_sample'"
+FE: 2 | controls: notyet
+
+. import delimited using "`input_file'", clear varnames(1)
+(encoding automatically selected: ISO-8859-1)
+Missing: /users/aquisper/proj_bureaucrats_farms/figures/exploratory_analysis/politician_original_controls_fe_sweep/politician_original_fe01_controls_notyet_did_interaction_rural_acpop_all_1.png
+Missing: /users/aquisper/proj_bureaucrats_farms/tables/exploratory_analysis/politician_original_controls_fe_sweep/politician_original_fe02_controls_notyet_event_rural_acpop_all.csv
+Missing: /users/aquisper/proj_bureaucrats_farms/tables/exploratory_analysis/politician_original_controls_fe_sweep/politician_original_fe02_controls_notyet_did_interaction_rural_acpop_all.csv
+Missing: /users/aquisper/proj_bureaucrats_farms/figures/exploratory_analysis/politician_original_controls_fe_sweep/politician_original_fe02_controls_notyet_did_interaction_rural_acpop_all_1.png
+Missing: /users/aquisper/proj_bureaucrats_farms/tables/exploratory_analysis/politician_original_controls_fe_sweep/politician_original_fe03_controls_notyet_event_rural_acpop_all.csv
+Missing: /users/aquisper/proj_bureaucrats_farms/tables/exploratory_analysis/politician_original_controls_fe_sweep/politician_original_fe03_controls_notyet_did_interaction_rural_acpop_all.csv
+Missing: /users/aquisper/proj_bureaucrats_farms/figures/exploratory_analysis/politician_original_controls_fe_sweep/politician_original_fe03_controls_notyet_did_interaction_rural_acpop_all_1.png
+Missing: /users/aquisper/proj_bureaucrats_farms/tables/exploratory_analysis/politician_original_controls_fe_sweep/politician_original_fe04_controls_notyet_event_rural_acpop_all.csv
+Missing: /users/aquisper/proj_bureaucrats_farms/tables/exploratory_analysis/politician_original_controls_fe_sweep/politician_original_fe04_controls_notyet_did_interaction_rural_acpop_all.csv
+Missing: /users/aquisper/proj_bureaucrats_farms/figures/exploratory_analysis/politician_original_controls_fe_sweep/politician_original_fe04_controls_notyet_did_interaction_rural_acpop_all_1.png
+Missing: /users/aquisper/proj_bureaucrats_farms/tables/exploratory_analysis/politician_original_controls_fe_sweep/politician_original_fe05_controls_notyet_event_rural_acpop_all.csv
+Missing: /users/aquisper/proj_bureaucrats_farms/tables/exploratory_analysis/politician_original_controls_fe_sweep/politician_original_fe05_controls_notyet_did_interaction_rural_acpop_all.csv
+Missing: /users/aquisper/proj_bureaucrats_farms/figures/exploratory_analysis/politician_original_controls_fe_sweep/politician_original_fe05_controls_notyet_did_interaction_rural_acpop_all_1.png
+Missing: /users/aquisper/proj_bureaucrats_farms/tables/exploratory_analysis/politician_original_controls_fe_sweep/politician_original_fe06_controls_notyet_event_rural_acpop_all.csv
+Missing: /users/aquisper/proj_bureaucrats_farms/tables/exploratory_analysis/politician_original_controls_fe_sweep/politician_original_fe06_controls_notyet_did_interaction_rural_acpop_all.csv
+Missing: /users/aquisper/proj_bureaucrats_farms/figures/exploratory_analysis/politician_original_controls_fe_sweep/politician_original_fe06_controls_notyet_did_interaction_rural_acpop_all_1.png
+Missing: /users/aquisper/proj_bureaucrats_farms/tables/exploratory_analysis/politician_original_controls_fe_sweep/politician_original_fe07_controls_notyet_event_rural_acpop_all.csv
+Missing: /users/aquisper/proj_bureaucrats_farms/tables/exploratory_analysis/politician_original_controls_fe_sweep/politician_original_fe07_controls_notyet_did_interaction_rural_acpop_all.csv
+Missing: /users/aquisper/proj_bureaucrats_farms/figures/exploratory_analysis/politician_original_controls_fe_sweep/politician_original_fe07_controls_notyet_did_interaction_rural_acpop_all_1.png
+Missing: /users/aquisper/proj_bureaucrats_farms/tables/exploratory_analysis/politician_original_controls_fe_sweep/politician_original_fe08_controls_notyet_event_rural_acpop_all.csv
+Missing: /users/aquisper/proj_bureaucrats_farms/tables/exploratory_analysis/politician_original_controls_fe_sweep/politician_original_fe08_controls_notyet_did_interaction_rural_acpop_all.csv
+Missing: /users/aquisper/proj_bureaucrats_farms/figures/exploratory_analysis/politician_original_controls_fe_sweep/politician_original_fe08_controls_notyet_did_interaction_rural_acpop_all_1.png
+Missing: /users/aquisper/proj_bureaucrats_farms/tables/exploratory_analysis/politician_original_controls_fe_sweep/politician_original_fe09_controls_notyet_event_rural_acpop_all.csv
+Missing: /users/aquisper/proj_bureaucrats_farms/tables/exploratory_analysis/politician_original_controls_fe_sweep/politician_original_fe09_controls_notyet_did_interaction_rural_acpop_all.csv
+Missing: /users/aquisper/proj_bureaucrats_farms/figures/exploratory_analysis/politician_original_controls_fe_sweep/politician_original_fe09_controls_notyet_did_interaction_rural_acpop_all_1.png
+Missing: /users/aquisper/proj_bureaucrats_farms/tables/exploratory_analysis/politician_original_controls_fe_sweep/politician_original_fe10_controls_notyet_event_rural_acpop_all.csv
+Missing: /users/aquisper/proj_bureaucrats_farms/tables/exploratory_analysis/politician_original_controls_fe_sweep/politician_original_fe10_controls_notyet_did_interaction_rural_acpop_all.csv
+Missing: /users/aquisper/proj_bureaucrats_farms/figures/exploratory_analysis/politician_original_controls_fe_sweep/politician_original_fe10_controls_notyet_did_interaction_rural_acpop_all_1.png
+Missing: /users/aquisper/proj_bureaucrats_farms/tables/exploratory_analysis/politician_original_controls_fe_sweep/politician_original_fe11_controls_notyet_event_rural_acpop_all.csv
+Missing: /users/aquisper/proj_bureaucrats_farms/tables/exploratory_analysis/politician_original_controls_fe_sweep/politician_original_fe11_controls_notyet_did_interaction_rural_acpop_all.csv
+Missing: /users/aquisper/proj_bureaucrats_farms/figures/exploratory_analysis/politician_original_controls_fe_sweep/politician_original_fe11_controls_notyet_did_interaction_rural_acpop_all_1.png
+Missing: /users/aquisper/proj_bureaucrats_farms/tables/exploratory_analysis/politician_original_controls_fe_sweep/politician_original_fe12_controls_notyet_event_rural_acpop_all.csv
+Missing: /users/aquisper/proj_bureaucrats_farms/tables/exploratory_analysis/politician_original_controls_fe_sweep/politician_original_fe12_controls_notyet_did_interaction_rural_acpop_all.csv
+Missing: /users/aquisper/proj_bureaucrats_farms/figures/exploratory_analysis/politician_original_controls_fe_sweep/politician_original_fe12_controls_notyet_did_interaction_rural_acpop_all_1.png
+Missing: /users/aquisper/proj_bureaucrats_farms/tables/exploratory_analysis/politician_original_controls_fe_sweep/politician_original_fe13_controls_notyet_event_rural_acpop_all.csv
+Missing: /users/aquisper/proj_bureaucrats_farms/tables/exploratory_analysis/politician_original_controls_fe_sweep/politician_original_fe13_controls_notyet_did_interaction_rural_acpop_all.csv
+Missing: /users/aquisper/proj_bureaucrats_farms/figures/exploratory_analysis/politician_original_controls_fe_sweep/politician_original_fe13_controls_notyet_did_interaction_rural_acpop_all_1.png
+Missing: /users/aquisper/proj_bureaucrats_farms/tables/exploratory_analysis/politician_original_controls_fe_sweep/politician_original_fe14_controls_notyet_event_rural_acpop_all.csv
+Missing: /users/aquisper/proj_bureaucrats_farms/tables/exploratory_analysis/politician_original_controls_fe_sweep/politician_original_fe14_controls_notyet_did_interaction_rural_acpop_all.csv
+Missing: /users/aquisper/proj_bureaucrats_farms/figures/exploratory_analysis/politician_original_controls_fe_sweep/politician_original_fe14_controls_notyet_did_interaction_rural_acpop_all_1.png
+Missing: /users/aquisper/proj_bureaucrats_farms/tables/exploratory_analysis/politician_original_controls_fe_sweep/politician_original_fe15_controls_notyet_event_rural_acpop_all.csv
+Missing: /users/aquisper/proj_bureaucrats_farms/tables/exploratory_analysis/politician_original_controls_fe_sweep/politician_original_fe15_controls_notyet_did_interaction_rural_acpop_all.csv
+Missing: /users/aquisper/proj_bureaucrats_farms/figures/exploratory_analysis/politician_original_controls_fe_sweep/politician_original_fe15_controls_notyet_did_interaction_rural_acpop_all_1.png
+Missing: /users/aquisper/proj_bureaucrats_farms/tables/exploratory_analysis/politician_original_controls_fe_sweep/politician_original_fe16_controls_notyet_event_rural_acpop_all.csv
+Missing: /users/aquisper/proj_bureaucrats_farms/tables/exploratory_analysis/politician_original_controls_fe_sweep/politician_original_fe16_controls_notyet_did_interaction_rural_acpop_all.csv
+Missing: /users/aquisper/proj_bureaucrats_farms/figures/exploratory_analysis/politician_original_controls_fe_sweep/politician_original_fe16_controls_notyet_did_interaction_rural_acpop_all_1.png
+Missing: /users/aquisper/proj_bureaucrats_farms/tables/exploratory_analysis/politician_original_controls_fe_sweep/politician_original_fe17_controls_notyet_event_rural_acpop_all.csv
+Missing: /users/aquisper/proj_bureaucrats_farms/tables/exploratory_analysis/politician_original_controls_fe_sweep/politician_original_fe17_controls_notyet_did_interaction_rural_acpop_all.csv
+Missing: /users/aquisper/proj_bureaucrats_farms/figures/exploratory_analysis/politician_original_controls_fe_sweep/politician_original_fe17_controls_notyet_did_interaction_rural_acpop_all_1.png
+Missing: /users/aquisper/proj_bureaucrats_farms/tables/exploratory_analysis/politician_original_controls_fe_sweep/politician_original_fe18_controls_notyet_event_rural_acpop_all.csv
+Missing: /users/aquisper/proj_bureaucrats_farms/tables/exploratory_analysis/politician_original_controls_fe_sweep/politician_original_fe18_controls_notyet_did_interaction_rural_acpop_all.csv
+Missing: /users/aquisper/proj_bureaucrats_farms/figures/exploratory_analysis/politician_original_controls_fe_sweep/politician_original_fe18_controls_notyet_did_interaction_rural_acpop_all_1.png
+Missing: /users/aquisper/proj_bureaucrats_farms/tables/exploratory_analysis/politician_original_controls_fe_sweep/politician_original_fe19_controls_notyet_event_rural_acpop_all.csv
+Missing: /users/aquisper/proj_bureaucrats_farms/tables/exploratory_analysis/politician_original_controls_fe_sweep/politician_original_fe19_controls_notyet_did_interaction_rural_acpop_all.csv
+Missing: /users/aquisper/proj_bureaucrats_farms/figures/exploratory_analysis/politician_original_controls_fe_sweep/politician_original_fe19_controls_notyet_did_interaction_rural_acpop_all_1.png
+Missing: /users/aquisper/proj_bureaucrats_farms/tables/exploratory_analysis/politician_original_controls_fe_sweep/politician_original_fe20_controls_notyet_event_rural_acpop_all.csv
+Missing: /users/aquisper/proj_bureaucrats_farms/tables/exploratory_analysis/politician_original_controls_fe_sweep/politician_original_fe20_controls_notyet_did_interaction_rural_acpop_all.csv
+Missing: /users/aquisper/proj_bureaucrats_farms/figures/exploratory_analysis/politician_original_controls_fe_sweep/politician_original_fe20_controls_notyet_did_interaction_rural_acpop_all_1.png
+Missing: /users/aquisper/proj_bureaucrats_farms/tables/exploratory_analysis/politician_original_controls_fe_sweep/politician_original_fe21_controls_notyet_event_rural_acpop_all.csv
+Missing: /users/aquisper/proj_bureaucrats_farms/tables/exploratory_analysis/politician_original_controls_fe_sweep/politician_original_fe21_controls_notyet_did_interaction_rural_acpop_all.csv
+Missing: /users/aquisper/proj_bureaucrats_farms/figures/exploratory_analysis/politician_original_controls_fe_sweep/politician_original_fe21_controls_notyet_did_interaction_rural_acpop_all_1.png
+Missing: /users/aquisper/proj_bureaucrats_farms/tables/exploratory_analysis/politician_original_controls_fe_sweep/politician_original_fe22_controls_notyet_event_rural_acpop_all.csv
+Missing: /users/aquisper/proj_bureaucrats_farms/tables/exploratory_analysis/politician_original_controls_fe_sweep/politician_original_fe22_controls_notyet_did_interaction_rural_acpop_all.csv
+Missing: /users/aquisper/proj_bureaucrats_farms/figures/exploratory_analysis/politician_original_controls_fe_sweep/politician_original_fe22_controls_notyet_did_interaction_rural_acpop_all_1.png
+Missing: /users/aquisper/proj_bureaucrats_farms/tables/exploratory_analysis/politician_original_controls_fe_sweep/politician_original_fe23_controls_notyet_event_rural_acpop_all.csv
+Missing: /users/aquisper/proj_bureaucrats_farms/tables/exploratory_analysis/politician_original_controls_fe_sweep/politician_original_fe23_controls_notyet_did_interaction_rural_acpop_all.csv
+Missing: /users/aquisper/proj_bureaucrats_farms/figures/exploratory_analysis/politician_original_controls_fe_sweep/politician_original_fe23_controls_notyet_did_interaction_rural_acpop_all_1.png
+Missing: /users/aquisper/proj_bureaucrats_farms/tables/exploratory_analysis/politician_original_controls_fe_sweep/politician_original_fe24_controls_notyet_event_rural_acpop_all.csv
+Missing: /users/aquisper/proj_bureaucrats_farms/tables/exploratory_analysis/politician_original_controls_fe_sweep/politician_original_fe24_controls_notyet_did_interaction_rural_acpop_all.csv
+Missing: /users/aquisper/proj_bureaucrats_farms/figures/exploratory_analysis/politician_original_controls_fe_sweep/politician_original_fe24_controls_notyet_did_interaction_rural_acpop_all_1.png
+Missing: /users/aquisper/proj_bureaucrats_farms/tables/exploratory_analysis/politician_original_controls_fe_sweep/politician_original_fe25_controls_notyet_event_rural_acpop_all.csv
+Missing: /users/aquisper/proj_bureaucrats_farms/tables/exploratory_analysis/politician_original_controls_fe_sweep/politician_original_fe25_controls_notyet_did_interaction_rural_acpop_all.csv
+Missing: /users/aquisper/proj_bureaucrats_farms/figures/exploratory_analysis/politician_original_controls_fe_sweep/politician_original_fe25_controls_notyet_did_interaction_rural_acpop_all_1.png
+Missing: /users/aquisper/proj_bureaucrats_farms/tables/exploratory_analysis/politician_original_controls_fe_sweep/politician_original_fe26_controls_notyet_event_rural_acpop_all.csv
+Missing: /users/aquisper/proj_bureaucrats_farms/tables/exploratory_analysis/politician_original_controls_fe_sweep/politician_original_fe26_controls_notyet_did_interaction_rural_acpop_all.csv
+Missing: /users/aquisper/proj_bureaucrats_farms/figures/exploratory_analysis/politician_original_controls_fe_sweep/politician_original_fe26_controls_notyet_did_interaction_rural_acpop_all_1.png
+Missing: /users/aquisper/proj_bureaucrats_farms/tables/exploratory_analysis/politician_original_controls_fe_sweep/politician_original_fe27_controls_notyet_event_rural_acpop_all.csv
+Missing: /users/aquisper/proj_bureaucrats_farms/tables/exploratory_analysis/politician_original_controls_fe_sweep/politician_original_fe27_controls_notyet_did_interaction_rural_acpop_all.csv
+Missing: /users/aquisper/proj_bureaucrats_farms/figures/exploratory_analysis/politician_original_controls_fe_sweep/politician_original_fe27_controls_notyet_did_interaction_rural_acpop_all_1.png
+Missing: /users/aquisper/proj_bureaucrats_farms/tables/exploratory_analysis/politician_original_controls_fe_sweep/politician_original_fe28_controls_notyet_event_rural_acpop_all.csv
+Missing: /users/aquisper/proj_bureaucrats_farms/tables/exploratory_analysis/politician_original_controls_fe_sweep/politician_original_fe28_controls_notyet_did_interaction_rural_acpop_all.csv
+Missing: /users/aquisper/proj_bureaucrats_farms/figures/exploratory_analysis/politician_original_controls_fe_sweep/politician_original_fe28_controls_notyet_did_interaction_rural_acpop_all_1.png
+Missing: /users/aquisper/proj_bureaucrats_farms/tables/exploratory_analysis/politician_original_controls_fe_sweep/politician_original_fe29_controls_notyet_event_rural_acpop_all.csv
+Missing: /users/aquisper/proj_bureaucrats_farms/tables/exploratory_analysis/politician_original_controls_fe_sweep/politician_original_fe29_controls_notyet_did_interaction_rural_acpop_all.csv
+Missing: /users/aquisper/proj_bureaucrats_farms/figures/exploratory_analysis/politician_original_controls_fe_sweep/politician_original_fe29_controls_notyet_did_interaction_rural_acpop_all_1.png
+Missing: /users/aquisper/proj_bureaucrats_farms/tables/exploratory_analysis/politician_original_controls_fe_sweep/politician_original_fe30_controls_notyet_event_rural_acpop_all.csv
+Missing: /users/aquisper/proj_bureaucrats_farms/tables/exploratory_analysis/politician_original_controls_fe_sweep/politician_original_fe30_controls_notyet_did_interaction_rural_acpop_all.csv
+Missing: /users/aquisper/proj_bureaucrats_farms/figures/exploratory_analysis/politician_original_controls_fe_sweep/politician_original_fe30_controls_notyet_did_interaction_rural_acpop_all_1.png
+Missing: /users/aquisper/proj_bureaucrats_farms/tables/exploratory_analysis/politician_original_controls_fe_sweep/politician_original_fe31_controls_notyet_event_rural_acpop_all.csv
+Missing: /users/aquisper/proj_bureaucrats_farms/tables/exploratory_analysis/politician_original_controls_fe_sweep/politician_original_fe31_controls_notyet_did_interaction_rural_acpop_all.csv
+Missing: /users/aquisper/proj_bureaucrats_farms/figures/exploratory_analysis/politician_original_controls_fe_sweep/politician_original_fe31_controls_notyet_did_interaction_rural_acpop_all_1.png
+Missing: /users/aquisper/proj_bureaucrats_farms/tables/exploratory_analysis/politician_original_controls_fe_sweep/politician_original_fe32_controls_notyet_event_rural_acpop_all.csv
+Missing: /users/aquisper/proj_bureaucrats_farms/tables/exploratory_analysis/politician_original_controls_fe_sweep/politician_original_fe32_controls_notyet_did_interaction_rural_acpop_all.csv
+Missing: /users/aquisper/proj_bureaucrats_farms/figures/exploratory_analysis/politician_original_controls_fe_sweep/politician_original_fe32_controls_notyet_did_interaction_rural_acpop_all_1.png
+TERM environment variable not set.
