@@ -16,17 +16,21 @@ find_repo <- function(start) {
 }
 script_arg <- grep("^--file=", commandArgs(FALSE), value = TRUE)
 start <- if (length(script_arg)) sub("^--file=", "", script_arg[[1]]) else getwd()
-cfg <- list(root = find_repo(start), output_root = find_repo(start))
+cfg <- list(root = find_repo(start), output_root = find_repo(start), sample = FALSE)
 args <- commandArgs(TRUE); i <- 1L
 while (i <= length(args)) {
-  if (args[[i]] == "--root" && i < length(args)) cfg$root <- args[[i + 1L]]
-  else if (args[[i]] == "--output-root" && i < length(args)) cfg$output_root <- args[[i + 1L]]
-  else stop("Unknown or incomplete argument: ", args[[i]])
-  i <- i + 2L
+  if (args[[i]] == "--root" && i < length(args)) {
+    cfg$root <- args[[i + 1L]]; i <- i + 2L
+  } else if (args[[i]] == "--output-root" && i < length(args)) {
+    cfg$output_root <- args[[i + 1L]]; i <- i + 2L
+  } else if (args[[i]] == "--sample") {
+    cfg$sample <- TRUE; i <- i + 1L
+  } else stop("Unknown or incomplete argument: ", args[[i]])
 }
 if (!nzchar(cfg$root) || !nzchar(cfg$output_root)) stop("Repository root not found.")
 
 rel <- file.path("exploratory_analysis", "protest_original_controls_fe_sweep")
+if (isTRUE(cfg$sample)) rel <- file.path(rel, "sample")
 tabdir <- file.path(cfg$root, "tables", rel)
 figdir <- file.path(cfg$output_root, "figures", rel)
 dir.create(figdir, recursive = TRUE, showWarnings = FALSE)

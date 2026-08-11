@@ -13,12 +13,13 @@ args fe_arg control_arg
 
 local fe_env : environment PROTEST_FE_LIST
 local control_env : environment PROTEST_CONTROL_SAMPLE
+local sample_env : environment ANALYSIS_SAMPLE_SUFFIX
 
 if "$root" == "" {
     clear all
     set more off
     global location     "shell"
-    global sample       ""
+    global sample       "`sample_env'"
     global is_rural_var "is_rural"
     global fe_list      "1/15"
     global ster_suffix  "_acpop"
@@ -34,7 +35,6 @@ if "$root" == "" {
         global root "$shell"
         global code "$code_shell"
     }
-    quietly do "${code}/estsave_csv.ado"
 }
 
 if "`fe_arg'" != "" global fe_list "`fe_arg'"
@@ -59,6 +59,10 @@ global tables_root "${code}/../../tables"
 global tables "${tables_root}/exploratory_analysis/protest_original_controls_fe_sweep"
 global figures_root "${code}/../../figures"
 global figures "${figures_root}/exploratory_analysis/protest_original_controls_fe_sweep"
+if "${sample}" == "_sample" {
+    global tables "${tables}/sample"
+    global figures "${figures}/sample"
+}
 capture mkdir "${tables_root}/exploratory_analysis"
 capture mkdir "${tables}"
 capture mkdir "${figures_root}/exploratory_analysis"
@@ -201,8 +205,7 @@ foreach mod of local moderators_list {
         est store evreg1
         local event_out "${tables}/`prefix'_event_rural_acpop_all"
         estwrite evreg1 using "`event_out'.ster", replace
-        estsave_csv evreg1 using "`event_out'.csv", replace
-        confirm file "`event_out'_scalars.csv"
+        confirm file "`event_out'.ster"
     }
 }
 
@@ -247,21 +250,8 @@ foreach mod of local moderators_list {
         est store evreg1
         local did_out "${tables}/`prefix'_did_interaction_rural_acpop_all"
         estwrite evreg1 using "`did_out'.ster", replace
-        estsave_csv evreg1 using "`did_out'.csv", replace
-        confirm file "`did_out'_scalars.csv"
+        confirm file "`did_out'.ster"
     }
 }
 
-* Render interactions only after every requested regression has been saved.
-* This avoids alternating JVM-backed estimation and graph postprocessing.
-quietly do "${code}/interaction_graph.ado"
-foreach selected_fe of numlist $fe_list {
-    local fe_tag : display %02.0f `selected_fe'
-    local fe_tag = strtrim("`fe_tag'")
-    local prefix "protest_original_fe`fe_tag'_controls_`control_sample'"
-    local did_input "${tables}/`prefix'_did_interaction_rural_acpop_all.ster"
-    local graph_output "${figures}/`prefix'_did_interaction_rural_acpop_all"
-    interaction_graph using "`did_input'", estimates(1) ///
-        output("`graph_output'") type(protest) modvar(downup_ac_pop)
-    confirm file "`graph_output'_1.png"
-}
+display as result "COMPLETED protest STER files: controls=`control_sample', FE=$fe_list"

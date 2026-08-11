@@ -42,7 +42,8 @@ RSTUDIO_CONFIG <- list(
   root = detected_root,
   output_root = detected_root,
   controls = c("never", "both", "notyet"),
-  fe_ids = 1:32
+  fe_ids = 1:32,
+  sample = FALSE
 )
 
 parse_args <- function(args) {
@@ -63,6 +64,9 @@ parse_args <- function(args) {
         strsplit(args[[i + 1L]], ",", fixed = TRUE)[[1L]]
       ))
       i <- i + 2L
+    } else if (args[[i]] == "--sample") {
+      out$sample <- TRUE
+      i <- i + 1L
     } else {
       stop("Unknown or incomplete argument: ", args[[i]], call. = FALSE)
     }
@@ -88,6 +92,7 @@ cfg <- parse_args(commandArgs(trailingOnly = TRUE))
 relative_dir <- file.path(
   "exploratory_analysis", "politician_original_controls_fe_sweep"
 )
+if (isTRUE(cfg$sample)) relative_dir <- file.path(relative_dir, "sample")
 table_dir <- file.path(cfg$root, "tables", relative_dir)
 figure_dir <- file.path(cfg$output_root, "figures", relative_dir)
 dir.create(table_dir, recursive = TRUE, showWarnings = FALSE)
@@ -337,4 +342,3 @@ fwrite(
   file.path(table_dir, "politician_original_controls_pre_post_averages.csv")
 )
 message("Completed 96 original and 96 rotated event-study figures.")
-

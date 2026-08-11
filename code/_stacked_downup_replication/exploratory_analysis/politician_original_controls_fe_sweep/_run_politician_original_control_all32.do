@@ -12,6 +12,7 @@ set processors 1
 
 args control_arg
 local control_env : environment POL_ORIGINAL_CONTROL_SAMPLE
+local sample_env : environment ANALYSIS_SAMPLE_SUFFIX
 local control_sample "`control_arg'"
 if "`control_sample'" == "" local control_sample "`control_env'"
 if "`control_sample'" == "" local control_sample "never"
@@ -22,7 +23,7 @@ if !inlist("`control_sample'", "never", "both", "notyet") {
 
 * Standalone defaults for the five standard parameters.
 global location     "shell"
-global sample       ""
+global sample       "`sample_env'"
 global is_rural_var "is_rural"
 global fe_list      "1/32"
 global ster_suffix  "_acpop"
@@ -31,9 +32,12 @@ global code "/users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replica
 global int_data "${root}/data_output/intermediate"
 global tables "${code}/../../tables/exploratory_analysis/politician_original_controls_fe_sweep"
 global figures "${code}/../../figures/exploratory_analysis/politician_original_controls_fe_sweep"
+if "${sample}" == "_sample" {
+    global tables "${tables}/sample"
+    global figures "${figures}/sample"
+}
 capture mkdir "${tables}"
 capture mkdir "${figures}"
-quietly do "${code}/estsave_csv.ado"
 
 ********************************************************************************
 * Import and prepare the common sample exactly once.
@@ -183,8 +187,7 @@ foreach mod of local moderators_list {
         est store evreg1
         local out "${tables}/`prefix'_event_rural_acpop_all"
         estwrite evreg1 using "`out'.ster", replace
-        estsave_csv evreg1 using "`out'.csv", replace
-        confirm file "`out'_scalars.csv"
+        confirm file "`out'.ster"
     }
 }
 
@@ -231,23 +234,8 @@ foreach mod of local moderators_list {
         est store evreg1
         local out "${tables}/`prefix'_did_interaction_rural_acpop_all"
         estwrite evreg1 using "`out'.ster", replace
-        estsave_csv evreg1 using "`out'.csv", replace
-        confirm file "`out'_scalars.csv"
+        confirm file "`out'.ster"
     }
 }
 
-********************************************************************************
-* Plotting loop after every regression output has been persisted.
-********************************************************************************
-quietly do "${code}/interaction_graph.ado"
-foreach fe of numlist $fe_list {
-    local tag : display %02.0f `fe'
-    local tag = strtrim("`tag'")
-    local prefix "politician_original_fe`tag'_controls_`control_sample'"
-    local input "${tables}/`prefix'_did_interaction_rural_acpop_all.ster"
-    local output "${figures}/`prefix'_did_interaction_rural_acpop_all"
-    interaction_graph using "`input'", estimates(1) ///
-        output("`output'") type(politician) modvar(downup_ac_pop)
-    confirm file "`output'_1.png"
-}
-display as result "COMPLETED politician controls=`control_sample', FE 1/32"
+display as result "COMPLETED politician STER files: controls=`control_sample', FE 1/32"

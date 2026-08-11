@@ -38,7 +38,18 @@ command -v "${STATA_BIN}" >/dev/null 2>&1 || exit 127
 export OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1
 export NUMEXPR_NUM_THREADS=1 JULIA_NUM_THREADS=1
 export POL_ORIGINAL_CONTROL_SAMPLE="${CONTROL_SAMPLE}"
+export ANALYSIS_SAMPLE_SUFFIX="${ANALYSIS_SAMPLE_SUFFIX:-}"
 echo "[$(date '+%F %T')] one Stata process: controls=${CONTROL_SAMPLE}, FE=1/32"
+
+TABLE_DIR="${REPO}/tables/exploratory_analysis/politician_original_controls_fe_sweep"
+[[ "${ANALYSIS_SAMPLE_SUFFIX}" == "_sample" ]] && TABLE_DIR="${TABLE_DIR}/sample"
+mkdir -p "${TABLE_DIR}"
+for fe in $(seq -w 1 32); do
+    stem="politician_original_fe${fe}_controls_${CONTROL_SAMPLE}"
+    rm -f \
+        "${TABLE_DIR}/${stem}_event_rural_acpop_all.ster" \
+        "${TABLE_DIR}/${stem}_did_interaction_rural_acpop_all.ster"
+done
 
 set +e
 "${STATA_BIN}" -b do "${DOFILE}"
@@ -46,18 +57,17 @@ status=$?
 set -e
 LOG="_run_politician_original_control_all32.log"
 FINAL_LOG_DIR="${LOG_DIR}/${CONTROL_SAMPLE}"
+[[ "${ANALYSIS_SAMPLE_SUFFIX}" == "_sample" ]] && \
+    FINAL_LOG_DIR="${LOG_DIR}/sample/${CONTROL_SAMPLE}"
 mkdir -p "${FINAL_LOG_DIR}"
 [[ -f "${LOG}" ]] && cp "${LOG}" "${FINAL_LOG_DIR}/${LOG}"
 
-TABLE_DIR="${REPO}/tables/exploratory_analysis/politician_original_controls_fe_sweep"
-FIGURE_DIR="${REPO}/figures/exploratory_analysis/politician_original_controls_fe_sweep"
 missing=0
 for fe in $(seq -w 1 32); do
     stem="politician_original_fe${fe}_controls_${CONTROL_SAMPLE}"
     for output in \
-        "${TABLE_DIR}/${stem}_event_rural_acpop_all.csv" \
-        "${TABLE_DIR}/${stem}_did_interaction_rural_acpop_all.csv" \
-        "${FIGURE_DIR}/${stem}_did_interaction_rural_acpop_all_1.png"; do
+        "${TABLE_DIR}/${stem}_event_rural_acpop_all.ster" \
+        "${TABLE_DIR}/${stem}_did_interaction_rural_acpop_all.ster"; do
         [[ -s "${output}" ]] || { echo "Missing: ${output}" >&2; missing=1; }
     done
 done
@@ -65,4 +75,4 @@ if (( missing != 0 )); then
     (( status != 0 )) && exit "${status}"
     exit 1
 fi
-(( status == 0 )) || echo "WARNING: Stata exited ${status} after all outputs were verified." >&2
+(( status == 0 )) || echo "WARNING: Stata exited ${status} after all STER files were verified." >&2
