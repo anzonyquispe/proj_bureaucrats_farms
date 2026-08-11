@@ -49,6 +49,8 @@ relative_dir <- file.path(
 )
 table_dir <- file.path(repo_root, "tables", relative_dir)
 figure_dir <- file.path(repo_root, "figures", relative_dir)
+report_dir <- file.path(repo_root, "code", "_report")
+dir.create(report_dir, recursive = TRUE, showWarnings = FALSE)
 coefficient_path <- file.path(
   table_dir, "politician_original_controls_coefficients.csv"
 )
@@ -235,7 +237,7 @@ for (control_sample in names(control_labels)) {
   }
 
   lines <- c(lines, "\\end{document}")
-  report_path <- file.path(table_dir, paste0(report_stem, ".tex"))
+  report_path <- file.path(report_dir, paste0(report_stem, ".tex"))
   writeLines(lines, report_path, useBytes = TRUE)
   message("Generated: ", report_path)
 }

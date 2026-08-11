@@ -300,12 +300,5 @@ confirm file "`did_outbase'.csv"
 confirm file "`did_outbase'_scalars.csv"
 display as result "Saved DiD interaction: `did_outbase'"
 
-quietly do "${code}/interaction_graph.ado"
-interaction_graph using "`did_outbase'.ster", ///
-    estimates(1) ///
-    output("${figures}/`output_prefix'_did_interaction_rural_acpop_all") ///
-    type(politician) modvar(downup_ac_pop)
-confirm file "${figures}/`output_prefix'_did_interaction_rural_acpop_all_1.png"
-
 display as result ///
     "COMPLETED original politician FE `selected_fe', controls=`control_sample'"

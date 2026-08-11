@@ -6,70 +6,62 @@
 #$ -j y
 #$ -o /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication/exploratory_analysis/politician_original_controls_fe_sweep/logs
 
-# One scheduler job runs all 32 politician FE specifications sequentially for
-# one control definition.  Three copies of this job use three cores in total.
-
+# One scheduler job and one Stata process run all 32 FEs for one control group.
 set -euo pipefail
-
 : "${CONTROL_SAMPLE:?CONTROL_SAMPLE must be never, both, or notyet}"
-case "${CONTROL_SAMPLE}" in
-    never|both|notyet) ;;
-    *) echo "Invalid CONTROL_SAMPLE=${CONTROL_SAMPLE}" >&2; exit 198 ;;
-esac
+case "${CONTROL_SAMPLE}" in never|both|notyet) ;; *) exit 198 ;; esac
 
 REPO="${REPLICATION_REPO:-/users/aquisper/proj_bureaucrats_farms}"
 ANALYSIS_DIR="${REPO}/code/_stacked_downup_replication/exploratory_analysis/politician_original_controls_fe_sweep"
-DOFILE="${ANALYSIS_DIR}/_politician_original_controls_fe_sweep.do"
+DOFILE="${ANALYSIS_DIR}/_run_politician_original_control_all32.do"
 LOG_DIR="${ANALYSIS_DIR}/logs"
-WORK_ROOT="${TMPDIR:-/tmp}/pol_original_${JOB_ID:-manual}_${CONTROL_SAMPLE}"
-mkdir -p "${LOG_DIR}" "${WORK_ROOT}"
+WORK_DIR="${TMPDIR:-/tmp}/pol_original_${JOB_ID:-manual}_${CONTROL_SAMPLE}"
+mkdir -p "${LOG_DIR}" "${WORK_DIR}"
+cd "${WORK_DIR}"
+ulimit -c 0 || true
 
 if ! type module >/dev/null 2>&1; then
-    for module_init in /etc/profile.d/modules.sh /usr/share/Modules/init/bash; do
-        if [[ -r "${module_init}" ]]; then
-            # shellcheck disable=SC1090
-            source "${module_init}"
-            break
-        fi
+    for init in /etc/profile.d/modules.sh /usr/share/Modules/init/bash; do
+        [[ -r "${init}" ]] && source "${init}" && break
     done
 fi
 if ! type module >/dev/null 2>&1; then
-    if [[ "${FARMS_LOGIN_RETRY:-0}" == "1" ]]; then
-        echo "The module command is unavailable even in a login shell." >&2
-        exit 127
-    fi
+    [[ "${FARMS_LOGIN_RETRY:-0}" == "1" ]] && exit 127
     export FARMS_LOGIN_RETRY=1
     exec /bin/bash -l "$0" "$@"
 fi
-
 module purge 2>/dev/null || true
 module load stata gcc
 STATA_BIN="${STATA_BIN:-stata-mp}"
-command -v "${STATA_BIN}" >/dev/null 2>&1 || {
-    echo "Stata executable not found: ${STATA_BIN}" >&2
-    exit 127
-}
+command -v "${STATA_BIN}" >/dev/null 2>&1 || exit 127
 
 export OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1
 export NUMEXPR_NUM_THREADS=1 JULIA_NUM_THREADS=1
 export POL_ORIGINAL_CONTROL_SAMPLE="${CONTROL_SAMPLE}"
+echo "[$(date '+%F %T')] one Stata process: controls=${CONTROL_SAMPLE}, FE=1/32"
 
-for FE_ID in $(seq 1 32); do
-    FE_TAG=$(printf '%02d' "${FE_ID}")
-    WORK_DIR="${WORK_ROOT}/fe${FE_TAG}"
-    mkdir -p "${WORK_DIR}"
-    cd "${WORK_DIR}"
-    export POL_ORIGINAL_FE_ID="${FE_ID}"
-    echo "[$(date '+%F %T')] controls=${CONTROL_SAMPLE} FE=${FE_ID}/32"
-    "${STATA_BIN}" -b do "${DOFILE}"
-    STATA_LOG="_politician_original_controls_fe_sweep.log"
-    if [[ ! -f "${STATA_LOG}" ]]; then
-        echo "Stata log missing for FE ${FE_ID}" >&2
-        exit 66
-    fi
-    cp "${STATA_LOG}" \
-        "${LOG_DIR}/politician_original_${CONTROL_SAMPLE}_fe${FE_TAG}_${JOB_ID:-manual}.stata.log"
-    cat "${STATA_LOG}"
+set +e
+"${STATA_BIN}" -b do "${DOFILE}"
+status=$?
+set -e
+LOG="_run_politician_original_control_all32.log"
+[[ -f "${LOG}" ]] && cp "${LOG}" "${LOG_DIR}/politician_original_${CONTROL_SAMPLE}_all32_${JOB_ID:-manual}.stata.log"
+[[ -f "${LOG}" ]] && cat "${LOG}"
+
+TABLE_DIR="${REPO}/tables/exploratory_analysis/politician_original_controls_fe_sweep"
+FIGURE_DIR="${REPO}/figures/exploratory_analysis/politician_original_controls_fe_sweep"
+missing=0
+for fe in $(seq -w 1 32); do
+    stem="politician_original_fe${fe}_controls_${CONTROL_SAMPLE}"
+    for output in \
+        "${TABLE_DIR}/${stem}_event_rural_acpop_all.csv" \
+        "${TABLE_DIR}/${stem}_did_interaction_rural_acpop_all.csv" \
+        "${FIGURE_DIR}/${stem}_did_interaction_rural_acpop_all_1.png"; do
+        [[ -s "${output}" ]] || { echo "Missing: ${output}" >&2; missing=1; }
+    done
 done
-
-echo "[$(date '+%F %T')] completed controls=${CONTROL_SAMPLE}, FE 1-32"
+if (( missing != 0 )); then
+    (( status != 0 )) && exit "${status}"
+    exit 1
+fi
+(( status == 0 )) || echo "WARNING: Stata exited ${status} after all outputs were verified." >&2

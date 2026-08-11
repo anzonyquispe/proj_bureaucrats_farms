@@ -12,7 +12,7 @@ REPO="${REPLICATION_REPO:-/users/aquisper/proj_bureaucrats_farms}"
 ANALYSIS_DIR="${REPO}/code/_stacked_downup_replication/exploratory_analysis/politician_original_controls_fe_sweep"
 PLOT_SCRIPT="${ANALYSIS_DIR}/plot_politician_original_controls_fe_sweep.R"
 REPORT_SCRIPT="${ANALYSIS_DIR}/build_politician_original_controls_reports.R"
-PDF_DIR="${REPO}/output/pdf"
+PDF_DIR="${REPO}/code/_report"
 
 if ! type module >/dev/null 2>&1; then
     for module_init in /etc/profile.d/modules.sh /usr/share/Modules/init/bash; do
@@ -61,7 +61,7 @@ if ! command -v pdflatex >/dev/null 2>&1; then
     exit 127
 fi
 
-TABLE_DIR="${REPO}/tables/exploratory_analysis/politician_original_controls_fe_sweep"
+TABLE_DIR="${REPO}/code/_report"
 for control_sample in never both notyet; do
     tex_file="${TABLE_DIR}/politician_original_controls_${control_sample}_report.tex"
     pdflatex -interaction=nonstopmode -halt-on-error \
@@ -71,4 +71,3 @@ for control_sample in never both notyet; do
 done
 
 echo "[$(date '+%F %T')] Completed three reports in ${PDF_DIR}"
-

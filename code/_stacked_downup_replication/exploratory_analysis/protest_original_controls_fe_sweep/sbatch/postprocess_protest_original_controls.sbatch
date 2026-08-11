@@ -30,8 +30,8 @@ cd "${REPO}"
 "${RSCRIPT_BIN}" "${ANALYSIS_DIR}/build_protest_original_controls_reports.R" \
     --root "${REPO}"
 
-PDF_DIR="${REPO}/output/pdf"
-TABLE_DIR="${REPO}/tables/exploratory_analysis/protest_original_controls_fe_sweep"
+PDF_DIR="${REPO}/code/_report"
+TABLE_DIR="${REPO}/code/_report"
 mkdir -p "${PDF_DIR}"
 if ! command -v pdflatex >/dev/null 2>&1; then
     echo "pdflatex unavailable; TeX reports remain in ${TABLE_DIR}" >&2

@@ -6,6 +6,7 @@ root <- find_repo(getwd()); args <- commandArgs(TRUE)
 if (length(args)) { if (length(args)!=2L || args[[1]]!="--root") stop("Usage: [--root REPO]"); root <- args[[2]] }
 rel <- file.path("exploratory_analysis", "protest_original_controls_fe_sweep")
 tabdir <- file.path(root,"tables",rel); figdir <- file.path(root,"figures",rel)
+reportdir <- file.path(root,"code","_report"); dir.create(reportdir,recursive=TRUE,showWarnings=FALSE)
 coefs <- fread(file.path(tabdir,"protest_original_controls_coefficients.csv"))
 avgs <- fread(file.path(tabdir,"protest_original_controls_pre_post_averages.csv"))
 lp <- function(x) paste0("\\detokenize{", normalizePath(x,winslash="/",mustWork=TRUE), "}")
@@ -31,5 +32,5 @@ for (controls in names(labels)) {
     lines <- c(lines,"\\bottomrule","\\end{tabular}","\\end{center}","\\clearpage")
   }
   lines <- c(lines,"\\end{document}")
-  writeLines(lines,file.path(tabdir,paste0("protest_original_controls_",controls,"_report.tex")),useBytes=TRUE)
+  writeLines(lines,file.path(reportdir,paste0("protest_original_controls_",controls,"_report.tex")),useBytes=TRUE)
 }

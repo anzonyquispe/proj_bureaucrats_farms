@@ -239,10 +239,19 @@ foreach selected_fe of numlist $fe_list {
     local did_out "${tables}/`prefix'_did_interaction_rural_acpop_all"
     estwrite evreg1 using "`did_out'.ster", replace
     estsave_csv evreg1 using "`did_out'.csv", replace
-    quietly do "${code}/interaction_graph.ado"
-    interaction_graph using "`did_out'.ster", estimates(1) ///
-        output("${figures}/`prefix'_did_interaction_rural_acpop_all") ///
-        type(protest) modvar(downup_ac_pop)
-    confirm file "${figures}/`prefix'_did_interaction_rural_acpop_all_1.png"
     display as result "COMPLETED protest FE `selected_fe', controls=`control_sample'"
+}
+
+* Render interactions only after every requested regression has been saved.
+* This avoids alternating JVM-backed estimation and graph postprocessing.
+quietly do "${code}/interaction_graph.ado"
+foreach selected_fe of numlist $fe_list {
+    local fe_tag : display %02.0f `selected_fe'
+    local fe_tag = strtrim("`fe_tag'")
+    local prefix "protest_original_fe`fe_tag'_controls_`control_sample'"
+    local did_input "${tables}/`prefix'_did_interaction_rural_acpop_all.ster"
+    local graph_output "${figures}/`prefix'_did_interaction_rural_acpop_all"
+    interaction_graph using "`did_input'", estimates(1) ///
+        output("`graph_output'") type(protest) modvar(downup_ac_pop)
+    confirm file "`graph_output'_1.png"
 }
