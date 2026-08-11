@@ -1,0 +1,709 @@
+
+  ___  ____  ____  ____  ____ ®
+ /__    /   ____/   /   ____/      StataNow 19.5
+___/   /   /___/   /   /___/       MP—Parallel Edition
+
+ Statistics and Data Science       Copyright 1985-2025 StataCorp LLC
+                                   StataCorp
+                                   4905 Lakeway Drive
+                                   College Station, Texas 77845 USA
+                                   800-782-8272        https://www.stata.com
+                                   979-696-4600        service@stata.com
+
+Stata license: 4-user 16-core network, expiring 14 Sep 2026
+Serial number: 501909301589
+  Licensed to: University of Notre Dame
+               Notre Dame, IN 46556
+
+Notes:
+      1. Stata is running in batch mode.
+      2. Unicode is supported; see help unicode_advice.
+      3. More than 2 billion observations are allowed; see help obs_advice.
+      4. Maximum number of variables is set to 5,000 but can be increased;
+          see help set_maxvar.
+
+. do /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication/ex
+> ploratory_analysis/politician_byprov_fe_sweep/_politician_byprov_fe_sweep.do 
+
+. *****************************************************************************
+> ***
+. * Exploratory politician event-study fixed-effect sweep
+. *
+. * Input (cluster only):
+. *   politicians_characteristics_byprov.csv
+. *
+. * One invocation estimates exactly one FE specification on the input dataset'
+> s
+. * unchanged control composition and for two moderators:
+. *   moderator     = baseline event study
+. *   downup_ac_pop = interaction event study
+. *
+. * The first command-line argument selects FE 1,...,32. If absent, $fe_list is
+. * used; standalone runs default to FE 1.
+. *****************************************************************************
+> ***
+. 
+. version 17
+
+. 
+. args fe_arg
+
+. local fe_env : environment POL_BYPROV_FE_ID
+
+. 
+. if "$root" == "" {
+.     clear all
+.     set more off
+. 
+.     * Standalone defaults for the five sbatch-array parameters:
+.     * location, sample, is_rural_var, fe_list, and ster_suffix.
+.     global location     "shell"
+.     global sample       ""
+.     global is_rural_var "is_rural"
+.     global fe_list      "1"
+.     global ster_suffix  "_acpop"
+. 
+.     global shell "/groups/sgulzar/sa_fires/proj_bureaucrats_farms"
+.     global dbox  "C:/Users/eunic/Dropbox/sa_fires/proj_bureaucrats_farms"
+.     global code_shell "/users/aquisper/proj_bureaucrats_farms/code/_stacked_d
+> ownup_replication"
+.     global code_dbox  "C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucr
+> ats_farms/code/_stacked_downup_replication"
+. 
+.     if "$location" == "dbox" {
+.         global root "$dbox"
+.         global code "$code_dbox"
+.     }
+.     else {
+.         global root "$shell"
+.         global code "$code_shell"
+.     }
+.     quietly do "${code}/estsave_csv.ado"
+. }
+
+. 
+. if "`fe_arg'" != "" {
+.     global fe_list "`fe_arg'"
+. }
+
+. else if "`fe_env'" != "" {
+.     global fe_list "`fe_env'"
+. }
+
+. local n_fe : word count $fe_list
+
+. if `n_fe' != 1 {
+.     display as error "This exploratory job must receive exactly one FE id; re
+> ceived: $fe_list"
+.     exit 198
+. }
+
+. local selected_fe : word 1 of $fe_list
+
+. if !inrange(real("`selected_fe'"), 1, 32) | real("`selected_fe'") != floor(re
+> al("`selected_fe'")) {
+.     display as error "FE id must be an integer from 1 through 32; received: `
+> selected_fe'"
+.     exit 198
+. }
+
+. 
+. global int_data "${root}/data_output/intermediate"
+
+. global tables_root "${code}/../../tables"
+
+. global tables "${tables_root}/exploratory_analysis/politician_byprov_fe_sweep
+> "
+
+. capture mkdir "${tables_root}/exploratory_analysis"
+
+. capture mkdir "${tables}"
+
+. 
+. local input_file "${int_data}/politicians_characteristics_byprov${sample}.csv
+> "
+
+. confirm file "`input_file'"
+
+. display as text "Input: `input_file'"
+Input: /groups/sgulzar/sa_fires/proj_bureaucrats_farms/data_output/intermediate
+> /politicians_characteristics_byprov.csv
+
+. display as text "Selected FE: `selected_fe'"
+Selected FE: 5
+
+. import delimited using "`input_file'", clear varnames(1)
+(encoding automatically selected: ISO-8859-1)
+(27 vars, 16,167,680 obs)
+
+. 
+. * The stack may retain the source name relative_year.
+. capture confirm variable relative_year_bin
+
+. if _rc {
+.     confirm variable relative_year
+.     rename relative_year relative_year_bin
+. }
+
+. 
+. local required ///
+>     unique_small_grid_id province ac_uq_id count month year monthyear ///
+>     downup_ac_pop av_wind_speed wind_direction election_year yeargov ///
+>     treat cohort relative_year_bin
+
+. foreach variable of local required {
+  2.     capture confirm variable `variable'
+  3.     if _rc {
+  4.         display as error "Required variable absent from politicians_charac
+> teristics_byprov.csv: `variable'"
+  5.         exit 111
+  6.     }
+  7. }
+
+. 
+. capture drop countk
+
+. gen double countk = count * 1000
+
+. 
+. merge m:1 unique_small_grid_id using ///
+>     "${int_data}/ghs_grid_classification_2000.dta", ///
+>     keep(master match) keepusing(is_rural)
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                             0
+    Matched                        16,167,680  (_merge==3)
+    -----------------------------------------
+
+. count if _merge == 1
+  0
+
+. display as text "Rows without rural classification: " r(N)
+Rows without rural classification: 0
+
+. drop _merge
+
+. keep if ${is_rural_var} == 1
+(4,134,646 observations deleted)
+
+. keep if year < 2022 | (year == 2022 & month <= 8)
+(2,321,348 observations deleted)
+
+. keep if inrange(relative_year_bin, -5, 4)
+(1,577,804 observations deleted)
+
+. 
+. * Enforce a common complete-case sample before the FE sweep. This makes all 3
+> 2
+. * specifications directly comparable rather than allowing FE-specific samples
+> .
+. gen byte fe_complete = 1
+
+. local complete_vars ///
+>     unique_small_grid_id province ac_uq_id month year monthyear election_year
+>  ///
+>     yeargov cohort countk downup_ac_pop av_wind_speed wind_direction treat //
+> /
+>     relative_year_bin
+
+. foreach variable of local complete_vars {
+  2.     replace fe_complete = 0 if missing(`variable')
+  3. }
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+
+. count if fe_complete == 0
+  0
+
+. display as text "Rows removed by common FE complete-case restriction: " r(N)
+Rows removed by common FE complete-case restriction: 0
+
+. drop if fe_complete == 0
+(0 observations deleted)
+
+. drop fe_complete
+
+. 
+. egen long unique_small_grid_id_cohort = group(unique_small_grid_id cohort)
+
+. egen long province_cohort = group(province cohort)
+
+. egen long monthyearco = group(month year cohort)
+
+. egen long ac_elec_yr = group(ac_uq_id election_year cohort)
+
+. 
+. quietly summarize relative_year_bin
+
+. local rmin = r(min)
+
+. local rmax = r(max)
+
+. assert `rmin' == -5
+
+. assert `rmax' == 4
+
+. gen int relative_year_bin_aux = relative_year_bin - `rmin' + 1
+
+. local base = -1 - `rmin' + 1
+
+. 
+. * Exact exploratory FE grid supplied for this analysis.
+. local fe1  "unique_small_grid_id_cohort"
+
+. local fe2  "unique_small_grid_id_cohort monthyearco"
+
+. local fe3  "unique_small_grid_id_cohort province_cohort#c.monthyear"
+
+. local fe4  "unique_small_grid_id_cohort yeargov"
+
+. local fe5  "unique_small_grid_id_cohort province_cohort#election_year"
+
+. local fe6  "unique_small_grid_id_cohort province_cohort#election_year#yeargov
+> "
+
+. local fe7  "unique_small_grid_id_cohort monthyearco province_cohort#c.monthye
+> ar"
+
+. local fe8  "unique_small_grid_id_cohort monthyearco yeargov"
+
+. local fe9  "unique_small_grid_id_cohort monthyearco province_cohort#election_
+> year"
+
+. local fe10 "unique_small_grid_id_cohort monthyearco province_cohort#election_
+> year#yeargov"
+
+. local fe11 "unique_small_grid_id_cohort province_cohort#c.monthyear yeargov"
+
+. local fe12 "unique_small_grid_id_cohort province_cohort#c.monthyear province_
+> cohort#election_year"
+
+. local fe13 "unique_small_grid_id_cohort province_cohort#c.monthyear province_
+> cohort#election_year#yeargov"
+
+. local fe14 "unique_small_grid_id_cohort yeargov province_cohort#election_year
+> "
+
+. local fe15 "unique_small_grid_id_cohort yeargov province_cohort#election_year
+> #yeargov"
+
+. local fe16 "unique_small_grid_id_cohort province_cohort#election_year provinc
+> e_cohort#election_year#yeargov"
+
+. local fe17 "unique_small_grid_id_cohort monthyearco province_cohort#c.monthye
+> ar yeargov"
+
+. local fe18 "unique_small_grid_id_cohort monthyearco province_cohort#c.monthye
+> ar province_cohort#election_year"
+
+. local fe19 "unique_small_grid_id_cohort monthyearco province_cohort#c.monthye
+> ar province_cohort#election_year#yeargov"
+
+. local fe20 "unique_small_grid_id_cohort monthyearco yeargov province_cohort#e
+> lection_year"
+
+. local fe21 "unique_small_grid_id_cohort monthyearco yeargov province_cohort#e
+> lection_year#yeargov"
+
+. local fe22 "unique_small_grid_id_cohort monthyearco province_cohort#election_
+> year province_cohort#election_year#yeargov"
+
+. local fe23 "unique_small_grid_id_cohort province_cohort#c.monthyear yeargov p
+> rovince_cohort#election_year"
+
+. local fe24 "unique_small_grid_id_cohort province_cohort#c.monthyear yeargov p
+> rovince_cohort#election_year#yeargov"
+
+. local fe25 "unique_small_grid_id_cohort province_cohort#c.monthyear province_
+> cohort#election_year province_cohort#election_year#yeargov"
+
+. local fe26 "unique_small_grid_id_cohort yeargov province_cohort#election_year
+>  province_cohort#election_year#yeargov"
+
+. local fe27 "unique_small_grid_id_cohort monthyearco province_cohort#c.monthye
+> ar yeargov province_cohort#election_year"
+
+. local fe28 "unique_small_grid_id_cohort monthyearco province_cohort#c.monthye
+> ar yeargov province_cohort#election_year#yeargov"
+
+. local fe29 "unique_small_grid_id_cohort monthyearco province_cohort#c.monthye
+> ar province_cohort#election_year province_cohort#election_year#yeargov"
+
+. local fe30 "unique_small_grid_id_cohort monthyearco yeargov province_cohort#e
+> lection_year province_cohort#election_year#yeargov"
+
+. local fe31 "unique_small_grid_id_cohort province_cohort#c.monthyear yeargov p
+> rovince_cohort#election_year province_cohort#election_year#yeargov"
+
+. local fe32 "unique_small_grid_id_cohort monthyearco province_cohort#c.monthye
+> ar yeargov province_cohort#election_year province_cohort#election_year#yeargo
+> v"
+
+. 
+. local fespec "`fe`selected_fe''"
+
+. display as result "FE `selected_fe': `fespec'"
+FE 5: unique_small_grid_id_cohort province_cohort#election_year
+
+. 
+. gen byte moderator = 0
+
+. * local moderators_list moderator downup_ac rice_area_aclvl_ahigh rice_harvar
+> ea_aclvl_ahigh rice_prod_aclvl_ahigh
+. local moderators_list moderator downup_ac_pop
+
+. 
+. count if treat == 1
+  3,324,700
+
+. local n_treated = r(N)
+
+. count if treat == 0
+  4,809,182
+
+. local n_control = r(N)
+
+. egen byte tag_ac = tag(ac_uq_id)
+
+. count if tag_ac == 1
+  689
+
+. local numacs = r(N)
+
+. drop tag_ac
+
+. display as result "FE=`selected_fe' full unchanged sample N=" _N ///
+>     " treated=" `n_treated' " controls=" `n_control' " ACs=" `numacs'
+FE=5 full unchanged sample N=8133882 treated=3324700 controls=4809182 ACs=689
+
+. 
+. est clear
+
+. local i = 1
+
+. local estimate_names ""
+
+. foreach mod of local moderators_list {
+  2.     replace moderator = `mod'
+  3.     local rhs "ib`base'.relative_year_bin_aux##ib0.treat##ib0.`mod' wind_d
+> irection av_wind_speed"
+  4. 
+.     quietly summarize countk if treat == 1 & relative_year_bin <= -1
+  5.     local ymean = r(mean)
+  6.     quietly summarize countk if treat == 1 & relative_year_bin <= -1 & mod
+> erator == 1
+  7.     local ymean2 = r(mean)
+  8. 
+.     reghdfejl countk `rhs', absorb(`fespec') vce(cluster ac_elec_yr)
+  9. 
+.     estadd scalar ymean = `ymean'
+ 10.     estadd scalar ymean2 = `ymean2'
+ 11.     estadd scalar acq = `numacs'
+ 12.     estadd scalar fe_id = `selected_fe'
+ 13.     estadd scalar n_treated = `n_treated'
+ 14.     estadd scalar n_control = `n_control'
+ 15.     estadd local smpl "Rural"
+ 16.     estadd local fespec "`fespec'"
+ 17.     estadd local mod "`mod'"
+ 18.     estadd local controls "unchanged full sample"
+ 19.     local estname evreg`i'
+ 20.     local estimate_names "`estimate_names' `estname'"
+ 21.     local i = `i' + 1
+ 22.     est store `estname'
+ 23. }
+(0 real changes made)
+(MWFE estimator converged in 10 iterations)
+
+HDFE linear regression with Julia                 Number of obs   =  8,133,882
+Absorbing 2 HDFE groups                           F(  19,   2149) =      22.30
+Statistics cluster-robust                         Prob > F        =     0.0000
+                                                  R-squared       =     0.1063
+                                                  Adj R-squared   =     0.0948
+Number of clusters (ac_elec_yr) =       2149      Within R-sq.    =     0.0078
+                                                  Root MSE        =   964.3048
+
+                         (Std. err. adjusted for 2,149 clusters in ac_elec_yr)
+------------------------------------------------------------------------------
+             |               Robust
+      countk | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+relative_y~x |
+          1  |  -10.35896   8.721139    -1.19   0.235    -27.46171    6.743795
+          2  |  -47.88083   6.027731    -7.94   0.000    -59.70163   -36.06004
+          3  |  -32.71694   6.797548    -4.81   0.000    -46.04739   -19.38648
+          4  |  -28.61077   5.903254    -4.85   0.000    -40.18745   -17.03408
+          6  |  -42.47033   7.250758    -5.86   0.000    -56.68956    -28.2511
+          7  |  -41.60443     6.1693    -6.74   0.000    -53.70285   -29.50601
+          8  |  -34.23224   7.782965    -4.40   0.000    -49.49517   -18.96932
+          9  |  -11.32724   4.270344    -2.65   0.008    -19.70168   -2.952807
+         10  |          0  (omitted)
+             |
+     1.treat |          0  (omitted)
+wind_direc~n |  -.8241072   .0494744   -16.66   0.000    -.9211299   -.7270845
+av_wind_sp~d |   83.30534    6.78479    12.28   0.000      69.9999    96.61078
+             |
+relative_y~x#|
+       treat |
+        1 1  |    7.74783   10.59709     0.73   0.465    -13.03379    28.52945
+        2 1  |   32.02751   8.159813     3.93   0.000     16.02556    48.02946
+        3 1  |   35.95837   9.607151     3.74   0.000     17.11809    54.79865
+        4 1  |   21.08874   8.469331     2.49   0.013     4.479798    37.69767
+        6 1  |   37.38558   7.417087     5.04   0.000     22.84016    51.93099
+        7 1  |   40.17215   7.762349     5.18   0.000     24.94965    55.39465
+        8 1  |   42.36131   8.664016     4.89   0.000     25.37058    59.35203
+        9 1  |   21.07819   9.808413     2.15   0.032     1.843221    40.31316
+       10 1  |   13.13033   10.14743     1.29   0.196    -6.769472    33.03012
+------------------------------------------------------------------------------
+
+added scalar:
+              e(ymean) =  110.67337
+
+added scalar:
+             e(ymean2) =  .
+
+added scalar:
+                e(acq) =  689
+
+added scalar:
+              e(fe_id) =  5
+
+added scalar:
+          e(n_treated) =  3324700
+
+added scalar:
+          e(n_control) =  4809182
+
+added macro:
+               e(smpl) : "Rural"
+
+added macro:
+             e(fespec) : "unique_small_grid_id_cohort province_cohort#election_
+> year"
+
+added macro:
+                e(mod) : "moderator"
+
+added macro:
+           e(controls) : "unchanged full sample"
+(4,139,562 real changes made)
+(MWFE estimator converged in 10 iterations)
+
+HDFE linear regression with Julia                 Number of obs   =  8,133,882
+Absorbing 2 HDFE groups                           F(  39,   2149) =      11.41
+Statistics cluster-robust                         Prob > F        =     0.0000
+                                                  R-squared       =     0.1063
+                                                  Adj R-squared   =     0.0948
+Number of clusters (ac_elec_yr) =       2149      Within R-sq.    =     0.0078
+                                                  Root MSE        =   964.3029
+
+                         (Std. err. adjusted for 2,149 clusters in ac_elec_yr)
+------------------------------------------------------------------------------
+             |               Robust
+      countk | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+relative_y~x |
+          1  |   -13.9847    8.76002    -1.60   0.111     -31.1637    3.194298
+          2  |  -48.92447   6.474335    -7.56   0.000    -61.62108   -36.22786
+          3  |  -36.65106    6.81261    -5.38   0.000    -50.01105   -23.29106
+          4  |  -28.83515   6.136111    -4.70   0.000    -40.86848   -16.80182
+          6  |  -46.98682   7.351831    -6.39   0.000    -61.40427   -32.56938
+          7  |  -42.04913   6.677514    -6.30   0.000     -55.1442   -28.95407
+          8  |  -38.89664   7.935726    -4.90   0.000    -54.45914   -23.33414
+          9  |   -10.3172   4.621491    -2.23   0.026    -19.38026   -1.254141
+         10  |          0  (omitted)
+             |
+     1.treat |          0  (omitted)
+1.downup_a~p |   1.134591   5.679955     0.20   0.842    -10.00419    12.27337
+wind_direc~n |   -.824239   .0494739   -16.66   0.000    -.9212607   -.7272173
+av_wind_sp~d |   83.30285   6.783709    12.28   0.000     69.99953    96.60617
+             |
+relative_y~x#|
+       treat |
+        1 1  |   8.697746   11.46579     0.76   0.448    -13.78746    31.18295
+        2 1  |   31.19454   9.118183     3.42   0.001     13.31316    49.07592
+        3 1  |   35.02549   9.865481     3.55   0.000     15.67861    54.37238
+        4 1  |   16.98776   8.444885     2.01   0.044     .4267641    33.54876
+        6 1  |   35.40482   8.584951     4.12   0.000     18.56914    52.24049
+        7 1  |   35.44484   9.085384     3.90   0.000     17.62778     53.2619
+        8 1  |   45.10218   9.655965     4.67   0.000     26.16618    64.03819
+        9 1  |   18.37191   11.28605     1.63   0.104    -3.760802    40.50463
+       10 1  |   9.249421    11.2329     0.82   0.410    -12.77906     31.2779
+             |
+relative_y~x#|
+downup_ac_~p |
+        1 1  |   7.117514   6.854638     1.04   0.299    -6.324902    20.55993
+        2 1  |   2.040286   5.158395     0.40   0.692     -8.07568    12.15625
+        3 1  |   7.701064   5.296935     1.45   0.146    -2.686589    18.08872
+        4 1  |   .4359043   4.684948     0.09   0.926      -8.7516    9.623409
+        6 1  |   7.157859   7.299361     0.98   0.327    -7.156689    21.47241
+        7 1  |  -.7896907   7.076389    -0.11   0.911    -14.66697    13.08759
+        8 1  |   7.458067   6.732205     1.11   0.268    -5.744247    20.66038
+        9 1  |  -3.660607   7.647368    -0.48   0.632    -18.65762    11.33641
+       10 1  |  -1.678417   7.799631    -0.22   0.830    -16.97403    13.61719
+             |
+       treat#|
+downup_ac_~p |
+        1 1  |  -4.908927   7.689425    -0.64   0.523    -19.98842    10.17056
+             |
+relative_y~x#|
+       treat#|
+downup_ac_~p |
+      1 1 1  |   -1.82628   9.878529    -0.18   0.853    -21.19875    17.54619
+      2 1 1  |   1.662317   7.385835     0.23   0.822    -12.82181    16.14645
+      3 1 1  |   1.938805   7.673337     0.25   0.801    -13.10913    16.98674
+      4 1 1  |   8.114558   6.671599     1.22   0.224    -4.968904    21.19802
+      6 1 1  |   4.001795   11.03727     0.36   0.717    -17.64305    25.64664
+      7 1 1  |   9.338001   11.28335     0.83   0.408    -12.78942    31.46542
+      8 1 1  |  -5.313881   9.868937    -0.54   0.590    -24.66754    14.03978
+      9 1 1  |   5.367403    10.6278     0.51   0.614    -15.47445    26.20925
+     10 1 1  |   7.687736   11.19237     0.69   0.492    -14.26126    29.63674
+------------------------------------------------------------------------------
+
+added scalar:
+              e(ymean) =  110.67337
+
+added scalar:
+             e(ymean2) =  111.59452
+
+added scalar:
+                e(acq) =  689
+
+added scalar:
+              e(fe_id) =  5
+
+added scalar:
+          e(n_treated) =  3324700
+
+added scalar:
+          e(n_control) =  4809182
+
+added macro:
+               e(smpl) : "Rural"
+
+added macro:
+             e(fespec) : "unique_small_grid_id_cohort province_cohort#election_
+> year"
+
+added macro:
+                e(mod) : "downup_ac_pop"
+
+added macro:
+           e(controls) : "unchanged full sample"
+
+. 
+. local fe_tag : display %02.0f `selected_fe'
+
+. local fe_tag = strtrim("`fe_tag'")
+
+. local outbase "${tables}/politician_byprov_fe`fe_tag'${sample}_rural${ster_su
+> ffix}_all"
+
+. estwrite `estimate_names' using "`outbase'.ster", replace
+(saving evreg1)
+(saving evreg2)
+(file /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication/.
+> ./../tables/exploratory_analysis/politician_byprov_fe_sweep/politician_byprov
+> _fe05_rural_acpop_all.ster saved)
+
+. estsave_csv `estimate_names' using "`outbase'.csv", replace
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(41 missing values generated)
+(41 missing values generated)
+(41 missing values generated)
+(41 missing values generated)
+(41 missing values generated)
+(41 missing values generated)
+(41 missing values generated)
+(41 missing values generated)
+(41 missing values generated)
+(41 missing values generated)
+(41 missing values generated)
+(41 missing values generated)
+(41 missing values generated)
+(41 missing values generated)
+(41 missing values generated)
+(41 missing values generated)
+(41 missing values generated)
+(41 missing values generated)
+(41 missing values generated)
+(41 missing values generated)
+(41 missing values generated)
+(41 missing values generated)
+(41 missing values generated)
+(41 missing values generated)
+(41 missing values generated)
+(41 missing values generated)
+(41 missing values generated)
+(41 missing values generated)
+(41 missing values generated)
+(41 missing values generated)
+(41 missing values generated)
+(41 missing values generated)
+(41 missing values generated)
+(41 missing values generated)
+(41 missing values generated)
+(41 missing values generated)
+(41 missing values generated)
+(41 missing values generated)
+(41 missing values generated)
+(41 missing values generated)
+(41 missing values generated)
+(41 missing values generated)
+(41 missing values generated)
+Estimates exported to /users/aquisper/proj_bureaucrats_farms/code/_stacked_down
+> up_replication/../../tables/exploratory_analysis/politician_byprov_fe_sweep/p
+> olitician_byprov_fe05_rural_acpop_all.csv
+
+. confirm file "`outbase'.ster"
+
+. confirm file "`outbase'.csv"
+
+. confirm file "`outbase'_scalars.csv"
+
+. display as result "Saved: `outbase'.ster, .csv, and _scalars.csv"
+Saved: /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication/
+> ../../tables/exploratory_analysis/politician_byprov_fe_sweep/politician_bypro
+> v_fe05_rural_acpop_all.ster, .csv, and _scalars.csv
+
+. 
+. display as result "COMPLETED politician by-province FE `selected_fe'"
+COMPLETED politician by-province FE 5
+
+. 
+end of do-file
