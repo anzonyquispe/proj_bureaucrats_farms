@@ -1,0 +1,24 @@
+PASS: politician event STER files (96)
+PASS: politician DiD STER files (96)
+PASS: politician event coefficient CSV files (96)
+PASS: politician event scalar CSV files (96)
+PASS: politician DiD coefficient CSV files (96)
+PASS: politician DiD scalar CSV files (96)
+PASS: politician DiD interaction plots (96)
+PASS: politician original event-study plots (96)
+PASS: politician rotated event-study plots (96)
+PASS: protest event STER files (96)
+PASS: protest DiD STER files (96)
+PASS: protest event coefficient CSV files (96)
+PASS: protest event scalar CSV files (96)
+PASS: protest DiD coefficient CSV files (96)
+PASS: protest DiD scalar CSV files (96)
+PASS: protest DiD interaction plots (96)
+PASS: protest original event-study plots (96)
+PASS: protest rotated event-study plots (96)
+All random-sample checks passed. Submitting the full pipeline.
+/users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication/exploratory_analysis/submit_politician_and_protest_original_controls.sh: line 26: qsub: command not found
+=================================================================
+WARNING: SAMPLE VALIDATION PASSED, BUT FULL JOB SUBMISSION FAILED.
+Run /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication/exploratory_analysis/submit_politician_and_protest_original_controls.sh manually after resolving the qsub error.
+=================================================================
