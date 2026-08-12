@@ -16,7 +16,10 @@ find_repo <- function(start) {
 }
 script_arg <- grep("^--file=", commandArgs(FALSE), value = TRUE)
 start <- if (length(script_arg)) sub("^--file=", "", script_arg[[1]]) else getwd()
-cfg <- list(root = find_repo(start), output_root = find_repo(start), sample = FALSE)
+cfg <- list(
+  root = find_repo(start), output_root = find_repo(start), sample = FALSE,
+  controls = c("never", "both", "notyet")
+)
 args <- commandArgs(TRUE); i <- 1L
 while (i <= length(args)) {
   if (args[[i]] == "--root" && i < length(args)) {
@@ -25,9 +28,15 @@ while (i <= length(args)) {
     cfg$output_root <- args[[i + 1L]]; i <- i + 2L
   } else if (args[[i]] == "--sample") {
     cfg$sample <- TRUE; i <- i + 1L
+  } else if (args[[i]] == "--controls" && i < length(args)) {
+    cfg$controls <- trimws(strsplit(args[[i + 1L]], ",", fixed = TRUE)[[1L]])
+    i <- i + 2L
   } else stop("Unknown or incomplete argument: ", args[[i]])
 }
 if (!nzchar(cfg$root) || !nzchar(cfg$output_root)) stop("Repository root not found.")
+if (length(setdiff(cfg$controls, c("never", "both", "notyet")))) {
+  stop("Unknown control group requested.")
+}
 
 rel <- file.path("exploratory_analysis", "protest_original_controls_fe_sweep")
 if (isTRUE(cfg$sample)) rel <- file.path(rel, "sample")
@@ -102,7 +111,7 @@ render <- function(x, stem, fe, controls) {
 }
 
 coefs <- list(); avgs <- list(); k <- 1L; missing <- character()
-for (controls in c("never", "both", "notyet")) for (fe in 1:32) {
+for (controls in cfg$controls) for (fe in 1:32) {
   stem <- sprintf("protest_original_fe%02d_controls_%s", fe, controls)
   path <- file.path(tabdir, paste0(stem, "_event_rural_acpop_all.csv"))
   if (!file.exists(path)) { missing <- c(missing, path); next }
@@ -112,4 +121,5 @@ for (controls in c("never", "both", "notyet")) for (fe in 1:32) {
 if (length(missing)) stop("Missing event-study CSV files:\n", paste(missing, collapse="\n"))
 fwrite(rbindlist(coefs), file.path(tabdir, "protest_original_controls_coefficients.csv"))
 fwrite(rbindlist(avgs), file.path(tabdir, "protest_original_controls_pre_post_averages.csv"))
-message("Completed 96 original and 96 rotated protest figures.")
+message("Completed ", length(cfg$controls) * 32L,
+        " original and rotated protest figure pairs.")

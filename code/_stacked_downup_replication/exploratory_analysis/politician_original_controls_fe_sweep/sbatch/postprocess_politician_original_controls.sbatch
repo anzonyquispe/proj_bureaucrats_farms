@@ -10,6 +10,7 @@ set -euo pipefail
 
 REPO="${REPLICATION_REPO:-/users/aquisper/proj_bureaucrats_farms}"
 export ANALYSIS_SAMPLE_SUFFIX="${ANALYSIS_SAMPLE_SUFFIX:-}"
+export POSTPROCESS_CONTROLS="${POSTPROCESS_CONTROLS:-never:both:notyet}"
 ANALYSIS_DIR="${REPO}/code/_stacked_downup_replication/exploratory_analysis/politician_original_controls_fe_sweep"
 LOG_DIR="${ANALYSIS_DIR}/logs"
 mkdir -p "${LOG_DIR}"
@@ -80,10 +81,18 @@ cd "${REPO}"
 echo "[$(date '+%F %T')] Rendering 192 event-study figures from exported CSVs"
 plot_args=(--root "${REPO}" --output-root "${REPO}")
 [[ "${ANALYSIS_SAMPLE_SUFFIX}" == "_sample" ]] && plot_args+=(--sample)
+controls_csv="${POSTPROCESS_CONTROLS//:/,}"
+controls_csv="${controls_csv// /,}"
+plot_args+=(--controls "${controls_csv}")
 "${RSCRIPT_BIN}" "${PLOT_SCRIPT}" "${plot_args[@]}"
 
 if [[ "${ANALYSIS_SAMPLE_SUFFIX}" == "_sample" ]]; then
     echo "[$(date '+%F %T')] Sample STER/CSV/plot postprocessing completed"
+    exit 0
+fi
+
+if [[ "${POSTPROCESS_CONTROLS}" != "never:both:notyet" ]]; then
+    echo "[$(date '+%F %T')] Partial controls=${POSTPROCESS_CONTROLS}: CSVs and plots completed; reports deferred"
     exit 0
 fi
 

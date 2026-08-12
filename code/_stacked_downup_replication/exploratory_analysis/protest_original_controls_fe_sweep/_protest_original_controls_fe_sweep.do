@@ -14,6 +14,7 @@ args fe_arg control_arg
 local fe_env : environment PROTEST_FE_LIST
 local control_env : environment PROTEST_CONTROL_SAMPLE
 local sample_env : environment ANALYSIS_SAMPLE_SUFFIX
+local stage_env : environment ANALYSIS_STAGE
 
 if "$root" == "" {
     clear all
@@ -45,6 +46,12 @@ if "`control_sample'" == "" local control_sample "`control_env'"
 if "`control_sample'" == "" local control_sample "never"
 if !inlist("`control_sample'", "never", "both", "notyet") {
     display as error "Control sample must be never, both, or notyet."
+    exit 198
+}
+local analysis_stage "`stage_env'"
+if "`analysis_stage'" == "" local analysis_stage "both"
+if !inlist("`analysis_stage'", "event", "did", "both") {
+    display as error "ANALYSIS_STAGE must be event, did, or both."
     exit 198
 }
 foreach selected_fe of numlist $fe_list {
@@ -158,6 +165,7 @@ tempfile full_analysis_sample
 save `full_analysis_sample'
 
 * Prepare the event-study sample once and loop over the requested FEs.
+if inlist("`analysis_stage'", "event", "both") {
 use `full_analysis_sample', clear
 keep if inrange(relative_year_bin, -8, 1)
 quietly summarize relative_year_bin
@@ -208,8 +216,10 @@ foreach mod of local moderators_list {
         confirm file "`event_out'.ster"
     }
 }
+}
 
 * Reload the prepared full sample once and loop over the DiD specifications.
+if inlist("`analysis_stage'", "did", "both") {
 use `full_analysis_sample', clear
 gen byte post_ = relative_year_bin >= 0
 gen byte moderator = downup_ac_pop
@@ -253,5 +263,6 @@ foreach mod of local moderators_list {
         confirm file "`did_out'.ster"
     }
 }
+}
 
-display as result "COMPLETED protest STER files: controls=`control_sample', FE=$fe_list"
+display as result "COMPLETED protest STER files: controls=`control_sample', FE=$fe_list, stage=`analysis_stage'"

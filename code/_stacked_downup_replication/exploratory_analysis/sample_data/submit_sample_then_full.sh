@@ -21,6 +21,23 @@ for file in "${SAMPLE_BUILD}" "${SAMPLE_GATE}" "${POL_RUNNER}" \
     fi
 done
 if ! command -v qsub >/dev/null 2>&1; then
+    for settings in \
+        /opt/sge/crc/common/settings.sh \
+        /opt/sge/default/common/settings.sh \
+        /etc/profile.d/sge.sh; do
+        if [[ -r "${settings}" ]]; then
+            # shellcheck disable=SC1090
+            source "${settings}"
+            break
+        fi
+    done
+fi
+if ! command -v qsub >/dev/null 2>&1; then
+    for qsub_dir in /opt/sge/bin/lx-amd64 /opt/sge/bin; do
+        [[ -x "${qsub_dir}/qsub" ]] && export PATH="${qsub_dir}:${PATH}" && break
+    done
+fi
+if ! command -v qsub >/dev/null 2>&1; then
     echo "WARNING: qsub is unavailable; no jobs were submitted." >&2
     exit 127
 fi

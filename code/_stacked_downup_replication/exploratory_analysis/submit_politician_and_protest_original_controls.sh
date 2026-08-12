@@ -7,6 +7,32 @@
 
 set -euo pipefail
 REPO="${REPLICATION_REPO:-/users/aquisper/proj_bureaucrats_farms}"
+
+# Batch compute nodes do not always inherit the SGE client environment.  Load
+# it explicitly so this launcher works both on crcfe login nodes and when the
+# successful sample-validation job invokes it automatically.
+if ! command -v qsub >/dev/null 2>&1; then
+    for settings in \
+        /opt/sge/crc/common/settings.sh \
+        /opt/sge/default/common/settings.sh \
+        /etc/profile.d/sge.sh; do
+        if [[ -r "${settings}" ]]; then
+            # shellcheck disable=SC1090
+            source "${settings}"
+            break
+        fi
+    done
+fi
+if ! command -v qsub >/dev/null 2>&1; then
+    for qsub_dir in /opt/sge/bin/lx-amd64 /opt/sge/bin; do
+        [[ -x "${qsub_dir}/qsub" ]] && export PATH="${qsub_dir}:${PATH}" && break
+    done
+fi
+if ! command -v qsub >/dev/null 2>&1; then
+    echo "WARNING: qsub is unavailable; no full-sample jobs were submitted." >&2
+    exit 127
+fi
+
 POL_DIR="${REPO}/code/_stacked_downup_replication/exploratory_analysis/politician_original_controls_fe_sweep"
 PR_DIR="${REPO}/code/_stacked_downup_replication/exploratory_analysis/protest_original_controls_fe_sweep"
 POL_RUNNER="${POL_DIR}/sbatch/run_politician_original_control_all32.sbatch"

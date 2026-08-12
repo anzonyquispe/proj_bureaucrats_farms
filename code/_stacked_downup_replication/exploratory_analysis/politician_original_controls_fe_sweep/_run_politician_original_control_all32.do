@@ -13,11 +13,19 @@ set processors 1
 args control_arg
 local control_env : environment POL_ORIGINAL_CONTROL_SAMPLE
 local sample_env : environment ANALYSIS_SAMPLE_SUFFIX
+local fe_env : environment POL_ORIGINAL_FE_LIST
+local stage_env : environment ANALYSIS_STAGE
 local control_sample "`control_arg'"
 if "`control_sample'" == "" local control_sample "`control_env'"
 if "`control_sample'" == "" local control_sample "never"
 if !inlist("`control_sample'", "never", "both", "notyet") {
     display as error "Control sample must be never, both, or notyet."
+    exit 198
+}
+local analysis_stage "`stage_env'"
+if "`analysis_stage'" == "" local analysis_stage "both"
+if !inlist("`analysis_stage'", "event", "did", "both") {
+    display as error "ANALYSIS_STAGE must be event, did, or both."
     exit 198
 }
 
@@ -32,6 +40,13 @@ global code "/users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replica
 global int_data "${root}/data_output/intermediate"
 global tables "${code}/../../tables/exploratory_analysis/politician_original_controls_fe_sweep"
 global figures "${code}/../../figures/exploratory_analysis/politician_original_controls_fe_sweep"
+if "`fe_env'" != "" global fe_list "`fe_env'"
+foreach selected_fe of numlist $fe_list {
+    if !inrange(`selected_fe', 1, 32) {
+        display as error "Every FE id must be from 1 through 32."
+        exit 198
+    }
+}
 if "${sample}" == "_sample" {
     global tables "${tables}/sample"
     global figures "${figures}/sample"
@@ -137,8 +152,9 @@ tempfile full_analysis_sample
 save `full_analysis_sample'
 
 ********************************************************************************
-* Event-study loop: prepare once, estimate FE 1/32, save each independently.
+* Event-study loop: prepare once, estimate requested FEs, save independently.
 ********************************************************************************
+if inlist("`analysis_stage'", "event", "both") {
 use `full_analysis_sample', clear
 keep if inrange(relative_year_bin, -5, 4)
 quietly summarize relative_year_bin
@@ -190,10 +206,12 @@ foreach mod of local moderators_list {
         confirm file "`out'.ster"
     }
 }
+}
 
 ********************************************************************************
-* DiD loop: reload prepared sample once, estimate FE 1/32, save independently.
+* DiD loop: reload prepared sample once, estimate requested FEs independently.
 ********************************************************************************
+if inlist("`analysis_stage'", "did", "both") {
 use `full_analysis_sample', clear
 gen byte post_ = relative_year_bin >= 0
 gen byte moderator = downup_ac_pop
@@ -237,5 +255,6 @@ foreach mod of local moderators_list {
         confirm file "`out'.ster"
     }
 }
+}
 
-display as result "COMPLETED politician STER files: controls=`control_sample', FE 1/32"
+display as result "COMPLETED politician STER files: controls=`control_sample', FE=$fe_list, stage=`analysis_stage'"
