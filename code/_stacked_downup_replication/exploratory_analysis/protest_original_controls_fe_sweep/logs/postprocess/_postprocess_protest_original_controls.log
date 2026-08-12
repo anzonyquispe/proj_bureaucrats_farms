@@ -45,7 +45,15 @@ Notes:
 
 . local sample_env : environment ANALYSIS_SAMPLE_SUFFIX
 
+. local controls_env : environment POSTPROCESS_CONTROLS
+
 . global sample "`sample_env'"
+
+. local controls_list = subinstr("`controls_env'", ",", " ", .)
+
+. local controls_list = subinstr("`controls_list'", ":", " ", .)
+
+. if "`controls_list'" == "" local controls_list "never both notyet"
 
 . global tables "${code}/../../tables/exploratory_analysis/protest_original_con
 > trols_fe_sweep"
@@ -67,38 +75,43 @@ Notes:
 . quietly do "${code}/interaction_graph.ado"
 
 . 
-. foreach controls in never both notyet {
-  2.     forvalues fe = 1/32 {
-  3.         local tag : display %02.0f `fe'
-  4.         local tag = strtrim("`tag'")
-  5.         local prefix "protest_original_fe`tag'_controls_`controls'"
-  6. 
+. foreach controls of local controls_list {
+  2.     if !inlist("`controls'", "never", "both", "notyet") {
+  3.         display as error "POSTPROCESS_CONTROLS contains an invalid control
+>  group: `controls'"
+  4.         exit 198
+  5.     }
+  6.     forvalues fe = 1/32 {
+  7.         local tag : display %02.0f `fe'
+  8.         local tag = strtrim("`tag'")
+  9.         local prefix "protest_original_fe`tag'_controls_`controls'"
+ 10. 
 .         local event "${tables}/`prefix'_event_rural_acpop_all"
-  7.         confirm file "`event'.ster"
-  8.         est clear
-  9.         estread using "`event'.ster"
- 10.         quietly estimates dir
- 11.         local names `r(names)'
- 12.         estsave_csv `names' using "`event'.csv", replace
- 13.         confirm file "`event'_scalars.csv"
- 14. 
+ 11.         confirm file "`event'.ster"
+ 12.         est clear
+ 13.         estread using "`event'.ster"
+ 14.         quietly estimates dir
+ 15.         local names `r(names)'
+ 16.         estsave_csv `names' using "`event'.csv", replace
+ 17.         confirm file "`event'_scalars.csv"
+ 18. 
 .         local did "${tables}/`prefix'_did_interaction_rural_acpop_all"
- 15.         confirm file "`did'.ster"
- 16.         est clear
- 17.         estread using "`did'.ster"
- 18.         quietly estimates dir
- 19.         local names `r(names)'
- 20.         estsave_csv `names' using "`did'.csv", replace
- 21.         confirm file "`did'_scalars.csv"
- 22. 
+ 19.         confirm file "`did'.ster"
+ 20.         est clear
+ 21.         estread using "`did'.ster"
+ 22.         quietly estimates dir
+ 23.         local names `r(names)'
+ 24.         estsave_csv `names' using "`did'.csv", replace
+ 25.         confirm file "`did'_scalars.csv"
+ 26. 
 .         est clear
- 23.         interaction_graph using "`did'.ster", estimates(1) ///
+ 27.         interaction_graph using "`did'.ster", estimates(1) ///
 >             output("${figures}/`prefix'_did_interaction_rural_acpop_all") ///
 >             type(protest) modvar(downup_ac_pop)
- 24.         confirm file "${figures}/`prefix'_did_interaction_rural_acpop_all_
+ 28.         confirm file "${figures}/`prefix'_did_interaction_rural_acpop_all_
 > 1.png"
- 25.     }
- 26. }
+ 29.     }
+ 30. }
 
 -------------------------------------------------------------------------------
              |           Dependent  Number of        
@@ -254,9 +267,6 @@ Number of observations (_N) was 0, now 4.
 (1 real change made)
 (1 real change made)
 (1 real change made)
-(file /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication/.
-> ./../figures/exploratory_analysis/protest_original_controls_fe_sweep/protest_
-> original_fe02_controls_never_did_interaction_rural_acpop_all_1.png not found)
 file /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication/..
 > /../figures/exploratory_analysis/protest_original_controls_fe_sweep/protest_o
 > riginal_fe02_controls_never_did_interaction_rural_acpop_all_1.png written in 
@@ -338,9 +348,6 @@ Number of observations (_N) was 0, now 4.
 (1 real change made)
 (1 real change made)
 (1 real change made)
-(file /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication/.
-> ./../figures/exploratory_analysis/protest_original_controls_fe_sweep/protest_
-> original_fe03_controls_never_did_interaction_rural_acpop_all_1.png not found)
 file /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication/..
 > /../figures/exploratory_analysis/protest_original_controls_fe_sweep/protest_o
 > riginal_fe03_controls_never_did_interaction_rural_acpop_all_1.png written in 
@@ -422,9 +429,6 @@ Number of observations (_N) was 0, now 4.
 (1 real change made)
 (1 real change made)
 (1 real change made)
-(file /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication/.
-> ./../figures/exploratory_analysis/protest_original_controls_fe_sweep/protest_
-> original_fe04_controls_never_did_interaction_rural_acpop_all_1.png not found)
 file /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication/..
 > /../figures/exploratory_analysis/protest_original_controls_fe_sweep/protest_o
 > riginal_fe04_controls_never_did_interaction_rural_acpop_all_1.png written in 
@@ -506,9 +510,6 @@ Number of observations (_N) was 0, now 4.
 (1 real change made)
 (1 real change made)
 (1 real change made)
-(file /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication/.
-> ./../figures/exploratory_analysis/protest_original_controls_fe_sweep/protest_
-> original_fe05_controls_never_did_interaction_rural_acpop_all_1.png not found)
 file /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication/..
 > /../figures/exploratory_analysis/protest_original_controls_fe_sweep/protest_o
 > riginal_fe05_controls_never_did_interaction_rural_acpop_all_1.png written in 
@@ -590,9 +591,6 @@ Number of observations (_N) was 0, now 4.
 (1 real change made)
 (1 real change made)
 (1 real change made)
-(file /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication/.
-> ./../figures/exploratory_analysis/protest_original_controls_fe_sweep/protest_
-> original_fe06_controls_never_did_interaction_rural_acpop_all_1.png not found)
 file /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication/..
 > /../figures/exploratory_analysis/protest_original_controls_fe_sweep/protest_o
 > riginal_fe06_controls_never_did_interaction_rural_acpop_all_1.png written in 
@@ -674,9 +672,6 @@ Number of observations (_N) was 0, now 4.
 (1 real change made)
 (1 real change made)
 (1 real change made)
-(file /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication/.
-> ./../figures/exploratory_analysis/protest_original_controls_fe_sweep/protest_
-> original_fe07_controls_never_did_interaction_rural_acpop_all_1.png not found)
 file /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication/..
 > /../figures/exploratory_analysis/protest_original_controls_fe_sweep/protest_o
 > riginal_fe07_controls_never_did_interaction_rural_acpop_all_1.png written in 
@@ -758,9 +753,6 @@ Number of observations (_N) was 0, now 4.
 (1 real change made)
 (1 real change made)
 (1 real change made)
-(file /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication/.
-> ./../figures/exploratory_analysis/protest_original_controls_fe_sweep/protest_
-> original_fe08_controls_never_did_interaction_rural_acpop_all_1.png not found)
 file /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication/..
 > /../figures/exploratory_analysis/protest_original_controls_fe_sweep/protest_o
 > riginal_fe08_controls_never_did_interaction_rural_acpop_all_1.png written in 
@@ -842,9 +834,6 @@ Number of observations (_N) was 0, now 4.
 (1 real change made)
 (1 real change made)
 (1 real change made)
-(file /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication/.
-> ./../figures/exploratory_analysis/protest_original_controls_fe_sweep/protest_
-> original_fe09_controls_never_did_interaction_rural_acpop_all_1.png not found)
 file /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication/..
 > /../figures/exploratory_analysis/protest_original_controls_fe_sweep/protest_o
 > riginal_fe09_controls_never_did_interaction_rural_acpop_all_1.png written in 
@@ -926,9 +915,6 @@ Number of observations (_N) was 0, now 4.
 (1 real change made)
 (1 real change made)
 (1 real change made)
-(file /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication/.
-> ./../figures/exploratory_analysis/protest_original_controls_fe_sweep/protest_
-> original_fe10_controls_never_did_interaction_rural_acpop_all_1.png not found)
 file /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication/..
 > /../figures/exploratory_analysis/protest_original_controls_fe_sweep/protest_o
 > riginal_fe10_controls_never_did_interaction_rural_acpop_all_1.png written in 
@@ -1010,9 +996,6 @@ Number of observations (_N) was 0, now 4.
 (1 real change made)
 (1 real change made)
 (1 real change made)
-(file /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication/.
-> ./../figures/exploratory_analysis/protest_original_controls_fe_sweep/protest_
-> original_fe11_controls_never_did_interaction_rural_acpop_all_1.png not found)
 file /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication/..
 > /../figures/exploratory_analysis/protest_original_controls_fe_sweep/protest_o
 > riginal_fe11_controls_never_did_interaction_rural_acpop_all_1.png written in 
@@ -1094,9 +1077,6 @@ Number of observations (_N) was 0, now 4.
 (1 real change made)
 (1 real change made)
 (1 real change made)
-(file /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication/.
-> ./../figures/exploratory_analysis/protest_original_controls_fe_sweep/protest_
-> original_fe12_controls_never_did_interaction_rural_acpop_all_1.png not found)
 file /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication/..
 > /../figures/exploratory_analysis/protest_original_controls_fe_sweep/protest_o
 > riginal_fe12_controls_never_did_interaction_rural_acpop_all_1.png written in 
@@ -1178,9 +1158,6 @@ Number of observations (_N) was 0, now 4.
 (1 real change made)
 (1 real change made)
 (1 real change made)
-(file /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication/.
-> ./../figures/exploratory_analysis/protest_original_controls_fe_sweep/protest_
-> original_fe13_controls_never_did_interaction_rural_acpop_all_1.png not found)
 file /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication/..
 > /../figures/exploratory_analysis/protest_original_controls_fe_sweep/protest_o
 > riginal_fe13_controls_never_did_interaction_rural_acpop_all_1.png written in 
@@ -1262,9 +1239,6 @@ Number of observations (_N) was 0, now 4.
 (1 real change made)
 (1 real change made)
 (1 real change made)
-(file /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication/.
-> ./../figures/exploratory_analysis/protest_original_controls_fe_sweep/protest_
-> original_fe14_controls_never_did_interaction_rural_acpop_all_1.png not found)
 file /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication/..
 > /../figures/exploratory_analysis/protest_original_controls_fe_sweep/protest_o
 > riginal_fe14_controls_never_did_interaction_rural_acpop_all_1.png written in 
@@ -1346,9 +1320,6 @@ Number of observations (_N) was 0, now 4.
 (1 real change made)
 (1 real change made)
 (1 real change made)
-(file /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication/.
-> ./../figures/exploratory_analysis/protest_original_controls_fe_sweep/protest_
-> original_fe15_controls_never_did_interaction_rural_acpop_all_1.png not found)
 file /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication/..
 > /../figures/exploratory_analysis/protest_original_controls_fe_sweep/protest_o
 > riginal_fe15_controls_never_did_interaction_rural_acpop_all_1.png written in 
@@ -1390,12 +1361,1400 @@ Exported: /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replicati
 Estimates exported to /users/aquisper/proj_bureaucrats_farms/code/_stacked_down
 > up_replication/../../tables/exploratory_analysis/protest_original_controls_fe
 > _sweep/protest_original_fe16_controls_never_event_rural_acpop_all.csv
-file
-    /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication/.
-    > ./../tables/exploratory_analysis/protest_original_controls_fe_sweep/pro
-    > test_original_fe16_controls_never_did_interaction_rural_acpop_all.ster
-    not found
-r(601);
 
+-------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+-----------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with
+             |                                 Julia
+-------------------------------------------------------------------------------
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+Estimates exported to /users/aquisper/proj_bureaucrats_farms/code/_stacked_down
+> up_replication/../../tables/exploratory_analysis/protest_original_controls_fe
+> _sweep/protest_original_fe16_controls_never_did_interaction_rural_acpop_all.c
+> sv
+
+-------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+-----------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with
+             |                                 Julia
+-------------------------------------------------------------------------------
+(results evreg1 are active now)
+number of observations will be reset to 4
+Press any key to continue, or Break to abort
+Number of observations (_N) was 0, now 4.
+(4 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+file /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication/..
+> /../figures/exploratory_analysis/protest_original_controls_fe_sweep/protest_o
+> riginal_fe16_controls_never_did_interaction_rural_acpop_all_1.png written in 
+> PNG format
+Exported: /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replicati
+> on/../../figures/exploratory_analysis/protest_original_controls_fe_sweep/prot
+> est_original_fe16_controls_never_did_interaction_rural_acpop_all_1.png
+
+-------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+-----------------------------------------------------------------
+      evreg1 | reghdfejl    countk         21  HDFE linear regression with
+             |                                 Julia
+-------------------------------------------------------------------------------
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+Estimates exported to /users/aquisper/proj_bureaucrats_farms/code/_stacked_down
+> up_replication/../../tables/exploratory_analysis/protest_original_controls_fe
+> _sweep/protest_original_fe17_controls_never_event_rural_acpop_all.csv
+
+-------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+-----------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with
+             |                                 Julia
+-------------------------------------------------------------------------------
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+Estimates exported to /users/aquisper/proj_bureaucrats_farms/code/_stacked_down
+> up_replication/../../tables/exploratory_analysis/protest_original_controls_fe
+> _sweep/protest_original_fe17_controls_never_did_interaction_rural_acpop_all.c
+> sv
+
+-------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+-----------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with
+             |                                 Julia
+-------------------------------------------------------------------------------
+(results evreg1 are active now)
+number of observations will be reset to 4
+Press any key to continue, or Break to abort
+Number of observations (_N) was 0, now 4.
+(4 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(file /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication/.
+> ./../figures/exploratory_analysis/protest_original_controls_fe_sweep/protest_
+> original_fe17_controls_never_did_interaction_rural_acpop_all_1.png not found)
+file /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication/..
+> /../figures/exploratory_analysis/protest_original_controls_fe_sweep/protest_o
+> riginal_fe17_controls_never_did_interaction_rural_acpop_all_1.png written in 
+> PNG format
+Exported: /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replicati
+> on/../../figures/exploratory_analysis/protest_original_controls_fe_sweep/prot
+> est_original_fe17_controls_never_did_interaction_rural_acpop_all_1.png
+
+-------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+-----------------------------------------------------------------
+      evreg1 | reghdfejl    countk         21  HDFE linear regression with
+             |                                 Julia
+-------------------------------------------------------------------------------
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+Estimates exported to /users/aquisper/proj_bureaucrats_farms/code/_stacked_down
+> up_replication/../../tables/exploratory_analysis/protest_original_controls_fe
+> _sweep/protest_original_fe18_controls_never_event_rural_acpop_all.csv
+
+-------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+-----------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with
+             |                                 Julia
+-------------------------------------------------------------------------------
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+Estimates exported to /users/aquisper/proj_bureaucrats_farms/code/_stacked_down
+> up_replication/../../tables/exploratory_analysis/protest_original_controls_fe
+> _sweep/protest_original_fe18_controls_never_did_interaction_rural_acpop_all.c
+> sv
+
+-------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+-----------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with
+             |                                 Julia
+-------------------------------------------------------------------------------
+(results evreg1 are active now)
+number of observations will be reset to 4
+Press any key to continue, or Break to abort
+Number of observations (_N) was 0, now 4.
+(4 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(file /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication/.
+> ./../figures/exploratory_analysis/protest_original_controls_fe_sweep/protest_
+> original_fe18_controls_never_did_interaction_rural_acpop_all_1.png not found)
+file /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication/..
+> /../figures/exploratory_analysis/protest_original_controls_fe_sweep/protest_o
+> riginal_fe18_controls_never_did_interaction_rural_acpop_all_1.png written in 
+> PNG format
+Exported: /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replicati
+> on/../../figures/exploratory_analysis/protest_original_controls_fe_sweep/prot
+> est_original_fe18_controls_never_did_interaction_rural_acpop_all_1.png
+
+-------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+-----------------------------------------------------------------
+      evreg1 | reghdfejl    countk         21  HDFE linear regression with
+             |                                 Julia
+-------------------------------------------------------------------------------
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+Estimates exported to /users/aquisper/proj_bureaucrats_farms/code/_stacked_down
+> up_replication/../../tables/exploratory_analysis/protest_original_controls_fe
+> _sweep/protest_original_fe19_controls_never_event_rural_acpop_all.csv
+
+-------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+-----------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with
+             |                                 Julia
+-------------------------------------------------------------------------------
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+Estimates exported to /users/aquisper/proj_bureaucrats_farms/code/_stacked_down
+> up_replication/../../tables/exploratory_analysis/protest_original_controls_fe
+> _sweep/protest_original_fe19_controls_never_did_interaction_rural_acpop_all.c
+> sv
+
+-------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+-----------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with
+             |                                 Julia
+-------------------------------------------------------------------------------
+(results evreg1 are active now)
+number of observations will be reset to 4
+Press any key to continue, or Break to abort
+Number of observations (_N) was 0, now 4.
+(4 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(file /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication/.
+> ./../figures/exploratory_analysis/protest_original_controls_fe_sweep/protest_
+> original_fe19_controls_never_did_interaction_rural_acpop_all_1.png not found)
+file /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication/..
+> /../figures/exploratory_analysis/protest_original_controls_fe_sweep/protest_o
+> riginal_fe19_controls_never_did_interaction_rural_acpop_all_1.png written in 
+> PNG format
+Exported: /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replicati
+> on/../../figures/exploratory_analysis/protest_original_controls_fe_sweep/prot
+> est_original_fe19_controls_never_did_interaction_rural_acpop_all_1.png
+
+-------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+-----------------------------------------------------------------
+      evreg1 | reghdfejl    countk         21  HDFE linear regression with
+             |                                 Julia
+-------------------------------------------------------------------------------
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+Estimates exported to /users/aquisper/proj_bureaucrats_farms/code/_stacked_down
+> up_replication/../../tables/exploratory_analysis/protest_original_controls_fe
+> _sweep/protest_original_fe20_controls_never_event_rural_acpop_all.csv
+
+-------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+-----------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with
+             |                                 Julia
+-------------------------------------------------------------------------------
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+Estimates exported to /users/aquisper/proj_bureaucrats_farms/code/_stacked_down
+> up_replication/../../tables/exploratory_analysis/protest_original_controls_fe
+> _sweep/protest_original_fe20_controls_never_did_interaction_rural_acpop_all.c
+> sv
+
+-------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+-----------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with
+             |                                 Julia
+-------------------------------------------------------------------------------
+(results evreg1 are active now)
+number of observations will be reset to 4
+Press any key to continue, or Break to abort
+Number of observations (_N) was 0, now 4.
+(4 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(file /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication/.
+> ./../figures/exploratory_analysis/protest_original_controls_fe_sweep/protest_
+> original_fe20_controls_never_did_interaction_rural_acpop_all_1.png not found)
+file /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication/..
+> /../figures/exploratory_analysis/protest_original_controls_fe_sweep/protest_o
+> riginal_fe20_controls_never_did_interaction_rural_acpop_all_1.png written in 
+> PNG format
+Exported: /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replicati
+> on/../../figures/exploratory_analysis/protest_original_controls_fe_sweep/prot
+> est_original_fe20_controls_never_did_interaction_rural_acpop_all_1.png
+
+-------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+-----------------------------------------------------------------
+      evreg1 | reghdfejl    countk         21  HDFE linear regression with
+             |                                 Julia
+-------------------------------------------------------------------------------
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+Estimates exported to /users/aquisper/proj_bureaucrats_farms/code/_stacked_down
+> up_replication/../../tables/exploratory_analysis/protest_original_controls_fe
+> _sweep/protest_original_fe21_controls_never_event_rural_acpop_all.csv
+
+-------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+-----------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with
+             |                                 Julia
+-------------------------------------------------------------------------------
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+Estimates exported to /users/aquisper/proj_bureaucrats_farms/code/_stacked_down
+> up_replication/../../tables/exploratory_analysis/protest_original_controls_fe
+> _sweep/protest_original_fe21_controls_never_did_interaction_rural_acpop_all.c
+> sv
+
+-------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+-----------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with
+             |                                 Julia
+-------------------------------------------------------------------------------
+(results evreg1 are active now)
+number of observations will be reset to 4
+Press any key to continue, or Break to abort
+Number of observations (_N) was 0, now 4.
+(4 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(file /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication/.
+> ./../figures/exploratory_analysis/protest_original_controls_fe_sweep/protest_
+> original_fe21_controls_never_did_interaction_rural_acpop_all_1.png not found)
+file /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication/..
+> /../figures/exploratory_analysis/protest_original_controls_fe_sweep/protest_o
+> riginal_fe21_controls_never_did_interaction_rural_acpop_all_1.png written in 
+> PNG format
+Exported: /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replicati
+> on/../../figures/exploratory_analysis/protest_original_controls_fe_sweep/prot
+> est_original_fe21_controls_never_did_interaction_rural_acpop_all_1.png
+
+-------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+-----------------------------------------------------------------
+      evreg1 | reghdfejl    countk         21  HDFE linear regression with
+             |                                 Julia
+-------------------------------------------------------------------------------
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+Estimates exported to /users/aquisper/proj_bureaucrats_farms/code/_stacked_down
+> up_replication/../../tables/exploratory_analysis/protest_original_controls_fe
+> _sweep/protest_original_fe22_controls_never_event_rural_acpop_all.csv
+
+-------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+-----------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with
+             |                                 Julia
+-------------------------------------------------------------------------------
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+Estimates exported to /users/aquisper/proj_bureaucrats_farms/code/_stacked_down
+> up_replication/../../tables/exploratory_analysis/protest_original_controls_fe
+> _sweep/protest_original_fe22_controls_never_did_interaction_rural_acpop_all.c
+> sv
+
+-------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+-----------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with
+             |                                 Julia
+-------------------------------------------------------------------------------
+(results evreg1 are active now)
+number of observations will be reset to 4
+Press any key to continue, or Break to abort
+Number of observations (_N) was 0, now 4.
+(4 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(file /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication/.
+> ./../figures/exploratory_analysis/protest_original_controls_fe_sweep/protest_
+> original_fe22_controls_never_did_interaction_rural_acpop_all_1.png not found)
+file /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication/..
+> /../figures/exploratory_analysis/protest_original_controls_fe_sweep/protest_o
+> riginal_fe22_controls_never_did_interaction_rural_acpop_all_1.png written in 
+> PNG format
+Exported: /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replicati
+> on/../../figures/exploratory_analysis/protest_original_controls_fe_sweep/prot
+> est_original_fe22_controls_never_did_interaction_rural_acpop_all_1.png
+
+-------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+-----------------------------------------------------------------
+      evreg1 | reghdfejl    countk         21  HDFE linear regression with
+             |                                 Julia
+-------------------------------------------------------------------------------
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+Estimates exported to /users/aquisper/proj_bureaucrats_farms/code/_stacked_down
+> up_replication/../../tables/exploratory_analysis/protest_original_controls_fe
+> _sweep/protest_original_fe23_controls_never_event_rural_acpop_all.csv
+
+-------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+-----------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with
+             |                                 Julia
+-------------------------------------------------------------------------------
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+Estimates exported to /users/aquisper/proj_bureaucrats_farms/code/_stacked_down
+> up_replication/../../tables/exploratory_analysis/protest_original_controls_fe
+> _sweep/protest_original_fe23_controls_never_did_interaction_rural_acpop_all.c
+> sv
+
+-------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+-----------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with
+             |                                 Julia
+-------------------------------------------------------------------------------
+(results evreg1 are active now)
+number of observations will be reset to 4
+Press any key to continue, or Break to abort
+Number of observations (_N) was 0, now 4.
+(4 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(file /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication/.
+> ./../figures/exploratory_analysis/protest_original_controls_fe_sweep/protest_
+> original_fe23_controls_never_did_interaction_rural_acpop_all_1.png not found)
+file /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication/..
+> /../figures/exploratory_analysis/protest_original_controls_fe_sweep/protest_o
+> riginal_fe23_controls_never_did_interaction_rural_acpop_all_1.png written in 
+> PNG format
+Exported: /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replicati
+> on/../../figures/exploratory_analysis/protest_original_controls_fe_sweep/prot
+> est_original_fe23_controls_never_did_interaction_rural_acpop_all_1.png
+
+-------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+-----------------------------------------------------------------
+      evreg1 | reghdfejl    countk         21  HDFE linear regression with
+             |                                 Julia
+-------------------------------------------------------------------------------
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+Estimates exported to /users/aquisper/proj_bureaucrats_farms/code/_stacked_down
+> up_replication/../../tables/exploratory_analysis/protest_original_controls_fe
+> _sweep/protest_original_fe24_controls_never_event_rural_acpop_all.csv
+
+-------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+-----------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with
+             |                                 Julia
+-------------------------------------------------------------------------------
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+Estimates exported to /users/aquisper/proj_bureaucrats_farms/code/_stacked_down
+> up_replication/../../tables/exploratory_analysis/protest_original_controls_fe
+> _sweep/protest_original_fe24_controls_never_did_interaction_rural_acpop_all.c
+> sv
+
+-------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+-----------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with
+             |                                 Julia
+-------------------------------------------------------------------------------
+(results evreg1 are active now)
+number of observations will be reset to 4
+Press any key to continue, or Break to abort
+Number of observations (_N) was 0, now 4.
+(4 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(file /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication/.
+> ./../figures/exploratory_analysis/protest_original_controls_fe_sweep/protest_
+> original_fe24_controls_never_did_interaction_rural_acpop_all_1.png not found)
+file /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication/..
+> /../figures/exploratory_analysis/protest_original_controls_fe_sweep/protest_o
+> riginal_fe24_controls_never_did_interaction_rural_acpop_all_1.png written in 
+> PNG format
+Exported: /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replicati
+> on/../../figures/exploratory_analysis/protest_original_controls_fe_sweep/prot
+> est_original_fe24_controls_never_did_interaction_rural_acpop_all_1.png
+
+-------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+-----------------------------------------------------------------
+      evreg1 | reghdfejl    countk         21  HDFE linear regression with
+             |                                 Julia
+-------------------------------------------------------------------------------
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+Estimates exported to /users/aquisper/proj_bureaucrats_farms/code/_stacked_down
+> up_replication/../../tables/exploratory_analysis/protest_original_controls_fe
+> _sweep/protest_original_fe25_controls_never_event_rural_acpop_all.csv
+
+-------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+-----------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with
+             |                                 Julia
+-------------------------------------------------------------------------------
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+Estimates exported to /users/aquisper/proj_bureaucrats_farms/code/_stacked_down
+> up_replication/../../tables/exploratory_analysis/protest_original_controls_fe
+> _sweep/protest_original_fe25_controls_never_did_interaction_rural_acpop_all.c
+> sv
+
+-------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+-----------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with
+             |                                 Julia
+-------------------------------------------------------------------------------
+(results evreg1 are active now)
+number of observations will be reset to 4
+Press any key to continue, or Break to abort
+Number of observations (_N) was 0, now 4.
+(4 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(file /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication/.
+> ./../figures/exploratory_analysis/protest_original_controls_fe_sweep/protest_
+> original_fe25_controls_never_did_interaction_rural_acpop_all_1.png not found)
+file /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication/..
+> /../figures/exploratory_analysis/protest_original_controls_fe_sweep/protest_o
+> riginal_fe25_controls_never_did_interaction_rural_acpop_all_1.png written in 
+> PNG format
+Exported: /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replicati
+> on/../../figures/exploratory_analysis/protest_original_controls_fe_sweep/prot
+> est_original_fe25_controls_never_did_interaction_rural_acpop_all_1.png
+
+-------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+-----------------------------------------------------------------
+      evreg1 | reghdfejl    countk         21  HDFE linear regression with
+             |                                 Julia
+-------------------------------------------------------------------------------
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+Estimates exported to /users/aquisper/proj_bureaucrats_farms/code/_stacked_down
+> up_replication/../../tables/exploratory_analysis/protest_original_controls_fe
+> _sweep/protest_original_fe26_controls_never_event_rural_acpop_all.csv
+
+-------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+-----------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with
+             |                                 Julia
+-------------------------------------------------------------------------------
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+Estimates exported to /users/aquisper/proj_bureaucrats_farms/code/_stacked_down
+> up_replication/../../tables/exploratory_analysis/protest_original_controls_fe
+> _sweep/protest_original_fe26_controls_never_did_interaction_rural_acpop_all.c
+> sv
+
+-------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+-----------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with
+             |                                 Julia
+-------------------------------------------------------------------------------
+(results evreg1 are active now)
+number of observations will be reset to 4
+Press any key to continue, or Break to abort
+Number of observations (_N) was 0, now 4.
+(4 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(file /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication/.
+> ./../figures/exploratory_analysis/protest_original_controls_fe_sweep/protest_
+> original_fe26_controls_never_did_interaction_rural_acpop_all_1.png not found)
+file /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication/..
+> /../figures/exploratory_analysis/protest_original_controls_fe_sweep/protest_o
+> riginal_fe26_controls_never_did_interaction_rural_acpop_all_1.png written in 
+> PNG format
+Exported: /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replicati
+> on/../../figures/exploratory_analysis/protest_original_controls_fe_sweep/prot
+> est_original_fe26_controls_never_did_interaction_rural_acpop_all_1.png
+
+-------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+-----------------------------------------------------------------
+      evreg1 | reghdfejl    countk         21  HDFE linear regression with
+             |                                 Julia
+-------------------------------------------------------------------------------
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+Estimates exported to /users/aquisper/proj_bureaucrats_farms/code/_stacked_down
+> up_replication/../../tables/exploratory_analysis/protest_original_controls_fe
+> _sweep/protest_original_fe27_controls_never_event_rural_acpop_all.csv
+
+-------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+-----------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with
+             |                                 Julia
+-------------------------------------------------------------------------------
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+Estimates exported to /users/aquisper/proj_bureaucrats_farms/code/_stacked_down
+> up_replication/../../tables/exploratory_analysis/protest_original_controls_fe
+> _sweep/protest_original_fe27_controls_never_did_interaction_rural_acpop_all.c
+> sv
+
+-------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+-----------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with
+             |                                 Julia
+-------------------------------------------------------------------------------
+(results evreg1 are active now)
+number of observations will be reset to 4
+Press any key to continue, or Break to abort
+Number of observations (_N) was 0, now 4.
+(4 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(file /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication/.
+> ./../figures/exploratory_analysis/protest_original_controls_fe_sweep/protest_
+> original_fe27_controls_never_did_interaction_rural_acpop_all_1.png not found)
+file /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication/..
+> /../figures/exploratory_analysis/protest_original_controls_fe_sweep/protest_o
+> riginal_fe27_controls_never_did_interaction_rural_acpop_all_1.png written in 
+> PNG format
+Exported: /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replicati
+> on/../../figures/exploratory_analysis/protest_original_controls_fe_sweep/prot
+> est_original_fe27_controls_never_did_interaction_rural_acpop_all_1.png
+
+-------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+-----------------------------------------------------------------
+      evreg1 | reghdfejl    countk         21  HDFE linear regression with
+             |                                 Julia
+-------------------------------------------------------------------------------
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+Estimates exported to /users/aquisper/proj_bureaucrats_farms/code/_stacked_down
+> up_replication/../../tables/exploratory_analysis/protest_original_controls_fe
+> _sweep/protest_original_fe28_controls_never_event_rural_acpop_all.csv
+
+-------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+-----------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with
+             |                                 Julia
+-------------------------------------------------------------------------------
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+Estimates exported to /users/aquisper/proj_bureaucrats_farms/code/_stacked_down
+> up_replication/../../tables/exploratory_analysis/protest_original_controls_fe
+> _sweep/protest_original_fe28_controls_never_did_interaction_rural_acpop_all.c
+> sv
+
+-------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+-----------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with
+             |                                 Julia
+-------------------------------------------------------------------------------
+(results evreg1 are active now)
+number of observations will be reset to 4
+Press any key to continue, or Break to abort
+Number of observations (_N) was 0, now 4.
+(4 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(file /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication/.
+> ./../figures/exploratory_analysis/protest_original_controls_fe_sweep/protest_
+> original_fe28_controls_never_did_interaction_rural_acpop_all_1.png not found)
+file /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication/..
+> /../figures/exploratory_analysis/protest_original_controls_fe_sweep/protest_o
+> riginal_fe28_controls_never_did_interaction_rural_acpop_all_1.png written in 
+> PNG format
+Exported: /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replicati
+> on/../../figures/exploratory_analysis/protest_original_controls_fe_sweep/prot
+> est_original_fe28_controls_never_did_interaction_rural_acpop_all_1.png
+
+-------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+-----------------------------------------------------------------
+      evreg1 | reghdfejl    countk         21  HDFE linear regression with
+             |                                 Julia
+-------------------------------------------------------------------------------
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+Estimates exported to /users/aquisper/proj_bureaucrats_farms/code/_stacked_down
+> up_replication/../../tables/exploratory_analysis/protest_original_controls_fe
+> _sweep/protest_original_fe29_controls_never_event_rural_acpop_all.csv
+
+-------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+-----------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with
+             |                                 Julia
+-------------------------------------------------------------------------------
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+Estimates exported to /users/aquisper/proj_bureaucrats_farms/code/_stacked_down
+> up_replication/../../tables/exploratory_analysis/protest_original_controls_fe
+> _sweep/protest_original_fe29_controls_never_did_interaction_rural_acpop_all.c
+> sv
+
+-------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+-----------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with
+             |                                 Julia
+-------------------------------------------------------------------------------
+(results evreg1 are active now)
+number of observations will be reset to 4
+Press any key to continue, or Break to abort
+Number of observations (_N) was 0, now 4.
+(4 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(file /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication/.
+> ./../figures/exploratory_analysis/protest_original_controls_fe_sweep/protest_
+> original_fe29_controls_never_did_interaction_rural_acpop_all_1.png not found)
+file /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication/..
+> /../figures/exploratory_analysis/protest_original_controls_fe_sweep/protest_o
+> riginal_fe29_controls_never_did_interaction_rural_acpop_all_1.png written in 
+> PNG format
+Exported: /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replicati
+> on/../../figures/exploratory_analysis/protest_original_controls_fe_sweep/prot
+> est_original_fe29_controls_never_did_interaction_rural_acpop_all_1.png
+
+-------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+-----------------------------------------------------------------
+      evreg1 | reghdfejl    countk         21  HDFE linear regression with
+             |                                 Julia
+-------------------------------------------------------------------------------
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+Estimates exported to /users/aquisper/proj_bureaucrats_farms/code/_stacked_down
+> up_replication/../../tables/exploratory_analysis/protest_original_controls_fe
+> _sweep/protest_original_fe30_controls_never_event_rural_acpop_all.csv
+
+-------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+-----------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with
+             |                                 Julia
+-------------------------------------------------------------------------------
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+Estimates exported to /users/aquisper/proj_bureaucrats_farms/code/_stacked_down
+> up_replication/../../tables/exploratory_analysis/protest_original_controls_fe
+> _sweep/protest_original_fe30_controls_never_did_interaction_rural_acpop_all.c
+> sv
+
+-------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+-----------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with
+             |                                 Julia
+-------------------------------------------------------------------------------
+(results evreg1 are active now)
+number of observations will be reset to 4
+Press any key to continue, or Break to abort
+Number of observations (_N) was 0, now 4.
+(4 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(file /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication/.
+> ./../figures/exploratory_analysis/protest_original_controls_fe_sweep/protest_
+> original_fe30_controls_never_did_interaction_rural_acpop_all_1.png not found)
+file /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication/..
+> /../figures/exploratory_analysis/protest_original_controls_fe_sweep/protest_o
+> riginal_fe30_controls_never_did_interaction_rural_acpop_all_1.png written in 
+> PNG format
+Exported: /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replicati
+> on/../../figures/exploratory_analysis/protest_original_controls_fe_sweep/prot
+> est_original_fe30_controls_never_did_interaction_rural_acpop_all_1.png
+
+-------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+-----------------------------------------------------------------
+      evreg1 | reghdfejl    countk         21  HDFE linear regression with
+             |                                 Julia
+-------------------------------------------------------------------------------
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+Estimates exported to /users/aquisper/proj_bureaucrats_farms/code/_stacked_down
+> up_replication/../../tables/exploratory_analysis/protest_original_controls_fe
+> _sweep/protest_original_fe31_controls_never_event_rural_acpop_all.csv
+
+-------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+-----------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with
+             |                                 Julia
+-------------------------------------------------------------------------------
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+Estimates exported to /users/aquisper/proj_bureaucrats_farms/code/_stacked_down
+> up_replication/../../tables/exploratory_analysis/protest_original_controls_fe
+> _sweep/protest_original_fe31_controls_never_did_interaction_rural_acpop_all.c
+> sv
+
+-------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+-----------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with
+             |                                 Julia
+-------------------------------------------------------------------------------
+(results evreg1 are active now)
+number of observations will be reset to 4
+Press any key to continue, or Break to abort
+Number of observations (_N) was 0, now 4.
+(4 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(file /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication/.
+> ./../figures/exploratory_analysis/protest_original_controls_fe_sweep/protest_
+> original_fe31_controls_never_did_interaction_rural_acpop_all_1.png not found)
+file /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication/..
+> /../figures/exploratory_analysis/protest_original_controls_fe_sweep/protest_o
+> riginal_fe31_controls_never_did_interaction_rural_acpop_all_1.png written in 
+> PNG format
+Exported: /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replicati
+> on/../../figures/exploratory_analysis/protest_original_controls_fe_sweep/prot
+> est_original_fe31_controls_never_did_interaction_rural_acpop_all_1.png
+
+-------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+-----------------------------------------------------------------
+      evreg1 | reghdfejl    countk         21  HDFE linear regression with
+             |                                 Julia
+-------------------------------------------------------------------------------
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+Estimates exported to /users/aquisper/proj_bureaucrats_farms/code/_stacked_down
+> up_replication/../../tables/exploratory_analysis/protest_original_controls_fe
+> _sweep/protest_original_fe32_controls_never_event_rural_acpop_all.csv
+
+-------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+-----------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with
+             |                                 Julia
+-------------------------------------------------------------------------------
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+Estimates exported to /users/aquisper/proj_bureaucrats_farms/code/_stacked_down
+> up_replication/../../tables/exploratory_analysis/protest_original_controls_fe
+> _sweep/protest_original_fe32_controls_never_did_interaction_rural_acpop_all.c
+> sv
+
+-------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+-----------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with
+             |                                 Julia
+-------------------------------------------------------------------------------
+(results evreg1 are active now)
+number of observations will be reset to 4
+Press any key to continue, or Break to abort
+Number of observations (_N) was 0, now 4.
+(4 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(file /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication/.
+> ./../figures/exploratory_analysis/protest_original_controls_fe_sweep/protest_
+> original_fe32_controls_never_did_interaction_rural_acpop_all_1.png not found)
+file /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication/..
+> /../figures/exploratory_analysis/protest_original_controls_fe_sweep/protest_o
+> riginal_fe32_controls_never_did_interaction_rural_acpop_all_1.png written in 
+> PNG format
+Exported: /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replicati
+> on/../../figures/exploratory_analysis/protest_original_controls_fe_sweep/prot
+> est_original_fe32_controls_never_did_interaction_rural_acpop_all_1.png
+
+. display as result "COMPLETED protest CSV and interaction-plot postprocessing"
+COMPLETED protest CSV and interaction-plot postprocessing
+
+. 
 end of do-file
-r(601);

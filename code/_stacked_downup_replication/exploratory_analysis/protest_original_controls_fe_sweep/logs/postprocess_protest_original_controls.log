@@ -1,10 +1,2 @@
 Loading R/4.4.0/gcc/11.5Loading R/4.4.0/gcc/11.5.0
-  Loading requirementError: Missing event-stuError: Missing event-study CSV files:
-/users/aquisper/proj_bureaucrats_farms/tables/exploratory_analysis/protest_original_controls_fe_sweep/protest_original_fe17_controls_never_event_rural_acpop_all.csv
-/users/aquisper/proj_bureaucrats_farms/tables/exploratory_analysis/protest_original_controls_fe_sweep/protest_original_fe18_controls_never_event_rural_acpop_all.csv
-/users/aquisper/proj_bureaucrats_farms/tables/exploratory_analysis/protest_original_controls_fe_sweep/protest_original_fe19_controls_never_event_rural_acpop_all.csv
-/users/aquisper/proj_bureaucrats_farms/tables/exploratory_analysis/protest_original_controls_fe_sweep/protest_original_fe20_controls_never_event_rural_acpop_all.csv
-/users/aquisper/proj_bureaucrats_farms/tables/exploratory_analysis/protest_original_controls_fe_sweep/protest_original_fe21_controls_never_event_rural_acpop_all.csv
-/users/aquisper/proj_bureaucrats_farms/tables/exploratory_analysis/protest_original_controls_fe_sweep/protest_origExecution halted
-s_neve
-Execution halted
+  Loading requirementCompleted 32 original anCompleted 32 original and rotate[2026-08-12 04:07:35] Pa[2026-08-12 04:07:35] Partial controls=never: CSVs and plots compTERM environment variablTERM environment variable not set.

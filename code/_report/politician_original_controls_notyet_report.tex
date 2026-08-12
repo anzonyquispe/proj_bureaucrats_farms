@@ -1,0 +1,1299 @@
+\documentclass[10pt]{article}
+\usepackage[letterpaper,landscape,margin=0.55in]{geometry}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage[hidelinks]{hyperref}
+\setlength{\parindent}{0pt}
+\setlength{\tabcolsep}{4pt}
+\title{Politician Characteristics: Exploratory Fixed-Effect Results}
+\author{Original \texttt{politicians\_characteristics.csv}\\Legacy not-yet/partial-zero-spell controls}
+\date{August 2026}
+\begin{document}
+\maketitle
+\begin{abstract}
+This report compares 32 fixed-effect specifications using Legacy not-yet/partial-zero-spell controls. Each specification presents the baseline politician event study for event years -5 through 4, with -1 omitted, before and after pretrend rotation. It also presents one non-rotated DiD interaction plot for \texttt{post} $\times$ \texttt{treat} $\times$ \texttt{downup\_ac\_pop}, following \texttt{\_app\_19\_polischar\_fe12\_did\_downup\_inter\_plot.do}.
+\end{abstract}
+\tableofcontents
+\clearpage
+\section{Fixed-effect specification 1}
+\begin{center}
+\begin{minipage}[t]{0.48\textwidth}\centering
+\textbf{Baseline event study: original}\par\smallskip
+\includegraphics[width=\textwidth]{\detokenize{/users/aquisper/proj_bureaucrats_farms/figures/exploratory_analysis/politician_original_controls_fe_sweep/politician_original_fe01_controls_notyet_event_ori.png}}
+\end{minipage}\hfill
+\begin{minipage}[t]{0.48\textwidth}\centering
+\textbf{Baseline event study: pretrend rotated}\par\smallskip
+\includegraphics[width=\textwidth]{\detokenize{/users/aquisper/proj_bureaucrats_farms/figures/exploratory_analysis/politician_original_controls_fe_sweep/politician_original_fe01_controls_notyet_event_rotated.png}}
+\end{minipage}\par\medskip
+\textbf{DiD interaction: post $\times$ treat $\times$ downup\_ac\_pop}\par\smallskip
+\includegraphics[width=0.54\textwidth]{\detokenize{/users/aquisper/proj_bureaucrats_farms/figures/exploratory_analysis/politician_original_controls_fe_sweep/politician_original_fe01_controls_notyet_did_interaction_rural_acpop_all_1.png}}
+\end{center}
+\clearpage
+\subsection*{Baseline event-study estimates: specification 1}
+\begin{center}
+\scriptsize
+\begin{tabular}{r rr rr}
+\toprule
+Event time & Original $\hat\beta$ & Original 95\% CI & Rotated $\hat\beta$ & Rotated 95\% CI \\
+\midrule
+-5 & -20.8064 & [-41.9197, 0.3069] & 16.6034 & [-4.5099, 37.7167] \\
+-4 & -57.4343 & [-77.6906, -37.1779] & -29.3769 & [-49.6332, -9.1206] \\
+-3 & -7.6887 & [-23.5056, 8.1282] & 11.0162 & [-4.8007, 26.8331] \\
+-2 & -9.6679 & [-22.9916, 3.6558] & -0.3155 & [-13.6391, 13.0082] \\
+-1 & 0.0000 & [0.0000, 0.0000] & 0.0000 & [0.0000, 0.0000] \\
+0 & -0.3765 & [-13.1254, 12.3724] & -9.7290 & [-22.4779, 3.0199] \\
+1 & 7.0324 & [-6.5235, 20.5882] & -11.6725 & [-25.2284, 1.8833] \\
+2 & 1.9424 & [-16.2287, 20.1136] & -26.1149 & [-44.2861, -7.9438] \\
+3 & 16.4787 & [-2.3288, 35.2861] & -20.9311 & [-39.7386, -2.1237] \\
+4 & 8.4463 & [-10.7501, 27.6426] & -38.3160 & [-57.5124, -19.1196] \\
+\midrule
+Pre average & -23.8993 & [-37.4464, -10.3522] & -0.5182 & [-3.6179, 2.5816] \\
+Post average & 6.7046 & [-5.0532, 18.4625] & -21.3527 & [-43.6235, 0.9181] \\
+\bottomrule
+\end{tabular}
+\end{center}
+\medskip
+\textit{The interaction panel comes from this FE specification's own \texttt{post} $\times$ \texttt{treat} $\times$ \texttt{downup\_ac\_pop} regression and is not rotated.}
+\clearpage
+\section{Fixed-effect specification 2}
+\begin{center}
+\begin{minipage}[t]{0.48\textwidth}\centering
+\textbf{Baseline event study: original}\par\smallskip
+\includegraphics[width=\textwidth]{\detokenize{/users/aquisper/proj_bureaucrats_farms/figures/exploratory_analysis/politician_original_controls_fe_sweep/politician_original_fe02_controls_notyet_event_ori.png}}
+\end{minipage}\hfill
+\begin{minipage}[t]{0.48\textwidth}\centering
+\textbf{Baseline event study: pretrend rotated}\par\smallskip
+\includegraphics[width=\textwidth]{\detokenize{/users/aquisper/proj_bureaucrats_farms/figures/exploratory_analysis/politician_original_controls_fe_sweep/politician_original_fe02_controls_notyet_event_rotated.png}}
+\end{minipage}\par\medskip
+\textbf{DiD interaction: post $\times$ treat $\times$ downup\_ac\_pop}\par\smallskip
+\includegraphics[width=0.54\textwidth]{\detokenize{/users/aquisper/proj_bureaucrats_farms/figures/exploratory_analysis/politician_original_controls_fe_sweep/politician_original_fe02_controls_notyet_did_interaction_rural_acpop_all_1.png}}
+\end{center}
+\clearpage
+\subsection*{Baseline event-study estimates: specification 2}
+\begin{center}
+\scriptsize
+\begin{tabular}{r rr rr}
+\toprule
+Event time & Original $\hat\beta$ & Original 95\% CI & Rotated $\hat\beta$ & Rotated 95\% CI \\
+\midrule
+-5 & -7.9381 & [-28.1706, 12.2944] & -0.1142 & [-20.3467, 20.1183] \\
+-4 & -25.9785 & [-43.8090, -8.1480] & -20.1106 & [-37.9411, -2.2800] \\
+-3 & 21.4408 & [5.1519, 37.7298] & 25.3528 & [9.0638, 41.6417] \\
+-2 & 8.1271 & [-5.2983, 21.5524] & 10.0830 & [-3.3423, 23.5084] \\
+-1 & 0.0000 & [0.0000, 0.0000] & 0.0000 & [0.0000, 0.0000] \\
+0 & 12.9440 & [-0.5493, 26.4373] & 10.9881 & [-2.5052, 24.4813] \\
+1 & 28.4840 & [13.5417, 43.4262] & 24.5720 & [9.6298, 39.5143] \\
+2 & 28.7459 & [9.1646, 48.3273] & 22.8780 & [3.2967, 42.4594] \\
+3 & 37.7957 & [17.9749, 57.6164] & 29.9718 & [10.1510, 49.7925] \\
+4 & 29.3384 & [10.1492, 48.5276] & 19.5586 & [0.3693, 38.7478] \\
+\midrule
+Pre average & -1.0872 & [-13.7648, 11.5904] & 3.8028 & [0.6926, 6.9129] \\
+Post average & 27.4616 & [14.2211, 40.7021] & 21.5937 & [-0.1858, 43.3732] \\
+\bottomrule
+\end{tabular}
+\end{center}
+\medskip
+\textit{The interaction panel comes from this FE specification's own \texttt{post} $\times$ \texttt{treat} $\times$ \texttt{downup\_ac\_pop} regression and is not rotated.}
+\clearpage
+\section{Fixed-effect specification 3}
+\begin{center}
+\begin{minipage}[t]{0.48\textwidth}\centering
+\textbf{Baseline event study: original}\par\smallskip
+\includegraphics[width=\textwidth]{\detokenize{/users/aquisper/proj_bureaucrats_farms/figures/exploratory_analysis/politician_original_controls_fe_sweep/politician_original_fe03_controls_notyet_event_ori.png}}
+\end{minipage}\hfill
+\begin{minipage}[t]{0.48\textwidth}\centering
+\textbf{Baseline event study: pretrend rotated}\par\smallskip
+\includegraphics[width=\textwidth]{\detokenize{/users/aquisper/proj_bureaucrats_farms/figures/exploratory_analysis/politician_original_controls_fe_sweep/politician_original_fe03_controls_notyet_event_rotated.png}}
+\end{minipage}\par\medskip
+\textbf{DiD interaction: post $\times$ treat $\times$ downup\_ac\_pop}\par\smallskip
+\includegraphics[width=0.54\textwidth]{\detokenize{/users/aquisper/proj_bureaucrats_farms/figures/exploratory_analysis/politician_original_controls_fe_sweep/politician_original_fe03_controls_notyet_did_interaction_rural_acpop_all_1.png}}
+\end{center}
+\clearpage
+\subsection*{Baseline event-study estimates: specification 3}
+\begin{center}
+\scriptsize
+\begin{tabular}{r rr rr}
+\toprule
+Event time & Original $\hat\beta$ & Original 95\% CI & Rotated $\hat\beta$ & Rotated 95\% CI \\
+\midrule
+-5 & -38.4766 & [-66.3559, -10.5974] & 13.8368 & [-14.0424, 41.7161] \\
+-4 & -66.4706 & [-90.4328, -42.5084] & -27.2355 & [-51.1977, -3.2733] \\
+-3 & -13.3375 & [-30.9063, 4.2313] & 12.8193 & [-4.7496, 30.3881] \\
+-2 & -12.3578 & [-25.7740, 1.0584] & 0.7206 & [-12.6956, 14.1367] \\
+-1 & 0.0000 & [0.0000, 0.0000] & 0.0000 & [0.0000, 0.0000] \\
+0 & 6.0850 & [-7.7330, 19.9030] & -6.9934 & [-20.8114, 6.8247] \\
+1 & 17.3444 & [0.7747, 33.9141] & -8.8123 & [-25.3821, 7.7574] \\
+2 & 12.0750 & [-9.4235, 33.5735] & -27.1601 & [-48.6586, -5.6616] \\
+3 & 28.3465 & [7.2638, 49.4292] & -23.9670 & [-45.0496, -2.8843] \\
+4 & 20.6548 & [-0.7252, 42.0347] & -44.7371 & [-66.1170, -23.3572] \\
+\midrule
+Pre average & -32.6606 & [-49.4673, -15.8540] & 0.0353 & [-3.1146, 3.1852] \\
+Post average & 16.9011 & [1.9754, 31.8268] & -22.3340 & [-47.0303, 2.3623] \\
+\bottomrule
+\end{tabular}
+\end{center}
+\medskip
+\textit{The interaction panel comes from this FE specification's own \texttt{post} $\times$ \texttt{treat} $\times$ \texttt{downup\_ac\_pop} regression and is not rotated.}
+\clearpage
+\section{Fixed-effect specification 4}
+\begin{center}
+\begin{minipage}[t]{0.48\textwidth}\centering
+\textbf{Baseline event study: original}\par\smallskip
+\includegraphics[width=\textwidth]{\detokenize{/users/aquisper/proj_bureaucrats_farms/figures/exploratory_analysis/politician_original_controls_fe_sweep/politician_original_fe04_controls_notyet_event_ori.png}}
+\end{minipage}\hfill
+\begin{minipage}[t]{0.48\textwidth}\centering
+\textbf{Baseline event study: pretrend rotated}\par\smallskip
+\includegraphics[width=\textwidth]{\detokenize{/users/aquisper/proj_bureaucrats_farms/figures/exploratory_analysis/politician_original_controls_fe_sweep/politician_original_fe04_controls_notyet_event_rotated.png}}
+\end{minipage}\par\medskip
+\textbf{DiD interaction: post $\times$ treat $\times$ downup\_ac\_pop}\par\smallskip
+\includegraphics[width=0.54\textwidth]{\detokenize{/users/aquisper/proj_bureaucrats_farms/figures/exploratory_analysis/politician_original_controls_fe_sweep/politician_original_fe04_controls_notyet_did_interaction_rural_acpop_all_1.png}}
+\end{center}
+\clearpage
+\subsection*{Baseline event-study estimates: specification 4}
+\begin{center}
+\scriptsize
+\begin{tabular}{r rr rr}
+\toprule
+Event time & Original $\hat\beta$ & Original 95\% CI & Rotated $\hat\beta$ & Rotated 95\% CI \\
+\midrule
+-5 & 8.6428 & [-11.4445, 28.7301] & 12.2852 & [-7.8021, 32.3726] \\
+-4 & -25.7727 & [-44.7620, -6.7834] & -23.0409 & [-42.0302, -4.0516] \\
+-3 & 5.3555 & [-12.2505, 22.9615] & 7.1767 & [-10.4292, 24.7827] \\
+-2 & 4.7176 & [-10.0213, 19.4564] & 5.6282 & [-9.1106, 20.3671] \\
+-1 & 0.0000 & [0.0000, 0.0000] & 0.0000 & [0.0000, 0.0000] \\
+0 & 40.4713 & [23.9979, 56.9448] & 39.5607 & [23.0873, 56.0342] \\
+1 & 53.9622 & [34.6320, 73.2924] & 52.1410 & [32.8108, 71.4712] \\
+2 & 33.9072 & [12.4393, 55.3752] & 31.1754 & [9.7075, 52.6433] \\
+3 & 44.5452 & [23.1693, 65.9212] & 40.9028 & [19.5268, 62.2788] \\
+4 & 29.1286 & [8.5131, 49.7441] & 24.5755 & [3.9600, 45.1910] \\
+\midrule
+Pre average & -1.7642 & [-14.9736, 11.4452] & 0.5123 & [-2.9851, 4.0098] \\
+Post average & 40.4029 & [24.4247, 56.3811] & 37.6711 & [12.1529, 63.1893] \\
+\bottomrule
+\end{tabular}
+\end{center}
+\medskip
+\textit{The interaction panel comes from this FE specification's own \texttt{post} $\times$ \texttt{treat} $\times$ \texttt{downup\_ac\_pop} regression and is not rotated.}
+\clearpage
+\section{Fixed-effect specification 5}
+\begin{center}
+\begin{minipage}[t]{0.48\textwidth}\centering
+\textbf{Baseline event study: original}\par\smallskip
+\includegraphics[width=\textwidth]{\detokenize{/users/aquisper/proj_bureaucrats_farms/figures/exploratory_analysis/politician_original_controls_fe_sweep/politician_original_fe05_controls_notyet_event_ori.png}}
+\end{minipage}\hfill
+\begin{minipage}[t]{0.48\textwidth}\centering
+\textbf{Baseline event study: pretrend rotated}\par\smallskip
+\includegraphics[width=\textwidth]{\detokenize{/users/aquisper/proj_bureaucrats_farms/figures/exploratory_analysis/politician_original_controls_fe_sweep/politician_original_fe05_controls_notyet_event_rotated.png}}
+\end{minipage}\par\medskip
+\textbf{DiD interaction: post $\times$ treat $\times$ downup\_ac\_pop}\par\smallskip
+\includegraphics[width=0.54\textwidth]{\detokenize{/users/aquisper/proj_bureaucrats_farms/figures/exploratory_analysis/politician_original_controls_fe_sweep/politician_original_fe05_controls_notyet_did_interaction_rural_acpop_all_1.png}}
+\end{center}
+\clearpage
+\subsection*{Baseline event-study estimates: specification 5}
+\begin{center}
+\scriptsize
+\begin{tabular}{r rr rr}
+\toprule
+Event time & Original $\hat\beta$ & Original 95\% CI & Rotated $\hat\beta$ & Rotated 95\% CI \\
+\midrule
+-5 & -18.4127 & [-44.0943, 7.2688] & 17.6125 & [-8.0691, 43.2940] \\
+-4 & -57.0966 & [-80.3216, -33.8715] & -30.0776 & [-53.3027, -6.8526] \\
+-3 & -7.4301 & [-23.7251, 8.8649] & 10.5825 & [-5.7125, 26.8775] \\
+-2 & -10.3884 & [-23.7697, 2.9929] & -1.3821 & [-14.7634, 11.9992] \\
+-1 & 0.0000 & [0.0000, 0.0000] & 0.0000 & [0.0000, 0.0000] \\
+0 & 5.7327 & [-15.2800, 26.7454] & -3.2736 & [-24.2863, 17.7391] \\
+1 & 16.9425 & [-3.3190, 37.2041] & -1.0701 & [-21.3316, 19.1915] \\
+2 & 7.7562 & [-14.9309, 30.4434] & -19.2627 & [-41.9498, 3.4245] \\
+3 & 14.4929 & [-8.0050, 36.9908] & -21.5323 & [-44.0303, 0.9656] \\
+4 & 3.8736 & [-18.7956, 26.5427] & -41.1579 & [-63.8271, -18.4888] \\
+\midrule
+Pre average & -23.3319 & [-38.7380, -7.9259] & -0.8162 & [-4.0965, 2.4641] \\
+Post average & 9.7596 & [-8.4872, 28.0063] & -17.2593 & [-46.8674, 12.3488] \\
+\bottomrule
+\end{tabular}
+\end{center}
+\medskip
+\textit{The interaction panel comes from this FE specification's own \texttt{post} $\times$ \texttt{treat} $\times$ \texttt{downup\_ac\_pop} regression and is not rotated.}
+\clearpage
+\section{Fixed-effect specification 6}
+\begin{center}
+\begin{minipage}[t]{0.48\textwidth}\centering
+\textbf{Baseline event study: original}\par\smallskip
+\includegraphics[width=\textwidth]{\detokenize{/users/aquisper/proj_bureaucrats_farms/figures/exploratory_analysis/politician_original_controls_fe_sweep/politician_original_fe06_controls_notyet_event_ori.png}}
+\end{minipage}\hfill
+\begin{minipage}[t]{0.48\textwidth}\centering
+\textbf{Baseline event study: pretrend rotated}\par\smallskip
+\includegraphics[width=\textwidth]{\detokenize{/users/aquisper/proj_bureaucrats_farms/figures/exploratory_analysis/politician_original_controls_fe_sweep/politician_original_fe06_controls_notyet_event_rotated.png}}
+\end{minipage}\par\medskip
+\textbf{DiD interaction: post $\times$ treat $\times$ downup\_ac\_pop}\par\smallskip
+\includegraphics[width=0.54\textwidth]{\detokenize{/users/aquisper/proj_bureaucrats_farms/figures/exploratory_analysis/politician_original_controls_fe_sweep/politician_original_fe06_controls_notyet_did_interaction_rural_acpop_all_1.png}}
+\end{center}
+\clearpage
+\subsection*{Baseline event-study estimates: specification 6}
+\begin{center}
+\scriptsize
+\begin{tabular}{r rr rr}
+\toprule
+Event time & Original $\hat\beta$ & Original 95\% CI & Rotated $\hat\beta$ & Rotated 95\% CI \\
+\midrule
+-5 & -9.1468 & [-29.9906, 11.6971] & -1.7987 & [-22.6426, 19.0451] \\
+-4 & -7.2617 & [-23.0982, 8.5747] & -1.7507 & [-17.5871, 14.0857] \\
+-3 & 1.4316 & [-18.0527, 20.9158] & 5.1056 & [-14.3786, 24.5899] \\
+-2 & 0.3988 & [-14.1076, 14.9052] & 2.2358 & [-12.2706, 16.7423] \\
+-1 & 0.0000 & [0.0000, 0.0000] & 0.0000 & [0.0000, 0.0000] \\
+0 & 19.6726 & [0.1698, 39.1754] & 17.8356 & [-1.6672, 37.3384] \\
+1 & 22.7581 & [1.2487, 44.2675] & 19.0841 & [-2.4253, 40.5934] \\
+2 & 23.2594 & [0.3150, 46.2038] & 17.7484 & [-5.1960, 40.6928] \\
+3 & 25.6838 & [1.8813, 49.4864] & 18.3358 & [-5.4667, 42.1383] \\
+4 & 24.3170 & [0.5987, 48.0353] & 15.1319 & [-8.5864, 38.8502] \\
+\midrule
+Pre average & -3.6445 & [-17.6748, 10.3857] & 0.9480 & [-2.1538, 4.0498] \\
+Post average & 23.1382 & [4.0052, 42.2712] & 17.6272 & [-10.5870, 45.8413] \\
+\bottomrule
+\end{tabular}
+\end{center}
+\medskip
+\textit{The interaction panel comes from this FE specification's own \texttt{post} $\times$ \texttt{treat} $\times$ \texttt{downup\_ac\_pop} regression and is not rotated.}
+\clearpage
+\section{Fixed-effect specification 7}
+\begin{center}
+\begin{minipage}[t]{0.48\textwidth}\centering
+\textbf{Baseline event study: original}\par\smallskip
+\includegraphics[width=\textwidth]{\detokenize{/users/aquisper/proj_bureaucrats_farms/figures/exploratory_analysis/politician_original_controls_fe_sweep/politician_original_fe07_controls_notyet_event_ori.png}}
+\end{minipage}\hfill
+\begin{minipage}[t]{0.48\textwidth}\centering
+\textbf{Baseline event study: pretrend rotated}\par\smallskip
+\includegraphics[width=\textwidth]{\detokenize{/users/aquisper/proj_bureaucrats_farms/figures/exploratory_analysis/politician_original_controls_fe_sweep/politician_original_fe07_controls_notyet_event_rotated.png}}
+\end{minipage}\par\medskip
+\textbf{DiD interaction: post $\times$ treat $\times$ downup\_ac\_pop}\par\smallskip
+\includegraphics[width=0.54\textwidth]{\detokenize{/users/aquisper/proj_bureaucrats_farms/figures/exploratory_analysis/politician_original_controls_fe_sweep/politician_original_fe07_controls_notyet_did_interaction_rural_acpop_all_1.png}}
+\end{center}
+\clearpage
+\subsection*{Baseline event-study estimates: specification 7}
+\begin{center}
+\scriptsize
+\begin{tabular}{r rr rr}
+\toprule
+Event time & Original $\hat\beta$ & Original 95\% CI & Rotated $\hat\beta$ & Rotated 95\% CI \\
+\midrule
+-5 & -15.7285 & [-39.3248, 7.8677] & 0.5749 & [-23.0213, 24.1712] \\
+-4 & -32.2225 & [-52.6551, -11.7900] & -19.9949 & [-40.4274, 0.4376] \\
+-3 & 16.1813 & [-1.7057, 34.0683] & 24.3331 & [6.4461, 42.2201] \\
+-2 & 4.9430 & [-8.2866, 18.1726] & 9.0188 & [-4.2108, 22.2484] \\
+-1 & 0.0000 & [0.0000, 0.0000] & 0.0000 & [0.0000, 0.0000] \\
+0 & 16.1509 & [1.3339, 30.9679] & 12.0750 & [-2.7420, 26.8920] \\
+1 & 34.8500 & [17.9061, 51.7940] & 26.6983 & [9.7543, 43.6422] \\
+2 & 36.9141 & [14.6900, 59.1383] & 24.6865 & [2.4624, 46.9107] \\
+3 & 46.9151 & [24.2926, 69.5376] & 30.6116 & [7.9891, 53.2341] \\
+4 & 38.5978 & [16.5914, 60.6042] & 18.2184 & [-3.7880, 40.2249] \\
+\midrule
+Pre average & -6.7067 & [-21.4138, 8.0004] & 3.4830 & [0.3966, 6.5694] \\
+Post average & 34.6856 & [18.6834, 50.6878] & 22.4580 & [-0.9379, 45.8538] \\
+\bottomrule
+\end{tabular}
+\end{center}
+\medskip
+\textit{The interaction panel comes from this FE specification's own \texttt{post} $\times$ \texttt{treat} $\times$ \texttt{downup\_ac\_pop} regression and is not rotated.}
+\clearpage
+\section{Fixed-effect specification 8}
+\begin{center}
+\begin{minipage}[t]{0.48\textwidth}\centering
+\textbf{Baseline event study: original}\par\smallskip
+\includegraphics[width=\textwidth]{\detokenize{/users/aquisper/proj_bureaucrats_farms/figures/exploratory_analysis/politician_original_controls_fe_sweep/politician_original_fe08_controls_notyet_event_ori.png}}
+\end{minipage}\hfill
+\begin{minipage}[t]{0.48\textwidth}\centering
+\textbf{Baseline event study: pretrend rotated}\par\smallskip
+\includegraphics[width=\textwidth]{\detokenize{/users/aquisper/proj_bureaucrats_farms/figures/exploratory_analysis/politician_original_controls_fe_sweep/politician_original_fe08_controls_notyet_event_rotated.png}}
+\end{minipage}\par\medskip
+\textbf{DiD interaction: post $\times$ treat $\times$ downup\_ac\_pop}\par\smallskip
+\includegraphics[width=0.54\textwidth]{\detokenize{/users/aquisper/proj_bureaucrats_farms/figures/exploratory_analysis/politician_original_controls_fe_sweep/politician_original_fe08_controls_notyet_did_interaction_rural_acpop_all_1.png}}
+\end{center}
+\clearpage
+\subsection*{Baseline event-study estimates: specification 8}
+\begin{center}
+\scriptsize
+\begin{tabular}{r rr rr}
+\toprule
+Event time & Original $\hat\beta$ & Original 95\% CI & Rotated $\hat\beta$ & Rotated 95\% CI \\
+\midrule
+-5 & 5.4256 & [-14.8337, 25.6849] & 1.4051 & [-18.8542, 21.6645] \\
+-4 & -10.0168 & [-27.6679, 7.6342] & -13.0322 & [-30.6832, 4.6189] \\
+-3 & 16.3072 & [-1.1634, 33.7778] & 14.2969 & [-3.1736, 31.7675] \\
+-2 & 5.8872 & [-8.3958, 20.1702] & 4.8821 & [-9.4009, 19.1651] \\
+-1 & 0.0000 & [0.0000, 0.0000] & 0.0000 & [0.0000, 0.0000] \\
+0 & 32.9122 & [16.1237, 49.7007] & 33.9173 & [17.1288, 50.7058] \\
+1 & 51.9969 & [32.5262, 71.4677] & 54.0071 & [34.5364, 73.4779] \\
+2 & 32.6033 & [10.7966, 54.4101] & 35.6187 & [13.8120, 57.4254] \\
+3 & 43.6570 & [22.2893, 65.0247] & 47.6775 & [26.3098, 69.0452] \\
+4 & 37.1871 & [16.8731, 57.5010] & 42.2127 & [21.8987, 62.5266] \\
+\midrule
+Pre average & 4.4008 & [-8.3556, 17.1572] & 1.8880 & [-1.4146, 5.1906] \\
+Post average & 39.6713 & [23.5612, 55.7814] & 42.6867 & [17.5387, 67.8346] \\
+\bottomrule
+\end{tabular}
+\end{center}
+\medskip
+\textit{The interaction panel comes from this FE specification's own \texttt{post} $\times$ \texttt{treat} $\times$ \texttt{downup\_ac\_pop} regression and is not rotated.}
+\clearpage
+\section{Fixed-effect specification 9}
+\begin{center}
+\begin{minipage}[t]{0.48\textwidth}\centering
+\textbf{Baseline event study: original}\par\smallskip
+\includegraphics[width=\textwidth]{\detokenize{/users/aquisper/proj_bureaucrats_farms/figures/exploratory_analysis/politician_original_controls_fe_sweep/politician_original_fe09_controls_notyet_event_ori.png}}
+\end{minipage}\hfill
+\begin{minipage}[t]{0.48\textwidth}\centering
+\textbf{Baseline event study: pretrend rotated}\par\smallskip
+\includegraphics[width=\textwidth]{\detokenize{/users/aquisper/proj_bureaucrats_farms/figures/exploratory_analysis/politician_original_controls_fe_sweep/politician_original_fe09_controls_notyet_event_rotated.png}}
+\end{minipage}\par\medskip
+\textbf{DiD interaction: post $\times$ treat $\times$ downup\_ac\_pop}\par\smallskip
+\includegraphics[width=0.54\textwidth]{\detokenize{/users/aquisper/proj_bureaucrats_farms/figures/exploratory_analysis/politician_original_controls_fe_sweep/politician_original_fe09_controls_notyet_did_interaction_rural_acpop_all_1.png}}
+\end{center}
+\clearpage
+\subsection*{Baseline event-study estimates: specification 9}
+\begin{center}
+\scriptsize
+\begin{tabular}{r rr rr}
+\toprule
+Event time & Original $\hat\beta$ & Original 95\% CI & Rotated $\hat\beta$ & Rotated 95\% CI \\
+\midrule
+-5 & -7.5585 & [-31.4354, 16.3185] & 0.9939 & [-22.8830, 24.8709] \\
+-4 & -27.2039 & [-47.9868, -6.4210] & -20.7896 & [-41.5725, -0.0067] \\
+-3 & 20.3663 & [2.4546, 38.2779] & 24.6425 & [6.7308, 42.5541] \\
+-2 & 6.9700 & [-6.5900, 20.5301] & 9.1081 & [-4.4519, 22.6682] \\
+-1 & 0.0000 & [0.0000, 0.0000] & 0.0000 & [0.0000, 0.0000] \\
+0 & 12.2721 & [-8.2330, 32.7771] & 10.1340 & [-10.3711, 30.6390] \\
+1 & 29.9448 & [9.4285, 50.4611] & 25.6686 & [5.1524, 46.1849] \\
+2 & 29.6273 & [6.6419, 52.6127] & 23.2130 & [0.2276, 46.1984] \\
+3 & 36.4815 & [13.3935, 59.5695] & 27.9291 & [4.8411, 51.0171] \\
+4 & 26.4313 & [3.8438, 49.0188] & 15.7408 & [-6.8467, 38.3283] \\
+\midrule
+Pre average & -1.8565 & [-16.6930, 12.9800] & 3.4887 & [0.3024, 6.6751] \\
+Post average & 26.9514 & [8.3200, 45.5828] & 20.5371 & [-8.4621, 49.5364] \\
+\bottomrule
+\end{tabular}
+\end{center}
+\medskip
+\textit{The interaction panel comes from this FE specification's own \texttt{post} $\times$ \texttt{treat} $\times$ \texttt{downup\_ac\_pop} regression and is not rotated.}
+\clearpage
+\section{Fixed-effect specification 10}
+\begin{center}
+\begin{minipage}[t]{0.48\textwidth}\centering
+\textbf{Baseline event study: original}\par\smallskip
+\includegraphics[width=\textwidth]{\detokenize{/users/aquisper/proj_bureaucrats_farms/figures/exploratory_analysis/politician_original_controls_fe_sweep/politician_original_fe10_controls_notyet_event_ori.png}}
+\end{minipage}\hfill
+\begin{minipage}[t]{0.48\textwidth}\centering
+\textbf{Baseline event study: pretrend rotated}\par\smallskip
+\includegraphics[width=\textwidth]{\detokenize{/users/aquisper/proj_bureaucrats_farms/figures/exploratory_analysis/politician_original_controls_fe_sweep/politician_original_fe10_controls_notyet_event_rotated.png}}
+\end{minipage}\par\medskip
+\textbf{DiD interaction: post $\times$ treat $\times$ downup\_ac\_pop}\par\smallskip
+\includegraphics[width=0.54\textwidth]{\detokenize{/users/aquisper/proj_bureaucrats_farms/figures/exploratory_analysis/politician_original_controls_fe_sweep/politician_original_fe10_controls_notyet_did_interaction_rural_acpop_all_1.png}}
+\end{center}
+\clearpage
+\subsection*{Baseline event-study estimates: specification 10}
+\begin{center}
+\scriptsize
+\begin{tabular}{r rr rr}
+\toprule
+Event time & Original $\hat\beta$ & Original 95\% CI & Rotated $\hat\beta$ & Rotated 95\% CI \\
+\midrule
+-5 & -5.3613 & [-26.2111, 15.4885] & -0.8733 & [-21.7232, 19.9765] \\
+-4 & -6.1527 & [-21.6913, 9.3859] & -2.7867 & [-18.3253, 12.7518] \\
+-3 & 2.9644 & [-16.5262, 22.4551] & 5.2084 & [-14.2823, 24.6991] \\
+-2 & 0.3148 & [-13.7827, 14.4124] & 1.4368 & [-12.6607, 15.5344] \\
+-1 & 0.0000 & [0.0000, 0.0000] & 0.0000 & [0.0000, 0.0000] \\
+0 & 19.6914 & [0.4669, 38.9160] & 18.5694 & [-0.6551, 37.7940] \\
+1 & 22.7736 & [1.5775, 43.9696] & 20.5296 & [-0.6664, 41.7256] \\
+2 & 24.0250 & [1.0813, 46.9687] & 20.6590 & [-2.2847, 43.6027] \\
+3 & 27.4221 & [3.8413, 51.0029] & 22.9342 & [-0.6466, 46.5150] \\
+4 & 25.1804 & [1.7904, 48.5704] & 19.5704 & [-3.8196, 42.9605] \\
+\midrule
+Pre average & -2.0587 & [-15.8482, 11.7308] & 0.7463 & [-2.3227, 3.8153] \\
+Post average & 23.8185 & [4.9331, 42.7039] & 20.4525 & [-7.2690, 48.1741] \\
+\bottomrule
+\end{tabular}
+\end{center}
+\medskip
+\textit{The interaction panel comes from this FE specification's own \texttt{post} $\times$ \texttt{treat} $\times$ \texttt{downup\_ac\_pop} regression and is not rotated.}
+\clearpage
+\section{Fixed-effect specification 11}
+\begin{center}
+\begin{minipage}[t]{0.48\textwidth}\centering
+\textbf{Baseline event study: original}\par\smallskip
+\includegraphics[width=\textwidth]{\detokenize{/users/aquisper/proj_bureaucrats_farms/figures/exploratory_analysis/politician_original_controls_fe_sweep/politician_original_fe11_controls_notyet_event_ori.png}}
+\end{minipage}\hfill
+\begin{minipage}[t]{0.48\textwidth}\centering
+\textbf{Baseline event study: pretrend rotated}\par\smallskip
+\includegraphics[width=\textwidth]{\detokenize{/users/aquisper/proj_bureaucrats_farms/figures/exploratory_analysis/politician_original_controls_fe_sweep/politician_original_fe11_controls_notyet_event_rotated.png}}
+\end{minipage}\par\medskip
+\textbf{DiD interaction: post $\times$ treat $\times$ downup\_ac\_pop}\par\smallskip
+\includegraphics[width=0.54\textwidth]{\detokenize{/users/aquisper/proj_bureaucrats_farms/figures/exploratory_analysis/politician_original_controls_fe_sweep/politician_original_fe11_controls_notyet_did_interaction_rural_acpop_all_1.png}}
+\end{center}
+\clearpage
+\subsection*{Baseline event-study estimates: specification 11}
+\begin{center}
+\scriptsize
+\begin{tabular}{r rr rr}
+\toprule
+Event time & Original $\hat\beta$ & Original 95\% CI & Rotated $\hat\beta$ & Rotated 95\% CI \\
+\midrule
+-5 & -13.8226 & [-40.0885, 12.4433] & 9.0928 & [-17.1731, 35.3586] \\
+-4 & -38.0889 & [-60.4821, -15.6956] & -20.9023 & [-43.2956, 1.4909] \\
+-3 & -1.4264 & [-20.0436, 17.1907] & 10.0313 & [-8.5859, 28.6484] \\
+-2 & 0.5447 & [-14.0673, 15.1566] & 6.2735 & [-8.3384, 20.8855] \\
+-1 & 0.0000 & [0.0000, 0.0000] & 0.0000 & [0.0000, 0.0000] \\
+0 & 41.8414 & [24.6390, 59.0439] & 36.1126 & [18.9101, 53.3151] \\
+1 & 59.3753 & [38.5441, 80.2066] & 47.9177 & [27.0864, 68.7489] \\
+2 & 40.8797 & [17.0517, 64.7077] & 23.6932 & [-0.1348, 47.5212] \\
+3 & 53.8232 & [30.6362, 77.0103] & 30.9079 & [7.7208, 54.0949] \\
+4 & 38.7993 & [16.3518, 61.2469] & 10.1552 & [-12.2924, 32.6027] \\
+\midrule
+Pre average & -13.1983 & [-29.0854, 2.6888] & 1.1238 & [-2.4425, 4.6901] \\
+Post average & 46.9438 & [29.1072, 64.7805] & 29.7573 & [3.8213, 55.6933] \\
+\bottomrule
+\end{tabular}
+\end{center}
+\medskip
+\textit{The interaction panel comes from this FE specification's own \texttt{post} $\times$ \texttt{treat} $\times$ \texttt{downup\_ac\_pop} regression and is not rotated.}
+\clearpage
+\section{Fixed-effect specification 12}
+\begin{center}
+\begin{minipage}[t]{0.48\textwidth}\centering
+\textbf{Baseline event study: original}\par\smallskip
+\includegraphics[width=\textwidth]{\detokenize{/users/aquisper/proj_bureaucrats_farms/figures/exploratory_analysis/politician_original_controls_fe_sweep/politician_original_fe12_controls_notyet_event_ori.png}}
+\end{minipage}\hfill
+\begin{minipage}[t]{0.48\textwidth}\centering
+\textbf{Baseline event study: pretrend rotated}\par\smallskip
+\includegraphics[width=\textwidth]{\detokenize{/users/aquisper/proj_bureaucrats_farms/figures/exploratory_analysis/politician_original_controls_fe_sweep/politician_original_fe12_controls_notyet_event_rotated.png}}
+\end{minipage}\par\medskip
+\textbf{DiD interaction: post $\times$ treat $\times$ downup\_ac\_pop}\par\smallskip
+\includegraphics[width=0.54\textwidth]{\detokenize{/users/aquisper/proj_bureaucrats_farms/figures/exploratory_analysis/politician_original_controls_fe_sweep/politician_original_fe12_controls_notyet_did_interaction_rural_acpop_all_1.png}}
+\end{center}
+\clearpage
+\subsection*{Baseline event-study estimates: specification 12}
+\begin{center}
+\scriptsize
+\begin{tabular}{r rr rr}
+\toprule
+Event time & Original $\hat\beta$ & Original 95\% CI & Rotated $\hat\beta$ & Rotated 95\% CI \\
+\midrule
+-5 & -60.5093 & [-96.5249, -24.4936] & 26.9995 & [-9.0161, 63.0152] \\
+-4 & -98.3256 & [-132.9051, -63.7460] & -32.6940 & [-67.2735, 1.8856] \\
+-3 & -44.9013 & [-67.7937, -22.0089] & -1.1469 & [-24.0394, 21.7455] \\
+-2 & -29.4995 & [-44.5358, -14.4631] & -7.6223 & [-22.6586, 7.4141] \\
+-1 & 0.0000 & [0.0000, 0.0000] & 0.0000 & [0.0000, 0.0000] \\
+0 & -34.2694 & [-61.2205, -7.3183] & -56.1466 & [-83.0977, -29.1955] \\
+1 & -8.6474 & [-31.2223, 13.9276] & -52.4018 & [-74.9767, -29.8268] \\
+2 & -13.5757 & [-38.0751, 10.9237] & -79.2073 & [-103.7067, -54.7079] \\
+3 & -1.1549 & [-25.0212, 22.7114] & -88.6637 & [-112.5299, -64.7974] \\
+4 & -0.4972 & [-24.0743, 23.0799] & -109.8832 & [-133.4603, -86.3060] \\
+\midrule
+Pre average & -58.3089 & [-82.2711, -34.3467] & -3.6159 & [-6.9502, -0.2816] \\
+Post average & -11.6289 & [-32.4781, 9.2203] & -77.2605 & [-120.5811, -33.9399] \\
+\bottomrule
+\end{tabular}
+\end{center}
+\medskip
+\textit{The interaction panel comes from this FE specification's own \texttt{post} $\times$ \texttt{treat} $\times$ \texttt{downup\_ac\_pop} regression and is not rotated.}
+\clearpage
+\section{Fixed-effect specification 13}
+\begin{center}
+\begin{minipage}[t]{0.48\textwidth}\centering
+\textbf{Baseline event study: original}\par\smallskip
+\includegraphics[width=\textwidth]{\detokenize{/users/aquisper/proj_bureaucrats_farms/figures/exploratory_analysis/politician_original_controls_fe_sweep/politician_original_fe13_controls_notyet_event_ori.png}}
+\end{minipage}\hfill
+\begin{minipage}[t]{0.48\textwidth}\centering
+\textbf{Baseline event study: pretrend rotated}\par\smallskip
+\includegraphics[width=\textwidth]{\detokenize{/users/aquisper/proj_bureaucrats_farms/figures/exploratory_analysis/politician_original_controls_fe_sweep/politician_original_fe13_controls_notyet_event_rotated.png}}
+\end{minipage}\par\medskip
+\textbf{DiD interaction: post $\times$ treat $\times$ downup\_ac\_pop}\par\smallskip
+\includegraphics[width=0.54\textwidth]{\detokenize{/users/aquisper/proj_bureaucrats_farms/figures/exploratory_analysis/politician_original_controls_fe_sweep/politician_original_fe13_controls_notyet_did_interaction_rural_acpop_all_1.png}}
+\end{center}
+\clearpage
+\subsection*{Baseline event-study estimates: specification 13}
+\begin{center}
+\scriptsize
+\begin{tabular}{r rr rr}
+\toprule
+Event time & Original $\hat\beta$ & Original 95\% CI & Rotated $\hat\beta$ & Rotated 95\% CI \\
+\midrule
+-5 & -9.2262 & [-30.0980, 11.6455] & -1.8067 & [-22.6784, 19.0651] \\
+-4 & -7.2827 & [-23.1445, 8.5790] & -1.7181 & [-17.5798, 14.1437] \\
+-3 & 1.3334 & [-18.1558, 20.8225] & 5.0431 & [-14.4460, 24.5323] \\
+-2 & 0.4396 & [-14.1085, 14.9877] & 2.2945 & [-12.2536, 16.8426] \\
+-1 & 0.0000 & [0.0000, 0.0000] & 0.0000 & [0.0000, 0.0000] \\
+0 & 19.6939 & [0.1597, 39.2282] & 17.8390 & [-1.6952, 37.3733] \\
+1 & 22.8256 & [1.2867, 44.3646] & 19.1159 & [-2.4231, 40.6548] \\
+2 & 23.3127 & [0.3569, 46.2686] & 17.7481 & [-5.2078, 40.7039] \\
+3 & 25.6764 & [1.8448, 49.5080] & 18.2568 & [-5.5748, 42.0885] \\
+4 & 24.3626 & [0.6122, 48.1130] & 15.0881 & [-8.6623, 38.8386] \\
+\midrule
+Pre average & -3.6840 & [-17.7394, 10.3714] & 0.9532 & [-2.1536, 4.0601] \\
+Post average & 23.1743 & [4.0146, 42.3339] & 17.6096 & [-10.6631, 45.8823] \\
+\bottomrule
+\end{tabular}
+\end{center}
+\medskip
+\textit{The interaction panel comes from this FE specification's own \texttt{post} $\times$ \texttt{treat} $\times$ \texttt{downup\_ac\_pop} regression and is not rotated.}
+\clearpage
+\section{Fixed-effect specification 14}
+\begin{center}
+\begin{minipage}[t]{0.48\textwidth}\centering
+\textbf{Baseline event study: original}\par\smallskip
+\includegraphics[width=\textwidth]{\detokenize{/users/aquisper/proj_bureaucrats_farms/figures/exploratory_analysis/politician_original_controls_fe_sweep/politician_original_fe14_controls_notyet_event_ori.png}}
+\end{minipage}\hfill
+\begin{minipage}[t]{0.48\textwidth}\centering
+\textbf{Baseline event study: pretrend rotated}\par\smallskip
+\includegraphics[width=\textwidth]{\detokenize{/users/aquisper/proj_bureaucrats_farms/figures/exploratory_analysis/politician_original_controls_fe_sweep/politician_original_fe14_controls_notyet_event_rotated.png}}
+\end{minipage}\par\medskip
+\textbf{DiD interaction: post $\times$ treat $\times$ downup\_ac\_pop}\par\smallskip
+\includegraphics[width=0.54\textwidth]{\detokenize{/users/aquisper/proj_bureaucrats_farms/figures/exploratory_analysis/politician_original_controls_fe_sweep/politician_original_fe14_controls_notyet_did_interaction_rural_acpop_all_1.png}}
+\end{center}
+\clearpage
+\subsection*{Baseline event-study estimates: specification 14}
+\begin{center}
+\scriptsize
+\begin{tabular}{r rr rr}
+\toprule
+Event time & Original $\hat\beta$ & Original 95\% CI & Rotated $\hat\beta$ & Rotated 95\% CI \\
+\midrule
+-5 & 3.6971 & [-19.1241, 26.5182] & 9.9867 & [-12.8344, 32.8079] \\
+-4 & -25.4503 & [-44.9399, -5.9606] & -20.7330 & [-40.2226, -1.2434] \\
+-3 & 5.7697 & [-12.2212, 23.7606] & 8.9145 & [-9.0764, 26.9054] \\
+-2 & 2.8505 & [-11.9998, 17.7009] & 4.4230 & [-10.4274, 19.2733] \\
+-1 & 0.0000 & [0.0000, 0.0000] & 0.0000 & [0.0000, 0.0000] \\
+0 & 23.2816 & [3.3751, 43.1881] & 21.7091 & [1.8026, 41.6157] \\
+1 & 37.6973 & [16.0786, 59.3160] & 34.5525 & [12.9337, 56.1712] \\
+2 & 14.2121 & [-9.8124, 38.2365] & 9.4948 & [-14.5296, 33.5193] \\
+3 & 26.8311 & [3.4132, 50.2490] & 20.5414 & [-2.8765, 43.9593] \\
+4 & 10.6767 & [-12.3765, 33.7300] & 2.8146 & [-20.2387, 25.8678] \\
+\midrule
+Pre average & -3.2833 & [-17.1014, 10.5349] & 0.6478 & [-3.0864, 4.3820] \\
+Post average & 22.5398 & [3.4962, 41.5833] & 17.8225 & [-10.2436, 45.8885] \\
+\bottomrule
+\end{tabular}
+\end{center}
+\medskip
+\textit{The interaction panel comes from this FE specification's own \texttt{post} $\times$ \texttt{treat} $\times$ \texttt{downup\_ac\_pop} regression and is not rotated.}
+\clearpage
+\section{Fixed-effect specification 15}
+\begin{center}
+\begin{minipage}[t]{0.48\textwidth}\centering
+\textbf{Baseline event study: original}\par\smallskip
+\includegraphics[width=\textwidth]{\detokenize{/users/aquisper/proj_bureaucrats_farms/figures/exploratory_analysis/politician_original_controls_fe_sweep/politician_original_fe15_controls_notyet_event_ori.png}}
+\end{minipage}\hfill
+\begin{minipage}[t]{0.48\textwidth}\centering
+\textbf{Baseline event study: pretrend rotated}\par\smallskip
+\includegraphics[width=\textwidth]{\detokenize{/users/aquisper/proj_bureaucrats_farms/figures/exploratory_analysis/politician_original_controls_fe_sweep/politician_original_fe15_controls_notyet_event_rotated.png}}
+\end{minipage}\par\medskip
+\textbf{DiD interaction: post $\times$ treat $\times$ downup\_ac\_pop}\par\smallskip
+\includegraphics[width=0.54\textwidth]{\detokenize{/users/aquisper/proj_bureaucrats_farms/figures/exploratory_analysis/politician_original_controls_fe_sweep/politician_original_fe15_controls_notyet_did_interaction_rural_acpop_all_1.png}}
+\end{center}
+\clearpage
+\subsection*{Baseline event-study estimates: specification 15}
+\begin{center}
+\scriptsize
+\begin{tabular}{r rr rr}
+\toprule
+Event time & Original $\hat\beta$ & Original 95\% CI & Rotated $\hat\beta$ & Rotated 95\% CI \\
+\midrule
+-5 & -9.1468 & [-29.9907, 11.6971] & -1.7987 & [-22.6426, 19.0451] \\
+-4 & -7.2617 & [-23.0981, 8.5746] & -1.7507 & [-17.5871, 14.0857] \\
+-3 & 1.4316 & [-18.0527, 20.9159] & 5.1056 & [-14.3787, 24.5899] \\
+-2 & 0.3988 & [-14.1076, 14.9052] & 2.2358 & [-12.2706, 16.7422] \\
+-1 & 0.0000 & [0.0000, 0.0000] & 0.0000 & [0.0000, 0.0000] \\
+0 & 19.6726 & [0.1701, 39.1752] & 17.8356 & [-1.6669, 37.3382] \\
+1 & 22.7581 & [1.2491, 44.2671] & 19.0841 & [-2.4249, 40.5930] \\
+2 & 23.2594 & [0.3154, 46.2035] & 17.7484 & [-5.1957, 40.6924] \\
+3 & 25.6838 & [1.8816, 49.4861] & 18.3358 & [-5.4664, 42.1380] \\
+4 & 24.3170 & [0.5989, 48.0350] & 15.1319 & [-8.5862, 38.8500] \\
+\midrule
+Pre average & -3.6445 & [-17.6748, 10.3857] & 0.9480 & [-2.1538, 4.0498] \\
+Post average & 23.1382 & [4.0056, 42.2708] & 17.6272 & [-10.5868, 45.8411] \\
+\bottomrule
+\end{tabular}
+\end{center}
+\medskip
+\textit{The interaction panel comes from this FE specification's own \texttt{post} $\times$ \texttt{treat} $\times$ \texttt{downup\_ac\_pop} regression and is not rotated.}
+\clearpage
+\section{Fixed-effect specification 16}
+\begin{center}
+\begin{minipage}[t]{0.48\textwidth}\centering
+\textbf{Baseline event study: original}\par\smallskip
+\includegraphics[width=\textwidth]{\detokenize{/users/aquisper/proj_bureaucrats_farms/figures/exploratory_analysis/politician_original_controls_fe_sweep/politician_original_fe16_controls_notyet_event_ori.png}}
+\end{minipage}\hfill
+\begin{minipage}[t]{0.48\textwidth}\centering
+\textbf{Baseline event study: pretrend rotated}\par\smallskip
+\includegraphics[width=\textwidth]{\detokenize{/users/aquisper/proj_bureaucrats_farms/figures/exploratory_analysis/politician_original_controls_fe_sweep/politician_original_fe16_controls_notyet_event_rotated.png}}
+\end{minipage}\par\medskip
+\textbf{DiD interaction: post $\times$ treat $\times$ downup\_ac\_pop}\par\smallskip
+\includegraphics[width=0.54\textwidth]{\detokenize{/users/aquisper/proj_bureaucrats_farms/figures/exploratory_analysis/politician_original_controls_fe_sweep/politician_original_fe16_controls_notyet_did_interaction_rural_acpop_all_1.png}}
+\end{center}
+\clearpage
+\subsection*{Baseline event-study estimates: specification 16}
+\begin{center}
+\scriptsize
+\begin{tabular}{r rr rr}
+\toprule
+Event time & Original $\hat\beta$ & Original 95\% CI & Rotated $\hat\beta$ & Rotated 95\% CI \\
+\midrule
+-5 & -9.1468 & [-29.9907, 11.6971] & -1.7987 & [-22.6426, 19.0451] \\
+-4 & -7.2617 & [-23.0982, 8.5747] & -1.7507 & [-17.5871, 14.0857] \\
+-3 & 1.4316 & [-18.0527, 20.9159] & 5.1056 & [-14.3787, 24.5899] \\
+-2 & 0.3988 & [-14.1077, 14.9053] & 2.2358 & [-12.2706, 16.7423] \\
+-1 & 0.0000 & [0.0000, 0.0000] & 0.0000 & [0.0000, 0.0000] \\
+0 & 19.6726 & [0.1698, 39.1755] & 17.8356 & [-1.6672, 37.3384] \\
+1 & 22.7581 & [1.2487, 44.2675] & 19.0841 & [-2.4253, 40.5935] \\
+2 & 23.2594 & [0.3150, 46.2039] & 17.7484 & [-5.1960, 40.6928] \\
+3 & 25.6838 & [1.8813, 49.4864] & 18.3358 & [-5.4668, 42.1383] \\
+4 & 24.3170 & [0.5986, 48.0353] & 15.1319 & [-8.5864, 38.8503] \\
+\midrule
+Pre average & -3.6445 & [-17.6748, 10.3857] & 0.9480 & [-2.1538, 4.0498] \\
+Post average & 23.1382 & [4.0052, 42.2712] & 17.6272 & [-10.5871, 45.8414] \\
+\bottomrule
+\end{tabular}
+\end{center}
+\medskip
+\textit{The interaction panel comes from this FE specification's own \texttt{post} $\times$ \texttt{treat} $\times$ \texttt{downup\_ac\_pop} regression and is not rotated.}
+\clearpage
+\section{Fixed-effect specification 17}
+\begin{center}
+\begin{minipage}[t]{0.48\textwidth}\centering
+\textbf{Baseline event study: original}\par\smallskip
+\includegraphics[width=\textwidth]{\detokenize{/users/aquisper/proj_bureaucrats_farms/figures/exploratory_analysis/politician_original_controls_fe_sweep/politician_original_fe17_controls_notyet_event_ori.png}}
+\end{minipage}\hfill
+\begin{minipage}[t]{0.48\textwidth}\centering
+\textbf{Baseline event study: pretrend rotated}\par\smallskip
+\includegraphics[width=\textwidth]{\detokenize{/users/aquisper/proj_bureaucrats_farms/figures/exploratory_analysis/politician_original_controls_fe_sweep/politician_original_fe17_controls_notyet_event_rotated.png}}
+\end{minipage}\par\medskip
+\textbf{DiD interaction: post $\times$ treat $\times$ downup\_ac\_pop}\par\smallskip
+\includegraphics[width=0.54\textwidth]{\detokenize{/users/aquisper/proj_bureaucrats_farms/figures/exploratory_analysis/politician_original_controls_fe_sweep/politician_original_fe17_controls_notyet_did_interaction_rural_acpop_all_1.png}}
+\end{center}
+\clearpage
+\subsection*{Baseline event-study estimates: specification 17}
+\begin{center}
+\scriptsize
+\begin{tabular}{r rr rr}
+\toprule
+Event time & Original $\hat\beta$ & Original 95\% CI & Rotated $\hat\beta$ & Rotated 95\% CI \\
+\midrule
+-5 & -4.0175 & [-27.1300, 19.0950] & 1.6698 & [-21.4427, 24.7823] \\
+-4 & -17.1890 & [-36.7973, 2.4193] & -12.9235 & [-32.5319, 6.6848] \\
+-3 & 11.3662 & [-7.3628, 30.0952] & 14.2099 & [-4.5192, 32.9389] \\
+-2 & 2.2500 & [-11.8327, 16.3326] & 3.6718 & [-10.4109, 17.7544] \\
+-1 & 0.0000 & [0.0000, 0.0000] & 0.0000 & [0.0000, 0.0000] \\
+0 & 37.1251 & [19.1332, 55.1170] & 35.7033 & [17.7113, 53.6952] \\
+1 & 58.8957 & [37.8163, 79.9750] & 56.0520 & [34.9727, 77.1314] \\
+2 & 41.4497 & [17.4975, 65.4018] & 37.1842 & [13.2321, 61.1364] \\
+3 & 52.9857 & [29.1964, 76.7750] & 47.2984 & [23.5091, 71.0877] \\
+4 & 46.3689 & [23.7718, 68.9661] & 39.2598 & [16.6627, 61.8570] \\
+\midrule
+Pre average & -1.8976 & [-16.2815, 12.4863] & 1.6570 & [-1.6224, 4.9363] \\
+Post average & 47.3650 & [29.1812, 65.5488] & 43.0995 & [17.8837, 68.3154] \\
+\bottomrule
+\end{tabular}
+\end{center}
+\medskip
+\textit{The interaction panel comes from this FE specification's own \texttt{post} $\times$ \texttt{treat} $\times$ \texttt{downup\_ac\_pop} regression and is not rotated.}
+\clearpage
+\section{Fixed-effect specification 18}
+\begin{center}
+\begin{minipage}[t]{0.48\textwidth}\centering
+\textbf{Baseline event study: original}\par\smallskip
+\includegraphics[width=\textwidth]{\detokenize{/users/aquisper/proj_bureaucrats_farms/figures/exploratory_analysis/politician_original_controls_fe_sweep/politician_original_fe18_controls_notyet_event_ori.png}}
+\end{minipage}\hfill
+\begin{minipage}[t]{0.48\textwidth}\centering
+\textbf{Baseline event study: pretrend rotated}\par\smallskip
+\includegraphics[width=\textwidth]{\detokenize{/users/aquisper/proj_bureaucrats_farms/figures/exploratory_analysis/politician_original_controls_fe_sweep/politician_original_fe18_controls_notyet_event_rotated.png}}
+\end{minipage}\par\medskip
+\textbf{DiD interaction: post $\times$ treat $\times$ downup\_ac\_pop}\par\smallskip
+\includegraphics[width=0.54\textwidth]{\detokenize{/users/aquisper/proj_bureaucrats_farms/figures/exploratory_analysis/politician_original_controls_fe_sweep/politician_original_fe18_controls_notyet_did_interaction_rural_acpop_all_1.png}}
+\end{center}
+\clearpage
+\subsection*{Baseline event-study estimates: specification 18}
+\begin{center}
+\scriptsize
+\begin{tabular}{r rr rr}
+\toprule
+Event time & Original $\hat\beta$ & Original 95\% CI & Rotated $\hat\beta$ & Rotated 95\% CI \\
+\midrule
+-5 & -28.5653 & [-58.8882, 1.7576] & 11.2978 & [-19.0251, 41.6207] \\
+-4 & -53.0159 & [-81.1815, -24.8503] & -23.1186 & [-51.2842, 5.0470] \\
+-3 & -8.4836 & [-31.5572, 14.5900] & 11.4479 & [-11.6257, 34.5215] \\
+-2 & -8.6970 & [-23.3594, 5.9653] & 1.2687 & [-13.3936, 15.9310] \\
+-1 & 0.0000 & [0.0000, 0.0000] & 0.0000 & [0.0000, 0.0000] \\
+0 & -13.7624 & [-38.6237, 11.0988] & -23.7282 & [-48.5894, 1.1330] \\
+1 & 13.0538 & [-9.8231, 35.9306] & -6.8778 & [-29.7546, 15.9991] \\
+2 & 12.4967 & [-11.4186, 36.4121] & -17.4006 & [-41.3159, 6.5148] \\
+3 & 23.0018 & [-0.2344, 46.2381] & -16.8613 & [-40.0975, 6.3750] \\
+4 & 22.0232 & [-1.1971, 45.2434] & -27.8057 & [-51.0259, -4.5854] \\
+\midrule
+Pre average & -24.6905 & [-45.2737, -4.1073] & 0.2240 & [-3.1111, 3.5590] \\
+Post average & 11.3626 & [-8.6659, 31.3911] & -18.5347 & [-56.1591, 19.0897] \\
+\bottomrule
+\end{tabular}
+\end{center}
+\medskip
+\textit{The interaction panel comes from this FE specification's own \texttt{post} $\times$ \texttt{treat} $\times$ \texttt{downup\_ac\_pop} regression and is not rotated.}
+\clearpage
+\section{Fixed-effect specification 19}
+\begin{center}
+\begin{minipage}[t]{0.48\textwidth}\centering
+\textbf{Baseline event study: original}\par\smallskip
+\includegraphics[width=\textwidth]{\detokenize{/users/aquisper/proj_bureaucrats_farms/figures/exploratory_analysis/politician_original_controls_fe_sweep/politician_original_fe19_controls_notyet_event_ori.png}}
+\end{minipage}\hfill
+\begin{minipage}[t]{0.48\textwidth}\centering
+\textbf{Baseline event study: pretrend rotated}\par\smallskip
+\includegraphics[width=\textwidth]{\detokenize{/users/aquisper/proj_bureaucrats_farms/figures/exploratory_analysis/politician_original_controls_fe_sweep/politician_original_fe19_controls_notyet_event_rotated.png}}
+\end{minipage}\par\medskip
+\textbf{DiD interaction: post $\times$ treat $\times$ downup\_ac\_pop}\par\smallskip
+\includegraphics[width=0.54\textwidth]{\detokenize{/users/aquisper/proj_bureaucrats_farms/figures/exploratory_analysis/politician_original_controls_fe_sweep/politician_original_fe19_controls_notyet_did_interaction_rural_acpop_all_1.png}}
+\end{center}
+\clearpage
+\subsection*{Baseline event-study estimates: specification 19}
+\begin{center}
+\scriptsize
+\begin{tabular}{r rr rr}
+\toprule
+Event time & Original $\hat\beta$ & Original 95\% CI & Rotated $\hat\beta$ & Rotated 95\% CI \\
+\midrule
+-5 & -5.3561 & [-26.2055, 15.4932] & -0.8758 & [-21.7252, 19.9736] \\
+-4 & -6.1471 & [-21.6853, 9.3911] & -2.7869 & [-18.3251, 12.7513] \\
+-3 & 2.9712 & [-16.5189, 22.4614] & 5.2114 & [-14.2787, 24.7015] \\
+-2 & 0.3211 & [-13.7764, 14.4186] & 1.4412 & [-12.6563, 15.5387] \\
+-1 & 0.0000 & [0.0000, 0.0000] & 0.0000 & [0.0000, 0.0000] \\
+0 & 19.6983 & [0.4740, 38.9226] & 18.5782 & [-0.6461, 37.8025] \\
+1 & 22.7806 & [1.5847, 43.9765] & 20.5404 & [-0.6554, 41.7363] \\
+2 & 24.0317 & [1.0878, 46.9755] & 20.6714 & [-2.2724, 43.6153] \\
+3 & 27.4290 & [3.8482, 51.0098] & 22.9487 & [-0.6321, 46.5295] \\
+4 & 25.1872 & [1.7970, 48.5773] & 19.5868 & [-3.8034, 42.9769] \\
+\midrule
+Pre average & -2.0527 & [-15.8417, 11.7363] & 0.7475 & [-2.3216, 3.8165] \\
+Post average & 23.8253 & [4.9401, 42.7106] & 20.4651 & [-7.2556, 48.1858] \\
+\bottomrule
+\end{tabular}
+\end{center}
+\medskip
+\textit{The interaction panel comes from this FE specification's own \texttt{post} $\times$ \texttt{treat} $\times$ \texttt{downup\_ac\_pop} regression and is not rotated.}
+\clearpage
+\section{Fixed-effect specification 20}
+\begin{center}
+\begin{minipage}[t]{0.48\textwidth}\centering
+\textbf{Baseline event study: original}\par\smallskip
+\includegraphics[width=\textwidth]{\detokenize{/users/aquisper/proj_bureaucrats_farms/figures/exploratory_analysis/politician_original_controls_fe_sweep/politician_original_fe20_controls_notyet_event_ori.png}}
+\end{minipage}\hfill
+\begin{minipage}[t]{0.48\textwidth}\centering
+\textbf{Baseline event study: pretrend rotated}\par\smallskip
+\includegraphics[width=\textwidth]{\detokenize{/users/aquisper/proj_bureaucrats_farms/figures/exploratory_analysis/politician_original_controls_fe_sweep/politician_original_fe20_controls_notyet_event_rotated.png}}
+\end{minipage}\par\medskip
+\textbf{DiD interaction: post $\times$ treat $\times$ downup\_ac\_pop}\par\smallskip
+\includegraphics[width=0.54\textwidth]{\detokenize{/users/aquisper/proj_bureaucrats_farms/figures/exploratory_analysis/politician_original_controls_fe_sweep/politician_original_fe20_controls_notyet_did_interaction_rural_acpop_all_1.png}}
+\end{center}
+\clearpage
+\subsection*{Baseline event-study estimates: specification 20}
+\begin{center}
+\scriptsize
+\begin{tabular}{r rr rr}
+\toprule
+Event time & Original $\hat\beta$ & Original 95\% CI & Rotated $\hat\beta$ & Rotated 95\% CI \\
+\midrule
+-5 & 8.1320 & [-14.3987, 30.6627] & 0.4795 & [-22.0512, 23.0102] \\
+-4 & -7.2289 & [-26.0008, 11.5430] & -12.9683 & [-31.7402, 5.8036] \\
+-3 & 19.1001 & [0.4041, 37.7961] & 15.2738 & [-3.4222, 33.9699] \\
+-2 & 8.3525 & [-6.1577, 22.8628] & 6.4394 & [-8.0709, 20.9497] \\
+-1 & 0.0000 & [0.0000, 0.0000] & 0.0000 & [0.0000, 0.0000] \\
+0 & 22.9637 & [3.0740, 42.8534] & 24.8768 & [4.9871, 44.7665] \\
+1 & 42.4207 & [20.7027, 64.1387] & 46.2470 & [24.5289, 67.9650] \\
+2 & 24.1094 & [0.2941, 47.9248] & 29.8488 & [6.0335, 53.6641] \\
+3 & 36.5630 & [12.9575, 60.1684] & 44.2155 & [20.6101, 67.8209] \\
+4 & 28.0603 & [5.3837, 50.7369] & 37.6260 & [14.9493, 60.3026] \\
+\midrule
+Pre average & 7.0889 & [-6.7653, 20.9432] & 2.3061 & [-1.1593, 5.7715] \\
+Post average & 30.8234 & [11.8114, 49.8354] & 36.5628 & [8.5423, 64.5833] \\
+\bottomrule
+\end{tabular}
+\end{center}
+\medskip
+\textit{The interaction panel comes from this FE specification's own \texttt{post} $\times$ \texttt{treat} $\times$ \texttt{downup\_ac\_pop} regression and is not rotated.}
+\clearpage
+\section{Fixed-effect specification 21}
+\begin{center}
+\begin{minipage}[t]{0.48\textwidth}\centering
+\textbf{Baseline event study: original}\par\smallskip
+\includegraphics[width=\textwidth]{\detokenize{/users/aquisper/proj_bureaucrats_farms/figures/exploratory_analysis/politician_original_controls_fe_sweep/politician_original_fe21_controls_notyet_event_ori.png}}
+\end{minipage}\hfill
+\begin{minipage}[t]{0.48\textwidth}\centering
+\textbf{Baseline event study: pretrend rotated}\par\smallskip
+\includegraphics[width=\textwidth]{\detokenize{/users/aquisper/proj_bureaucrats_farms/figures/exploratory_analysis/politician_original_controls_fe_sweep/politician_original_fe21_controls_notyet_event_rotated.png}}
+\end{minipage}\par\medskip
+\textbf{DiD interaction: post $\times$ treat $\times$ downup\_ac\_pop}\par\smallskip
+\includegraphics[width=0.54\textwidth]{\detokenize{/users/aquisper/proj_bureaucrats_farms/figures/exploratory_analysis/politician_original_controls_fe_sweep/politician_original_fe21_controls_notyet_did_interaction_rural_acpop_all_1.png}}
+\end{center}
+\clearpage
+\subsection*{Baseline event-study estimates: specification 21}
+\begin{center}
+\scriptsize
+\begin{tabular}{r rr rr}
+\toprule
+Event time & Original $\hat\beta$ & Original 95\% CI & Rotated $\hat\beta$ & Rotated 95\% CI \\
+\midrule
+-5 & -5.3613 & [-26.2106, 15.4880] & -0.8733 & [-21.7226, 19.9760] \\
+-4 & -6.1528 & [-21.6911, 9.3856] & -2.7868 & [-18.3251, 12.7516] \\
+-3 & 2.9644 & [-16.5259, 22.4547] & 5.2084 & [-14.2819, 24.6987] \\
+-2 & 0.3148 & [-13.7830, 14.4127] & 1.4368 & [-12.6610, 15.5347] \\
+-1 & 0.0000 & [0.0000, 0.0000] & 0.0000 & [0.0000, 0.0000] \\
+0 & 19.6918 & [0.4669, 38.9166] & 18.5698 & [-0.6551, 37.7946] \\
+1 & 22.7739 & [1.5776, 43.9702] & 20.5299 & [-0.6664, 41.7262] \\
+2 & 24.0253 & [1.0813, 46.9693] & 20.6593 & [-2.2847, 43.6033] \\
+3 & 27.4225 & [3.8414, 51.0036] & 22.9345 & [-0.6466, 46.5156] \\
+4 & 25.1806 & [1.7903, 48.5708] & 19.5706 & [-3.8197, 42.9608] \\
+\midrule
+Pre average & -2.0587 & [-15.8480, 11.7305] & 0.7463 & [-2.3228, 3.8153] \\
+Post average & 23.8188 & [4.9332, 42.7045] & 20.4528 & [-7.2687, 48.1744] \\
+\bottomrule
+\end{tabular}
+\end{center}
+\medskip
+\textit{The interaction panel comes from this FE specification's own \texttt{post} $\times$ \texttt{treat} $\times$ \texttt{downup\_ac\_pop} regression and is not rotated.}
+\clearpage
+\section{Fixed-effect specification 22}
+\begin{center}
+\begin{minipage}[t]{0.48\textwidth}\centering
+\textbf{Baseline event study: original}\par\smallskip
+\includegraphics[width=\textwidth]{\detokenize{/users/aquisper/proj_bureaucrats_farms/figures/exploratory_analysis/politician_original_controls_fe_sweep/politician_original_fe22_controls_notyet_event_ori.png}}
+\end{minipage}\hfill
+\begin{minipage}[t]{0.48\textwidth}\centering
+\textbf{Baseline event study: pretrend rotated}\par\smallskip
+\includegraphics[width=\textwidth]{\detokenize{/users/aquisper/proj_bureaucrats_farms/figures/exploratory_analysis/politician_original_controls_fe_sweep/politician_original_fe22_controls_notyet_event_rotated.png}}
+\end{minipage}\par\medskip
+\textbf{DiD interaction: post $\times$ treat $\times$ downup\_ac\_pop}\par\smallskip
+\includegraphics[width=0.54\textwidth]{\detokenize{/users/aquisper/proj_bureaucrats_farms/figures/exploratory_analysis/politician_original_controls_fe_sweep/politician_original_fe22_controls_notyet_did_interaction_rural_acpop_all_1.png}}
+\end{center}
+\clearpage
+\subsection*{Baseline event-study estimates: specification 22}
+\begin{center}
+\scriptsize
+\begin{tabular}{r rr rr}
+\toprule
+Event time & Original $\hat\beta$ & Original 95\% CI & Rotated $\hat\beta$ & Rotated 95\% CI \\
+\midrule
+-5 & -5.3623 & [-26.2124, 15.4877] & -0.8729 & [-21.7229, 19.9772] \\
+-4 & -6.1539 & [-21.6930, 9.3852] & -2.7868 & [-18.3259, 12.7523] \\
+-3 & 2.9631 & [-16.5278, 22.4541] & 5.2079 & [-14.2831, 24.6988] \\
+-2 & 0.3137 & [-13.7838, 14.4112] & 1.4360 & [-12.6615, 15.5336] \\
+-1 & 0.0000 & [0.0000, 0.0000] & 0.0000 & [0.0000, 0.0000] \\
+0 & 19.6899 & [0.4648, 38.9149] & 18.5675 & [-0.6576, 37.7926] \\
+1 & 22.7714 & [1.5761, 43.9667] & 20.5267 & [-0.6686, 41.7220] \\
+2 & 24.0232 & [1.0773, 46.9691] & 20.6561 & [-2.2898, 43.6020] \\
+3 & 27.4209 & [3.8401, 51.0017] & 22.9314 & [-0.6494, 46.5122] \\
+4 & 25.1790 & [1.7884, 48.5695] & 19.5671 & [-3.8234, 42.9577] \\
+\midrule
+Pre average & -2.0598 & [-15.8498, 11.7301] & 0.7461 & [-2.3229, 3.8151] \\
+Post average & 23.8169 & [4.9309, 42.7028] & 20.4498 & [-7.2739, 48.1734] \\
+\bottomrule
+\end{tabular}
+\end{center}
+\medskip
+\textit{The interaction panel comes from this FE specification's own \texttt{post} $\times$ \texttt{treat} $\times$ \texttt{downup\_ac\_pop} regression and is not rotated.}
+\clearpage
+\section{Fixed-effect specification 23}
+\begin{center}
+\begin{minipage}[t]{0.48\textwidth}\centering
+\textbf{Baseline event study: original}\par\smallskip
+\includegraphics[width=\textwidth]{\detokenize{/users/aquisper/proj_bureaucrats_farms/figures/exploratory_analysis/politician_original_controls_fe_sweep/politician_original_fe23_controls_notyet_event_ori.png}}
+\end{minipage}\hfill
+\begin{minipage}[t]{0.48\textwidth}\centering
+\textbf{Baseline event study: pretrend rotated}\par\smallskip
+\includegraphics[width=\textwidth]{\detokenize{/users/aquisper/proj_bureaucrats_farms/figures/exploratory_analysis/politician_original_controls_fe_sweep/politician_original_fe23_controls_notyet_event_rotated.png}}
+\end{minipage}\par\medskip
+\textbf{DiD interaction: post $\times$ treat $\times$ downup\_ac\_pop}\par\smallskip
+\includegraphics[width=0.54\textwidth]{\detokenize{/users/aquisper/proj_bureaucrats_farms/figures/exploratory_analysis/politician_original_controls_fe_sweep/politician_original_fe23_controls_notyet_did_interaction_rural_acpop_all_1.png}}
+\end{center}
+\clearpage
+\subsection*{Baseline event-study estimates: specification 23}
+\begin{center}
+\scriptsize
+\begin{tabular}{r rr rr}
+\toprule
+Event time & Original $\hat\beta$ & Original 95\% CI & Rotated $\hat\beta$ & Rotated 95\% CI \\
+\midrule
+-5 & -36.6794 & [-67.7989, -5.5598] & 15.8732 & [-15.2463, 46.9927] \\
+-4 & -62.9499 & [-91.9299, -33.9698] & -23.5354 & [-52.5155, 5.4446] \\
+-3 & -22.9653 & [-44.9028, -1.0279] & 3.3109 & [-18.6265, 25.2484] \\
+-2 & -12.6466 & [-28.1337, 2.8405] & 0.4915 & [-14.9956, 15.9786] \\
+-1 & 0.0000 & [0.0000, 0.0000] & 0.0000 & [0.0000, 0.0000] \\
+0 & -15.9267 & [-39.7369, 7.8836] & -29.0648 & [-52.8751, -5.2546] \\
+1 & 16.3988 & [-6.2821, 39.0797] & -9.8775 & [-32.5584, 12.8034] \\
+2 & 0.8870 & [-23.9916, 25.7656] & -38.5274 & [-63.4060, -13.6488] \\
+3 & 14.3101 & [-9.6378, 38.2581] & -38.2425 & [-62.1904, -14.2945] \\
+4 & 7.5424 & [-15.9425, 31.0272] & -58.1484 & [-81.6332, -34.6635] \\
+\midrule
+Pre average & -33.8103 & [-54.0142, -13.6064] & -0.9649 & [-4.7315, 2.8016] \\
+Post average & 4.6423 & [-15.7258, 25.0104] & -34.7721 & [-72.3640, 2.8198] \\
+\bottomrule
+\end{tabular}
+\end{center}
+\medskip
+\textit{The interaction panel comes from this FE specification's own \texttt{post} $\times$ \texttt{treat} $\times$ \texttt{downup\_ac\_pop} regression and is not rotated.}
+\clearpage
+\section{Fixed-effect specification 24}
+\begin{center}
+\begin{minipage}[t]{0.48\textwidth}\centering
+\textbf{Baseline event study: original}\par\smallskip
+\includegraphics[width=\textwidth]{\detokenize{/users/aquisper/proj_bureaucrats_farms/figures/exploratory_analysis/politician_original_controls_fe_sweep/politician_original_fe24_controls_notyet_event_ori.png}}
+\end{minipage}\hfill
+\begin{minipage}[t]{0.48\textwidth}\centering
+\textbf{Baseline event study: pretrend rotated}\par\smallskip
+\includegraphics[width=\textwidth]{\detokenize{/users/aquisper/proj_bureaucrats_farms/figures/exploratory_analysis/politician_original_controls_fe_sweep/politician_original_fe24_controls_notyet_event_rotated.png}}
+\end{minipage}\par\medskip
+\textbf{DiD interaction: post $\times$ treat $\times$ downup\_ac\_pop}\par\smallskip
+\includegraphics[width=0.54\textwidth]{\detokenize{/users/aquisper/proj_bureaucrats_farms/figures/exploratory_analysis/politician_original_controls_fe_sweep/politician_original_fe24_controls_notyet_did_interaction_rural_acpop_all_1.png}}
+\end{center}
+\clearpage
+\subsection*{Baseline event-study estimates: specification 24}
+\begin{center}
+\scriptsize
+\begin{tabular}{r rr rr}
+\toprule
+Event time & Original $\hat\beta$ & Original 95\% CI & Rotated $\hat\beta$ & Rotated 95\% CI \\
+\midrule
+-5 & -9.2247 & [-30.0948, 11.6453] & -1.8073 & [-22.6773, 19.0627] \\
+-4 & -7.2823 & [-23.1426, 8.5780] & -1.7192 & [-17.5795, 14.1411] \\
+-3 & 1.3391 & [-18.1496, 20.8278] & 5.0479 & [-14.4408, 24.5366] \\
+-2 & 0.4368 & [-14.1088, 14.9824] & 2.2911 & [-12.2545, 16.8367] \\
+-1 & 0.0000 & [0.0000, 0.0000] & 0.0000 & [0.0000, 0.0000] \\
+0 & 19.6924 & [0.1603, 39.2246] & 17.8381 & [-1.6941, 37.3702] \\
+1 & 22.8207 & [1.2836, 44.3577] & 19.1120 & [-2.4251, 40.6490] \\
+2 & 23.3079 & [0.3530, 46.2628] & 17.7448 & [-5.2101, 40.6997] \\
+3 & 25.6750 & [1.8454, 49.5046] & 18.2575 & [-5.5721, 42.0871] \\
+4 & 24.3582 & [0.6096, 48.1068] & 15.0864 & [-8.6622, 38.8350] \\
+\midrule
+Pre average & -3.6828 & [-17.7368, 10.3712] & 0.9531 & [-2.1534, 4.0596] \\
+Post average & 23.1708 & [4.0130, 42.3287] & 17.6078 & [-10.6614, 45.8769] \\
+\bottomrule
+\end{tabular}
+\end{center}
+\medskip
+\textit{The interaction panel comes from this FE specification's own \texttt{post} $\times$ \texttt{treat} $\times$ \texttt{downup\_ac\_pop} regression and is not rotated.}
+\clearpage
+\section{Fixed-effect specification 25}
+\begin{center}
+\begin{minipage}[t]{0.48\textwidth}\centering
+\textbf{Baseline event study: original}\par\smallskip
+\includegraphics[width=\textwidth]{\detokenize{/users/aquisper/proj_bureaucrats_farms/figures/exploratory_analysis/politician_original_controls_fe_sweep/politician_original_fe25_controls_notyet_event_ori.png}}
+\end{minipage}\hfill
+\begin{minipage}[t]{0.48\textwidth}\centering
+\textbf{Baseline event study: pretrend rotated}\par\smallskip
+\includegraphics[width=\textwidth]{\detokenize{/users/aquisper/proj_bureaucrats_farms/figures/exploratory_analysis/politician_original_controls_fe_sweep/politician_original_fe25_controls_notyet_event_rotated.png}}
+\end{minipage}\par\medskip
+\textbf{DiD interaction: post $\times$ treat $\times$ downup\_ac\_pop}\par\smallskip
+\includegraphics[width=0.54\textwidth]{\detokenize{/users/aquisper/proj_bureaucrats_farms/figures/exploratory_analysis/politician_original_controls_fe_sweep/politician_original_fe25_controls_notyet_did_interaction_rural_acpop_all_1.png}}
+\end{center}
+\clearpage
+\subsection*{Baseline event-study estimates: specification 25}
+\begin{center}
+\scriptsize
+\begin{tabular}{r rr rr}
+\toprule
+Event time & Original $\hat\beta$ & Original 95\% CI & Rotated $\hat\beta$ & Rotated 95\% CI \\
+\midrule
+-5 & -9.2329 & [-30.1055, 11.6397] & -1.8036 & [-22.6762, 19.0690] \\
+-4 & -7.2899 & [-23.1523, 8.5725] & -1.7178 & [-17.5802, 14.1446] \\
+-3 & 1.3238 & [-18.1659, 20.8135] & 5.0385 & [-14.4513, 24.5282] \\
+-2 & 0.4334 & [-14.1157, 14.9825] & 2.2908 & [-12.2583, 16.8399] \\
+-1 & 0.0000 & [0.0000, 0.0000] & 0.0000 & [0.0000, 0.0000] \\
+0 & 19.6869 & [0.1519, 39.2220] & 17.8296 & [-1.7055, 37.3647] \\
+1 & 22.8201 & [1.2801, 44.3601] & 19.1054 & [-2.4345, 40.6454] \\
+2 & 23.3075 & [0.3513, 46.2636] & 17.7354 & [-5.2207, 40.6916] \\
+3 & 25.6699 & [1.8373, 49.5024] & 18.2405 & [-5.5920, 42.0731] \\
+4 & 24.3571 & [0.6055, 48.1088] & 15.0704 & [-8.6812, 38.8220] \\
+\midrule
+Pre average & -3.6914 & [-17.7477, 10.3649] & 0.9520 & [-2.1550, 4.0589] \\
+Post average & 23.1683 & [4.0078, 42.3289] & 17.5963 & [-10.6785, 45.8710] \\
+\bottomrule
+\end{tabular}
+\end{center}
+\medskip
+\textit{The interaction panel comes from this FE specification's own \texttt{post} $\times$ \texttt{treat} $\times$ \texttt{downup\_ac\_pop} regression and is not rotated.}
+\clearpage
+\section{Fixed-effect specification 26}
+\begin{center}
+\begin{minipage}[t]{0.48\textwidth}\centering
+\textbf{Baseline event study: original}\par\smallskip
+\includegraphics[width=\textwidth]{\detokenize{/users/aquisper/proj_bureaucrats_farms/figures/exploratory_analysis/politician_original_controls_fe_sweep/politician_original_fe26_controls_notyet_event_ori.png}}
+\end{minipage}\hfill
+\begin{minipage}[t]{0.48\textwidth}\centering
+\textbf{Baseline event study: pretrend rotated}\par\smallskip
+\includegraphics[width=\textwidth]{\detokenize{/users/aquisper/proj_bureaucrats_farms/figures/exploratory_analysis/politician_original_controls_fe_sweep/politician_original_fe26_controls_notyet_event_rotated.png}}
+\end{minipage}\par\medskip
+\textbf{DiD interaction: post $\times$ treat $\times$ downup\_ac\_pop}\par\smallskip
+\includegraphics[width=0.54\textwidth]{\detokenize{/users/aquisper/proj_bureaucrats_farms/figures/exploratory_analysis/politician_original_controls_fe_sweep/politician_original_fe26_controls_notyet_did_interaction_rural_acpop_all_1.png}}
+\end{center}
+\clearpage
+\subsection*{Baseline event-study estimates: specification 26}
+\begin{center}
+\scriptsize
+\begin{tabular}{r rr rr}
+\toprule
+Event time & Original $\hat\beta$ & Original 95\% CI & Rotated $\hat\beta$ & Rotated 95\% CI \\
+\midrule
+-5 & -9.1468 & [-29.9907, 11.6972] & -1.7987 & [-22.6427, 19.0452] \\
+-4 & -7.2617 & [-23.0981, 8.5747] & -1.7507 & [-17.5871, 14.0857] \\
+-3 & 1.4316 & [-18.0527, 20.9159] & 5.1056 & [-14.3787, 24.5899] \\
+-2 & 0.3988 & [-14.1077, 14.9053] & 2.2358 & [-12.2706, 16.7423] \\
+-1 & 0.0000 & [0.0000, 0.0000] & 0.0000 & [0.0000, 0.0000] \\
+0 & 19.6726 & [0.1698, 39.1754] & 17.8356 & [-1.6672, 37.3384] \\
+1 & 22.7581 & [1.2488, 44.2674] & 19.0841 & [-2.4253, 40.5934] \\
+2 & 23.2594 & [0.3151, 46.2038] & 17.7484 & [-5.1960, 40.6928] \\
+3 & 25.6838 & [1.8813, 49.4864] & 18.3358 & [-5.4667, 42.1383] \\
+4 & 24.3170 & [0.5987, 48.0353] & 15.1319 & [-8.5864, 38.8502] \\
+\midrule
+Pre average & -3.6445 & [-17.6748, 10.3857] & 0.9480 & [-2.1538, 4.0498] \\
+Post average & 23.1382 & [4.0052, 42.2711] & 17.6272 & [-10.5871, 45.8414] \\
+\bottomrule
+\end{tabular}
+\end{center}
+\medskip
+\textit{The interaction panel comes from this FE specification's own \texttt{post} $\times$ \texttt{treat} $\times$ \texttt{downup\_ac\_pop} regression and is not rotated.}
+\clearpage
+\section{Fixed-effect specification 27}
+\begin{center}
+\begin{minipage}[t]{0.48\textwidth}\centering
+\textbf{Baseline event study: original}\par\smallskip
+\includegraphics[width=\textwidth]{\detokenize{/users/aquisper/proj_bureaucrats_farms/figures/exploratory_analysis/politician_original_controls_fe_sweep/politician_original_fe27_controls_notyet_event_ori.png}}
+\end{minipage}\hfill
+\begin{minipage}[t]{0.48\textwidth}\centering
+\textbf{Baseline event study: pretrend rotated}\par\smallskip
+\includegraphics[width=\textwidth]{\detokenize{/users/aquisper/proj_bureaucrats_farms/figures/exploratory_analysis/politician_original_controls_fe_sweep/politician_original_fe27_controls_notyet_event_rotated.png}}
+\end{minipage}\par\medskip
+\textbf{DiD interaction: post $\times$ treat $\times$ downup\_ac\_pop}\par\smallskip
+\includegraphics[width=0.54\textwidth]{\detokenize{/users/aquisper/proj_bureaucrats_farms/figures/exploratory_analysis/politician_original_controls_fe_sweep/politician_original_fe27_controls_notyet_did_interaction_rural_acpop_all_1.png}}
+\end{center}
+\clearpage
+\subsection*{Baseline event-study estimates: specification 27}
+\begin{center}
+\scriptsize
+\begin{tabular}{r rr rr}
+\toprule
+Event time & Original $\hat\beta$ & Original 95\% CI & Rotated $\hat\beta$ & Rotated 95\% CI \\
+\midrule
+-5 & -3.7711 & [-31.1024, 23.5602] & 3.0367 & [-24.2946, 30.3680] \\
+-4 & -19.8848 & [-43.9924, 4.2228] & -14.7789 & [-38.8866, 9.3287] \\
+-3 & 10.0020 & [-11.9358, 31.9397] & 13.4059 & [-8.5319, 35.3436] \\
+-2 & 3.6763 & [-11.1970, 18.5496] & 5.3783 & [-9.4950, 20.2516] \\
+-1 & 0.0000 & [0.0000, 0.0000] & 0.0000 & [0.0000, 0.0000] \\
+0 & 5.7464 & [-16.6642, 28.1569] & 4.0444 & [-18.3661, 26.4549] \\
+1 & 34.6705 & [11.6337, 57.7074] & 31.2666 & [8.2298, 54.3035] \\
+2 & 20.0195 & [-4.2165, 44.2556] & 14.9137 & [-9.3223, 39.1497] \\
+3 & 30.9714 & [7.4831, 54.4596] & 24.1636 & [0.6753, 47.6518] \\
+4 & 24.7019 & [1.6740, 47.7299] & 16.1922 & [-6.8358, 39.2201] \\
+\midrule
+Pre average & -2.4944 & [-20.3475, 15.3587] & 1.7605 & [-1.7527, 5.2737] \\
+Post average & 23.2219 & [3.6265, 42.8174] & 18.1161 & [-15.4180, 51.6502] \\
+\bottomrule
+\end{tabular}
+\end{center}
+\medskip
+\textit{The interaction panel comes from this FE specification's own \texttt{post} $\times$ \texttt{treat} $\times$ \texttt{downup\_ac\_pop} regression and is not rotated.}
+\clearpage
+\section{Fixed-effect specification 28}
+\begin{center}
+\begin{minipage}[t]{0.48\textwidth}\centering
+\textbf{Baseline event study: original}\par\smallskip
+\includegraphics[width=\textwidth]{\detokenize{/users/aquisper/proj_bureaucrats_farms/figures/exploratory_analysis/politician_original_controls_fe_sweep/politician_original_fe28_controls_notyet_event_ori.png}}
+\end{minipage}\hfill
+\begin{minipage}[t]{0.48\textwidth}\centering
+\textbf{Baseline event study: pretrend rotated}\par\smallskip
+\includegraphics[width=\textwidth]{\detokenize{/users/aquisper/proj_bureaucrats_farms/figures/exploratory_analysis/politician_original_controls_fe_sweep/politician_original_fe28_controls_notyet_event_rotated.png}}
+\end{minipage}\par\medskip
+\textbf{DiD interaction: post $\times$ treat $\times$ downup\_ac\_pop}\par\smallskip
+\includegraphics[width=0.54\textwidth]{\detokenize{/users/aquisper/proj_bureaucrats_farms/figures/exploratory_analysis/politician_original_controls_fe_sweep/politician_original_fe28_controls_notyet_did_interaction_rural_acpop_all_1.png}}
+\end{center}
+\clearpage
+\subsection*{Baseline event-study estimates: specification 28}
+\begin{center}
+\scriptsize
+\begin{tabular}{r rr rr}
+\toprule
+Event time & Original $\hat\beta$ & Original 95\% CI & Rotated $\hat\beta$ & Rotated 95\% CI \\
+\midrule
+-5 & -5.3555 & [-26.2044, 15.4933] & -0.8759 & [-21.7248, 19.9729] \\
+-4 & -6.1465 & [-21.6845, 9.3915] & -2.7868 & [-18.3248, 12.7512] \\
+-3 & 2.9716 & [-16.5184, 22.4616] & 5.2114 & [-14.2786, 24.7014] \\
+-2 & 0.3215 & [-13.7763, 14.4193] & 1.4414 & [-12.6564, 15.5392] \\
+-1 & 0.0000 & [0.0000, 0.0000] & 0.0000 & [0.0000, 0.0000] \\
+0 & 19.6994 & [0.4746, 38.9242] & 18.5795 & [-0.6453, 37.8043] \\
+1 & 22.7819 & [1.5857, 43.9780] & 20.5421 & [-0.6541, 41.7382] \\
+2 & 24.0327 & [1.0885, 46.9768] & 20.6730 & [-2.2712, 43.6171] \\
+3 & 27.4300 & [3.8490, 51.0110] & 22.9504 & [-0.6306, 46.5314] \\
+4 & 25.1879 & [1.7981, 48.5777] & 19.5884 & [-3.8014, 42.9782] \\
+\midrule
+Pre average & -2.0522 & [-15.8411, 11.7366] & 0.7475 & [-2.3216, 3.8166] \\
+Post average & 23.8264 & [4.9409, 42.7118] & 20.4667 & [-7.2541, 48.1874] \\
+\bottomrule
+\end{tabular}
+\end{center}
+\medskip
+\textit{The interaction panel comes from this FE specification's own \texttt{post} $\times$ \texttt{treat} $\times$ \texttt{downup\_ac\_pop} regression and is not rotated.}
+\clearpage
+\section{Fixed-effect specification 29}
+\begin{center}
+\begin{minipage}[t]{0.48\textwidth}\centering
+\textbf{Baseline event study: original}\par\smallskip
+\includegraphics[width=\textwidth]{\detokenize{/users/aquisper/proj_bureaucrats_farms/figures/exploratory_analysis/politician_original_controls_fe_sweep/politician_original_fe29_controls_notyet_event_ori.png}}
+\end{minipage}\hfill
+\begin{minipage}[t]{0.48\textwidth}\centering
+\textbf{Baseline event study: pretrend rotated}\par\smallskip
+\includegraphics[width=\textwidth]{\detokenize{/users/aquisper/proj_bureaucrats_farms/figures/exploratory_analysis/politician_original_controls_fe_sweep/politician_original_fe29_controls_notyet_event_rotated.png}}
+\end{minipage}\par\medskip
+\textbf{DiD interaction: post $\times$ treat $\times$ downup\_ac\_pop}\par\smallskip
+\includegraphics[width=0.54\textwidth]{\detokenize{/users/aquisper/proj_bureaucrats_farms/figures/exploratory_analysis/politician_original_controls_fe_sweep/politician_original_fe29_controls_notyet_did_interaction_rural_acpop_all_1.png}}
+\end{center}
+\clearpage
+\subsection*{Baseline event-study estimates: specification 29}
+\begin{center}
+\scriptsize
+\begin{tabular}{r rr rr}
+\toprule
+Event time & Original $\hat\beta$ & Original 95\% CI & Rotated $\hat\beta$ & Rotated 95\% CI \\
+\midrule
+-5 & -5.3589 & [-26.2089, 15.4912] & -0.8745 & [-21.7246, 19.9755] \\
+-4 & -6.1502 & [-21.6891, 9.3888] & -2.7869 & [-18.3259, 12.7521] \\
+-3 & 2.9677 & [-16.5230, 22.4585] & 5.2099 & [-14.2809, 24.7007] \\
+-2 & 0.3179 & [-13.7796, 14.4155] & 1.4390 & [-12.6586, 15.5366] \\
+-1 & 0.0000 & [0.0000, 0.0000] & 0.0000 & [0.0000, 0.0000] \\
+0 & 19.6944 & [0.4694, 38.9194] & 18.5733 & [-0.6517, 37.7983] \\
+1 & 22.7759 & [1.5809, 43.9710] & 20.5337 & [-0.6613, 41.7288] \\
+2 & 24.0276 & [1.0814, 46.9737] & 20.6643 & [-2.2818, 43.6104] \\
+3 & 27.4257 & [3.8450, 51.0064] & 22.9414 & [-0.6393, 46.5221] \\
+4 & 25.1836 & [1.7929, 48.5742] & 19.5781 & [-3.8125, 42.9688] \\
+\midrule
+Pre average & -2.0558 & [-15.8457, 11.7341] & 0.7469 & [-2.3221, 3.8159] \\
+Post average & 23.8214 & [4.9356, 42.7073] & 20.4582 & [-7.2653, 48.1816] \\
+\bottomrule
+\end{tabular}
+\end{center}
+\medskip
+\textit{The interaction panel comes from this FE specification's own \texttt{post} $\times$ \texttt{treat} $\times$ \texttt{downup\_ac\_pop} regression and is not rotated.}
+\clearpage
+\section{Fixed-effect specification 30}
+\begin{center}
+\begin{minipage}[t]{0.48\textwidth}\centering
+\textbf{Baseline event study: original}\par\smallskip
+\includegraphics[width=\textwidth]{\detokenize{/users/aquisper/proj_bureaucrats_farms/figures/exploratory_analysis/politician_original_controls_fe_sweep/politician_original_fe30_controls_notyet_event_ori.png}}
+\end{minipage}\hfill
+\begin{minipage}[t]{0.48\textwidth}\centering
+\textbf{Baseline event study: pretrend rotated}\par\smallskip
+\includegraphics[width=\textwidth]{\detokenize{/users/aquisper/proj_bureaucrats_farms/figures/exploratory_analysis/politician_original_controls_fe_sweep/politician_original_fe30_controls_notyet_event_rotated.png}}
+\end{minipage}\par\medskip
+\textbf{DiD interaction: post $\times$ treat $\times$ downup\_ac\_pop}\par\smallskip
+\includegraphics[width=0.54\textwidth]{\detokenize{/users/aquisper/proj_bureaucrats_farms/figures/exploratory_analysis/politician_original_controls_fe_sweep/politician_original_fe30_controls_notyet_did_interaction_rural_acpop_all_1.png}}
+\end{center}
+\clearpage
+\subsection*{Baseline event-study estimates: specification 30}
+\begin{center}
+\scriptsize
+\begin{tabular}{r rr rr}
+\toprule
+Event time & Original $\hat\beta$ & Original 95\% CI & Rotated $\hat\beta$ & Rotated 95\% CI \\
+\midrule
+-5 & -5.3619 & [-26.2103, 15.4865] & -0.8728 & [-21.7212, 19.9756] \\
+-4 & -6.1536 & [-21.6917, 9.3846] & -2.7868 & [-18.3250, 12.7514] \\
+-3 & 2.9633 & [-16.5266, 22.4532] & 5.2079 & [-14.2820, 24.6977] \\
+-2 & 0.3138 & [-13.7847, 14.4123] & 1.4361 & [-12.6624, 15.5345] \\
+-1 & 0.0000 & [0.0000, 0.0000] & 0.0000 & [0.0000, 0.0000] \\
+0 & 19.6903 & [0.4650, 38.9156] & 18.5680 & [-0.6573, 37.7933] \\
+1 & 22.7718 & [1.5759, 43.9676] & 20.5272 & [-0.6686, 41.7231] \\
+2 & 24.0239 & [1.0777, 46.9701] & 20.6571 & [-2.2891, 43.6033] \\
+3 & 27.4217 & [3.8403, 51.0030] & 22.9326 & [-0.6487, 46.5139] \\
+4 & 25.1794 & [1.7890, 48.5699] & 19.5681 & [-3.8223, 42.9585] \\
+\midrule
+Pre average & -2.0596 & [-15.8486, 11.7294] & 0.7461 & [-2.3231, 3.8152] \\
+Post average & 23.8174 & [4.9313, 42.7036] & 20.4506 & [-7.2717, 48.1729] \\
+\bottomrule
+\end{tabular}
+\end{center}
+\medskip
+\textit{The interaction panel comes from this FE specification's own \texttt{post} $\times$ \texttt{treat} $\times$ \texttt{downup\_ac\_pop} regression and is not rotated.}
+\clearpage
+\section{Fixed-effect specification 31}
+\begin{center}
+\begin{minipage}[t]{0.48\textwidth}\centering
+\textbf{Baseline event study: original}\par\smallskip
+\includegraphics[width=\textwidth]{\detokenize{/users/aquisper/proj_bureaucrats_farms/figures/exploratory_analysis/politician_original_controls_fe_sweep/politician_original_fe31_controls_notyet_event_ori.png}}
+\end{minipage}\hfill
+\begin{minipage}[t]{0.48\textwidth}\centering
+\textbf{Baseline event study: pretrend rotated}\par\smallskip
+\includegraphics[width=\textwidth]{\detokenize{/users/aquisper/proj_bureaucrats_farms/figures/exploratory_analysis/politician_original_controls_fe_sweep/politician_original_fe31_controls_notyet_event_rotated.png}}
+\end{minipage}\par\medskip
+\textbf{DiD interaction: post $\times$ treat $\times$ downup\_ac\_pop}\par\smallskip
+\includegraphics[width=0.54\textwidth]{\detokenize{/users/aquisper/proj_bureaucrats_farms/figures/exploratory_analysis/politician_original_controls_fe_sweep/politician_original_fe31_controls_notyet_did_interaction_rural_acpop_all_1.png}}
+\end{center}
+\clearpage
+\subsection*{Baseline event-study estimates: specification 31}
+\begin{center}
+\scriptsize
+\begin{tabular}{r rr rr}
+\toprule
+Event time & Original $\hat\beta$ & Original 95\% CI & Rotated $\hat\beta$ & Rotated 95\% CI \\
+\midrule
+-5 & -9.2285 & [-30.1002, 11.6432] & -1.8027 & [-22.6744, 19.0690] \\
+-4 & -7.2889 & [-23.1502, 8.5724] & -1.7196 & [-17.5809, 14.1417] \\
+-3 & 1.3281 & [-18.1612, 20.8173] & 5.0410 & [-14.4483, 24.5302] \\
+-2 & 0.4313 & [-14.1158, 14.9784] & 2.2878 & [-12.2593, 16.8349] \\
+-1 & 0.0000 & [0.0000, 0.0000] & 0.0000 & [0.0000, 0.0000] \\
+0 & 19.6856 & [0.1521, 39.2191] & 17.8292 & [-1.7043, 37.3627] \\
+1 & 22.8170 & [1.2784, 44.3556] & 19.1041 & [-2.4345, 40.6427] \\
+2 & 23.3052 & [0.3496, 46.2608] & 17.7359 & [-5.2197, 40.6915] \\
+3 & 25.6705 & [1.8394, 49.5017] & 18.2448 & [-5.5864, 42.0759] \\
+4 & 24.3552 & [0.6051, 48.1054] & 15.0730 & [-8.6771, 38.8232] \\
+\midrule
+Pre average & -3.6895 & [-17.7446, 10.3656] & 0.9516 & [-2.1551, 4.0583] \\
+Post average & 23.1667 & [4.0075, 42.3260] & 17.5974 & [-10.6747, 45.8695] \\
+\bottomrule
+\end{tabular}
+\end{center}
+\medskip
+\textit{The interaction panel comes from this FE specification's own \texttt{post} $\times$ \texttt{treat} $\times$ \texttt{downup\_ac\_pop} regression and is not rotated.}
+\clearpage
+\section{Fixed-effect specification 32}
+\begin{center}
+\begin{minipage}[t]{0.48\textwidth}\centering
+\textbf{Baseline event study: original}\par\smallskip
+\includegraphics[width=\textwidth]{\detokenize{/users/aquisper/proj_bureaucrats_farms/figures/exploratory_analysis/politician_original_controls_fe_sweep/politician_original_fe32_controls_notyet_event_ori.png}}
+\end{minipage}\hfill
+\begin{minipage}[t]{0.48\textwidth}\centering
+\textbf{Baseline event study: pretrend rotated}\par\smallskip
+\includegraphics[width=\textwidth]{\detokenize{/users/aquisper/proj_bureaucrats_farms/figures/exploratory_analysis/politician_original_controls_fe_sweep/politician_original_fe32_controls_notyet_event_rotated.png}}
+\end{minipage}\par\medskip
+\textbf{DiD interaction: post $\times$ treat $\times$ downup\_ac\_pop}\par\smallskip
+\includegraphics[width=0.54\textwidth]{\detokenize{/users/aquisper/proj_bureaucrats_farms/figures/exploratory_analysis/politician_original_controls_fe_sweep/politician_original_fe32_controls_notyet_did_interaction_rural_acpop_all_1.png}}
+\end{center}
+\clearpage
+\subsection*{Baseline event-study estimates: specification 32}
+\begin{center}
+\scriptsize
+\begin{tabular}{r rr rr}
+\toprule
+Event time & Original $\hat\beta$ & Original 95\% CI & Rotated $\hat\beta$ & Rotated 95\% CI \\
+\midrule
+-5 & -5.3579 & [-26.2057, 15.4900] & -0.8746 & [-21.7225, 19.9732] \\
+-4 & -6.1492 & [-21.6870, 9.3885] & -2.7868 & [-18.3246, 12.7510] \\
+-3 & 2.9683 & [-16.5210, 22.4576] & 5.2099 & [-14.2794, 24.6992] \\
+-2 & 0.3184 & [-13.7802, 14.4170] & 1.4392 & [-12.6594, 15.5378] \\
+-1 & 0.0000 & [0.0000, 0.0000] & 0.0000 & [0.0000, 0.0000] \\
+0 & 19.6954 & [0.4702, 38.9207] & 18.5746 & [-0.6506, 37.7999] \\
+1 & 22.7769 & [1.5812, 43.9727] & 20.5353 & [-0.6604, 41.7311] \\
+2 & 24.0288 & [1.0824, 46.9752] & 20.6664 & [-2.2801, 43.6128] \\
+3 & 27.4270 & [3.8456, 51.0085] & 22.9438 & [-0.6377, 46.5252] \\
+4 & 25.1845 & [1.7941, 48.5748] & 19.5804 & [-3.8099, 42.9708] \\
+\midrule
+Pre average & -2.0551 & [-15.8436, 11.7334] & 0.7469 & [-2.3222, 3.8161] \\
+Post average & 23.8225 & [4.9364, 42.7087] & 20.4601 & [-7.2616, 48.1818] \\
+\bottomrule
+\end{tabular}
+\end{center}
+\medskip
+\textit{The interaction panel comes from this FE specification's own \texttt{post} $\times$ \texttt{treat} $\times$ \texttt{downup\_ac\_pop} regression and is not rotated.}
+\clearpage
+\end{document}
