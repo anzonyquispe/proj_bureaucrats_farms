@@ -3,12 +3,15 @@
 #$ -q largemem
 #$ -pe smp 1
 #$ -cwd
-#$ -o /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication/exploratory_analysis/did_windows/logs
-#$ -e /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication/exploratory_analysis/did_windows/logs
+# Log destinations are passed as -o/-e by submit_all_did_windows.sh; SGE cannot
+# expand variables in "#$" directives, so no path is hardcoded here. Submitting
+# this file directly without -o/-e falls back to -cwd.
 
 set -euo pipefail
 
-CODE="${REPLICATION_CODE:-/users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication}"
+# submit_all_did_windows.sh resolves REPLICATION_CODE from its own location.
+CODE="${REPLICATION_CODE:?Set REPLICATION_CODE (submit via submit_all_did_windows.sh)}"
+export REPLICATION_CODE="${CODE}"
 mkdir -p "${CODE}/exploratory_analysis/did_windows/logs"
 
 if ! type module >/dev/null 2>&1; then

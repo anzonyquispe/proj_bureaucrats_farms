@@ -79,9 +79,13 @@ program define _set_main_fe_tags
         local gridfe "N"
         if `i' == 2 {
             local monthyearfe "Y"
-            local acfe "Y"
+            local gridfe "Y"
         }
-        if `i' == 3 local acmonthfe "Y"
+        if `i' == 3 {
+            local monthyearfe "Y"
+            local acfe "Y"
+            local gridfe "Y"
+        }
         if `i' == 4 {
             local acmonthfe "Y"
             local gridfe "Y"

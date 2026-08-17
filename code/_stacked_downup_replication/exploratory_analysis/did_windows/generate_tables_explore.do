@@ -19,6 +19,12 @@ if "`c(os)'" != "Windows" {
     global code "`cluster_code'"
 }
 
+* REPLICATION_CODE wins on either OS so any user's checkout works unedited.
+local env_code : environment REPLICATION_CODE
+if "`env_code'" != "" {
+    global code "`env_code'"
+}
+
 global tables "${code}/../../tables/exploratory_analysis"
 if "`tables_arg'" != "" {
     global tables "`tables_arg'"
@@ -85,8 +91,8 @@ foreach treatment in area pop {
                          "Month-Year FE" "AC FE" ///
                          "AC \$\times\$ Month-Year FE" "Grid FE" ///
                          "Mean DV, treated pre-treatment")) ///
-            mtitles("No FE" "AC + Month-Year" ///
-                    "AC \$\times\$ Month-Year" ///
+            mtitles("No FE" "Grid + Month-Year" ///
+                    "Grid + AC + Month-Year" ///
                     "Grid + AC \$\times\$ Month-Year") ///
             collabels(none) nobaselevels ///
             prehead("{" ///

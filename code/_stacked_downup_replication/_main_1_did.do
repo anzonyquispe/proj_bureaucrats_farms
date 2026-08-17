@@ -26,7 +26,11 @@ if "$root" == "" {
 
     global shell "/groups/sgulzar/sa_fires/proj_bureaucrats_farms"
     global dbox "/Users/anzony.quisperojas/Library/CloudStorage/Dropbox/sa_fires/proj_bureaucrats_farms"
-    global code_shell "/users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication"
+    * Honour REPLICATION_CODE so any user's checkout works without path edits.
+    global code_shell : environment REPLICATION_CODE
+    if "$code_shell" == "" {
+        global code_shell "/users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication"
+    }
     global code_dbox "/Users/anzony.quisperojas/Documents/GitHub/proj_bureaucrats_farms/code/_stacked_downup_replication"
     if "$location" == "dbox" {
         global root "$dbox"
@@ -145,8 +149,8 @@ local numacs : word count `ac_levels'
 local controls wind_direction av_wind_speed
 local cluster ac_uq_id#cohort#monthyear unique_small_grid_id#cohort
 local fespec1 "No fixed effects"
-local fespec2 "AC and month-year"
-local fespec3 "AC x month-year"
+local fespec2 "Grid and month-year"
+local fespec3 "Grid, AC and month-year"
 local fespec4 "Grid and AC x month-year"
 local estimates ""
 
@@ -160,19 +164,19 @@ foreach fe of numlist $fe_list {
     }
     else if `fe' == 2 {
         reghdfejl countk ${downup_var} `controls', ///
-            absorb(ac_id#cohort monthyear#cohort) cluster(`cluster')
+            absorb(grid_id#cohort  monthyear#cohort) cluster(`cluster')
         local monthyearfe "Y"
-        local acfe "Y"
+        local acfe "N"
         local acmonthfe "N"
-        local gridfe "N"
+        local gridfe "Y"
     }
     else if `fe' == 3 {
         reghdfejl countk ${downup_var} `controls', ///
-            absorb(ac_id#monthyear#cohort) cluster(`cluster')
-        local monthyearfe "N"
-        local acfe "N"
-        local acmonthfe "Y"
-        local gridfe "N"
+            absorb(grid_id#cohort ac_id#cohort monthyear#cohort) cluster(`cluster')
+        local monthyearfe "Y"
+        local acfe "Y"
+        local acmonthfe "N"
+        local gridfe "Y"
     }
     else if `fe' == 4 {
         reghdfejl countk ${downup_var} `controls', ///
