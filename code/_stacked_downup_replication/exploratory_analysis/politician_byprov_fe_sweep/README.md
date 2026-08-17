@@ -85,6 +85,15 @@ Regenerate any missing DiD interaction figures in local Stata with:
 do "code/_stacked_downup_replication/exploratory_analysis/politician_byprov_fe_sweep/generate_politician_byprov_did_interaction_plots.do"
 ```
 
+If local Stata is unavailable, recreate the same report inputs directly from
+the Stata coefficient and covariance CSV exports:
+
+```powershell
+& "C:\Program Files\R\R-4.5.0\bin\Rscript.exe" `
+  "code\_stacked_downup_replication\exploratory_analysis\politician_byprov_fe_sweep\prepare_politician_byprov_report_inputs.R" `
+  --root (Get-Location).Path
+```
+
 Then rebuild the report source:
 
 ```powershell

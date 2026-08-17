@@ -131,7 +131,7 @@ for (fe_id in 1:32) {
   if (!file.exists(original_plot) || !file.exists(rotated_plot)) {
     stop("Missing baseline event-study figure(s) for FE ", fe_id)
   }
-  did_available <- file.exists(did_plot)
+  did_available <- file.exists(did_plot) && file.info(did_plot)$size > 0
   if (!did_available) missing_did <- c(missing_did, fe_id)
 
   lines <- c(
