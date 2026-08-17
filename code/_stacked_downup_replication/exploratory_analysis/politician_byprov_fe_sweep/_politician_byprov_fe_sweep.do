@@ -89,7 +89,7 @@ if _rc {
 local required ///
     unique_small_grid_id province ac_uq_id count month year monthyear ///
     downup_ac_pop av_wind_speed wind_direction election_year yeargov ///
-    treat cohort relative_year_bin
+    treat control_type cohort cohort_id cohort_province relative_year_bin
 foreach variable of local required {
     capture confirm variable `variable'
     if _rc {
@@ -115,8 +115,8 @@ keep if year < 2022 | (year == 2022 & month <= 8)
 gen byte fe_complete = 1
 local complete_vars ///
     unique_small_grid_id province ac_uq_id month year monthyear election_year ///
-    yeargov cohort countk downup_ac_pop av_wind_speed wind_direction treat ///
-    relative_year_bin
+    yeargov cohort cohort_id cohort_province countk downup_ac_pop ///
+    av_wind_speed wind_direction treat control_type relative_year_bin
 foreach variable of local complete_vars {
     replace fe_complete = 0 if missing(`variable')
 }
@@ -125,10 +125,44 @@ display as text "Rows removed by common FE complete-case restriction: " r(N)
 drop if fe_complete == 0
 drop fe_complete
 
-egen long unique_small_grid_id_cohort = group(unique_small_grid_id cohort)
-egen long province_cohort = group(province cohort)
-egen long monthyearco = group(month year cohort)
-egen long ac_elec_yr = group(ac_uq_id election_year cohort)
+********************************************************************************
+* Enforce the province-election cohort definition.
+*
+* `cohort' is the calendar switching month and can legitimately repeat across
+* provinces (Punjab and Uttar Pradesh share April 2017 and April 2022).
+* `cohort_id' is the unique province-election cohort and must therefore be used
+* in every cohort-specific FE and clustering identifier.
+********************************************************************************
+assert cohort_id == floor(cohort_id) & cohort_id > 0
+assert inlist(treat, 0, 1)
+assert control_type == 0 if treat == 1
+assert inlist(control_type, 1, 2) if treat == 0
+
+sort cohort_id unique_small_grid_id monthyear
+by cohort_id: assert province == province[1]
+by cohort_id: assert cohort == cohort[1]
+by cohort_id: assert cohort_province == cohort_province[1]
+by cohort_id unique_small_grid_id: assert province == province[1]
+by cohort_id unique_small_grid_id: assert treat == treat[1]
+by cohort_id unique_small_grid_id: assert control_type == control_type[1]
+isid unique_small_grid_id monthyear cohort_id treat
+
+by cohort_id: egen byte cohort_has_treated = max(treat == 1)
+by cohort_id: egen byte cohort_has_control = max(treat == 0)
+assert cohort_has_treated == 1
+assert cohort_has_control == 1
+drop cohort_has_treated cohort_has_control
+
+egen byte cohort_tag = tag(cohort_id)
+count if cohort_tag == 1
+local number_cohorts = r(N)
+drop cohort_tag
+display as result "Validated province-election cohort_id groups: `number_cohorts'"
+
+egen long unique_small_grid_id_cohort = group(unique_small_grid_id cohort_id)
+egen long province_cohort = group(province cohort_id)
+egen long monthyearco = group(monthyear cohort_id)
+egen long ac_elec_yr = group(ac_uq_id election_year cohort_id)
 
 * Exact exploratory FE grid supplied for this analysis.
 local fe1  "unique_small_grid_id_cohort"
@@ -220,10 +254,12 @@ foreach mod of local moderators_list {
     estadd scalar fe_id = `selected_fe'
     estadd scalar n_treated = `event_n_treated'
     estadd scalar n_control = `event_n_control'
+    estadd scalar n_cohorts = `number_cohorts'
     estadd local smpl "Rural"
     estadd local fespec "`fespec'"
     estadd local mod "`mod'"
     estadd local controls "unchanged full control composition"
+    estadd local cohortvar "cohort_id"
     est store `event_estname'
 }
 
@@ -267,10 +303,12 @@ estadd scalar acq = `did_numacs'
 estadd scalar fe_id = `selected_fe'
 estadd scalar n_treated = `did_n_treated'
 estadd scalar n_control = `did_n_control'
+estadd scalar n_cohorts = `number_cohorts'
 estadd local smpl "Rural"
 estadd local fespec "`fespec'"
 estadd local mod "downup_ac_pop"
 estadd local controls "unchanged full control composition"
+estadd local cohortvar "cohort_id"
 est store evreg1
 
 local did_outbase "${tables}/politician_byprov_fe`fe_tag'_did_interaction${sample}_rural${ster_suffix}_all"

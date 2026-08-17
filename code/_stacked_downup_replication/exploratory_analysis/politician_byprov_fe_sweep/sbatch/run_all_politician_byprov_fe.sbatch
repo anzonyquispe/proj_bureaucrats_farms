@@ -7,9 +7,10 @@
 #$ -t 1-32
 #$ -o /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication/exploratory_analysis/politician_byprov_fe_sweep/logs
 
-# Submit once with qsub. SGE creates 32 independent one-core tasks, and each
-# task estimates the baseline event study plus the _app_19-style DiD
-# interaction for exactly one FE specification.
+# Optional SGE-array entry point. The preferred launcher is
+# submit_all_politician_byprov_fe.sh, which submits 32 separately named jobs.
+# Each task estimates the baseline event study plus the _app_19-style DiD
+# interaction for exactly one FE specification using cohort_id.
 
 set -euo pipefail
 
@@ -27,6 +28,6 @@ if [[ ! -f "${RUNNER}" ]]; then
 fi
 
 export FE_ID="${SGE_TASK_ID}"
+export REPLACE_RESULTS=1
 export REPLICATION_REPO="${REPO}"
 exec /bin/bash "${RUNNER}"
-

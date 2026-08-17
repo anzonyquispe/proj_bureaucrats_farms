@@ -5,6 +5,12 @@ This exploratory module uses only the cluster input
 over years `-5,...,4`, omits year `-1`, retains the weather controls, and
 clusters by AC-election-year-cohort.
 
+The unique stacked cohort is `cohort_id`, which identifies a
+province-election pair. The calendar switching-month variable `cohort` is kept
+only as descriptive timing information because Punjab and Uttar Pradesh share
+the April 2017 and April 2022 switch months. Every cohort-specific FE and
+clustering identifier is therefore constructed with `cohort_id`.
+
 The input dataset's control group is left untouched. There is no filtering or
 subdivision by `control_type`. Each of the 32 independent one-core jobs uses the
 full eligible rural sample and estimates:
@@ -18,7 +24,7 @@ The old event-time interaction with `downup_ac_pop` is not part of this report.
 The Stata script uses one common complete-case sample for all FE ingredients so
 the 32 specifications remain comparable.
 
-## Submit all 32 cluster jobs
+## Replace all results with 32 independent cluster jobs
 
 From the repository root on CRC:
 
@@ -26,11 +32,25 @@ From the repository root on CRC:
 bash code/_stacked_downup_replication/exploratory_analysis/politician_byprov_fe_sweep/sbatch/submit_all_politician_byprov_fe.sh
 ```
 
+The launcher submits 32 separately named one-core jobs in a single command.
+Each job removes only its own old FE outputs, estimates the event study and DiD
+interaction, verifies the replacement files, and writes a stable Stata log.
+A held validation job checks all 32 specifications after they finish and
+regenerates the original and rotated baseline event-study figures using the
+canonical `plotting_event_studies.R` format.
+
+If the launcher reports an older conflicting by-province job, inspect it first.
+To replace only the listed conflicting jobs, run:
+
+```bash
+CANCEL_CONFLICTING_JOB=1 bash code/_stacked_downup_replication/exploratory_analysis/politician_byprov_fe_sweep/sbatch/submit_all_politician_byprov_fe.sh
+```
+
 To resubmit only FE 7:
 
 ```bash
 qsub -N polbp_fe07 \
-  -v FE_ID=7,REPLICATION_REPO=/users/aquisper/proj_bureaucrats_farms \
+  -v FE_ID=7,REPLACE_RESULTS=1,REPLICATION_REPO=/users/aquisper/proj_bureaucrats_farms \
   code/_stacked_downup_replication/exploratory_analysis/politician_byprov_fe_sweep/sbatch/run_politician_byprov_fe.sbatch
 ```
 
