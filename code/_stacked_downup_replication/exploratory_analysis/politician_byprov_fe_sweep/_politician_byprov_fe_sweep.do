@@ -273,10 +273,12 @@ display as result "Saved event study: `event_outbase'"
 
 ********************************************************************************
 * 2. DiD interaction, following _app_19_polischar_fe12_did_downup_inter_plot.
-* Unlike the event study, this uses the full eligible relative-year sample.
+* Use the same -5,...,4 event window as the event study. This keeps exactly
+* the immediately preceding and current election terms in every cohort_id.
 ********************************************************************************
 
 use `full_analysis_sample', clear
+keep if inrange(relative_year_bin, -5, 4)
 gen byte post_ = relative_year_bin >= 0
 gen byte moderator = downup_ac_pop
 

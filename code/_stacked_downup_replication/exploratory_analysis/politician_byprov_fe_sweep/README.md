@@ -13,7 +13,7 @@ clustering identifier is therefore constructed with `cohort_id`.
 
 The input dataset's control group is left untouched. There is no filtering or
 subdivision by `control_type`. Each of the 32 independent one-core jobs uses the
-full eligible rural sample and estimates:
+eligible rural sample restricted to event years `-5,...,4` and estimates:
 
 - the baseline event study using a zero-valued `moderator` stub; and
 - the DiD interaction `post x treat x downup_ac_pop`, following
