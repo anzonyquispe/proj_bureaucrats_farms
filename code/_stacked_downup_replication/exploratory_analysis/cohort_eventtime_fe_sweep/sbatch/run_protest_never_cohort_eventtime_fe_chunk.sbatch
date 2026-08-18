@@ -75,8 +75,13 @@ cp "_protest_never_cohort_eventtime_fe_sweep.log" \
 
 echo "[$(date '+%F %T')] protest CSV and interaction-plot postprocessing"
 "${STATA_BIN}" -b do "${POST_DOF}" protest "${FE_LIST}"
-cp "_postprocess_cohort_eventtime_fe_sweep.log" \
-   "${LOG_DIR}/_postprocess_cohort_eventtime_fe_sweep.log"
+POST_LOG=$(find . -maxdepth 1 -type f \
+    -name '*postprocess_cohort_eventtime_fe_sweep.log' -print -quit)
+if [[ -n "${POST_LOG}" ]]; then
+    cp "${POST_LOG}" "${LOG_DIR}/_postprocess_cohort_eventtime_fe_sweep.log"
+else
+    echo "WARNING: Stata postprocessing log was not found; verified outputs determine success." >&2
+fi
 
 module load R/4.4.0/gcc/11.5.0
 command -v Rscript >/dev/null 2>&1 || exit 127
@@ -100,4 +105,3 @@ for fe in $(seq "${first}" "${last}"); do
 done
 (( missing == 0 )) || exit 1
 echo "[$(date '+%F %T')] COMPLETED protest FE ${FE_LIST}"
-

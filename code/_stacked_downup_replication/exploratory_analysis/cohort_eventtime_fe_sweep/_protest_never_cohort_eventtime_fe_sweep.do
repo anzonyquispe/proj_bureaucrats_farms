@@ -9,11 +9,25 @@
 version 17
 clear all
 set more off
-set processors 5
+local processors_env : environment STATA_PROCESSORS
+local processors = real("`processors_env'")
+if missing(`processors') local processors = 5
+if !inlist(`processors', 1, 2, 3, 4, 5) {
+    display as error "STATA_PROCESSORS must be an integer from 1 through 5."
+    exit 198
+}
+set processors `processors'
 
 args fe_arg
 local fe_env : environment PROTEST_CTIME_FE_LIST
 local sample_env : environment ANALYSIS_SAMPLE_SUFFIX
+local stage_env : environment ANALYSIS_STAGE
+local analysis_stage "`stage_env'"
+if "`analysis_stage'" == "" local analysis_stage "both"
+if !inlist("`analysis_stage'", "event", "did", "both") {
+    display as error "ANALYSIS_STAGE must be event, did, or both."
+    exit 198
+}
 
 * Standalone defaults for the five standard sbatch parameters.
 global location     "shell"
@@ -155,6 +169,7 @@ local n_control = r(N)
 ********************************************************************************
 * Event studies.
 ********************************************************************************
+if inlist("`analysis_stage'", "event", "both") {
 foreach mod of local moderators_list {
     replace moderator = `mod'
     local rhs "ib`base'.relative_year_bin_aux##ib0.treat##ib0.`mod' wind_direction av_wind_speed"
@@ -184,10 +199,12 @@ foreach mod of local moderators_list {
         confirm file "`out'.ster"
     }
 }
+}
 
 ********************************************************************************
 * DiD interactions on exactly the same -8,...,1 observations.
 ********************************************************************************
+if inlist("`analysis_stage'", "did", "both") {
 gen byte post_ = relative_year_bin >= 0
 quietly summarize countk if treat == 1 & relative_year_bin <= -1 & downup_ac_pop == 1
 local ymean2 = r(mean)
@@ -217,5 +234,6 @@ foreach selected_fe of numlist $fe_list {
     estwrite evreg1 using "`out'.ster", replace
     confirm file "`out'.ster"
 }
+}
 
-display as result "COMPLETED protest never-treated cohort-event-time FE sweep: $fe_list"
+display as result "COMPLETED protest never-treated cohort-event-time FE sweep: $fe_list; stage=`analysis_stage'"

@@ -22,3 +22,18 @@ bash code/_stacked_downup_replication/exploratory_analysis/cohort_eventtime_fe_s
 The launcher submits one one-core politician job and five five-core protest
 jobs, for a maximum simultaneous allocation of 26 cores.
 
+## Local event CSV export
+
+Run `_export_event_csv_local.do` in local Stata to convert all 64 politician and
+protest event-study STER files to CSV without loading an analysis dataset or
+rerunning a regression.
+
+## Missing protest DiD recovery
+
+The audited recovery launcher submits FE 23-26 and 28-32 independently. Each
+job requests three cores, runs only the DiD interaction, and then creates its
+CSV, interaction plot, and event-study figures:
+
+```bash
+bash code/_stacked_downup_replication/exploratory_analysis/cohort_eventtime_fe_sweep/submit_missing_protest_did_individual.sh
+```
