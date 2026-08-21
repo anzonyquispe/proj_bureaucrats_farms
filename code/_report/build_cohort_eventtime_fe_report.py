@@ -144,6 +144,9 @@ def build_report() -> None:
         "Common addition to every specification: cohort-specific relative-year fixed effects",
         "Politicians: relative_year_bin_aux#cohort_id",
         "Protest: relative_year_bin_aux#cohort",
+        "Interaction plots: every displayed lincom subtracts the control-pre estimate; control pre is normalized to zero",
+        "The treated-control post contrast is unchanged because the common control-pre baseline cancels",
+        "Interaction figures omit confidence intervals and report exact p-values rounded to three decimals",
     ]
     y = height - 180
     for line in cover_lines:
@@ -208,14 +211,19 @@ def build_report() -> None:
         paths = result_paths(fe)
         c.setFont("Helvetica-Bold", 15)
         c.drawString(24, height - 25, f"FE{fe:02d}: original event studies and DiD interactions")
-        c.setFont("Helvetica", 7.8)
         spec = BASE_FE[fe]
-        c.drawString(24, height - 39, f"Base absorbed variables: {spec}")
-        c.drawString(24, height - 50,
+        header_y = draw_wrapped(
+            c, f"Base absorbed variables: {spec}", 24, height - 48,
+            145, size=7.5, leading=9,
+        )
+        c.setFont("Helvetica", 7.5)
+        c.drawString(24, header_y,
                      "Additional cohort-event-time FE: politicians use cohort_id; protest uses cohort.")
+        c.drawString(24, header_y - 10,
+                     "Interaction panels omit CIs and show exact p-values rounded to three decimals; the post contrast is unchanged.")
         gap = 10
         panel_w = (width - 48 - gap) / 2
-        panel_h = (height - 86 - gap - 22) / 2
+        panel_h = (height - 100 - gap - 22) / 2
         left = 24
         right = left + panel_w + gap
         bottom = 28

@@ -44,9 +44,9 @@ interaction_results <- function(beta, vcov, df, post_var, mod_var) {
   w_treated_post <- w_control_post + unit_weight(c(post_var, "treat")) +
     unit_weight(c("treat", mod_var)) + unit_weight(c(post_var, "treat", mod_var))
   weights <- list(
-    Pre = w_pre,
-    `Control post` = w_control_post,
-    `Treated post` = w_treated_post,
+    Pre = w_pre - w_pre,
+    `Control post` = w_control_post - w_pre,
+    `Treated post` = w_treated_post - w_pre,
     Difference = w_treated_post - w_control_post
   )
 
@@ -59,7 +59,7 @@ interaction_results <- function(beta, vcov, df, post_var, mod_var) {
       lower90 = r90[["lower"]], upper90 = r90[["upper"]]
     )
   }))
-  out[, p_value := 2 * pt(-abs(estimate / se), df = df)]
+  out[, p_value := fifelse(se == 0, NA_real_, 2 * pt(-abs(estimate / se), df = df))]
   out
 }
 
@@ -83,8 +83,7 @@ interaction_from_fixest <- function(model, post_var = "post",
 }
 
 p_label <- function(p) {
-  if (p < .01) "p-value\n< 0.01" else if (p < .05) "p-value\n< 0.05" else
-    if (p < .10) "p-value\n< 0.10" else "p-value\n> 0.10"
+  sprintf("p = %.3f", p)
 }
 
 plot_did_interaction <- function(results, output, type = c("politician", "protest"),
@@ -93,28 +92,22 @@ plot_did_interaction <- function(results, output, type = c("politician", "protes
   if (type == "politician") {
     x_pre <- .90; x_control <- 3.08; x_treated <- 3.42; x_post <- 3.25
     x_label <- 3.62; x_bracket <- 4.68; xlim <- c(-.35, 5.50)
-    base_y_range <- c(-26, 40)
     labels <- c("Non-Agricultural\nPolitician", "Agricultural\nPolitician")
     pre_label <- "Non-Agricultural\nPolitician"
   } else {
     x_pre <- .90; x_control <- 3.30; x_treated <- 3.70; x_post <- 3.50
     x_label <- 3.92; x_bracket <- 4.55; xlim <- c(-.40, 5.40)
-    base_y_range <- c(-26, 66)
     labels <- c("No Protest", "Protest")
     pre_label <- "Before protest"
   }
 
   if (is.null(y_range)) {
     observed <- range(
-      c(results[group != "Difference", lower95],
-        results[group != "Difference", upper95], 0),
+      c(results[group != "Difference", estimate], 0),
       finite = TRUE
     )
-    padding <- max(diff(observed) * .06, 2)
-    y_range <- c(
-      min(base_y_range[1], observed[1] - padding),
-      max(base_y_range[2], observed[2] + padding)
-    )
+    padding <- max(diff(observed) * .12, 1)
+    y_range <- observed + c(-padding, padding)
   }
 
   points <- copy(results[group != "Difference"])
@@ -122,8 +115,8 @@ plot_did_interaction <- function(results, output, type = c("politician", "protes
   pre_y <- points[group == "Pre", estimate]
   control_y <- points[group == "Control post", estimate]
   treated_y <- points[group == "Treated post", estimate]
-  midpoint <- mean(c(control_y, treated_y))
   difference_p <- results[group == "Difference", p_value]
+  midpoint <- mean(c(control_y, treated_y))
   label_y <- c(control_y, treated_y)
   min_gap <- diff(y_range) * .09
   if (abs(diff(label_y)) < min_gap) {
@@ -144,10 +137,6 @@ plot_did_interaction <- function(results, output, type = c("politician", "protes
     geom_segment(aes(x = x_pre + .05, y = pre_y,
                      xend = x_treated - .08, yend = treated_y),
                  arrow = grid::arrow(length = grid::unit(.09, "inches")), linewidth = .4) +
-    geom_errorbar(data = points, aes(x = x, ymin = lower95, ymax = upper95),
-                  width = .025, linewidth = .45) +
-    geom_errorbar(data = points, aes(x = x, ymin = lower90, ymax = upper90),
-                  width = .055, linewidth = 1.05) +
     geom_point(data = points, aes(x = x, y = estimate), shape = 21,
                size = 3.3, fill = "black") +
     geom_segment(data = label_data,
