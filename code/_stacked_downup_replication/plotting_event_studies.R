@@ -62,7 +62,8 @@ RSTUDIO_CONFIG <- list(
   root = detected_repo_root,
   output_root = detected_repo_root,
   sample = "",
-  # Choose any of: "main", "politician", "protest", "politician_sweep".
+  # Choose any of: "main", "politician", "protest", "politician_sweep",
+  # "politician_qweights".
   families = c("main", "politician", "protest"),
   # For the main family, optionally list registry IDs; empty means all cases.
   cases = character(),
@@ -137,13 +138,17 @@ parse_args <- function(args) {
   )
   out$families <- trimws(strsplit(out$families, ",", fixed = TRUE)[[1L]])
   allowed_families <- c(
-    "main", "politician", "protest", "politician_sweep"
+    "main", "politician", "protest", "politician_sweep",
+    "politician_qweights"
   )
   invalid_families <- setdiff(out$families, allowed_families)
   if (length(invalid_families)) {
     stop(
       "Unknown plot family: ", paste(invalid_families, collapse = ", "),
-      ". Use main, politician, protest, and/or politician_sweep.",
+      paste0(
+        ". Use main, politician, protest, politician_sweep, and/or ",
+        "politician_qweights."
+      ),
       call. = FALSE
     )
   }
@@ -878,6 +883,32 @@ if ("politician_sweep" %in% args$families) {
       event, figure_base,
       num_pre = 5, num_post = 5, omitted = -1,
       xlab = "Years from Election"
+    )
+  }
+}
+
+# Q-weighted politician event studies estimated in R. Each input contains the
+# dependent-variable mean, coefficient vector, and matching covariance matrix.
+if ("politician_qweights" %in% args$families) {
+  qweight_rel_dir <- file.path(
+    "exploratory_analysis", "politician_byprov_stack_weights"
+  )
+  dir.create(
+    file.path(figure_dir, qweight_rel_dir),
+    recursive = TRUE, showWarnings = FALSE
+  )
+  for (spec_id in c("original", "fe01", "fe05")) {
+    input_path <- file.path(
+      table_dir, qweight_rel_dir, paste0(spec_id, "_plot_input.csv")
+    )
+    if (!file.exists(input_path)) {
+      stop("Missing Q-weight plot input: ", input_path, call. = FALSE)
+    }
+    plot_event(
+      fread(input_path),
+      file.path(qweight_rel_dir, paste0("politician_qweight_", spec_id)),
+      num_pre = 5, num_post = 5, omitted = -1,
+      xlab = "Years from Election", ylim_original = c(-60, 40)
     )
   }
 }

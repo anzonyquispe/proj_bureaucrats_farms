@@ -1,0 +1,133 @@
+\documentclass[10pt]{article}
+\usepackage[letterpaper,landscape,margin=0.55in]{geometry}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{amsmath}
+\usepackage{float}
+\usepackage[hidelinks]{hyperref}
+\setlength{\parindent}{0pt}
+\title{Q-Weighted Politician Event Studies}
+\author{Exploratory fixed-effect comparison}
+\date{August 18, 2026}
+\begin{document}
+\maketitle
+\textbf{Connection to the paper.} This exploratory analysis applies the 
+corrective Q-weighted stacked difference-in-differences estimator from 
+\href{https://doi.org/10.3386/w32054}{Wing, Freedman, and Hollingsworth 
+(2024), \textit{Stacked Difference-in-Differences}}. We replicate their 
+method and their original fixed-effect specification, not their numerical 
+Medicaid results: the estimates below are for fires in this project. The 
+paper's preferred fixed-composition target is a trimmed aggregate ATT.
+
+\textbf{What cohort ID means.} A cohort ID labels one stacked 
+sub-experiment (a province-election pair); it does not label a control type. 
+Every included cohort contains both treated observations ($treat=1$) and 
+controls ($treat=0$). All $treat=0$ observations are included because they 
+remain untreated throughout that stack's analysis window; no distinction 
+among control types is used.
+
+\textbf{All cohorts are included.} No cohort is discarded for lacking 
+some leads or lags. Each sub-experiment contributes only at the event years 
+available in the data. Thus IDs 3--6 contribute from -5 through 4; IDs 1--2 
+enter later; and IDs 7--8 leave after event year 2.
+\begin{center}
+\small
+\begin{tabular}{rllll}
+\toprule
+ID & Province & Election & Available event years & Used? \\
+\midrule
+1 & Haryana & 2014-11 & -3 to 4 & Include \\
+2 & Bihar & 2015-12 & -4 to 4 & Include \\
+3 & Punjab & 2017-04 & -5 to 4 & Include \\
+4 & Uttar Pradesh & 2017-04 & -5 to 4 & Include \\
+5 & Haryana & 2019-11 & -5 to 4 & Include \\
+6 & Bihar & 2020-12 & -5 to 4 & Include \\
+7 & Punjab & 2022-04 & -5 to 2 & Include \\
+8 & Uttar Pradesh & 2022-04 & -5 to 2 & Include \\
+\bottomrule
+\end{tabular}
+\end{center}
+\textbf{Corrective weights.} For cohort $s$ and event year $e$, treated 
+observations receive weight one and controls receive
+\[Q_{se}=\frac{n^T_{se}/N^T_e}{n^C_{se}/N^C_e}.\]
+At each event year, this makes the weighted cohort shares among controls 
+match the shares among treated observations for the cohorts available at 
+that event year, which is the paper's corrective-weight principle.
+
+\textbf{Estimand caveat.} Because cohort availability changes over event 
+time, this requested all-cohort specification is not the paper's 
+fixed-composition trimmed aggregate ATT over -5 through 4. Event year -5 
+uses IDs 3--8; -4 uses IDs 2--8; -3 through 2 use IDs 1--8; and 3--4 use 
+IDs 1--6. Consequently, differences across event years can reflect both 
+dynamic effects and changes in the contributing cohorts.
+\clearpage
+\section*{Event-study estimates}
+Event years run from -5 through 4, with -1 omitted. 
+The sample contains 12,599,763 observations from cohort IDs 1, 2, 3, 4, 5, 6, 7, 8. All models include wind direction and average wind speed, use Q-weights, and cluster standard errors by AC $\times$ cohort.
+ Control weights range from 0.167 to 1.938.
+
+\textbf{Specifications.} Original stacked FE absorbs treatment-group and 
+relative-year effects. FE 01 absorbs grid $\times$ cohort effects. FE 05 
+absorbs grid $\times$ cohort and province $\times$ cohort $\times$ 
+election-year effects.
+
+\begin{figure}[H]
+\centering
+\begin{minipage}[t]{0.325\textwidth}
+\centering
+\textbf{Original stacked FE}\par\smallskip
+\includegraphics[width=\linewidth]{\detokenize{C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/politician_byprov_stack_weights/politician_qweight_original_ori.png}}
+\end{minipage}
+\hfill
+\begin{minipage}[t]{0.325\textwidth}
+\centering
+\textbf{FE 01}\par\smallskip
+\includegraphics[width=\linewidth]{\detokenize{C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/politician_byprov_stack_weights/politician_qweight_fe01_ori.png}}
+\end{minipage}
+\hfill
+\begin{minipage}[t]{0.325\textwidth}
+\centering
+\textbf{FE 05}\par\smallskip
+\includegraphics[width=\linewidth]{\detokenize{C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/politician_byprov_stack_weights/politician_qweight_fe05_ori.png}}
+\end{minipage}
+\caption{Q-weighted event-study estimates and 95\% confidence intervals.}
+\end{figure}
+\clearpage
+\section*{Q-weighted DiD interactions}
+The two post-treatment estimates are intentionally offset horizontally. 
+Their coefficient values and confidence intervals are unchanged; the added 
+space only makes overlapping 90\% and 95\% intervals visible.
+\begin{figure}[H]
+\centering
+\begin{minipage}[t]{0.44\textwidth}
+\centering
+\textbf{Original stacked FE}\par\smallskip
+\includegraphics[width=\linewidth]{\detokenize{C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/politician_byprov_stack_weights/politician_qweight_original_interaction.png}}
+\end{minipage}
+\hfill
+\begin{minipage}[t]{0.44\textwidth}
+\centering
+\textbf{FE 01}\par\smallskip
+\includegraphics[width=\linewidth]{\detokenize{C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/politician_byprov_stack_weights/politician_qweight_fe01_interaction.png}}
+\end{minipage}
+\par\medskip
+\begin{minipage}[t]{0.44\textwidth}
+\centering
+\textbf{FE 05}\par\smallskip
+\includegraphics[width=\linewidth]{\detokenize{C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/politician_byprov_stack_weights/politician_qweight_fe05_interaction.png}}
+\end{minipage}
+\caption{Q-weighted pre/post interactions with separated post positions.}
+\end{figure}
+\clearpage
+\section*{Regression estimates}
+\input{\detokenize{C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/tables/exploratory_analysis/politician_byprov_stack_weights/weighted_event_study_table.tex}}
+\vfill
+\footnotesize\textit{Notes:} The omitted event year is -1. The dependent 
+variable is the project-standard fire count multiplied by 1,000. The same 
+complete-case, all-cohort sample and Q-weights are used in all three 
+columns. Cohort composition varies with event-time coverage. Method: 
+\href{https://doi.org/10.3386/w32054}{Wing, 
+Freedman, and Hollingsworth (2024)}. Implementation reference: 
+\href{https://github.com/hollina/stacked-did-weights}{authors' example 
+code}.
+\end{document}
