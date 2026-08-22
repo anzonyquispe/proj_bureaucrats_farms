@@ -27,6 +27,8 @@ raw/curated sources
     -> build_all_stacked_datasets_duckdb.py -> five standard stacked datasets
     -> build_politicians_characteristics_byprov.py
        -> politicians_characteristics_byprov.csv / DuckDB / cohort manifest
+    -> build_stacked_duckdb_unique_pair.py
+       -> stacked_downup_neigh.csv / DuckDB / cohort manifest
 ```
 
 ## Wind-direction convention
@@ -89,6 +91,13 @@ The first command rebuilds all stacks from an existing master. The second
 rebuilds the master first and then all standard and province-election stacks.
 The dedicated `build_politicians_characteristics_byprov.sbatch` remains
 available when only the alternative stack needs to be rebuilt.
+
+The combined `build_master_and_stacked_datasets.sh` entry point additionally
+builds the neighbour-border stack from the uploaded
+`0_ac_neighs_downup.csv`. This stage uses
+`build_stacked_duckdb_unique_pair.py` and writes
+`stacked_downup_neigh.csv`, `stacked_downup_neigh.db`, and
+`stacked_downup_neigh_manifest.csv`.
 
 ## Inputs to each direct-input producer
 

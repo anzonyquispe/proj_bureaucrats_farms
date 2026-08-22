@@ -127,8 +127,26 @@ qsub build_master_and_stacked_datasets.sh
 
 The shell uses `set -euo pipefail`, so the stacked stage will not start if the
 master stage fails. All stages overwrite their existing outputs. By default,
-it runs all five registered treatments and the province-election politician
-stack.
+it runs all five registered treatments, the province-election politician
+stack, and the neighbour-border stack. The final stage reads
+`0_ac_neighs_downup.csv` and writes `stacked_downup_neigh.csv`,
+`stacked_downup_neigh.db`, and `stacked_downup_neigh_manifest.csv`.
+
+The combined job suppresses SGE's default `.o<jobid>` and `.e<jobid>` files.
+Its readable logs are written to
+`code/_replication_package/data_generation/logs/data_generation/`:
+
+```text
+00_master_and_stacked_pipeline.log
+01_master_dataset.log
+02_standard_stacks.log
+03_politicians_byprov.log
+04_neighbour_stack.log
+```
+
+The `00` file is a short pipeline summary. Each numbered stage file contains
+the detailed Python output. When a stage fails, the summary identifies the
+failed stage and prints the last 80 lines from its detailed log.
 
 The master job reads `9_rice_info_ac_lvl.parquet` and
 `panel_data_election_year.parquet` by default. The stack job reads the resulting

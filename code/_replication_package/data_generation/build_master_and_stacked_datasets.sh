@@ -5,6 +5,8 @@
 #$ -N master_and_stacks
 #$ -pe smp 10
 #$ -cwd
+#$ -o /dev/null
+#$ -e /dev/null
 
 set -euo pipefail
 
@@ -15,6 +17,33 @@ CONDA_ENV="${DOWNUP_ENV_PREFIX:-/groups/sgulzar/india_forest_land/downup_geo}"
 CONDA_SH="/afs/crc.nd.edu/x86_64_linux/c/conda/24.7.1/etc/profile.d/conda.sh"
 BRANCH="${PIPELINE_BRANCH:-replication_data}"
 MEMORY_LIMIT="${PIPELINE_MEMORY_LIMIT:-90GB}"
+NEIGH_INPUT="${NEIGH_INPUT:-${INTERMEDIATE}/0_ac_neighs_downup.csv}"
+NEIGH_OUTPUT="${NEIGH_OUTPUT:-${INTERMEDIATE}/stacked_downup_neigh.csv}"
+NEIGH_DATABASE="${NEIGH_DATABASE:-${INTERMEDIATE}/stacked_downup_neigh.db}"
+NEIGH_TEMP_DIRECTORY="${NEIGH_TEMP_DIRECTORY:-${INTERMEDIATE}/stacked_downup_neigh_duckdb_tmp}"
+LOG_DIR="${PIPELINE_LOG_DIR:-${CODE_DIR}/logs/data_generation}"
+
+mkdir -p "${LOG_DIR}"
+PIPELINE_LOG="${LOG_DIR}/00_master_and_stacked_pipeline.log"
+exec > >(tee "${PIPELINE_LOG}") 2>&1
+
+run_stage() {
+    local label="$1"
+    local log_file="$2"
+    shift 2
+
+    echo "[$(date '+%F %T')] START: ${label}"
+    echo "[$(date '+%F %T')] LOG:   ${log_file}"
+    if "$@" > "${log_file}" 2>&1; then
+        echo "[$(date '+%F %T')] DONE:  ${label}"
+    else
+        local status=$?
+        echo "[$(date '+%F %T')] ERROR: ${label} failed with exit code ${status}" >&2
+        echo "[$(date '+%F %T')] Last 80 lines from ${log_file}:" >&2
+        tail -n 80 "${log_file}" >&2 || true
+        exit "${status}"
+    fi
+}
 
 if [[ ! -f "${CONDA_SH}" ]]; then
     echo "ERROR: conda initialization script was not found at ${CONDA_SH}." >&2
@@ -50,14 +79,12 @@ flock -u 9
 
 cd "${CODE_DIR}"
 
-echo "[$(date '+%F %T')] building 0_master_dataset.parquet and CSV"
-"${PYTHON}" build_0_master_dataset.py \
+run_stage "master dataset" "${LOG_DIR}/01_master_dataset.log" \
+    "${PYTHON}" build_0_master_dataset.py \
     --intermediate "${INTERMEDIATE}" \
     --threads "${NSLOTS:-10}" \
     --memory-limit "${MEMORY_LIMIT}" \
-    --overwrite \
-    > build_0_master_dataset.out 2>&1
-echo "[$(date '+%F %T')] master dataset completed"
+    --overwrite
 
 SPEC_ARGS=()
 if [[ -n "${STACK_SPECS:-}" && "${STACK_SPECS}" != "all" ]]; then
@@ -67,24 +94,46 @@ if [[ -n "${STACK_SPECS:-}" && "${STACK_SPECS}" != "all" ]]; then
     done
 fi
 
-echo "[$(date '+%F %T')] building stacked datasets"
-"${PYTHON}" build_all_stacked_datasets_duckdb.py \
+run_stage "five standard stacked datasets" "${LOG_DIR}/02_standard_stacks.log" \
+    "${PYTHON}" build_all_stacked_datasets_duckdb.py \
     --intermediate "${INTERMEDIATE}" \
     --threads "${NSLOTS:-10}" \
     --memory-limit "${MEMORY_LIMIT}" \
     --overwrite \
-    "${SPEC_ARGS[@]}" \
-    > build_stacked_datasets.out 2>&1
+    "${SPEC_ARGS[@]}"
 
-echo "[$(date '+%F %T')] building politician stack by province-election cohort"
-"${PYTHON}" build_politicians_characteristics_byprov.py \
+run_stage "province-election politician stack" "${LOG_DIR}/03_politicians_byprov.log" \
+    "${PYTHON}" build_politicians_characteristics_byprov.py \
     --intermediate "${INTERMEDIATE}" \
     --threads "${NSLOTS:-10}" \
     --memory-limit "${MEMORY_LIMIT}" \
     --last-cohort-year 2022 \
     --last-cohort-month 12 \
     --expected-cohorts 8 \
-    --overwrite \
-    > build_politicians_characteristics_byprov.out 2>&1
+    --overwrite
 
-echo "[$(date '+%F %T')] completed master and all stacked datasets"
+if [[ ! -f "${NEIGH_INPUT}" ]]; then
+    echo "ERROR: neighbour-panel input was not found at ${NEIGH_INPUT}." >&2
+    exit 1
+fi
+run_stage "neighbour-border stacked dataset" "${LOG_DIR}/04_neighbour_stack.log" \
+    "${PYTHON}" build_stacked_duckdb_unique_pair.py \
+    --input "${NEIGH_INPUT}" \
+    --output "${NEIGH_OUTPUT}" \
+    --database "${NEIGH_DATABASE}" \
+    --temp-directory "${NEIGH_TEMP_DIRECTORY}" \
+    --treatment-col downwind_neighbours \
+    --pair-cols unique_small_grid_id ac_uq_id_neighbor \
+    --unit-cols unique_pair \
+    --cutoff-year 2022 \
+    --cutoff-month 8 \
+    --pre-periods 6 \
+    --post-periods 6 \
+    --post-definition include_event \
+    --threads "${NSLOTS:-10}" \
+    --memory-limit "${MEMORY_LIMIT}" \
+    --write-manifest \
+    --overwrite
+
+echo "[$(date '+%F %T')] completed master, standard stacks, province-election stack, and neighbour stack"
+echo "[$(date '+%F %T')] pipeline summary log: ${PIPELINE_LOG}"
