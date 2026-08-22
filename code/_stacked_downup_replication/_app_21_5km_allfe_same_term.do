@@ -2,7 +2,7 @@
 * _app_21_5km_allfe_same_term.do
 * Protest Event Study - RURAL GRIDS ONLY - ALL 32 FE SPECIFICATIONS
 *
-* Data: stacked_data_protest5km_election.csv, the election-cohort variant of the
+* Data: stacked_data_protest5km_election_sameterm.csv, the election-cohort variant of the
 *       protest stack. Cohorts are (switch month x election year) and every grid
 *       in a stack starts at the first month of the election term containing the
 *       treatment, so the pre-period trimming that this dofile used to do by hand
@@ -22,6 +22,9 @@ if "$root" == "" {
     * Set toggles for standalone run
     global location "shell"
     global sample ""
+    global is_rural_var "is_rural"
+    global fe_list "1/32"
+    global ster_suffix ""
 
     global shell "/groups/sgulzar/sa_fires/proj_bureaucrats_farms"
     global dbox "/Users/anzony.quisperojas/Library/CloudStorage/Dropbox/sa_fires/proj_bureaucrats_farms"
@@ -42,7 +45,20 @@ if "$root" == "" {
 * Import and Merge Data
 *-------------------------------------------------------------------------------
 cd "${root}"
-import delimited using "${root}/data_output/intermediate/cohorts_protest_term/stacked_data_protest5km_election.csv", clear varnames(1)
+local protest_input ///
+    "${root}/data_output/intermediate/stacked_data_protest5km_election_sameterm${sample}.csv"
+capture confirm file "`protest_input'"
+if _rc {
+    local protest_input ///
+        "${root}/data_output/intermediate/cohortes_protest_term/stacked_data_protest5km_election_sameterm${sample}.csv"
+}
+capture confirm file "`protest_input'"
+if _rc {
+    local protest_input ///
+        "${root}/data_output/intermediate/cohorts_protest_term/stacked_data_protest5km_election_sameterm${sample}.csv"
+}
+confirm file "`protest_input'"
+import delimited using "`protest_input'", clear varnames(1)
 
 d *
 
@@ -50,7 +66,9 @@ d *
 * treatment, and every cohort shares one election year. Verify both instead of
 * trimming here.
 assert monthyear >= cohort_term_start
+assert monthyear <= cohort_analysis_max
 assert cohort_term_start <= cohort
+assert inrange(cohort_analysis_max - cohort_term_start, 0, 59)
 bys cohort_id: assert cohort_election_year == cohort_election_year[1]
 
 quietly levelsof cohort_id, local(stack_ids)
@@ -62,6 +80,9 @@ if _rc {
     confirm variable relative_year
     rename relative_year relative_year_bin
 }
+assert relative_year_bin == floor((monthyear - cohort) / 12)
+keep if inrange(relative_year_bin, -4, 1)
+display as text "Final protest event-study sample: relative_year_bin in [-4, 1]"
 
 * election_year and yeargov arrive as floats; the factor and interaction
 * operators below need integers.
@@ -82,8 +103,9 @@ merge m:1 unique_small_grid_id using "${root}/data_output/intermediate/ghs_grid_
 keep if _merge == 3
 drop _merge
 
-* Keep only rural grids
-keep if is_rural == 1
+* Keep only the final rural event-study sample.
+keep if ${is_rural_var} == 1
+keep if year < 2022 | (year == 2022 & month <= 8)
 
 display "Observations after rural filter: " _N
 
@@ -102,6 +124,19 @@ egen monthyearco                 = group(month year cohort_id)
 egen province_cohort             = group(cohort_id province)
 egen ac_elec_yr                  = group(ac_uq_id cohort_election_year cohort_id)
 
+* Retain only grid-cohort units observed on both sides of the protest switch.
+bysort unique_small_grid_id_cohort: egen byte has_pre = max(relative_year_bin < 0)
+bysort unique_small_grid_id_cohort: egen byte has_post = max(relative_year_bin >= 0)
+egen byte unit_tag = tag(unique_small_grid_id_cohort)
+quietly count if unit_tag
+local units_before = r(N)
+quietly count if unit_tag & has_pre == 1 & has_post == 1
+local units_balanced = r(N)
+display as text "Grid-cohort units with pre and post periods: `units_balanced' of `units_before'"
+keep if has_pre == 1 & has_post == 1
+assert has_pre == 1 & has_post == 1
+drop unit_tag has_pre has_post
+
 sum relative_year_bin
 local rmin = r(min)
 gen relative_year_bin_aux = relative_year_bin - `rmin' + 1
@@ -115,8 +150,12 @@ gen countk = count * 1000
 
 local dep_var countk
 
-* Event study without moderators
-local rhs "ib`base'.relative_year_bin_aux##ib0.treat wind_direction av_wind_speed"
+* Keep the standard moderator structure. The zero-valued stub makes this a
+* plain event study while retaining the same coefficient naming convention as
+* the other production event-study dofiles.
+gen byte moderator = 0
+local moderators_list moderator
+* local moderators_list moderator downup_ac rice_area_aclvl_ahigh rice_harvarea_aclvl_ahigh rice_prod_aclvl_ahigh
 
 * Filters
 local filter1 "1"   // all sample
@@ -156,6 +195,7 @@ local fe31 "unique_small_grid_id_cohort province_cohort#c.monthyear yeargov prov
 local fe32 "unique_small_grid_id_cohort monthyearco province_cohort#c.monthyear yeargov province_cohort#election_year province_cohort#election_year#yeargov"
 
 local nfe = 32
+egen relativeyear_cohort = group(relative_year_bin cohort_id)
 
 *-------------------------------------------------------------------------------
 * Loop over fixed-effect specifications
@@ -163,14 +203,18 @@ local nfe = 32
 
 local i = 1
 
-foreach f of numlist 1/1 {
+foreach mod of local moderators_list {
+    local rhs "ib`base'.relative_year_bin_aux##ib0.treat##ib0.`mod' wind_direction av_wind_speed"
 
     * Select filter condition
-    local fcond `filter`f''
+    local fcond `filter1'
 
-    * Compute mean of dep var for untreated grids before treatment
-    quietly summarize `dep_var' if `fcond' & treat == 0 & relative_year_bin <= -1
+    * Project-standard treated-group pre-treatment means.
+    quietly summarize `dep_var' if `fcond' & treat == 1 & relative_year_bin <= -1
     local ymean = r(mean)
+    quietly summarize `dep_var' if `fcond' & treat == 1 & ///
+        relative_year_bin <= -1 & moderator == 1
+    local ymean2 = r(mean)
 
     * Count number of unique ACs in subsample
     unique ac_uq_id if `fcond'
@@ -185,13 +229,16 @@ foreach f of numlist 1/1 {
         display _newline "FE`fe': `fespec'"
 
         * Run regression with clustering
-        reghdfejl `dep_var' `rhs' if `fcond', absorb(`fespec') vce(cluster ac_elec_yr)
+        reghdfejl `dep_var' `rhs' if `fcond', ///
+            absorb(`fespec' relativeyear_cohort) vce(cluster ac_elec_yr)
 
-        * Store coefficient + SE of main var
-        est store evreg`i'
-        estadd scalar ymean = `ymean'
-        estadd scalar acq = `numacs'
-        estadd local sample "Rural"
+        * Attach all metadata before storing the estimate.
+        estadd scalar ymean `ymean'
+        estadd scalar ymean2 `ymean2'
+        estadd scalar acq `numacs'
+        estadd local smpl "Rural"
+        estadd local mod "`mod'"
+        estadd local fespec "`fespec' relativeyear_cohort"
         estadd local fename "FE`fe'"
         * FE indicators, read off the selected specification
         estadd local gridfe "Y"
@@ -200,6 +247,8 @@ foreach f of numlist 1/1 {
         estadd local yeargov     = cond(strpos("`padded'", " yeargov ") > 0, "Y", "N")
         estadd local provelec    = cond(strpos("`padded'", " province_cohort#election_year ") > 0, "Y", "N")
         estadd local provelecgov = cond(strpos("`padded'", " province_cohort#election_year#yeargov ") > 0, "Y", "N")
+
+        est store evreg`i'
 
         local i = `i' + 1
         display("`i'")

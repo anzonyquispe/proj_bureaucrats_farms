@@ -1,11 +1,11 @@
 ********************************************************************************
 * Politician-characteristics event study (rural stacked sample)
 *
-* Input:  politicians_characteristics${sample}.csv
-* Output: one .ster and one plotting .csv for each control definition:
-*   _controls_never      = treated + never-treated controls (paper baseline)
-*   _controls_both       = treated + never- and not-yet-treated controls
-*   _controls_notyet     = treated + legacy type-2 controls only
+* Input: politicians_characteristics_byprov${sample}.csv.
+* Final sample: the input's unchanged treated/control composition, as in the
+* politician_byprov_fe_sweep exploratory analysis. The canonical output keeps
+* the historical _controls_both suffix for downstream plotting compatibility.
+* Final FE: grid x province-election cohort_id and event year x cohort_id.
 *
 * The caller selects downup_ac or downup_ac_pop through $downup_var and uses
 * $ster_suffix (normally "" or "_acpop") to keep the two result families apart.
@@ -22,7 +22,7 @@ if "$root" == "" {
     global is_rural_var "is_rural"
     global fe_list      "1"
     global ster_suffix  ""
-    global control_samples "never both notyet"
+    global control_samples "both"
 
     global shell "/groups/sgulzar/sa_fires/proj_bureaucrats_farms"
     global dbox  "/Users/anzony.quisperojas/Library/CloudStorage/Dropbox/sa_fires/proj_bureaucrats_farms"
@@ -44,13 +44,13 @@ if "$downup_var" == "" {
     global downup_var "downup_ac_pop"
 }
 if "$control_samples" == "" {
-    global control_samples "never both notyet"
+    global control_samples "both"
 }
 
 global int_data "${root}/data_output/intermediate"
 global tables   "${code}/../../tables"
 
-import delimited using "${int_data}/politicians_characteristics${sample}.csv", ///
+import delimited using "${int_data}/politicians_characteristics_byprov${sample}.csv", ///
     clear varnames(1)
 
 * The new stack stores relative_year; retain the established analysis name.
@@ -84,21 +84,30 @@ keep if year < 2022 | (year == 2022 & month <= 8)
 keep if inrange(relative_year_bin, -5, 4)
 
 confirm variable control_type
+confirm variable cohort_id
+confirm variable cohort_province
 assert control_type == 0 if treat == 1
 assert inlist(control_type, 1, 2) if treat == 0
+assert cohort_id == floor(cohort_id) & cohort_id > 0
 
-egen unique_small_grid_id_cohort = group(unique_small_grid_id cohort)
-egen province_cohort = group(province cohort)
-egen ac_elec_yr = group(ac_uq_id election_year cohort)
+sort cohort_id unique_small_grid_id monthyear
+by cohort_id: assert province == province[1]
+by cohort_id: assert cohort == cohort[1]
+by cohort_id: assert cohort_province == cohort_province[1]
+by cohort_id unique_small_grid_id: assert treat == treat[1]
+by cohort_id unique_small_grid_id: assert control_type == control_type[1]
+isid unique_small_grid_id monthyear cohort_id treat
+
+egen unique_small_grid_id_cohort = group(unique_small_grid_id cohort_id)
+egen ac_elec_yr = group(ac_uq_id election_year cohort_id)
 
 quietly summarize relative_year_bin
 local rmin = r(min)
 gen relative_year_bin_aux = relative_year_bin - `rmin' + 1
 local base = -1 - `rmin' + 1
 
-* FE specification used by the paper figures. The loop is retained so an
-* sbatch array can override the selected specifications consistently.
-local fe1 "unique_small_grid_id_cohort province_cohort#c.monthyear province_cohort#election_year"
+* Final FE selected by the province-cohort exploratory sweep.
+local fe1 "unique_small_grid_id_cohort relative_year_bin_aux#cohort_id"
 
 local filter1 "1"
 gen moderator = 0

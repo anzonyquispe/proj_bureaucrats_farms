@@ -1,6 +1,6 @@
 ********************************************************************************
-* Population-weighted stacked event study over relative months -6 through 5.
-* Period -1 remains the omitted reference category.
+* Population-weighted stacked event study over relative months -5 through 6.
+* Period 0 is the omitted reference category.
 ********************************************************************************
 
 if "$root" == "" {
@@ -32,10 +32,11 @@ global int_data "${root}/data_output/intermediate"
 global tables   "${code}/../../tables"
 
 import delimited using "${int_data}/combined_dt_pop${sample}.csv", clear varnames(1)
-keep if inrange(relative_monthyear, -6, 5)
+keep if inrange(relative_monthyear, -5, 6)
 gen relative_year_bin = relative_monthyear
-gen relative_year_bin_aux = relative_year_bin + 7
+gen relative_year_bin_aux = relative_year_bin + 6
 local base = 6
+assert relative_year_bin == 0 if relative_year_bin_aux == `base'
 capture drop countk
 gen countk = count * 1000
 

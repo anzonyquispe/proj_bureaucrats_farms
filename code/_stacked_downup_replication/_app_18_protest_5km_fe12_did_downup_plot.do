@@ -29,12 +29,41 @@ if "$downup_var" == "" {
 global int_data "${root}/data_output/intermediate"
 global tables   "${code}/../../tables"
 
-import delimited using "${int_data}/stacked_data_protest5km${sample}.csv", ///
-    clear varnames(1)
+local protest_input ///
+    "${int_data}/stacked_data_protest5km_election_sameterm${sample}.csv"
+capture confirm file "`protest_input'"
+if _rc {
+    local protest_input ///
+        "${int_data}/cohortes_protest_term/stacked_data_protest5km_election_sameterm${sample}.csv"
+}
+capture confirm file "`protest_input'"
+if _rc {
+    local protest_input ///
+        "${int_data}/cohorts_protest_term/stacked_data_protest5km_election_sameterm${sample}.csv"
+}
+confirm file "`protest_input'"
+display as text "Final same-term protest input: `protest_input'"
+import delimited using "`protest_input'", clear varnames(1)
+
+confirm variable cohort_id
+confirm variable cohort_election_year
+confirm variable cohort_term_start
+confirm variable cohort_analysis_max
+assert monthyear >= cohort_term_start
+assert monthyear <= cohort_analysis_max
+assert cohort_term_start <= cohort
+assert inrange(cohort_analysis_max - cohort_term_start, 0, 59)
+bysort cohort_id: assert cohort == cohort[1]
+bysort cohort_id: assert cohort_election_year == cohort_election_year[1]
+bysort cohort_id: assert cohort_term_start == cohort_term_start[1]
+bysort cohort_id: assert cohort_analysis_max == cohort_analysis_max[1]
 capture confirm variable relative_year_bin
 if _rc {
     rename relative_year relative_year_bin
 }
+assert relative_year_bin == floor((monthyear - cohort) / 12)
+keep if inrange(relative_year_bin, -4, 1)
+display as text "Final protest event-study sample: relative_year_bin in [-4, 1]"
 
 merge m:1 unique_small_grid_id using ///
     "${int_data}/ghs_grid_classification_2000.dta", ///
@@ -49,15 +78,29 @@ keep if year < 2022 | (year == 2022 & month <= 8)
 
 capture drop countk
 gen countk = count * 1000
-egen unique_small_grid_id_cohort = group(unique_small_grid_id cohort)
-egen province_cohort = group(province cohort)
-egen ac_elec_yr = group(ac_uq_id election_year cohort)
+egen unique_small_grid_id_cohort = group(unique_small_grid_id cohort_id)
+egen province_cohort = group(province cohort_id)
+egen relativeyear_cohort = group(relative_year_bin cohort_id)
+egen ac_elec_yr = group(ac_uq_id cohort_election_year cohort_id)
+
+bysort unique_small_grid_id_cohort: egen byte has_pre = max(relative_year_bin < 0)
+bysort unique_small_grid_id_cohort: egen byte has_post = max(relative_year_bin >= 0)
+egen byte unit_tag = tag(unique_small_grid_id_cohort)
+quietly count if unit_tag
+local units_before = r(N)
+quietly count if unit_tag & has_pre == 1 & has_post == 1
+local units_balanced = r(N)
+display as text "Grid-cohort units with pre and post periods: `units_balanced' of `units_before'"
+keep if has_pre == 1 & has_post == 1
+assert has_pre == 1 & has_post == 1
+drop unit_tag has_pre has_post
+
 gen post_ = relative_year_bin >= 0
 gen moderator = ${downup_var}
 
 local dep_var countk
 local moderators_list ${downup_var}
-local fe1 "unique_small_grid_id_cohort relative_year_bin province_cohort#election_year province_cohort#c.monthyear"
+local fe1 "unique_small_grid_id_cohort relativeyear_cohort province_cohort#election_year province_cohort#c.monthyear"
 egen tag_ac = tag(ac_uq_id)
 count if tag_ac == 1
 local numacs = r(N)

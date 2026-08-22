@@ -84,15 +84,16 @@ table_ids+=("$(submit_stata did_by_state _app_9_main_did_by_state.do 1/4 none)")
 table_ids+=("$(submit_stata placebo_13km _app_11_placebo_pop_13km.do 1 none)")
 table_ids+=("$(submit_stata protest_did_area _main_4_protest_5km_fe12_did_downup.do 1/3 none downup_ac stacked_data_protest5km)")
 table_ids+=("$(submit_stata protest_did_pop _main_4_protest_5km_fe12_did_downup.do 1/3 _acpop downup_ac_pop stacked_data_protest5km)")
-table_ids+=("$(submit_stata politician_did_area _main_5_polischar_fe12_did_downup_inter.do 1/3 none downup_ac)")
-table_ids+=("$(submit_stata politician_did_pop _main_5_polischar_fe12_did_downup_inter.do 1/3 _acpop downup_ac_pop)")
+table_ids+=("$(submit_stata politician_did_area _main_5_polischar_fe12_did_downup_inter.do 1 none downup_ac)")
+table_ids+=("$(submit_stata politician_did_pop _main_5_polischar_fe12_did_downup_inter.do 1 _acpop downup_ac_pop)")
 
 # Descriptive tables are also separate Stata jobs.
 table_ids+=("$(submit_stata descriptives_main app_main_descriptive.do 1 none)")
 table_ids+=("$(submit_stata descriptives_protest app_5km_descriptive.do 1 none none stacked_data_protest5km)")
 table_ids+=("$(submit_stata descriptives_politician app_polischar_descriptive.do 1 none)")
 
-# Event-study estimates. app16/app17 each create never, both, and not-yet files.
+# Event-study estimates. Politician uses the unchanged by-province control
+# composition (_controls_both); protest retains all three control definitions.
 event_ids+=("$(submit_stata event_5pre_area _main_2_stacked_event_study_5pre_area.do "${EVENT_FE_LIST}" none)")
 event_ids+=("$(submit_stata event_5pre_pop _main_2_stacked_event_study_5pre.do "${EVENT_FE_LIST}" none)")
 event_ids+=("$(submit_stata politician_event_area _app_16_polischar_fe12_evst_all.do "${EVENT_FE_LIST}" none downup_ac)")

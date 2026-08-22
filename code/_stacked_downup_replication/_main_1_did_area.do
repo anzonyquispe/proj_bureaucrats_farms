@@ -35,10 +35,12 @@ global figure_farms "${code}/../../figures"
 * Import Data
 ********************************************************************************
 
-import delimited "${root}/data_output/intermediate/combined_dt_pop.csv", clear
+import delimited "${root}/data_output/intermediate/combined_dt_pop${sample}.csv", clear
+keep if inrange(relative_monthyear, -5, 6)
+display as text "Final event-study sample: relative_monthyear in [-5, 6]"
 
 preserve
-		import delimited using "${root}/data_output/intermediate/0_master_dataset.csv", ///
+		import delimited using "${root}/data_output/intermediate/0_master_dataset${sample}.csv", ///
     clear varnames(1)
 		keep unique_small_grid_id month year downup_ac downup_dummy
 		tempfile dta

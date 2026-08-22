@@ -3,12 +3,8 @@
 * Single LaTeX-table entry point for rural area and population specifications
 * Run this AFTER analysis do-files have produced .ster files.
 *
-* NOTE: the stacked analyses (main_1, main_3, app_7, app_8, app_9, app_10,
-* app_20) now read the "_rural_stacked.ster" files those do-files write.
-* The analyses not yet converted to the stacked design (main_4, main_5,
-* app_14, app_15) still read their "_rural_acpop.ster" files.
-* The .tex output filenames are unchanged (_rural_acpop.tex) so downstream
-* \input's keep resolving.
+* All regression estimates now use their corresponding final stacked sample.
+* Historical .ster/.tex stems are retained so downstream \input paths resolve.
 *
 * Also writes a single side-by-side comparison document:
 *   ${tables}/_comparison_downup_ac_vs_acpop.tex
@@ -188,9 +184,9 @@ esttab evreg1 evreg2 evreg3 evreg4 evreg5 evreg6 using ///
 
 est clear
 estread using "${tables}/_main_5_polischar_fe12_did_downup_inter${sample}_rural.ster"
-_strip_zeros_stats, models(evreg1 evreg2 evreg3 evreg4 evreg5 evreg6) stats(ymean ymean2)
+_strip_zeros_stats, models(evreg1 evreg2) stats(ymean ymean2)
 
-esttab evreg1 evreg2 evreg3 evreg4 evreg5 evreg6 using ///
+esttab evreg1 evreg2 using ///
     "${tables}/_main_5_polischar_fe12_did_downup_inter${sample}_rural.tex", ///
     replace ///
     cells(b(fmt(3) star) se(par fmt(3))) ///
@@ -213,10 +209,10 @@ esttab evreg1 evreg2 evreg3 evreg4 evreg5 evreg6 using ///
     nomtitles nonumbers collabels(none) nobaselevels ///
     prehead("{" ///
             "\def\sym#1{\ifmmode^{#1}\else\(^{#1}\)\fi}" ///
-            "\begin{tabular}{l*{6}{c}}" ///
+            "\begin{tabular}{l*{2}{c}}" ///
             "\hline" ///
-            "            &\multicolumn{1}{c}{(1)}         &\multicolumn{1}{c}{(2)}         &\multicolumn{1}{c}{(3)}         &\multicolumn{1}{c}{(4)}         &\multicolumn{1}{c}{(5)}         &\multicolumn{1}{c}{(6)}         \\" ///
-            "            & \multicolumn{6}{c}{Number of Fires (in 1,000 units)} \\ \hline") ///
+            "            &\multicolumn{1}{c}{(1)}         &\multicolumn{1}{c}{(2)}         \\" ///
+            "            & \multicolumn{2}{c}{Number of Fires (in 1,000 units)} \\ \hline") ///
     posthead("") prefoot("\hline") ///
     postfoot("\hline" "\end{tabular}" "}")
 
@@ -407,10 +403,9 @@ display "Generated: _main_4_protest_5km_fe12_did_downup_rural_acpop_new.tex"
 {
 est clear
 estread using "${tables}/_main_5_polischar_fe12_did_downup_inter${sample}_rural_acpop.ster"
-_strip_zeros_stats, models(evreg1 evreg2 evreg3 evreg4 evreg5 evreg6) stats(ymean ymean2 ymean3)
+_strip_zeros_stats, models(evreg1 evreg2) stats(ymean ymean2)
 
-
-forval i = 4(1)6 {
+forval i = 2/2 {
     est restore evreg`i'
 
     lincom 1.downup_ac_pop
@@ -439,7 +434,7 @@ forval i = 4(1)6 {
 *---------------------------------------------------------------
 * Panel A: estimated coefficients
 *---------------------------------------------------------------
-esttab evreg1 evreg2 evreg3 evreg4 evreg5 evreg6 ///
+esttab evreg1 evreg2 ///
     using "${tables}/_main_5_polischar_fe12_did_downup_inter${sample}_rural_acpop.tex", ///
     replace fragment ///
     cells(b(fmt(3) star) se(par fmt(3))) ///
@@ -462,19 +457,17 @@ esttab evreg1 evreg2 evreg3 evreg4 evreg5 evreg6 ///
     nomtitles nonumbers collabels(none) nobaselevels noobs ///
     prehead("{" ///
             "\def\sym#1{\ifmmode^{#1}\else\(^{#1}\)\fi}" ///
-            "\begin{tabular}{l*{6}{c}}" ///
+            "\begin{tabular}{l*{2}{c}}" ///
             "\hline" ///
-            "            &\multicolumn{1}{c}{(1)}         &\multicolumn{1}{c}{(2)}         &\multicolumn{1}{c}{(3)}         &\multicolumn{1}{c}{(4)}         &\multicolumn{1}{c}{(5)}         &\multicolumn{1}{c}{(6)}         \\" ///
-            "            & \multicolumn{6}{c}{Number of Fires (in 1,000 units)} \\ \hline") ///
-    posthead("\multicolumn{7}{l}{\textbf{Panel A: Estimated Coefficients}} \\ \hline") ///
+            "            &\multicolumn{1}{c}{(1)}         &\multicolumn{1}{c}{(2)}         \\" ///
+            "            & \multicolumn{2}{c}{Number of Fires (in 1,000 units)} \\ \hline") ///
+    posthead("\multicolumn{3}{l}{\textbf{Panel A: Estimated Coefficients}} \\ \hline") ///
     prefoot("") postfoot("")
 
 *---------------------------------------------------------------
 * Panel B: linear combinations
 *---------------------------------------------------------------
-* Start at evreg2 because the row label spans two columns; this reproduces the
-* legacy alignment (two empty model cells followed by estimates in 4--6).
-esttab evreg2 evreg3 evreg4 evreg5 evreg6 ///
+esttab evreg1 evreg2 ///
     using "${tables}/_main_5_polischar_fe12_did_downup_inter${sample}_rural_acpop.tex", ///
     append fragment ///
     cells(none) ///
@@ -487,13 +480,13 @@ esttab evreg2 evreg3 evreg4 evreg5 evreg6 ///
     nomtitles nonumbers collabels(none) nobaselevels noobs ///
     prehead("") posthead("") ///
     prefoot("\hline" ///
-            "\multicolumn{7}{l}{\textbf{Panel B: Linear Combinations}} \\ \hline") ///
+            "\multicolumn{3}{l}{\textbf{Panel B: Linear Combinations}} \\ \hline") ///
     postfoot("")
 
 *---------------------------------------------------------------
 * Footer: sample info and fixed effects
 *---------------------------------------------------------------
-esttab evreg1 evreg2 evreg3 evreg4 evreg5 evreg6 ///
+esttab evreg1 evreg2 ///
     using "${tables}/_main_5_polischar_fe12_did_downup_inter${sample}_rural_acpop.tex", ///
     append fragment ///
     cells(none) ///

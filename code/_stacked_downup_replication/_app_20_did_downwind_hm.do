@@ -38,6 +38,8 @@ global figure_farms "${code}/../../figures"
 ********************************************************************************
 
 use  "${int_farms}/combined_dt_pop.dta", clear
+keep if inrange(relative_monthyear, -5, 6)
+display as text "Final event-study sample: relative_monthyear in [-5, 6]"
 
 * Merge with rural classification
 merge m:1 unique_small_grid_id using "${root}/data_output/intermediate/ghs_grid_classification_2000.dta", keepusing(is_rural)

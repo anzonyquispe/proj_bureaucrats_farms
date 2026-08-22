@@ -1,7 +1,7 @@
 ********************************************************************************
 * _app_14_polischar_fe12_did_ricemods_rural.do
 * Politician characteristics DiD with rice moderators - RURAL GRIDS ONLY
-* 3 columns: 3 FE specs (baseline only, no downup_ac interaction)
+* 4 columns: baseline plus three rice moderators under the final politician FE.
 ********************************************************************************
 
 ********************************************************************************
@@ -34,22 +34,14 @@ cd "${root}"
 ********************************************************************************
 
 // Importing data from csv
-import delimited using "${root}/data_output/intermediate/politicians_characteristics${sample}.csv", ///
+import delimited using "${root}/data_output/intermediate/politicians_characteristics_byprov${sample}.csv", ///
     clear varnames(1)
-	
-	drop downup_ac 
-
-preserve
-		import delimited using "${root}/data_output/intermediate/0_master_dataset.csv", ///
-    clear varnames(1)
-		keep unique_small_grid_id month year downup_ac_pop
-		tempfile dta
-		save `dta'
-	restore
-	
-	merge m:1 unique_small_grid_id month year using `dta', keep(3) nogen
-	
-	rename  downup_ac_pop downup_ac
+capture confirm variable relative_year_bin
+if _rc rename relative_year relative_year_bin
+capture drop downup_ac
+gen byte downup_ac = downup_ac_pop
+keep if inrange(relative_year_bin, -5, 4)
+display as text "Final politician event-study sample: relative_year_bin in [-5, 4]"
 
 * Merge with rice moderators
 merge m:1 unique_small_grid_id ac_uq_id using "${root}/data_output/intermediate/rice_moderators.dta"
@@ -63,6 +55,13 @@ drop _merge
 
 * Keep only rural grids
 keep if is_rural == 1
+keep if year < 2022 | (year == 2022 & month <= 8)
+
+assert cohort_id == floor(cohort_id) & cohort_id > 0
+sort cohort_id unique_small_grid_id monthyear
+by cohort_id: assert province == province[1]
+by cohort_id: assert cohort == cohort[1]
+by cohort_id unique_small_grid_id: assert treat == treat[1]
 
 display "Observations after rural filter: " _N
 
@@ -74,10 +73,10 @@ display "Observations after rural filter: " _N
 gen date_ym = ym(year, month)
 
 * Fixed Effects
-egen unique_small_grid_id_cohort = group(unique_small_grid_id cohort)
-egen monthyearco = group(month year cohort)
-egen ac_elec_yr = group(ac_uq_id election_year cohort)
-egen province_cohort = group(cohort province)
+egen unique_small_grid_id_cohort = group(unique_small_grid_id cohort_id)
+egen monthyearco = group(month year cohort_id)
+egen ac_elec_yr = group(ac_uq_id election_year cohort_id)
+egen province_cohort = group(cohort_id province)
 
 
 * Government year
@@ -106,7 +105,7 @@ local dep_var countk
 * FE specifications
 local dep_var countk
 local rhs "wind_direction av_wind_speed"
-local fe12 "unique_small_grid_id_cohort relative_year_bin_aux province_cohort#election_year province_cohort#c.monthyear"
+local fe12 "unique_small_grid_id_cohort relative_year_bin_aux#cohort_id"
 
 unique ac_uq_id
 local numacs = r(unique)
@@ -120,10 +119,10 @@ local i = 1
 
 foreach mod of local mods_list {
 
-	quietly summarize `dep_var' if treat == 0 & post_ == 0
+	quietly summarize `dep_var' if treat == 1 & relative_year_bin <= -1
 	local ymean_fmt = r(mean)
 
-	quietly summarize `dep_var' if treat == 0 & post_ == 0 & `mod' == 0
+	quietly summarize `dep_var' if treat == 1 & relative_year_bin <= -1 & `mod' == 1
 	local ymean2 = r(mean)
 
 	reghdfejl `dep_var' ib0.post_##ib0.treat##ib0.`mod' `rhs', absorb(`fe12') cluster(ac_elec_yr)

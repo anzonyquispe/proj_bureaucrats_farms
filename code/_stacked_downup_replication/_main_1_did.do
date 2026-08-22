@@ -9,7 +9,7 @@
 * Optional direct-call arguments:
 *   stacked input stem, treatment variable, output stem, output suffix,
 *   minimum relative month, maximum relative month.
-* The final two arguments default to the production window [-6, 5].
+* The final two arguments default to the final production window [-5, 6].
 args stacked_file_arg downup_var_arg did_output_arg ster_suffix_arg ///
     window_min_arg window_max_arg
 
@@ -68,8 +68,8 @@ if "`ster_suffix_arg'" != "" {
     global ster_suffix "`ster_suffix_arg'"
 }
 
-local window_min = -6
-local window_max = 5
+local window_min = -5
+local window_max = 6
 if "`window_min_arg'" != "" {
     local window_min = real("`window_min_arg'")
 }
@@ -90,7 +90,7 @@ import delimited "${int_data}/${stacked_file}${sample}.csv", clear varnames(1)
 capture drop countk
 gen countk = count * 1000
 keep if inrange(relative_monthyear, `window_min', `window_max')
-display as text "Exploration window: relative_monthyear in [`window_min', `window_max']"
+display as text "Production window: relative_monthyear in [`window_min', `window_max']"
 
 * Preserve the stacked-analysis convention used by the event-study templates:
 * relative_year_bin is the analysis-period copy of relative_monthyear.

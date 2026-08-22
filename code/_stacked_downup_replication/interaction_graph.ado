@@ -1,4 +1,4 @@
-*! version 1.5  2026-08-21
+*! version 1.6  2026-08-22
 *! Interaction effect graph for triple-interaction DiD models.
 
 capture program drop interaction_graph
@@ -151,16 +151,16 @@ program define interaction_graph
 
         if "`type'" == "politician" {
             quietly replace sec = 0.9 in 1
-            * Separate the two post estimates horizontally so overlapping
-            * confidence intervals remain visible.
-            quietly replace sec = 3.08 in 2
-            quietly replace sec = 3.42 in 3
-            quietly replace sec = 3.20 in 4
+            * Both estimates refer to the same post period and therefore share
+            * exactly the same horizontal coordinate.
+            quietly replace sec = 3.25 in 2
+            quietly replace sec = 3.25 in 3
+            quietly replace sec = 4.68 in 4
             local text_ypos = `ymin' + (`ymax' - `ymin') * .05
 
             twoway ///
-                (pcarrowi `pos1' .95 `pos2' 3.00, color(black)) ///
-                (pcarrowi `pos1' .95 `pos3' 3.34, color(black)) ///
+                (pcarrowi `pos1' .95 `pos2' 3.25, color(black)) ///
+                (pcarrowi `pos1' .95 `pos3' 3.25, color(black)) ///
                 (scatter lincoms_treat1 sec in 1, msymbol(O) color(black) msize(3)) ///
                 (scatter lincoms_treat1 sec in 2/3, msymbol(O) color(black) msize(3)) ///
                 (pci `pos2' 4.55 `pos2' 4.68, color(black)) ///
@@ -169,8 +169,8 @@ program define interaction_graph
                 (pci `pos4' 4.68 `pos4' 4.72, color(black)), ///
                 legend(off) ///
                 text(`pos1' .77 "Non-Agricultural" "Politician", place(w) size(3.5) justification(left)) ///
-                text(`pos2' 3.58 "Non-Agricultural" "Politician", place(e) size(3.5) justification(left)) ///
-                text(`pos3' 3.58 "Agricultural" "Politician", place(e) size(3.5) justification(left)) ///
+                text(`pos2' 3.42 "Non-Agricultural" "Politician", place(e) size(3.5) justification(left)) ///
+                text(`pos3' 3.42 "Agricultural" "Politician", place(e) size(3.5) justification(left)) ///
                 text(`text_ypos' .9 "Pre", place(c) size(3.5)) ///
                 text(`text_ypos' 3.25 "Post", place(c) size(3.5)) ///
                 text(`pos4' 4.75 "p-value" "`pval'", place(e) size(3)) ///
@@ -181,14 +181,14 @@ program define interaction_graph
         }
         else {
             quietly replace sec = .9 in 1
-            quietly replace sec = 3.30 in 2
-            quietly replace sec = 3.70 in 3
+            quietly replace sec = 3.50 in 2
+            quietly replace sec = 3.50 in 3
             quietly replace sec = 4.70 in 4
             local text_ypos = `ymin' + (`ymax' - `ymin') * .05
 
             twoway ///
-                (pcarrowi `pos1' .95 `pos2' 3.22, color(black)) ///
-                (pcarrowi `pos1' .95 `pos3' 3.62, color(black)) ///
+                (pcarrowi `pos1' .95 `pos2' 3.50, color(black)) ///
+                (pcarrowi `pos1' .95 `pos3' 3.50, color(black)) ///
                 (scatter lincoms_treat1 sec in 2/3, msymbol(O) color(black) msize(3)) ///
                 (scatter lincoms_treat1 sec in 1, msymbol(O) color(black) msize(3)) ///
                 (pci `pos2' 4.40 `pos2' 4.50, color(black)) ///

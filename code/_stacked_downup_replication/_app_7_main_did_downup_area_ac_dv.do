@@ -39,6 +39,8 @@ global figure_farms "${code}/../../figures"
 
 * The new stack is CSV and already retains mean_brightness.
 import delimited "${root}/data_output/intermediate/combined_dt_pop${sample}.csv", clear
+keep if inrange(relative_monthyear, -5, 6)
+display as text "Final event-study sample: relative_monthyear in [-5, 6]"
 
 
 * Merge with rural classification

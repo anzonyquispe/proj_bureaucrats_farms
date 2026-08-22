@@ -428,6 +428,31 @@ s <- args$sample
 #   id, csv_stem, model, rows, columns, and figure_base.
 # csv_stem excludes the optional sample suffix and trailing "_rural.csv".
 event_cases <- list(
+  # Final production event studies: relative months -5,...,+6, omitting 0.
+  event_case(
+    id = "final_stacked_area_baseline",
+    csv_stem = "stacked_event_study_5pre", model = "evreg1",
+    rows = 15:25, columns = c(3, 4, 19:29),
+    figure_base = "stacked_event_study_5pre_rural_1",
+    pre = 5, post = 6, omitted = 0,
+    ylim_original = c(-40, 20), ylim_rotated = c(-40, 30)
+  ),
+  event_case(
+    id = "final_stacked_population_baseline",
+    csv_stem = "stacked_event_study_pop_5pre", model = "evreg1",
+    rows = 15:25, columns = c(3, 4, 19:29),
+    figure_base = "stacked_event_study_pop_5pre_rural_1",
+    pre = 5, post = 6, omitted = 0,
+    ylim_original = c(-40, 20), ylim_rotated = c(-40, 30)
+  ),
+  event_case(
+    id = "final_stacked_population_rice",
+    csv_stem = "stacked_event_study_pop_5pre", model = "evreg2",
+    rows = 39:49, columns = c(3, 4, 43:53),
+    figure_base = "stacked_event_study_pop_5pre_rural_riceP",
+    pre = 5, post = 6, omitted = 0,
+    ylim_original = c(-80, 50), ylim_rotated = c(-80, 50)
+  ),
   # event_case(
   #   id = "legacy_main_baseline",
   #   csv_stem = "main_event_study", model = "evreg1",
@@ -915,9 +940,7 @@ if ("politician_qweights" %in% args$families) {
 
 # All politician/protest moderators, area/population definitions, and controls.
 politician_control_suffixes <- c(
-  never = "_controls_never",
-  both = "_controls_both",
-  notyet = "_controls_notyet"
+  both = "_controls_both"
 )
 protest_control_suffixes <- c(
   never = "_controls_never",
@@ -927,17 +950,23 @@ protest_control_suffixes <- c(
 moderator_names <- c("1", "downup_2", "riceA_3", "riceHA_4", "riceP_5")
 
 for (analysis_suffix in c("", "_acpop")) {
-  for (control_name in names(politician_control_suffixes)) {
-    politician_control_suffix <- politician_control_suffixes[[control_name]]
-    protest_control_suffix <- protest_control_suffixes[[control_name]]
-    politician_stem <- paste0(
-      "_app_16_polischar_fe12_evst_all", s, "_rural",
-      analysis_suffix, politician_control_suffix
-    )
-    protest_stem <- paste0(
-      "_app_17_5km_fe12_evst_all", s, "_rural",
-      analysis_suffix, protest_control_suffix
-    )
+  for (control_name in union(
+    names(politician_control_suffixes), names(protest_control_suffixes)
+  )) {
+    politician_stem <- NULL
+    protest_stem <- NULL
+    if (control_name %in% names(politician_control_suffixes)) {
+      politician_stem <- paste0(
+        "_app_16_polischar_fe12_evst_all", s, "_rural",
+        analysis_suffix, politician_control_suffixes[[control_name]]
+      )
+    }
+    if (control_name %in% names(protest_control_suffixes)) {
+      protest_stem <- paste0(
+        "_app_17_5km_fe12_evst_all", s, "_rural",
+        analysis_suffix, protest_control_suffixes[[control_name]]
+      )
+    }
     for (model_index in seq_along(moderator_names)) {
       if (model_index == 1L) {
         rows <- 13:21
@@ -946,22 +975,42 @@ for (analysis_suffix in c("", "_acpop")) {
         rows <- 33:41
         columns <- c(3, 4, 37:45)
       }
-      if ("politician" %in% args$families) {
+      if ("politician" %in% args$families && !is.null(politician_stem)) {
+        politician_figure_stem <- if (identical(control_name, "both")) {
+          sub("_controls_both$", "", politician_stem)
+        } else {
+          politician_stem
+        }
         run_case(
           paste0(politician_stem, ".csv"), paste0("evreg", model_index),
           rows, columns,
-          paste0(politician_stem, "_", moderator_names[[model_index]]),
+          paste0(politician_figure_stem, "_", moderator_names[[model_index]]),
           5, 5, -1, "Time from Treatment (years)",
           if (model_index == 1L) c(-20, 50) else NULL, NULL,
-          required = identical(control_name, "never")
+          required = identical(control_name, "both")
         )
       }
-      if ("protest" %in% args$families) {
+      if ("protest" %in% args$families && !is.null(protest_stem)) {
+        protest_figure_stem <- if (identical(control_name, "never")) {
+          sub("_controls_never$", "", protest_stem)
+        } else {
+          protest_stem
+        }
+        # The same-government-term protest sample spans event years -4,...,1
+        # with -1 omitted. Reducing the event support shifts the positions of
+        # the saved interaction coefficients relative to the politician CSV.
+        if (model_index == 1L) {
+          protest_rows <- 9:13
+          protest_columns <- c(3, 4, 13:17)
+        } else {
+          protest_rows <- 21:25
+          protest_columns <- c(3, 4, 25:29)
+        }
         run_case(
           paste0(protest_stem, ".csv"), paste0("evreg", model_index),
-          rows, columns,
-          paste0(protest_stem, "_", moderator_names[[model_index]]),
-          8, 2, -1, "Time from Treatment (years)",
+          protest_rows, protest_columns,
+          paste0(protest_figure_stem, "_", moderator_names[[model_index]]),
+          4, 2, -1, "Time from Treatment (years)",
           required = identical(control_name, "never")
         )
       }

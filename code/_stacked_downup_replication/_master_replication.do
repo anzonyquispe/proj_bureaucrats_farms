@@ -102,7 +102,7 @@ do "${code}/app_5km_descriptive.do"
 do "${code}/app_polischar_descriptive.do"
 
 ********************************************************************************
-* 3. Main-stack event studies over relative months -6 through 5
+* 3. Main-stack event studies over relative months -5 through 6, omitting 0
 ********************************************************************************
 
 global fe_list "1"
@@ -113,17 +113,17 @@ do "${code}/_main_2_stacked_event_study_5pre.do"
 ********************************************************************************
 * 4. Protest and politician-characteristic analyses
 *
-* Event studies write three control-sample versions:
-*   baseline             treated + never treated
-*   _controls_both       treated + never treated + not yet treated
-*   _controls_notyet     treated + not yet treated
+* Politician: by-province stack, unchanged full control composition, and
+* grid x cohort_id plus event-year x cohort_id FE.
+* Protest: election-term-cleaned stack; retain the established never, pooled,
+* and not-yet control outputs for the event study.
 ********************************************************************************
-
-global fe_list "1/3"
 
 global downup_var "downup_ac"
 global ster_suffix ""
+global fe_list "1/3"
 do "${code}/_main_4_protest_5km_fe12_did_downup.do"
+global fe_list "1"
 do "${code}/_main_5_polischar_fe12_did_downup_inter.do"
 
 global fe_list "1"
@@ -132,7 +132,9 @@ do "${code}/_app_19_polischar_fe12_did_downup_inter_plot.do"
 
 global downup_var "downup_ac_pop"
 global ster_suffix "_acpop"
+global fe_list "1/3"
 do "${code}/_main_4_protest_5km_fe12_did_downup.do"
+global fe_list "1"
 do "${code}/_main_5_polischar_fe12_did_downup_inter.do"
 
 global fe_list "1"
@@ -143,12 +145,16 @@ global fe_list "1"
 
 global downup_var "downup_ac"
 global ster_suffix ""
+global control_samples "both"
 do "${code}/_app_16_polischar_fe12_evst_all.do"
+global control_samples "never both notyet"
 do "${code}/_app_17_5km_fe12_evst_all.do"
 
 global downup_var "downup_ac_pop"
 global ster_suffix "_acpop"
+global control_samples "both"
 do "${code}/_app_16_polischar_fe12_evst_all.do"
+global control_samples "never both notyet"
 do "${code}/_app_17_5km_fe12_evst_all.do"
 
 * Event-study CSV export is local post-processing after .ster synchronization:

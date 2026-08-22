@@ -29,6 +29,12 @@ global int_data "${root}/data_output/intermediate"
 global tables   "${code}/../../tables"
 
 import delimited "${int_data}/stacked_downup_neigh${sample}.csv", clear varnames(1)
+capture confirm variable relative_monthyear
+if _rc {
+    gen relative_monthyear = monthyear - cohort
+}
+keep if inrange(relative_monthyear, -5, 6)
+display as text "Final event-study sample: relative_monthyear in [-5, 6]"
 merge m:1 unique_small_grid_id using "${int_data}/ghs_grid_classification_2000.dta", ///
     keep(master match) keepusing(is_rural)
 drop _merge

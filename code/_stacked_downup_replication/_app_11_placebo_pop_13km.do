@@ -26,6 +26,8 @@ global tables   "${code}/../../tables"
 
 import delimited using "${int_data}/stacked_downup_13kmpl${sample}.csv", ///
     clear varnames(1)
+keep if inrange(relative_monthyear, -5, 6)
+display as text "Final event-study sample: relative_monthyear in [-5, 6]"
 
 rename downup_13kmpl downup_pop_13km
 capture drop countk

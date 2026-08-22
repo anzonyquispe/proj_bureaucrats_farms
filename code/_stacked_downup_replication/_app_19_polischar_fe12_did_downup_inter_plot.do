@@ -1,5 +1,6 @@
 ********************************************************************************
-* Politician-characteristics interaction estimates used by plot generator
+* Politician-characteristics interaction estimates used by plot generator.
+* Final input and FE follow politician_byprov_fe_sweep.
 ********************************************************************************
 
 version 17
@@ -29,7 +30,7 @@ if "$downup_var" == "" {
 global int_data "${root}/data_output/intermediate"
 global tables   "${code}/../../tables"
 
-import delimited using "${int_data}/politicians_characteristics${sample}.csv", ///
+import delimited using "${int_data}/politicians_characteristics_byprov${sample}.csv", ///
     clear varnames(1)
 capture confirm variable relative_year_bin
 if _rc {
@@ -41,6 +42,7 @@ merge m:1 unique_small_grid_id using ///
     keep(master match) keepusing(is_rural) nogen
 keep if ${is_rural_var} == 1
 keep if year < 2022 | (year == 2022 & month <= 8)
+keep if inrange(relative_year_bin, -5, 4)
 
 * Do not exclude grids intersecting more than one AC.
 * merge m:1 unique_small_grid_id using "${int_data}/grids_with_more_1_ac.dta"
@@ -49,15 +51,31 @@ keep if year < 2022 | (year == 2022 & month <= 8)
 
 capture drop countk
 gen countk = count * 1000
-egen unique_small_grid_id_cohort = group(unique_small_grid_id cohort)
-egen province_cohort = group(province cohort)
-egen ac_elec_yr = group(ac_uq_id election_year cohort)
+confirm variable cohort_id
+confirm variable cohort_province
+confirm variable control_type
+assert cohort_id == floor(cohort_id) & cohort_id > 0
+assert control_type == 0 if treat == 1
+assert inlist(control_type, 1, 2) if treat == 0
+sort cohort_id unique_small_grid_id monthyear
+by cohort_id: assert province == province[1]
+by cohort_id: assert cohort == cohort[1]
+by cohort_id: assert cohort_province == cohort_province[1]
+by cohort_id unique_small_grid_id: assert treat == treat[1]
+by cohort_id unique_small_grid_id: assert control_type == control_type[1]
+isid unique_small_grid_id monthyear cohort_id treat
+
+egen unique_small_grid_id_cohort = group(unique_small_grid_id cohort_id)
+egen ac_elec_yr = group(ac_uq_id election_year cohort_id)
+quietly summarize relative_year_bin
+local rmin = r(min)
+gen int relative_year_bin_aux = relative_year_bin - `rmin' + 1
 gen post_ = relative_year_bin >= 0
 gen moderator = ${downup_var}
 
 local dep_var countk
 local moderators_list ${downup_var}
-local fe1 "unique_small_grid_id_cohort relative_year_bin province_cohort#election_year province_cohort#c.monthyear"
+local fe1 "unique_small_grid_id_cohort relative_year_bin_aux#cohort_id"
 egen tag_ac = tag(ac_uq_id)
 count if tag_ac == 1
 local numacs = r(N)
@@ -76,6 +94,7 @@ foreach mod of local moderators_list {
         estadd scalar ymean2 = `ymean2'
         estadd scalar acq = `numacs'
         estadd local smpl "Rural"
+        estadd local fespec "`fe`fe''"
         estadd local mod "`mod'"
         est store evreg`i'
         local i = `i' + 1

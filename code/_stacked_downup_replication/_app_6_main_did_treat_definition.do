@@ -40,6 +40,8 @@ global figure_farms "${code}/../../figures"
 
 * Getting downup_dummy & mean_brigthness
 import delimited "${root}/data_output/intermediate/combined_dt_pop${sample}.csv", clear
+keep if inrange(relative_monthyear, -5, 6)
+display as text "Final event-study sample: relative_monthyear in [-5, 6]"
 
 preserve
 		import delimited using "${root}/data_output/intermediate/0_master_dataset${sample}.csv", ///
