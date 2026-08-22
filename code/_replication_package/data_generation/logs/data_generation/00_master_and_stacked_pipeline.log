@@ -1,0 +1,25 @@
+[2026-08-21 21:21:55] host=d32cepyc256.crc.nd.edu job=1377081 pwd=/users/aquisper/proj_bureaucrats_farms
+[2026-08-21 21:21:55] conda environment=/groups/sgulzar/india_forest_land/downup_geo
+[2026-08-21 21:21:55] python=/groups/sgulzar/india_forest_land/downup_geo/bin/python
+[2026-08-21 21:21:55] intermediate=/groups/sgulzar/sa_fires/proj_bureaucrats_farms/data_output/intermediate
+From github.com:anzonyquispe/proj_bureaucrats_farms
+ * branch            replication_data -> FETCH_HEAD
+Already on 'replication_data'
+Your branch is up to date with 'origin/replication_data'.
+From github.com:anzonyquispe/proj_bureaucrats_farms
+ * branch            replication_data -> FETCH_HEAD
+Already up to date.
+[2026-08-21 21:21:57] git HEAD: 1d941ab
+[2026-08-21 21:21:57] START: canonical AC-area panel
+[2026-08-21 21:21:57] LOG:   /users/aquisper/proj_bureaucrats_farms/code/_replication_package/data_generation/logs/data_generation/01_normalize_ac_area.log
+[2026-08-21 21:22:00] DONE:  canonical AC-area panel
+[2026-08-21 21:22:00] START: master dataset
+[2026-08-21 21:22:00] LOG:   /users/aquisper/proj_bureaucrats_farms/code/_replication_package/data_generation/logs/data_generation/02_master_dataset.log
+[2026-08-21 21:22:53] DONE:  master dataset
+[2026-08-21 21:22:53] START: five standard stacked datasets
+[2026-08-21 21:22:53] LOG:   /users/aquisper/proj_bureaucrats_farms/code/_replication_package/data_generation/logs/data_generation/03_standard_stacks.log
+[2026-08-21 21:35:40] DONE:  five standard stacked datasets
+[2026-08-21 21:35:40] START: province-election politician stack
+[2026-08-21 21:35:40] LOG:   /users/aquisper/proj_bureaucrats_farms/code/_replication_package/data_generation/logs/data_generation/04_politicians_byprov.log
+[2026-08-21 21:36:19] DONE:  province-election politician stack
+ERROR: neighbour-panel input was not found at /groups/sgulzar/sa_fires/proj_bureaucrats_farms/data_output/intermediate/0_ac_neighs_downup.csv.

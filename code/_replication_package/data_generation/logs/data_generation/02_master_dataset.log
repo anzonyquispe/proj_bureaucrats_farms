@@ -1,0 +1,26 @@
+2026-08-21 21:22:02 | INFO | Loading protest, election, rice, and fire inputs
+2026-08-21 21:22:04 | INFO | Rice-production median used for rice_prod_aclvl_ahigh: 38090.8
+2026-08-21 21:22:04 | INFO | Wind-complete population base | source_rows=14,837,592 | excluded_grids=0 | excluded_rows=0 | retained_rows=14,837,592
+2026-08-21 21:22:04 | INFO | Validating large-panel keys
+2026-08-21 21:22:05 | INFO | Merge population base x area panel [grid-AC-month] | left_only=0 | right_only=0 | both=14,837,592
+2026-08-21 21:22:05 | INFO | Merge population base x 13 km placebo [grid-AC-month] | left_only=0 | right_only=0 | both=14,837,592
+2026-08-21 21:22:05 | INFO | Merge population base x fire panel [grid-month] | left_only=14,169,115 | right_only=185,228 | both=668,477
+2026-08-21 21:22:05 | INFO | Merge population grids x protest grids [grid] | left_only=87,467 | right_only=115 | both=12,787
+2026-08-21 21:22:05 | WARNING | Protest grids outside the population base: 115
+2026-08-21 21:22:06 | INFO | Merge population base x grid/protest lookup [grid-AC] | left_only=0 | right_only=0 | both=100,254
+2026-08-21 21:22:06 | INFO | Merge population base x election panel [AC-month] | left_only=0 | right_only=32,696 | both=14,837,592
+2026-08-21 21:22:06 | INFO | Merge population ACs x rice panel [AC] | left_only=0 | right_only=0 | both=853
+2026-08-21 21:22:07 | INFO | downup_diff_pop sample SD: 295722.255835
+2026-08-21 21:22:07 | INFO | Writing master Parquet
+2026-08-21 21:22:18 | INFO | Rows without election_year (field may legitimately be missing): 0
+2026-08-21 21:22:18 | INFO | Rows with no fire record (count=0, mean_brightness missing): 14,169,115
+2026-08-21 21:22:18 | INFO | Writing master CSV
+2026-08-21 21:22:53 | INFO | Completed master dataset
+2026-08-21 21:22:53 | INFO | rows: 14,837,592
+2026-08-21 21:22:53 | INFO | grids: 100,254
+2026-08-21 21:22:53 | INFO | ACs: 853
+2026-08-21 21:22:53 | INFO | protest5km=1 rows: 613,960
+2026-08-21 21:22:53 | INFO | downup_1sd_pop=1 rows: 2,525,812
+2026-08-21 21:22:53 | INFO | zero-population rows: 148
+2026-08-21 21:22:53 | INFO | Parquet: /groups/sgulzar/sa_fires/proj_bureaucrats_farms/data_output/intermediate/0_master_dataset.parquet
+2026-08-21 21:22:53 | INFO | CSV: /groups/sgulzar/sa_fires/proj_bureaucrats_farms/data_output/intermediate/0_master_dataset.csv

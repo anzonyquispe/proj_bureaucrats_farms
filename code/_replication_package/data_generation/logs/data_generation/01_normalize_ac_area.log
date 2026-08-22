@@ -1,0 +1,4 @@
+2026-08-21 21:21:58,726 | INFO | Merge population x legacy area [grid-month] | left_only=0 | right_only=0 | both=14,837,592
+2026-08-21 21:21:59,586 | INFO | Rolling-direction mismatches: 0
+2026-08-21 21:22:00,876 | INFO | Canonical area panel written: /groups/sgulzar/sa_fires/proj_bureaucrats_farms/data_output/intermediate/data_2012_2024_grid_ac_downup.parquet
+2026-08-21 21:22:00,876 | INFO | Rows: 14,837,592 | columns: 7
