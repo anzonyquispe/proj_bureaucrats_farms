@@ -62,14 +62,13 @@ if _rc {
     rename relative_year relative_year_bin
 }
 assert relative_year_bin == floor((monthyear - cohort) / 12)
-keep if inrange(relative_year_bin, -4, 1)
-display as text "Final protest event-study sample: relative_year_bin in [-4, 1]"
+drop if relative_year_bin == -5
+display as text "Canonical protest sample: full same-term support except relative year -5"
 
 merge m:1 unique_small_grid_id using ///
     "${int_data}/ghs_grid_classification_2000.dta", ///
     keep(master match) keepusing(is_rural) nogen
 keep if ${is_rural_var} == 1
-keep if year < 2022 | (year == 2022 & month <= 8)
 
 * Do not exclude grids intersecting more than one AC.
 * merge m:1 unique_small_grid_id using "${int_data}/grids_with_more_1_ac.dta"

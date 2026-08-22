@@ -1,0 +1,20 @@
+OLS estimation, Dep. Var.: countk
+Observations: 629,251
+Fixed-effects: grid_cohort: 11,901,  relativeyear_cohort: 189,
+ province_election: 62
+Varying slopes: monthyear (province_cohort): 62
+Standard-errors: Clustered (ac_elec_yr) 
+                              Estimate   Std. Error    t value   Pr(>|t|)    
+post                     207159.063570 6.238328e+04   3.320746 0.00090213 ***
+treat                    161477.695266 1.722969e+05   0.937206 0.34868336    
+downup_ac_pop                 4.837347 4.138950e+00   1.168738 0.24254706    
+wind_direction               -0.871605 2.582500e-02 -33.750357  < 2.2e-16 ***
+av_wind_speed                92.330030 4.288466e+00  21.529849  < 2.2e-16 ***
+post:treat                  185.188209 7.098142e+01   2.608967 0.00909993 ** 
+post:downup_ac_pop            1.161748 4.661233e+00   0.249236 0.80318510    
+treat:downup_ac_pop         -54.665963 9.445339e+01  -0.578761 0.56276794    
+post:treat:downup_ac_pop   -138.196094 7.751665e+01  -1.782792 0.07466124 .  
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+RMSE: 912.4     Adj. R2: 0.091243
+              Within R2: 0.00922 

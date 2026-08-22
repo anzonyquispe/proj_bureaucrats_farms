@@ -17,7 +17,7 @@ loading and standardizing the event-time variable, before estimation.
 | 13 km placebo | `stacked_downup_13kmpl.csv` | `relative_monthyear` in `[-5, 6]` |
 | Neighbour | `stacked_downup_neigh.csv` | `relative_monthyear` in `[-5, 6]` |
 | Politician characteristics | `politicians_characteristics_byprov.csv` | `relative_year_bin` in `[-5, 4]` |
-| Protest | `stacked_data_protest5km_election_sameterm.csv` | `relative_year_bin` in `[-4, 1]`, same election term, and both pre/post observations |
+| Protest | `stacked_data_protest5km_election_sameterm.csv` | Full same-election-term support except `relative_year_bin == -5`, with both pre/post observations |
 
 The `0_master_dataset.csv` descriptive table is not a stacked regression and
 therefore does not receive an event-time restriction.
@@ -54,7 +54,7 @@ production master or cluster submission script.
 | `_app_14_polischar_fe12_did_ricemods.do` | Politician DiD baseline plus three rice-moderator specifications under the final cohort-ID FE. | `tables/_app_14_polischar_fe12_did_ricemods*_rural_stacked.ster` |
 | `_app_15_polischar_fe12_did.do` | Politician DiD across three FE robustness variants, all preserving grid-by-cohort-ID and event-year-by-cohort-ID FE. | `tables/_app_15_polischar_fe12_did*_rural_stacked.ster` |
 | `_app_16_polischar_fe12_evst_all.do` | Politician event study using the by-province stack. Produces area and population variants; the historical `_controls_both` suffix denotes the unchanged full input composition. | `tables/_app_16_polischar_fe12_evst_all_rural_controls_both*.ster` and `.csv` |
-| `_app_17_5km_fe12_evst_all.do` | Protest event studies for never-treated, pooled, and not-yet-treated control definitions, for area and population downwind measures. | `tables/_app_17_5km_fe12_evst_all_rural_controls_{never,both,notyet}*.ster` and `.csv` |
+| `_app_17_5km_fe12_evst_all.do` | Canonical pooled-control protest event study. Runs FE1-FE5 for the baseline and the `rice_prod_aclvl_ahigh` interaction, matching `_app_21_5km_allfe_same_term.do`. | `tables/_app_17_5km_fe12_evst_all_rural.ster` and `.csv` |
 | `_app_18_protest_5km_fe12_did_downup_plot.do` | Stores the protest post-treatment interaction estimates consumed by the interaction graph routine. | `tables/_app_18_protest_5km_fe12_did_downup_plot*_rural*.ster` |
 | `_app_19_polischar_fe12_did_downup_inter_plot.do` | Stores the politician post-treatment interaction estimates consumed by the interaction graph routine. | `tables/_app_19_polischar_fe12_did_downup_inter_plot*_rural*.ster` |
 | `_app_20_did_downwind_hm.do` | Population-downwind DiD restricted to harvest-month/rice heterogeneity variants. | `tables/_app_20_did_downwind_hm_rural_stacked.ster` |

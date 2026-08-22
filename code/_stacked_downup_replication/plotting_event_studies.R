@@ -1,9 +1,9 @@
 #!/usr/bin/env Rscript
 
 # Single entry point for every event-study and HonestDiD plot produced by the
-# stacked/down-up replication package. The politician and protest families are
-# rendered for never-treated, pooled never/not-yet-treated, and not-yet-treated
-# control samples. Baseline (never-treated) filenames remain unchanged.
+# stacked/down-up replication package. Politician robustness files retain their
+# historical control suffixes; the production protest family uses one pooled
+# sample and reports the baseline and rice-production interaction for FE1-FE5.
 #
 # RStudio use:
 #   1. Open this file in RStudio.
@@ -829,6 +829,49 @@ for (window in alternative_windows) {
       )
   }
 }
+
+# Extract an event-study coefficient vector and its matching covariance
+# submatrix by coefficient name. This avoids layout-dependent row numbers for
+# the canonical protest file, which stores five FE specifications and two
+# moderator models in one CSV.
+extract_event_pattern <- function(csv_name, model, pattern) {
+  path <- file.path(table_dir, csv_name)
+  if (!file.exists(path)) return(NULL)
+  estimates <- fread(path)
+  selected <- estimates[reg == model]
+  indices <- grep(pattern, selected$var)
+  if (!length(indices)) {
+    stop(csv_name, " / ", model, ": no coefficients match ", pattern)
+  }
+  covariance_columns <- paste0("cov", indices)
+  if (!all(covariance_columns %in% names(selected))) {
+    stop(csv_name, " / ", model, ": covariance columns are incomplete")
+  }
+  covariance <- as.matrix(
+    selected[indices, ..covariance_columns]
+  )
+  output <- data.table(
+    ymean = selected$ymean[indices],
+    beta = selected$beta[indices]
+  )
+  cbind(output, as.data.table(covariance))
+}
+
+run_pattern_case <- function(csv, model, pattern, base, pre, post,
+                             omitted = -1, required = TRUE) {
+  event <- extract_event_pattern(csv, model, pattern)
+  if (is.null(event)) {
+    message <- paste0("Missing estimate file: ", file.path(table_dir, csv))
+    if (required) stop(message, call. = FALSE)
+    warning("Skipping ", message, call. = FALSE)
+    return(invisible(FALSE))
+  }
+  plot_event(
+    event, base, pre, post, omitted,
+    xlab = "Time from Treatment (years)"
+  )
+  invisible(TRUE)
+}
 event_cases <- c(event_cases, alternative_window_cases)
 # -----------------------------------------------------------------------
 
@@ -938,33 +981,19 @@ if ("politician_qweights" %in% args$families) {
   }
 }
 
-# All politician/protest moderators, area/population definitions, and controls.
+# Politician moderators and its retained pooled-control filename.
 politician_control_suffixes <- c(
   both = "_controls_both"
-)
-protest_control_suffixes <- c(
-  never = "_controls_never",
-  both = "_controls_both",
-  notyet = "_controls_notyet"
 )
 moderator_names <- c("1", "downup_2", "riceA_3", "riceHA_4", "riceP_5")
 
 for (analysis_suffix in c("", "_acpop")) {
-  for (control_name in union(
-    names(politician_control_suffixes), names(protest_control_suffixes)
-  )) {
+  for (control_name in names(politician_control_suffixes)) {
     politician_stem <- NULL
-    protest_stem <- NULL
     if (control_name %in% names(politician_control_suffixes)) {
       politician_stem <- paste0(
         "_app_16_polischar_fe12_evst_all", s, "_rural",
         analysis_suffix, politician_control_suffixes[[control_name]]
-      )
-    }
-    if (control_name %in% names(protest_control_suffixes)) {
-      protest_stem <- paste0(
-        "_app_17_5km_fe12_evst_all", s, "_rural",
-        analysis_suffix, protest_control_suffixes[[control_name]]
       )
     }
     for (model_index in seq_along(moderator_names)) {
@@ -990,31 +1019,35 @@ for (analysis_suffix in c("", "_acpop")) {
           required = identical(control_name, "both")
         )
       }
-      if ("protest" %in% args$families && !is.null(protest_stem)) {
-        protest_figure_stem <- if (identical(control_name, "never")) {
-          sub("_controls_never$", "", protest_stem)
-        } else {
-          protest_stem
-        }
-        # The same-government-term protest sample spans event years -4,...,1
-        # with -1 omitted. Reducing the event support shifts the positions of
-        # the saved interaction coefficients relative to the politician CSV.
-        if (model_index == 1L) {
-          protest_rows <- 9:13
-          protest_columns <- c(3, 4, 13:17)
-        } else {
-          protest_rows <- 21:25
-          protest_columns <- c(3, 4, 25:29)
-        }
-        run_case(
-          paste0(protest_stem, ".csv"), paste0("evreg", model_index),
-          protest_rows, protest_columns,
-          paste0(protest_figure_stem, "_", moderator_names[[model_index]]),
-          4, 2, -1, "Time from Treatment (years)",
-          required = identical(control_name, "never")
-        )
-      }
     }
+  }
+}
+
+# Canonical protest event study: one pooled sample, no control suffix and no
+# area/population suffix. Each FE has a baseline model followed by the
+# rice-production-above-median interaction model. The reference support is
+# -4,...,+4 with -1 omitted.
+if ("protest" %in% args$families) {
+  protest_csv <- paste0(
+    "_app_17_5km_fe12_evst_all", s, "_rural.csv"
+  )
+  for (fe in seq_len(5L)) {
+    baseline_model <- paste0("evreg", 2L * fe - 1L)
+    rice_model <- paste0("evreg", 2L * fe)
+    fe_suffix <- if (fe == 1L) "" else sprintf("_fe%02d", fe)
+    protest_base <- paste0(
+      "_app_17_5km_fe12_evst_all", s, "_rural", fe_suffix
+    )
+    run_pattern_case(
+      protest_csv, baseline_model,
+      "relative_year_bin_aux#1\\.treat$",
+      paste0(protest_base, "_1"), 4, 5
+    )
+    run_pattern_case(
+      protest_csv, rice_model,
+      "relative_year_bin_aux#1\\.treat#1\\.rice_prod_aclvl_ahigh$",
+      paste0(protest_base, "_riceP_2"), 4, 5
+    )
   }
 }
 

@@ -65,8 +65,8 @@ drop _merge
 
 * Keep only rural grids
 keep if is_rural == 1
-keep if year < 2022 | (year == 2022 & month <= 8)
-keep if inrange(relative_year_bin, -4, 1)
+drop if relative_year_bin == -5
+display as text "Canonical protest sample: full same-term support except relative year -5"
 
 display "Observations after rural filter: " _N
 

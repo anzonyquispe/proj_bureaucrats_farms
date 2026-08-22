@@ -13,9 +13,9 @@ models, and descriptive outputs—not only the event-study regressions.
 - Main downup, 13 km placebo, and neighbour stacks:
   `relative_monthyear` from `-5` through `+6`.
 - Politician by-province stack: `relative_year_bin` from `-5` through `+4`.
-- Election-term-cleaned protest stack: `relative_year_bin` from `-4` through
-  `+1`, restricted to observations in the election term containing the switch
-  and requiring both pre- and post-switch observations in every grid-cohort.
+- Election-term-cleaned protest stack: the full election-term support after
+  dropping `relative_year_bin == -5`, requiring both pre- and post-switch
+  observations in every grid-cohort.
 
 See `DOFILE_PIPELINE_REFERENCE.md` for the script-by-script inventory.
 
@@ -54,11 +54,16 @@ See `DOFILE_PIPELINE_REFERENCE.md` for the script-by-script inventory.
 - Every retained grid x `cohort_id` unit must contain at least one pre-switch
   and one post-switch observation. Production scripts report and remove units
   that fail this condition, then assert it on the estimation sample.
-- Event time is measured from the protest date. The retained support is four
-  pre-event years and event years 0 and +1; year -1 is the omitted reference.
-- The established never-treated, pooled, and not-yet-treated event-study
-  control outputs are retained.
-- Event-year x `cohort_id` effects are absorbed in the final protest models.
+- Event time is measured from the protest date. Relative year -5 is removed,
+  all other same-government-term periods are retained, and year -1 is the
+  omitted reference.
+- The treated, never-treated, and not-yet-treated observations are retained in
+  one pooled estimation sample; production code does not iterate over control
+  definitions.
+- The event study reports FE1-FE5 from the reference dofile. Every model also
+  absorbs event-year x `cohort_id` effects.
+- For every FE, the package estimates a baseline event study and a triple
+  interaction with `rice_prod_aclvl_ahigh`.
 
 ## Interaction figures
 

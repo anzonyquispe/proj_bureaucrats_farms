@@ -92,14 +92,14 @@ table_ids+=("$(submit_stata descriptives_main app_main_descriptive.do 1 none)")
 table_ids+=("$(submit_stata descriptives_protest app_5km_descriptive.do 1 none none stacked_data_protest5km)")
 table_ids+=("$(submit_stata descriptives_politician app_polischar_descriptive.do 1 none)")
 
-# Event-study estimates. Politician uses the unchanged by-province control
-# composition (_controls_both); protest retains all three control definitions.
+# Event-study estimates. Politician uses the unchanged by-province composition.
+# Protest uses one pooled control sample and estimates FE1-FE5 for the baseline
+# and the above-median rice-production interaction.
 event_ids+=("$(submit_stata event_5pre_area _main_2_stacked_event_study_5pre_area.do "${EVENT_FE_LIST}" none)")
 event_ids+=("$(submit_stata event_5pre_pop _main_2_stacked_event_study_5pre.do "${EVENT_FE_LIST}" none)")
 event_ids+=("$(submit_stata politician_event_area _app_16_polischar_fe12_evst_all.do "${EVENT_FE_LIST}" none downup_ac)")
 event_ids+=("$(submit_stata politician_event_pop _app_16_polischar_fe12_evst_all.do "${EVENT_FE_LIST}" _acpop downup_ac_pop)")
-event_ids+=("$(submit_stata protest_event_area _app_17_5km_fe12_evst_all.do "${EVENT_FE_LIST}" none downup_ac stacked_data_protest5km)")
-event_ids+=("$(submit_stata protest_event_pop _app_17_5km_fe12_evst_all.do "${EVENT_FE_LIST}" _acpop downup_ac_pop stacked_data_protest5km)")
+event_ids+=("$(submit_stata protest_event _app_17_5km_fe12_evst_all.do 1/5 none none stacked_data_protest5km)")
 
 # Interaction estimates used by the two active interaction figures.
 interaction_ids+=("$(submit_stata protest_inter_area _app_18_protest_5km_fe12_did_downup_plot.do 1 none downup_ac stacked_data_protest5km)")

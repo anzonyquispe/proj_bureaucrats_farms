@@ -1,0 +1,182 @@
+
+  ___  ____  ____  ____  ____ ®
+ /__    /   ____/   /   ____/      18.0
+___/   /   /___/   /   /___/       MP—Parallel Edition
+
+ Statistics and Data Science       Copyright 1985-2023 StataCorp LLC
+                                   StataCorp
+                                   4905 Lakeway Drive
+                                   College Station, Texas 77845 USA
+                                   800-STATA-PC        https://www.stata.com
+                                   979-696-4600        stata@stata.com
+
+Stata license: Single-user 4-core  perpetual
+Serial number: 501806366048
+  Licensed to: Any Name
+               Any Name
+
+Notes:
+      1. Stata is running in batch mode.
+      2. Unicode is supported; see help unicode_advice.
+      3. More than 2 billion observations are allowed; see help obs_advice.
+      4. Maximum number of variables is set to 5,000 but can be increased;
+          see help set_maxvar.
+
+. do C:\Users\eunic\OneDrive\Documents\GitHub\proj_bureaucrats_farms\code\_stac
+> ked_downup_replication\exploratory_analysis\protest_fixest_replication\compar
+> e_sample_stata.do C:\Users\eunic\OneDrive\Documents\protest_fixest_stata_samp
+> le.csv C:\Users\eunic\OneDrive\Documents\protest_fixest_stata_comparison.log 
+
+. *****************************************************************************
+> ***
+. * Cross-software audit: run the R/fixest validation sample in Stata.
+. * The compact CSV is generated from the exact R estimation cache.
+. *****************************************************************************
+> ***
+. 
+. version 18
+
+. clear all
+
+. set more off
+
+. 
+. args sample_csv output_log
+
+. if "`sample_csv'" == "" {
+.     local sample_csv "C:/Users/eunic/OneDrive/Documents/protest_fixest_stata_
+> sample.csv"
+. }
+
+. if "`output_log'" == "" {
+.     local output_log "C:/Users/eunic/OneDrive/Documents/protest_fixest_stata_
+> comparison.log"
+. }
+
+. 
+. capture log close _all
+
+. log using "`output_log'", text replace
+(file C:\Users\eunic\OneDrive\Documents\protest_fixest_stata_comparison.log
+    not found)
+-------------------------------------------------------------------------------
+      name:  <unnamed>
+       log:  C:\Users\eunic\OneDrive\Documents\protest_fixest_stata_comparison.
+> log
+  log type:  text
+ opened on:  22 Aug 2026, 12:17:25
+
+. import delimited using "`sample_csv'", clear varnames(1)
+(encoding automatically selected: ISO-8859-1)
+(13 vars, 629,251 obs)
+
+. 
+. reghdfe countk ///
+>     ib0.post##ib0.treat##ib0.downup_ac_pop ///
+>     wind_direction av_wind_speed, ///
+>     absorb(grid_cohort relativeyear_cohort province_election ///
+>            province_cohort#c.monthyear) ///
+>     vce(cluster ac_elec_yr)
+(MWFE estimator converged in 81 iterations)
+note: 1bn.post is probably collinear with the fixed effects (all partialled-out
+>  values are close to zero; tol = 1.0e-09)
+note: 1bn.treat is probably collinear with the fixed effects (all partialled-ou
+> t values are close to zero; tol = 1.0e-09)
+
+HDFE Linear regression                            Number of obs   =    629,251
+Absorbing 4 HDFE groups                           F(   7,   7371) =     156.05
+Statistics robust to heteroskedasticity           Prob > F        =     0.0000
+                                                  R-squared       =     0.1122
+                                                  Adj R-squared   =     0.0947
+                                                  Within R-sq.    =     0.0093
+Number of clusters (ac_elec_yr) =      7,372      Root MSE        =   919.7034
+
+                         (Std. err. adjusted for 7,372 clusters in ac_elec_yr)
+------------------------------------------------------------------------------
+             |               Robust
+      countk | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+      1.post |          0  (omitted)
+     1.treat |          0  (omitted)
+             |
+  post#treat |
+        1 1  |   187.1225   70.71131     2.65   0.008     48.50813    325.7369
+             |
+1.downup_a~p |   4.716426   4.188111     1.13   0.260    -3.493469    12.92632
+             |
+        post#|
+downup_ac_~p |
+        1 1  |    1.60359   4.677996     0.34   0.732    -7.566619     10.7738
+             |
+       treat#|
+downup_ac_~p |
+        1 1  |  -46.55261   93.51112    -0.50   0.619    -229.8611    136.7559
+             |
+  post#treat#|
+downup_ac_~p |
+      1 1 1  |   -142.621   77.14666    -1.85   0.065    -293.8505    8.608551
+             |
+wind_direc~n |  -.8709615   .0282483   -30.83   0.000    -.9263362   -.8155868
+av_wind_sp~d |   129.9217   5.736369    22.65   0.000     118.6768    141.1666
+       _cons |   -38.6544   7.812386    -4.95   0.000    -53.96891   -23.33989
+------------------------------------------------------------------------------
+
+Absorbed degrees of freedom:
+---------------------------------------------------------------------+
+                 Absorbed FE | Categories  - Redundant  = Num. Coefs |
+-----------------------------+---------------------------------------|
+                 grid_cohort |     11901       11901           0    *|
+         relativeyear_cohort |       189           1         188     |
+           province_election |        62          43          19     |
+ province_cohort#c.monthyear |        62           0          62    ?|
+---------------------------------------------------------------------+
+? = number of redundant parameters may be higher
+* = FE nested within cluster; treated as redundant for DoF computation
+
+. 
+. lincom 1.post#1.downup_ac_pop
+
+ ( 1)  1.post#1.downup_ac_pop = 0
+
+------------------------------------------------------------------------------
+      countk | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+         (1) |    1.60359   4.677996     0.34   0.732    -7.566619     10.7738
+------------------------------------------------------------------------------
+
+. lincom 1.post#1.treat + 1.post#1.downup_ac_pop + ///
+>        1.treat#1.downup_ac_pop + 1.post#1.treat#1.downup_ac_pop
+
+ ( 1)  1.post#1.treat + 1.post#1.downup_ac_pop + 1.treat#1.downup_ac_pop +
+       1.post#1.treat#1.downup_ac_pop = 0
+
+------------------------------------------------------------------------------
+      countk | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+         (1) |  -.4474661   99.85554    -0.00   0.996    -196.1929    195.2979
+------------------------------------------------------------------------------
+
+. lincom 1.post#1.treat + 1.treat#1.downup_ac_pop + ///
+>        1.post#1.treat#1.downup_ac_pop
+
+ ( 1)  1.post#1.treat + 1.treat#1.downup_ac_pop +
+       1.post#1.treat#1.downup_ac_pop = 0
+
+------------------------------------------------------------------------------
+      countk | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+         (1) |  -2.051056   99.85274    -0.02   0.984     -197.791    193.6889
+------------------------------------------------------------------------------
+
+. 
+. log close
+      name:  <unnamed>
+       log:  C:\Users\eunic\OneDrive\Documents\protest_fixest_stata_comparison.
+> log
+  log type:  text
+ closed on:  22 Aug 2026, 12:18:33
+-------------------------------------------------------------------------------
+
+. exit, clear
+
+end of do-file

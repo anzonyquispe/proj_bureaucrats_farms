@@ -147,14 +147,18 @@ global downup_var "downup_ac"
 global ster_suffix ""
 global control_samples "both"
 do "${code}/_app_16_polischar_fe12_evst_all.do"
-global control_samples "never both notyet"
-do "${code}/_app_17_5km_fe12_evst_all.do"
 
 global downup_var "downup_ac_pop"
 global ster_suffix "_acpop"
 global control_samples "both"
 do "${code}/_app_16_polischar_fe12_evst_all.do"
-global control_samples "never both notyet"
+
+* Canonical protest event study: one pooled sample, FE1-FE5, baseline and rice
+* production above median. It is independent of the downup treatment measure.
+global downup_var ""
+global ster_suffix ""
+global control_samples ""
+global fe_list "1/5"
 do "${code}/_app_17_5km_fe12_evst_all.do"
 
 * Event-study CSV export is local post-processing after .ster synchronization:

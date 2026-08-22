@@ -29,17 +29,12 @@ adopath ++ "${code}"
 
 display as text "Local .ster input folder: ${tables}"
 
-* Politician uses the final pooled by-province sample. Protest retains the
-* three established control definitions. Warn without blocking unrelated work.
+* Both production analyses use their final pooled samples. Protest produces a
+* single ster containing FE1-FE5 for the baseline and rice-production result.
 local control_sters ///
     "_app_16_polischar_fe12_evst_all_rural_controls_both.ster" ///
     "_app_16_polischar_fe12_evst_all_rural_acpop_controls_both.ster" ///
-    "_app_17_5km_fe12_evst_all_rural_controls_never.ster" ///
-    "_app_17_5km_fe12_evst_all_rural_controls_both.ster" ///
-    "_app_17_5km_fe12_evst_all_rural_controls_notyet.ster" ///
-    "_app_17_5km_fe12_evst_all_rural_acpop_controls_never.ster" ///
-    "_app_17_5km_fe12_evst_all_rural_acpop_controls_both.ster" ///
-    "_app_17_5km_fe12_evst_all_rural_acpop_controls_notyet.ster"
+    "_app_17_5km_fe12_evst_all_rural.ster"
 
 local missing_controls = 0
 foreach ster_file of local control_sters {

@@ -60,8 +60,8 @@ if _rc {
     rename relative_year relative_year_bin
 }
 assert relative_year_bin == floor((monthyear - cohort) / 12)
-keep if inrange(relative_year_bin, -4, 1)
-display as text "Final protest event-study sample: relative_year_bin in [-4, 1]"
+drop if relative_year_bin == -5
+display as text "Canonical protest sample: full same-term support except relative year -5"
 * Always express the fire-count outcome in thousands.
 capture drop countk
 gen countk = count * 1000
@@ -71,7 +71,6 @@ merge m:1 unique_small_grid_id using ///
     keep(master match) keepusing(is_rural)
 drop _merge
 keep if ${is_rural_var} == 1
-keep if year < 2022 | (year == 2022 & month <= 8)
 
 egen unique_small_grid_id_cohort = group(unique_small_grid_id cohort_id)
 egen province_cohort = group(province cohort_id)

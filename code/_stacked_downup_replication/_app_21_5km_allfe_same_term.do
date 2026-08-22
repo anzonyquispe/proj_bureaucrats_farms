@@ -81,8 +81,6 @@ if _rc {
     rename relative_year relative_year_bin
 }
 assert relative_year_bin == floor((monthyear - cohort) / 12)
-keep if inrange(relative_year_bin, -4, 1)
-display as text "Final protest event-study sample: relative_year_bin in [-4, 1]"
 
 * election_year and yeargov arrive as floats; the factor and interaction
 * operators below need integers.
@@ -105,7 +103,8 @@ drop _merge
 
 * Keep only the final rural event-study sample.
 keep if ${is_rural_var} == 1
-keep if year < 2022 | (year == 2022 & month <= 8)
+drop if relative_year_bin == -5
+display as text "Canonical protest sample: full same-term support except relative year -5"
 
 display "Observations after rural filter: " _N
 
@@ -154,7 +153,7 @@ local dep_var countk
 * plain event study while retaining the same coefficient naming convention as
 * the other production event-study dofiles.
 gen byte moderator = 0
-local moderators_list moderator
+local moderators_list moderator rice_prod_aclvl_ahigh
 * local moderators_list moderator downup_ac rice_area_aclvl_ahigh rice_harvarea_aclvl_ahigh rice_prod_aclvl_ahigh
 
 * Filters
@@ -204,6 +203,7 @@ egen relativeyear_cohort = group(relative_year_bin cohort_id)
 local i = 1
 
 foreach mod of local moderators_list {
+    replace moderator = `mod'
     local rhs "ib`base'.relative_year_bin_aux##ib0.treat##ib0.`mod' wind_direction av_wind_speed"
 
     * Select filter condition
@@ -248,10 +248,10 @@ foreach mod of local moderators_list {
         estadd local provelec    = cond(strpos("`padded'", " province_cohort#election_year ") > 0, "Y", "N")
         estadd local provelecgov = cond(strpos("`padded'", " province_cohort#election_year#yeargov ") > 0, "Y", "N")
 
-        est store evreg`i'
-
+        local estname evreg`i'
         local i = `i' + 1
         display("`i'")
+        est store `estname'
     }
 }
 
@@ -260,7 +260,8 @@ foreach mod of local moderators_list {
 *-------------------------------------------------------------------------------
 
 local est_list
-forvalues j = 1/`nfe' {
+local nestimates = `nfe' * 2
+forvalues j = 1/`nestimates' {
     local est_list `est_list' evreg`j'
 }
 

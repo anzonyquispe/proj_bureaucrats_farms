@@ -125,10 +125,8 @@ Then generate the event-study figures locally from PowerShell:
 ```
 
 The plotting runner generates every figure supported by the CSV files present
-locally. Missing `controls_never`, `controls_both`, or `controls_notyet` files
-are reported and skipped; after those `.ster` files are synchronized and the
-local Stata export is rerun, invoking the same PowerShell script automatically
-adds their figures.
+locally. The production protest event study expects one pooled-control CSV;
+alternative control definitions remain confined to `exploratory_analysis/`.
 
 ## Table and event-plot structure
 
@@ -137,20 +135,9 @@ active table reads are not wrapped in `capture`, so a missing/corrupt `.ster`
 or model name fails the job instead of silently retaining an old table.
 
 `plotting_event_studies.R` is the only event-study/HonestDiD plotting entry
-point. For politician and protest event studies it renders:
-
-- `_controls_never`: treated plus never-treated controls (paper baseline);
-- `_controls_both`: treated plus never- and not-yet-treated controls;
-- `_controls_notyet`: treated plus type-2 controls.
-
-For the absorbing protest treatment, type 2 is a genuine not-yet-treated
-group. For the reversible politician-profession treatment, the
-`controls_notyet` name is retained for compatibility, but type 2 can contain
-previously treated grids and is therefore not a pure not-yet-treated group.
-
-Both area- and population-weighted moderator families are generated. The
-population-weighted baseline filenames remain the ones referenced by
-`main.tex`.
+point. The production protest section renders FE1-FE5 from the single pooled
+sample, with one baseline plot and one `rice_prod_aclvl_ahigh` interaction plot
+for each FE. Politician control-sample robustness naming is unchanged.
 
 ## Software expected on compute nodes
 

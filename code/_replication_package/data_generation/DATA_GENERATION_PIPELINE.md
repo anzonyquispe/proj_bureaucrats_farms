@@ -162,6 +162,16 @@ and acquisition instructions should be preserved:
 | `_0_2_3_ACs_right_shapefile.shp` | grid/AC panel, AC area, protest, and rice producers |
 | `_ac_covs_myneta.csv` | `panel_data_election_year.ipynb` |
 | ACLED India protest CSV, dated `2000-01-01-2025-05-13` | `8_grids_ac_pr_5km.ipynb` |
+
+## Exploratory province-election-switch protest stack
+
+`build_stacked_protest_province_election_switch.py` constructs the exploratory
+protest stack directly from `0_master_dataset.parquet`. Cohorts are uniquely
+defined by province, election year, and protest switching month. Controls must
+share that province and government term. Never-treated controls span the term;
+later-treated controls are censored before their own switch. The separate
+`build_stacked_protest_province_election_switch.sbatch` job writes CSV, Parquet,
+DuckDB, and a cohort manifest to the intermediate directory.
 | `ac_india_elec_yr_clean.csv` | `panel_data_election_year.ipynb` |
 | `1-fires20002024.csv` | `build_fire_grid_duckdb.py` |
 | ERA5-Land 1990-2021 u10/v10 NetCDF | `build_wind_direction_grid_duckdb.py` |
