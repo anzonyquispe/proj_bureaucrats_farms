@@ -79,7 +79,15 @@ flock -u 9
 
 cd "${CODE_DIR}"
 
-run_stage "master dataset" "${LOG_DIR}/01_master_dataset.log" \
+run_stage "canonical AC-area panel" "${LOG_DIR}/01_normalize_ac_area.log" \
+    "${PYTHON}" normalize_downup_ac_area_panel.py \
+    --population "${INTERMEDIATE}/data_2012_2024_grid_ac_downup_pop.parquet" \
+    --area "${INTERMEDIATE}/data_2012_2024_grid_ac_downup.parquet" \
+    --threads "${NSLOTS:-10}" \
+    --memory-limit "${MEMORY_LIMIT}" \
+    --overwrite
+
+run_stage "master dataset" "${LOG_DIR}/02_master_dataset.log" \
     "${PYTHON}" build_0_master_dataset.py \
     --intermediate "${INTERMEDIATE}" \
     --threads "${NSLOTS:-10}" \
@@ -94,7 +102,7 @@ if [[ -n "${STACK_SPECS:-}" && "${STACK_SPECS}" != "all" ]]; then
     done
 fi
 
-run_stage "five standard stacked datasets" "${LOG_DIR}/02_standard_stacks.log" \
+run_stage "five standard stacked datasets" "${LOG_DIR}/03_standard_stacks.log" \
     "${PYTHON}" build_all_stacked_datasets_duckdb.py \
     --intermediate "${INTERMEDIATE}" \
     --threads "${NSLOTS:-10}" \
@@ -102,7 +110,7 @@ run_stage "five standard stacked datasets" "${LOG_DIR}/02_standard_stacks.log" \
     --overwrite \
     "${SPEC_ARGS[@]}"
 
-run_stage "province-election politician stack" "${LOG_DIR}/03_politicians_byprov.log" \
+run_stage "province-election politician stack" "${LOG_DIR}/04_politicians_byprov.log" \
     "${PYTHON}" build_politicians_characteristics_byprov.py \
     --intermediate "${INTERMEDIATE}" \
     --threads "${NSLOTS:-10}" \
@@ -116,7 +124,7 @@ if [[ ! -f "${NEIGH_INPUT}" ]]; then
     echo "ERROR: neighbour-panel input was not found at ${NEIGH_INPUT}." >&2
     exit 1
 fi
-run_stage "neighbour-border stacked dataset" "${LOG_DIR}/04_neighbour_stack.log" \
+run_stage "neighbour-border stacked dataset" "${LOG_DIR}/05_neighbour_stack.log" \
     "${PYTHON}" build_stacked_duckdb_unique_pair.py \
     --input "${NEIGH_INPUT}" \
     --output "${NEIGH_OUTPUT}" \

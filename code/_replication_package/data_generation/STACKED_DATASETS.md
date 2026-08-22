@@ -138,10 +138,11 @@ Its readable logs are written to
 
 ```text
 00_master_and_stacked_pipeline.log
-01_master_dataset.log
-02_standard_stacks.log
-03_politicians_byprov.log
-04_neighbour_stack.log
+01_normalize_ac_area.log
+02_master_dataset.log
+03_standard_stacks.log
+04_politicians_byprov.log
+05_neighbour_stack.log
 ```
 
 The `00` file is a short pipeline summary. Each numbered stage file contains
