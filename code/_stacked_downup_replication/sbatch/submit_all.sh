@@ -82,8 +82,8 @@ table_ids+=("$(submit_stata alternative_dv _app_7_main_did_downup_area_ac_dv.do 
 table_ids+=("$(submit_stata did_by_year _app_8_main_did_by_year.do 1/10 none)")
 table_ids+=("$(submit_stata did_by_state _app_9_main_did_by_state.do 1/4 none)")
 table_ids+=("$(submit_stata placebo_13km _app_11_placebo_pop_13km.do 1 none)")
-table_ids+=("$(submit_stata protest_did_area _main_4_protest_5km_fe12_did_downup.do 1/3 none downup_ac stacked_data_protest5km)")
-table_ids+=("$(submit_stata protest_did_pop _main_4_protest_5km_fe12_did_downup.do 1/3 _acpop downup_ac_pop stacked_data_protest5km)")
+table_ids+=("$(submit_stata protest_did_area _main_4_protest_5km_fe12_did_downup.do 3 none downup_ac stacked_data_protest5km)")
+table_ids+=("$(submit_stata protest_did_pop _main_4_protest_5km_fe12_did_downup.do 3 _acpop downup_ac_pop stacked_data_protest5km)")
 table_ids+=("$(submit_stata politician_did_area _main_5_polischar_fe12_did_downup_inter.do 1 none downup_ac)")
 table_ids+=("$(submit_stata politician_did_pop _main_5_polischar_fe12_did_downup_inter.do 1 _acpop downup_ac_pop)")
 
@@ -93,17 +93,16 @@ table_ids+=("$(submit_stata descriptives_protest app_5km_descriptive.do 1 none n
 table_ids+=("$(submit_stata descriptives_politician app_polischar_descriptive.do 1 none)")
 
 # Event-study estimates. Politician uses the unchanged by-province composition.
-# Protest uses one pooled control sample and estimates FE1-FE5 for the baseline
-# and the above-median rice-production interaction.
+# Protest uses the RA's pooled control sample and selected FE3 only.
 event_ids+=("$(submit_stata event_5pre_area _main_2_stacked_event_study_5pre_area.do "${EVENT_FE_LIST}" none)")
 event_ids+=("$(submit_stata event_5pre_pop _main_2_stacked_event_study_5pre.do "${EVENT_FE_LIST}" none)")
 event_ids+=("$(submit_stata politician_event_area _app_16_polischar_fe12_evst_all.do "${EVENT_FE_LIST}" none downup_ac)")
 event_ids+=("$(submit_stata politician_event_pop _app_16_polischar_fe12_evst_all.do "${EVENT_FE_LIST}" _acpop downup_ac_pop)")
-event_ids+=("$(submit_stata protest_event _app_17_5km_fe12_evst_all.do 1/5 none none stacked_data_protest5km)")
+event_ids+=("$(submit_stata protest_event _app_17_5km_fe12_evst_all.do 3 none none stacked_data_protest5km)")
 
 # Interaction estimates used by the two active interaction figures.
-interaction_ids+=("$(submit_stata protest_inter_area _app_18_protest_5km_fe12_did_downup_plot.do 1 none downup_ac stacked_data_protest5km)")
-interaction_ids+=("$(submit_stata protest_inter_pop _app_18_protest_5km_fe12_did_downup_plot.do 1 _acpop downup_ac_pop stacked_data_protest5km)")
+interaction_ids+=("$(submit_stata protest_inter_area _app_18_protest_5km_fe12_did_downup_plot.do 3 none downup_ac stacked_data_protest5km)")
+interaction_ids+=("$(submit_stata protest_inter_pop _app_18_protest_5km_fe12_did_downup_plot.do 3 _acpop downup_ac_pop stacked_data_protest5km)")
 interaction_ids+=("$(submit_stata politician_inter_area _app_19_polischar_fe12_did_downup_inter_plot.do 1 none downup_ac)")
 interaction_ids+=("$(submit_stata politician_inter_pop _app_19_polischar_fe12_did_downup_inter_plot.do 1 _acpop downup_ac_pop)")
 

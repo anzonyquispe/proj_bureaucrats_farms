@@ -11,7 +11,7 @@ if "$root" == "" {
     global location     "shell"
     global sample       ""
     global is_rural_var "is_rural"
-    global fe_list      "1"
+    global fe_list      "3"
     global ster_suffix  ""
     global shell "/groups/sgulzar/sa_fires/proj_bureaucrats_farms"
     global dbox  "/Users/anzony.quisperojas/Library/CloudStorage/Dropbox/sa_fires/proj_bureaucrats_farms"
@@ -99,13 +99,17 @@ gen moderator = ${downup_var}
 
 local dep_var countk
 local moderators_list ${downup_var}
-local fe1 "unique_small_grid_id_cohort relativeyear_cohort province_cohort#election_year province_cohort#c.monthyear"
+local fe3 "unique_small_grid_id_cohort province_cohort#c.monthyear relativeyear_cohort"
 egen tag_ac = tag(ac_uq_id)
 count if tag_ac == 1
 local numacs = r(N)
 
 est clear
 local i = 1
+if trim("$fe_list") != "3" {
+    display as error "Canonical protest interaction requires fe_list=3."
+    exit 198
+}
 foreach mod of local moderators_list {
     local rhs "ib0.post_##ib0.treat##ib0.`mod' wind_direction av_wind_speed"
     quietly summarize `dep_var' if treat == 1 & relative_year_bin <= -1

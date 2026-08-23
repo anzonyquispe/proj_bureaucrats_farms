@@ -98,7 +98,7 @@ gen moderator = 0
 quietly reghdfejl countk ///
     ib0.post_##ib0.treat##ib0.moderator wind_direction av_wind_speed, ///
     absorb(unique_small_grid_id_cohort relativeyear_cohort ///
-           province_cohort#election_year province_cohort#c.monthyear) ///
+           province_cohort#c.monthyear) ///
     vce(cluster ac_elec_yr)
 keep if e(sample)
 

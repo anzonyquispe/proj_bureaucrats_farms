@@ -60,10 +60,9 @@ See `DOFILE_PIPELINE_REFERENCE.md` for the script-by-script inventory.
 - The treated, never-treated, and not-yet-treated observations are retained in
   one pooled estimation sample; production code does not iterate over control
   definitions.
-- The event study reports FE1-FE5 from the reference dofile. Every model also
+- The event study reports the selected FE3 from the reference dofile and also
   absorbs event-year x `cohort_id` effects.
-- For every FE, the package estimates a baseline event study and a triple
-  interaction with `rice_prod_aclvl_ahigh`.
+- The canonical protest event study is unmoderated, matching the RA's model.
 
 ## Interaction figures
 

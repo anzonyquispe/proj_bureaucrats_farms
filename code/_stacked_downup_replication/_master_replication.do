@@ -115,29 +115,28 @@ do "${code}/_main_2_stacked_event_study_5pre.do"
 *
 * Politician: by-province stack, unchanged full control composition, and
 * grid x cohort_id plus event-year x cohort_id FE.
-* Protest: election-term-cleaned stack; retain the established never, pooled,
-* and not-yet control outputs for the event study.
+* Protest: the RA's election-term-cleaned stack, pooled controls, and FE3.
 ********************************************************************************
 
 global downup_var "downup_ac"
 global ster_suffix ""
-global fe_list "1/3"
+global fe_list "3"
 do "${code}/_main_4_protest_5km_fe12_did_downup.do"
 global fe_list "1"
 do "${code}/_main_5_polischar_fe12_did_downup_inter.do"
 
-global fe_list "1"
+global fe_list "3"
 do "${code}/_app_18_protest_5km_fe12_did_downup_plot.do"
 do "${code}/_app_19_polischar_fe12_did_downup_inter_plot.do"
 
 global downup_var "downup_ac_pop"
 global ster_suffix "_acpop"
-global fe_list "1/3"
+global fe_list "3"
 do "${code}/_main_4_protest_5km_fe12_did_downup.do"
 global fe_list "1"
 do "${code}/_main_5_polischar_fe12_did_downup_inter.do"
 
-global fe_list "1"
+global fe_list "3"
 do "${code}/_app_18_protest_5km_fe12_did_downup_plot.do"
 do "${code}/_app_19_polischar_fe12_did_downup_inter_plot.do"
 
@@ -153,12 +152,11 @@ global ster_suffix "_acpop"
 global control_samples "both"
 do "${code}/_app_16_polischar_fe12_evst_all.do"
 
-* Canonical protest event study: one pooled sample, FE1-FE5, baseline and rice
-* production above median. It is independent of the downup treatment measure.
+* Canonical protest event study: the RA's pooled sample and selected FE3 only.
 global downup_var ""
 global ster_suffix ""
 global control_samples ""
-global fe_list "1/5"
+global fe_list "3"
 do "${code}/_app_17_5km_fe12_evst_all.do"
 
 * Event-study CSV export is local post-processing after .ster synchronization:

@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
-# Submit the single canonical pooled-control protest event study. The Stata
-# dofile estimates FE1-FE5 for the baseline and rice-production moderator.
+# Submit the single canonical pooled-control protest event study. It estimates
+# only the RA-selected FE3 and audits the result against the RA benchmark.
 
-#$ -N protest_event
+#$ -N protest_event_fe03
 #$ -q largemem
 #$ -pe smp 10
 #$ -cwd
 #$ -j y
-#$ -o /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication/logs/protest_event.log
+#$ -o /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication/logs/protest_event_fe03.log
 
 set -euo pipefail
 
@@ -28,7 +28,7 @@ exec /bin/bash "${RUNNER}" \
   "shell" \
   "${SAMPLE}" \
   "is_rural" \
-  "1/5" \
+  "3" \
   "none" \
   "none" \
   "stacked_data_protest5km" \

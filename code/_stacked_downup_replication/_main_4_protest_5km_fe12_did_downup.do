@@ -9,7 +9,7 @@ if "$root" == "" {
     global location     "shell"
     global sample       ""
     global is_rural_var "is_rural"
-    global fe_list      "1/3"
+    global fe_list      "3"
     global ster_suffix  ""
     global shell "/groups/sgulzar/sa_fires/proj_bureaucrats_farms"
     global dbox  "/Users/anzony.quisperojas/Library/CloudStorage/Dropbox/sa_fires/proj_bureaucrats_farms"
@@ -95,8 +95,6 @@ drop unit_tag has_pre has_post
 gen post_ = relative_year_bin >= 0
 gen moderator = 0
 
-local fe1 "unique_small_grid_id_cohort"
-local fe2 "unique_small_grid_id_cohort monthyearco"
 local fe3 "unique_small_grid_id_cohort province_cohort#c.monthyear"
 local moderators_list moderator ${downup_var}
 egen tag_ac = tag(ac_uq_id)
@@ -105,6 +103,10 @@ local numacs = r(N)
 
 est clear
 local i = 1
+if trim("$fe_list") != "3" {
+    display as error "Canonical protest DiD requires fe_list=3."
+    exit 198
+}
 foreach mod of local moderators_list {
     replace moderator = `mod'
     local rhs "ib0.post_##ib0.treat##ib0.`mod' wind_direction av_wind_speed"
@@ -121,8 +123,8 @@ foreach mod of local moderators_list {
         estadd local smpl "Rural"
         estadd local gridfe "Y"
         estadd local time "Y"
-        local election_label = cond(`fe' >= 2, "Y", "N")
-        local provtrend_label = cond(`fe' == 3, "Y", "N")
+        local election_label "N"
+        local provtrend_label "Y"
         estadd local electionfe "`election_label'"
         estadd local provtrendfe "`provtrend_label'"
         estadd local mod "`mod'"

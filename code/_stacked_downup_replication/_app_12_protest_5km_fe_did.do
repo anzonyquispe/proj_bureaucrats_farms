@@ -1,7 +1,7 @@
 ********************************************************************************
 * _app_12_protest_5km_fe_did_rural.do
 * Protest DiD analysis WITHOUT moderator - RURAL GRIDS ONLY
-* 3 columns: 3 FE specs (baseline only, no downup_ac interaction)
+* One column: RA-selected FE3 (baseline only, no downup_ac interaction)
 ********************************************************************************
 
 ********************************************************************************
@@ -104,9 +104,7 @@ drop unit_tag has_pre has_post
 local dep_var countk
 local rhs "ib0.post_##ib0.treat##ib0.moderator wind_direction av_wind_speed"
 
-* FE specifications
-local fe1 "unique_small_grid_id_cohort"
-local fe2 "unique_small_grid_id_cohort monthyearco"
+* RA-selected FE3 specification
 local fe3 "unique_small_grid_id_cohort province_cohort#c.monthyear"
 
 * Statistics
@@ -118,12 +116,12 @@ unique ac_uq_id
 local numacs = r(unique)
 
 ********************************************************************************
-* Run Regressions (only 3 FE specs, no moderator loop)
+* Run the single selected FE3 regression
 ********************************************************************************
 
 local i = 1
 
-foreach fe of numlist 1/3 {
+foreach fe of numlist 3 {
 
     reghdfejl `dep_var' `rhs', ///
         absorb(`fe`fe'' relativeyear_cohort) cluster(ac_elec_yr)
@@ -131,8 +129,8 @@ foreach fe of numlist 1/3 {
     * Store FE indicators
     estadd local gridfe "Y"
 	estadd local time "Y"
-    estadd local electionfe = cond(`fe' >= 2, "Y", "N")
-    estadd local provtrendfe = cond(`fe' == 3, "Y", "N")
+    estadd local electionfe "N"
+    estadd local provtrendfe "Y"
     estadd scalar ymean `ymean_fmt'
     estadd scalar ymean2 `ymean2_fmt'
     estadd scalar acq `numacs'

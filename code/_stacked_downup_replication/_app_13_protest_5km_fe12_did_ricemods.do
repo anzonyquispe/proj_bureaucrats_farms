@@ -102,8 +102,8 @@ drop unit_tag has_pre has_post
 local dep_var countk
 local rhs "wind_direction av_wind_speed"
 
-* FE specifications (Grid, Relative Year, Government Term-Year)
-local fe12 "unique_small_grid_id_cohort relativeyear_cohort province_cohort#election_year province_cohort#c.monthyear"
+* RA-selected FE3 plus its cohort-specific relative-year fixed effect.
+local fe3 "unique_small_grid_id_cohort province_cohort#c.monthyear relativeyear_cohort"
 
 * Statistics
 unique ac_uq_id
@@ -126,10 +126,10 @@ foreach mod of local modlist{
 
 	* Equation 1: Rice Area
 	reghdfejl `dep_var' ib0.post_##ib0.treat##ib0.`mod' `rhs', ///
-		absorb(`fe12') cluster(ac_elec_yr)
+		absorb(`fe3') cluster(ac_elec_yr)
 	estadd local gridfe "Y"
 	estadd local time "Y"
-	estadd local electionfe "Y"
+	estadd local electionfe "N"
 	estadd local provtrendfe "Y"
 	estadd scalar ymean `ymean'
 	estadd scalar ymean2 `ymean2'

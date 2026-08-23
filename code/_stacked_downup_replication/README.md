@@ -135,9 +135,8 @@ active table reads are not wrapped in `capture`, so a missing/corrupt `.ster`
 or model name fails the job instead of silently retaining an old table.
 
 `plotting_event_studies.R` is the only event-study/HonestDiD plotting entry
-point. The production protest section renders FE1-FE5 from the single pooled
-sample, with one baseline plot and one `rice_prod_aclvl_ahigh` interaction plot
-for each FE. Politician control-sample robustness naming is unchanged.
+point. The production protest section renders the RA-selected FE3 from the
+single pooled sample. Politician control-sample robustness naming is unchanged.
 
 ## Software expected on compute nodes
 

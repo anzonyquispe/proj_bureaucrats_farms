@@ -1,9 +1,10 @@
 ********************************************************************************
-* Canonical protest event study: same election term, pooled control sample.
+* Canonical protest event study: exact FE3 implementation of the RA's
+* _app_21_5km_allfe_same_term.do.
 *
-* This is the production implementation of _app_21_5km_allfe_same_term.do.
-* It intentionally does not split the sample by control_type. The only
-* substantive heterogeneity result is rice production above the AC median.
+* Authoritative input: stacked_data_protest5km_election_sameterm.csv.
+* Controls are pooled exactly as supplied by that stack. There is no
+* control_type filter and no moderator/heterogeneity regression in this file.
 ********************************************************************************
 
 if "$root" == "" {
@@ -15,7 +16,7 @@ if "$root" == "" {
     global location     "shell"
     global sample       ""
     global is_rural_var "is_rural"
-    global fe_list      "1/5"
+    global fe_list      "3"
     global ster_suffix  ""
 
     global shell "/groups/sgulzar/sa_fires/proj_bureaucrats_farms"
@@ -39,18 +40,8 @@ global tables   "${code}/../../tables"
 
 local protest_input ///
     "${int_data}/stacked_data_protest5km_election_sameterm${sample}.csv"
-capture confirm file "`protest_input'"
-if _rc {
-    local protest_input ///
-        "${int_data}/cohortes_protest_term/stacked_data_protest5km_election_sameterm${sample}.csv"
-}
-capture confirm file "`protest_input'"
-if _rc {
-    local protest_input ///
-        "${int_data}/cohorts_protest_term/stacked_data_protest5km_election_sameterm${sample}.csv"
-}
 confirm file "`protest_input'"
-display as text "Canonical same-term protest input: `protest_input'"
+display as text "RA same-term protest input: `protest_input'"
 import delimited using "`protest_input'", clear varnames(1)
 
 * Match the reference dofile's cohort and election-term checks.
@@ -129,18 +120,15 @@ gen countk = count * 1000
 local dep_var countk
 local filter1 "1"
 
-* The five specifications actually estimated by the reference dofile.
-local fe1 "unique_small_grid_id_cohort"
-local fe2 "unique_small_grid_id_cohort monthyearco"
+* Selected specification from the RA's five-specification comparison.
 local fe3 "unique_small_grid_id_cohort province_cohort#c.monthyear"
-local fe4 "unique_small_grid_id_cohort yeargov"
-local fe5 "unique_small_grid_id_cohort province_cohort#election_year"
 
-* Preserve the required moderator structure. The production analysis contains
-* the baseline and rice-production-above-median event studies only.
+* Preserve the project-standard moderator structure while estimating only the
+* RA's unmoderated event study. Because moderator is identically zero, the
+* estimable event-time x treat coefficients are identical to the RA's RHS.
 gen byte moderator = 0
 * local moderators_list moderator downup_ac rice_area_aclvl_ahigh rice_harvarea_aclvl_ahigh rice_prod_aclvl_ahigh
-local moderators_list moderator rice_prod_aclvl_ahigh
+local moderators_list moderator
 
 egen byte tag_ac = tag(ac_uq_id)
 quietly count if tag_ac
@@ -150,6 +138,10 @@ drop tag_ac
 est clear
 local i = 1
 local estimate_names ""
+if trim("$fe_list") != "3" {
+    display as error "Canonical protest event study requires fe_list=3."
+    exit 198
+}
 foreach fe of numlist $fe_list {
     local fespec `fe`fe''
     display _newline as text "FE`fe': `fespec' + relativeyear_cohort"
@@ -163,13 +155,53 @@ foreach fe of numlist $fe_list {
         local ymean = r(mean)
         quietly summarize `dep_var' if treat == 1 & relative_year_bin <= -1 & moderator == 1 & `filter1'
         local ymean2 = r(mean)
+        quietly summarize `dep_var' if treat == 0 & relative_year_bin <= -1 & `filter1'
+        local ra_ymean = r(mean)
+        if abs(`ra_ymean' - 139.86196) > .001 {
+            display as error "RA replication failed: untreated pre-mean=" ///
+                `ra_ymean' ", expected 139.86196."
+            exit 459
+        }
 
         reghdfejl `dep_var' `rhs' if `filter1', ///
             absorb(`fespec' relativeyear_cohort) ///
             vce(cluster ac_elec_yr)
 
+        * Exact replication audit against the RA's completed FE3 log. These
+        * checks detect any change in the input, sample construction, FE,
+        * clustering, or event-time coefficients.
+        if e(N) != 67728314 {
+            display as error "RA replication failed: N=" e(N) ///
+                ", expected 67728314."
+            exit 459
+        }
+        if e(N_clust) != 12096 {
+            display as error "RA replication failed: clusters=" e(N_clust) ///
+                ", expected 12096."
+            exit 459
+        }
+        local audit_terms "1bn.relative_year_bin_aux#1.treat 2.relative_year_bin_aux#1.treat 3.relative_year_bin_aux#1.treat 5.relative_year_bin_aux#1.treat 6.relative_year_bin_aux#1.treat 7.relative_year_bin_aux#1.treat 8.relative_year_bin_aux#1.treat 9.relative_year_bin_aux#1.treat"
+        local audit_beta "-42.01641 -8.181174 -20.40768 56.44675 164.7035 64.44406 69.70303 82.60937"
+        local audit_se   "13.70218 10.15766 10.99382 10.52979 28.49049 12.78092 13.62757 19.89362"
+        local audit_n : word count `audit_terms'
+        forvalues a = 1/`audit_n' {
+            local term : word `a' of `audit_terms'
+            local expected_beta : word `a' of `audit_beta'
+            local expected_se : word `a' of `audit_se'
+            if abs(_b[`term'] - `expected_beta') > .001 {
+                display as error "RA replication failed for event coefficient `term'."
+                exit 459
+            }
+            if abs(_se[`term'] - `expected_se') > .001 {
+                display as error "RA replication failed for event SE `term'."
+                exit 459
+            }
+        }
+        display as result "PASS: FE3 sample, coefficients, and SEs match the RA benchmark."
+
         estadd scalar ymean  = `ymean'
         estadd scalar ymean2 = `ymean2'
+        estadd scalar ra_ymean = `ra_ymean'
         estadd scalar acq    = `numacs'
         estadd local smpl "Rural"
         estadd local fespec "FE`fe': `fespec' relativeyear_cohort"
@@ -190,6 +222,6 @@ estsave_csv `estimate_names' using "`outbase'.csv", replace
 confirm file "`outbase'.ster"
 confirm file "`outbase'.csv"
 confirm file "`outbase'_scalars.csv"
-display as result "Saved canonical pooled protest results: `outbase'.ster and .csv"
+display as result "Saved canonical RA-matched FE3 protest results: `outbase'.ster and .csv"
 
 ********************************************************************************

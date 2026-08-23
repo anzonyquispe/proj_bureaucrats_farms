@@ -62,8 +62,8 @@ RSTUDIO_CONFIG <- list(
   root = detected_repo_root,
   output_root = detected_repo_root,
   sample = "",
-  # Choose any of: "main", "politician", "protest", "politician_sweep",
-  # "politician_qweights".
+  # Choose any of: "main", "politician", "protest", "protest_switch",
+  # "politician_sweep", "politician_qweights".
   families = c("main", "politician", "protest"),
   # For the main family, optionally list registry IDs; empty means all cases.
   cases = character(),
@@ -138,7 +138,7 @@ parse_args <- function(args) {
   )
   out$families <- trimws(strsplit(out$families, ",", fixed = TRUE)[[1L]])
   allowed_families <- c(
-    "main", "politician", "protest", "politician_sweep",
+    "main", "politician", "protest", "protest_switch", "politician_sweep",
     "politician_qweights"
   )
   invalid_families <- setdiff(out$families, allowed_families)
@@ -146,8 +146,8 @@ parse_args <- function(args) {
     stop(
       "Unknown plot family: ", paste(invalid_families, collapse = ", "),
       paste0(
-        ". Use main, politician, protest, politician_sweep, and/or ",
-        "politician_qweights."
+        ". Use main, politician, protest, protest_switch, ",
+        "politician_sweep, and/or politician_qweights."
       ),
       call. = FALSE
     )
@@ -1023,30 +1023,52 @@ for (analysis_suffix in c("", "_acpop")) {
   }
 }
 
-# Canonical protest event study: one pooled sample, no control suffix and no
-# area/population suffix. Each FE has a baseline model followed by the
-# rice-production-above-median interaction model. The reference support is
-# -4,...,+4 with -1 omitted.
+# Canonical protest event study: the RA's same-term input, pooled controls, and
+# selected FE3. The reference support is -4,...,+4 with -1 omitted.
 if ("protest" %in% args$families) {
   protest_csv <- paste0(
     "_app_17_5km_fe12_evst_all", s, "_rural.csv"
   )
+  run_pattern_case(
+    protest_csv, "evreg1",
+    "relative_year_bin_aux#1\\.treat$",
+    paste0("_app_17_5km_fe12_evst_all", s, "_rural_fe03_1"),
+    4, 5
+  )
+}
+
+# Exploratory province x election-year x switching-date protest cohorts. Each
+# FE has a baseline event study and a rice-production interaction. The support
+# is -4,...,+2 with -1 omitted; every FE also absorbs event year x cohort_id.
+if ("protest_switch" %in% args$families) {
+  switch_rel_dir <- file.path(
+    "exploratory_analysis", "protest_province_election_switch"
+  )
+  dir.create(
+    file.path(figure_dir, switch_rel_dir),
+    recursive = TRUE, showWarnings = FALSE
+  )
+  switch_csv <- file.path(
+    switch_rel_dir,
+    paste0("protest_province_election_switch_event", s, "_rural.csv")
+  )
   for (fe in seq_len(5L)) {
+    fe_tag <- sprintf("%02d", fe)
     baseline_model <- paste0("evreg", 2L * fe - 1L)
     rice_model <- paste0("evreg", 2L * fe)
-    fe_suffix <- if (fe == 1L) "" else sprintf("_fe%02d", fe)
-    protest_base <- paste0(
-      "_app_17_5km_fe12_evst_all", s, "_rural", fe_suffix
+    figure_stem <- file.path(
+      switch_rel_dir,
+      paste0("protest_province_election_switch_fe", fe_tag)
     )
     run_pattern_case(
-      protest_csv, baseline_model,
+      switch_csv, baseline_model,
       "relative_year_bin_aux#1\\.treat$",
-      paste0(protest_base, "_1"), 4, 5
+      paste0(figure_stem, "_baseline"), 4, 3
     )
     run_pattern_case(
-      protest_csv, rice_model,
+      switch_csv, rice_model,
       "relative_year_bin_aux#1\\.treat#1\\.rice_prod_aclvl_ahigh$",
-      paste0(protest_base, "_riceP_2"), 4, 5
+      paste0(figure_stem, "_riceP"), 4, 3
     )
   }
 }
