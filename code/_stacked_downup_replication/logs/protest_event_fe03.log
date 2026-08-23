@@ -1,0 +1,734 @@
+Loading CRC_default/1.1
+Starting _app_17_5km_fe12_evst_all.do with 10 CPU(s).
+Permanent Stata log: /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication/logs/protest_event_fe03_1378410.stata.log
+
+  ___  ____  ____  ____  ____ ®
+ /__    /   ____/   /   ____/      StataNow 19.5
+___/   /   /___/   /   /___/       MP—Parallel Edition
+
+ Statistics and Data Science       Copyright 1985-2025 StataCorp LLC
+                                   StataCorp
+                                   4905 Lakeway Drive
+                                   College Station, Texas 77845 USA
+                                   800-782-8272        https://www.stata.com
+                                   979-696-4600        service@stata.com
+
+Stata license: 4-user 16-core network, expiring 14 Sep 2026
+Serial number: 501909301589
+  Licensed to: University of Notre Dame
+               Notre Dame, IN 46556
+
+Notes:
+      1. Stata is running in batch mode.
+      2. Unicode is supported; see help unicode_advice.
+      3. More than 2 billion observations are allowed; see help obs_advice.
+      4. Maximum number of variables is set to 5,000 but can be increased;
+          see help set_maxvar.
+
+. do /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication/sb
+> atch/_run_dofile.do 
+
+. *****************************************************************************
+> ***
+. * Environment bridge: one invocation runs exactly one result-generating dofil
+> e.
+. *****************************************************************************
+> ***
+. 
+. version 17
+
+. set more off
+
+. 
+. local dofile        : environment FARMS_DOFILE
+
+. local root          : environment FARMS_ROOT
+
+. local code          : environment FARMS_CODE
+
+. local location      : environment FARMS_LOCATION
+
+. local sample        : environment FARMS_SAMPLE
+
+. local is_rural_var  : environment FARMS_RURAL_VAR
+
+. local fe_list       : environment FARMS_FE_LIST
+
+. local ster_suffix   : environment FARMS_STER_SUFFIX
+
+. local downup_var    : environment FARMS_DOWNUP_VAR
+
+. local stacked_file  : environment FARMS_STACKED_FILE
+
+. local did_output    : environment FARMS_DID_OUTPUT
+
+. local control_samples : environment FARMS_CONTROL_SAMPLES
+
+. local processors    : environment FARMS_CPUS
+
+. 
+. if "`processors'" == "" local processors "1"
+
+. set processors `processors'
+    The maximum number of processors or cores being used is changed from 16
+    to 10.  It can be set to any number between 1 and 16
+
+. 
+. if "`dofile'" == "" {
+.     display as error "FARMS_DOFILE is empty; use sbatch/run_dofile.sbatch."
+.     exit 198
+. }
+
+. if "`root'" == "" {
+.     display as error "FARMS_ROOT is empty; use sbatch/run_dofile.sbatch."
+.     exit 198
+. }
+
+. if "`code'" == "" {
+.     display as error "FARMS_CODE is empty; use sbatch/run_dofile.sbatch."
+.     exit 198
+. }
+
+. 
+. if "`sample'" == "none" local sample ""
+
+. if "`ster_suffix'" == "none" local ster_suffix ""
+
+. if "`downup_var'" == "none" local downup_var ""
+
+. if "`stacked_file'" == "none" local stacked_file ""
+
+. if "`did_output'" == "none" local did_output ""
+
+. if "`control_samples'" == "all" local control_samples ""
+
+. 
+. global root          "`root'"
+
+. global code          "`code'"
+
+. global location      "`location'"
+
+. global sample        "`sample'"
+
+. global is_rural_var  "`is_rural_var'"
+
+. global fe_list       "`fe_list'"
+
+. global ster_suffix   "`ster_suffix'"
+
+. global downup_var    "`downup_var'"
+
+. global stacked_file  "`stacked_file'"
+
+. global did_output    "`did_output'"
+
+. global control_samples "`control_samples'"
+
+. 
+. global int_data    "${root}/data_output/intermediate"
+
+. global int_farms   "${int_data}"
+
+. global tables      "${code}/../../tables"
+
+. global table_farms "${tables}"
+
+. global figures     "${code}/../../figures"
+
+. global figure_farms "${figures}"
+
+. 
+. capture mkdir "${tables}"
+
+. capture mkdir "${figures}"
+
+. capture mkdir "${code}/logs"
+
+. 
+. adopath ++ "${code}"
+  [1]              "/users/aquisper/proj_bureaucrats_farms/code/_stacked_downup
+> _replication"
+  [2]  (BASE)      "/software/s/stata/19.5/ado/base/"
+  [3]  (SITE)      "/software/s/stata/ado/"
+  [4]              "."
+  [5]  (PERSONAL)  "~/ado/personal/"
+  [6]  (PLUS)      "~/ado/plus/"
+  [7]  (OLDPLACE)  "~/ado/"
+
+. capture noisily do "${code}/estsave_csv.ado"
+
+. *! estsave_csv v1.2 - Export stored estimates and covariance matrices to CSV
+. program define estsave_csv
+  1.     version 14.0
+  2.     syntax namelist using/, [replace append]
+  3. 
+.     local outfile `"`using'"'
+  4.     tempfile coef_all coef_cur scalar_all scalar_cur
+  5.     local first = 1
+  6. 
+.     foreach est of local namelist {
+  7.         quietly estimates restore `est'
+  8.         matrix b = e(b)
+  9.         matrix V = e(V)
+ 10.         local k = colsof(b)
+ 11.         local cnames : colfullnames b
+ 12. 
+.         preserve
+ 13.         clear
+ 14.         quietly set obs `k'
+ 15.         gen strL reg = "`est'"
+ 16.         gen strL var = ""
+ 17.         gen double beta = .
+ 18.         capture local ymean_val `"`e(ymean)'"'
+ 19.         if !_rc & `"`ymean_val'"' != "" gen strL ymean = `"`ymean_val'"'
+ 20.         else gen strL ymean = ""
+ 21. 
+.         forvalues j = 1/`k' {
+ 22.             local nm : word `j' of `cnames'
+ 23.             quietly replace var = "`nm'" in `j'
+ 24.             quietly replace beta = b[1, `j'] in `j'
+ 25.             gen double cov`j' = .
+ 26.         }
+ 27.         forvalues i = 1/`k' {
+ 28.             forvalues j = 1/`k' {
+ 29.                 quietly replace cov`j' = V[`i', `j'] in `i'
+ 30.             }
+ 31.         }
+ 32.         quietly save `coef_cur', replace
+ 33.         if `first' quietly save `coef_all', replace
+ 34.         else {
+ 35.             quietly use `coef_all', clear
+ 36.             quietly append using `coef_cur'
+ 37.             quietly save `coef_all', replace
+ 38.         }
+ 39.         restore
+ 40. 
+.         preserve
+ 41.         clear
+ 42.         quietly set obs 1
+ 43.         gen strL reg = "`est'"
+ 44.         local escalars : e(scalars)
+ 45.         foreach sc of local escalars {
+ 46.             local scval = e(`sc')
+ 47.             local safe = subinstr("`sc'", "-", "_", .)
+ 48.             capture gen double `safe' = `scval'
+ 49.             if _rc capture gen double sc_`safe' = `scval'
+ 50.         }
+ 51.         local emacros : e(macros)
+ 52.         foreach mc of local emacros {
+ 53.             capture local mcval `"`e(`mc')'"'
+ 54.             if !_rc & `"`mcval'"' != "" {
+ 55.                 if strlen(`"`mcval'"') > 244 local mcval = substr(`"`mcval
+> '"', 1, 244)
+ 56.                 local safe = subinstr("`mc'", "-", "_", .)
+ 57.                 capture gen strL `safe' = `"`mcval'"'
+ 58.                 if _rc capture gen strL mc_`safe' = `"`mcval'"'
+ 59.             }
+ 60.         }
+ 61.         quietly save `scalar_cur', replace
+ 62.         if `first' {
+ 63.             quietly save `scalar_all', replace
+ 64.             local first = 0
+ 65.         }
+ 66.         else {
+ 67.             quietly use `scalar_all', clear
+ 68.             quietly append using `scalar_cur'
+ 69.             quietly save `scalar_all', replace
+ 70.         }
+ 71.         restore
+ 72.     }
+ 73. 
+.     local basefile = subinstr(`"`outfile'"', ".csv", "", .)
+ 74.     quietly use `coef_all', clear
+ 75.     order reg var beta ymean
+ 76.     quietly export delimited using "`basefile'.csv", `replace' `append'
+ 77.     quietly use `scalar_all', clear
+ 78.     quietly export delimited using "`basefile'_scalars.csv", `replace' `ap
+> pend'
+ 79.     display as result "Estimates exported to `basefile'.csv"
+ 80. end
+
+. 
+. 
+end of do-file
+
+. capture noisily do "${code}/estload_csv.ado"
+
+. *! estload_csv v1.0 - Reconstruct estimate objects exported by estsave_csv
+. program define estload_csv
+  1.     version 14.0
+  2.     syntax using/
+  3. 
+.     local infile `"`using'"'
+  4.     local basefile = subinstr(`"`infile'"', ".csv", "", .)
+  5.     preserve
+  6.     quietly import delimited using "`basefile'.csv", clear varnames(1)
+  7.     quietly levelsof reg, local(regs)
+  8. 
+.     foreach r of local regs {
+  9.         preserve
+ 10.         quietly keep if reg == "`r'"
+ 11.         local k = _N
+ 12.         matrix b = J(1, `k', .)
+ 13.         matrix V = J(`k', `k', .)
+ 14.         local varnames ""
+ 15.         forvalues i = 1/`k' {
+ 16.             local vname = var[`i']
+ 17.             local varnames `"`varnames' `vname'"'
+ 18.             matrix b[1, `i'] = beta[`i']
+ 19.             forvalues j = 1/`k' {
+ 20.                 matrix V[`i', `j'] = cov`j'[`i']
+ 21.             }
+ 22.         }
+ 23.         matrix colnames b = `varnames'
+ 24.         matrix rownames V = `varnames'
+ 25.         matrix colnames V = `varnames'
+ 26.         restore, preserve
+ 27.         quietly ereturn post b V
+ 28.         estimates store `r'
+ 29.         display as text "Loaded estimate: `r'"
+ 30.     }
+ 31.     restore
+ 32. end
+
+. 
+. 
+end of do-file
+
+. 
+. display "============================================================"
+============================================================
+
+. display "Independent dofile job: `dofile'"
+Independent dofile job: _app_17_5km_fe12_evst_all.do
+
+. display "Data root: ${root}"
+Data root: /groups/sgulzar/sa_fires/proj_bureaucrats_farms
+
+. display "Tables output: ${tables}"
+Tables output: /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_repl
+> ication/../../tables
+
+. display "Figures output: ${figures}"
+Figures output: /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_rep
+> lication/../../figures
+
+. display "Code root: ${code}"
+Code root: /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replicat
+> ion
+
+. display "Sample: ${sample}; rural: ${is_rural_var}; FE: ${fe_list}"
+Sample: ; rural: is_rural; FE: 3
+
+. display "Suffix: ${ster_suffix}; moderator: ${downup_var}"
+Suffix: ; moderator: 
+
+. display "Control samples: ${control_samples}"
+Control samples: 
+
+. display "Stata processors: " c(processors)
+Stata processors: 10
+
+. display "============================================================"
+============================================================
+
+. 
+. do "${code}/`dofile'"
+
+. *****************************************************************************
+> ***
+. * Canonical protest event study: exact FE3 implementation of the RA's
+. * _app_21_5km_allfe_same_term.do.
+. *
+. * Authoritative input: stacked_data_protest5km_election_sameterm.csv.
+. * Controls are pooled exactly as supplied by that stack. There is no
+. * control_type filter and no moderator/heterogeneity regression in this file.
+. *****************************************************************************
+> ***
+. 
+. if "$root" == "" {
+.     clear all
+.     set more off
+. 
+.     * Standalone defaults for the five sbatch-array parameters:
+.     * location, sample, is_rural_var, fe_list, and ster_suffix.
+.     global location     "shell"
+.     global sample       ""
+.     global is_rural_var "is_rural"
+.     global fe_list      "3"
+.     global ster_suffix  ""
+. 
+.     global shell "/groups/sgulzar/sa_fires/proj_bureaucrats_farms"
+.     global dbox  "/Users/anzony.quisperojas/Library/CloudStorage/Dropbox/sa_f
+> ires/proj_bureaucrats_farms"
+.     global code_shell "/users/aquisper/proj_bureaucrats_farms/code/_stacked_d
+> ownup_replication"
+.     global code_dbox  "/Users/anzony.quisperojas/Documents/GitHub/proj_bureau
+> crats_farms/code/_stacked_downup_replication"
+. 
+.     if "$location" == "dbox" {
+.         global root "$dbox"
+.         global code "$code_dbox"
+.     }
+.     else {
+.         global root "$shell"
+.         global code "$code_shell"
+.     }
+.     quietly do "${code}/estsave_csv.ado"
+. }
+
+. 
+. global int_data "${root}/data_output/intermediate"
+
+. global tables   "${code}/../../tables"
+
+. 
+. local protest_input ///
+>     "${int_data}/stacked_data_protest5km_election_sameterm${sample}.csv"
+
+. confirm file "`protest_input'"
+
+. display as text "RA same-term protest input: `protest_input'"
+RA same-term protest input: /groups/sgulzar/sa_fires/proj_bureaucrats_farms/dat
+> a_output/intermediate/stacked_data_protest5km_election_sameterm.csv
+
+. import delimited using "`protest_input'", clear varnames(1)
+(encoding automatically selected: ISO-8859-1)
+(29 vars, 87,667,769 obs)
+
+. 
+. * Match the reference dofile's cohort and election-term checks.
+. confirm variable cohort_id
+
+. confirm variable cohort_election_year
+
+. confirm variable cohort_term_start
+
+. assert monthyear >= cohort_term_start
+
+. assert cohort_term_start <= cohort
+
+. bysort cohort_id: assert cohort_election_year == cohort_election_year[1]
+
+. 
+. capture confirm variable relative_year_bin
+
+. if _rc {
+.     confirm variable relative_year
+.     rename relative_year relative_year_bin
+. }
+
+. assert relative_year_bin == floor((monthyear - cohort) / 12)
+
+. 
+. * Use rice_moderators.dta as both the sample definition and authoritative sou
+> rce
+. * for the above-median rice-production indicator, exactly as in the reference
+> .
+. capture drop rice_prod_aclvl_ahigh
+
+. merge m:1 unique_small_grid_id ac_uq_id using ///
+>     "${int_data}/rice_moderators.dta", ///
+>     keepusing(rice_prod_aclvl_ahigh)
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                        22,567
+        from master                    22,407  (_merge==1)
+        from using                        160  (_merge==2)
+
+    Matched                        87,645,362  (_merge==3)
+    -----------------------------------------
+
+. keep if _merge == 3
+(22,567 observations deleted)
+
+. drop _merge
+
+. assert inlist(rice_prod_aclvl_ahigh, 0, 1)
+
+. 
+. merge m:1 unique_small_grid_id using ///
+>     "${int_data}/ghs_grid_classification_2000.dta", ///
+>     keepusing(is_rural)
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                        58,584
+        from master                         0  (_merge==1)
+        from using                     58,584  (_merge==2)
+
+    Matched                        87,645,362  (_merge==3)
+    -----------------------------------------
+
+. keep if _merge == 3
+(58,584 observations deleted)
+
+. drop _merge
+
+. keep if ${is_rural_var} == 1
+(17,208,708 observations deleted)
+
+. display as text "Observations after rice and rural filters: " _N
+Observations after rice and rural filters: 70436654
+
+. 
+. * The reference removes only relative year -5. It does not impose an August
+. * 2022 cutoff or truncate the remaining government-term event-time support.
+. count if relative_year_bin == -5
+  2,059,948
+
+. display as text "Observations dropped at relative_year_bin == -5: " r(N)
+Observations dropped at relative_year_bin == -5: 2059948
+
+. drop if relative_year_bin == -5
+(2,059,948 observations deleted)
+
+. 
+. foreach v of varlist election_year yeargov {
+  2.     capture confirm numeric variable `v'
+  3.     if _rc destring `v', replace
+  4. }
+
+. recast int election_year, force
+
+. recast byte yeargov, force
+
+. 
+. egen unique_small_grid_id_cohort = group(unique_small_grid_id cohort_id)
+
+. egen monthyearco                 = group(month year cohort_id)
+
+. egen province_cohort             = group(cohort_id province)
+
+. egen ac_elec_yr                  = group(ac_uq_id cohort_election_year cohort
+> _id)
+
+. egen relativeyear_cohort         = group(relative_year_bin cohort_id)
+
+. 
+. * Retain grid-cohort units observed on both sides of the protest switch.
+. bysort unique_small_grid_id_cohort: egen byte has_pre  = max(relative_year_bi
+> n < 0)
+
+. bysort unique_small_grid_id_cohort: egen byte has_post = max(relative_year_bi
+> n >= 0)
+
+. egen byte unit_tag = tag(unique_small_grid_id_cohort)
+
+. quietly count if unit_tag
+
+. local all_units = r(N)
+
+. quietly count if unit_tag & has_pre == 1 & has_post == 1
+
+. local balanced_units = r(N)
+
+. display as text "Grid-cohort units with pre and post: `balanced_units' of `al
+> l_units'"
+Grid-cohort units with pre and post: 1193627 of 1206980
+
+. drop unit_tag
+
+. keep if has_pre == 1 & has_post == 1
+(648,392 observations deleted)
+
+. drop has_pre has_post
+
+. display as text "Canonical protest estimation observations: " _N
+Canonical protest estimation observations: 67728314
+
+. 
+. quietly summarize relative_year_bin
+
+. local rmin = r(min)
+
+. gen relative_year_bin_aux = relative_year_bin - `rmin' + 1
+
+. local base = -1 - `rmin' + 1
+
+. 
+. capture drop countk
+
+. gen countk = count * 1000
+
+. local dep_var countk
+
+. local filter1 "1"
+
+. 
+. * Selected specification from the RA's five-specification comparison.
+. local fe3 "unique_small_grid_id_cohort province_cohort#c.monthyear"
+
+. 
+. * Preserve the project-standard moderator structure while estimating only the
+. * RA's unmoderated event study. Because moderator is identically zero, the
+. * estimable event-time x treat coefficients are identical to the RA's RHS.
+. gen byte moderator = 0
+
+. * local moderators_list moderator downup_ac rice_area_aclvl_ahigh rice_harvar
+> ea_aclvl_ahigh rice_prod_aclvl_ahigh
+. local moderators_list moderator
+
+. 
+. egen byte tag_ac = tag(ac_uq_id)
+
+. quietly count if tag_ac
+
+. local numacs = r(N)
+
+. drop tag_ac
+
+. 
+. est clear
+
+. local i = 1
+
+. local estimate_names ""
+
+. if trim("$fe_list") != "3" {
+.     display as error "Canonical protest event study requires fe_list=3."
+.     exit 198
+. }
+
+. foreach fe of numlist $fe_list {
+  2.     local fespec `fe`fe''
+  3.     display _newline as text "FE`fe': `fespec' + relativeyear_cohort"
+  4. 
+.     foreach mod of local moderators_list {
+  5.         replace moderator = `mod'
+  6.         local rhs ///
+>             "ib`base'.relative_year_bin_aux##ib0.treat##ib0.`mod' wind_direct
+> ion av_wind_speed"
+  7. 
+.         quietly summarize `dep_var' if treat == 1 & relative_year_bin <= -1 &
+>  `filter1'
+  8.         local ymean = r(mean)
+  9.         quietly summarize `dep_var' if treat == 1 & relative_year_bin <= -
+> 1 & moderator == 1 & `filter1'
+ 10.         local ymean2 = r(mean)
+ 11.         quietly summarize `dep_var' if treat == 0 & relative_year_bin <= -
+> 1 & `filter1'
+ 12.         local ra_ymean = r(mean)
+ 13.         if abs(`ra_ymean' - 139.86196) > .001 {
+ 14.             display as error "RA replication failed: untreated pre-mean=" 
+> ///
+>                 `ra_ymean' ", expected 139.86196."
+ 15.             exit 459
+ 16.         }
+ 17. 
+.         reghdfejl `dep_var' `rhs' if `filter1', ///
+>             absorb(`fespec' relativeyear_cohort) ///
+>             vce(cluster ac_elec_yr)
+ 18. 
+.         * Exact replication audit against the RA's completed FE3 log. These
+.         * checks detect any change in the input, sample construction, FE,
+.         * clustering, or event-time coefficients.
+.         if e(N) != 67728314 {
+ 19.             display as error "RA replication failed: N=" e(N) ///
+>                 ", expected 67728314."
+ 20.             exit 459
+ 21.         }
+ 22.         if e(N_clust) != 12096 {
+ 23.             display as error "RA replication failed: clusters=" e(N_clust)
+>  ///
+>                 ", expected 12096."
+ 24.             exit 459
+ 25.         }
+ 26.         local audit_terms "1bn.relative_year_bin_aux#1.treat 2.relative_ye
+> ar_bin_aux#1.treat 3.relative_year_bin_aux#1.treat 5.relative_year_bin_aux#1.
+> treat 6.relative_year_bin_aux#1.treat 7.relative_year_bin_aux#1.treat 8.relat
+> ive_year_bin_aux#1.treat 9.relative_year_bin_aux#1.treat"
+ 27.         local audit_beta "-42.01641 -8.181174 -20.40768 56.44675 164.7035 
+> 64.44406 69.70303 82.60937"
+ 28.         local audit_se   "13.70218 10.15766 10.99382 10.52979 28.49049 12.
+> 78092 13.62757 19.89362"
+ 29.         local audit_n : word count `audit_terms'
+ 30.         forvalues a = 1/`audit_n' {
+ 31.             local term : word `a' of `audit_terms'
+ 32.             local expected_beta : word `a' of `audit_beta'
+ 33.             local expected_se : word `a' of `audit_se'
+ 34.             if abs(_b[`term'] - `expected_beta') > .001 {
+ 35.                 display as error "RA replication failed for event coeffici
+> ent `term'."
+ 36.                 exit 459
+ 37.             }
+ 38.             if abs(_se[`term'] - `expected_se') > .001 {
+ 39.                 display as error "RA replication failed for event SE `term
+> '."
+ 40.                 exit 459
+ 41.             }
+ 42.         }
+ 43.         display as result "PASS: FE3 sample, coefficients, and SEs match t
+> he RA benchmark."
+ 44. 
+.         estadd scalar ymean  = `ymean'
+ 45.         estadd scalar ymean2 = `ymean2'
+ 46.         estadd scalar ra_ymean = `ra_ymean'
+ 47.         estadd scalar acq    = `numacs'
+ 48.         estadd local smpl "Rural"
+ 49.         estadd local fespec "FE`fe': `fespec' relativeyear_cohort"
+ 50.         estadd local mod "`mod'"
+ 51.         estadd local controls "pooled"
+ 52. 
+.         local estname evreg`i'
+ 53.         local estimate_names "`estimate_names' `estname'"
+ 54.         local i = `i' + 1
+ 55.         est store `estname'
+ 56.     }
+ 57. }
+
+FE3: unique_small_grid_id_cohort province_cohort#c.monthyear + relativeyear_coh
+> ort
+(0 real changes made)
+(MWFE estimator converged in 47 iterations)
+
+HDFE linear regression with Julia                 Number of obs   = 67,728,314
+Absorbing 3 HDFE groups                           F(  10,  12095) =     216.70
+Statistics cluster-robust                         Prob > F        =     0.0000
+                                                  R-squared       =     0.1081
+                                                  Adj R-squared   =     0.0921
+Number of clusters (ac_elec_yr) =      12096      Within R-sq.    =     0.0088
+                                                  Root MSE        =   902.3100
+
+                        (Std. err. adjusted for 12,096 clusters in ac_elec_yr)
+------------------------------------------------------------------------------
+             |               Robust
+      countk | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+relative_y~x |
+          1  |          0  (omitted)
+          2  |          0  (omitted)
+          3  |          0  (omitted)
+          5  |          0  (omitted)
+          6  |          0  (omitted)
+          7  |          0  (omitted)
+          8  |          0  (omitted)
+          9  |          0  (omitted)
+             |
+     1.treat |          0  (omitted)
+wind_direc~n |  -.8349953   .0193769   -43.09   0.000    -.8729772   -.7970134
+av_wind_sp~d |   126.9037   3.683478    34.45   0.000     119.6835    134.1239
+             |
+relative_y~x#|
+       treat |
+        1 1  |  -41.63327    13.7635    -3.02   0.002    -68.61192   -14.65461
+        2 1  |  -7.795929   10.19059    -0.77   0.444    -27.77112    12.17926
+        3 1  |  -20.25265   10.97072    -1.85   0.065    -41.75701    1.251709
+        5 1  |   56.00096   10.50103     5.33   0.000     35.41726    76.58466
+        6 1  |   164.2201    28.5214     5.76   0.000     108.3136    220.1266
+        7 1  |   64.15177    12.7758     5.02   0.000     39.10916    89.19438
+        8 1  |   69.38762   13.62263     5.09   0.000     42.68508    96.09016
+        9 1  |   82.22586   19.89927     4.13   0.000      43.2201    121.2316
+------------------------------------------------------------------------------
+RA replication failed for event coefficient 1bn.relative_year_bin_aux#1.treat.
+r(459);
+
+end of do-file
+r(459);
+
+end of do-file
+r(459);
+Stata exit status: 0
+TERM environment variable not set.
