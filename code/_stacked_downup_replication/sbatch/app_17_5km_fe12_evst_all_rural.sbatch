@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Submit the single canonical pooled-control protest event study. It estimates
-# only the RA-selected FE3 and audits the result against the RA benchmark.
+# the selected FE3 over every relative year naturally present in the input.
 
 #$ -N protest_event_fe03
 #$ -q largemem

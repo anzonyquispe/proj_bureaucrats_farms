@@ -1,6 +1,6 @@
 ********************************************************************************
-* Canonical protest event study: exact FE3 implementation of the RA's
-* _app_21_5km_allfe_same_term.do.
+* Canonical protest event study: FE3 implementation based on the RA's
+* _app_21_5km_allfe_same_term.do, estimating all naturally observed event years.
 *
 * Authoritative input: stacked_data_protest5km_election_sameterm.csv.
 * Controls are pooled exactly as supplied by that stack. There is no
@@ -77,11 +77,11 @@ drop _merge
 keep if ${is_rural_var} == 1
 display as text "Observations after rice and rural filters: " _N
 
-* The reference removes only relative year -5. It does not impose an August
-* 2022 cutoff or truncate the remaining government-term event-time support.
-count if relative_year_bin == -5
-display as text "Observations dropped at relative_year_bin == -5: " r(N)
-drop if relative_year_bin == -5
+* Do not truncate event time in the estimation sample. Plotting code may select
+* a narrower display window after every naturally observed coefficient exists.
+quietly summarize relative_year_bin
+display as text "Natural relative-year support retained: [" ///
+    r(min) ", " r(max) "]"
 
 foreach v of varlist election_year yeargov {
     capture confirm numeric variable `v'
@@ -123,9 +123,10 @@ local filter1 "1"
 * Selected specification from the RA's five-specification comparison.
 local fe3 "unique_small_grid_id_cohort province_cohort#c.monthyear"
 
-* Preserve the project-standard moderator structure while estimating only the
-* RA's unmoderated event study. Because moderator is identically zero, the
-* estimable event-time x treat coefficients are identical to the RA's RHS.
+* Preserve the project-standard moderator wrapper and ymean2 wiring. The
+* regression itself uses the RA's literal unmoderated RHS: reghdfejl does not
+* treat a triple interaction with a constant-zero moderator as numerically
+* identical (the 2026-08-23 audit detected different coefficients and fit).
 gen byte moderator = 0
 * local moderators_list moderator downup_ac rice_area_aclvl_ahigh rice_harvarea_aclvl_ahigh rice_prod_aclvl_ahigh
 local moderators_list moderator
@@ -149,59 +150,30 @@ foreach fe of numlist $fe_list {
     foreach mod of local moderators_list {
         replace moderator = `mod'
         local rhs ///
-            "ib`base'.relative_year_bin_aux##ib0.treat##ib0.`mod' wind_direction av_wind_speed"
+            "ib`base'.relative_year_bin_aux##ib0.treat wind_direction av_wind_speed"
 
         quietly summarize `dep_var' if treat == 1 & relative_year_bin <= -1 & `filter1'
         local ymean = r(mean)
         quietly summarize `dep_var' if treat == 1 & relative_year_bin <= -1 & moderator == 1 & `filter1'
         local ymean2 = r(mean)
         quietly summarize `dep_var' if treat == 0 & relative_year_bin <= -1 & `filter1'
-        local ra_ymean = r(mean)
-        if abs(`ra_ymean' - 139.86196) > .001 {
-            display as error "RA replication failed: untreated pre-mean=" ///
-                `ra_ymean' ", expected 139.86196."
-            exit 459
-        }
+        local control_ymean = r(mean)
 
         reghdfejl `dep_var' `rhs' if `filter1', ///
             absorb(`fespec' relativeyear_cohort) ///
             vce(cluster ac_elec_yr)
 
-        * Exact replication audit against the RA's completed FE3 log. These
-        * checks detect any change in the input, sample construction, FE,
-        * clustering, or event-time coefficients.
-        if e(N) != 67728314 {
-            display as error "RA replication failed: N=" e(N) ///
-                ", expected 67728314."
+        * Exact RA coefficient checks are intentionally not used here because
+        * the RA dropped event year -5. Preserve structural sanity checks.
+        if e(N) <= 0 | e(N_clust) <= 1 {
+            display as error "FE3 returned an empty sample or insufficient clusters."
             exit 459
         }
-        if e(N_clust) != 12096 {
-            display as error "RA replication failed: clusters=" e(N_clust) ///
-                ", expected 12096."
-            exit 459
-        }
-        local audit_terms "1bn.relative_year_bin_aux#1.treat 2.relative_year_bin_aux#1.treat 3.relative_year_bin_aux#1.treat 5.relative_year_bin_aux#1.treat 6.relative_year_bin_aux#1.treat 7.relative_year_bin_aux#1.treat 8.relative_year_bin_aux#1.treat 9.relative_year_bin_aux#1.treat"
-        local audit_beta "-42.01641 -8.181174 -20.40768 56.44675 164.7035 64.44406 69.70303 82.60937"
-        local audit_se   "13.70218 10.15766 10.99382 10.52979 28.49049 12.78092 13.62757 19.89362"
-        local audit_n : word count `audit_terms'
-        forvalues a = 1/`audit_n' {
-            local term : word `a' of `audit_terms'
-            local expected_beta : word `a' of `audit_beta'
-            local expected_se : word `a' of `audit_se'
-            if abs(_b[`term'] - `expected_beta') > .001 {
-                display as error "RA replication failed for event coefficient `term'."
-                exit 459
-            }
-            if abs(_se[`term'] - `expected_se') > .001 {
-                display as error "RA replication failed for event SE `term'."
-                exit 459
-            }
-        }
-        display as result "PASS: FE3 sample, coefficients, and SEs match the RA benchmark."
+        display as result "PASS: FE3 estimated over full natural event support."
 
         estadd scalar ymean  = `ymean'
         estadd scalar ymean2 = `ymean2'
-        estadd scalar ra_ymean = `ra_ymean'
+        estadd scalar control_ymean = `control_ymean'
         estadd scalar acq    = `numacs'
         estadd local smpl "Rural"
         estadd local fespec "FE`fe': `fespec' relativeyear_cohort"
@@ -222,6 +194,6 @@ estsave_csv `estimate_names' using "`outbase'.csv", replace
 confirm file "`outbase'.ster"
 confirm file "`outbase'.csv"
 confirm file "`outbase'_scalars.csv"
-display as result "Saved canonical RA-matched FE3 protest results: `outbase'.ster and .csv"
+display as result "Saved canonical full-support FE3 protest results: `outbase'.ster and .csv"
 
 ********************************************************************************

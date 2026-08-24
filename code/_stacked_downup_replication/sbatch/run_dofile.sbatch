@@ -103,6 +103,13 @@ set -e
 if [[ -f "${STATA_AUTOMATIC_LOG}" ]]; then
   preserve_stata_log
   cat "${STATA_AUTOMATIC_LOG}"
+  # Stata/MP can return shell status 0 even when a nested dofile terminates with
+  # r(#). Treat an uncaught Stata return code in the batch log as job failure so
+  # dependent jobs are not released after an incomplete estimate.
+  if grep -Eq '^r\([1-9][0-9]*\);[[:space:]]*$' "${STATA_AUTOMATIC_LOG}"; then
+    echo "ERROR: uncaught Stata return code detected in the batch log." >&2
+    stata_status=1
+  fi
   # The permanent copy above and scheduler output contain the diagnostics.
   # Remove the per-job working copy so logs/stata_work does not accumulate a
   # third duplicate of every Stata log.
