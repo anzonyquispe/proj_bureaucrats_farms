@@ -1,5 +1,6 @@
 ********************************************************************************
-* Politician-characteristics DiD with down/up interaction.
+* Politician-characteristics DiD: three regular specifications followed by
+* the same three specifications interacted with downup_ac_pop.
 * Final input and FE follow politician_byprov_fe_sweep.
 ********************************************************************************
 
@@ -10,8 +11,8 @@ if "$root" == "" {
     global location     "shell"
     global sample       ""
     global is_rural_var "is_rural"
-    global fe_list      "1"
-    global ster_suffix  ""
+    global fe_list      "1/3"
+    global ster_suffix  "_acpop"
     global shell "/groups/sgulzar/sa_fires/proj_bureaucrats_farms"
     global dbox  "/Users/anzony.quisperojas/Library/CloudStorage/Dropbox/sa_fires/proj_bureaucrats_farms"
     if "$location" == "dbox" {
@@ -22,7 +23,7 @@ if "$root" == "" {
     }
 }
 if "$downup_var" == "" {
-    global downup_var "downup_ac"
+    global downup_var "downup_ac_pop"
 }
 
 global int_data "${root}/data_output/intermediate"
@@ -61,6 +62,8 @@ by cohort_id unique_small_grid_id: assert control_type == control_type[1]
 isid unique_small_grid_id monthyear cohort_id treat
 
 egen unique_small_grid_id_cohort = group(unique_small_grid_id cohort_id)
+capture drop province_cohort
+egen province_cohort = group(province cohort_id)
 egen ac_elec_yr = group(ac_uq_id election_year cohort_id)
 quietly summarize relative_year_bin
 local rmin = r(min)
@@ -69,7 +72,24 @@ gen post_ = relative_year_bin >= 0
 gen moderator = 0
 
 local fe1 "unique_small_grid_id_cohort relative_year_bin_aux#cohort_id"
+local fe2 "unique_small_grid_id_cohort relative_year_bin_aux#cohort_id province_cohort#election_year"
+local fe3 "unique_small_grid_id_cohort relative_year_bin_aux#cohort_id province_cohort#election_year province_cohort#c.monthyear"
 local moderators_list moderator ${downup_var}
+
+* Anchor every regular and interacted model to the sample retained by the
+* richest FE specification with the full downup interaction.
+local common_rhs "ib0.post_##ib0.treat##ib0.${downup_var} wind_direction av_wind_speed"
+quietly reghdfejl countk `common_rhs', absorb(`fe3') vce(cluster ac_elec_yr)
+gen byte common_sample = e(sample)
+quietly count
+local candidate_n = r(N)
+quietly count if common_sample
+local common_n = r(N)
+display as text "Common-sample anchor: interacted FE specification 3"
+display as text "Common estimation sample: `common_n' of `candidate_n' observations"
+keep if common_sample
+drop common_sample
+
 egen tag_ac = tag(ac_uq_id)
 count if tag_ac == 1
 local numacs = r(N)
@@ -85,6 +105,10 @@ foreach mod of local moderators_list {
     local ymean2 = r(mean)
     foreach fe of numlist $fe_list {
         reghdfejl countk `rhs', absorb(`fe`fe'') vce(cluster ac_elec_yr)
+        if e(N) != `common_n' {
+            display as error "FE specification `fe' with moderator `mod' changed the anchored sample."
+            exit 459
+        }
         estadd scalar ymean = `ymean'
         estadd scalar ymean2 = `ymean2'
         estadd scalar acq = `numacs'
@@ -92,8 +116,10 @@ foreach mod of local moderators_list {
         estadd local fespec "`fe`fe''"
         estadd local gridfe "Y"
         estadd local time "Y"
-        estadd local electionfe "N"
-        estadd local provtrendfe "N"
+        local election_label = cond(`fe' >= 2, "Y", "N")
+        local provtrend_label = cond(`fe' == 3, "Y", "N")
+        estadd local electionfe "`election_label'"
+        estadd local provtrendfe "`provtrend_label'"
         estadd local mod "`mod'"
         local estname evreg`i'
         local i = `i' + 1
@@ -101,7 +127,7 @@ foreach mod of local moderators_list {
     }
 }
 
-estwrite evreg* using ///
+estwrite evreg1 evreg2 evreg3 evreg4 evreg5 evreg6 using ///
     "${tables}/_main_5_polischar_fe12_did_downup_inter${sample}_rural${ster_suffix}.ster", replace
 
 ********************************************************************************

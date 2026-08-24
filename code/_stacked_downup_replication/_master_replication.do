@@ -113,16 +113,16 @@ do "${code}/_main_2_stacked_event_study_5pre.do"
 ********************************************************************************
 * 4. Protest and politician-characteristic analyses
 *
-* Politician: by-province stack, unchanged full control composition, and
-* grid x cohort_id plus event-year x cohort_id FE.
-* Protest: the RA's election-term-cleaned stack, pooled controls, and FE3.
+* Each analysis estimates three regular DiDs followed by the same three FE
+* specifications interacted with downup_ac or downup_ac_pop. Politicians use
+* the by-province stack; protests use the election-term-cleaned pooled stack.
 ********************************************************************************
 
 global downup_var "downup_ac"
 global ster_suffix ""
-global fe_list "3"
+global fe_list "1/3"
 do "${code}/_main_4_protest_5km_fe12_did_downup.do"
-global fe_list "1"
+global fe_list "1/3"
 do "${code}/_main_5_polischar_fe12_did_downup_inter.do"
 
 global fe_list "3"
@@ -131,9 +131,9 @@ do "${code}/_app_19_polischar_fe12_did_downup_inter_plot.do"
 
 global downup_var "downup_ac_pop"
 global ster_suffix "_acpop"
-global fe_list "3"
+global fe_list "1/3"
 do "${code}/_main_4_protest_5km_fe12_did_downup.do"
-global fe_list "1"
+global fe_list "1/3"
 do "${code}/_main_5_polischar_fe12_did_downup_inter.do"
 
 global fe_list "3"

@@ -1,5 +1,6 @@
 ********************************************************************************
-* Protest DiD with down/up interaction on election-term-cleaned stacks.
+* Protest DiD: three regular specifications followed by the same three
+* specifications interacted with downup_ac_pop.
 ********************************************************************************
 
 if "$root" == "" {
@@ -9,8 +10,8 @@ if "$root" == "" {
     global location     "shell"
     global sample       ""
     global is_rural_var "is_rural"
-    global fe_list      "3"
-    global ster_suffix  ""
+    global fe_list      "1/3"
+    global ster_suffix  "_acpop"
     global shell "/groups/sgulzar/sa_fires/proj_bureaucrats_farms"
     global dbox  "/Users/anzony.quisperojas/Library/CloudStorage/Dropbox/sa_fires/proj_bureaucrats_farms"
     if "$location" == "dbox" {
@@ -21,7 +22,7 @@ if "$root" == "" {
     }
 }
 if "$downup_var" == "" {
-    global downup_var "downup_ac"
+    global downup_var "downup_ac_pop"
 }
 
 global int_data "${root}/data_output/intermediate"
@@ -60,8 +61,9 @@ if _rc {
     rename relative_year relative_year_bin
 }
 assert relative_year_bin == floor((monthyear - cohort) / 12)
-drop if relative_year_bin == -5
-display as text "Canonical protest sample: full same-term support except relative year -5"
+keep if inrange(relative_year_bin, -4, 4)
+quietly summarize relative_year_bin
+display as text "Canonical protest DiD support: [" r(min) ", " r(max) "]"
 * Always express the fire-count outcome in thousands.
 capture drop countk
 gen countk = count * 1000
@@ -73,6 +75,7 @@ drop _merge
 keep if ${is_rural_var} == 1
 
 egen unique_small_grid_id_cohort = group(unique_small_grid_id cohort_id)
+capture drop province_cohort
 egen province_cohort = group(province cohort_id)
 egen monthyearco = group(monthyear cohort_id)
 egen relativeyear_cohort = group(relative_year_bin cohort_id)
@@ -95,18 +98,32 @@ drop unit_tag has_pre has_post
 gen post_ = relative_year_bin >= 0
 gen moderator = 0
 
-local fe3 "unique_small_grid_id_cohort province_cohort#c.monthyear"
+local fe1 "unique_small_grid_id_cohort"
+local fe2 "unique_small_grid_id_cohort province_cohort#election_year"
+local fe3 "unique_small_grid_id_cohort province_cohort#election_year province_cohort#c.monthyear"
 local moderators_list moderator ${downup_var}
+
+* Anchor every regular and interacted model to the sample retained by the
+* richest FE specification with the full downup interaction.
+local common_rhs "ib0.post_##ib0.treat##ib0.${downup_var} wind_direction av_wind_speed"
+quietly reghdfejl countk `common_rhs', ///
+    absorb(`fe3' relativeyear_cohort) vce(cluster ac_elec_yr)
+gen byte common_sample = e(sample)
+quietly count
+local candidate_n = r(N)
+quietly count if common_sample
+local common_n = r(N)
+display as text "Common-sample anchor: interacted FE specification 3"
+display as text "Common estimation sample: `common_n' of `candidate_n' observations"
+keep if common_sample
+drop common_sample
+
 egen tag_ac = tag(ac_uq_id)
 count if tag_ac == 1
 local numacs = r(N)
 
 est clear
 local i = 1
-if trim("$fe_list") != "3" {
-    display as error "Canonical protest DiD requires fe_list=3."
-    exit 198
-}
 foreach mod of local moderators_list {
     replace moderator = `mod'
     local rhs "ib0.post_##ib0.treat##ib0.`mod' wind_direction av_wind_speed"
@@ -117,14 +134,19 @@ foreach mod of local moderators_list {
     foreach fe of numlist $fe_list {
         reghdfejl countk `rhs', ///
             absorb(`fe`fe'' relativeyear_cohort) vce(cluster ac_elec_yr)
+        if e(N) != `common_n' {
+            display as error "FE specification `fe' with moderator `mod' changed the anchored sample."
+            exit 459
+        }
         estadd scalar ymean = `ymean'
         estadd scalar ymean2 = `ymean2'
         estadd scalar acq = `numacs'
         estadd local smpl "Rural"
+        estadd local fespec "`fe`fe'' relativeyear_cohort"
         estadd local gridfe "Y"
         estadd local time "Y"
-        local election_label "N"
-        local provtrend_label "Y"
+        local election_label = cond(`fe' >= 2, "Y", "N")
+        local provtrend_label = cond(`fe' == 3, "Y", "N")
         estadd local electionfe "`election_label'"
         estadd local provtrendfe "`provtrend_label'"
         estadd local mod "`mod'"
@@ -134,7 +156,7 @@ foreach mod of local moderators_list {
     }
 }
 
-estwrite evreg* using ///
+estwrite evreg1 evreg2 evreg3 evreg4 evreg5 evreg6 using ///
     "${tables}/_main_4_protest_5km_fe12_did_downup${sample}_rural${ster_suffix}.ster", replace
 
 ********************************************************************************

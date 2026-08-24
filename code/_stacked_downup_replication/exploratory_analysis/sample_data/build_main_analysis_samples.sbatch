@@ -35,14 +35,26 @@ fi
 
 "${PYTHON}" -c 'import duckdb; print("duckdb", duckdb.__version__)'
 
-"${PYTHON}" "${SCRIPT}" \
-  --intermediate "${INTERMEDIATE}" \
-  --rate "${SAMPLE_RATE:-0.005}" \
-  --minimum-units "${MINIMUM_UNITS:-30}" \
-  --seed "${SAMPLE_SEED:-20260824}" \
-  --threads "${NSLOTS:-8}" \
-  --memory-limit "${MEMORY_LIMIT:-48GB}" \
-  --temp-directory "${TMPDIR:-${INTERMEDIATE}/main_analysis_sample_duckdb_tmp}" \
+declare -a sample_args=(
+  --intermediate "${INTERMEDIATE}"
+  --rate "${SAMPLE_RATE:-0.005}"
+  --minimum-units "${MINIMUM_UNITS:-30}"
+  --seed "${SAMPLE_SEED:-20260824}"
+  --threads "${NSLOTS:-8}"
+  --memory-limit "${MEMORY_LIMIT:-48GB}"
+  --temp-directory "${TMPDIR:-${INTERMEDIATE}/main_analysis_sample_duckdb_tmp}"
   --overwrite
+)
+
+# Normally the cluster samples stacked_downup_13kmpl.csv in INTERMEDIATE.  A
+# retained pipeline database can be used directly when the CSV is unavailable.
+if [[ -n "${SOURCE_13KM_DB:-}" ]]; then
+  sample_args+=(
+    --source-override
+    "stacked_downup_13kmpl.csv=${SOURCE_13KM_DB}"
+  )
+fi
+
+"${PYTHON}" "${SCRIPT}" "${sample_args[@]}"
 
 echo "[$(date '+%F %T')] completed main-analysis samples"

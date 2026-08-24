@@ -1,0 +1,146 @@
+
+  ___  ____  ____  ____  ____ ®
+ /__    /   ____/   /   ____/      18.0
+___/   /   /___/   /   /___/       MP—Parallel Edition
+
+ Statistics and Data Science       Copyright 1985-2023 StataCorp LLC
+                                   StataCorp
+                                   4905 Lakeway Drive
+                                   College Station, Texas 77845 USA
+                                   800-STATA-PC        https://www.stata.com
+                                   979-696-4600        stata@stata.com
+
+Stata license: Single-user 4-core  perpetual
+Serial number: 501806366048
+  Licensed to: Any Name
+               Any Name
+
+Notes:
+      1. Stata is running in batch mode.
+      2. Unicode is supported; see help unicode_advice.
+      3. More than 2 billion observations are allowed; see help obs_advice.
+      4. Maximum number of variables is set to 5,000 but can be increased;
+          see help set_maxvar.
+
+. do C:\Users\eunic\OneDrive\Documents\GitHub\proj_bureaucrats_farms\code\_stac
+> ked_downup_replication\run_local_sample_protest_event.do 
+
+. *****************************************************************************
+> ***
+. * Focused local smoke test for the canonical protest event study.
+. *****************************************************************************
+> ***
+. 
+. version 17
+
+. clear all
+
+. set more off
+
+. 
+. global location "dbox"
+
+. global sample "_sample"
+
+. global is_rural_var "is_rural"
+
+. global fe_list "3"
+
+. global ster_suffix ""
+
+. global control_samples ""
+
+. global root "C:/Users/eunic/Dropbox/sa_fires/proj_bureaucrats_farms"
+
+. global repo "C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms"
+
+. global code "${repo}/code/_stacked_downup_replication"
+
+. global tables "${repo}/tables"
+
+. global figures "${repo}/figures"
+
+. 
+. capture program drop reghdfejl
+
+. program define reghdfejl, eclass
+  1.     reghdfe `0'
+  2. end
+
+. 
+. capture log close _all
+
+. log using "${code}/logs/local_sample_protest_event.log", replace text
+(file
+    C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/code/_sta
+    > cked_downup_replication/logs/local_sample_protest_event.log not found)
+-------------------------------------------------------------------------------
+      name:  <unnamed>
+       log:  C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/co
+> de/_stacked_downup_replication/logs/local_sample_protest_event.log
+  log type:  text
+ opened on:  24 Aug 2026, 07:03:57
+
+. do "${code}/_app_17_5km_fe12_evst_all.do"
+
+. *****************************************************************************
+> ***
+. * Canonical protest event study: FE3 implementation based on the RA's
+. * _app_21_5km_allfe_same_term.do, estimating all naturally observed event yea
+> rs.
+. *
+. * Authoritative input: stacked_data_protest5km_election_sameterm.csv.
+. * Controls are pooled exactly as supplied by that stack. There is no
+. * control_type filter and no moderator/heterogeneity regression in this file.
+. *****************************************************************************
+> ***
+. 
+. if "$root" == "" {
+.     clear all
+.     set more off
+. 
+.     * Standalone defaults for the five sbatch-array parameters:
+.     * location, sample, is_rural_var, fe_list, and ster_suffix.
+.     global location     "shell"
+.     global sample       ""
+.     global is_rural_var "is_rural"
+.     global fe_list      "3"
+.     global ster_suffix  ""
+. 
+.     global shell "/groups/sgulzar/sa_fires/proj_bureaucrats_farms"
+.     global dbox  "/Users/anzony.quisperojas/Library/CloudStorage/Dropbox/sa_f
+> ires/proj_bureaucrats_farms"
+.     global code_shell "/users/aquisper/proj_bureaucrats_farms/code/_stacked_d
+> ownup_replication"
+.     global code_dbox  "/Users/anzony.quisperojas/Documents/GitHub/proj_bureau
+> crats_farms/code/_stacked_downup_replication"
+. 
+.     if "$location" == "dbox" {
+.         global root "$dbox"
+.         global code "$code_dbox"
+.     }
+.     else {
+.         global root "$shell"
+.         global code "$code_shell"
+.     }
+.     quietly do "${code}/estsave_csv.ado"
+. }
+
+. 
+. global int_data "${root}/data_output/intermediate"
+
+. global tables   "${code}/../../tables"
+
+. 
+. local protest_input ///
+>     "${int_data}/stacked_data_protest5km_election_sameterm${sample}.csv"
+
+. confirm file "`protest_input'"
+
+. display as text "RA same-term protest input: `protest_input'"
+RA same-term protest input: C:/Users/eunic/Dropbox/sa_fires/proj_bureaucrats_fa
+> rms/data_output/intermediate/stacked_data_protest5km_election_sameterm_sample
+> .csv
+
+. import delimited using "`protest_input'", clear varnames(1)
+(encoding automatically selected: ISO-8859-1)

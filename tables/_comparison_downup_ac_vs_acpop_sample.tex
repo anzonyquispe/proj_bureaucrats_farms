@@ -1,0 +1,102 @@
+\documentclass[10pt]{article}
+\usepackage[margin=0.6in]{geometry}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{multirow}
+\usepackage{xcolor}
+\usepackage{colortbl}
+\usepackage{tabularx}
+\usepackage{graphicx}
+\usepackage{adjustbox}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{titlesec}
+\providecommand{\sym}[1]{\ifmmode^{#1}\else\(^{#1}\)\fi}
+\titleformat{\section}{\normalfont\Large\bfseries\color{blue!60!black}}{\thesection}{1em}{}
+\newcommand{\OLD}[1]{\begin{center}\colorbox{red!8}{\parbox{0.97\linewidth}{\textbf{\textcolor{red!60!black}{ORIGINAL (downup\_ac):}}\par\vspace{0.4em}\centering\begin{adjustbox}{max width=\linewidth}#1\end{adjustbox}}}\end{center}}
+\newcommand{\NEW}[1]{\begin{center}\colorbox{green!8}{\parbox{0.97\linewidth}{\textbf{\textcolor{green!50!black}{NEW (downup\_ac\_pop):}}\par\vspace{0.4em}\centering\begin{adjustbox}{max width=\linewidth}#1\end{adjustbox}}}\end{center}}
+\begin{document}
+\begin{center}{\Huge\bfseries Rural Replication Comparison}\\[0.4em]
+{\large Treatment: \texttt{downup\_ac} vs \texttt{downup\_ac\_pop}}\\[0.4em]
+{\normalsize Generated \today}\end{center}
+\vspace{1em}
+\noindent Each section shows the original specification (red, treatment = \texttt{downup\_ac}) above the new specification (green, treatment = \texttt{downup\_ac\_pop}). Both tex files are produced by the \texttt{\_generate\_all\_tables} dofiles in \texttt{code/\_replication\_rural} and \texttt{code/\_replication\_rural\_acpop}.\par
+\newpage
+\section{Main DiD (\_main\_1\_did)}
+\noindent\textbf{Original file:} \texttt{main_did_downup_area_ac_sample_rural.tex}\par
+\OLD{\IfFileExists{main_did_downup_area_ac_sample_rural.tex}{\input{main_did_downup_area_ac_sample_rural.tex}}{\textit{(missing: main_did_downup_area_ac_sample_rural.tex)}}}
+\vspace{0.4em}
+\noindent\textbf{New file:} \texttt{main_did_downup_ac_sample_rural_acpop.tex}\par
+\NEW{\IfFileExists{main_did_downup_ac_sample_rural_acpop.tex}{\input{main_did_downup_ac_sample_rural_acpop.tex}}{\textit{(missing: main_did_downup_ac_sample_rural_acpop.tex)}}}
+\clearpage
+\section{Bureaucrat $\times$ Politician DiD (\_main\_3\_bureau\_polisc\_did)}
+\noindent\textbf{Original file:} \texttt{_main_3_bureau_polisc_did_sample_rural.tex}\par
+\OLD{\IfFileExists{_main_3_bureau_polisc_did_sample_rural.tex}{\input{_main_3_bureau_polisc_did_sample_rural.tex}}{\textit{(missing: _main_3_bureau_polisc_did_sample_rural.tex)}}}
+\vspace{0.4em}
+\noindent\textbf{New file:} \texttt{_main_3_bureau_polisc_did_sample_rural_acpop.tex}\par
+\NEW{\IfFileExists{_main_3_bureau_polisc_did_sample_rural_acpop.tex}{\input{_main_3_bureau_polisc_did_sample_rural_acpop.tex}}{\textit{(missing: _main_3_bureau_polisc_did_sample_rural_acpop.tex)}}}
+\clearpage
+\section{Protest DiD with Down$> (\_main\_4\_protest\_5km\_fe12\_did\_downup)}
+\noindent\textbf{Original file:} \texttt{_main_4_protest_5km_fe12_did_downup_sample_rural.tex}\par
+\OLD{\IfFileExists{_main_4_protest_5km_fe12_did_downup_sample_rural.tex}{\input{_main_4_protest_5km_fe12_did_downup_sample_rural.tex}}{\textit{(missing: _main_4_protest_5km_fe12_did_downup_sample_rural.tex)}}}
+\vspace{0.4em}
+\noindent\textbf{New file:} \texttt{_main_4_protest_5km_fe12_did_downup_sample_rural_acpop_new.tex}\par
+\NEW{\IfFileExists{_main_4_protest_5km_fe12_did_downup_sample_rural_acpop_new.tex}{\input{_main_4_protest_5km_fe12_did_downup_sample_rural_acpop_new.tex}}{\textit{(missing: _main_4_protest_5km_fe12_did_downup_sample_rural_acpop_new.tex)}}}
+\clearpage
+\section{Politician Char DiD with Down$> (\_main\_5\_polischar\_fe12\_did\_downup\_inter)}
+\noindent\textbf{Original file:} \texttt{_main_5_polischar_fe12_did_downup_inter_sample_rural.tex}\par
+\OLD{\IfFileExists{_main_5_polischar_fe12_did_downup_inter_sample_rural.tex}{\input{_main_5_polischar_fe12_did_downup_inter_sample_rural.tex}}{\textit{(missing: _main_5_polischar_fe12_did_downup_inter_sample_rural.tex)}}}
+\vspace{0.4em}
+\noindent\textbf{New file:} \texttt{_main_5_polischar_fe12_did_downup_inter_sample_rural_acpop.tex}\par
+\NEW{\IfFileExists{_main_5_polischar_fe12_did_downup_inter_sample_rural_acpop.tex}{\input{_main_5_polischar_fe12_did_downup_inter_sample_rural_acpop.tex}}{\textit{(missing: _main_5_polischar_fe12_did_downup_inter_sample_rural_acpop.tex)}}}
+\clearpage
+\section{Alternative DVs (\_app\_7\_main\_did\_downup\_area\_ac\_dv)}
+\noindent\textbf{Original file:} \texttt{_app_7_main_did_downup_area_ac_dv_sample_rural.tex}\par
+\OLD{\IfFileExists{_app_7_main_did_downup_area_ac_dv_sample_rural.tex}{\input{_app_7_main_did_downup_area_ac_dv_sample_rural.tex}}{\textit{(missing: _app_7_main_did_downup_area_ac_dv_sample_rural.tex)}}}
+\vspace{0.4em}
+\noindent\textbf{New file:} \texttt{_app_7_main_did_downup_area_ac_dv_sample_rural_acpop.tex}\par
+\NEW{\IfFileExists{_app_7_main_did_downup_area_ac_dv_sample_rural_acpop.tex}{\input{_app_7_main_did_downup_area_ac_dv_sample_rural_acpop.tex}}{\textit{(missing: _app_7_main_did_downup_area_ac_dv_sample_rural_acpop.tex)}}}
+\clearpage
+\section{DiD by Year (\_app\_8\_main\_did\_by\_year)}
+\noindent\textbf{Original file:} \texttt{_app_8_main_did_by_year_sample_rural.tex}\par
+\OLD{\IfFileExists{_app_8_main_did_by_year_sample_rural.tex}{\input{_app_8_main_did_by_year_sample_rural.tex}}{\textit{(missing: _app_8_main_did_by_year_sample_rural.tex)}}}
+\vspace{0.4em}
+\noindent\textbf{New file:} \texttt{_app_8_main_did_by_year_sample_rural_acpop.tex}\par
+\NEW{\IfFileExists{_app_8_main_did_by_year_sample_rural_acpop.tex}{\input{_app_8_main_did_by_year_sample_rural_acpop.tex}}{\textit{(missing: _app_8_main_did_by_year_sample_rural_acpop.tex)}}}
+\clearpage
+\section{DiD by State (\_app\_9\_main\_did\_by\_state)}
+\noindent\textbf{Original file:} \texttt{_app_9_main_did_by_state_sample_rural.tex}\par
+\OLD{\IfFileExists{_app_9_main_did_by_state_sample_rural.tex}{\input{_app_9_main_did_by_state_sample_rural.tex}}{\textit{(missing: _app_9_main_did_by_state_sample_rural.tex)}}}
+\vspace{0.4em}
+\noindent\textbf{New file:} \texttt{_app_9_main_did_by_state_sample_rural_acpop.tex}\par
+\NEW{\IfFileExists{_app_9_main_did_by_state_sample_rural_acpop.tex}{\input{_app_9_main_did_by_state_sample_rural_acpop.tex}}{\textit{(missing: _app_9_main_did_by_state_sample_rural_acpop.tex)}}}
+\clearpage
+\section{Rice Moderators (\_app\_10\_did\_rice\_moderators)}
+\noindent\textbf{Original file:} \texttt{_app_10_did_rice_moderators_sample_rural.tex}\par
+\OLD{\IfFileExists{_app_10_did_rice_moderators_sample_rural.tex}{\input{_app_10_did_rice_moderators_sample_rural.tex}}{\textit{(missing: _app_10_did_rice_moderators_sample_rural.tex)}}}
+\vspace{0.4em}
+\noindent\textbf{New file:} \texttt{_app_10_did_rice_moderators_sample_rural_acpop.tex}\par
+\NEW{\IfFileExists{_app_10_did_rice_moderators_sample_rural_acpop.tex}{\input{_app_10_did_rice_moderators_sample_rural_acpop.tex}}{\textit{(missing: _app_10_did_rice_moderators_sample_rural_acpop.tex)}}}
+\clearpage
+\section{Politician Rice Mods (\_app\_14\_polischar\_fe12\_did\_ricemods)}
+\noindent\textbf{Original file:} \texttt{_app_14_polischar_fe12_did_ricemods_sample_rural.tex}\par
+\OLD{\IfFileExists{_app_14_polischar_fe12_did_ricemods_sample_rural.tex}{\input{_app_14_polischar_fe12_did_ricemods_sample_rural.tex}}{\textit{(missing: _app_14_polischar_fe12_did_ricemods_sample_rural.tex)}}}
+\vspace{0.4em}
+\noindent\textbf{New file:} \texttt{_app_14_polischar_fe12_did_ricemods_sample_rural_acpop.tex}\par
+\NEW{\IfFileExists{_app_14_polischar_fe12_did_ricemods_sample_rural_acpop.tex}{\input{_app_14_polischar_fe12_did_ricemods_sample_rural_acpop.tex}}{\textit{(missing: _app_14_polischar_fe12_did_ricemods_sample_rural_acpop.tex)}}}
+\clearpage
+\section{Politician FE DiD (\_app\_15\_polischar\_fe12\_did)}
+\noindent\textbf{Original file:} \texttt{_app_15_polischar_fe12_did_sample_rural.tex}\par
+\OLD{\IfFileExists{_app_15_polischar_fe12_did_sample_rural.tex}{\input{_app_15_polischar_fe12_did_sample_rural.tex}}{\textit{(missing: _app_15_polischar_fe12_did_sample_rural.tex)}}}
+\vspace{0.4em}
+\noindent\textbf{New file:} \texttt{_app_15_polischar_fe12_did_sample_rural_acpop.tex}\par
+\NEW{\IfFileExists{_app_15_polischar_fe12_did_sample_rural_acpop.tex}{\input{_app_15_polischar_fe12_did_sample_rural_acpop.tex}}{\textit{(missing: _app_15_polischar_fe12_did_sample_rural_acpop.tex)}}}
+\clearpage
+\section{Downwind Heterogeneity (\_app\_20\_did\_downwind\_hm)}
+\noindent\textbf{Original file:} \texttt{_app_20_did_downwind_hm_sample_rural.tex}\par
+\OLD{\IfFileExists{_app_20_did_downwind_hm_sample_rural.tex}{\input{_app_20_did_downwind_hm_sample_rural.tex}}{\textit{(missing: _app_20_did_downwind_hm_sample_rural.tex)}}}
+\vspace{0.4em}
+\noindent\textbf{New file:} \texttt{_app_20_did_downwind_hm_sample_rural_acpop.tex}\par
+\NEW{\IfFileExists{_app_20_did_downwind_hm_sample_rural_acpop.tex}{\input{_app_20_did_downwind_hm_sample_rural_acpop.tex}}{\textit{(missing: _app_20_did_downwind_hm_sample_rural_acpop.tex)}}}
+\clearpage
+\end{document}

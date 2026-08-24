@@ -36,14 +36,14 @@ est clear
 interaction_graph using ///
     "${tables}/_app_18_protest_5km_fe12_did_downup_plot${sample}_rural_acpop.ster", ///
     estimates(1) ///
-    output("${figures}/_app_18_protest_5km_fe12_did_downup_plot_rural_acpop") ///
+    output("${figures}/_app_18_protest_5km_fe12_did_downup_plot_rural_acpop${sample}") ///
     type(protest) modvar(downup_ac_pop)
 
 est clear
 interaction_graph using ///
     "${tables}/_app_19_polischar_fe12_did_downup_inter_plot${sample}_rural_acpop.ster", ///
     estimates(1) ///
-    output("${figures}/_app_19_polischar_fe12_did_downup_inter_plot_rural_acpop") ///
+    output("${figures}/_app_19_polischar_fe12_did_downup_inter_plot_rural_acpop${sample}") ///
     type(politician) modvar(downup_ac_pop)
 
 * Area-weighted counterparts retained under their historical names.
@@ -51,16 +51,16 @@ est clear
 interaction_graph using ///
     "${tables}/_app_18_protest_5km_fe12_did_downup_plot${sample}_rural.ster", ///
     estimates(1) ///
-    output("${figures}/Interaction_downwind/_app_downup_rel_protest") ///
+    output("${figures}/Interaction_downwind/_app_downup_rel_protest${sample}") ///
     type(protest) modvar(downup_ac)
-copy "${figures}/Interaction_downwind/_app_downup_rel_protest_1.png" ///
-     "${figures}/Interaction_downwind/_app_downup_rel_protest.png", replace
+copy "${figures}/Interaction_downwind/_app_downup_rel_protest${sample}_1.png" ///
+     "${figures}/Interaction_downwind/_app_downup_rel_protest${sample}.png", replace
 
 est clear
 interaction_graph using ///
     "${tables}/_app_19_polischar_fe12_did_downup_inter_plot${sample}_rural.ster", ///
     estimates(1) ///
-    output("${figures}/Interaction_downwind/_app_downup_rel_polischar") ///
+    output("${figures}/Interaction_downwind/_app_downup_rel_polischar${sample}") ///
     type(politician) modvar(downup_ac)
-copy "${figures}/Interaction_downwind/_app_downup_rel_polischar_1.png" ///
-     "${figures}/Interaction_downwind/_app_downup_rel_polischar.png", replace
+copy "${figures}/Interaction_downwind/_app_downup_rel_polischar${sample}_1.png" ///
+     "${figures}/Interaction_downwind/_app_downup_rel_polischar${sample}.png", replace

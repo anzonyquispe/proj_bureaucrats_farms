@@ -65,6 +65,6 @@ twoway ///
     ytitle("Effect on number of fires (x 1,000 units)") ///
     yline(0, lpattern(dash)) xlabel(1 "Closest" 5 "Farthest") legend(off)
 
-graph export "${figures}/neighbor_output.pdf", replace as(pdf)
+graph export "${figures}/neighbor_output${sample}.pdf", replace as(pdf)
 
 ********************************************************************************

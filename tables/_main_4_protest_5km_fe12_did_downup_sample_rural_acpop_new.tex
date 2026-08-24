@@ -1,0 +1,46 @@
+{
+\def\sym#1{\ifmmode^{#1}\else\(^{#1}\)\fi}
+\begin{tabular}{l*{6}{c}}
+\hline
+            &\multicolumn{1}{c}{(1)}         &\multicolumn{1}{c}{(2)}         &\multicolumn{1}{c}{(3)}         &\multicolumn{1}{c}{(4)}         &\multicolumn{1}{c}{(5)}         &\multicolumn{1}{c}{(6)}         \\
+            & \multicolumn{6}{c}{Number of Fires (per 1,000 units)} \\ \hline
+\multicolumn{7}{l}{\textbf{Panel A: Estimated Coefficients}} \\ \hline
+(1) Post $\times$ Protest&     108.372\sym{***}&     108.372\sym{***}&      67.946\sym{***}&     119.948\sym{***}&     119.948\sym{***}&      81.769\sym{***}\\
+            &    (15.312)         &    (15.313)         &    (15.527)         &    (19.894)         &    (19.895)         &    (20.411)         \\
+(2) Down $>$ Up&                     &                     &                     &       8.227         &       8.227         &       6.521         \\
+            &                     &                     &                     &     (6.010)         &     (6.010)         &     (6.201)         \\
+(3) Post $\times$ Down $>$ Up&                     &                     &                     &      10.424\sym{*}  &      10.424\sym{*}  &      10.700\sym{*}  \\
+            &                     &                     &                     &     (6.031)         &     (6.031)         &     (6.120)         \\
+(4) Protest $\times$ Down $>$ Up&                     &                     &                     &     -31.724         &     -31.724         &     -26.239         \\
+            &                     &                     &                     &    (38.075)         &    (38.075)         &    (38.305)         \\
+(5) Post $\times$ Protest $\times$ Down $>$ Up&                     &                     &                     &     -22.904         &     -22.904         &     -27.174         \\
+            &                     &                     &                     &    (24.712)         &    (24.713)         &    (25.495)         \\
+
+
+
+
+\hline
+\multicolumn{7}{l}{\textbf{Panel B: Linear Combinations}} \\ \hline
+\multicolumn{2}{l}{(2) Down$>$Up Effect, pre-period in no protest areas}&            &            &       8.227&       8.227&       6.521\\
+            &            &            &     (6.010)&     (6.010)&     (6.201)\\
+\multicolumn{2}{l}{(2+3) Down$>$Up Effect, post-period in no protest areas}&            &            &18.651\sym{**}&18.651\sym{**}&17.221\sym{**}\\
+            &            &            &     (7.542)&     (7.542)&     (7.576)\\
+\multicolumn{2}{l}{(1+2+3+4+5) Down$>$Up Effect, post-period in protest areas}&            &            &83.970\sym{***}&83.970\sym{***}&      45.577\\
+            &            &            &    (31.862)&    (31.863)&    (32.538)\\
+\multicolumn{2}{l}{(1+2+3+4+5)-(2+3) Differential Down$>$Up effect, post period}&            &            &65.319\sym{**}&65.319\sym{**}&      28.356\\
+            &            &            &    (32.281)&    (32.282)&    (33.021)\\
+
+
+
+\hline
+Observations&     389,693&     389,693&     389,693&     389,693&     389,693&     389,693\\
+N Assembly Constituencies&         732&         732&         732&         732&         732&         732\\
+Grid $\times$ Cohort FE&           Y&           Y&           Y&           Y&           Y&           Y\\
+Relative Time $\times$ Cohort FE&           Y&           Y&           Y&           Y&           Y&           Y\\
+Legislature $\times$ Cohort FE&           N&           Y&           Y&           N&           Y&           Y\\
+Province Trend $\times$ Cohort FE&           N&           N&           Y&           N&           N&           Y\\
+Mean DV     &     424.903&     424.903&     424.903&     424.903&     424.903&     424.903\\
+Mean DV2 (Down$>$Up=1)&            &            &            &     419.009&     419.009&     419.009\\
+\hline
+\end{tabular}
+}

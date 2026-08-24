@@ -75,11 +75,9 @@ program define _set_main_fe_tags
         local gridfe "N"
         if `i' == 2 {
             local monthyearfe "Y"
-            local gridfe "Y"
         }
         if `i' == 3 {
             local monthyearfe "Y"
-            local acfe "Y"
             local gridfe "Y"
         }
         if `i' == 4 {
@@ -134,11 +132,13 @@ esttab eq1 eq2 eq3 eq4 using ///
     star(* 0.10 ** 0.05 *** 0.01) ///
     keep(downup_ac) order(downup_ac) ///
     varlabels(downup_ac "Down \$>\$ Up") ///
-    stats(N acq monthyearfe acfe acmonthfe gridfe ymean_clean, ///
-          fmt(%12.0fc %12.0fc %s %s %s %s %s) ///
+    stats(N acq monthyearfe gridfe acmonthfe ymean_clean, ///
+          fmt(%12.0fc %12.0fc %s %s %s %s) ///
           labels("Observations" "N Assembly Constituencies" ///
-                 "Month-Year FE" "AC FE" "AC \$\times\$ Month-Year FE" ///
-                 "Grid FE" "Mean DV")) ///
+                 "Month-Year \$\times\$ Cohort FE" ///
+                 "Grid \$\times\$ Cohort FE" ///
+                 "AC \$\times\$ Month-Year \$\times\$ Cohort FE" ///
+                 "Mean DV")) ///
     nomtitles nonumbers collabels(none) nobaselevels ///
     prehead("{" ///
             "\def\sym#1{\ifmmode^{#1}\else\(^{#1}\)\fi}" ///
@@ -222,32 +222,33 @@ esttab evreg1 evreg2 using ///
 est clear
 estread using "${tables}/main_did_downup_pop_ac${sample}_rural_stacked.ster"
 _set_main_fe_tags
-_strip_zeros_stats, models(eq2 eq3 eq4) stats(ymean)
+_strip_zeros_stats, models(eq1 eq2 eq3 eq4) stats(ymean)
 
-* The manuscript's original main table reports the three fixed-effect models
-* (the no-FE diagnostic eq1 remains in the ster file but is not displayed).
-esttab eq2 eq3 eq4 using "${tables}/main_did_downup_ac${sample}_rural_acpop.tex", ///
+* Four-column progression: no FE; month-year x cohort; grid x cohort plus
+* month-year x cohort; grid x cohort plus AC x month-year x cohort.
+esttab eq1 eq2 eq3 eq4 using "${tables}/main_did_downup_ac${sample}_rural_acpop.tex", ///
     replace ///
     cells(b(fmt(3) star) se(par fmt(3))) ///
     star(* 0.10 ** 0.05 *** 0.01) ///
     keep(downup_ac_pop) ///
     order(downup_ac_pop) ///
     varlabels(downup_ac_pop "Down \$>\$ Up") ///
-    stats(N acq monthyearfe acfe acmonthfe gridfe ymean_clean, ///
-          fmt(%12.0fc %12.0fc %s %s %s %s %s) ///
+    stats(N acq monthyearfe gridfe acmonthfe ymean_clean, ///
+          fmt(%12.0fc %12.0fc %s %s %s %s) ///
           labels("Observations" "N Assembly Constituencies" ///
-                 "Month-Year FE" "AC \$\times\$ Cohort FE" ///
+                 "Month-Year \$\times\$ Cohort FE" ///
+                 "Grid \$\times\$ Cohort FE" ///
                  "AC \$\times\$ Month-Year \$\times\$ Cohort FE" ///
-                 "Grid \$\times\$ Cohort FE" "Mean DV")) ///
+                 "Mean DV")) ///
     nomtitles nonumbers ///
     collabels(none) ///
     nobaselevels ///
     prehead("{" ///
             "\def\sym#1{\ifmmode^{#1}\else\(^{#1}\)\fi}" ///
-            "\begin{tabular}{l*{3}{c}}" ///
+            "\begin{tabular}{l*{4}{c}}" ///
             "\hline" ///
-            "            &\multicolumn{1}{c}{(1)}         &\multicolumn{1}{c}{(2)}         &\multicolumn{1}{c}{(3)}             \\" ///
-            "            & \multicolumn{3}{c}{Number of Fires (in 1,000 units)} \\ \hline") ///
+            "            &\multicolumn{1}{c}{(1)}         &\multicolumn{1}{c}{(2)}         &\multicolumn{1}{c}{(3)}         &\multicolumn{1}{c}{(4)}             \\" ///
+            "            & \multicolumn{4}{c}{Number of Fires (in 1,000 units)} \\ \hline") ///
     posthead("") ///
     postfoot("\hline" "\end{tabular}" "}")
 
@@ -292,7 +293,7 @@ display "Generated: _main_3_bureau_polisc_did_rural_acpop.tex"
 {
 est clear
 estread using "${tables}/_main_4_protest_5km_fe12_did_downup${sample}_rural_acpop.ster"
-_strip_zeros_stats, models(evreg1 evreg2 evreg3 evreg4 evreg5 evreg6) stats(ymean ymean2 ymean3)
+_strip_zeros_stats, models(evreg1 evreg2 evreg3 evreg4 evreg5 evreg6) stats(ymean ymean2)
 
 
 forval i = 4(1)6 {
@@ -301,18 +302,17 @@ forval i = 4(1)6 {
     lincom 1.downup_ac_pop
     _add_lincom 1
 
-    lincom 1.post_ + 1.downup_ac_pop + ///
-           1.post_#1.downup_ac_pop
+    lincom 1.downup_ac_pop + 1.post_#1.downup_ac_pop
     _add_lincom 2
 
-    lincom 1.post_ + 1.treat + 1.downup_ac_pop + ///
-           1.post_#1.treat + 1.post_#1.downup_ac_pop + 1.treat#1.downup_ac_pop + ///
+    lincom 1.post_#1.treat + 1.downup_ac_pop + ///
+           1.post_#1.downup_ac_pop + 1.treat#1.downup_ac_pop + ///
            1.post_#1.treat#1.downup_ac_pop
     _add_lincom 3
 
-    lincom (1.post_ + 1.treat + 1.downup_ac_pop + ///
-           1.post_#1.treat + 1.post_#1.downup_ac_pop + 1.treat#1.downup_ac_pop + ///
-           1.post_#1.treat#1.downup_ac_pop) - (1.post_ + 1.downup_ac_pop + ///
+    lincom (1.post_#1.treat + 1.downup_ac_pop + ///
+           1.post_#1.downup_ac_pop + 1.treat#1.downup_ac_pop + ///
+           1.post_#1.treat#1.downup_ac_pop) - (1.downup_ac_pop + ///
            1.post_#1.downup_ac_pop)
     _add_lincom 4
 
@@ -386,7 +386,8 @@ esttab evreg1 evreg2 evreg3 evreg4 evreg5 evreg6 ///
     stats(N acq gridfe time electionfe provtrendfe ymean_clean ymean2_clean, ///
           fmt(%12.0fc %12.0fc %s %s %s %s %s %s) ///
           labels("Observations" "N Assembly Constituencies" ///
-                 "Grid FE" "Relative Time FE" "Legislature FE" "Province Trend FE" ///
+                 "Grid \$\times\$ Cohort FE" "Relative Time \$\times\$ Cohort FE" ///
+                 "Legislature \$\times\$ Cohort FE" "Province Trend \$\times\$ Cohort FE" ///
                  "Mean DV" "Mean DV2 (Down\$>\$Up=1)")) ///
     nomtitles nonumbers collabels(none) nobaselevels noobs ///
     prehead("") posthead("") ///
@@ -403,26 +404,25 @@ display "Generated: _main_4_protest_5km_fe12_did_downup_rural_acpop_new.tex"
 {
 est clear
 estread using "${tables}/_main_5_polischar_fe12_did_downup_inter${sample}_rural_acpop.ster"
-_strip_zeros_stats, models(evreg1 evreg2) stats(ymean ymean2)
+_strip_zeros_stats, models(evreg1 evreg2 evreg3 evreg4 evreg5 evreg6) stats(ymean ymean2)
 
-forval i = 2/2 {
+forval i = 4/6 {
     est restore evreg`i'
 
     lincom 1.downup_ac_pop
     _add_lincom 1
 
-    lincom 1.post_ + 1.downup_ac_pop + ///
-           1.post_#1.downup_ac_pop
+    lincom 1.downup_ac_pop + 1.post_#1.downup_ac_pop
     _add_lincom 2
 
-    lincom 1.post_ + 1.treat + 1.downup_ac_pop + ///
-           1.post_#1.treat + 1.post_#1.downup_ac_pop + 1.treat#1.downup_ac_pop + ///
+    lincom 1.post_#1.treat + 1.downup_ac_pop + ///
+           1.post_#1.downup_ac_pop + 1.treat#1.downup_ac_pop + ///
            1.post_#1.treat#1.downup_ac_pop
     _add_lincom 3
 
-    lincom (1.post_ + 1.treat + 1.downup_ac_pop + ///
-           1.post_#1.treat + 1.post_#1.downup_ac_pop + 1.treat#1.downup_ac_pop + ///
-           1.post_#1.treat#1.downup_ac_pop) - (1.post_ + 1.downup_ac_pop + ///
+    lincom (1.post_#1.treat + 1.downup_ac_pop + ///
+           1.post_#1.downup_ac_pop + 1.treat#1.downup_ac_pop + ///
+           1.post_#1.treat#1.downup_ac_pop) - (1.downup_ac_pop + ///
            1.post_#1.downup_ac_pop)
     _add_lincom 4
 
@@ -434,7 +434,7 @@ forval i = 2/2 {
 *---------------------------------------------------------------
 * Panel A: estimated coefficients
 *---------------------------------------------------------------
-esttab evreg1 evreg2 ///
+esttab evreg1 evreg2 evreg3 evreg4 evreg5 evreg6 ///
     using "${tables}/_main_5_polischar_fe12_did_downup_inter${sample}_rural_acpop.tex", ///
     replace fragment ///
     cells(b(fmt(3) star) se(par fmt(3))) ///
@@ -457,17 +457,19 @@ esttab evreg1 evreg2 ///
     nomtitles nonumbers collabels(none) nobaselevels noobs ///
     prehead("{" ///
             "\def\sym#1{\ifmmode^{#1}\else\(^{#1}\)\fi}" ///
-            "\begin{tabular}{l*{2}{c}}" ///
+            "\begin{tabular}{l*{6}{c}}" ///
             "\hline" ///
-            "            &\multicolumn{1}{c}{(1)}         &\multicolumn{1}{c}{(2)}         \\" ///
-            "            & \multicolumn{2}{c}{Number of Fires (in 1,000 units)} \\ \hline") ///
-    posthead("\multicolumn{3}{l}{\textbf{Panel A: Estimated Coefficients}} \\ \hline") ///
+            "            &\multicolumn{1}{c}{(1)}         &\multicolumn{1}{c}{(2)}         &\multicolumn{1}{c}{(3)}         &\multicolumn{1}{c}{(4)}         &\multicolumn{1}{c}{(5)}         &\multicolumn{1}{c}{(6)}         \\" ///
+            "            & \multicolumn{6}{c}{Number of Fires (in 1,000 units)} \\ \hline") ///
+    posthead("\multicolumn{7}{l}{\textbf{Panel A: Estimated Coefficients}} \\ \hline") ///
     prefoot("") postfoot("")
 
 *---------------------------------------------------------------
 * Panel B: linear combinations
 *---------------------------------------------------------------
-esttab evreg1 evreg2 ///
+* Start at evreg2 because the row label spans two columns. The two regular-DiD
+* model cells are blank and the lincom estimates appear under columns 4--6.
+esttab evreg2 evreg3 evreg4 evreg5 evreg6 ///
     using "${tables}/_main_5_polischar_fe12_did_downup_inter${sample}_rural_acpop.tex", ///
     append fragment ///
     cells(none) ///
@@ -480,20 +482,21 @@ esttab evreg1 evreg2 ///
     nomtitles nonumbers collabels(none) nobaselevels noobs ///
     prehead("") posthead("") ///
     prefoot("\hline" ///
-            "\multicolumn{3}{l}{\textbf{Panel B: Linear Combinations}} \\ \hline") ///
+            "\multicolumn{7}{l}{\textbf{Panel B: Linear Combinations}} \\ \hline") ///
     postfoot("")
 
 *---------------------------------------------------------------
 * Footer: sample info and fixed effects
 *---------------------------------------------------------------
-esttab evreg1 evreg2 ///
+esttab evreg1 evreg2 evreg3 evreg4 evreg5 evreg6 ///
     using "${tables}/_main_5_polischar_fe12_did_downup_inter${sample}_rural_acpop.tex", ///
     append fragment ///
     cells(none) ///
     stats(N acq gridfe time electionfe provtrendfe ymean_clean ymean2_clean, ///
           fmt(%12.0fc %12.0fc %s %s %s %s %s %s) ///
           labels("Observations" "N Assembly Constituencies" ///
-                 "Grid FE" "Relative Time FE" "Legislature FE" "Province Trend FE" ///
+                 "Grid \$\times\$ Cohort FE" "Relative Time \$\times\$ Cohort FE" ///
+                 "Legislature \$\times\$ Cohort FE" "Province Trend \$\times\$ Cohort FE" ///
                  "Mean DV" "Mean DV2 (Down\$>\$Up=1)")) ///
     nomtitles nonumbers collabels(none) nobaselevels noobs ///
     prehead("") posthead("") ///

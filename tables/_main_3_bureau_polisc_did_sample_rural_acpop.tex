@@ -1,0 +1,25 @@
+{\def\sym#1{\ifmmode^{#1}\else\(^{#1}\)\fi}
+\begin{tabular}{l*{5}{c}}
+\hline
+ & (1) & (2) & (3) & (4) & (5) \\
+ & \multicolumn{5}{c}{Number of Fires (in 1,000 units)} \\ \hline
+
+Down$>$ Up Bureaucrat&     -50.239\sym{***}&     -48.994\sym{***}&     -27.215\sym{*}  &     -14.408         &     -14.514         \\
+            &    (11.479)         &    (11.973)         &    (15.858)         &    (22.560)         &    (15.685)         \\
+Down$>$ Up Politician (Pop)&     -12.920         &      -5.620         &      11.601         &     -10.922         &     -11.927         \\
+            &    (19.724)         &    (14.405)         &    (25.293)         &    (50.309)         &    (36.726)         \\
+Down$>$ Up Pol. (Pop) $\times$ Down$>$ Up Bur.&      23.492         &      31.146         &      12.273         &      59.861         &      51.531         \\
+            &    (28.851)         &    (23.459)         &    (34.245)         &    (52.271)         &    (35.920)         \\
+\hline
+Observations&      56,537         &      56,537         &      56,537         &      56,537         &      56,037         \\
+N Assembly Constituencies&         796         &         796         &         796         &         796         &         796         \\
+N Districts &         160         &         160         &         160         &         160         &         160         \\
+Month-Year FE&           N         &           Y         &           N         &           N         &           N         \\
+AC FE       &           N         &           Y         &           N         &           N         &           N         \\
+AC $\times$ Month-Year FE&           N         &           N         &           Y         &           Y         &           N         \\
+District $\times$ Month-Year FE&           N         &           N         &           N         &           N         &           Y         \\
+Grid FE     &           N         &           N         &           N         &           Y         &           Y         \\
+Mean DV     &     100.749         &     100.749         &     100.749         &     100.749         &     100.749         \\
+\hline
+\end{tabular}
+}

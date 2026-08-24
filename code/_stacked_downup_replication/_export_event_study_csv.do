@@ -51,13 +51,15 @@ local exported = 0
 local failed = 0
 
 foreach ster_file of local ster_files {
+    * A sample smoke test must never rewrite production CSV/scalar outputs.
+    local matches_sample = "$sample" == "" | strpos("`ster_file'", "$sample") > 0
     local is_event = ///
         strpos("`ster_file'", "main_event_study") == 1 | ///
         strpos("`ster_file'", "stacked_event_study") == 1 | ///
         strpos("`ster_file'", "_app_16_polischar_fe12_evst_all") == 1 | ///
         strpos("`ster_file'", "_app_17_5km_fe12_evst_all") == 1
 
-    if `is_event' {
+    if `is_event' & `matches_sample' {
         est clear
         capture noisily estread using "${tables}/`ster_file'"
         if _rc {

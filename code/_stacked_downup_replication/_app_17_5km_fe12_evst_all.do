@@ -77,10 +77,11 @@ drop _merge
 keep if ${is_rural_var} == 1
 display as text "Observations after rice and rural filters: " _N
 
-* Do not truncate event time in the estimation sample. Plotting code may select
-* a narrower display window after every naturally observed coefficient exists.
+* Estimate the agreed support -4,...,+4. Plotting later displays only through
+* +1 while retaining the +2,...,+4 coefficients in the stored result.
+keep if inrange(relative_year_bin, -4, 4)
 quietly summarize relative_year_bin
-display as text "Natural relative-year support retained: [" ///
+display as text "Canonical protest event-study support retained: [" ///
     r(min) ", " r(max) "]"
 
 foreach v of varlist election_year yeargov {
@@ -163,8 +164,7 @@ foreach fe of numlist $fe_list {
             absorb(`fespec' relativeyear_cohort) ///
             vce(cluster ac_elec_yr)
 
-        * Exact RA coefficient checks are intentionally not used here because
-        * the RA dropped event year -5. Preserve structural sanity checks.
+        * Preserve structural sanity checks for the agreed -4,...,+4 support.
         if e(N) <= 0 | e(N_clust) <= 1 {
             display as error "FE3 returned an empty sample or insufficient clusters."
             exit 459

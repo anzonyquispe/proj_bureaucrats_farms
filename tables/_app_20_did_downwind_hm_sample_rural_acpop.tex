@@ -1,0 +1,23 @@
+{
+\def\sym#1{\ifmmode^{#1}\else\(^{#1}\)\fi}
+\begin{tabular}{l*{4}{c}}
+\hline
+            &\multicolumn{1}{c}{(1)}         &\multicolumn{1}{c}{(2)}         &\multicolumn{1}{c}{(3)}         &\multicolumn{1}{c}{(4)}         \\
+            & \multicolumn{4}{c}{Number of Fires (in 1,000 units)} \\ \hline
+
+Down $>$ Up (Pop)&     -14.651\sym{***}&     -32.523\sym{***}&     -31.382\sym{***}&     -73.502\sym{***}\\
+            &     (4.776)         &     (5.415)         &     (5.765)         &     (9.464)         \\
+Down $>$ Up (Pop) $\times$ Rice Production&     122.002\sym{***}&      -2.104         &     -30.868\sym{***}&     154.162\sym{***}\\
+            &    (23.265)         &    (11.089)         &    (11.760)         &    (31.355)         \\
+\hline
+Observations&   7,133,417         &   7,132,586         &   6,883,834         &   6,529,162         \\
+N Assembly Constituencies&         808         &         808         &         808         &         808         \\
+Month-Year FE&           N         &           Y         &           N         &           N         \\
+AC FE       &           N         &           Y         &           N         &           N         \\
+AC $\times$ Month-Year FE&           N         &           N         &           Y         &           Y         \\
+Grid FE     &           N         &           N         &           N         &           Y         \\
+Mean DV     &     539.585         &     539.585         &     539.585         &     539.585         \\
+ymean2\\_clean&    1107.366         &    1107.366         &    1107.366         &    1107.366         \\
+\hline
+\end{tabular}
+}

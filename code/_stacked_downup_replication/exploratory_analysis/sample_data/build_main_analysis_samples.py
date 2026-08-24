@@ -23,6 +23,7 @@ class DatasetSpec:
     filename: str
     cohort_col: str
     unit_cols: tuple[str, ...]
+    duckdb_table: str = "final_stack"
 
 
 DATASETS = (
@@ -38,6 +39,7 @@ DATASETS = (
         "cohort_id",
         ("unique_small_grid_id",),
     ),
+    DatasetSpec("stacked_downup_13kmpl.csv", "cohort", ("unique_small_grid_id",)),
     DatasetSpec("stacked_downup_neigh.csv", "cohort", ("unique_pair",)),
 )
 
@@ -54,7 +56,11 @@ def output_path(input_path: Path) -> Path:
     return input_path.with_name(f"{input_path.stem}_sample.csv")
 
 
-def source_sql(path: Path) -> str:
+def source_sql(path: Path, duckdb_alias: str | None = None, table: str = "final_stack") -> str:
+    if path.suffix.lower() in {".db", ".duckdb"}:
+        if not duckdb_alias:
+            raise ValueError(f"A DuckDB alias is required for database source {path}")
+        return f"{qid(duckdb_alias)}.{qid(table)}"
     # all_varchar avoids expensive or unstable whole-file type inference. The
     # CSV text is preserved; only treat is cast temporarily for validation.
     return (
@@ -63,11 +69,16 @@ def source_sql(path: Path) -> str:
     )
 
 
-def describe_columns(con: duckdb.DuckDBPyConnection, path: Path) -> set[str]:
+def describe_columns(
+    con: duckdb.DuckDBPyConnection,
+    path: Path,
+    duckdb_alias: str | None = None,
+    table: str = "final_stack",
+) -> set[str]:
     return {
         row[0]
         for row in con.execute(
-            f"DESCRIBE SELECT * FROM {source_sql(path)}"
+            f"DESCRIBE SELECT * FROM {source_sql(path, duckdb_alias, table)}"
         ).fetchall()
     }
 
@@ -80,17 +91,31 @@ def build_one(
     minimum_units: int,
     seed: int,
     overwrite: bool,
+    source_override: Path | None,
 ) -> None:
-    input_csv = intermediate / spec.filename
-    sample_csv = output_path(input_csv)
-    if not input_csv.is_file():
-        raise FileNotFoundError(f"Required main-analysis input is absent: {input_csv}")
+    input_path = source_override or (intermediate / spec.filename)
+    sample_csv = output_path(intermediate / spec.filename)
+    if not input_path.is_file():
+        raise FileNotFoundError(f"Required main-analysis input is absent: {input_path}")
     if sample_csv.exists() and not overwrite:
         raise FileExistsError(
             f"Sample already exists: {sample_csv}. Pass --overwrite to replace it."
         )
 
-    columns = describe_columns(con, input_csv)
+    duckdb_alias = None
+    if input_path.suffix.lower() in {".db", ".duckdb"}:
+        duckdb_alias = "sample_source"
+        con.execute(f"DETACH {qid(duckdb_alias)}") if duckdb_alias in {
+            row[0]
+            for row in con.execute(
+                "SELECT database_name FROM duckdb_databases()"
+            ).fetchall()
+        } else None
+        con.execute(
+            f"ATTACH {sql_string(input_path)} AS {qid(duckdb_alias)} (READ_ONLY)"
+        )
+
+    columns = describe_columns(con, input_path, duckdb_alias, spec.duckdb_table)
     required = {spec.cohort_col, "treat", *spec.unit_cols}
     missing = sorted(required - columns)
     if missing:
@@ -100,9 +125,9 @@ def build_one(
     units = [qid(col) for col in spec.unit_cols]
     keys = [cohort, *units]
     key_csv = ", ".join(keys)
-    source = source_sql(input_csv)
+    source = source_sql(input_path, duckdb_alias, spec.duckdb_table)
 
-    logging.info("START %s", spec.filename)
+    logging.info("START %s | source=%s", spec.filename, input_path)
     con.execute("DROP TABLE IF EXISTS unit_arms")
     con.execute("DROP TABLE IF EXISTS sampled_units")
 
@@ -248,6 +273,75 @@ def build_one(
             f"{selected:,}",
             f"{denominator:,}",
         )
+    if duckdb_alias:
+        con.execute(f"DETACH {qid(duckdb_alias)}")
+
+
+def build_master_attachment(
+    con: duckdb.DuckDBPyConnection,
+    intermediate: Path,
+    overwrite: bool,
+) -> None:
+    """Retain master rows needed by either sampled main stacked dataset."""
+    area_sample = intermediate / "combined_dt_sample.csv"
+    pop_sample = intermediate / "combined_dt_pop_sample.csv"
+    master_parquet = intermediate / "0_master_dataset.parquet"
+    output_csv = intermediate / "0_master_dataset_sample.csv"
+    for required in (area_sample, pop_sample, master_parquet):
+        if not required.is_file():
+            raise FileNotFoundError(
+                f"Required master-attachment input is absent: {required}"
+            )
+    if output_csv.exists() and not overwrite:
+        raise FileExistsError(
+            f"Sample already exists: {output_csv}. Pass --overwrite to replace it."
+        )
+
+    logging.info("START 0_master_dataset.parquet attachment sample")
+    con.execute("DROP TABLE IF EXISTS sampled_master_keys")
+    con.execute(
+        f"""
+        CREATE TEMP TABLE sampled_master_keys AS
+        SELECT DISTINCT
+            CAST(unique_small_grid_id AS VARCHAR) AS unique_small_grid_id,
+            TRY_CAST(year AS INTEGER) AS year,
+            TRY_CAST(month AS INTEGER) AS month
+        FROM (
+            SELECT unique_small_grid_id, year, month
+            FROM {source_sql(area_sample)}
+            UNION ALL
+            SELECT unique_small_grid_id, year, month
+            FROM {source_sql(pop_sample)}
+        )
+        """
+    )
+    key_count = con.execute(
+        "SELECT COUNT(*) FROM sampled_master_keys"
+    ).fetchone()[0]
+    copy_result = con.execute(
+        f"""
+        COPY (
+            SELECT m.*
+            FROM read_parquet({sql_string(master_parquet)}) AS m
+            SEMI JOIN sampled_master_keys AS k
+              ON CAST(m.unique_small_grid_id AS VARCHAR) = k.unique_small_grid_id
+             AND TRY_CAST(m.year AS INTEGER) = k.year
+             AND TRY_CAST(m.month AS INTEGER) = k.month
+        ) TO {sql_string(output_csv)}
+        (FORMAT CSV, HEADER TRUE)
+        """
+    ).fetchone()
+    output_rows = int(copy_result[0]) if copy_result else -1
+    if output_rows != key_count:
+        raise AssertionError(
+            "0_master_dataset_sample.csv does not match the union of sampled "
+            f"stacked keys: rows={output_rows:,}, keys={key_count:,}"
+        )
+    logging.info(
+        "DONE 0_master_dataset.parquet -> %s | rows=%s",
+        output_csv.name,
+        f"{output_rows:,}",
+    )
 
 
 def parse_args() -> argparse.Namespace:
@@ -271,16 +365,44 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--temp-directory", type=Path, default=None)
     parser.add_argument("--overwrite", action="store_true")
     parser.add_argument(
+        "--master-attachment-only",
+        action="store_true",
+        help=(
+            "Only create 0_master_dataset_sample.csv from the grid-month keys "
+            "already present in the two sampled main stacks."
+        ),
+    )
+    parser.add_argument(
         "--dataset",
         action="append",
         choices=[spec.filename for spec in DATASETS],
         help="Generate only selected inputs; repeat the option as needed.",
+    )
+    parser.add_argument(
+        "--source-override",
+        action="append",
+        default=[],
+        metavar="FILENAME=PATH",
+        help=(
+            "Override a dataset source. PATH may be a CSV or a DuckDB database; "
+            "database sources are read from final_stack. Repeat as needed."
+        ),
     )
     args = parser.parse_args()
     if not 0 < args.rate <= 1:
         parser.error("--rate must be greater than zero and at most one")
     if args.minimum_units < 1:
         parser.error("--minimum-units must be at least one")
+    overrides: dict[str, Path] = {}
+    valid_names = {spec.filename for spec in DATASETS}
+    for raw in args.source_override:
+        if "=" not in raw:
+            parser.error("--source-override must have the form FILENAME=PATH")
+        filename, raw_path = raw.split("=", 1)
+        if filename not in valid_names:
+            parser.error(f"Unknown override dataset: {filename}")
+        overrides[filename] = Path(raw_path).expanduser().resolve()
+    args.source_overrides = overrides
     return args
 
 
@@ -299,7 +421,7 @@ def main() -> int:
     )
     temp_directory.mkdir(parents=True, exist_ok=True)
 
-    selected = [
+    selected = [] if args.master_attachment_only else [
         spec for spec in DATASETS
         if not args.dataset or spec.filename in set(args.dataset)
     ]
@@ -318,10 +440,13 @@ def main() -> int:
                 args.minimum_units,
                 args.seed,
                 args.overwrite,
+                args.source_overrides.get(spec.filename),
             )
+        if args.master_attachment_only or not args.dataset:
+            build_master_attachment(con, args.intermediate, args.overwrite)
     finally:
         con.close()
-    logging.info("All %s main-analysis samples completed.", len(selected))
+    logging.info("All %s stacked samples and master attachment completed.", len(selected))
     return 0
 
 

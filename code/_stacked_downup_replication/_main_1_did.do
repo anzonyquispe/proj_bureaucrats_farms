@@ -139,20 +139,36 @@ else {
     gen ac_id = ac_uq_id
 }
 
+local controls wind_direction av_wind_speed
+local cluster ac_uq_id#cohort#monthyear unique_small_grid_id#cohort
+local fespec1 "No fixed effects"
+local fespec2 "Month-year x cohort"
+local fespec3 "Grid x cohort and month-year x cohort"
+local fespec4 "Grid x cohort and AC x month-year x cohort"
+local estimates ""
+
+* Define the common sample with the richest displayed specification. This
+* captures missing regressors and observations removed by the HDFE singleton
+* logic before any of the less saturated models are estimated.
+quietly reghdfejl countk ${downup_var} `controls', ///
+    absorb(grid_id#cohort ac_id#monthyear#cohort) cluster(`cluster')
+gen byte common_sample = e(sample)
+quietly count
+local candidate_n = r(N)
+quietly count if common_sample
+local common_n = r(N)
+display as text "Common-sample anchor: richest FE specification (4)"
+display as text "Common estimation sample: `common_n' of `candidate_n' observations"
+keep if common_sample
+drop common_sample
+
+* Summary statistics and AC counts describe that common estimation sample.
 quietly summarize countk if treat == 1 & relative_year_bin <= -1
 local ymean = r(mean)
 quietly summarize countk if treat == 1 & relative_year_bin <= -1 & moderator == 1
 local ymean2 = r(mean)
 quietly levelsof ac_id, local(ac_levels)
 local numacs : word count `ac_levels'
-
-local controls wind_direction av_wind_speed
-local cluster ac_uq_id#cohort#monthyear unique_small_grid_id#cohort
-local fespec1 "No fixed effects"
-local fespec2 "Grid and month-year"
-local fespec3 "Grid, AC and month-year"
-local fespec4 "Grid and AC x month-year"
-local estimates ""
 
 foreach fe of numlist $fe_list {
     if `fe' == 1 {
@@ -164,17 +180,17 @@ foreach fe of numlist $fe_list {
     }
     else if `fe' == 2 {
         reghdfejl countk ${downup_var} `controls', ///
-            absorb(grid_id#cohort  monthyear#cohort) cluster(`cluster')
+            absorb(monthyear#cohort) cluster(`cluster')
         local monthyearfe "Y"
         local acfe "N"
         local acmonthfe "N"
-        local gridfe "Y"
+        local gridfe "N"
     }
     else if `fe' == 3 {
         reghdfejl countk ${downup_var} `controls', ///
-            absorb(grid_id#cohort ac_id#cohort monthyear#cohort) cluster(`cluster')
+            absorb(grid_id#cohort monthyear#cohort) cluster(`cluster')
         local monthyearfe "Y"
-        local acfe "Y"
+        local acfe "N"
         local acmonthfe "N"
         local gridfe "Y"
     }
@@ -189,6 +205,11 @@ foreach fe of numlist $fe_list {
     else {
         display as error "Unsupported FE specification `fe'; use 1/4."
         exit 198
+    }
+
+    if e(N) != `common_n' {
+        display as error "FE specification `fe' changed the anchored estimation sample."
+        exit 459
     }
 
     estadd scalar ymean = `ymean'

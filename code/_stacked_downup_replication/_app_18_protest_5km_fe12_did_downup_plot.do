@@ -62,7 +62,7 @@ if _rc {
     rename relative_year relative_year_bin
 }
 assert relative_year_bin == floor((monthyear - cohort) / 12)
-drop if relative_year_bin == -5
+keep if inrange(relative_year_bin, -4, 4)
 display as text "Canonical protest sample: full same-term support except relative year -5"
 
 merge m:1 unique_small_grid_id using ///

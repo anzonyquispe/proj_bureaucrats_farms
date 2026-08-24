@@ -858,13 +858,23 @@ extract_event_pattern <- function(csv_name, model, pattern) {
 }
 
 run_pattern_case <- function(csv, model, pattern, base, pre, post,
-                             omitted = -1, required = TRUE) {
+                             omitted = -1, required = TRUE,
+                             display_coefficients = NULL) {
   event <- extract_event_pattern(csv, model, pattern)
   if (is.null(event)) {
     message <- paste0("Missing estimate file: ", file.path(table_dir, csv))
     if (required) stop(message, call. = FALSE)
     warning("Skipping ", message, call. = FALSE)
     return(invisible(FALSE))
+  }
+  if (!is.null(display_coefficients)) {
+    if (display_coefficients < 1L || display_coefficients > nrow(event)) {
+      stop(base, ": invalid number of displayed coefficients", call. = FALSE)
+    }
+    # Coefficients are exported in ascending event-time order. Keep the first
+    # requested coefficients and the matching leading covariance submatrix.
+    keep_columns <- seq_len(2L + display_coefficients)
+    event <- event[seq_len(display_coefficients), ..keep_columns]
   }
   plot_event(
     event, base, pre, post, omitted,
@@ -1024,7 +1034,7 @@ for (analysis_suffix in c("", "_acpop")) {
 }
 
 # Canonical protest event study: the RA's same-term input, pooled controls, and
-# selected FE3. The reference support is -4,...,+4 with -1 omitted.
+# selected FE3. Estimate -4,...,+4 with -1 omitted, but display only -4,...,+1.
 if ("protest" %in% args$families) {
   protest_csv <- paste0(
     "_app_17_5km_fe12_evst_all", s, "_rural.csv"
@@ -1033,7 +1043,7 @@ if ("protest" %in% args$families) {
     protest_csv, "evreg1",
     "relative_year_bin_aux#1\\.treat$",
     paste0("_app_17_5km_fe12_evst_all", s, "_rural_fe03_1"),
-    4, 5
+    4, 2, display_coefficients = 5L
   )
 }
 
