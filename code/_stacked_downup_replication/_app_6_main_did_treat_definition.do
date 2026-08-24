@@ -75,12 +75,8 @@ display "Observations after rural filter: " _N
 * drop _merge
 
 
-* Merge rice moderators if not already present
-capture confirm variable rice_area_aclvl_ahigh
-if _rc {
-    display "Merging rice moderators..."
-    merge m:1 unique_small_grid_id ac_uq_id using "${root}/data_output/intermediate/rice_moderators.dta", nogen keep(3)
-}
+confirm variable rice_prod_aclvl_ahigh
+assert inlist(rice_prod_aclvl_ahigh, 0, 1)
 
 
 

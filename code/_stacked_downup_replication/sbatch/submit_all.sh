@@ -76,7 +76,7 @@ declare -a table_ids event_ids interaction_ids neighbour_ids
 # Main and appendix table estimates. Each call is a distinct scheduler job.
 table_ids+=("$(submit_stata main_did_area _main_1_did.do 1/4 _stacked downup_ac combined_dt main_did_downup_area_ac)")
 table_ids+=("$(submit_stata main_did_pop _main_1_did.do 1/4 _stacked downup_ac_pop combined_dt_pop main_did_downup_pop_ac)")
-table_ids+=("$(submit_stata bureau_polisc _main_3_bureau_polisc_did.do 1/5 none)")
+table_ids+=("$(submit_stata bureau_polisc _main_3_bureau_polisc_did.do 1/4 none)")
 table_ids+=("$(submit_stata treatment_defs _app_6_main_did_treat_definition.do 1/7 none)")
 table_ids+=("$(submit_stata alternative_dv _app_7_main_did_downup_area_ac_dv.do 1/3 none)")
 table_ids+=("$(submit_stata did_by_year _app_8_main_did_by_year.do 1/10 none)")
@@ -96,7 +96,6 @@ table_ids+=("$(submit_stata descriptives_politician app_polischar_descriptive.do
 # Protest uses the RA's pooled control sample and selected FE3 only.
 event_ids+=("$(submit_stata event_5pre_area _main_2_stacked_event_study_5pre_area.do "${EVENT_FE_LIST}" none)")
 event_ids+=("$(submit_stata event_5pre_pop _main_2_stacked_event_study_5pre.do "${EVENT_FE_LIST}" none)")
-event_ids+=("$(submit_stata politician_event_area _app_16_polischar_fe12_evst_all.do "${EVENT_FE_LIST}" none downup_ac)")
 event_ids+=("$(submit_stata politician_event_pop _app_16_polischar_fe12_evst_all.do "${EVENT_FE_LIST}" _acpop downup_ac_pop)")
 event_ids+=("$(submit_stata protest_event _app_17_5km_fe12_evst_all.do 3 none none stacked_data_protest5km)")
 

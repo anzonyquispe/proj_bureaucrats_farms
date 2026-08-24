@@ -64,17 +64,6 @@ if _rc {
 capture drop countk
 gen countk = count * 1000
 
-* Only the two rice indicators absent from the standard stacked schema are
-* attached. This is a left merge, so it cannot implicitly shrink the stack.
-capture confirm variable rice_area_aclvl_ahigh
-if _rc {
-    merge m:1 unique_small_grid_id ac_uq_id using ///
-        "${int_data}/rice_moderators.dta", ///
-        keep(master match) ///
-        keepusing(rice_area_aclvl_ahigh rice_harvarea_aclvl_ahigh)
-    drop _merge
-}
-
 merge m:1 unique_small_grid_id using ///
     "${int_data}/ghs_grid_classification_2000.dta", ///
     keep(master match) keepusing(is_rural)
@@ -82,6 +71,10 @@ drop _merge
 keep if ${is_rural_var} == 1
 keep if year < 2022 | (year == 2022 & month <= 8)
 keep if inrange(relative_year_bin, -5, 4)
+
+* The politician stack carries the only substantive rice moderator used here.
+confirm variable rice_prod_aclvl_ahigh
+assert inlist(rice_prod_aclvl_ahigh, 0, 1)
 
 confirm variable control_type
 confirm variable cohort_id
@@ -112,9 +105,8 @@ local fe1 "unique_small_grid_id_cohort relative_year_bin_aux#cohort_id"
 local filter1 "1"
 gen moderator = 0
 
-* Required moderator wiring; the area/population choice is made by the caller.
-* local moderators_list moderator downup_ac rice_area_aclvl_ahigh rice_harvarea_aclvl_ahigh rice_prod_aclvl_ahigh
-local moderators_list moderator ${downup_var} rice_area_aclvl_ahigh rice_harvarea_aclvl_ahigh rice_prod_aclvl_ahigh
+* Baseline plus the only substantive event-study moderator.
+local moderators_list moderator rice_prod_aclvl_ahigh
 
 do "${code}/exploratory_analysis/rice_high_subsample/_apply_rice_high_subsample.do"
 

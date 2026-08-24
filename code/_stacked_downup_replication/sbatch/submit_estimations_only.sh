@@ -78,7 +78,7 @@ submit_estimation main_did_pop _main_1_did.do 1 1/4 _stacked \
   downup_ac_pop combined_dt_pop main_did_downup_pop_ac
 
 # Remaining main and appendix table estimations.
-submit_estimation bureau_polisc _main_3_bureau_polisc_did.do 1 1/5 none
+submit_estimation bureau_polisc _main_3_bureau_polisc_did.do 1 1/4 none
 submit_estimation treatment_defs _app_6_main_did_treat_definition.do 1 1/7 none
 submit_estimation alternative_dv _app_7_main_did_downup_area_ac_dv.do 1 1/3 none
 submit_estimation did_by_year _app_8_main_did_by_year.do 1 1/10 none
@@ -110,8 +110,6 @@ submit_estimation politician_inter_area _app_19_polischar_fe12_did_downup_inter_
   downup_ac
 submit_estimation politician_inter_pop _app_19_polischar_fe12_did_downup_inter_plot.do 1 1 _acpop \
   downup_ac_pop
-submit_estimation politician_event_area _app_16_polischar_fe12_evst_all.do 1 1 none \
-  downup_ac none none both
 submit_estimation politician_event_pop _app_16_polischar_fe12_evst_all.do 1 1 _acpop \
   downup_ac_pop none none both
 

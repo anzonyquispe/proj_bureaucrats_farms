@@ -68,14 +68,8 @@ if _rc {
 }
 assert relative_year_bin == floor((monthyear - cohort) / 12)
 
-* Use rice_moderators.dta as both the sample definition and authoritative source
-* for the above-median rice-production indicator, exactly as in the reference.
-capture drop rice_prod_aclvl_ahigh
-merge m:1 unique_small_grid_id ac_uq_id using ///
-    "${int_data}/rice_moderators.dta", ///
-    keepusing(rice_prod_aclvl_ahigh)
-keep if _merge == 3
-drop _merge
+* The canonical protest stack carries the only rice moderator used here.
+confirm variable rice_prod_aclvl_ahigh
 assert inlist(rice_prod_aclvl_ahigh, 0, 1)
 
 merge m:1 unique_small_grid_id using ///
@@ -85,7 +79,7 @@ keep if _merge == 3
 drop _merge
 keep if ${is_rural_var} == 1
 keep if year < 2022 | (year == 2022 & month <= 8)
-display as text "Observations after rice and rural filters: " _N
+display as text "Observations after rural and date filters: " _N
 
 * Match the reference sample: remove only its earliest -5 bin and estimate all
 * remaining naturally observed event years. Plotting can impose a narrower
@@ -136,13 +130,10 @@ local filter1 "1"
 * Selected specification from the RA's five-specification comparison.
 local fe3 "unique_small_grid_id_cohort province_cohort#c.monthyear"
 
-* Preserve the project-standard moderator wrapper and ymean2 wiring. The
-* regression itself uses the RA's literal unmoderated RHS: reghdfejl does not
-* treat a triple interaction with a constant-zero moderator as numerically
-* identical (the 2026-08-23 audit detected different coefficients and fit).
+* The only substantive event-study moderator is rice production. The zero stub
+* retains the required unmoderated baseline specification.
 gen byte moderator = 0
-* local moderators_list moderator downup_ac rice_area_aclvl_ahigh rice_harvarea_aclvl_ahigh rice_prod_aclvl_ahigh
-local moderators_list moderator
+local moderators_list moderator rice_prod_aclvl_ahigh
 
 do "${code}/exploratory_analysis/rice_high_subsample/_apply_rice_high_subsample.do"
 
@@ -165,7 +156,7 @@ foreach fe of numlist $fe_list {
     foreach mod of local moderators_list {
         replace moderator = `mod'
         local rhs ///
-            "ib`base'.relative_year_bin_aux##ib0.treat wind_direction av_wind_speed"
+            "ib`base'.relative_year_bin_aux##ib0.treat##ib0.`mod' wind_direction av_wind_speed"
 
         quietly summarize `dep_var' if treat == 1 & relative_year_bin <= -1 & `filter1'
         local ymean = r(mean)

@@ -15,7 +15,7 @@ if "$root" == "" {
     global location "shell"
     global sample ""
     global is_rural_var "is_rural"
-    global fe_list "1/5"
+    global fe_list "1/4"
     global ster_suffix ""
 
     global shell "/groups/sgulzar/sa_fires/proj_bureaucrats_farms"
@@ -66,12 +66,8 @@ keep if ${is_rural_var} == 1
 display "Observations after rural filter: " _N
 
 
-* Merge rice moderators if not already present
-capture confirm variable rice_area_aclvl_ahigh
-if _rc {
-    display "Merging rice moderators..."
-    merge m:1 unique_small_grid_id ac_uq_id using "${root}/data_output/intermediate/rice_moderators.dta", nogen
-}
+confirm variable rice_prod_aclvl_ahigh
+assert inlist(rice_prod_aclvl_ahigh, 0, 1)
 
 * Create count in thousands
 capture drop countk
@@ -126,32 +122,10 @@ else {
     gen ac_id = ac_uq_id
 }
 
-********************************************************************************
-* Calculate statistics for table footer
-********************************************************************************
-
-* Count unique assemblies
-egen tag_assembly = tag(assembly_id)
-count if tag_assembly == 1
-local n_assemblies = r(N)
-
-* Count unique districts
-egen tag_district = tag(district_id)
-count if tag_district == 1
-local n_districts = r(N)
-
-* Project-standard treated-group pre-treatment means.
+* Project-standard event-time and moderator variables.
 gen relative_year_bin = floor(relative_monthyear / 12)
 gen moderator = downup_dummy
 do "${code}/exploratory_analysis/rice_high_subsample/_apply_rice_high_subsample.do"
-
-quietly summarize countk if treat == 1 & relative_year_bin <= -1
-local meandv = r(mean)
-quietly summarize countk if treat == 1 & relative_year_bin <= -1 & moderator == 1
-local meandv2 = r(mean)
-
-local numacs = `n_assemblies'
-local numdist = `n_districts'
 
 ********************************************************************************
 * DiD Regressions
@@ -167,32 +141,50 @@ global controls av_wind_speed wind_direction
 global cluster unique_small_grid_id#cohort district_id#cohort#monthyear
 
 
-** Equalizing sample
-qui reghdfejl countk downup_dummy downup_ac_pop downup_interaction $controls , ///
-    absorb(grid_id#cohort assembly_id#monthyear#cohort) ///
-    cluster($cluster )
-	gen esample3 = e(sample)
+********************************************************************************
+* Anchor every column and every footer statistic to the final specification.
+*
+* Run the final grid x cohort + district x month-year x cohort regression first.
+* This is the specification that previously dropped an additional 240 rows.
+********************************************************************************
 
-* Specification 1: No FE (baseline) 
-reg countk downup_dummy downup_ac_pop downup_interaction $controls if esample3 == 1 , ///
-    vce(cluster grid_id)
+quietly reghdfejl countk downup_dummy downup_ac_pop downup_interaction $controls, ///
+    absorb(grid_id#cohort district_id#monthyear#cohort) ///
+    cluster($cluster)
+gen byte common_sample = e(sample)
+quietly count if common_sample
+local common_n = r(N)
+assert `common_n' > 0
+keep if common_sample
+drop common_sample
+
+* All table statistics are now calculated on the anchored estimation sample.
+egen tag_assembly = tag(assembly_id)
+quietly count if tag_assembly == 1
+local numacs = r(N)
+
+egen tag_district = tag(district_id)
+quietly count if tag_district == 1
+local numdist = r(N)
+
+quietly summarize countk if treat == 1 & relative_year_bin <= -1
+local meandv = r(mean)
+quietly summarize countk if treat == 1 & relative_year_bin <= -1 & moderator == 1
+local meandv2 = r(mean)
+
+display as text "Anchored common sample: `common_n' observations"
+display as text "Anchored AC count: `numacs'"
+display as text "Anchored district count: `numdist'"
+display as text "Anchored treated pre-period mean: `meandv'"
+
+* Specification 1: AC x cohort + MonthYear x cohort FE
+reghdfejl countk downup_dummy downup_ac_pop downup_interaction $controls, ///
+    absorb(assembly_id#cohort monthyear#cohort) ///
+    cluster($cluster)
+assert e(N) == `common_n'
 estadd scalar ymean = `meandv'
 estadd scalar ymean2 = `meandv2'
-estadd scalar nacs = `numacs'
-estadd scalar ndists = `numdist'
-estadd local monthyearfe "N"
-estadd local acfe "N"
-estadd local acmonthfe "N"
-estadd local distmonthfe "N"
-estadd local gridfe "N"
-estimates store eq1
-
-* Specification 2:  MonthYear FE + AC FE
-reghdfejl countk downup_dummy downup_ac_pop downup_interaction $controls if esample3 == 1 , ///
-    absorb(monthyear#cohort assembly_id#cohort) ///
-    cluster($cluster )
-estadd scalar ymean = `meandv'
-estadd scalar ymean2 = `meandv2'
+estadd scalar acq = `numacs'
 estadd scalar nacs = `numacs'
 estadd scalar ndists = `numdist'
 estadd local monthyearfe "Y"
@@ -200,29 +192,33 @@ estadd local acfe "Y"
 estadd local acmonthfe "N"
 estadd local distmonthfe "N"
 estadd local gridfe "N"
-estimates store eq2
+estimates store eq1
 
-* Specification 3:	AC x MonthYear FE
-reghdfejl countk downup_dummy downup_ac_pop downup_interaction $controls if esample3 == 1 , ///
-    absorb(assembly_id#monthyear#cohort) ///
-    cluster($cluster )
+* Specification 2: Grid x cohort + MonthYear x cohort FE
+reghdfejl countk downup_dummy downup_ac_pop downup_interaction $controls, ///
+    absorb(grid_id#cohort monthyear#cohort) ///
+    cluster($cluster)
+assert e(N) == `common_n'
 estadd scalar ymean = `meandv'
 estadd scalar ymean2 = `meandv2'
+estadd scalar acq = `numacs'
 estadd scalar nacs = `numacs'
 estadd scalar ndists = `numdist'
-estadd local monthyearfe "N"
+estadd local monthyearfe "Y"
 estadd local acfe "N"
-estadd local acmonthfe "Y"
+estadd local acmonthfe "N"
 estadd local distmonthfe "N"
-estadd local gridfe "N"
-estimates store eq3
+estadd local gridfe "Y"
+estimates store eq2
 
-* Specification 4: 	AC x MonthYear FE + Grid FE
-reghdfejl countk downup_dummy downup_ac_pop downup_interaction $controls if esample3 == 1  , ///
+* Specification 3: Grid x cohort + AC x MonthYear x cohort FE
+reghdfejl countk downup_dummy downup_ac_pop downup_interaction $controls, ///
     absorb(grid_id#cohort assembly_id#monthyear#cohort) ///
-    cluster($cluster )
+    cluster($cluster)
+assert e(N) == `common_n'
 estadd scalar ymean = `meandv'
 estadd scalar ymean2 = `meandv2'
+estadd scalar acq = `numacs'
 estadd scalar nacs = `numacs'
 estadd scalar ndists = `numdist'
 estadd local monthyearfe "N"
@@ -230,14 +226,16 @@ estadd local acfe "N"
 estadd local acmonthfe "Y"
 estadd local distmonthfe "N"
 estadd local gridfe "Y"
-estimates store eq4
+estimates store eq3
 
-* Specification 5: 	Grid FE + District x MonthYear FE (alternative)
-reghdfejl countk downup_dummy downup_ac_pop downup_interaction $controls if esample3 == 1 , ///
+* Specification 4: Grid x cohort + District x MonthYear x cohort FE
+reghdfejl countk downup_dummy downup_ac_pop downup_interaction $controls, ///
     absorb(grid_id#cohort district_id#monthyear#cohort) ///
-    cluster($cluster )
+    cluster($cluster)
+assert e(N) == `common_n'
 estadd scalar ymean = `meandv'
 estadd scalar ymean2 = `meandv2'
+estadd scalar acq = `numacs'
 estadd scalar nacs = `numacs'
 estadd scalar ndists = `numdist'
 estadd local monthyearfe "N"
@@ -245,14 +243,14 @@ estadd local acfe "N"
 estadd local acmonthfe "N"
 estadd local distmonthfe "Y"
 estadd local gridfe "Y"
-estimates store eq5
+estimates store eq4
 
 
 ********************************************************************************
 * Save estimates
 ********************************************************************************
 
-estwrite eq1 eq2 eq3 eq4 eq5 using ///
+estwrite eq1 eq2 eq3 eq4 using ///
     "${table_farms}/_main_3_bureau_polisc_did${sample}_rural_stacked${ster_suffix}.ster", replace
 
 display "Estimates saved to: ${table_farms}/_main_3_bureau_polisc_did${sample}_rural_stacked${ster_suffix}.ster"

@@ -62,13 +62,13 @@ RSTUDIO_CONFIG <- list(
   root = detected_repo_root,
   output_root = detected_repo_root,
   sample = "",
-  # Choose any of: "main", "politician", "protest", "protest_switch",
-  # "politician_sweep", "politician_qweights".
+  # Production plot families only.
   families = c("main", "politician", "protest"),
   # For the main family, optionally list registry IDs; empty means all cases.
   cases = character(),
-  # Set FALSE for fast original/detrended plots while developing.
-  honest = TRUE
+  # HonestDiD is opt-in after selecting the preferred main specification.
+  # Set TRUE in RStudio, or use -IncludeHonestDiD in the PowerShell runner.
+  honest = FALSE
 )
 # -----------------------------------------------------------------------
 
@@ -137,17 +137,13 @@ parse_args <- function(args) {
     out$output_root, winslash = "/", mustWork = FALSE
   )
   out$families <- trimws(strsplit(out$families, ",", fixed = TRUE)[[1L]])
-  allowed_families <- c(
-    "main", "politician", "protest", "protest_switch", "politician_sweep",
-    "politician_qweights"
-  )
+  allowed_families <- c("main", "politician", "protest")
   invalid_families <- setdiff(out$families, allowed_families)
   if (length(invalid_families)) {
     stop(
       "Unknown plot family: ", paste(invalid_families, collapse = ", "),
       paste0(
-        ". Use main, politician, protest, protest_switch, ",
-        "politician_sweep, and/or politician_qweights."
+        ". Use main, politician, and/or protest."
       ),
       call. = FALSE
     )
@@ -882,7 +878,15 @@ run_pattern_case <- function(csv, model, pattern, base, pre, post,
   )
   invisible(TRUE)
 }
-event_cases <- c(event_cases, alternative_window_cases)
+# Production plotting deliberately excludes all exploratory clustering,
+# omitted-period, and alternative-window registry cases.
+production_main_case_ids <- c(
+  "final_stacked_area_baseline",
+  "final_stacked_population_baseline",
+  "final_stacked_population_rice"
+)
+event_case_ids <- vapply(event_cases, `[[`, character(1L), "id")
+event_cases <- event_cases[event_case_ids %in% production_main_case_ids]
 # -----------------------------------------------------------------------
 
 selected_event_cases <- event_cases
@@ -991,13 +995,15 @@ if ("politician_qweights" %in% args$families) {
   }
 }
 
-# Politician moderators and its retained pooled-control filename.
+# Politician baseline and the only substantive moderator, rice production.
 politician_control_suffixes <- c(
   both = "_controls_both"
 )
-moderator_names <- c("1", "downup_2", "riceA_3", "riceHA_4", "riceP_5")
+# Retain the historical riceP_5 filename used by the report, although rice
+# production is now the second and only substantive moderator model.
+moderator_names <- c("1", "riceP_5")
 
-for (analysis_suffix in c("", "_acpop")) {
+for (analysis_suffix in "_acpop") {
   for (control_name in names(politician_control_suffixes)) {
     politician_stem <- NULL
     if (control_name %in% names(politician_control_suffixes)) {
@@ -1033,8 +1039,9 @@ for (analysis_suffix in c("", "_acpop")) {
   }
 }
 
-# Canonical protest event study: the RA's same-term input, pooled controls, and
-# selected FE3. Estimate -4,...,+4 with -1 omitted, but display only -4,...,+1.
+# Canonical protest event studies: baseline and rice-production moderation on
+# the same-term input and selected FE3. Estimate the natural support but display
+# only -4,...,+1.
 if ("protest" %in% args$families) {
   protest_csv <- paste0(
     "_app_17_5km_fe12_evst_all", s, "_rural.csv"
@@ -1043,6 +1050,12 @@ if ("protest" %in% args$families) {
     protest_csv, "evreg1",
     "relative_year_bin_aux#1\\.treat$",
     paste0("_app_17_5km_fe12_evst_all", s, "_rural_fe03_1"),
+    4, 2, display_coefficients = 5L
+  )
+  run_pattern_case(
+    protest_csv, "evreg2",
+    "relative_year_bin_aux#1\\.treat#1\\.rice_prod_aclvl_ahigh$",
+    paste0("_app_17_5km_fe12_evst_all", s, "_rural_fe03_riceP_2"),
     4, 2, display_coefficients = 5L
   )
 }

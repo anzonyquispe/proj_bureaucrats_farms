@@ -1,7 +1,10 @@
 param(
     [string]$RepositoryRoot = "C:\Users\eunic\OneDrive\Documents\GitHub\proj_bureaucrats_farms",
     [string]$DataRoot = "C:\Users\eunic\Dropbox\sa_fires\proj_bureaucrats_farms",
-    [string]$RscriptCommand = "Rscript"
+    [string]$RscriptCommand = "Rscript",
+    [string]$Families = "main,politician,protest",
+    [string]$Cases = "",
+    [switch]$IncludeHonestDiD
 )
 
 $ErrorActionPreference = "Stop"
@@ -29,12 +32,31 @@ if ($missingControlCsv.Count -gt 0) {
     Write-Warning "Missing control-sample CSV files. Available event-study figures will still be generated. To generate the omitted control-sample figures, copy the corresponding ster files locally and rerun _run_local_ster_postprocessing.do:`n$($missingControlCsv -join "`n")"
 }
 
-& $RscriptCommand $plotScript `
-    --root $DataRoot `
-    --output-root $RepositoryRoot
+$plotArguments = @(
+    $plotScript,
+    "--root", $DataRoot,
+    "--output-root", $RepositoryRoot,
+    "--families", $Families
+)
+
+if ($Cases) {
+    $plotArguments += @("--cases", $Cases)
+}
+
+# Ordinary event-study figures are the default. HonestDiD is deliberately
+# opt-in so that sensitivity plots are produced only after choosing the exact
+# main specification(s) to analyze.
+if (-not $IncludeHonestDiD) {
+    $plotArguments += "--skip-honest"
+}
+
+& $RscriptCommand @plotArguments
 
 if ($LASTEXITCODE -ne 0) {
     throw "plotting_event_studies.R failed with exit code $LASTEXITCODE"
 }
 
 Write-Host "Local event-study figures completed: $(Join-Path $RepositoryRoot 'figures')"
+if (-not $IncludeHonestDiD) {
+    Write-Host "HonestDiD was skipped. Rerun with -IncludeHonestDiD and -Cases '<registry_id>' after selecting a specification."
+}

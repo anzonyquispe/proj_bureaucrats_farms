@@ -259,29 +259,31 @@ display "Generated: main_did_downup_ac_rural_acpop.tex"
 ********************************************************************************
 est clear
 estread using "${tables}/_main_3_bureau_polisc_did${sample}_rural_stacked.ster"
-_strip_zeros_stats, models(eq1 eq2 eq3 eq4 eq5) stats(ymean ymean2)
+_strip_zeros_stats, models(eq1 eq2 eq3 eq4) stats(ymean ymean2)
 
-esttab eq1 eq2 eq3 eq4 eq5 using "${tables}/_main_3_bureau_polisc_did${sample}_rural_acpop.tex", ///
+esttab eq1 eq2 eq3 eq4 using "${tables}/_main_3_bureau_polisc_did${sample}_rural_acpop.tex", ///
     replace ///
     cells(b(fmt(3) star) se(par fmt(3))) ///
     star(* 0.10 ** 0.05 *** 0.01) ///
     keep(downup_ac_pop downup_dummy downup_interaction) ///
     order( downup_dummy downup_ac_pop downup_interaction) ///
-    varlabels(downup_ac_pop "Down\$>\$ Up Politician (Pop)" ///
+    varlabels(downup_ac_pop "Down\$>\$ Up Politician" ///
               downup_dummy "Down\$>\$ Up Bureaucrat" ///
-              downup_interaction "Down\$>\$ Up Pol. (Pop) \$\times\$ Down\$>\$ Up Bur.") ///
-    stats(N nacs ndists monthyearfe acfe  acmonthfe distmonthfe gridfe ymean2_clean, ///
-          fmt(%12.0fc %12.0fc %12.0fc %s %s %s %s %s %s) ///
+              downup_interaction "Down\$>\$ Up Pol. \$\times\$ Down\$>\$ Up Bur.") ///
+    stats(N nacs ndists monthyearfe gridfe acmonthfe distmonthfe ymean_clean, ///
+          fmt(%12.0fc %12.0fc %12.0fc %s %s %s %s %s) ///
           labels("Observations" "N Assembly Constituencies" "N Districts" ///
-                 "Month-Year FE" "AC FE" "AC \$\times\$ Month-Year FE" "District \$\times\$ Month-Year FE" "Grid FE" "Mean DV")) ///
+                 "Month-Year \$\times\$ Cohort FE" "Grid \$\times\$ Cohort FE" ///
+                 "AC \$\times\$ Month-Year \$\times\$ Cohort FE" ///
+                 "District \$\times\$ Month-Year \$\times\$ Cohort FE" "Mean DV")) ///
     nomtitles nonumbers ///
     collabels(none) ///
     nobaselevels ///
     prehead("{\def\sym#1{\ifmmode^{#1}\else\(^{#1}\)\fi}" ///
-            "\begin{tabular}{l*{5}{c}}" ///
+            "\begin{tabular}{l*{4}{c}}" ///
             "\hline" ///
-            " & (1) & (2) & (3) & (4) & (5) \\" ///
-            " & \multicolumn{5}{c}{Number of Fires (in 1,000 units)} \\ \hline") ///
+            " & (1) & (2) & (3) & (4) \\" ///
+            " & \multicolumn{4}{c}{Number of Fires (in 1,000 units)} \\ \hline") ///
     posthead("") ///
     postfoot("\hline" "\end{tabular}" "}")
 

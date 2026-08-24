@@ -142,11 +142,6 @@ do "${code}/_app_19_polischar_fe12_did_downup_inter_plot.do"
 
 global fe_list "1"
 
-global downup_var "downup_ac"
-global ster_suffix ""
-global control_samples "both"
-do "${code}/_app_16_polischar_fe12_evst_all.do"
-
 global downup_var "downup_ac_pop"
 global ster_suffix "_acpop"
 global control_samples "both"

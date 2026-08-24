@@ -47,17 +47,12 @@ drop _merge
 keep if ${is_rural_var} == 1
 keep if year < 2022 | (year == 2022 & month <= 8)
 
-capture confirm variable rice_prod_aclvl_ahigh
-if _rc {
-    merge m:1 unique_small_grid_id ac_uq_id using ///
-        "${int_data}/rice_moderators.dta", keep(master match) nogen ///
-        keepusing(rice_area_aclvl_ahigh rice_harvarea_aclvl_ahigh rice_prod_aclvl_ahigh)
-}
+confirm variable rice_prod_aclvl_ahigh
+assert inlist(rice_prod_aclvl_ahigh, 0, 1)
 
 local dep_var countk
 local fe1 "unique_small_grid_id#cohort monthyear#cohort"
 local moderators_list moderator rice_prod_aclvl_ahigh
-* local moderators_list moderator downup_ac rice_area_aclvl_ahigh rice_harvarea_aclvl_ahigh rice_prod_aclvl_ahigh
 gen moderator = 0
 egen tag_ac = tag(ac_uq_id)
 count if tag_ac == 1
@@ -105,4 +100,3 @@ estwrite `estimate_names' using "`outbase'.ster", replace
 estsave_csv `estimate_names' using "`outbase'.csv", replace
 
 display as result "Saved `outbase'.ster and `outbase'.csv"
-
