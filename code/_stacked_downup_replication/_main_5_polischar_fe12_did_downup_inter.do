@@ -79,6 +79,8 @@ local moderators_list moderator ${downup_var}
 * Anchor every regular and interacted model to the sample retained by the
 * richest FE specification with the full downup interaction.
 local common_rhs "ib0.post_##ib0.treat##ib0.${downup_var} wind_direction av_wind_speed"
+do "${code}/exploratory_analysis/rice_high_subsample/_apply_rice_high_subsample.do"
+
 quietly reghdfejl countk `common_rhs', absorb(`fe3') vce(cluster ac_elec_yr)
 gen byte common_sample = e(sample)
 quietly count

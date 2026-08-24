@@ -142,6 +142,8 @@ egen cluster_acmonth = group(ac_id monthyear)
 global controls av_wind_speed wind_direction
 
 * Eq1: downup_ac_pop (exclude grid 116147 as in R code)
+do "${code}/exploratory_analysis/rice_high_subsample/_apply_rice_high_subsample.do"
+
 reghdfejl countk downup_ac_pop $controls if grid_id != 116147, ///
     absorb(grid_id ac_id#monthyear) cluster(grid_id cluster_acmonth)
 

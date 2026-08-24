@@ -116,6 +116,8 @@ gen moderator = 0
 * local moderators_list moderator downup_ac rice_area_aclvl_ahigh rice_harvarea_aclvl_ahigh rice_prod_aclvl_ahigh
 local moderators_list moderator ${downup_var} rice_area_aclvl_ahigh rice_harvarea_aclvl_ahigh rice_prod_aclvl_ahigh
 
+do "${code}/exploratory_analysis/rice_high_subsample/_apply_rice_high_subsample.do"
+
 tempfile analysis_base
 save `analysis_base'
 

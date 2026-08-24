@@ -71,15 +71,12 @@ Notes:
 . capture log close _all
 
 . log using "${code}/logs/local_sample_protest_event.log", replace text
-(file
-    C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/code/_sta
-    > cked_downup_replication/logs/local_sample_protest_event.log not found)
 -------------------------------------------------------------------------------
       name:  <unnamed>
        log:  C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/co
 > de/_stacked_downup_replication/logs/local_sample_protest_event.log
   log type:  text
- opened on:  24 Aug 2026, 07:03:57
+ opened on:  24 Aug 2026, 15:00:32
 
 . do "${code}/_app_17_5km_fe12_evst_all.do"
 
@@ -144,3 +141,435 @@ RA same-term protest input: C:/Users/eunic/Dropbox/sa_fires/proj_bureaucrats_fa
 
 . import delimited using "`protest_input'", clear varnames(1)
 (encoding automatically selected: ISO-8859-1)
+(29 vars, 511,686 obs)
+
+. 
+. * Attach the reference dofile's AC-area clustering variable without importing
+. * the full master CSV into Stata.
+. merge m:1 unique_small_grid_id month year using ///
+>     "${int_data}/grid_month_ac_area_tr.dta", ///
+>     keep(master match) keepusing(ac_area_tr)
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                             0
+    Matched                           511,686  (_merge==3)
+    -----------------------------------------
+
+. assert _merge == 3
+
+. drop _merge
+
+. assert !missing(ac_area_tr)
+
+. 
+. * Match the reference dofile's cohort and election-term checks.
+. confirm variable cohort_id
+
+. confirm variable cohort_election_year
+
+. confirm variable cohort_term_start
+
+. assert monthyear >= cohort_term_start
+
+. assert cohort_term_start <= cohort
+
+. bysort cohort_id: assert cohort_election_year == cohort_election_year[1]
+
+. 
+. capture confirm variable relative_year_bin
+
+. if _rc {
+.     confirm variable relative_year
+.     rename relative_year relative_year_bin
+. }
+
+. assert relative_year_bin == floor((monthyear - cohort) / 12)
+
+. 
+. * Use rice_moderators.dta as both the sample definition and authoritative sou
+> rce
+. * for the above-median rice-production indicator, exactly as in the reference
+> .
+. capture drop rice_prod_aclvl_ahigh
+
+. merge m:1 unique_small_grid_id ac_uq_id using ///
+>     "${int_data}/rice_moderators.dta", ///
+>     keepusing(rice_prod_aclvl_ahigh)
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                        92,044
+        from master                       169  (_merge==1)
+        from using                     91,875  (_merge==2)
+
+    Matched                           511,517  (_merge==3)
+    -----------------------------------------
+
+. keep if _merge == 3
+(92,044 observations deleted)
+
+. drop _merge
+
+. assert inlist(rice_prod_aclvl_ahigh, 0, 1)
+
+. 
+. merge m:1 unique_small_grid_id using ///
+>     "${int_data}/ghs_grid_classification_2000.dta", ///
+>     keepusing(is_rural)
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                       150,299
+        from master                         0  (_merge==1)
+        from using                    150,299  (_merge==2)
+
+    Matched                           511,517  (_merge==3)
+    -----------------------------------------
+
+. keep if _merge == 3
+(150,299 observations deleted)
+
+. drop _merge
+
+. keep if ${is_rural_var} == 1
+(106,988 observations deleted)
+
+. keep if year < 2022 | (year == 2022 & month <= 8)
+(35,410 observations deleted)
+
+. display as text "Observations after rice and rural filters: " _N
+Observations after rice and rural filters: 369119
+
+. 
+. * Match the reference sample: remove only its earliest -5 bin and estimate al
+> l
+. * remaining naturally observed event years. Plotting can impose a narrower
+. * display window without changing the estimation sample.
+. count if relative_year_bin == -5
+  11,555
+
+. display as text "Observations dropped at relative_year_bin == -5: " r(N)
+Observations dropped at relative_year_bin == -5: 11555
+
+. drop if relative_year_bin == -5
+(11,555 observations deleted)
+
+. quietly summarize relative_year_bin
+
+. display as text "Canonical protest event-study support retained: [" ///
+>     r(min) ", " r(max) "]"
+Canonical protest event-study support retained: [-4, 2]
+
+. 
+. foreach v of varlist election_year yeargov {
+  2.     capture confirm numeric variable `v'
+  3.     if _rc destring `v', replace
+  4. }
+
+. recast int election_year, force
+
+. recast byte yeargov, force
+
+. 
+. egen unique_small_grid_id_cohort = group(unique_small_grid_id cohort_id)
+
+. egen monthyearco                 = group(month year cohort_id)
+
+. egen province_cohort             = group(cohort_id province)
+
+. egen ac_elec_yr                  = group(ac_uq_id cohort_election_year cohort
+> _id)
+
+. egen relativeyear_cohort         = group(relative_year_bin cohort_id)
+
+. 
+. * Retain grid-cohort units observed on both sides of the protest switch.
+. bysort unique_small_grid_id_cohort: egen byte has_pre  = max(relative_year_bi
+> n < 0)
+
+. bysort unique_small_grid_id_cohort: egen byte has_post = max(relative_year_bi
+> n >= 0)
+
+. egen byte unit_tag = tag(unique_small_grid_id_cohort)
+
+. quietly count if unit_tag
+
+. local all_units = r(N)
+
+. quietly count if unit_tag & has_pre == 1 & has_post == 1
+
+. local balanced_units = r(N)
+
+. display as text "Grid-cohort units with pre and post: `balanced_units' of `al
+> l_units'"
+Grid-cohort units with pre and post: 6853 of 6922
+
+. drop unit_tag
+
+. keep if has_pre == 1 & has_post == 1
+(1,449 observations deleted)
+
+. drop has_pre has_post
+
+. display as text "Canonical protest estimation observations: " _N
+Canonical protest estimation observations: 356115
+
+. 
+. quietly summarize relative_year_bin
+
+. local rmin = r(min)
+
+. gen relative_year_bin_aux = relative_year_bin - `rmin' + 1
+
+. local base = -1 - `rmin' + 1
+
+. 
+. capture drop countk
+
+. gen countk = count * 1000
+
+. local dep_var countk
+
+. local filter1 "1"
+
+. 
+. * Selected specification from the RA's five-specification comparison.
+. local fe3 "unique_small_grid_id_cohort province_cohort#c.monthyear"
+
+. 
+. * Preserve the project-standard moderator wrapper and ymean2 wiring. The
+. * regression itself uses the RA's literal unmoderated RHS: reghdfejl does not
+. * treat a triple interaction with a constant-zero moderator as numerically
+. * identical (the 2026-08-23 audit detected different coefficients and fit).
+. gen byte moderator = 0
+
+. * local moderators_list moderator downup_ac rice_area_aclvl_ahigh rice_harvar
+> ea_aclvl_ahigh rice_prod_aclvl_ahigh
+. local moderators_list moderator
+
+. 
+. do "${code}/exploratory_analysis/rice_high_subsample/_apply_rice_high_subsamp
+> le.do"
+
+. *****************************************************************************
+> ***
+. * Optional exploratory restriction: ACs with above-median rice production.
+. *
+. * Called after an analysis dataset and its required merge fields are loaded,
+. * but before the first regression/common-sample regression.  It is inert unle
+> ss
+. * $analysis_subsample is "rice_high".
+. *****************************************************************************
+> ***
+. 
+. if "$analysis_subsample" == "rice_high" {
+.     capture confirm variable rice_prod_aclvl_ahigh
+.     if _rc {
+.         display as error ///
+>             "rice_prod_aclvl_ahigh is missing from the stacked dataset. " ///
+>             "Regenerate it from 0_master_dataset with the data-generation pip
+> eline."
+.         exit 111
+.     }
+. 
+.     assert inlist(rice_prod_aclvl_ahigh, 0, 1)
+.     quietly count
+.     local rice_before = r(N)
+.     keep if rice_prod_aclvl_ahigh == 1
+.     quietly count
+.     local rice_after = r(N)
+.     if `rice_after' == 0 {
+.         display as error "The rice-high exploratory restriction removed every
+>  row."
+.         exit 2000
+.     }
+.     display as result "EXPLORATORY SAMPLE: rice_prod_aclvl_ahigh == 1"
+.     display as result "Rows retained: `rice_after' of `rice_before'"
+. }
+
+. 
+end of do-file
+
+. 
+. egen byte tag_ac = tag(ac_uq_id)
+
+. quietly count if tag_ac
+
+. local numacs = r(N)
+
+. drop tag_ac
+
+. 
+. est clear
+
+. local i = 1
+
+. local estimate_names ""
+
+. if trim("$fe_list") != "3" {
+.     display as error "Canonical protest event study requires fe_list=3."
+.     exit 198
+. }
+
+. foreach fe of numlist $fe_list {
+  2.     local fespec `fe`fe''
+  3.     display _newline as text "FE`fe': `fespec' + relativeyear_cohort"
+  4. 
+.     foreach mod of local moderators_list {
+  5.         replace moderator = `mod'
+  6.         local rhs ///
+>             "ib`base'.relative_year_bin_aux##ib0.treat wind_direction av_wind
+> _speed"
+  7. 
+.         quietly summarize `dep_var' if treat == 1 & relative_year_bin <= -1 &
+>  `filter1'
+  8.         local ymean = r(mean)
+  9.         quietly summarize `dep_var' if treat == 1 & relative_year_bin <= -
+> 1 & moderator == 1 & `filter1'
+ 10.         local ymean2 = r(mean)
+ 11.         quietly summarize `dep_var' if treat == 0 & relative_year_bin <= -
+> 1 & `filter1'
+ 12.         local control_ymean = r(mean)
+ 13. 
+.         reghdfejl `dep_var' `rhs' if `filter1', ///
+>             absorb(`fespec' relativeyear_cohort) ///
+>             vce(cluster ac_area_tr)
+ 14. 
+.         * Preserve structural sanity checks for the agreed -4,...,+4 support.
+.         if e(N) <= 0 | e(N_clust) <= 1 {
+ 15.             display as error "FE3 returned an empty sample or insufficient
+>  clusters."
+ 16.             exit 459
+ 17.         }
+ 18.         display as result "PASS: FE3 estimated over full natural event sup
+> port."
+ 19. 
+.         estadd scalar ymean  = `ymean'
+ 20.         estadd scalar ymean2 = `ymean2'
+ 21.         estadd scalar control_ymean = `control_ymean'
+ 22.         estadd scalar acq    = `numacs'
+ 23.         estadd local smpl "Rural"
+ 24.         estadd local fespec "FE`fe': `fespec' relativeyear_cohort"
+ 25.         estadd local mod "`mod'"
+ 26.         estadd local controls "pooled"
+ 27. 
+.         local estname evreg`i'
+ 28.         local estimate_names "`estimate_names' `estname'"
+ 29.         local i = `i' + 1
+ 30.         est store `estname'
+ 31.     }
+ 32. }
+
+FE3: unique_small_grid_id_cohort province_cohort#c.monthyear + relativeyear_coh
+> ort
+(0 real changes made)
+(MWFE estimator converged in 20 iterations)
+note: 1bn.relative_year_bin_aux is probably collinear with the fixed effects (a
+> ll partialled-out values are close to zero; tol = 1.0e-09)
+note: 2bn.relative_year_bin_aux is probably collinear with the fixed effects (a
+> ll partialled-out values are close to zero; tol = 1.0e-09)
+note: 3bn.relative_year_bin_aux is probably collinear with the fixed effects (a
+> ll partialled-out values are close to zero; tol = 1.0e-09)
+note: 5bn.relative_year_bin_aux is probably collinear with the fixed effects (a
+> ll partialled-out values are close to zero; tol = 1.0e-09)
+note: 6bn.relative_year_bin_aux is probably collinear with the fixed effects (a
+> ll partialled-out values are close to zero; tol = 1.0e-09)
+note: 7bn.relative_year_bin_aux is probably collinear with the fixed effects (a
+> ll partialled-out values are close to zero; tol = 1.0e-09)
+note: 1bn.treat is probably collinear with the fixed effects (all partialled-ou
+> t values are close to zero; tol = 1.0e-09)
+
+HDFE Linear regression                            Number of obs   =    356,115
+Absorbing 3 HDFE groups                           F(   8,   1120) =      27.74
+Statistics robust to heteroskedasticity           Prob > F        =     0.0000
+                                                  R-squared       =     0.1104
+                                                  Adj R-squared   =     0.0923
+                                                  Within R-sq.    =     0.0114
+Number of clusters (ac_area_tr) =      1,121      Root MSE        =  1027.5692
+
+                         (Std. err. adjusted for 1,121 clusters in ac_area_tr)
+------------------------------------------------------------------------------
+             |               Robust
+      countk | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+relative_y~x |
+          1  |          0  (omitted)
+          2  |          0  (omitted)
+          3  |          0  (omitted)
+          5  |          0  (omitted)
+          6  |          0  (omitted)
+          7  |          0  (omitted)
+             |
+     1.treat |          0  (omitted)
+             |
+relative_y~x#|
+       treat |
+        1 1  |  -29.55345   25.27319    -1.17   0.243    -79.14157    20.03468
+        2 1  |  -10.04204   22.13948    -0.45   0.650    -53.48156    33.39749
+        3 1  |  -15.46506   18.92721    -0.82   0.414    -52.60184    21.67171
+        5 1  |   57.06596   19.53623     2.92   0.004     18.73423    95.39768
+        6 1  |   111.2117   34.98718     3.18   0.002      42.5639    179.8595
+        7 1  |   53.23312   47.58796     1.12   0.264    -40.13847    146.6047
+             |
+wind_direc~n |  -1.078537   .0805741   -13.39   0.000    -1.236631   -.9204443
+av_wind_sp~d |   159.2609   16.16517     9.85   0.000     127.5435    190.9784
+       _cons |  -45.11561   21.25104    -2.12   0.034    -86.81194   -3.419278
+------------------------------------------------------------------------------
+
+Absorbed degrees of freedom:
+---------------------------------------------------------------------+
+                 Absorbed FE | Categories  - Redundant  = Num. Coefs |
+-----------------------------+---------------------------------------|
+ unique_small_grid_id_cohort |      6853        6853           0    *|
+ province_cohort#c.monthyear |        62           0          62    ?|
+         relativeyear_cohort |       192           1         191     |
+---------------------------------------------------------------------+
+? = number of redundant parameters may be higher
+* = FE nested within cluster; treated as redundant for DoF computation
+PASS: FE3 estimated over full natural event support.
+
+added scalar:
+              e(ymean) =  424.90343
+
+added scalar:
+             e(ymean2) =  .
+
+added scalar:
+      e(control_ymean) =  144.11775
+
+added scalar:
+                e(acq) =  732
+
+added macro:
+               e(smpl) : "Rural"
+
+added macro:
+             e(fespec) : "FE3: unique_small_grid_id_cohort province_cohort#c.mo
+> nthyear relativeyear_cohort"
+
+added macro:
+                e(mod) : "moderator"
+
+added macro:
+           e(controls) : "pooled"
+
+. 
+. local outbase ///
+>     "${tables}/_app_17_5km_fe12_evst_all${sample}_rural${ster_suffix}"
+
+. estwrite `estimate_names' using "`outbase'.ster", replace
+(saving evreg1)
+(file C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/code/_sta
+> cked_downup_replication/../../tables/_app_17_5km_fe12_evst_all_sample_rural.s
+> ter saved)
+
+. estsave_csv `estimate_names' using "`outbase'.csv", replace
+command estsave_csv is unrecognized
+r(199);
+
+end of do-file
+r(199);
+
+end of do-file
+r(199);

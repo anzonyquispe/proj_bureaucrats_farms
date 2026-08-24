@@ -1,0 +1,357 @@
+
+  ___  ____  ____  ____  ____ ®
+ /__    /   ____/   /   ____/      18.0
+___/   /   /___/   /   /___/       MP—Parallel Edition
+
+ Statistics and Data Science       Copyright 1985-2023 StataCorp LLC
+                                   StataCorp
+                                   4905 Lakeway Drive
+                                   College Station, Texas 77845 USA
+                                   800-STATA-PC        https://www.stata.com
+                                   979-696-4600        stata@stata.com
+
+Stata license: Single-user 4-core  perpetual
+Serial number: 501806366048
+  Licensed to: Any Name
+               Any Name
+
+Notes:
+      1. Stata is running in batch mode.
+      2. Unicode is supported; see help unicode_advice.
+      3. More than 2 billion observations are allowed; see help obs_advice.
+      4. Maximum number of variables is set to 5,000 but can be increased;
+          see help set_maxvar.
+
+. do C:\Users\eunic\OneDrive\Documents\GitHub\proj_bureaucrats_farms\code\_stac
+> ked_downup_replication\exploratory_analysis\rice_high_subsample\run_local_ric
+> e_high_neighbour_smoke.do 
+
+. *****************************************************************************
+> ***
+. * Local neighbour regression test for the master-derived rice-high sample.
+. *****************************************************************************
+> ***
+. 
+. version 17
+
+. clear all
+
+. set more off
+
+. 
+. global location "dbox"
+
+. global sample "_sample"
+
+. global is_rural_var "is_rural"
+
+. global fe_list "1"
+
+. global ster_suffix "_ricehigh"
+
+. global analysis_subsample "rice_high"
+
+. global root "C:/Users/eunic/Dropbox/sa_fires/proj_bureaucrats_farms"
+
+. global code "C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/
+> code/_stacked_downup_replication"
+
+. global int_data "${root}/data_output/intermediate"
+
+. global tables "${code}/../../tables"
+
+. global figures "${code}/../../figures"
+
+. 
+. capture program drop reghdfejl
+
+. program define reghdfejl, eclass
+  1.     reghdfe `0'
+  2. end
+
+. 
+. do "${code}/_main_6_neighbour.do"
+
+. *****************************************************************************
+> ***
+. * Neighbour-border analysis for figures/neighbor_output.pdf
+. *****************************************************************************
+> ***
+. 
+. if "$root" == "" {
+.     clear all
+.     set more off
+.     * Standalone defaults for the five sbatch-array parameters.
+.     global location     "shell"
+.     global sample       ""
+.     global is_rural_var "is_rural"
+.     global fe_list      "1"
+.     global ster_suffix  ""
+.     global shell "/groups/sgulzar/sa_fires/proj_bureaucrats_farms"
+.     global dbox  "/Users/anzony.quisperojas/Library/CloudStorage/Dropbox/sa_f
+> ires/proj_bureaucrats_farms"
+.     global code_shell "/users/aquisper/proj_bureaucrats_farms/code/_stacked_d
+> ownup_replication"
+.     global code_dbox  "/Users/anzony.quisperojas/Documents/GitHub/proj_bureau
+> crats_farms/code/_stacked_downup_replication"
+.     if "$location" == "dbox" {
+.         global root "$dbox"
+.         global code "$code_dbox"
+.     }
+.     else {
+.         global root "$shell"
+.         global code "$code_shell"
+.     }
+. }
+
+. 
+. global int_data "${root}/data_output/intermediate"
+
+. global tables   "${code}/../../tables"
+
+. 
+. import delimited "${int_data}/stacked_downup_neigh${sample}.csv", clear varna
+> mes(1)
+(encoding automatically selected: ISO-8859-1)
+(16 vars, 1,230,100 obs)
+
+. capture confirm variable relative_monthyear
+
+. if _rc {
+.     gen relative_monthyear = monthyear - cohort
+. }
+
+. keep if inrange(relative_monthyear, -5, 6)
+(0 observations deleted)
+
+. display as text "Final event-study sample: relative_monthyear in [-5, 6]"
+Final event-study sample: relative_monthyear in [-5, 6]
+
+. merge m:1 unique_small_grid_id using "${int_data}/ghs_grid_classification_200
+> 0.dta", ///
+>     keep(master match) keepusing(is_rural)
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                             0
+    Matched                         1,230,100  (_merge==3)
+    -----------------------------------------
+
+. drop _merge
+
+. keep if ${is_rural_var} == 1
+(291,304 observations deleted)
+
+. keep if year < 2022 | (year == 2022 & month <= 8)
+(0 observations deleted)
+
+. 
+. capture drop countk
+
+. gen countk = count * 1000
+
+. capture confirm variable treat
+
+. if _rc {
+.     gen byte treat = downwind_neighbours
+. }
+
+. capture confirm variable relative_year_bin
+
+. if _rc {
+.     capture confirm variable relative_monthyear
+.     if !_rc {
+.         gen relative_year_bin = floor(relative_monthyear / 12)
+.     }
+.     else {
+.         gen relative_year_bin = floor((monthyear - cohort) / 12)
+.     }
+. }
+
+. gen moderator = 0
+
+. 
+. do "${code}/exploratory_analysis/rice_high_subsample/_apply_rice_high_subsamp
+> le.do"
+
+. *****************************************************************************
+> ***
+. * Optional exploratory restriction: ACs with above-median rice production.
+. *
+. * Called after an analysis dataset and its required merge fields are loaded,
+. * but before the first regression/common-sample regression.  It is inert unle
+> ss
+. * $analysis_subsample is "rice_high".
+. *****************************************************************************
+> ***
+. 
+. if "$analysis_subsample" == "rice_high" {
+.     capture confirm variable rice_prod_aclvl_ahigh
+.     if _rc {
+.         display as error ///
+>             "rice_prod_aclvl_ahigh is missing from the stacked dataset. " ///
+>             "Regenerate it from 0_master_dataset with the data-generation pip
+> eline."
+.         exit 111
+.     }
+. 
+.     assert inlist(rice_prod_aclvl_ahigh, 0, 1)
+.     quietly count
+.     local rice_before = r(N)
+.     keep if rice_prod_aclvl_ahigh == 1
+(493,359 observations deleted)
+.     quietly count
+.     local rice_after = r(N)
+.     if `rice_after' == 0 {
+.         display as error "The rice-high exploratory restriction removed every
+>  row."
+.         exit 2000
+.     }
+.     display as result "EXPLORATORY SAMPLE: rice_prod_aclvl_ahigh == 1"
+EXPLORATORY SAMPLE: rice_prod_aclvl_ahigh == 1
+.     display as result "Rows retained: `rice_after' of `rice_before'"
+Rows retained: 445437 of 938796
+. }
+
+. 
+end of do-file
+
+. 
+. quietly summarize countk if treat == 1 & relative_year_bin <= -1
+
+. local ymean = r(mean)
+
+. quietly summarize countk if treat == 1 & relative_year_bin <= -1 & moderator 
+> == 1
+
+. local ymean2 = r(mean)
+
+. egen tag_ac = tag(ac_uq_id)
+
+. count if tag_ac == 1
+  399
+
+. local numacs = r(N)
+
+. 
+. local fe1 "ac_uq_id#ac_uq_id_neighbor#month#year#cohort unique_small_grid_id#
+> cohort"
+
+. foreach fe of numlist $fe_list {
+  2.     if `fe' != 1 {
+  3.         display as error "The neighbour figure defines FE specification 1 
+> only."
+  4.         exit 198
+  5.     }
+  6.     reghdfejl countk b5.dist_q##b0.downwind_neighbours, ///
+>         absorb(`fe`fe'') ///
+>         cluster(ac_uq_id#month#year unique_small_grid_id)
+  7.     estadd scalar ymean = `ymean'
+  8.     estadd scalar ymean2 = `ymean2'
+  9.     estadd scalar acq = `numacs'
+ 10.     estadd local smpl "Rural"
+ 11.     estadd local fespec "fe`fe'"
+ 12.     est store reg`fe'
+ 13. }
+(dropped 297730 singleton observations)
+(MWFE estimator converged in 16 iterations)
+note: 1bn.dist_q is probably collinear with the fixed effects (all partialled-o
+> ut values are close to zero; tol = 1.0e-09)
+note: 2bn.dist_q is probably collinear with the fixed effects (all partialled-o
+> ut values are close to zero; tol = 1.0e-09)
+note: 3bn.dist_q is probably collinear with the fixed effects (all partialled-o
+> ut values are close to zero; tol = 1.0e-09)
+note: 4bn.dist_q is probably collinear with the fixed effects (all partialled-o
+> ut values are close to zero; tol = 1.0e-09)
+Warning: VCV matrix was non-positive semi-definite; adjustment from Cameron, Ge
+> lbach & Miller applied.
+
+HDFE Linear regression                            Number of obs   =    147,707
+Absorbing 2 HDFE groups                           F(   5,  13305) =       0.71
+Statistics robust to heteroskedasticity           Prob > F        =     0.6128
+                                                  R-squared       =     0.8228
+                                                  Adj R-squared   =     0.5816
+Number of clusters (ac_uq_id#month#year) =     28,285Within R-sq. =     0.0000
+Number of clusters (unique_small_grid_id) =     13,306Root MSE    =   982.9860
+
+(Std. err. adjusted for 13,306 clusters in ac_uq_id#month#year unique_small_gri
+> d_id)
+------------------------------------------------------------------------------
+             |               Robust
+      countk | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+      dist_q |
+          1  |          0  (omitted)
+          2  |          0  (omitted)
+          3  |          0  (omitted)
+          4  |          0  (omitted)
+             |
+1.downwind~s |   20.78146   60.97935     0.34   0.733    -98.74674    140.3097
+             |
+      dist_q#|
+downwind_n~s |
+        1 1  |  -45.73363   46.51597    -0.98   0.326    -136.9115    45.44429
+        2 1  |   2.539995    44.3354     0.06   0.954     -84.3637    89.44369
+        3 1  |   28.54758   45.53566     0.63   0.531    -60.70879    117.8039
+        4 1  |    26.8507   42.57355     0.63   0.528    -56.59951    110.3009
+             |
+       _cons |   323.3664   3.996805    80.91   0.000      315.532    331.2007
+------------------------------------------------------------------------------
+
+Absorbed degrees of freedom:
+-------------------------------------------------------------------------------
+> ---------------+
+                                          Absorbed FE | Categories  - Redundant
+>   = Num. Coefs                                                               
+>                |
+------------------------------------------------------+------------------------
+> ---------------|
+         ac_uq_id#ac_uq_id_neighbor#month#year#cohort |     67578       67578  
+>          0                                                                   
+>               *                                                              
+>                |
+                          unique_small_grid_id#cohort |     17579       17579  
+>          0                                                                   
+>               *                                                              
+>                |
+-------------------------------------------------------------------------------
+> ---------------+
+* = FE nested within cluster; treated as redundant for DoF computation
+
+added scalar:
+              e(ymean) =  175.97842
+
+added scalar:
+             e(ymean2) =  .
+
+added scalar:
+                e(acq) =  399
+
+added macro:
+               e(smpl) : "Rural"
+
+added macro:
+             e(fespec) : "fe1"
+
+. 
+. estwrite reg1 using ///
+>     "${tables}/main_figure4_neighbour${sample}_rural${ster_suffix}.ster", rep
+> lace
+(saving reg1)
+(file C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/code/_sta
+> cked_downup_replication/../../tables/main_figure4_neighbour_sample_rural_rice
+> high.ster saved)
+
+. 
+. *****************************************************************************
+> ***
+. 
+end of do-file
+
+. confirm file "${tables}/main_figure4_neighbour_sample_rural_ricehigh.ster"
+
+. display as result "LOCAL RICE-HIGH NEIGHBOUR SMOKE TEST PASSED"
+LOCAL RICE-HIGH NEIGHBOUR SMOKE TEST PASSED
+
+. 
+end of do-file

@@ -45,6 +45,13 @@ confirm file "`protest_input'"
 display as text "Final same-term protest input: `protest_input'"
 import delimited using "`protest_input'", clear varnames(1)
 
+merge m:1 unique_small_grid_id month year using ///
+    "${int_data}/grid_month_ac_area_tr.dta", ///
+    keep(master match) keepusing(ac_area_tr)
+assert _merge == 3
+drop _merge
+assert !missing(ac_area_tr)
+
 confirm variable cohort_id
 confirm variable cohort_election_year
 confirm variable cohort_term_start
@@ -62,7 +69,10 @@ if _rc {
     rename relative_year relative_year_bin
 }
 assert relative_year_bin == floor((monthyear - cohort) / 12)
-keep if inrange(relative_year_bin, -4, 4)
+keep if year < 2022 | (year == 2022 & month <= 8)
+count if relative_year_bin == -5
+display as text "Observations dropped at relative_year_bin == -5: " r(N)
+drop if relative_year_bin == -5
 display as text "Canonical protest sample: full same-term support except relative year -5"
 
 merge m:1 unique_small_grid_id using ///
@@ -80,7 +90,6 @@ gen countk = count * 1000
 egen unique_small_grid_id_cohort = group(unique_small_grid_id cohort_id)
 egen province_cohort = group(province cohort_id)
 egen relativeyear_cohort = group(relative_year_bin cohort_id)
-egen ac_elec_yr = group(ac_uq_id cohort_election_year cohort_id)
 
 bysort unique_small_grid_id_cohort: egen byte has_pre = max(relative_year_bin < 0)
 bysort unique_small_grid_id_cohort: egen byte has_post = max(relative_year_bin >= 0)
@@ -99,7 +108,9 @@ gen moderator = ${downup_var}
 
 local dep_var countk
 local moderators_list ${downup_var}
-local fe3 "unique_small_grid_id_cohort province_cohort#c.monthyear relativeyear_cohort"
+local fe3 "unique_small_grid_id_cohort province_cohort#election_year province_cohort#c.monthyear relativeyear_cohort"
+do "${code}/exploratory_analysis/rice_high_subsample/_apply_rice_high_subsample.do"
+
 egen tag_ac = tag(ac_uq_id)
 count if tag_ac == 1
 local numacs = r(N)
@@ -117,7 +128,7 @@ foreach mod of local moderators_list {
     quietly summarize `dep_var' if treat == 1 & relative_year_bin <= -1 & moderator == 1
     local ymean2 = r(mean)
     foreach fe of numlist $fe_list {
-        reghdfejl `dep_var' `rhs', absorb(`fe`fe'') vce(cluster ac_elec_yr)
+        reghdfejl `dep_var' `rhs', absorb(`fe`fe'') vce(cluster ac_area_tr)
         estadd scalar ymean = `ymean'
         estadd scalar ymean2 = `ymean2'
         estadd scalar acq = `numacs'

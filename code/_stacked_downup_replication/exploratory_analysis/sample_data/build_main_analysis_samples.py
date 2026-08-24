@@ -116,7 +116,12 @@ def build_one(
         )
 
     columns = describe_columns(con, input_path, duckdb_alias, spec.duckdb_table)
-    required = {spec.cohort_col, "treat", *spec.unit_cols}
+    required = {
+        spec.cohort_col,
+        "treat",
+        "rice_prod_aclvl_ahigh",
+        *spec.unit_cols,
+    }
     missing = sorted(required - columns)
     if missing:
         raise ValueError(f"{spec.filename} is missing required columns: {missing}")

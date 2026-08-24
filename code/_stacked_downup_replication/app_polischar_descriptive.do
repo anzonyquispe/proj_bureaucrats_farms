@@ -58,19 +58,31 @@ by cohort_id: assert cohort_province == cohort_province[1]
 egen prov = group(province)
 egen legis_govyear = group(province election_year)
 egen unique_small_grid_id_cohort = group(unique_small_grid_id cohort_id)
+capture drop province_cohort
+egen province_cohort = group(province cohort_id)
 egen ac_elec_yr = group(ac_uq_id election_year cohort_id)
 quietly summarize relative_year_bin
 local rmin = r(min)
 gen int relative_year_bin_aux = relative_year_bin - `rmin' + 1
 gen post_ = relative_year_bin >= 0
 gen agri_politician = post_ * treat
-gen moderator = 0
 
+* Retain exactly the sample selected by the richest interacted population DiD.
+local common_rhs ///
+    "ib0.post_##ib0.treat##ib0.downup_ac_pop wind_direction av_wind_speed"
+do "${code}/exploratory_analysis/rice_high_subsample/_apply_rice_high_subsample.do"
 quietly reghdfejl countk ///
-    ib0.post_##ib0.treat##ib0.moderator wind_direction av_wind_speed, ///
-    absorb(unique_small_grid_id_cohort relative_year_bin_aux#cohort_id) ///
+    `common_rhs', ///
+    absorb(unique_small_grid_id_cohort ///
+           relative_year_bin_aux#cohort_id ///
+           province_cohort#election_year ///
+           province_cohort#c.monthyear) ///
     vce(cluster ac_elec_yr)
-keep if e(sample)
+gen byte descriptive_sample = e(sample)
+quietly count if descriptive_sample
+display as text "Politician richest-DiD descriptive sample: " r(N)
+keep if descriptive_sample
+drop descriptive_sample
 
 capture program drop _fmt_num
 program define _fmt_num, rclass
@@ -115,9 +127,10 @@ program define _unique_count, rclass
 end
 
 local colsel unique_small_grid_id year month ac_uq_id prov election_year ///
-    cohort legis_govyear relative_year_bin agri_politician countk ///
+    cohort legis_govyear self_profession_nomiss relative_year_bin ///
+    agri_politician countk ///
     rice_prod_aclvl_ahigh
-local contvars countk rice_prod_aclvl_ahigh relative_year_bin
+local contvars countk rice_prod_aclvl_ahigh relative_year_bin agri_politician
 
 local lab_unique_small_grid_id  "Grid ID"
 local lab_year                  "Year"
@@ -127,8 +140,9 @@ local lab_prov                  "Province"
 local lab_election_year         "Election Year"
 local lab_cohort                "Cohort"
 local lab_legis_govyear         "Legislature"
+local lab_self_profession_nomiss "Agricultural Politician"
 local lab_relative_year_bin     "Relative year"
-local lab_agri_politician       "Agricultural Politician"
+local lab_agri_politician       "Switching to Agri Pol"
 local lab_countk                "Number of Fires (in 1,000 units)"
 local lab_rice_prod_aclvl_ahigh "High Rice Production (AC level)"
 

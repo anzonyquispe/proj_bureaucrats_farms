@@ -44,6 +44,13 @@ confirm file "`protest_input'"
 display as text "Final same-term protest input: `protest_input'"
 import delimited using "`protest_input'", clear varnames(1) case(preserve)
 
+merge m:1 unique_small_grid_id month year using ///
+    "${int_data}/grid_month_ac_area_tr.dta", ///
+    keep(master match) keepusing(ac_area_tr)
+assert _merge == 3
+drop _merge
+assert !missing(ac_area_tr)
+
 confirm variable cohort_id
 confirm variable cohort_election_year
 confirm variable cohort_term_start
@@ -60,8 +67,11 @@ if _rc {
     rename relative_year relative_year_bin
 }
 assert relative_year_bin == floor((monthyear - cohort) / 12)
-keep if inrange(relative_year_bin, -4, 4)
-display as text "Canonical protest sample: relative years -4 through +4"
+keep if year < 2022 | (year == 2022 & month <= 8)
+count if relative_year_bin == -5
+display as text "Observations dropped at relative_year_bin == -5: " r(N)
+drop if relative_year_bin == -5
+display as text "Canonical protest sample: natural support after dropping -5"
 
 * Prefer raw count and rebuild the scaled regression outcome.
 capture drop countk
@@ -77,7 +87,6 @@ egen legis_govyear = group(province election_year)
 egen unique_small_grid_id_cohort = group(unique_small_grid_id cohort_id)
 egen province_cohort = group(province cohort_id)
 egen relativeyear_cohort = group(relative_year_bin cohort_id)
-egen ac_elec_yr = group(ac_uq_id cohort_election_year cohort_id)
 
 bysort unique_small_grid_id_cohort: egen byte has_pre = max(relative_year_bin < 0)
 bysort unique_small_grid_id_cohort: egen byte has_post = max(relative_year_bin >= 0)
@@ -92,15 +101,21 @@ assert has_pre == 1 & has_post == 1
 drop unit_tag has_pre has_post
 gen post_ = relative_year_bin >= 0
 gen protest = post_ * treat
-gen moderator = 0
 
-* Restrict descriptives to the same estimation sample used by the baseline DiD.
-quietly reghdfejl countk ///
-    ib0.post_##ib0.treat##ib0.moderator wind_direction av_wind_speed, ///
+* Retain exactly the sample selected by the richest interacted population DiD.
+local common_rhs ///
+    "ib0.post_##ib0.treat##ib0.downup_ac_pop wind_direction av_wind_speed"
+do "${code}/exploratory_analysis/rice_high_subsample/_apply_rice_high_subsample.do"
+quietly reghdfejl countk `common_rhs', ///
     absorb(unique_small_grid_id_cohort relativeyear_cohort ///
+           province_cohort#election_year ///
            province_cohort#c.monthyear) ///
-    vce(cluster ac_elec_yr)
-keep if e(sample)
+    vce(cluster ac_area_tr)
+gen byte descriptive_sample = e(sample)
+quietly count if descriptive_sample
+display as text "Protest richest-DiD descriptive sample: " r(N)
+keep if descriptive_sample
+drop descriptive_sample
 
 capture program drop _fmt_num
 program define _fmt_num, rclass
@@ -144,8 +159,8 @@ program define _unique_count, rclass
     restore
 end
 
-local colsel unique_small_grid_id year month ac_uq_id prov protest5km ///
-    cohort legis_govyear relative_year_bin protest countk ///
+local colsel unique_small_grid_id year month ac_uq_id prov ///
+    ac_area_tr cohort legis_govyear relative_year_bin protest countk ///
     rice_prod_aclvl_ahigh
 local contvars countk rice_prod_aclvl_ahigh protest relative_year_bin
 
@@ -154,7 +169,7 @@ local lab_year                  "Year"
 local lab_month                 "Month"
 local lab_ac_uq_id              "Assembly Constituency (AC)"
 local lab_prov                  "Province"
-local lab_protest5km            "Within 5 km of Protest"
+local lab_ac_area_tr            "Protest Area"
 local lab_cohort                "Cohort"
 local lab_legis_govyear         "Legislature"
 local lab_relative_year_bin     "Relative year"

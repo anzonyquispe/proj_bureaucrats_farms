@@ -143,6 +143,8 @@ local n_districts = r(N)
 * Project-standard treated-group pre-treatment means.
 gen relative_year_bin = floor(relative_monthyear / 12)
 gen moderator = downup_dummy
+do "${code}/exploratory_analysis/rice_high_subsample/_apply_rice_high_subsample.do"
+
 quietly summarize countk if treat == 1 & relative_year_bin <= -1
 local meandv = r(mean)
 quietly summarize countk if treat == 1 & relative_year_bin <= -1 & moderator == 1

@@ -21,6 +21,7 @@ NEIGH_INPUT="${NEIGH_INPUT:-${INTERMEDIATE}/0_ac_neighs_downup.csv}"
 NEIGH_OUTPUT="${NEIGH_OUTPUT:-${INTERMEDIATE}/stacked_downup_neigh.csv}"
 NEIGH_DATABASE="${NEIGH_DATABASE:-${INTERMEDIATE}/stacked_downup_neigh.db}"
 NEIGH_TEMP_DIRECTORY="${NEIGH_TEMP_DIRECTORY:-${INTERMEDIATE}/stacked_downup_neigh_duckdb_tmp}"
+MASTER_PARQUET="${MASTER_PARQUET:-${INTERMEDIATE}/0_master_dataset.parquet}"
 LOG_DIR="${PIPELINE_LOG_DIR:-${CODE_DIR}/logs/data_generation}"
 
 mkdir -p "${LOG_DIR}"
@@ -94,6 +95,14 @@ run_stage "master dataset" "${LOG_DIR}/02_master_dataset.log" \
     --memory-limit "${MEMORY_LIMIT}" \
     --overwrite
 
+run_stage "grid-month AC-area treatment crosswalk" "${LOG_DIR}/03_ac_area_tr_crosswalk.log" \
+    "${PYTHON}" build_grid_month_ac_area_tr.py \
+    --master-parquet "${MASTER_PARQUET}" \
+    --output "${INTERMEDIATE}/grid_month_ac_area_tr.dta" \
+    --threads "${NSLOTS:-10}" \
+    --memory-limit "${MEMORY_LIMIT}" \
+    --overwrite
+
 SPEC_ARGS=()
 if [[ -n "${STACK_SPECS:-}" && "${STACK_SPECS}" != "all" ]]; then
     IFS=',' read -r -a REQUESTED_SPECS <<< "${STACK_SPECS}"
@@ -102,7 +111,7 @@ if [[ -n "${STACK_SPECS:-}" && "${STACK_SPECS}" != "all" ]]; then
     done
 fi
 
-run_stage "five standard stacked datasets" "${LOG_DIR}/03_standard_stacks.log" \
+run_stage "five standard stacked datasets" "${LOG_DIR}/04_standard_stacks.log" \
     "${PYTHON}" build_all_stacked_datasets_duckdb.py \
     --intermediate "${INTERMEDIATE}" \
     --threads "${NSLOTS:-10}" \
@@ -110,7 +119,7 @@ run_stage "five standard stacked datasets" "${LOG_DIR}/03_standard_stacks.log" \
     --overwrite \
     "${SPEC_ARGS[@]}"
 
-run_stage "province-election politician stack" "${LOG_DIR}/04_politicians_byprov.log" \
+run_stage "province-election politician stack" "${LOG_DIR}/05_politicians_byprov.log" \
     "${PYTHON}" build_politicians_characteristics_byprov.py \
     --intermediate "${INTERMEDIATE}" \
     --threads "${NSLOTS:-10}" \
@@ -124,11 +133,12 @@ if [[ ! -f "${NEIGH_INPUT}" ]]; then
     echo "ERROR: neighbour-panel input was not found at ${NEIGH_INPUT}." >&2
     exit 1
 fi
-run_stage "neighbour-border stacked dataset" "${LOG_DIR}/05_neighbour_stack.log" \
+run_stage "neighbour-border stacked dataset" "${LOG_DIR}/06_neighbour_stack.log" \
     "${PYTHON}" build_stacked_duckdb_unique_pair.py \
     --input "${NEIGH_INPUT}" \
     --output "${NEIGH_OUTPUT}" \
     --database "${NEIGH_DATABASE}" \
+    --master-parquet "${MASTER_PARQUET}" \
     --temp-directory "${NEIGH_TEMP_DIRECTORY}" \
     --treatment-col downwind_neighbours \
     --pair-cols unique_small_grid_id ac_uq_id_neighbor \
@@ -143,5 +153,5 @@ run_stage "neighbour-border stacked dataset" "${LOG_DIR}/05_neighbour_stack.log"
     --write-manifest \
     --overwrite
 
-echo "[$(date '+%F %T')] completed master, standard stacks, province-election stack, and neighbour stack"
+echo "[$(date '+%F %T')] completed master, AC-area crosswalk, standard stacks, province-election stack, and neighbour stack"
 echo "[$(date '+%F %T')] pipeline summary log: ${PIPELINE_LOG}"

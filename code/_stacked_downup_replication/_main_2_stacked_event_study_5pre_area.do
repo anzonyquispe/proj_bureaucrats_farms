@@ -58,6 +58,8 @@ local fe1 "unique_small_grid_id#cohort ac_uq_id#monthyear#cohort"
 local moderators_list moderator rice_prod_aclvl_ahigh
 * local moderators_list moderator downup_ac rice_area_aclvl_ahigh rice_harvarea_aclvl_ahigh rice_prod_aclvl_ahigh
 gen moderator = 0
+do "${code}/exploratory_analysis/rice_high_subsample/_apply_rice_high_subsample.do"
+
 egen tag_ac = tag(ac_uq_id)
 count if tag_ac == 1
 local numacs = r(N)

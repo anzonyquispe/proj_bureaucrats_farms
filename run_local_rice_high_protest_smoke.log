@@ -1,0 +1,346 @@
+
+  ___  ____  ____  ____  ____ ®
+ /__    /   ____/   /   ____/      18.0
+___/   /   /___/   /   /___/       MP—Parallel Edition
+
+ Statistics and Data Science       Copyright 1985-2023 StataCorp LLC
+                                   StataCorp
+                                   4905 Lakeway Drive
+                                   College Station, Texas 77845 USA
+                                   800-STATA-PC        https://www.stata.com
+                                   979-696-4600        stata@stata.com
+
+Stata license: Single-user 4-core  perpetual
+Serial number: 501806366048
+  Licensed to: Any Name
+               Any Name
+
+Notes:
+      1. Stata is running in batch mode.
+      2. Unicode is supported; see help unicode_advice.
+      3. More than 2 billion observations are allowed; see help obs_advice.
+      4. Maximum number of variables is set to 5,000 but can be increased;
+          see help set_maxvar.
+
+. do C:\Users\eunic\OneDrive\Documents\GitHub\proj_bureaucrats_farms\code\_stac
+> ked_downup_replication\exploratory_analysis\rice_high_subsample\run_local_ric
+> e_high_protest_smoke.do 
+
+. *****************************************************************************
+> ***
+. * Local protest regression test for the rice-high sampled observations.
+. *****************************************************************************
+> ***
+. 
+. version 17
+
+. clear all
+
+. set more off
+
+. 
+. global location "dbox"
+
+. global sample "_sample"
+
+. global is_rural_var "is_rural"
+
+. global fe_list "1/3"
+
+. global ster_suffix "_acpop_ricehigh"
+
+. global analysis_subsample "rice_high"
+
+. global stacked_file "stacked_data_protest5km"
+
+. global downup_var "downup_ac_pop"
+
+. global root "C:/Users/eunic/Dropbox/sa_fires/proj_bureaucrats_farms"
+
+. global code "C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/
+> code/_stacked_downup_replication"
+
+. global int_data "${root}/data_output/intermediate"
+
+. global tables "${code}/../../tables"
+
+. global figures "${code}/../../figures"
+
+. 
+. capture program drop reghdfejl
+
+. program define reghdfejl, eclass
+  1.     reghdfe `0'
+  2. end
+
+. 
+. do "${code}/_main_4_protest_5km_fe12_did_downup.do"
+
+. *****************************************************************************
+> ***
+. * Protest DiD: three regular specifications followed by the same three
+. * specifications interacted with downup_ac_pop.
+. *****************************************************************************
+> ***
+. 
+. if "$root" == "" {
+.     clear all
+.     set more off
+.     * Standalone defaults for the five sbatch-array parameters.
+.     global location     "shell"
+.     global sample       ""
+.     global is_rural_var "is_rural"
+.     global fe_list      "1/3"
+.     global ster_suffix  "_acpop"
+.     global shell "/groups/sgulzar/sa_fires/proj_bureaucrats_farms"
+.     global dbox  "/Users/anzony.quisperojas/Library/CloudStorage/Dropbox/sa_f
+> ires/proj_bureaucrats_farms"
+.     if "$location" == "dbox" {
+.         global root "$dbox"
+.     }
+.     else {
+.         global root "$shell"
+.     }
+. }
+
+. if "$downup_var" == "" {
+.     global downup_var "downup_ac_pop"
+. }
+
+. 
+. global int_data "${root}/data_output/intermediate"
+
+. global tables   "${code}/../../tables"
+
+. 
+. local protest_input ///
+>     "${int_data}/stacked_data_protest5km_election_sameterm${sample}.csv"
+
+. capture confirm file "`protest_input'"
+
+. if _rc {
+.     local protest_input ///
+>         "${int_data}/cohortes_protest_term/stacked_data_protest5km_election_s
+> ameterm${sample}.csv"
+. }
+
+. capture confirm file "`protest_input'"
+
+. if _rc {
+.     local protest_input ///
+>         "${int_data}/cohorts_protest_term/stacked_data_protest5km_election_sa
+> meterm${sample}.csv"
+. }
+
+. confirm file "`protest_input'"
+
+. display as text "Final same-term protest input: `protest_input'"
+Final same-term protest input: C:/Users/eunic/Dropbox/sa_fires/proj_bureaucrats
+> _farms/data_output/intermediate/stacked_data_protest5km_election_sameterm_sam
+> ple.csv
+
+. import delimited using "`protest_input'", clear varnames(1)
+(encoding automatically selected: ISO-8859-1)
+(29 vars, 511,686 obs)
+
+. 
+. merge m:1 unique_small_grid_id month year using ///
+>     "${int_data}/grid_month_ac_area_tr.dta", ///
+>     keep(master match) keepusing(ac_area_tr)
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                             0
+    Matched                           511,686  (_merge==3)
+    -----------------------------------------
+
+. assert _merge == 3
+
+. drop _merge
+
+. assert !missing(ac_area_tr)
+
+. 
+. confirm variable cohort_id
+
+. confirm variable cohort_election_year
+
+. confirm variable cohort_term_start
+
+. confirm variable cohort_analysis_max
+
+. assert monthyear >= cohort_term_start
+
+. assert monthyear <= cohort_analysis_max
+
+. assert cohort_term_start <= cohort
+
+. assert inrange(cohort_analysis_max - cohort_term_start, 0, 59)
+
+. bysort cohort_id: assert cohort == cohort[1]
+
+. bysort cohort_id: assert cohort_election_year == cohort_election_year[1]
+
+. bysort cohort_id: assert cohort_term_start == cohort_term_start[1]
+
+. bysort cohort_id: assert cohort_analysis_max == cohort_analysis_max[1]
+
+. capture confirm variable relative_year_bin
+
+. if _rc {
+.     rename relative_year relative_year_bin
+. }
+
+. assert relative_year_bin == floor((monthyear - cohort) / 12)
+
+. keep if year < 2022 | (year == 2022 & month <= 8)
+(48,842 observations deleted)
+
+. count if relative_year_bin == -5
+  14,722
+
+. display as text "Observations dropped at relative_year_bin == -5: " r(N)
+Observations dropped at relative_year_bin == -5: 14722
+
+. drop if relative_year_bin == -5
+(14,722 observations deleted)
+
+. quietly summarize relative_year_bin
+
+. display as text "Canonical protest DiD support: [" r(min) ", " r(max) "]"
+Canonical protest DiD support: [-4, 2]
+
+. * Always express the fire-count outcome in thousands.
+. capture drop countk
+
+. gen countk = count * 1000
+
+. 
+. merge m:1 unique_small_grid_id using ///
+>     "${int_data}/ghs_grid_classification_2000.dta", ///
+>     keep(master match) keepusing(is_rural)
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                             0
+    Matched                           448,122  (_merge==3)
+    -----------------------------------------
+
+. drop _merge
+
+. keep if ${is_rural_var} == 1
+(90,486 observations deleted)
+
+. 
+. egen unique_small_grid_id_cohort = group(unique_small_grid_id cohort_id)
+
+. capture drop province_cohort
+
+. egen province_cohort = group(province cohort_id)
+
+. egen monthyearco = group(monthyear cohort_id)
+
+. egen relativeyear_cohort = group(relative_year_bin cohort_id)
+
+. egen ac_elec_yr = group(ac_uq_id cohort_election_year cohort_id)
+
+. 
+. * The production stack must already contain both sides of the switch for ever
+> y
+. * retained grid-cohort. Fail loudly instead of silently changing the sample.
+. bysort unique_small_grid_id_cohort: egen byte has_pre = max(relative_year_bin
+>  < 0)
+
+. bysort unique_small_grid_id_cohort: egen byte has_post = max(relative_year_bi
+> n >= 0)
+
+. egen byte unit_tag = tag(unique_small_grid_id_cohort)
+
+. quietly count if unit_tag
+
+. local units_before = r(N)
+
+. quietly count if unit_tag & has_pre == 1 & has_post == 1
+
+. local units_balanced = r(N)
+
+. display as text "Grid-cohort units with pre and post periods: `units_balanced
+> ' of `units_before'"
+Grid-cohort units with pre and post periods: 6855 of 6924
+
+. keep if has_pre == 1 & has_post == 1
+(1,449 observations deleted)
+
+. assert has_pre == 1 & has_post == 1
+
+. drop unit_tag has_pre has_post
+
+. 
+. gen post_ = relative_year_bin >= 0
+
+. gen moderator = 0
+
+. 
+. local fe1 "unique_small_grid_id_cohort"
+
+. local fe2 "unique_small_grid_id_cohort province_cohort#election_year"
+
+. local fe3 "unique_small_grid_id_cohort province_cohort#election_year province
+> _cohort#c.monthyear"
+
+. local moderators_list moderator ${downup_var}
+
+. 
+. * Anchor every regular and interacted model to the sample retained by the
+. * richest FE specification with the full downup interaction.
+. local common_rhs "ib0.post_##ib0.treat##ib0.${downup_var} wind_direction av_w
+> ind_speed"
+
+. do "${code}/exploratory_analysis/rice_high_subsample/_apply_rice_high_subsamp
+> le.do"
+
+. *****************************************************************************
+> ***
+. * Optional exploratory restriction: ACs with above-median rice production.
+. *
+. * Called after an analysis dataset and its required merge fields are loaded,
+. * but before the first regression/common-sample regression.  It is inert unle
+> ss
+. * $analysis_subsample is "rice_high".
+. *****************************************************************************
+> ***
+. 
+. if "$analysis_subsample" == "rice_high" {
+.     capture confirm variable rice_prod_aclvl_ahigh
+.     if _rc {
+.         display as error ///
+>             "rice_prod_aclvl_ahigh is missing from the stacked dataset. " ///
+>             "Regenerate it from 0_master_dataset with the data-generation pip
+> eline."
+.         exit 111
+.     }
+. 
+.     assert inlist(rice_prod_aclvl_ahigh, 0, 1)
+.     quietly count
+.     local rice_before = r(N)
+.     keep if rice_prod_aclvl_ahigh == 1
+(183,324 observations deleted)
+.     quietly count
+.     local rice_after = r(N)
+.     if `rice_after' == 0 {
+.         display as error "The rice-high exploratory restriction removed every
+>  row."
+.         exit 2000
+.     }
+.     display as result "EXPLORATORY SAMPLE: rice_prod_aclvl_ahigh == 1"
+EXPLORATORY SAMPLE: rice_prod_aclvl_ahigh == 1
+.     display as result "Rows retained: `rice_after' of `rice_before'"
+Rows retained: 172863 of 356187
+. }
+
+. 
+end of do-file
+
+. 
+. quietly reghdfejl countk `common_rhs', ///
+>     absorb(`fe3' relativeyear_cohort) vce(cluster ac_area_tr)

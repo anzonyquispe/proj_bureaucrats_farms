@@ -61,6 +61,7 @@ DEFAULT_KEEP_COLS = [
     "av_wind_speed",
     "wind_direction",
     "dist_q",
+    "rice_prod_aclvl_ahigh",
 ]
 
 
@@ -80,6 +81,15 @@ def parse_args() -> argparse.Namespace:
         required=True,
         type=Path,
         help="Final output CSV path. No per-cohort files are written.",
+    )
+    parser.add_argument(
+        "--master-parquet",
+        type=Path,
+        default=None,
+        help=(
+            "Optional 0_master_dataset.parquet used to attach the canonical "
+            "rice_prod_aclvl_ahigh field by grid, AC, year, and month."
+        ),
     )
     parser.add_argument(
         "--database",
@@ -393,12 +403,18 @@ def build_config(
     selected_cols: Sequence[str],
 ) -> dict:
     stat = args.input.stat()
+    master_stat = args.master_parquet.stat() if args.master_parquet else None
     min_pre = args.pre_periods if args.require_full_window else args.min_pre
     min_post = args.post_periods if args.require_full_window else args.min_post
     return {
         "input": str(args.input.resolve()),
         "input_size": stat.st_size,
         "input_mtime_ns": stat.st_mtime_ns,
+        "master_parquet": (
+            str(args.master_parquet.resolve()) if args.master_parquet else None
+        ),
+        "master_size": master_stat.st_size if master_stat else None,
+        "master_mtime_ns": master_stat.st_mtime_ns if master_stat else None,
         "database": str(database_path.resolve()),
         "treatment_col": args.treatment_col,
         "time_col": args.time_col,
@@ -425,6 +441,8 @@ def build_config(
 def validate_args(args: argparse.Namespace) -> None:
     if not args.input.exists():
         raise FileNotFoundError(args.input)
+    if args.master_parquet is not None and not args.master_parquet.exists():
+        raise FileNotFoundError(args.master_parquet)
     if args.pre_periods < 0 or args.post_periods < 0:
         raise ValueError("--pre-periods and --post-periods must be nonnegative.")
     if args.min_pre < 0 or args.min_post < 0:
@@ -997,6 +1015,80 @@ def main() -> int:
             temp_directory=temp_directory,
         )
         source_cols = discover_columns(con, source_sql)
+        if args.master_parquet is not None:
+            if "rice_prod_aclvl_ahigh" in source_cols:
+                logging.info(
+                    "Neighbour input already contains rice_prod_aclvl_ahigh; "
+                    "the master attachment is not needed."
+                )
+            else:
+                join_keys = [
+                    "unique_small_grid_id",
+                    args.year_col,
+                    args.month_col,
+                ]
+                missing_keys = [key for key in join_keys if key not in source_cols]
+                if missing_keys:
+                    raise ValueError(
+                        "Cannot attach the master rice flag; neighbour input is "
+                        "missing join keys: " + ", ".join(missing_keys)
+                    )
+                master_sql = source_expression(args.master_parquet, args.csv_sample_size)
+                master_cols = {
+                    row[0]
+                    for row in con.execute(
+                        f"DESCRIBE SELECT * FROM {master_sql}"
+                    ).fetchall()
+                }
+                required_master = {*join_keys, "rice_prod_aclvl_ahigh"}
+                missing_master = sorted(required_master - master_cols)
+                if missing_master:
+                    raise ValueError(
+                        "Master attachment is missing columns: "
+                        + ", ".join(missing_master)
+                    )
+                duplicate_master_key = con.execute(
+                    f"""
+                    SELECT 1
+                    FROM {master_sql}
+                    GROUP BY {', '.join(qid(key) for key in join_keys)}
+                    HAVING COUNT(*) > 1
+                    LIMIT 1
+                    """
+                ).fetchone()
+                if duplicate_master_key is not None:
+                    raise ValueError(
+                        "0_master_dataset.parquet is not unique by "
+                        + ", ".join(join_keys)
+                    )
+                join_sql = " AND ".join(
+                    f"n.{qid(key)} IS NOT DISTINCT FROM m.{qid(key)}"
+                    for key in join_keys
+                )
+                source_sql = f"""
+                    SELECT n.*, m.{qid('rice_prod_aclvl_ahigh')}
+                    FROM ({source_sql}) AS n
+                    LEFT JOIN ({master_sql}) AS m
+                      ON {join_sql}
+                """
+                source_cols = discover_columns(con, source_sql)
+                missing_rice = con.execute(
+                    f"""
+                    SELECT 1
+                    FROM ({source_sql})
+                    WHERE {qid('rice_prod_aclvl_ahigh')} IS NULL
+                    LIMIT 1
+                    """
+                ).fetchone()
+                if missing_rice is not None:
+                    raise ValueError(
+                        "Some neighbour rows do not match 0_master_dataset by "
+                        + ", ".join(join_keys)
+                    )
+                logging.info(
+                    "Attached rice_prod_aclvl_ahigh from %s",
+                    args.master_parquet,
+                )
         selected_cols = choose_columns(args, source_cols)
         config = build_config(args, database_path, selected_cols)
         config_json = json.dumps(config, sort_keys=True)

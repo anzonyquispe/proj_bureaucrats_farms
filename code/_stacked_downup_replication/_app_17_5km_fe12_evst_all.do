@@ -44,6 +44,15 @@ confirm file "`protest_input'"
 display as text "RA same-term protest input: `protest_input'"
 import delimited using "`protest_input'", clear varnames(1)
 
+* Attach the reference dofile's AC-area clustering variable without importing
+* the full master CSV into Stata.
+merge m:1 unique_small_grid_id month year using ///
+    "${int_data}/grid_month_ac_area_tr.dta", ///
+    keep(master match) keepusing(ac_area_tr)
+assert _merge == 3
+drop _merge
+assert !missing(ac_area_tr)
+
 * Match the reference dofile's cohort and election-term checks.
 confirm variable cohort_id
 confirm variable cohort_election_year
@@ -75,11 +84,15 @@ merge m:1 unique_small_grid_id using ///
 keep if _merge == 3
 drop _merge
 keep if ${is_rural_var} == 1
+keep if year < 2022 | (year == 2022 & month <= 8)
 display as text "Observations after rice and rural filters: " _N
 
-* Estimate the agreed support -4,...,+4. Plotting later displays only through
-* +1 while retaining the +2,...,+4 coefficients in the stored result.
-keep if inrange(relative_year_bin, -4, 4)
+* Match the reference sample: remove only its earliest -5 bin and estimate all
+* remaining naturally observed event years. Plotting can impose a narrower
+* display window without changing the estimation sample.
+count if relative_year_bin == -5
+display as text "Observations dropped at relative_year_bin == -5: " r(N)
+drop if relative_year_bin == -5
 quietly summarize relative_year_bin
 display as text "Canonical protest event-study support retained: [" ///
     r(min) ", " r(max) "]"
@@ -94,7 +107,6 @@ recast byte yeargov, force
 egen unique_small_grid_id_cohort = group(unique_small_grid_id cohort_id)
 egen monthyearco                 = group(month year cohort_id)
 egen province_cohort             = group(cohort_id province)
-egen ac_elec_yr                  = group(ac_uq_id cohort_election_year cohort_id)
 egen relativeyear_cohort         = group(relative_year_bin cohort_id)
 
 * Retain grid-cohort units observed on both sides of the protest switch.
@@ -132,6 +144,8 @@ gen byte moderator = 0
 * local moderators_list moderator downup_ac rice_area_aclvl_ahigh rice_harvarea_aclvl_ahigh rice_prod_aclvl_ahigh
 local moderators_list moderator
 
+do "${code}/exploratory_analysis/rice_high_subsample/_apply_rice_high_subsample.do"
+
 egen byte tag_ac = tag(ac_uq_id)
 quietly count if tag_ac
 local numacs = r(N)
@@ -162,9 +176,9 @@ foreach fe of numlist $fe_list {
 
         reghdfejl `dep_var' `rhs' if `filter1', ///
             absorb(`fespec' relativeyear_cohort) ///
-            vce(cluster ac_elec_yr)
+            vce(cluster ac_area_tr)
 
-        * Preserve structural sanity checks for the agreed -4,...,+4 support.
+        * Preserve structural sanity checks for the naturally retained support.
         if e(N) <= 0 | e(N_clust) <= 1 {
             display as error "FE3 returned an empty sample or insufficient clusters."
             exit 459

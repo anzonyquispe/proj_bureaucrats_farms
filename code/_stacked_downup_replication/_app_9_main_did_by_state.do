@@ -128,6 +128,8 @@ forvalues prov_num = 1/`nstates' {
     keep if province_id == `prov_num'
 
     * Count unique ACs for this state
+    do "${code}/exploratory_analysis/rice_high_subsample/_apply_rice_high_subsample.do"
+
     egen tag_ac = tag(ac_id)
     count if tag_ac == 1
     local numacs`i' = r(N)

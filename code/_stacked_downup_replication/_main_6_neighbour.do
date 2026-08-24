@@ -59,6 +59,8 @@ if _rc {
 }
 gen moderator = 0
 
+do "${code}/exploratory_analysis/rice_high_subsample/_apply_rice_high_subsample.do"
+
 quietly summarize countk if treat == 1 & relative_year_bin <= -1
 local ymean = r(mean)
 quietly summarize countk if treat == 1 & relative_year_bin <= -1 & moderator == 1

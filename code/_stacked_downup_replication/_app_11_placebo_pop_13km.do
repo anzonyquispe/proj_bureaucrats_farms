@@ -59,6 +59,8 @@ else {
 }
 
 egen cluster_acmonth = group(ac_id monthyear)
+do "${code}/exploratory_analysis/rice_high_subsample/_apply_rice_high_subsample.do"
+
 egen tag_ac = tag(ac_id)
 count if tag_ac == 1
 local numacs = r(N)

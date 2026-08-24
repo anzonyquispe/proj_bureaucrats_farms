@@ -1,5 +1,5 @@
 ********************************************************************************
-* Descriptive table for the main rural panel
+* Descriptive table for the main rural stacked downup_ac_pop DiD sample
 * Output actively referenced by main.tex: tables/descriptives_main.tex
 ********************************************************************************
 
@@ -27,13 +27,46 @@ if "$root" == "" {
 global int_data "${root}/data_output/intermediate"
 global tables   "${code}/../../tables"
 
-import delimited using "${int_data}/0_master_dataset${sample}.csv", ///
+import delimited using "${int_data}/combined_dt_pop${sample}.csv", ///
     clear varnames(1) case(preserve)
+
+capture drop countk
+gen countk = count * 1000
+keep if inrange(relative_monthyear, -5, 6)
+
 merge m:1 unique_small_grid_id using ///
     "${int_data}/ghs_grid_classification_2000.dta", ///
     keep(master match) keepusing(is_rural) nogen
 keep if ${is_rural_var} == 1
 keep if year < 2022 | (year == 2022 & month <= 8)
+
+capture confirm numeric variable unique_small_grid_id
+if _rc {
+    encode unique_small_grid_id, gen(grid_id)
+}
+else {
+    gen grid_id = unique_small_grid_id
+}
+capture confirm numeric variable ac_uq_id
+if _rc {
+    encode ac_uq_id, gen(ac_id)
+}
+else {
+    gen ac_id = ac_uq_id
+}
+
+* Retain exactly the sample selected by the richest population DiD model.
+local controls wind_direction av_wind_speed
+local cluster ac_uq_id#cohort#monthyear unique_small_grid_id#cohort
+do "${code}/exploratory_analysis/rice_high_subsample/_apply_rice_high_subsample.do"
+quietly reghdfejl countk downup_ac_pop `controls', ///
+    absorb(grid_id#cohort ac_id#monthyear#cohort) cluster(`cluster')
+gen byte descriptive_sample = e(sample)
+quietly count if descriptive_sample
+display as text "Main richest-DiD descriptive sample: " r(N)
+keep if descriptive_sample
+drop descriptive_sample
+
 egen prov = group(province)
 
 capture program drop _fmt_num
@@ -82,7 +115,7 @@ local colsel unique_small_grid_id year month ac_uq_id prov count ///
     downup_ac_pop av_wind_speed wind_direction rice_prod_aclvl_ahigh
 local uniquevars unique_small_grid_id year month ac_uq_id prov
 
-local lab_unique_small_grid_id  "Grid ID"
+local lab_unique_small_grid_id  "Grid"
 local lab_year                  "Year"
 local lab_month                 "Month"
 local lab_ac_uq_id              "Assembly"

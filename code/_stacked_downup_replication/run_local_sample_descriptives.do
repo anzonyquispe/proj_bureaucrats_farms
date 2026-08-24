@@ -1,5 +1,5 @@
 ********************************************************************************
-* Focused local smoke test for the canonical protest event study.
+* Focused local smoke test for the three canonical descriptive tables.
 ********************************************************************************
 
 version 17
@@ -9,25 +9,23 @@ set more off
 global location "dbox"
 global sample "_sample"
 global is_rural_var "is_rural"
-global fe_list "3"
+global fe_list "1"
 global ster_suffix ""
-global control_samples ""
+global analysis_subsample "all"
 global root "C:/Users/eunic/Dropbox/sa_fires/proj_bureaucrats_farms"
 global repo "C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms"
 global code "${repo}/code/_stacked_downup_replication"
 global tables "${repo}/tables"
-global figures "${repo}/figures"
 
 capture program drop reghdfejl
 program define reghdfejl, eclass
     reghdfe `0'
 end
 
-quietly do "${code}/estsave_csv.ado"
-
 capture log close _all
-log using "${code}/logs/local_sample_protest_event.log", replace text
-do "${code}/_app_17_5km_fe12_evst_all.do"
-do "${code}/_export_event_study_csv.do"
-display as result "LOCAL SAMPLE PROTEST EVENT STUDY COMPLETED"
+log using "${code}/logs/local_sample_descriptives.log", replace text
+do "${code}/app_main_descriptive.do"
+do "${code}/app_5km_descriptive.do"
+do "${code}/app_polischar_descriptive.do"
+display as result "LOCAL SAMPLE DESCRIPTIVE TABLES COMPLETED"
 log close

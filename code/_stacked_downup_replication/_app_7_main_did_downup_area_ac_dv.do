@@ -101,6 +101,8 @@ else {
 
 
 * Count unique ACs
+do "${code}/exploratory_analysis/rice_high_subsample/_apply_rice_high_subsample.do"
+
 egen tag_ac = tag(ac_id)
 count if tag_ac == 1
 local numacs = r(N)

@@ -12,6 +12,9 @@ REPLICATION_CODE="${REPLICATION_CODE:-/users/aquisper/proj_bureaucrats_farms/cod
 LOCATION="${LOCATION:-shell}"
 SAMPLE="${SAMPLE:-none}"
 RURAL_VAR="${RURAL_VAR:-is_rural}"
+ANALYSIS_SUBSAMPLE="${ANALYSIS_SUBSAMPLE:-all}"
+OUTPUT_TAG="${OUTPUT_TAG:-}"
+JOB_PREFIX="${JOB_PREFIX:-}"
 RUNNER="${REPLICATION_CODE}/sbatch/run_dofile.sbatch"
 LOG_DIR="${REPLICATION_CODE}/logs"
 
@@ -28,9 +31,16 @@ else
 fi
 
 submit_estimation() {
-  local name="$1" dofile="$2" cpus="$3" fe_list="$4" suffix="$5"
+  local name="$1" dofile="$2" cpus="$3" fe_list="$4" base_suffix="$5"
   local downup="${6:-none}" stacked="${7:-none}" output="${8:-none}"
   local controls="${9:-all}"
+  local suffix="${base_suffix}"
+  if [[ -n "${OUTPUT_TAG}" ]]; then
+    [[ "${suffix}" == "none" ]] && suffix=""
+    suffix="${suffix}${OUTPUT_TAG}"
+  fi
+  [[ -z "${suffix}" ]] && suffix="none"
+  name="${JOB_PREFIX}${name}"
   local job_id
 
   if [[ "${scheduler}" == "sge" ]]; then
@@ -39,14 +49,15 @@ submit_estimation() {
     job_id=$(qsub "${opts[@]}" "${RUNNER}" \
       "${dofile}" "${REPLICATION_ROOT}" "${REPLICATION_CODE}" \
       "${LOCATION}" "${SAMPLE}" "${RURAL_VAR}" "${fe_list}" \
-      "${suffix}" "${downup}" "${stacked}" "${output}" "${controls}")
+      "${suffix}" "${downup}" "${stacked}" "${output}" "${controls}" \
+      "${ANALYSIS_SUBSAMPLE}")
   else
     job_id=$(sbatch --parsable --job-name="${name}" \
       --cpus-per-task="${cpus}" --output=/dev/null --error=/dev/null \
       "${RUNNER}" "${dofile}" "${REPLICATION_ROOT}" \
       "${REPLICATION_CODE}" "${LOCATION}" "${SAMPLE}" "${RURAL_VAR}" \
       "${fe_list}" "${suffix}" "${downup}" "${stacked}" "${output}" \
-      "${controls}")
+      "${controls}" "${ANALYSIS_SUBSAMPLE}")
     job_id="${job_id%%;*}"
   fi
   printf '%-28s job=%s cpus=%s dofile=%s\n' \
@@ -55,6 +66,9 @@ submit_estimation() {
 
 echo "Submitting estimation-only pipeline with ${scheduler}."
 echo "Sample suffix: ${SAMPLE}"
+echo "Analysis subsample: ${ANALYSIS_SUBSAMPLE}"
+echo "Output tag: ${OUTPUT_TAG:-<none>}"
+echo "Job prefix: ${JOB_PREFIX:-<none>}"
 echo "Permanent logs: ${LOG_DIR}/<job-name>_<job-id>.stata.log"
 
 # Main down/up DiD: the four common-sample FE specifications.

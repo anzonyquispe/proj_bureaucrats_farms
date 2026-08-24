@@ -44,6 +44,13 @@ confirm file "`protest_input'"
 display as text "Final same-term protest input: `protest_input'"
 import delimited using "`protest_input'", clear varnames(1)
 
+merge m:1 unique_small_grid_id month year using ///
+    "${int_data}/grid_month_ac_area_tr.dta", ///
+    keep(master match) keepusing(ac_area_tr)
+assert _merge == 3
+drop _merge
+assert !missing(ac_area_tr)
+
 confirm variable cohort_id
 confirm variable cohort_election_year
 confirm variable cohort_term_start
@@ -61,7 +68,10 @@ if _rc {
     rename relative_year relative_year_bin
 }
 assert relative_year_bin == floor((monthyear - cohort) / 12)
-keep if inrange(relative_year_bin, -4, 4)
+keep if year < 2022 | (year == 2022 & month <= 8)
+count if relative_year_bin == -5
+display as text "Observations dropped at relative_year_bin == -5: " r(N)
+drop if relative_year_bin == -5
 quietly summarize relative_year_bin
 display as text "Canonical protest DiD support: [" r(min) ", " r(max) "]"
 * Always express the fire-count outcome in thousands.
@@ -79,7 +89,6 @@ capture drop province_cohort
 egen province_cohort = group(province cohort_id)
 egen monthyearco = group(monthyear cohort_id)
 egen relativeyear_cohort = group(relative_year_bin cohort_id)
-egen ac_elec_yr = group(ac_uq_id cohort_election_year cohort_id)
 
 * The production stack must already contain both sides of the switch for every
 * retained grid-cohort. Fail loudly instead of silently changing the sample.
@@ -106,8 +115,10 @@ local moderators_list moderator ${downup_var}
 * Anchor every regular and interacted model to the sample retained by the
 * richest FE specification with the full downup interaction.
 local common_rhs "ib0.post_##ib0.treat##ib0.${downup_var} wind_direction av_wind_speed"
+do "${code}/exploratory_analysis/rice_high_subsample/_apply_rice_high_subsample.do"
+
 quietly reghdfejl countk `common_rhs', ///
-    absorb(`fe3' relativeyear_cohort) vce(cluster ac_elec_yr)
+    absorb(`fe3' relativeyear_cohort) vce(cluster ac_area_tr)
 gen byte common_sample = e(sample)
 quietly count
 local candidate_n = r(N)
@@ -133,7 +144,7 @@ foreach mod of local moderators_list {
     local ymean2 = r(mean)
     foreach fe of numlist $fe_list {
         reghdfejl countk `rhs', ///
-            absorb(`fe`fe'' relativeyear_cohort) vce(cluster ac_elec_yr)
+            absorb(`fe`fe'' relativeyear_cohort) vce(cluster ac_area_tr)
         if e(N) != `common_n' {
             display as error "FE specification `fe' with moderator `mod' changed the anchored sample."
             exit 459
