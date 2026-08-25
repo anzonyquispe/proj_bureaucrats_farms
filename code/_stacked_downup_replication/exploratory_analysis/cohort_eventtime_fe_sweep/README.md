@@ -13,6 +13,22 @@ the same window. Each estimation process imports and prepares its large dataset
 once and never uses `preserve`/`restore`. CSV export and plotting occur only
 after every assigned regression has written its STER file.
 
+## Current politician-only rerun
+
+To rerun the 32 politician specifications against the current full
+`politicians_characteristics_byprov.csv`, submit:
+
+```bash
+bash code/_stacked_downup_replication/exploratory_analysis/cohort_eventtime_fe_sweep/submit_politician_fe32_independent.sh
+```
+
+This submits 32 independent one-core jobs. Every job estimates one FE's main
+politician event study and its `post x treat x downup_ac_pop` DiD interaction.
+It does not submit any protest analysis. Logs are written as
+`logs/politician_current/politician_feNN.log`.
+
+## Historical combined launcher
+
 From the cluster repository root:
 
 ```bash

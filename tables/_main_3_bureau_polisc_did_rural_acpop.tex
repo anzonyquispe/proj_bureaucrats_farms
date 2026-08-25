@@ -1,25 +1,24 @@
 {\def\sym#1{\ifmmode^{#1}\else\(^{#1}\)\fi}
-\begin{tabular}{l*{5}{c}}
+\begin{tabular}{l*{4}{c}}
 \hline
- & (1) & (2) & (3) & (4) & (5) \\
- & \multicolumn{5}{c}{Number of Fires (in 1,000 units)} \\ \hline
+ & (1) & (2) & (3) & (4) \\
+ & \multicolumn{4}{c}{Number of Fires (in 1,000 units)} \\ \hline
 
-Down$>$ Up Bureaucrat&     -24.369\sym{***}&     -22.156\sym{***}&      -2.506\sym{**} &      -7.114\sym{***}&     -18.051\sym{***}\\
-            &     (2.958)         &     (1.355)         &     (1.018)         &     (1.002)         &     (1.156)         \\
-Down$>$ Up Politician (Pop)&       7.819\sym{**} &      -7.902\sym{***}&       4.762\sym{***}&     -10.448\sym{***}&      -6.530\sym{***}\\
-            &     (3.110)         &     (2.077)         &     (1.711)         &     (2.059)         &     (2.170)         \\
-Down$>$ Up Pol. (Pop) $\times$ Down$>$ Up Bur.&     -21.678\sym{***}&       3.514         &       1.102         &       9.958\sym{***}&       1.616         \\
-            &     (3.991)         &     (2.462)         &     (1.885)         &     (2.003)         &     (2.261)         \\
+Down$>$ Up Bureaucrat&     -24.369\sym{***}&     -22.156\sym{***}&      -2.506\sym{**} &      -7.114\sym{***}\\
+            &     (2.958)         &     (1.355)         &     (1.018)         &     (1.002)         \\
+Down$>$ Up Politician&       7.819\sym{**} &      -7.902\sym{***}&       4.762\sym{***}&     -10.448\sym{***}\\
+            &     (3.110)         &     (2.077)         &     (1.711)         &     (2.059)         \\
+Down$>$ Up Pol. $\times$ Down$>$ Up Bur.&     -21.678\sym{***}&       3.514         &       1.102         &       9.958\sym{***}\\
+            &     (3.991)         &     (2.462)         &     (1.885)         &     (2.003)         \\
 \hline
-Observations&  36,758,771         &  36,758,771         &  36,758,771         &  36,758,771         &  36,758,531         \\
-N Assembly Constituencies&         808         &         808         &         808         &         808         &         808         \\
-N Districts &         160         &         160         &         160         &         160         &         160         \\
-Month-Year FE&           N         &           Y         &           N         &           N         &           N         \\
-AC FE       &           N         &           Y         &           N         &           N         &           N         \\
-AC $\times$ Month-Year FE&           N         &           N         &           Y         &           Y         &           N         \\
-District $\times$ Month-Year FE&           N         &           N         &           N         &           N         &           Y         \\
-Grid FE     &           N         &           N         &           N         &           Y         &           Y         \\
-Mean DV     &      86.353         &      86.353         &      86.353         &      86.353         &      86.353         \\
+Observations&  36,758,771         &  36,758,771         &  36,758,771         &  36,758,771         \\
+N Assembly Constituencies&         808         &         808         &         808         &         808         \\
+N Districts &         160         &         160         &         160         &         160         \\
+Month-Year $\times$ Cohort FE&           N         &           Y         &           N         &           N         \\
+Grid $\times$ Cohort FE&           N         &           N         &           N         &           Y         \\
+AC $\times$ Month-Year $\times$ Cohort FE&           N         &           N         &           Y         &           Y         \\
+District $\times$ Month-Year $\times$ Cohort FE&           N         &           N         &           N         &           N         \\
+Mean DV     &      91.948         &      91.948         &      91.948         &      91.948         \\
 \hline
 \end{tabular}
 }

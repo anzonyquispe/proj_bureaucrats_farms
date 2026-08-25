@@ -4,8 +4,10 @@
 * Input: politicians_characteristics_byprov.csv
 * Sample: unchanged treated/control composition; rural; through August 2022;
 *         relative years -5,...,4.
-* One import and one prepared sample are used for both the event-study and DiD
-* interaction loops. No preserve/restore or analysis-data reload is used.
+* POL_CTIME_STAGE selects "event", "did", or "both". The independent FE
+* rerun sets it to "both": politician event study plus DiD interaction only.
+* When stage="both", one import and one prepared sample are used for both
+* loops. No preserve/restore or analysis-data reload is used.
 ********************************************************************************
 version 17
 clear all
@@ -15,6 +17,12 @@ set processors 1
 args fe_arg
 local fe_env : environment POL_CTIME_FE_LIST
 local sample_env : environment ANALYSIS_SAMPLE_SUFFIX
+local stage_env : environment POL_CTIME_STAGE
+if "`stage_env'" == "" local stage_env "both"
+if !inlist("`stage_env'", "event", "did", "both") {
+    display as error "POL_CTIME_STAGE must be event, did, or both."
+    exit 198
+}
 
 * Standalone defaults for the five standard sbatch parameters.
 global location     "shell"
@@ -41,7 +49,7 @@ capture mkdir "${tables}"
 
 local input_file "${int_data}/politicians_characteristics_byprov${sample}.csv"
 confirm file "`input_file'"
-display as text "Input: `input_file' | FE list: $fe_list"
+display as text "Input: `input_file' | FE list: $fe_list | stage: `stage_env'"
 import delimited using "`input_file'", clear varnames(1)
 
 capture confirm variable relative_year_bin
@@ -166,15 +174,52 @@ local n_control = r(N)
 ********************************************************************************
 * Event studies: all requested FEs, same loaded and filtered data.
 ********************************************************************************
-foreach mod of local moderators_list {
-    replace moderator = `mod'
-    local rhs "ib`base'.relative_year_bin_aux##ib0.treat##ib0.`mod' wind_direction av_wind_speed"
+if inlist("`stage_env'", "event", "both") {
+    foreach mod of local moderators_list {
+        replace moderator = `mod'
+        local rhs "ib`base'.relative_year_bin_aux##ib0.treat##ib0.`mod' wind_direction av_wind_speed"
+        foreach selected_fe of numlist $fe_list {
+            local original_fespec "`fe`selected_fe''"
+            local fespec "`original_fespec' relative_year_bin_aux#cohort_id"
+            local tag : display %02.0f `selected_fe'
+            local tag = strtrim("`tag'")
+            display as result "POLITICIAN EVENT FE `selected_fe': `fespec'"
+            est clear
+            reghdfejl countk `rhs', absorb(`fespec') vce(cluster ac_elec_yr)
+            estadd scalar ymean = `ymean'
+            estadd scalar ymean2 = `ymean2'
+            estadd scalar acq = `numacs'
+            estadd scalar fe_id = `selected_fe'
+            estadd scalar n_treated = `n_treated'
+            estadd scalar n_control = `n_control'
+            estadd scalar n_cohorts = `number_cohorts'
+            estadd local smpl "Rural"
+            estadd local fespec "`fespec'"
+            estadd local mod "`mod'"
+            estadd local controls "unchanged full control composition"
+            estadd local cohortvar "cohort_id"
+            est store evreg1
+            local out "${tables}/politician_byprov_cohorttime_fe`tag'_event_rural${ster_suffix}_all"
+            estwrite evreg1 using "`out'.ster", replace
+            confirm file "`out'.ster"
+        }
+    }
+}
+
+********************************************************************************
+* DiD interactions: same rows and same data in memory; no preserve/restore.
+********************************************************************************
+if inlist("`stage_env'", "did", "both") {
+    gen byte post_ = relative_year_bin >= 0
+    quietly summarize countk if treat == 1 & relative_year_bin <= -1 & downup_ac_pop == 1
+    local ymean2 = r(mean)
+    local rhs "ib0.post_##ib0.treat##ib0.downup_ac_pop wind_direction av_wind_speed"
     foreach selected_fe of numlist $fe_list {
         local original_fespec "`fe`selected_fe''"
         local fespec "`original_fespec' relative_year_bin_aux#cohort_id"
         local tag : display %02.0f `selected_fe'
         local tag = strtrim("`tag'")
-        display as result "POLITICIAN EVENT FE `selected_fe': `fespec'"
+        display as result "POLITICIAN DID FE `selected_fe': `fespec'"
         est clear
         reghdfejl countk `rhs', absorb(`fespec') vce(cluster ac_elec_yr)
         estadd scalar ymean = `ymean'
@@ -186,48 +231,14 @@ foreach mod of local moderators_list {
         estadd scalar n_cohorts = `number_cohorts'
         estadd local smpl "Rural"
         estadd local fespec "`fespec'"
-        estadd local mod "`mod'"
+        estadd local mod "downup_ac_pop"
         estadd local controls "unchanged full control composition"
         estadd local cohortvar "cohort_id"
         est store evreg1
-        local out "${tables}/politician_byprov_cohorttime_fe`tag'_event_rural${ster_suffix}_all"
+        local out "${tables}/politician_byprov_cohorttime_fe`tag'_did_interaction_rural${ster_suffix}_all"
         estwrite evreg1 using "`out'.ster", replace
         confirm file "`out'.ster"
     }
 }
 
-********************************************************************************
-* DiD interactions: same rows and same data in memory; no preserve/restore.
-********************************************************************************
-gen byte post_ = relative_year_bin >= 0
-quietly summarize countk if treat == 1 & relative_year_bin <= -1 & downup_ac_pop == 1
-local ymean2 = r(mean)
-local rhs "ib0.post_##ib0.treat##ib0.downup_ac_pop wind_direction av_wind_speed"
-foreach selected_fe of numlist $fe_list {
-    local original_fespec "`fe`selected_fe''"
-    local fespec "`original_fespec' relative_year_bin_aux#cohort_id"
-    local tag : display %02.0f `selected_fe'
-    local tag = strtrim("`tag'")
-    display as result "POLITICIAN DID FE `selected_fe': `fespec'"
-    est clear
-    reghdfejl countk `rhs', absorb(`fespec') vce(cluster ac_elec_yr)
-    estadd scalar ymean = `ymean'
-    estadd scalar ymean2 = `ymean2'
-    estadd scalar acq = `numacs'
-    estadd scalar fe_id = `selected_fe'
-    estadd scalar n_treated = `n_treated'
-    estadd scalar n_control = `n_control'
-    estadd scalar n_cohorts = `number_cohorts'
-    estadd local smpl "Rural"
-    estadd local fespec "`fespec'"
-    estadd local mod "downup_ac_pop"
-    estadd local controls "unchanged full control composition"
-    estadd local cohortvar "cohort_id"
-    est store evreg1
-    local out "${tables}/politician_byprov_cohorttime_fe`tag'_did_interaction_rural${ster_suffix}_all"
-    estwrite evreg1 using "`out'.ster", replace
-    confirm file "`out'.ster"
-}
-
-display as result "COMPLETED politician cohort-event-time FE sweep: $fe_list"
-
+display as result "COMPLETED politician cohort-event-time FE sweep: $fe_list; stage=`stage_env'"
