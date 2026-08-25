@@ -59,6 +59,22 @@ if _rc {
 }
 gen moderator = 0
 
+* Current neighbour stacks carry the master dataset's AC-level rice-production
+* flag natively.  Older full stacks predate that field.  Keep the stack as the
+* row-preserving master and attach only the same canonical flag in that legacy
+* case; require every neighbour row to match its AC.
+if "$analysis_subsample" == "rice_high" {
+    capture confirm variable rice_prod_aclvl_ahigh
+    if _rc {
+        merge m:1 ac_uq_id using "${int_data}/9_rice_info_ac_lvl.dta", ///
+            keep(master match) keepusing(rice_prod_aclvl_ahigh)
+        assert _merge == 3
+        drop _merge
+        display as result ///
+            "Attached rice_prod_aclvl_ahigh to legacy neighbour stack by ac_uq_id"
+    }
+}
+
 do "${code}/_apply_analysis_subsample.do"
 
 quietly summarize countk if treat == 1 & relative_year_bin <= -1

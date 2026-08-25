@@ -146,12 +146,13 @@ global cluster unique_small_grid_id#cohort district_id#cohort#monthyear
 ********************************************************************************
 * Anchor every column and every footer statistic to the final specification.
 *
-* Run the final grid x cohort + district x month-year x cohort regression first.
-* This is the specification that previously dropped an additional 240 rows.
+* Run the most restrictive grid x cohort + AC x month-year x cohort regression
+* first.  AC x month-year cells are finer than district x month-year cells and
+* therefore determine the singleton-safe common sample for every column.
 ********************************************************************************
 
 quietly reghdfejl countk downup_dummy downup_ac_pop downup_interaction $controls, ///
-    absorb(grid_id#cohort district_id#monthyear#cohort) ///
+    absorb(grid_id#cohort assembly_id#monthyear#cohort) ///
     cluster($cluster)
 gen byte common_sample = e(sample)
 quietly count if common_sample

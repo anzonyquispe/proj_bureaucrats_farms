@@ -4,6 +4,7 @@
 
 version 17
 set more off
+set graphics off
 
 if "$root" == "" {
     clear all

@@ -216,7 +216,8 @@ save_honest <- function(beta, vcov, file_base, suffix, pre, post, m_max = 1) {
 
 plot_event <- function(event_data, file_base, num_pre, num_post,
                        omitted = -1, xlab = "Time from Treatment",
-                       ylim_original = NULL, ylim_rotated = NULL) {
+                       ylim_original = NULL, ylim_rotated = NULL,
+                       result_suffix = "") {
   event_data <- as.data.table(copy(event_data))
   setnames(event_data, names(event_data)[1:2], c("ymean", "beta"))
   event_data[, beta := as.numeric(beta)]
@@ -300,7 +301,9 @@ plot_event <- function(event_data, file_base, num_pre, num_post,
     ) +
     plot_theme +
     coord_cartesian(ylim = original_auto_ylim, clip = "off")
-  original_path <- file.path(figure_dir, paste0(file_base, "_ori.png"))
+  original_path <- file.path(
+    figure_dir, paste0(file_base, "_ori", result_suffix, ".png")
+  )
   ggsave(original_path, original, width = 8, height = 4, dpi = 300)
   message("Generated: ", original_path)
 
@@ -374,18 +377,21 @@ plot_event <- function(event_data, file_base, num_pre, num_post,
     ) +
     plot_theme +
     coord_cartesian(ylim = rotated_auto_ylim, clip = "off")
-  rotated_path <- file.path(figure_dir, paste0(file_base, "_rotated.png"))
+  rotated_path <- file.path(
+    figure_dir, paste0(file_base, "_rotated", result_suffix, ".png")
+  )
   ggsave(rotated_path, rotated_plot, width = 8, height = 4, dpi = 300)
   message("Generated: ", rotated_path)
 
   if (isTRUE(generate_honest)) {
     save_honest(
-      event_data$beta, vcov, file_base, "_honest2", honest_pre, num_post
+      event_data$beta, vcov, file_base,
+      paste0("_honest2", result_suffix), honest_pre, num_post
     )
     rotated_beta <- full[time != omitted, rotated]
     save_honest(
-      rotated_beta, rotated_vcov, file_base, "_rot_honest2", honest_pre,
-      num_post
+      rotated_beta, rotated_vcov, file_base,
+      paste0("_rot_honest2", result_suffix), honest_pre, num_post
     )
   }
 }
@@ -406,7 +412,7 @@ extract_event <- function(csv_name, model, rows, columns) {
 
 run_case <- function(csv, model, rows, columns, base, pre, post, omitted,
                      xlab, ylim_original = NULL, ylim_rotated = NULL,
-                     required = TRUE) {
+                     required = TRUE, result_suffix = "") {
   event <- extract_event(csv, model, rows, columns)
   if (is.null(event)) {
     message <- paste0("Missing estimate file: ", file.path(table_dir, csv))
@@ -415,7 +421,7 @@ run_case <- function(csv, model, rows, columns, base, pre, post, omitted,
     return(invisible(FALSE))
   }
   plot_event(event, base, pre, post, omitted, xlab,
-             ylim_original, ylim_rotated)
+             ylim_original, ylim_rotated, result_suffix)
   invisible(TRUE)
 }
 
@@ -453,14 +459,15 @@ run_registered_case <- function(spec, sample_suffix, output_suffix) {
     model = spec$model,
     rows = spec$rows,
     columns = spec$columns,
-    base = paste0(spec$figure_base, sample_suffix, output_suffix),
+    base = paste0(spec$figure_base, sample_suffix),
     pre = spec$pre,
     post = spec$post,
     omitted = spec$omitted,
     xlab = spec$xlab,
     ylim_original = spec$ylim_original,
     ylim_rotated = spec$ylim_rotated,
-    required = spec$required
+    required = spec$required,
+    result_suffix = output_suffix
   )
 }
 
@@ -934,7 +941,8 @@ extract_event_pattern <- function(csv_name, model, pattern) {
 
 run_pattern_case <- function(csv, model, pattern, base, pre, post,
                              omitted = -1, required = TRUE,
-                             display_coefficients = NULL) {
+                             display_coefficients = NULL,
+                             result_suffix = "") {
   event <- extract_event_pattern(csv, model, pattern)
   if (is.null(event)) {
     message <- paste0("Missing estimate file: ", file.path(table_dir, csv))
@@ -953,7 +961,8 @@ run_pattern_case <- function(csv, model, pattern, base, pre, post,
   }
   plot_event(
     event, base, pre, post, omitted,
-    xlab = "Time from Treatment (years)"
+    xlab = "Time from Treatment (years)",
+    result_suffix = result_suffix
   )
   invisible(TRUE)
 }
@@ -1129,8 +1138,8 @@ if ("protest" %in% args$families) {
   run_pattern_case(
     protest_csv, "evreg1",
     "relative_year_bin_aux#1\\.treat$",
-    paste0("_app_17_5km_fe12_evst_all", s, args$suffix, "_rural_fe03_1"),
-    4, 2, display_coefficients = 5L
+    paste0("_app_17_5km_fe12_evst_all", s, "_rural_fe03_1"),
+    4, 2, display_coefficients = 5L, result_suffix = args$suffix
   )
 }
 

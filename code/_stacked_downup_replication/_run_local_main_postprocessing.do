@@ -1,7 +1,8 @@
 ********************************************************************************
 * Environment-driven local post-processing bridge.
 * FARMS_LOCAL_STAGE must be export or tables. The PowerShell launcher runs the
-* export first, then runs tables in parallel with the three R plot processes.
+* export first, then runs tables and interaction figures in parallel with the
+* four R event-study/HonestDiD processes.
 ********************************************************************************
 
 version 17
@@ -56,6 +57,7 @@ if "`stage'" == "export" {
 }
 else {
     do "${code}/_generate_all_tables.do"
+    do "${code}/_generate_interaction_plots.do"
 }
 
 display as result "LOCAL MAIN POST-PROCESSING STAGE COMPLETED: `stage'"

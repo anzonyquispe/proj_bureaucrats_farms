@@ -14,8 +14,9 @@ part of the production pipeline.
   files through `sbatch/run_dofile.sbatch`.
 - `run_main_postprocessing.ps1`: single Windows entry point after synchronizing
   the cluster-generated `tables/` files. It exports event-study CSVs, generates
-  LaTeX tables, and plots the four production event studies. Table generation
-  and the four R plot processes run concurrently after CSV export.
+  LaTeX tables, interaction figures, and plots the four production event
+  studies. The Stata table/interaction stage and four R plot processes run
+  concurrently after CSV export.
 
 Cluster event-study dofiles write `.ster` files only. CSV conversion is owned
 exclusively by the Windows post-processing stage.
@@ -37,6 +38,17 @@ After synchronizing `tables/` to Windows, run the matching mode, for example:
 & "C:\Users\eunic\OneDrive\Documents\GitHub\proj_bureaucrats_farms\code\_stacked_downup_replication\run_main_postprocessing.ps1" `
   -DataSize sample -AnalysisSubsample all -MaxCores 10
 ```
+
+For the full above-median-rice run, the guarded one-command wrapper performs
+all local post-processing and renders the separate report:
+
+```powershell
+& "C:\Users\eunic\OneDrive\Documents\GitHub\proj_bureaucrats_farms\code\_stacked_downup_replication\run_abovemedian_postprocessing.ps1" -MaxCores 10
+```
+
+Its final PDF is `code/_report/output/main_v3_abovemedian.pdf`. The wrapper
+requires `_rice_high` inputs and outputs throughout, so it cannot silently mix
+unrestricted-sample results into the above-median report.
 
 `sbatch`/`qsub` cannot run locally on Windows. The shell launcher submits the
 cluster jobs; the PowerShell launcher performs local post-processing. Permanent
@@ -109,7 +121,7 @@ cluster logs are `logs/<job-name>_<job-id>.stata.log` or `.python.log`; schedule
 Each receives original, detrended/rotated, original HonestDiD, and rotated
 HonestDiD figures. HonestDiD is enabled by default. With `-MaxCores 10`, the
 Windows launcher divides nine HonestDiD workers across the four R processes and
-reserves one core for concurrent Stata table generation.
+reserves one core for concurrent Stata table and interaction-figure generation.
 
 ## Files intentionally outside production
 

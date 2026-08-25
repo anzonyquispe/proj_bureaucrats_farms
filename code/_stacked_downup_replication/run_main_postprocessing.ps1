@@ -89,7 +89,7 @@ $rBudget = [Math]::Max(1, $MaxCores - 1)
 $baseHonestCores = [Math]::Max(1, [Math]::Floor($rBudget / $plotJobs.Count))
 $extraCores = $rBudget - ($baseHonestCores * $plotJobs.Count)
 
-Write-Host "Stage 2/2: generating tables and four main plot families concurrently."
+Write-Host "Stage 2/2: generating tables, interaction figures, and four main plot families concurrently."
 $tableProcess = Invoke-StataStage -Stage tables
 $processes = @(@{ Name = "tables"; Process = $tableProcess; Log = (Join-Path $logDir "local_main_tables${sample}${suffix}.stata.log") })
 
@@ -155,7 +155,7 @@ if ($failures.Count) {
     throw "Local post-processing failed:`n$($failures -join "`n")"
 }
 
-Write-Host "Completed tables and main event-study figures."
+Write-Host "Completed tables, interaction figures, and main event-study/HonestDiD figures."
 Write-Host "Sample=$DataSize; analysis subsample=$AnalysisSubsample; maximum cores=$MaxCores"
 Write-Host "HonestDiD=$generateHonestDiD; event-study families=$($plotJobs.Count)"
 Write-Host "Outputs: $(Join-Path $RepositoryRoot 'tables') and $(Join-Path $RepositoryRoot 'figures')"

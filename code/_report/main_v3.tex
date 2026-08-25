@@ -24,6 +24,7 @@
 \usepackage{float}
 \usepackage{verbatim}
 \usepackage{booktabs}
+\usepackage{array}
 \usepackage{etoolbox}
 \usepackage{todonotes}
 \usepackage[english]{babel}
@@ -36,27 +37,36 @@
 \providecommand{\printbibliography}{}
 \providecommand{\omicron}{\mathrm{o}}
 \newcommand{\subfloat}[2][]{\subcaptionbox{#1}{#2}}
+% Optional result suffix supplied by a render driver. The ordinary report uses
+% an empty suffix; the above-median report defines this as _rice_high.
+\providecommand{\resultsuffix}{}
 
 % Resolve every table call against the repository root. Missing legacy assets
 % remain visible as named placeholders and are never sourced elsewhere.
 \let\SourceInput\input
 \renewcommand{\input}[1]{%
+  \IfFileExists{../../#1\resultsuffix.tex}{\SourceInput{../../#1\resultsuffix.tex}}{%
   \IfFileExists{../../#1}{\SourceInput{../../#1}}{%
     \IfFileExists{../../#1.tex}{\SourceInput{../../#1.tex}}{%
-      \fbox{\scriptsize Missing table: \detokenize{#1}}}}}
+      \fbox{\scriptsize Missing table: \detokenize{#1}}}}}}
 
 % Resolve figures only from the repository-level figures folder.
 \let\SourceIncludeGraphics\includegraphics
 \newcommand{\MissingGraphic}[2][]{%
   \adjustbox{#1}{\fbox{\parbox[c][2.2cm][c]{4cm}{\centering\scriptsize
   Missing figure: \detokenize{#2}}}}}
+\makeatletter
 \renewcommand{\includegraphics}[2][]{%
+  \filename@parse{#2}%
+  \edef\ResultGraphic{../../\filename@area\filename@base\resultsuffix.\filename@ext}%
+  \IfFileExists{\ResultGraphic}{\SourceIncludeGraphics[#1]{\ResultGraphic}}{%
   \IfFileExists{../../#2}{\SourceIncludeGraphics[#1]{../../#2}}{%
   \IfFileExists{../../#2.pdf}{\SourceIncludeGraphics[#1]{../../#2.pdf}}{%
   \IfFileExists{../../#2.png}{\SourceIncludeGraphics[#1]{../../#2.png}}{%
   \IfFileExists{../../#2.jpg}{\SourceIncludeGraphics[#1]{../../#2.jpg}}{%
   \IfFileExists{../../#2.jpeg}{\SourceIncludeGraphics[#1]{../../#2.jpeg}}{%
-  \MissingGraphic[#1]{#2}}}}}}}
+  \MissingGraphic[#1]{#2}}}}}}}}
+\makeatother
 %\addbibresource{all_references.bib} %\addbibresource{appendix_references.bib} 
 \sloppy
 \AtBeginEnvironment{table}{\singlespacing}
@@ -509,7 +519,7 @@ To give a sense of the public health stakes of this political action, we transla
     %%% ---------- Fila 2: (b) neighbor_output a ancho completo ---------- %%%
     \setcounter{subfigure}{1}% el siguiente bloque será (b)
     \subcaptionbox{Effect of grid distance to the upwind (in blue) and downwind (in red) border on number fires\label{fig:neighbor_analysis}}[\textwidth]{%
-      \includegraphics[width=0.55\textwidth]{figures/neighbor_output.png}%
+      \includegraphics[width=0.55\textwidth]{figures/neighbor_output.pdf}%
     }
 
     \vspace{-0.3cm}
@@ -619,7 +629,7 @@ To capture politician-level incentives, we aggregate our grid-level treatment in
 \label{eq:potexposure}
 \end{equation}
 
-$\text{Potential Exposure}_{jt}$ measures the average share of the constituency's population that lies downwind of a randomly drawn grid-cell, given each grid's prevailing wind direction. Unlike a simple share, it can exceed one because the same constituent may lie downwind of multiple grids simultaneously, appearing in $\texit{Down}_{it}$ for each of them. It is high when, across most locations in the constituency, wind would carry smoke toward the politician's own constituents, making them potentially exposed to fires. %the total population inside the politician's own constituency that \emph{potentially} receives pollution from an upwind fire. 
+$\text{Potential Exposure}_{jt}$ measures the average share of the constituency's population that lies downwind of a randomly drawn grid-cell, given each grid's prevailing wind direction. Unlike a simple share, it can exceed one because the same constituent may lie downwind of multiple grids simultaneously, appearing in $\textit{Down}_{it}$ for each of them. It is high when, across most locations in the constituency, wind would carry smoke toward the politician's own constituents, making them potentially exposed to fires. %the total population inside the politician's own constituency that \emph{potentially} receives pollution from an upwind fire.
 We standardize $\text{Potential Exposure}_{jt}$ over the estimation sample (mean = 60.12, SD = 37.71), so a one-unit increase corresponds to a one-standard-deviation increase in the number of own-constituency potential pollution for an average constituent. 
 
 For outcome $Y$ in constituency $j$ and month-year $t$, we estimate the impact of potential exposure on the likelihood of observing political action in a given constituency-month $Y_jt$:
@@ -801,6 +811,7 @@ where the dependent variable is the number of fires per 1,000 units; $Post$ is a
 }
  \textcolor{purple}{While the stacked dataset is constructed at the month-year level, we aggregate relative-time into years (12 months from treatment) when plotting the event-study estimates to reduce noise.
 Standard errors are clustered at the assembly constituency $\times$ election year level. 
+}
 
 \subsubsection{Results\label{sssec:results3}}
 
@@ -865,7 +876,7 @@ When a constituency switches to electing an agriculturalist politician, fires in
     \hfill
     \subcaptionbox{By constituency exposure to smoke\label{fig:agr_downup}}[0.48\textwidth]{%
         \centering
-        \includegraphics[width=\linewidth]{figures/politician_byprov_cohorttime_fe03_did_interaction_rural_acpop_all_1.png}
+        \includegraphics[width=\linewidth]{figures/_app_19_polischar_fe12_did_downup_inter_plot_rural_acpop.png}
     }
     
     \vspace{1em}
@@ -933,7 +944,7 @@ To identify agricultural ties, we employed a large language model (\emph{GPT}) a
 For validation we carried out two exercises: First, we ran the classification procedure ten times for each observation and assigned the final category using the modal classification across the ten runs. Second, we manually reviewed a stratified random sample of 10 percent of observations (stratifying on LLM positives and negatives of farmer politicians), and found zero errors. 
 
 The following fixed prompt was supplied to GPT for the coding of politicians' agricultural assets and professions: 
-\begin{Verbatim}[breaklines=true, breakanywhere=true, fontsize=\small]
+\begin{Verbatim}[fontsize=\small]
 You are a research assistant interested in political capture in India. You are researching whether politicians with agricultural assets are more prone to taking actions that favor agricultural businesses. Your current task is to assess whether an individual owns agricultural assets.\ You will be provided a table with two columns. The table summarizes the immovable assets owned by the individual. The first column describes the type of immovable assets listed in the corresponding row. The Second column lists the immovable assets of the corresponding type. The individual is considered to own agricultural assets ONLY IF any are listed in the row corresponding to agricultural assets. If the value says \"Nil\", we can infer that the individual does not own any such assets.\ Provide a JSON blob with your assessment, structured as follows. First, the \"explanation\" field should include your reasoning for your assessment on whether the individual owns agricultural assets. Second, the "owns_agricultural_assets" must include a boolean, true if the individual is assessed to own any agricultural assets, and false otherwise.\ You must only use the information included in the row of agricultural assets; any other kind of asset should be ignored.
 \end{Verbatim}
 
@@ -941,7 +952,7 @@ We provide additional information on the use of AI in section \ref{ssec:ai}.
 
 \begin{comment}
 
-\begin{Verbatim}[breaklines=true, breakanywhere=true, fontsize=\small]
+\begin{Verbatim}[fontsize=\small]
 You are a research assistant interested in political capture in India. You are researching whether politicians with agricultural assets are more prone to taking actions that favor agricultural businesses. Your current task is to assess whether an individual owns agricultural assets.\ You will be provided a table with two columns. The table summarizes the immovable assets owned by the individual. The first column describes the type of immovable assets listed in the corresponding row. The Second column lists the immovable assets of the corresponding type. The individual is considered to own agricultural assets ONLY IF any are listed in the row corresponding to agricultural assets. If the value says \"Nil\", we can infer that the individual does not own any such assets.\ Provide a JSON blob with your assessment, structured as follows. First, the \"explanation\" field should include your reasoning for your assessment on whether the individual owns agricultural assets. Second, the "owns_agricultural_assets" must include a boolean, true if the individual is assessed to own any agricultural assets, and false otherwise.\ You must only use the information included in the row of agricultural assets; any other kind of asset should be ignored
 \end{Verbatim}
 % The classification procedure uses politicians characteristics to generate a prediction of the agricultural assets owned by the election's winner and their family, as well as the profession declared by the winner and their spouse. 
@@ -1281,7 +1292,7 @@ For the mortality estimate, Lan et al. report 69,000 premature deaths per year a
  \centering
 \caption{Effect of constituency exposure to smoke on number of Fires, by constituency with rice production}\label{fig:es_rice}
 {%
-    \includegraphics[width=0.48\linewidth]{figures/stacked_event_study_pop_m5_p6_omit0_rural_1_ori}
+    \includegraphics[width=0.48\linewidth]{figures/stacked_event_study_pop_5pre_rural_riceP_ori.png}
   }
   \hfill
        \begin{minipage}{\textwidth}
@@ -1320,7 +1331,7 @@ This section presents additional results for the lobbying analysis. First, we pr
      \centering
      \caption{Descriptive Statistics \label{tab:_desc_incentive_main}}
      \resizebox{0.8\textwidth}{!}{
-      \input{tables/_protest_stacked_descriptive.tex}
+      \input{tables/_protest_stacked_descriptive}
       }
       \begin{minipage}{\textwidth}
          {\small \textit{Notes: } This table shows descriptive statistics of the main variable for the protest analysis }
@@ -1447,13 +1458,14 @@ This section presents additional results for the lobbying analysis. First, we pr
     \caption{Effect of Protest occurrence on number of fires, by constituency exposure to smoke}
     \label{tab:protest_downup}
     \resizebox{\textwidth}{!}{
-    \input{tables/_main_4_protest_5km_fe12_did_downup_rural_acpop_new.tex}
+    \input{tables/_main_4_protest_5km_fe12_did_downup_rural_acpop_new}
     }
     \begin{minipage}{\textwidth}
         {\small \textit{Notes: } (Columns 1-3) Results from Equation \ref{eq_protest} of the effect of protest occurence on fires. (Columns 4-6) Results from Equation \ref{eq_protest} with the additional interaction for pollution visibility. $Down>Up$ is a dummy equal to one in months and grids from which most of the assembly constituency area is exposed to
 smoke (see Section \ref{ssec:empirical1} for details). 
         The table reports the mean of the dependent variable in control grids before the cohort event-time.  All regressions control for average wind speed and direction. 
         Standard errors are clustered at the buffer area $\times$ assembly constituency level. \textcolor{red}{Write why we look at linear combination as triple interaction is not significant}
+        }
     \end{minipage}
 \end{table}
 
@@ -1582,7 +1594,7 @@ This section presents additional results for the adverse selection analysis. Fir
     \caption{Effect of switching to an agriculturalist politician on number of fires, by constituency exposure to smoke}
     \label{tab:agri_profession_downwind}
     \resizebox{\textwidth}{!}{
-      \input{tables/_main_5_polischar_fe12_did_downup_inter_rural_acpop.tex}
+      \input{tables/_main_5_polischar_fe12_did_downup_inter_rural_acpop}
     }
      \begin{minipage}{\textwidth}
         {\small \textit{Notes: } (Columns 1-3) Results from Equation \ref{eq_agriculture} of the effect of switching to electing a politician with agricultural ties on fires. (Columns
@@ -2821,7 +2833,7 @@ Not allowing toll plazas to work, destroying telecom towers-does it serve a Pavi
     \centering
     \caption{Effect of switching to an agriculturalist politician, by constituency exposure to smoke (Area-Based Treatment)}\label{tab:app_agri_profession_downwind_area}
     \resizebox{0.75\textwidth}{!}{
-      \input{tables/_main_5_polischar_fe12_did_downup_inter_rural.tex}
+      \input{tables/_main_5_polischar_fe12_did_downup_inter_rural}
     }
 \end{table}
 

@@ -126,7 +126,7 @@ _set_main_fe_tags
 _strip_zeros_stats, models(eq1 eq2 eq3 eq4) stats(ymean)
 
 esttab eq1 eq2 eq3 eq4 using ///
-    "${tables}/main_did_downup_area_ac${sample}_rural.tex", ///
+    "${tables}/main_did_downup_area_ac${sample}_rural${ster_suffix}.tex", ///
     replace ///
     cells(b(fmt(3) star) se(par fmt(3))) ///
     star(* 0.10 ** 0.05 *** 0.01) ///
@@ -154,7 +154,7 @@ estread using "${tables}/_main_4_protest_5km_fe12_did_downup${sample}_rural${ste
 _strip_zeros_stats, models(evreg1 evreg2 evreg3 evreg4 evreg5 evreg6) stats(ymean ymean2)
 
 esttab evreg1 evreg2 evreg3 evreg4 evreg5 evreg6 using ///
-    "${tables}/_main_4_protest_5km_fe12_did_downup${sample}_rural.tex", ///
+    "${tables}/_main_4_protest_5km_fe12_did_downup${sample}_rural${ster_suffix}.tex", ///
     replace ///
     cells(b(fmt(3) star) se(par fmt(3))) ///
     star(* 0.10 ** 0.05 *** 0.01) ///
@@ -187,7 +187,7 @@ estread using "${tables}/_main_5_polischar_fe12_did_downup_inter${sample}_rural$
 _strip_zeros_stats, models(evreg1 evreg2) stats(ymean ymean2)
 
 esttab evreg1 evreg2 using ///
-    "${tables}/_main_5_polischar_fe12_did_downup_inter${sample}_rural.tex", ///
+    "${tables}/_main_5_polischar_fe12_did_downup_inter${sample}_rural${ster_suffix}.tex", ///
     replace ///
     cells(b(fmt(3) star) se(par fmt(3))) ///
     star(* 0.10 ** 0.05 *** 0.01) ///
@@ -944,48 +944,48 @@ program define _cmpsection
 end
 
 _cmpsection `cmp' "Main DiD (\_main\_1\_did)" ///
-    "main_did_downup_area_ac${sample}_rural.tex" ///
-    "main_did_downup_ac${sample}_rural_acpop.tex"
+    "main_did_downup_area_ac${sample}_rural${ster_suffix}.tex" ///
+    "main_did_downup_ac${sample}_rural_acpop${ster_suffix}.tex"
 
 _cmpsection `cmp' "Bureaucrat $\times$ Politician DiD (\_main\_3\_bureau\_polisc\_did)" ///
-    "_main_3_bureau_polisc_did${sample}_rural.tex" ///
-    "_main_3_bureau_polisc_did${sample}_rural_acpop.tex"
+    "_main_3_bureau_polisc_did${sample}_rural${ster_suffix}.tex" ///
+    "_main_3_bureau_polisc_did${sample}_rural_acpop${ster_suffix}.tex"
 
 _cmpsection `cmp' "Protest DiD with Down$>$Up (\_main\_4\_protest\_5km\_fe12\_did\_downup)" ///
-    "_main_4_protest_5km_fe12_did_downup${sample}_rural.tex" ///
-    "_main_4_protest_5km_fe12_did_downup${sample}_rural_acpop_new.tex"
+    "_main_4_protest_5km_fe12_did_downup${sample}_rural${ster_suffix}.tex" ///
+    "_main_4_protest_5km_fe12_did_downup${sample}_rural_acpop_new${ster_suffix}.tex"
 
 _cmpsection `cmp' "Politician Char DiD with Down$>$Up (\_main\_5\_polischar\_fe12\_did\_downup\_inter)" ///
-    "_main_5_polischar_fe12_did_downup_inter${sample}_rural.tex" ///
-    "_main_5_polischar_fe12_did_downup_inter${sample}_rural_acpop.tex"
+    "_main_5_polischar_fe12_did_downup_inter${sample}_rural${ster_suffix}.tex" ///
+    "_main_5_polischar_fe12_did_downup_inter${sample}_rural_acpop${ster_suffix}.tex"
 
 _cmpsection `cmp' "Alternative DVs (\_app\_7\_main\_did\_downup\_area\_ac\_dv)" ///
-    "_app_7_main_did_downup_area_ac_dv${sample}_rural.tex" ///
-    "_app_7_main_did_downup_area_ac_dv${sample}_rural_acpop.tex"
+    "_app_7_main_did_downup_area_ac_dv${sample}_rural${ster_suffix}.tex" ///
+    "_app_7_main_did_downup_area_ac_dv${sample}_rural_acpop${ster_suffix}.tex"
 
 _cmpsection `cmp' "DiD by Year (\_app\_8\_main\_did\_by\_year)" ///
-    "_app_8_main_did_by_year${sample}_rural.tex" ///
-    "_app_8_main_did_by_year${sample}_rural_acpop.tex"
+    "_app_8_main_did_by_year${sample}_rural${ster_suffix}.tex" ///
+    "_app_8_main_did_by_year${sample}_rural_acpop${ster_suffix}.tex"
 
 _cmpsection `cmp' "DiD by State (\_app\_9\_main\_did\_by\_state)" ///
-    "_app_9_main_did_by_state${sample}_rural.tex" ///
-    "_app_9_main_did_by_state${sample}_rural_acpop.tex"
+    "_app_9_main_did_by_state${sample}_rural${ster_suffix}.tex" ///
+    "_app_9_main_did_by_state${sample}_rural_acpop${ster_suffix}.tex"
 
 _cmpsection `cmp' "Rice Moderators (\_app\_10\_did\_rice\_moderators)" ///
-    "_app_10_did_rice_moderators${sample}_rural.tex" ///
-    "_app_10_did_rice_moderators${sample}_rural_acpop.tex"
+    "_app_10_did_rice_moderators${sample}_rural${ster_suffix}.tex" ///
+    "_app_10_did_rice_moderators${sample}_rural_acpop${ster_suffix}.tex"
 
 _cmpsection `cmp' "Politician Rice Mods (\_app\_14\_polischar\_fe12\_did\_ricemods)" ///
-    "_app_14_polischar_fe12_did_ricemods${sample}_rural.tex" ///
-    "_app_14_polischar_fe12_did_ricemods${sample}_rural_acpop.tex"
+    "_app_14_polischar_fe12_did_ricemods${sample}_rural${ster_suffix}.tex" ///
+    "_app_14_polischar_fe12_did_ricemods${sample}_rural_acpop${ster_suffix}.tex"
 
 _cmpsection `cmp' "Politician FE DiD (\_app\_15\_polischar\_fe12\_did)" ///
-    "_app_15_polischar_fe12_did${sample}_rural.tex" ///
-    "_app_15_polischar_fe12_did${sample}_rural_acpop.tex"
+    "_app_15_polischar_fe12_did${sample}_rural${ster_suffix}.tex" ///
+    "_app_15_polischar_fe12_did${sample}_rural_acpop${ster_suffix}.tex"
 
 _cmpsection `cmp' "Downwind Heterogeneity (\_app\_20\_did\_downwind\_hm)" ///
-    "_app_20_did_downwind_hm${sample}_rural.tex" ///
-    "_app_20_did_downwind_hm${sample}_rural_acpop.tex"
+    "_app_20_did_downwind_hm${sample}_rural${ster_suffix}.tex" ///
+    "_app_20_did_downwind_hm${sample}_rural_acpop${ster_suffix}.tex"
 
 file write `cmp' "\end{document}" _n
 file close `cmp'

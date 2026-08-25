@@ -1,4 +1,3 @@
-No traceback available 
 During startup - Warning messages:
 1: Setting LC_COLLATE=C.UTF-8 failed 
 2: Setting LC_CTYPE=C.UTF-8 failed 
@@ -6,43 +5,7 @@ During startup - Warning messages:
 4: Setting LC_TIME=C.UTF-8 failed 
 Warning message:
 package 'ggplot2' was built under R version 4.5.3 
-During startup - Warning messages:
-1: Setting LC_COLLATE=C.UTF-8 failed 
-2: Setting LC_CTYPE=C.UTF-8 failed 
-3: Setting LC_MONETARY=C.UTF-8 failed 
-During startup - 4: Setting LC_TIME=C.UTF-8 failed 
-Warning messages:
-1: Setting LC_COLLATE=C.UTF-8 failed 
-2: Setting LC_CTYPE=C.UTF-8 failed 
-3: Setting LC_MONETARY=C.UTF-8 failed 
-4: Setting LC_TIME=C.UTF-8 failed 
-HonestDiD parallel workers: 2
 Running registered result: final_stacked_population_baseline
 Generated: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/stacked_event_study_pop_5pre_rural_1_sample_ori.png
 Generated: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/stacked_event_study_pop_5pre_rural_1_sample_rotated.png
-Generated: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/stacked_event_study_pop_5pre_rural_1_sample_honest2.png
-Error in computing main results
-	call:  {
-	  temp = findOptimalFLCI(betahat = betahat, sigma = sigma, numPrePeriods = numPrePeriods,
-	    numPostPeriods = numPostPeriods, l_vec = l_vec, M = Mvec[m], alpha = alpha,
-	    seed = seed)
-	  tibble::tibble(lb = temp$FLCI[1], ub = temp$FLCI[2], method = "FLCI", Delta = "DeltaSD",
-	  M = Mvec[m])
-	}
-	error: task 4 failed - "missing value where TRUE/FALSE needed"
-Traceback:
-Generated: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/stacked_event_study_pop_5pre_rural_1_sample_rot_honest2.png
-Warning messages:
-1: In .warnIfNotSymmPSD(sigma) :
-  matrix sigma not numerically positive semi-definite (smallest eigenvalue was -1.08532e-44)
-2: In .warnIfNotSymmPSD(sigma) :
-  matrix sigma not numerically positive semi-definite (smallest eigenvalue was -1.08532e-44)
-3: In .warnIfNotSymmPSD(sigma) :
-  matrix sigma not numerically positive semi-definite (smallest eigenvalue was -3.48023e-13)
-4: In .warnIfNotSymmPSD(sigma) :
-  matrix sigma not numerically positive semi-definite (smallest eigenvalue was -3.48023e-13)
-5: In base::min(base::diff(base::sort(robustResults$M))) :
-  no non-missing arguments to min; returning Inf
-6: In base::min(robustResults$M) :
-  no non-missing arguments to min; returning Inf
-All requested event-study and HonestDiD plots completed.
+All requested original and detrended event-study plots completed.
