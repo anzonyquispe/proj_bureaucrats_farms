@@ -1,19 +1,18 @@
-[2026-08-25 13:04:01] Generating the three full-sample descriptive tables
+[2026-08-25 14:05:42] Generating the three full-sample descriptive tables
 Python: /groups/sgulzar/india_forest_land/downup_geo/bin/python
 Threads: 10; memory limit: 100GB
-2026-08-25 13:04:03,191 | INFO | Loaded 158775 rows into rural_lookup
-2026-08-25 13:04:03,664 | INFO | Loaded 14837592 rows into area_lookup
-2026-08-25 13:04:05,075 | INFO | Building main descriptive sample
-2026-08-25 13:04:15,875 | INFO | Building protest descriptive sample
-Traceback (most recent call last):
-  File "/users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication/python/generate_descriptive_tables_duckdb.py", line 266, in <module>
-    raise SystemExit(main())
-                     ^^^^^^
-  File "/users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication/python/generate_descriptive_tables_duckdb.py", line 178, in main
-    con.execute(f"""
-_duckdb.BinderException: Binder Error: Table "p" does not have a column named "relative_year_bin"
-
-Candidate bindings: : "relative_year"
-
-LINE 16:         WHERE p.relative_year_bin BETWEEN -4 AND 4
-                       ^
+2026-08-25 14:05:48,694 | INFO | Loaded 158775 rows into rural_lookup
+2026-08-25 14:05:49,067 | INFO | Loaded 14837592 rows into area_lookup
+2026-08-25 14:05:57,009 | INFO | Protest relative-year column: relative_year
+2026-08-25 14:05:57,009 | INFO | Politician relative-year column: relative_year
+2026-08-25 14:05:57,009 | INFO | Building main descriptive sample
+2026-08-25 14:06:07,873 | INFO | Building protest descriptive sample
+2026-08-25 14:06:40,620 | INFO | Building politician descriptive sample
+2026-08-25 14:06:59,204 | INFO | desc_main: 36,897,937 observations
+2026-08-25 14:06:59,208 | INFO | Generated /users/aquisper/proj_bureaucrats_farms/tables/descriptives_main.tex
+2026-08-25 14:06:59,822 | INFO | desc_protest: 63,557,119 observations
+2026-08-25 14:06:59,825 | INFO | Generated /users/aquisper/proj_bureaucrats_farms/tables/_protest_stacked_descriptive.tex
+2026-08-25 14:06:59,984 | INFO | desc_politician: 8,268,839 observations
+2026-08-25 14:06:59,988 | INFO | Generated /users/aquisper/proj_bureaucrats_farms/tables/_politicians_stacked_descriptive.tex
+[2026-08-25 14:07:00] Completed descriptive tables
+Outputs: /users/aquisper/proj_bureaucrats_farms/tables
