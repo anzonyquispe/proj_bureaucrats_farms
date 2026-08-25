@@ -1,6 +1,6 @@
 ********************************************************************************
-* _app_main_did_downup_area_ac_dv_rural.do
-* Replicates _app_main_did_downup_area_ac_dv.R - RURAL GRIDS ONLY
+* Alternative dependent variables using population-based Down > Up treatment.
+* The historical output filename is retained for compatibility with main_v3.tex.
 * Different dependent variables: Any Fire, Log Fires, Mean Brightness
 ********************************************************************************
 
@@ -191,5 +191,34 @@ estwrite eq* using ///
     "${code}/../../tables/_app_7_main_did_downup_area_ac_dv${sample}_rural_stacked${ster_suffix}.ster", replace
 
 display "Ster: ${code}/../../tables/_app_7_main_did_downup_area_ac_dv${sample}_rural_stacked${ster_suffix}.ster"
+
+********************************************************************************
+* Write the canonical population-treatment LaTeX table in the same job.
+********************************************************************************
+
+esttab eq1 eq2 eq3 using ///
+    "${code}/../../tables/_app_7_main_did_downup_area_ac_dv${sample}_rural_acpop${ster_suffix}.tex", ///
+    replace ///
+    cells(b(fmt(4) star) se(par fmt(4))) ///
+    star(* 0.10 ** 0.05 *** 0.01) ///
+    keep(downup_ac_pop) ///
+    varlabels(downup_ac_pop "Down \$>\$ Up") ///
+    stats(N acq gridfe acmonthfe ymean, ///
+          fmt(%12.0fc %12.0fc %s %s %9.3fc) ///
+          labels("Observations" "N Assembly Constituencies" ///
+                 "Grid FE \$\times\$ Cohort" ///
+                 "Assembly \$\times\$ Month-Year \$\times\$ Cohort FE" ///
+                 "Mean DV")) ///
+    nomtitles nonumbers collabels(none) nobaselevels ///
+    prehead("\begin{tabular}{lccc}" ///
+            "\tabularnewline \hline" ///
+            "& (1) & (2) & (3)\\" ///
+            "& Any Fire & Log (N) Fires & Mean Brightness\\" ///
+            "\hline") ///
+    posthead("") prefoot("\hline") ///
+    postfoot("\hline" "\end{tabular}")
+
+display as result "Generated population-treatment table: " ///
+    "${code}/../../tables/_app_7_main_did_downup_area_ac_dv${sample}_rural_acpop${ster_suffix}.tex"
 
 ********************************************************************************
