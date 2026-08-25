@@ -5,7 +5,8 @@
 * Final sample: the input's unchanged treated/control composition, as in the
 * politician_byprov_fe_sweep exploratory analysis. The canonical output keeps
 * the historical _controls_both suffix for downstream plotting compatibility.
-* Final FE: grid x province-election cohort_id and event year x cohort_id.
+* Final FE (selected as FE03): grid x province-election cohort_id,
+* province-cohort linear month-year trends, and event year x cohort_id.
 *
 * The caller selects downup_ac or downup_ac_pop through $downup_var and uses
 * $ster_suffix (normally "" or "_acpop") to keep the two result families apart.
@@ -92,6 +93,7 @@ by cohort_id unique_small_grid_id: assert control_type == control_type[1]
 isid unique_small_grid_id monthyear cohort_id treat
 
 egen unique_small_grid_id_cohort = group(unique_small_grid_id cohort_id)
+egen province_cohort = group(province cohort_id)
 egen ac_elec_yr = group(ac_uq_id election_year cohort_id)
 
 quietly summarize relative_year_bin
@@ -99,8 +101,8 @@ local rmin = r(min)
 gen relative_year_bin_aux = relative_year_bin - `rmin' + 1
 local base = -1 - `rmin' + 1
 
-* Final FE selected by the province-cohort exploratory sweep.
-local fe1 "unique_small_grid_id_cohort relative_year_bin_aux#cohort_id"
+* Final FE03 selected by the province-cohort exploratory sweep.
+local fe1 "unique_small_grid_id_cohort province_cohort#c.monthyear relative_year_bin_aux#cohort_id"
 
 local filter1 "1"
 gen moderator = 0

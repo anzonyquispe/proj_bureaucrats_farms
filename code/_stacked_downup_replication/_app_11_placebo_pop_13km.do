@@ -73,7 +73,7 @@ local ymean2 = r(mean)
 local if1 ""
 local if2 "if downup_ac == 1"
 local if3 "if downup_ac == 0"
-local fe1 "grid_id ac_id#monthyear#cohort"
+local fe1 "grid_id#cohort ac_id#monthyear#cohort"
 
 est clear
 forvalues i = 1/3 {

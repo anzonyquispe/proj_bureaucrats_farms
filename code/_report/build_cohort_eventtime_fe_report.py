@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build the paired politician/protest cohort-event-time FE report."""
+"""Build the current politician-only cohort-event-time FE report."""
 
 from __future__ import annotations
 
@@ -112,11 +112,8 @@ def result_paths(fe: int) -> dict[str, Path]:
     tag = f"{fe:02d}"
     return {
         "pol_event": FIGURES / f"politician_byprov_cohorttime_fe{tag}_event_rural_acpop_all_ori.png",
-        "pr_event": FIGURES / f"protest_never_cohorttime_fe{tag}_event_rural_acpop_all_ori.png",
         "pol_rot": FIGURES / f"politician_byprov_cohorttime_fe{tag}_event_rural_acpop_all_rotated.png",
-        "pr_rot": FIGURES / f"protest_never_cohorttime_fe{tag}_event_rural_acpop_all_rotated.png",
         "pol_did": FIGURES / f"politician_byprov_cohorttime_fe{tag}_did_interaction_rural_acpop_all_1.png",
-        "pr_did": FIGURES / f"protest_never_cohorttime_fe{tag}_did_interaction_rural_acpop_all_1.png",
     }
 
 
@@ -132,18 +129,15 @@ def build_report() -> None:
     c.rect(0, 0, width, height, stroke=0, fill=1)
     c.setFillColor(colors.white)
     c.setFont("Helvetica-Bold", 24)
-    c.drawString(48, height - 88, "Cohort-specific event-time FE sweep")
+    c.drawString(48, height - 88, "Politician cohort-event-time FE sweep")
     c.setFont("Helvetica", 14)
-    c.drawString(48, height - 118, "Politician characteristics by province and protest analysis")
+    c.drawString(48, height - 118, "Current politicians_characteristics_byprov.csv")
     c.setFont("Helvetica", 10)
     cover_lines = [
         "Treatment definition: downup_ac_pop",
         "Politician event window: relative years -5 to 4; omitted period -1",
-        "Protest event window: relative years -8 to 1; omitted period -1",
-        "Protest controls: never-treated observations",
         "Common addition to every specification: cohort-specific relative-year fixed effects",
         "Politicians: relative_year_bin_aux#cohort_id",
-        "Protest: relative_year_bin_aux#cohort",
         "Interaction plots: every displayed lincom subtracts the control-pre estimate; control pre is normalized to zero",
         "The treated-control post contrast is unchanged because the common control-pre baseline cancels",
         "Interaction figures omit confidence intervals and report exact p-values rounded to three decimals",
@@ -158,9 +152,9 @@ def build_report() -> None:
     c.setFont("Helvetica-Bold", 10)
     c.drawString(60, 130, "Availability note")
     c.setFont("Helvetica", 9)
-    c.drawString(60, 112, "All 32 politician and protest event studies are included in original and rotated form.")
-    c.drawString(60, 96, "All 32 politician and all 32 protest DiD interaction plots are included.")
-    c.drawString(60, 82, "Every FE page therefore contains the complete set of available results.")
+    c.drawString(60, 112, "All 32 politician event studies are included in original and rotated form.")
+    c.drawString(60, 96, "All 32 politician DiD interaction plots are included.")
+    c.drawString(60, 82, "No protest analysis is included in this report.")
     draw_page_number(c, page, width)
     c.showPage()
     page += 1
@@ -181,10 +175,6 @@ def build_report() -> None:
     c.drawString(40, y - 6, "Added to every politician FE:")
     c.setFont("Courier", 8.5)
     c.drawString(300, y - 6, "relative_year_bin_aux#cohort_id")
-    c.setFont("Helvetica-Bold", 10)
-    c.drawString(40, y - 30, "Added to every protest FE:")
-    c.setFont("Courier", 8.5)
-    c.drawString(300, y - 30, "relative_year_bin_aux#cohort")
     draw_page_number(c, page, width)
     c.showPage()
     page += 1
@@ -210,7 +200,7 @@ def build_report() -> None:
     for fe in range(1, 33):
         paths = result_paths(fe)
         c.setFont("Helvetica-Bold", 15)
-        c.drawString(24, height - 25, f"FE{fe:02d}: original event studies and DiD interactions")
+        c.drawString(24, height - 25, f"FE{fe:02d}: politician event study and DiD interaction")
         spec = BASE_FE[fe]
         header_y = draw_wrapped(
             c, f"Base absorbed variables: {spec}", 24, height - 48,
@@ -218,24 +208,19 @@ def build_report() -> None:
         )
         c.setFont("Helvetica", 7.5)
         c.drawString(24, header_y,
-                     "Additional cohort-event-time FE: politicians use cohort_id; protest uses cohort.")
+                     "Additional cohort-event-time FE: relative_year_bin_aux#cohort_id.")
         c.drawString(24, header_y - 10,
                      "Interaction panels omit CIs and show exact p-values rounded to three decimals; the post contrast is unchanged.")
         gap = 10
         panel_w = (width - 48 - gap) / 2
-        panel_h = (height - 100 - gap - 22) / 2
+        panel_h = height - 112
         left = 24
         right = left + panel_w + gap
         bottom = 28
-        top = bottom + panel_h + gap
-        fit_image(c, paths["pol_event"], left, top, panel_w, panel_h,
+        fit_image(c, paths["pol_event"], left, bottom, panel_w, panel_h,
                   "Politician event study")
-        fit_image(c, paths["pr_event"], right, top, panel_w, panel_h,
-                  "Protest event study - never-treated controls")
-        fit_image(c, paths["pol_did"], left, bottom, panel_w, panel_h,
+        fit_image(c, paths["pol_did"], right, bottom, panel_w, panel_h,
                   "Politician DiD interaction with downup_ac_pop")
-        fit_image(c, paths["pr_did"], right, bottom, panel_w, panel_h,
-                  "Protest DiD interaction with downup_ac_pop")
         draw_page_number(c, page, width)
         c.showPage()
         page += 1
@@ -245,7 +230,7 @@ def build_report() -> None:
     c.drawString(42, height - 76, "Appendix: detrended event studies")
     c.setFont("Helvetica", 10)
     c.drawString(42, height - 104,
-                 "Each page compares the rotated politician and protest event-study estimates for one FE specification.")
+                 "Each page presents the rotated politician event-study estimates for one FE specification.")
     c.drawString(42, height - 122,
                  "Pre- and post-treatment averages and standard errors are recomputed after the pretrend rotation.")
     draw_page_number(c, page, width)
@@ -258,13 +243,10 @@ def build_report() -> None:
         c.drawString(24, height - 27, f"FE{fe:02d}: rotated event studies")
         c.setFont("Helvetica", 8)
         c.drawString(24, height - 42, BASE_FE[fe])
-        gap = 10
-        panel_w = (width - 48 - gap) / 2
+        panel_w = width - 120
         panel_h = height - 86
-        fit_image(c, paths["pol_rot"], 24, 28, panel_w, panel_h,
+        fit_image(c, paths["pol_rot"], 60, 28, panel_w, panel_h,
                   "Politician rotated event study")
-        fit_image(c, paths["pr_rot"], 24 + panel_w + gap, 28, panel_w, panel_h,
-                  "Protest rotated event study - never-treated controls")
         draw_page_number(c, page, width)
         c.showPage()
         page += 1

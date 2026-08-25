@@ -68,7 +68,11 @@ RSTUDIO_CONFIG <- list(
   cases = character(),
   # HonestDiD is opt-in after selecting the preferred main specification.
   # Set TRUE in RStudio, or use -IncludeHonestDiD in the PowerShell runner.
-  honest = FALSE
+  honest = FALSE,
+  # There are five values in the HonestDiD sensitivity grid, so more than five
+  # workers would remain idle. Override with --honest-cores or
+  # HONESTDID_CORES when needed.
+  honest_cores = 5L
 )
 # -----------------------------------------------------------------------
 
@@ -87,7 +91,10 @@ parse_args <- function(args) {
       "REPLICATION_PLOT_CASES",
       unset = paste(RSTUDIO_CONFIG$cases, collapse = ",")
     ),
-    honest = RSTUDIO_CONFIG$honest
+    honest = RSTUDIO_CONFIG$honest,
+    honest_cores = as.integer(Sys.getenv(
+      "HONESTDID_CORES", unset = RSTUDIO_CONFIG$honest_cores
+    ))
   )
   i <- 1L
   while (i <= length(args)) {
@@ -113,6 +120,12 @@ parse_args <- function(args) {
     } else if (args[[i]] == "--skip-honest") {
       out$honest <- FALSE
       i <- i + 1L
+    } else if (args[[i]] == "--honest") {
+      out$honest <- TRUE
+      i <- i + 1L
+    } else if (args[[i]] == "--honest-cores" && i < length(args)) {
+      out$honest_cores <- as.integer(args[[i + 1L]])
+      i <- i + 2L
     } else {
       stop("Unknown or incomplete argument: ", args[[i]])
     }
@@ -153,6 +166,10 @@ parse_args <- function(args) {
   } else {
     character()
   }
+  if (is.na(out$honest_cores) || out$honest_cores < 1L) {
+    stop("--honest-cores must be a positive integer.", call. = FALSE)
+  }
+  out$honest_cores <- min(out$honest_cores, 5L)
   out
 }
 
@@ -181,7 +198,7 @@ save_honest <- function(beta, vcov, file_base, suffix, pre, post, m_max = 1) {
     numPostPeriods = post,
     Mvec = seq(0.05, m_max, by = 0.2),
     l_vec = rep(1 / post, post),
-    parallel = FALSE
+    parallel = honest_parallel
   )
   plot <- HonestDiD::createSensitivityPlot(sensitivity, original) +
     labs(y = "Effect on Fires (1,000 units)", title = "") +
@@ -338,7 +355,8 @@ plot_event <- function(event_data, file_base, num_pre, num_post,
     )
     rotated_beta <- full[time != omitted, rotated]
     save_honest(
-      rotated_beta, vcov, file_base, "_rot_honest2", honest_pre, num_post
+      rotated_beta, rotated_vcov, file_base, "_rot_honest2", honest_pre,
+      num_post
     )
   }
 }
@@ -414,6 +432,20 @@ run_registered_case <- function(spec, sample_suffix) {
 
 args <- parse_args(commandArgs(trailingOnly = TRUE))
 generate_honest <- args$honest
+honest_parallel <- FALSE
+if (generate_honest && args$honest_cores > 1L) {
+  if (!requireNamespace("doParallel", quietly = TRUE)) {
+    stop(
+      "Parallel HonestDiD requires the doParallel R package.",
+      call. = FALSE
+    )
+  }
+  doParallel::registerDoParallel(cores = args$honest_cores)
+  honest_parallel <- TRUE
+  message("HonestDiD parallel workers: ", args$honest_cores)
+} else if (generate_honest) {
+  message("HonestDiD running sequentially (one worker).")
+}
 table_dir <- file.path(args$output_root, "tables")
 figure_dir <- file.path(args$output_root, "figures")
 dir.create(figure_dir, recursive = TRUE, showWarnings = FALSE)
@@ -448,6 +480,17 @@ event_cases <- list(
     figure_base = "stacked_event_study_pop_5pre_rural_riceP",
     pre = 5, post = 6, omitted = 0,
     ylim_original = c(-80, 50), ylim_rotated = c(-80, 50)
+  ),
+  # Selected politician specification: grid x cohort, province-specific linear
+  # month-year trends, and cohort-specific event-year fixed effects. This is
+  # the baseline event study without a moderator interaction.
+  event_case(
+    id = "final_politician_fe03_baseline",
+    csv_stem = "_app_16_polischar_fe03_evst_main_acpop",
+    model = "evreg1", rows = 13:21, columns = c(3, 4, 17:25),
+    figure_base = "_app_16_polischar_fe03_evst_main_rural_acpop_1",
+    pre = 5, post = 5, omitted = -1,
+    xlab = "Years from Election", ylim_original = c(-20, 50)
   ),
   # event_case(
   #   id = "legacy_main_baseline",
@@ -883,7 +926,8 @@ run_pattern_case <- function(csv, model, pattern, base, pre, post,
 production_main_case_ids <- c(
   "final_stacked_area_baseline",
   "final_stacked_population_baseline",
-  "final_stacked_population_rice"
+  "final_stacked_population_rice",
+  "final_politician_fe03_baseline"
 )
 event_case_ids <- vapply(event_cases, `[[`, character(1L), "id")
 event_cases <- event_cases[event_case_ids %in% production_main_case_ids]

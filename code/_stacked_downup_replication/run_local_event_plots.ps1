@@ -49,6 +49,9 @@ if ($Cases) {
 if (-not $IncludeHonestDiD) {
     $plotArguments += "--skip-honest"
 }
+else {
+    $plotArguments += "--honest"
+}
 
 & $RscriptCommand @plotArguments
 

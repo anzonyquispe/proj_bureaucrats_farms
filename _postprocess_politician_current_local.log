@@ -1,0 +1,2274 @@
+
+  ___  ____  ____  ____  ____ ®
+ /__    /   ____/   /   ____/      18.0
+___/   /   /___/   /   /___/       MP—Parallel Edition
+
+ Statistics and Data Science       Copyright 1985-2023 StataCorp LLC
+                                   StataCorp
+                                   4905 Lakeway Drive
+                                   College Station, Texas 77845 USA
+                                   800-STATA-PC        https://www.stata.com
+                                   979-696-4600        stata@stata.com
+
+Stata license: Single-user 4-core  perpetual
+Serial number: 501806366048
+  Licensed to: Any Name
+               Any Name
+
+Notes:
+      1. Stata is running in batch mode.
+      2. Unicode is supported; see help unicode_advice.
+      3. More than 2 billion observations are allowed; see help obs_advice.
+      4. Maximum number of variables is set to 5,000 but can be increased;
+          see help set_maxvar.
+
+. do C:\Users\eunic\OneDrive\Documents\GitHub\proj_bureaucrats_farms\code\_stac
+> ked_downup_replication\exploratory_analysis\cohort_eventtime_fe_sweep\_postpr
+> ocess_politician_current_local.do 
+
+. *****************************************************************************
+> ***
+. * Local postprocessing for the current 32-FE politician rerun.
+. *
+. * Inputs: 32 event-study STER files and 32 DiD-interaction STER files.
+. * Outputs: event/DiD CSVs and politician DiD-interaction PNGs.
+. * No analysis dataset is loaded and no regression is re-estimated.
+. *****************************************************************************
+> ***
+. version 18
+
+. clear all
+
+. set more off
+
+. set linesize 255
+
+. 
+. local root `"`c(pwd)'"'
+
+. local root : subinstr local root "\" "/", all
+
+. local code "`root'/code/_stacked_downup_replication"
+
+. local tables "`root'/tables/exploratory_analysis/cohort_eventtime_fe_sweep"
+
+. local figures "`root'/figures/exploratory_analysis/cohort_eventtime_fe_sweep"
+
+. local analysis_dir "`code'/exploratory_analysis/cohort_eventtime_fe_sweep"
+
+. 
+. confirm file "`root'/AGENTS.md"
+
+. capture mkdir "`figures'"
+
+. capture mkdir "`analysis_dir'/logs"
+
+. capture log close politician_postprocess
+
+. log using "`analysis_dir'/logs/postprocess_politician_current_local.log", ///
+>     text replace name(politician_postprocess)
+(file C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/code/_stacked_downup_replication/exploratory_analysis/cohort_eventtime_fe_sweep/logs/postprocess_politician_current_local.log not found)
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+      name:  politician_postprocess
+       log:  C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/code/_stacked_downup_replication/exploratory_analysis/cohort_eventtime_fe_sweep/logs/postprocess_politician_current_local.log
+  log type:  text
+ opened on:  24 Aug 2026, 20:12:59
+
+. 
+. capture program drop estsave_csv
+
+. quietly do "`code'/estsave_csv.ado"
+
+. quietly do "`code'/interaction_graph.ado"
+
+. 
+. forvalues fe = 1/32 {
+  2.     local tag : display %02.0f `fe'
+  3.     local tag = strtrim("`tag'")
+  4.     local prefix "politician_byprov_cohorttime_fe`tag'"
+  5.     local event "`tables'/`prefix'_event_rural_acpop_all"
+  6.     local did "`tables'/`prefix'_did_interaction_rural_acpop_all"
+  7. 
+.     confirm file "`event'.ster"
+  8.     est clear
+  9.     estread using "`event'.ster"
+ 10.     quietly estimates dir
+ 11.     local names `r(names)'
+ 12.     estsave_csv `names' using "`event'.csv", replace
+ 13.     confirm file "`event'.csv"
+ 14.     confirm file "`event'_scalars.csv"
+ 15. 
+.     confirm file "`did'.ster"
+ 16.     est clear
+ 17.     estread using "`did'.ster"
+ 18.     quietly estimates dir
+ 19.     local names `r(names)'
+ 20.     estsave_csv `names' using "`did'.csv", replace
+ 21.     confirm file "`did'.csv"
+ 22.     confirm file "`did'_scalars.csv"
+ 23. 
+.     est clear
+ 24.     interaction_graph using "`did'.ster", estimates(1) ///
+>         output("`figures'/`prefix'_did_interaction_rural_acpop_all") ///
+>         type(politician) modvar(downup_ac_pop)
+ 25.     confirm file "`figures'/`prefix'_did_interaction_rural_acpop_all_1.png"
+ 26.     display as result "POSTPROCESSED POLITICIAN FE `tag'"
+ 27. }
+
+--------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+------------------------------------------------------------------
+      evreg1 | reghdfejl    countk         21  HDFE linear regression with Julia
+--------------------------------------------------------------------------------
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+Estimates exported to C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/tables/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_cohorttime_fe01_event_rural_acpop_all.csv
+
+--------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+------------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with Julia
+--------------------------------------------------------------------------------
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+Estimates exported to C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/tables/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_cohorttime_fe01_did_interaction_rural_acpop_all.csv
+
+--------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+------------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with Julia
+--------------------------------------------------------------------------------
+(results evreg1 are active now)
+
+INTERACTION AUDIT (CONTROL-PRE STANDARDIZED): politician, estimate evreg1, moderator downup_ac_pop
+Control pre  : b =     0.000000   95% CI [    0.000000,     0.000000]   90% CI [    0.000000,     0.000000]
+Control post : b =    -0.839596   95% CI [  -11.805121,    10.125929]   90% CI [  -10.040957,     8.361765]
+Treated post : b =    10.083680   95% CI [   -7.721682,    27.889042]   90% CI [   -4.857106,    25.024467]
+Difference   : b =    10.923277   SE =     6.657825   95% CI [   -2.133060,    23.979613]   90% CI [   -0.032521,    21.879074]   p =  0.101011
+file C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_cohorttime_fe01_did_interaction_rural_acpop_all_1.png saved as PNG format
+Exported: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_cohorttime_fe01_did_interaction_rural_acpop_all_1.png
+POSTPROCESSED POLITICIAN FE 01
+
+--------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+------------------------------------------------------------------
+      evreg1 | reghdfejl    countk         21  HDFE linear regression with Julia
+--------------------------------------------------------------------------------
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+Estimates exported to C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/tables/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_cohorttime_fe02_event_rural_acpop_all.csv
+
+--------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+------------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with Julia
+--------------------------------------------------------------------------------
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+Estimates exported to C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/tables/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_cohorttime_fe02_did_interaction_rural_acpop_all.csv
+
+--------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+------------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with Julia
+--------------------------------------------------------------------------------
+(results evreg1 are active now)
+
+INTERACTION AUDIT (CONTROL-PRE STANDARDIZED): politician, estimate evreg1, moderator downup_ac_pop
+Control pre  : b =     0.000000   95% CI [    0.000000,     0.000000]   90% CI [    0.000000,     0.000000]
+Control post : b =    -1.381382   95% CI [  -12.177815,     9.415051]   90% CI [  -10.440855,     7.678091]
+Treated post : b =     9.222811   95% CI [   -8.173096,    26.618719]   90% CI [   -5.374394,    23.820017]
+Difference   : b =    10.604194   SE =     6.651023   95% CI [   -2.438803,    23.647190]   90% CI [   -0.340410,    21.548797]   p =  0.110998
+file C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_cohorttime_fe02_did_interaction_rural_acpop_all_1.png saved as PNG format
+Exported: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_cohorttime_fe02_did_interaction_rural_acpop_all_1.png
+POSTPROCESSED POLITICIAN FE 02
+
+--------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+------------------------------------------------------------------
+      evreg1 | reghdfejl    countk         21  HDFE linear regression with Julia
+--------------------------------------------------------------------------------
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+Estimates exported to C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/tables/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_cohorttime_fe03_event_rural_acpop_all.csv
+
+--------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+------------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with Julia
+--------------------------------------------------------------------------------
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+Estimates exported to C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/tables/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_cohorttime_fe03_did_interaction_rural_acpop_all.csv
+
+--------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+------------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with Julia
+--------------------------------------------------------------------------------
+(results evreg1 are active now)
+
+INTERACTION AUDIT (CONTROL-PRE STANDARDIZED): politician, estimate evreg1, moderator downup_ac_pop
+Control pre  : b =     0.000000   95% CI [    0.000000,     0.000000]   90% CI [    0.000000,     0.000000]
+Control post : b =    -0.907364   95% CI [  -11.943260,    10.128532]   90% CI [  -10.167774,     8.353046]
+Treated post : b =    10.192064   95% CI [   -7.689526,    28.073653]   90% CI [   -4.812686,    25.196814]
+Difference   : b =    11.099428   SE =     6.681548   95% CI [   -2.003430,    24.202285]   90% CI [    0.104594,    22.094261]   p =  0.096816
+file C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_cohorttime_fe03_did_interaction_rural_acpop_all_1.png saved as PNG format
+Exported: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_cohorttime_fe03_did_interaction_rural_acpop_all_1.png
+POSTPROCESSED POLITICIAN FE 03
+
+--------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+------------------------------------------------------------------
+      evreg1 | reghdfejl    countk         21  HDFE linear regression with Julia
+--------------------------------------------------------------------------------
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+Estimates exported to C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/tables/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_cohorttime_fe04_event_rural_acpop_all.csv
+
+--------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+------------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with Julia
+--------------------------------------------------------------------------------
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+Estimates exported to C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/tables/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_cohorttime_fe04_did_interaction_rural_acpop_all.csv
+
+--------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+------------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with Julia
+--------------------------------------------------------------------------------
+(results evreg1 are active now)
+
+INTERACTION AUDIT (CONTROL-PRE STANDARDIZED): politician, estimate evreg1, moderator downup_ac_pop
+Control pre  : b =     0.000000   95% CI [    0.000000,     0.000000]   90% CI [    0.000000,     0.000000]
+Control post : b =    -0.839596   95% CI [  -11.805123,    10.125930]   90% CI [  -10.040959,     8.361766]
+Treated post : b =    10.083680   95% CI [   -7.721746,    27.889107]   90% CI [   -4.857160,    25.024521]
+Difference   : b =    10.923276   SE =     6.657867   95% CI [   -2.133141,    23.979694]   90% CI [   -0.032589,    21.879142]   p =  0.101013
+file C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_cohorttime_fe04_did_interaction_rural_acpop_all_1.png saved as PNG format
+Exported: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_cohorttime_fe04_did_interaction_rural_acpop_all_1.png
+POSTPROCESSED POLITICIAN FE 04
+
+--------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+------------------------------------------------------------------
+      evreg1 | reghdfejl    countk         21  HDFE linear regression with Julia
+--------------------------------------------------------------------------------
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+Estimates exported to C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/tables/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_cohorttime_fe05_event_rural_acpop_all.csv
+
+--------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+------------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with Julia
+--------------------------------------------------------------------------------
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+Estimates exported to C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/tables/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_cohorttime_fe05_did_interaction_rural_acpop_all.csv
+
+--------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+------------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with Julia
+--------------------------------------------------------------------------------
+(results evreg1 are active now)
+
+INTERACTION AUDIT (CONTROL-PRE STANDARDIZED): politician, estimate evreg1, moderator downup_ac_pop
+Control pre  : b =     0.000000   95% CI [    0.000000,     0.000000]   90% CI [    0.000000,     0.000000]
+Control post : b =    -0.839596   95% CI [  -11.805132,    10.125940]   90% CI [  -10.040966,     8.361774]
+Treated post : b =    10.083680   95% CI [   -7.721706,    27.889067]   90% CI [   -4.857127,    25.024487]
+Difference   : b =    10.923277   SE =     6.657840   95% CI [   -2.133089,    23.979642]   90% CI [   -0.032545,    21.879098]   p =  0.101011
+file C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_cohorttime_fe05_did_interaction_rural_acpop_all_1.png saved as PNG format
+Exported: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_cohorttime_fe05_did_interaction_rural_acpop_all_1.png
+POSTPROCESSED POLITICIAN FE 05
+
+--------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+------------------------------------------------------------------
+      evreg1 | reghdfejl    countk         21  HDFE linear regression with Julia
+--------------------------------------------------------------------------------
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+Estimates exported to C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/tables/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_cohorttime_fe06_event_rural_acpop_all.csv
+
+--------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+------------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with Julia
+--------------------------------------------------------------------------------
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+Estimates exported to C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/tables/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_cohorttime_fe06_did_interaction_rural_acpop_all.csv
+
+--------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+------------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with Julia
+--------------------------------------------------------------------------------
+(results evreg1 are active now)
+
+INTERACTION AUDIT (CONTROL-PRE STANDARDIZED): politician, estimate evreg1, moderator downup_ac_pop
+Control pre  : b =     0.000000   95% CI [    0.000000,     0.000000]   90% CI [    0.000000,     0.000000]
+Control post : b =    -0.839596   95% CI [  -11.805165,    10.125973]   90% CI [  -10.040994,     8.361802]
+Treated post : b =    10.083680   95% CI [   -7.721757,    27.889118]   90% CI [   -4.857169,    25.024530]
+Difference   : b =    10.923277   SE =     6.657859   95% CI [   -2.133126,    23.979679]   90% CI [   -0.032576,    21.879129]   p =  0.101012
+file C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_cohorttime_fe06_did_interaction_rural_acpop_all_1.png saved as PNG format
+Exported: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_cohorttime_fe06_did_interaction_rural_acpop_all_1.png
+POSTPROCESSED POLITICIAN FE 06
+
+--------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+------------------------------------------------------------------
+      evreg1 | reghdfejl    countk         21  HDFE linear regression with Julia
+--------------------------------------------------------------------------------
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+Estimates exported to C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/tables/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_cohorttime_fe07_event_rural_acpop_all.csv
+
+--------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+------------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with Julia
+--------------------------------------------------------------------------------
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+Estimates exported to C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/tables/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_cohorttime_fe07_did_interaction_rural_acpop_all.csv
+
+--------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+------------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with Julia
+--------------------------------------------------------------------------------
+(results evreg1 are active now)
+
+INTERACTION AUDIT (CONTROL-PRE STANDARDIZED): politician, estimate evreg1, moderator downup_ac_pop
+Control pre  : b =     0.000000   95% CI [    0.000000,     0.000000]   90% CI [    0.000000,     0.000000]
+Control post : b =    -1.381382   95% CI [  -12.177812,     9.415047]   90% CI [  -10.440852,     7.678088]
+Treated post : b =     9.222811   95% CI [   -8.173108,    26.618731]   90% CI [   -5.374404,    23.820027]
+Difference   : b =    10.604194   SE =     6.651026   95% CI [   -2.438810,    23.647197]   90% CI [   -0.340416,    21.548803]   p =  0.110998
+file C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_cohorttime_fe07_did_interaction_rural_acpop_all_1.png saved as PNG format
+Exported: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_cohorttime_fe07_did_interaction_rural_acpop_all_1.png
+POSTPROCESSED POLITICIAN FE 07
+
+--------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+------------------------------------------------------------------
+      evreg1 | reghdfejl    countk         21  HDFE linear regression with Julia
+--------------------------------------------------------------------------------
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+Estimates exported to C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/tables/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_cohorttime_fe08_event_rural_acpop_all.csv
+
+--------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+------------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with Julia
+--------------------------------------------------------------------------------
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+Estimates exported to C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/tables/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_cohorttime_fe08_did_interaction_rural_acpop_all.csv
+
+--------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+------------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with Julia
+--------------------------------------------------------------------------------
+(results evreg1 are active now)
+
+INTERACTION AUDIT (CONTROL-PRE STANDARDIZED): politician, estimate evreg1, moderator downup_ac_pop
+Control pre  : b =     0.000000   95% CI [    0.000000,     0.000000]   90% CI [    0.000000,     0.000000]
+Control post : b =    -1.381382   95% CI [  -12.177813,     9.415049]   90% CI [  -10.440854,     7.678090]
+Treated post : b =     9.222811   95% CI [   -8.173111,    26.618734]   90% CI [   -5.374407,    23.820030]
+Difference   : b =    10.604194   SE =     6.651026   95% CI [   -2.438810,    23.647197]   90% CI [   -0.340415,    21.548803]   p =  0.110998
+file C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_cohorttime_fe08_did_interaction_rural_acpop_all_1.png saved as PNG format
+Exported: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_cohorttime_fe08_did_interaction_rural_acpop_all_1.png
+POSTPROCESSED POLITICIAN FE 08
+
+--------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+------------------------------------------------------------------
+      evreg1 | reghdfejl    countk         21  HDFE linear regression with Julia
+--------------------------------------------------------------------------------
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+Estimates exported to C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/tables/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_cohorttime_fe09_event_rural_acpop_all.csv
+
+--------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+------------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with Julia
+--------------------------------------------------------------------------------
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+Estimates exported to C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/tables/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_cohorttime_fe09_did_interaction_rural_acpop_all.csv
+
+--------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+------------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with Julia
+--------------------------------------------------------------------------------
+(results evreg1 are active now)
+
+INTERACTION AUDIT (CONTROL-PRE STANDARDIZED): politician, estimate evreg1, moderator downup_ac_pop
+Control pre  : b =     0.000000   95% CI [    0.000000,     0.000000]   90% CI [    0.000000,     0.000000]
+Control post : b =    -1.381382   95% CI [  -12.177826,     9.415061]   90% CI [  -10.440864,     7.678100]
+Treated post : b =     9.222811   95% CI [   -8.173114,    26.618737]   90% CI [   -5.374409,    23.820032]
+Difference   : b =    10.604194   SE =     6.651028   95% CI [   -2.438814,    23.647202]   90% CI [   -0.340419,    21.548806]   p =  0.110998
+file C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_cohorttime_fe09_did_interaction_rural_acpop_all_1.png saved as PNG format
+Exported: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_cohorttime_fe09_did_interaction_rural_acpop_all_1.png
+POSTPROCESSED POLITICIAN FE 09
+
+--------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+------------------------------------------------------------------
+      evreg1 | reghdfejl    countk         21  HDFE linear regression with Julia
+--------------------------------------------------------------------------------
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+Estimates exported to C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/tables/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_cohorttime_fe10_event_rural_acpop_all.csv
+
+--------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+------------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with Julia
+--------------------------------------------------------------------------------
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+Estimates exported to C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/tables/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_cohorttime_fe10_did_interaction_rural_acpop_all.csv
+
+--------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+------------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with Julia
+--------------------------------------------------------------------------------
+(results evreg1 are active now)
+
+INTERACTION AUDIT (CONTROL-PRE STANDARDIZED): politician, estimate evreg1, moderator downup_ac_pop
+Control pre  : b =     0.000000   95% CI [    0.000000,     0.000000]   90% CI [    0.000000,     0.000000]
+Control post : b =    -1.381382   95% CI [  -12.177850,     9.415086]   90% CI [  -10.440884,     7.678120]
+Treated post : b =     9.222811   95% CI [   -8.173167,    26.618790]   90% CI [   -5.374454,    23.820077]
+Difference   : b =    10.604194   SE =     6.651049   95% CI [   -2.438855,    23.647242]   90% CI [   -0.340453,    21.548840]   p =  0.110999
+file C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_cohorttime_fe10_did_interaction_rural_acpop_all_1.png saved as PNG format
+Exported: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_cohorttime_fe10_did_interaction_rural_acpop_all_1.png
+POSTPROCESSED POLITICIAN FE 10
+
+--------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+------------------------------------------------------------------
+      evreg1 | reghdfejl    countk         21  HDFE linear regression with Julia
+--------------------------------------------------------------------------------
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+Estimates exported to C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/tables/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_cohorttime_fe11_event_rural_acpop_all.csv
+
+--------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+------------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with Julia
+--------------------------------------------------------------------------------
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+Estimates exported to C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/tables/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_cohorttime_fe11_did_interaction_rural_acpop_all.csv
+
+--------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+------------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with Julia
+--------------------------------------------------------------------------------
+(results evreg1 are active now)
+
+INTERACTION AUDIT (CONTROL-PRE STANDARDIZED): politician, estimate evreg1, moderator downup_ac_pop
+Control pre  : b =     0.000000   95% CI [    0.000000,     0.000000]   90% CI [    0.000000,     0.000000]
+Control post : b =    -0.904112   95% CI [  -11.938830,    10.130607]   90% CI [  -10.163534,     8.355311]
+Treated post : b =    10.197234   95% CI [   -7.683419,    28.077888]   90% CI [   -4.806730,    25.201199]
+Difference   : b =    11.101346   SE =     6.681486   95% CI [   -2.001390,    24.204082]   90% CI [    0.106614,    22.096078]   p =  0.096755
+file C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_cohorttime_fe11_did_interaction_rural_acpop_all_1.png saved as PNG format
+Exported: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_cohorttime_fe11_did_interaction_rural_acpop_all_1.png
+POSTPROCESSED POLITICIAN FE 11
+
+--------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+------------------------------------------------------------------
+      evreg1 | reghdfejl    countk         21  HDFE linear regression with Julia
+--------------------------------------------------------------------------------
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+Estimates exported to C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/tables/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_cohorttime_fe12_event_rural_acpop_all.csv
+
+--------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+------------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with Julia
+--------------------------------------------------------------------------------
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+Estimates exported to C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/tables/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_cohorttime_fe12_did_interaction_rural_acpop_all.csv
+
+--------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+------------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with Julia
+--------------------------------------------------------------------------------
+(results evreg1 are active now)
+
+INTERACTION AUDIT (CONTROL-PRE STANDARDIZED): politician, estimate evreg1, moderator downup_ac_pop
+Control pre  : b =     0.000000   95% CI [    0.000000,     0.000000]   90% CI [    0.000000,     0.000000]
+Control post : b =    -0.907864   95% CI [  -11.943769,    10.128042]   90% CI [  -10.168282,     8.352555]
+Treated post : b =    10.190707   95% CI [   -7.690920,    28.072334]   90% CI [   -4.814074,    25.195489]
+Difference   : b =    11.098571   SE =     6.681562   95% CI [   -2.004314,    24.201456]   90% CI [    0.103714,    22.093428]   p =  0.096842
+file C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_cohorttime_fe12_did_interaction_rural_acpop_all_1.png saved as PNG format
+Exported: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_cohorttime_fe12_did_interaction_rural_acpop_all_1.png
+POSTPROCESSED POLITICIAN FE 12
+
+--------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+------------------------------------------------------------------
+      evreg1 | reghdfejl    countk         21  HDFE linear regression with Julia
+--------------------------------------------------------------------------------
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+Estimates exported to C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/tables/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_cohorttime_fe13_event_rural_acpop_all.csv
+
+--------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+------------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with Julia
+--------------------------------------------------------------------------------
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+Estimates exported to C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/tables/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_cohorttime_fe13_did_interaction_rural_acpop_all.csv
+
+--------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+------------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with Julia
+--------------------------------------------------------------------------------
+(results evreg1 are active now)
+
+INTERACTION AUDIT (CONTROL-PRE STANDARDIZED): politician, estimate evreg1, moderator downup_ac_pop
+Control pre  : b =     0.000000   95% CI [    0.000000,     0.000000]   90% CI [    0.000000,     0.000000]
+Control post : b =    -0.907880   95% CI [  -11.943831,    10.128072]   90% CI [  -10.168337,     8.352577]
+Treated post : b =    10.190706   95% CI [   -7.690984,    28.072396]   90% CI [   -4.814129,    25.195540]
+Difference   : b =    11.098586   SE =     6.681584   95% CI [   -2.004343,    24.201514]   90% CI [    0.103692,    22.093479]   p =  0.096843
+file C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_cohorttime_fe13_did_interaction_rural_acpop_all_1.png saved as PNG format
+Exported: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_cohorttime_fe13_did_interaction_rural_acpop_all_1.png
+POSTPROCESSED POLITICIAN FE 13
+
+--------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+------------------------------------------------------------------
+      evreg1 | reghdfejl    countk         21  HDFE linear regression with Julia
+--------------------------------------------------------------------------------
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+Estimates exported to C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/tables/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_cohorttime_fe14_event_rural_acpop_all.csv
+
+--------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+------------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with Julia
+--------------------------------------------------------------------------------
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+Estimates exported to C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/tables/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_cohorttime_fe14_did_interaction_rural_acpop_all.csv
+
+--------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+------------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with Julia
+--------------------------------------------------------------------------------
+(results evreg1 are active now)
+
+INTERACTION AUDIT (CONTROL-PRE STANDARDIZED): politician, estimate evreg1, moderator downup_ac_pop
+Control pre  : b =     0.000000   95% CI [    0.000000,     0.000000]   90% CI [    0.000000,     0.000000]
+Control post : b =    -0.839596   95% CI [  -11.805136,    10.125944]   90% CI [  -10.040970,     8.361778]
+Treated post : b =    10.083680   95% CI [   -7.721705,    27.889066]   90% CI [   -4.857126,    25.024486]
+Difference   : b =    10.923277   SE =     6.657842   95% CI [   -2.133092,    23.979645]   90% CI [   -0.032548,    21.879101]   p =  0.101011
+file C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_cohorttime_fe14_did_interaction_rural_acpop_all_1.png saved as PNG format
+Exported: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_cohorttime_fe14_did_interaction_rural_acpop_all_1.png
+POSTPROCESSED POLITICIAN FE 14
+
+--------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+------------------------------------------------------------------
+      evreg1 | reghdfejl    countk         21  HDFE linear regression with Julia
+--------------------------------------------------------------------------------
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+Estimates exported to C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/tables/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_cohorttime_fe15_event_rural_acpop_all.csv
+
+--------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+------------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with Julia
+--------------------------------------------------------------------------------
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+Estimates exported to C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/tables/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_cohorttime_fe15_did_interaction_rural_acpop_all.csv
+
+--------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+------------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with Julia
+--------------------------------------------------------------------------------
+(results evreg1 are active now)
+
+INTERACTION AUDIT (CONTROL-PRE STANDARDIZED): politician, estimate evreg1, moderator downup_ac_pop
+Control pre  : b =     0.000000   95% CI [    0.000000,     0.000000]   90% CI [    0.000000,     0.000000]
+Control post : b =    -0.839596   95% CI [  -11.805163,    10.125971]   90% CI [  -10.040993,     8.361800]
+Treated post : b =    10.083680   95% CI [   -7.721767,    27.889127]   90% CI [   -4.857177,    25.024538]
+Difference   : b =    10.923276   SE =     6.657862   95% CI [   -2.133132,    23.979685]   90% CI [   -0.032581,    21.879134]   p =  0.101012
+file C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_cohorttime_fe15_did_interaction_rural_acpop_all_1.png saved as PNG format
+Exported: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_cohorttime_fe15_did_interaction_rural_acpop_all_1.png
+POSTPROCESSED POLITICIAN FE 15
+
+--------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+------------------------------------------------------------------
+      evreg1 | reghdfejl    countk         21  HDFE linear regression with Julia
+--------------------------------------------------------------------------------
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+Estimates exported to C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/tables/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_cohorttime_fe16_event_rural_acpop_all.csv
+
+--------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+------------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with Julia
+--------------------------------------------------------------------------------
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+Estimates exported to C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/tables/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_cohorttime_fe16_did_interaction_rural_acpop_all.csv
+
+--------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+------------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with Julia
+--------------------------------------------------------------------------------
+(results evreg1 are active now)
+
+INTERACTION AUDIT (CONTROL-PRE STANDARDIZED): politician, estimate evreg1, moderator downup_ac_pop
+Control pre  : b =     0.000000   95% CI [    0.000000,     0.000000]   90% CI [    0.000000,     0.000000]
+Control post : b =    -0.839596   95% CI [  -11.805176,    10.125983]   90% CI [  -10.041003,     8.361811]
+Treated post : b =    10.083680   95% CI [   -7.721775,    27.889136]   90% CI [   -4.857184,    25.024545]
+Difference   : b =    10.923277   SE =     6.657864   95% CI [   -2.133137,    23.979690]   90% CI [   -0.032585,    21.879138]   p =  0.101013
+file C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_cohorttime_fe16_did_interaction_rural_acpop_all_1.png saved as PNG format
+Exported: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_cohorttime_fe16_did_interaction_rural_acpop_all_1.png
+POSTPROCESSED POLITICIAN FE 16
+
+--------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+------------------------------------------------------------------
+      evreg1 | reghdfejl    countk         21  HDFE linear regression with Julia
+--------------------------------------------------------------------------------
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+Estimates exported to C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/tables/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_cohorttime_fe17_event_rural_acpop_all.csv
+
+--------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+------------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with Julia
+--------------------------------------------------------------------------------
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+Estimates exported to C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/tables/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_cohorttime_fe17_did_interaction_rural_acpop_all.csv
+
+--------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+------------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with Julia
+--------------------------------------------------------------------------------
+(results evreg1 are active now)
+
+INTERACTION AUDIT (CONTROL-PRE STANDARDIZED): politician, estimate evreg1, moderator downup_ac_pop
+Control pre  : b =     0.000000   95% CI [    0.000000,     0.000000]   90% CI [    0.000000,     0.000000]
+Control post : b =    -1.381382   95% CI [  -12.177818,     9.415053]   90% CI [  -10.440857,     7.678093]
+Treated post : b =     9.222811   95% CI [   -8.173120,    26.618743]   90% CI [   -5.374415,    23.820037]
+Difference   : b =    10.604194   SE =     6.651029   95% CI [   -2.438815,    23.647203]   90% CI [   -0.340420,    21.548807]   p =  0.110998
+file C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_cohorttime_fe17_did_interaction_rural_acpop_all_1.png saved as PNG format
+Exported: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_cohorttime_fe17_did_interaction_rural_acpop_all_1.png
+POSTPROCESSED POLITICIAN FE 17
+
+--------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+------------------------------------------------------------------
+      evreg1 | reghdfejl    countk         21  HDFE linear regression with Julia
+--------------------------------------------------------------------------------
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+Estimates exported to C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/tables/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_cohorttime_fe18_event_rural_acpop_all.csv
+
+--------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+------------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with Julia
+--------------------------------------------------------------------------------
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+Estimates exported to C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/tables/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_cohorttime_fe18_did_interaction_rural_acpop_all.csv
+
+--------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+------------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with Julia
+--------------------------------------------------------------------------------
+(results evreg1 are active now)
+
+INTERACTION AUDIT (CONTROL-PRE STANDARDIZED): politician, estimate evreg1, moderator downup_ac_pop
+Control pre  : b =     0.000000   95% CI [    0.000000,     0.000000]   90% CI [    0.000000,     0.000000]
+Control post : b =    -1.381382   95% CI [  -12.177834,     9.415070]   90% CI [  -10.440871,     7.678107]
+Treated post : b =     9.222811   95% CI [   -8.173125,    26.618748]   90% CI [   -5.374419,    23.820042]
+Difference   : b =    10.604194   SE =     6.651034   95% CI [   -2.438826,    23.647213]   90% CI [   -0.340429,    21.548816]   p =  0.110998
+file C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_cohorttime_fe18_did_interaction_rural_acpop_all_1.png saved as PNG format
+Exported: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_cohorttime_fe18_did_interaction_rural_acpop_all_1.png
+POSTPROCESSED POLITICIAN FE 18
+
+--------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+------------------------------------------------------------------
+      evreg1 | reghdfejl    countk         21  HDFE linear regression with Julia
+--------------------------------------------------------------------------------
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+Estimates exported to C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/tables/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_cohorttime_fe19_event_rural_acpop_all.csv
+
+--------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+------------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with Julia
+--------------------------------------------------------------------------------
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+Estimates exported to C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/tables/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_cohorttime_fe19_did_interaction_rural_acpop_all.csv
+
+--------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+------------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with Julia
+--------------------------------------------------------------------------------
+(results evreg1 are active now)
+
+INTERACTION AUDIT (CONTROL-PRE STANDARDIZED): politician, estimate evreg1, moderator downup_ac_pop
+Control pre  : b =     0.000000   95% CI [    0.000000,     0.000000]   90% CI [    0.000000,     0.000000]
+Control post : b =    -1.381382   95% CI [  -12.177848,     9.415084]   90% CI [  -10.440883,     7.678119]
+Treated post : b =     9.222811   95% CI [   -8.173163,    26.618786]   90% CI [   -5.374451,    23.820074]
+Difference   : b =    10.604194   SE =     6.651050   95% CI [   -2.438856,    23.647243]   90% CI [   -0.340454,    21.548842]   p =  0.110999
+file C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_cohorttime_fe19_did_interaction_rural_acpop_all_1.png saved as PNG format
+Exported: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_cohorttime_fe19_did_interaction_rural_acpop_all_1.png
+POSTPROCESSED POLITICIAN FE 19
+
+--------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+------------------------------------------------------------------
+      evreg1 | reghdfejl    countk         21  HDFE linear regression with Julia
+--------------------------------------------------------------------------------
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+Estimates exported to C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/tables/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_cohorttime_fe20_event_rural_acpop_all.csv
+
+--------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+------------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with Julia
+--------------------------------------------------------------------------------
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+Estimates exported to C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/tables/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_cohorttime_fe20_did_interaction_rural_acpop_all.csv
+
+--------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+------------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with Julia
+--------------------------------------------------------------------------------
+(results evreg1 are active now)
+
+INTERACTION AUDIT (CONTROL-PRE STANDARDIZED): politician, estimate evreg1, moderator downup_ac_pop
+Control pre  : b =     0.000000   95% CI [    0.000000,     0.000000]   90% CI [    0.000000,     0.000000]
+Control post : b =    -1.381382   95% CI [  -12.177825,     9.415061]   90% CI [  -10.440864,     7.678100]
+Treated post : b =     9.222811   95% CI [   -8.173125,    26.618748]   90% CI [   -5.374419,    23.820042]
+Difference   : b =    10.604194   SE =     6.651034   95% CI [   -2.438825,    23.647212]   90% CI [   -0.340428,    21.548815]   p =  0.110998
+file C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_cohorttime_fe20_did_interaction_rural_acpop_all_1.png saved as PNG format
+Exported: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_cohorttime_fe20_did_interaction_rural_acpop_all_1.png
+POSTPROCESSED POLITICIAN FE 20
+
+--------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+------------------------------------------------------------------
+      evreg1 | reghdfejl    countk         21  HDFE linear regression with Julia
+--------------------------------------------------------------------------------
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+Estimates exported to C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/tables/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_cohorttime_fe21_event_rural_acpop_all.csv
+
+--------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+------------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with Julia
+--------------------------------------------------------------------------------
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+Estimates exported to C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/tables/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_cohorttime_fe21_did_interaction_rural_acpop_all.csv
+
+--------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+------------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with Julia
+--------------------------------------------------------------------------------
+(results evreg1 are active now)
+
+INTERACTION AUDIT (CONTROL-PRE STANDARDIZED): politician, estimate evreg1, moderator downup_ac_pop
+Control pre  : b =     0.000000   95% CI [    0.000000,     0.000000]   90% CI [    0.000000,     0.000000]
+Control post : b =    -1.381382   95% CI [  -12.177859,     9.415095]   90% CI [  -10.440892,     7.678128]
+Treated post : b =     9.222811   95% CI [   -8.173174,    26.618797]   90% CI [   -5.374460,    23.820083]
+Difference   : b =    10.604194   SE =     6.651050   95% CI [   -2.438857,    23.647244]   90% CI [   -0.340455,    21.548842]   p =  0.110999
+file C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_cohorttime_fe21_did_interaction_rural_acpop_all_1.png saved as PNG format
+Exported: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_cohorttime_fe21_did_interaction_rural_acpop_all_1.png
+POSTPROCESSED POLITICIAN FE 21
+
+--------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+------------------------------------------------------------------
+      evreg1 | reghdfejl    countk         21  HDFE linear regression with Julia
+--------------------------------------------------------------------------------
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+Estimates exported to C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/tables/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_cohorttime_fe22_event_rural_acpop_all.csv
+
+--------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+------------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with Julia
+--------------------------------------------------------------------------------
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+Estimates exported to C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/tables/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_cohorttime_fe22_did_interaction_rural_acpop_all.csv
+
+--------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+------------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with Julia
+--------------------------------------------------------------------------------
+(results evreg1 are active now)
+
+INTERACTION AUDIT (CONTROL-PRE STANDARDIZED): politician, estimate evreg1, moderator downup_ac_pop
+Control pre  : b =     0.000000   95% CI [    0.000000,     0.000000]   90% CI [    0.000000,     0.000000]
+Control post : b =    -1.381382   95% CI [  -12.177869,     9.415105]   90% CI [  -10.440901,     7.678137]
+Treated post : b =     9.222811   95% CI [   -8.173182,    26.618805]   90% CI [   -5.374466,    23.820089]
+Difference   : b =    10.604194   SE =     6.651055   95% CI [   -2.438866,    23.647253]   90% CI [   -0.340463,    21.548850]   p =  0.111000
+file C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_cohorttime_fe22_did_interaction_rural_acpop_all_1.png saved as PNG format
+Exported: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_cohorttime_fe22_did_interaction_rural_acpop_all_1.png
+POSTPROCESSED POLITICIAN FE 22
+
+--------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+------------------------------------------------------------------
+      evreg1 | reghdfejl    countk         21  HDFE linear regression with Julia
+--------------------------------------------------------------------------------
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+Estimates exported to C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/tables/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_cohorttime_fe23_event_rural_acpop_all.csv
+
+--------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+------------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with Julia
+--------------------------------------------------------------------------------
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+Estimates exported to C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/tables/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_cohorttime_fe23_did_interaction_rural_acpop_all.csv
+
+--------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+------------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with Julia
+--------------------------------------------------------------------------------
+(results evreg1 are active now)
+
+INTERACTION AUDIT (CONTROL-PRE STANDARDIZED): politician, estimate evreg1, moderator downup_ac_pop
+Control pre  : b =     0.000000   95% CI [    0.000000,     0.000000]   90% CI [    0.000000,     0.000000]
+Control post : b =    -0.906171   95% CI [  -11.941498,    10.129155]   90% CI [  -10.166104,     8.353762]
+Treated post : b =    10.193453   95% CI [   -7.687676,    28.074582]   90% CI [   -4.810910,    25.197817]
+Difference   : b =    11.099624   SE =     6.681519   95% CI [   -2.003176,    24.202425]   90% CI [    0.104839,    22.094410]   p =  0.096808
+file C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_cohorttime_fe23_did_interaction_rural_acpop_all_1.png saved as PNG format
+Exported: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_cohorttime_fe23_did_interaction_rural_acpop_all_1.png
+POSTPROCESSED POLITICIAN FE 23
+
+--------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+------------------------------------------------------------------
+      evreg1 | reghdfejl    countk         21  HDFE linear regression with Julia
+--------------------------------------------------------------------------------
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+Estimates exported to C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/tables/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_cohorttime_fe24_event_rural_acpop_all.csv
+
+--------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+------------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with Julia
+--------------------------------------------------------------------------------
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+Estimates exported to C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/tables/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_cohorttime_fe24_did_interaction_rural_acpop_all.csv
+
+--------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+------------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with Julia
+--------------------------------------------------------------------------------
+(results evreg1 are active now)
+
+INTERACTION AUDIT (CONTROL-PRE STANDARDIZED): politician, estimate evreg1, moderator downup_ac_pop
+Control pre  : b =     0.000000   95% CI [    0.000000,     0.000000]   90% CI [    0.000000,     0.000000]
+Control post : b =    -0.906144   95% CI [  -11.941475,    10.129187]   90% CI [  -10.166081,     8.353793]
+Treated post : b =    10.193438   95% CI [   -7.687745,    28.074620]   90% CI [   -4.810971,    25.197846]
+Difference   : b =    11.099582   SE =     6.681535   95% CI [   -2.003252,    24.202415]   90% CI [    0.104768,    22.094395]   p =  0.096810
+file C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_cohorttime_fe24_did_interaction_rural_acpop_all_1.png saved as PNG format
+Exported: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_cohorttime_fe24_did_interaction_rural_acpop_all_1.png
+POSTPROCESSED POLITICIAN FE 24
+
+--------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+------------------------------------------------------------------
+      evreg1 | reghdfejl    countk         21  HDFE linear regression with Julia
+--------------------------------------------------------------------------------
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+Estimates exported to C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/tables/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_cohorttime_fe25_event_rural_acpop_all.csv
+
+--------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+------------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with Julia
+--------------------------------------------------------------------------------
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+Estimates exported to C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/tables/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_cohorttime_fe25_did_interaction_rural_acpop_all.csv
+
+--------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+------------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with Julia
+--------------------------------------------------------------------------------
+(results evreg1 are active now)
+
+INTERACTION AUDIT (CONTROL-PRE STANDARDIZED): politician, estimate evreg1, moderator downup_ac_pop
+Control pre  : b =     0.000000   95% CI [    0.000000,     0.000000]   90% CI [    0.000000,     0.000000]
+Control post : b =    -0.908187   95% CI [  -11.944163,    10.127789]   90% CI [  -10.168665,     8.352291]
+Treated post : b =    10.189893   95% CI [   -7.691820,    28.071605]   90% CI [   -4.814961,    25.194746]
+Difference   : b =    11.098080   SE =     6.681590   95% CI [   -2.004860,    24.201020]   90% CI [    0.103177,    22.092983]   p =  0.096858
+file C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_cohorttime_fe25_did_interaction_rural_acpop_all_1.png saved as PNG format
+Exported: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_cohorttime_fe25_did_interaction_rural_acpop_all_1.png
+POSTPROCESSED POLITICIAN FE 25
+
+--------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+------------------------------------------------------------------
+      evreg1 | reghdfejl    countk         21  HDFE linear regression with Julia
+--------------------------------------------------------------------------------
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+Estimates exported to C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/tables/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_cohorttime_fe26_event_rural_acpop_all.csv
+
+--------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+------------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with Julia
+--------------------------------------------------------------------------------
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+Estimates exported to C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/tables/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_cohorttime_fe26_did_interaction_rural_acpop_all.csv
+
+--------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+------------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with Julia
+--------------------------------------------------------------------------------
+(results evreg1 are active now)
+
+INTERACTION AUDIT (CONTROL-PRE STANDARDIZED): politician, estimate evreg1, moderator downup_ac_pop
+Control pre  : b =     0.000000   95% CI [    0.000000,     0.000000]   90% CI [    0.000000,     0.000000]
+Control post : b =    -0.839596   95% CI [  -11.805177,    10.125985]   90% CI [  -10.041004,     8.361812]
+Treated post : b =    10.083680   95% CI [   -7.721792,    27.889153]   90% CI [   -4.857199,    25.024559]
+Difference   : b =    10.923277   SE =     6.657874   95% CI [   -2.133156,    23.979709]   90% CI [   -0.032601,    21.879154]   p =  0.101013
+file C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_cohorttime_fe26_did_interaction_rural_acpop_all_1.png saved as PNG format
+Exported: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_cohorttime_fe26_did_interaction_rural_acpop_all_1.png
+POSTPROCESSED POLITICIAN FE 26
+
+--------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+------------------------------------------------------------------
+      evreg1 | reghdfejl    countk         21  HDFE linear regression with Julia
+--------------------------------------------------------------------------------
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+Estimates exported to C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/tables/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_cohorttime_fe27_event_rural_acpop_all.csv
+
+--------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+------------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with Julia
+--------------------------------------------------------------------------------
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+Estimates exported to C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/tables/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_cohorttime_fe27_did_interaction_rural_acpop_all.csv
+
+--------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+------------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with Julia
+--------------------------------------------------------------------------------
+(results evreg1 are active now)
+
+INTERACTION AUDIT (CONTROL-PRE STANDARDIZED): politician, estimate evreg1, moderator downup_ac_pop
+Control pre  : b =     0.000000   95% CI [    0.000000,     0.000000]   90% CI [    0.000000,     0.000000]
+Control post : b =    -1.381382   95% CI [  -12.177831,     9.415067]   90% CI [  -10.440869,     7.678105]
+Treated post : b =     9.222811   95% CI [   -8.173118,    26.618740]   90% CI [   -5.374412,    23.820035]
+Difference   : b =    10.604194   SE =     6.651021   95% CI [   -2.438800,    23.647187]   90% CI [   -0.340407,    21.548795]   p =  0.110998
+file C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_cohorttime_fe27_did_interaction_rural_acpop_all_1.png saved as PNG format
+Exported: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_cohorttime_fe27_did_interaction_rural_acpop_all_1.png
+POSTPROCESSED POLITICIAN FE 27
+
+--------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+------------------------------------------------------------------
+      evreg1 | reghdfejl    countk         21  HDFE linear regression with Julia
+--------------------------------------------------------------------------------
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+Estimates exported to C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/tables/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_cohorttime_fe28_event_rural_acpop_all.csv
+
+--------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+------------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with Julia
+--------------------------------------------------------------------------------
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+Estimates exported to C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/tables/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_cohorttime_fe28_did_interaction_rural_acpop_all.csv
+
+--------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+------------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with Julia
+--------------------------------------------------------------------------------
+(results evreg1 are active now)
+
+INTERACTION AUDIT (CONTROL-PRE STANDARDIZED): politician, estimate evreg1, moderator downup_ac_pop
+Control pre  : b =     0.000000   95% CI [    0.000000,     0.000000]   90% CI [    0.000000,     0.000000]
+Control post : b =    -1.381382   95% CI [  -12.177863,     9.415099]   90% CI [  -10.440896,     7.678131]
+Treated post : b =     9.222811   95% CI [   -8.173191,    26.618814]   90% CI [   -5.374474,    23.820097]
+Difference   : b =    10.604194   SE =     6.651055   95% CI [   -2.438867,    23.647254]   90% CI [   -0.340463,    21.548851]   p =  0.111000
+file C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_cohorttime_fe28_did_interaction_rural_acpop_all_1.png saved as PNG format
+Exported: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_cohorttime_fe28_did_interaction_rural_acpop_all_1.png
+POSTPROCESSED POLITICIAN FE 28
+
+--------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+------------------------------------------------------------------
+      evreg1 | reghdfejl    countk         21  HDFE linear regression with Julia
+--------------------------------------------------------------------------------
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+Estimates exported to C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/tables/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_cohorttime_fe29_event_rural_acpop_all.csv
+
+--------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+------------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with Julia
+--------------------------------------------------------------------------------
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+Estimates exported to C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/tables/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_cohorttime_fe29_did_interaction_rural_acpop_all.csv
+
+--------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+------------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with Julia
+--------------------------------------------------------------------------------
+(results evreg1 are active now)
+
+INTERACTION AUDIT (CONTROL-PRE STANDARDIZED): politician, estimate evreg1, moderator downup_ac_pop
+Control pre  : b =     0.000000   95% CI [    0.000000,     0.000000]   90% CI [    0.000000,     0.000000]
+Control post : b =    -1.381382   95% CI [  -12.177872,     9.415108]   90% CI [  -10.440903,     7.678139]
+Treated post : b =     9.222811   95% CI [   -8.173193,    26.618816]   90% CI [   -5.374476,    23.820099]
+Difference   : b =    10.604194   SE =     6.651061   95% CI [   -2.438879,    23.647266]   90% CI [   -0.340473,    21.548860]   p =  0.111000
+file C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_cohorttime_fe29_did_interaction_rural_acpop_all_1.png saved as PNG format
+Exported: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_cohorttime_fe29_did_interaction_rural_acpop_all_1.png
+POSTPROCESSED POLITICIAN FE 29
+
+--------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+------------------------------------------------------------------
+      evreg1 | reghdfejl    countk         21  HDFE linear regression with Julia
+--------------------------------------------------------------------------------
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+Estimates exported to C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/tables/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_cohorttime_fe30_event_rural_acpop_all.csv
+
+--------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+------------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with Julia
+--------------------------------------------------------------------------------
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+Estimates exported to C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/tables/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_cohorttime_fe30_did_interaction_rural_acpop_all.csv
+
+--------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+------------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with Julia
+--------------------------------------------------------------------------------
+(results evreg1 are active now)
+
+INTERACTION AUDIT (CONTROL-PRE STANDARDIZED): politician, estimate evreg1, moderator downup_ac_pop
+Control pre  : b =     0.000000   95% CI [    0.000000,     0.000000]   90% CI [    0.000000,     0.000000]
+Control post : b =    -1.381382   95% CI [  -12.177872,     9.415108]   90% CI [  -10.440903,     7.678139]
+Treated post : b =     9.222811   95% CI [   -8.173151,    26.618774]   90% CI [   -5.374441,    23.820064]
+Difference   : b =    10.604194   SE =     6.651039   95% CI [   -2.438835,    23.647223]   90% CI [   -0.340437,    21.548824]   p =  0.110999
+file C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_cohorttime_fe30_did_interaction_rural_acpop_all_1.png saved as PNG format
+Exported: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_cohorttime_fe30_did_interaction_rural_acpop_all_1.png
+POSTPROCESSED POLITICIAN FE 30
+
+--------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+------------------------------------------------------------------
+      evreg1 | reghdfejl    countk         21  HDFE linear regression with Julia
+--------------------------------------------------------------------------------
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+Estimates exported to C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/tables/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_cohorttime_fe31_event_rural_acpop_all.csv
+
+--------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+------------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with Julia
+--------------------------------------------------------------------------------
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+Estimates exported to C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/tables/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_cohorttime_fe31_did_interaction_rural_acpop_all.csv
+
+--------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+------------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with Julia
+--------------------------------------------------------------------------------
+(results evreg1 are active now)
+
+INTERACTION AUDIT (CONTROL-PRE STANDARDIZED): politician, estimate evreg1, moderator downup_ac_pop
+Control pre  : b =     0.000000   95% CI [    0.000000,     0.000000]   90% CI [    0.000000,     0.000000]
+Control post : b =    -0.906229   95% CI [  -11.941185,    10.128727]   90% CI [  -10.165851,     8.353393]
+Treated post : b =    10.191662   95% CI [   -7.689062,    28.072386]   90% CI [   -4.812362,    25.195685]
+Difference   : b =    11.097891   SE =     6.681378   95% CI [   -2.004634,    24.200416]   90% CI [    0.103336,    22.092446]   p =  0.096853
+file C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_cohorttime_fe31_did_interaction_rural_acpop_all_1.png saved as PNG format
+Exported: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_cohorttime_fe31_did_interaction_rural_acpop_all_1.png
+POSTPROCESSED POLITICIAN FE 31
+
+--------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+------------------------------------------------------------------
+      evreg1 | reghdfejl    countk         21  HDFE linear regression with Julia
+--------------------------------------------------------------------------------
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+Estimates exported to C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/tables/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_cohorttime_fe32_event_rural_acpop_all.csv
+
+--------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+------------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with Julia
+--------------------------------------------------------------------------------
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+Estimates exported to C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/tables/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_cohorttime_fe32_did_interaction_rural_acpop_all.csv
+
+--------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+------------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with Julia
+--------------------------------------------------------------------------------
+(results evreg1 are active now)
+
+INTERACTION AUDIT (CONTROL-PRE STANDARDIZED): politician, estimate evreg1, moderator downup_ac_pop
+Control pre  : b =     0.000000   95% CI [    0.000000,     0.000000]   90% CI [    0.000000,     0.000000]
+Control post : b =    -1.381382   95% CI [  -12.177879,     9.415115]   90% CI [  -10.440909,     7.678145]
+Treated post : b =     9.222811   95% CI [   -8.173194,    26.618817]   90% CI [   -5.374477,    23.820100]
+Difference   : b =    10.604194   SE =     6.651058   95% CI [   -2.438872,    23.647259]   90% CI [   -0.340468,    21.548855]   p =  0.111000
+file C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_cohorttime_fe32_did_interaction_rural_acpop_all_1.png saved as PNG format
+Exported: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_cohorttime_fe32_did_interaction_rural_acpop_all_1.png
+POSTPROCESSED POLITICIAN FE 32
+
+. 
+. display as result "COMPLETED current politician FE01-FE32 postprocessing"
+COMPLETED current politician FE01-FE32 postprocessing
+
+. log close politician_postprocess
+      name:  politician_postprocess
+       log:  C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/code/_stacked_downup_replication/exploratory_analysis/cohort_eventtime_fe_sweep/logs/postprocess_politician_current_local.log
+  log type:  text
+ closed on:  24 Aug 2026, 20:14:13
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+. 
+end of do-file
