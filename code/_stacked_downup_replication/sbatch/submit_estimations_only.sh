@@ -85,6 +85,13 @@ submit_estimation did_by_year _app_8_main_did_by_year.do 1 1/10 none
 submit_estimation did_by_state _app_9_main_did_by_state.do 1 1/4 none
 submit_estimation placebo_13km _app_11_placebo_pop_13km.do 1 1 none
 
+# Descriptive tables reproduce the richest-regression e(sample) directly from
+# each full stack. Protest receives three cores; the other jobs receive one.
+submit_estimation descriptives_main app_main_descriptive.do 1 1 none
+submit_estimation descriptives_protest app_5km_descriptive.do 3 1 none \
+  none stacked_data_protest5km
+submit_estimation descriptives_politician app_polischar_descriptive.do 1 1 none
+
 # Main down/up event studies.
 submit_estimation event_area _main_2_stacked_event_study_5pre_area.do 1 1 none
 submit_estimation event_pop _main_2_stacked_event_study_5pre.do 1 1 none
