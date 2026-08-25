@@ -1,7 +1,19 @@
-[2026-08-25 12:55:00] Generating the three full-sample descriptive tables
+[2026-08-25 13:04:01] Generating the three full-sample descriptive tables
 Python: /groups/sgulzar/india_forest_land/downup_geo/bin/python
 Threads: 10; memory limit: 100GB
+2026-08-25 13:04:03,191 | INFO | Loaded 158775 rows into rural_lookup
+2026-08-25 13:04:03,664 | INFO | Loaded 14837592 rows into area_lookup
+2026-08-25 13:04:05,075 | INFO | Building main descriptive sample
+2026-08-25 13:04:15,875 | INFO | Building protest descriptive sample
 Traceback (most recent call last):
-  File "/users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication/python/generate_descriptive_tables_duckdb.py", line 12, in <module>
-    import pyreadstat
-ModuleNotFoundError: No module named 'pyreadstat'
+  File "/users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication/python/generate_descriptive_tables_duckdb.py", line 266, in <module>
+    raise SystemExit(main())
+                     ^^^^^^
+  File "/users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication/python/generate_descriptive_tables_duckdb.py", line 178, in main
+    con.execute(f"""
+_duckdb.BinderException: Binder Error: Table "p" does not have a column named "relative_year_bin"
+
+Candidate bindings: : "relative_year"
+
+LINE 16:         WHERE p.relative_year_bin BETWEEN -4 AND 4
+                       ^
