@@ -41,6 +41,7 @@ interaction_graph using ///
     type(protest) modvar(downup_ac_pop)
 copy "${figures}/_app_18_protest_5km_fe12_did_downup_plot_rural_acpop${sample}${ster_suffix}_1.png" ///
      "${figures}/_app_18_protest_5km_fe12_did_downup_plot_rural_acpop${sample}${ster_suffix}.png", replace
+erase "${figures}/_app_18_protest_5km_fe12_did_downup_plot_rural_acpop${sample}${ster_suffix}_1.png"
 
 est clear
 interaction_graph using ///
@@ -50,6 +51,7 @@ interaction_graph using ///
     type(politician) modvar(downup_ac_pop)
 copy "${figures}/_app_19_polischar_fe12_did_downup_inter_plot_rural_acpop${sample}${ster_suffix}_1.png" ///
      "${figures}/_app_19_polischar_fe12_did_downup_inter_plot_rural_acpop${sample}${ster_suffix}.png", replace
+erase "${figures}/_app_19_polischar_fe12_did_downup_inter_plot_rural_acpop${sample}${ster_suffix}_1.png"
 
 * Area-weighted counterparts retained under their historical names.
 est clear

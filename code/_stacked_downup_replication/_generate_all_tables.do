@@ -742,67 +742,14 @@ display "Generated: _app_15_polischar_fe12_did_rural_acpop.tex"
 }
 
 ********************************************************************************
-* 11. Treatment-definition tables actively input by main.tex
+* 11. Canonical treatment-definition table (version 3 specification)
 ********************************************************************************
 est clear
 estread using "${tables}/_app_6_main_did_treat_definition${sample}_rural_acpop${ster_suffix}.ster"
 _strip_zeros_stats, models(eq1 eq2 eq3 eq4 eq5 eq6 eq7) stats(ymean)
 
-esttab eq1 eq2 eq3 eq4 eq5 using ///
-    "${tables}/_app_6_main_did_treat_definition${sample}_rural_acpop_new${ster_suffix}.tex", ///
-    replace cells(b(fmt(4) star) se(par fmt(4))) ///
-    star(* 0.10 ** 0.05 *** 0.01) ///
-    keep(downup_ac_pop downup_ac downup_1sd_pop down_percent_pop downup_diff_percent_pop) ///
-    order(downup_ac_pop downup_ac downup_1sd_pop down_percent_pop downup_diff_percent_pop) ///
-    varlabels(downup_ac_pop "Down\$>\$Up (Pop)" ///
-              downup_ac "Down\$>\$Up (Area)" ///
-              downup_1sd_pop "Down\$>\$Up by 1std" ///
-              down_percent_pop "Downwind over total Population" ///
-              downup_diff_percent_pop "Down-Up Percent") ///
-    stats(N acq gridfe acmonthfe ymean_clean, ///
-          fmt(%12.0fc %12.0fc %s %s %s) ///
-          labels("Observations" "N Assembly Constituencies" ///
-                 "Grid \$\times\$ Cohort FE" ///
-                 "Assembly \$\times\$ Month-Year \$\times\$ Cohort FE" ///
-                 "Mean DV")) ///
-    nomtitles nonumbers collabels(none) nobaselevels ///
-    prehead("\begin{tabular}{lccccc}" ///
-            "\hline" ///
-            "& (1) & (2) & (3) & (4) & (5)\\" ///
-            "& \multicolumn{5}{c}{Number of Fires (in 1,000 units) }\\" ///
-            "\hline") ///
-    posthead("") prefoot("\hline") ///
-    postfoot("\hline" "\end{tabular}")
-
-esttab eq1 eq2 eq3 eq4 eq6 eq5 using ///
-    "${tables}/_app_6_main_did_treat_definition${sample}_rural_acpop_new2${ster_suffix}.tex", ///
-    replace cells(b(fmt(4) star) se(par fmt(4))) ///
-    star(* 0.10 ** 0.05 *** 0.01) ///
-    keep(downup_ac_pop downup_ac downup_1sd_pop down_percent_pop down_percent downup_diff_percent_pop) ///
-    order(downup_ac_pop downup_ac downup_1sd_pop down_percent_pop down_percent downup_diff_percent_pop) ///
-    varlabels(downup_ac_pop "Down\$>\$Up (Pop)" ///
-              downup_ac "Down\$>\$Up (Area)" ///
-              downup_1sd_pop "Down\$>\$Up by 1std" ///
-              down_percent_pop "Downwind over total Population" ///
-              down_percent "Downwind over total Population V2" ///
-              downup_diff_percent_pop "Down-Up Percent") ///
-    stats(N acq gridfe acmonthfe ymean_clean, ///
-          fmt(%12.0fc %12.0fc %s %s %s) ///
-          labels("Observations" "N Assembly Constituencies" ///
-                 "Grid \$\times\$ Cohort FE" ///
-                 "Assembly \$\times\$ Month-Year \$\times\$ Cohort FE" ///
-                 "Mean DV")) ///
-    nomtitles nonumbers collabels(none) nobaselevels ///
-    prehead("\begin{tabular}{lcccccc}" ///
-            "\hline" ///
-            "& (1) & (2) & (3) & (4) & (5) & (6)\\" ///
-            "& \multicolumn{6}{c}{Number of Fires (in 1,000 units) }\\" ///
-            "\hline") ///
-    posthead("") prefoot("\hline") ///
-    postfoot("\hline" "\end{tabular}")
-
 esttab eq1 eq2 eq3 eq6 eq5 eq7 using ///
-    "${tables}/_app_6_main_did_treat_definition${sample}_rural_acpop_new3${ster_suffix}.tex", ///
+    "${tables}/_app_6_main_did_treat_definition${sample}_rural_acpop${ster_suffix}.tex", ///
     replace cells(b(fmt(4) star) se(par fmt(4))) ///
     star(* 0.10 ** 0.05 *** 0.01) ///
     rename(1.downup_ac_pop downup_ac_pop) ///
@@ -831,7 +778,7 @@ esttab eq1 eq2 eq3 eq6 eq5 eq7 using ///
     posthead("") prefoot("\hline") ///
     postfoot("\hline" "\end{tabular}")
 
-display "Generated: _app_6_main_did_treat_definition_rural_acpop_new[1-3].tex"
+display "Generated: _app_6_main_did_treat_definition_rural_acpop.tex (version 3)"
 
 ********************************************************************************
 * 12. Population placebo within 13 km

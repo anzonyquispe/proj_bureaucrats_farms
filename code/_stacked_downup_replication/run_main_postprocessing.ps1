@@ -76,9 +76,9 @@ Write-Host "Stage 1/2: exporting production event-study CSV files."
 Invoke-StataStage -Stage export -Wait | Out-Null
 
 $plotJobs = @(
-    @{ Name = "downup_area"; Families = "main"; Cases = "final_stacked_area_baseline" },
-    @{ Name = "downup_pop"; Families = "main"; Cases = "final_stacked_population_baseline" },
-    @{ Name = "politician"; Families = "main"; Cases = "final_politician_fe03_baseline" },
+    @{ Name = "downup_area"; Families = "main"; Cases = "final_stacked_area_baseline,final_stacked_area_rice" },
+    @{ Name = "downup_pop"; Families = "main"; Cases = "final_stacked_population_baseline,final_stacked_population_rice" },
+    @{ Name = "politician"; Families = "main"; Cases = "final_politician_fe03_baseline,final_politician_fe03_rice" },
     @{ Name = "protest"; Families = "protest"; Cases = "" }
 )
 
@@ -127,6 +127,7 @@ for ($index = 0; $index -lt $plotJobs.Count; $index++) {
 $failures = @()
 foreach ($item in $processes) {
     $item.Process.WaitForExit()
+    $item.Process.Refresh()
     if ($item.ContainsKey("Stdout")) {
         $content = @()
         if (Test-Path -LiteralPath $item.Stdout) { $content += Get-Content -LiteralPath $item.Stdout }
@@ -134,8 +135,24 @@ foreach ($item in $processes) {
         Set-Content -LiteralPath $item.Log -Value $content
         Remove-Item -LiteralPath $item.Stdout, $item.Stderr -Force -ErrorAction SilentlyContinue
     }
-    if ($item.Process.ExitCode -ne 0) {
-        $failures += "$($item.Name) (exit $($item.Process.ExitCode)); log: $($item.Log)"
+
+    # Start-Process can leave ExitCode unset on Windows after redirected child
+    # processes have completed. A blank value must not be treated as a nonzero
+    # exit code. For plot jobs, accept a missing exit code only when the final
+    # success marker is present in the completed log.
+    $exitCode = $item.Process.ExitCode
+    if ($null -eq $exitCode -and $item.ContainsKey("Stdout")) {
+        $completed = (Test-Path -LiteralPath $item.Log) -and
+            (Select-String -LiteralPath $item.Log `
+                -Pattern '^All requested .*plots completed\.$' -Quiet)
+        if ($completed) { $exitCode = 0 }
+    }
+
+    if ($null -eq $exitCode) {
+        $failures += "$($item.Name) (exit code unavailable and no success marker); log: $($item.Log)"
+    }
+    elseif ($exitCode -ne 0) {
+        $failures += "$($item.Name) (exit $exitCode); log: $($item.Log)"
     }
 }
 

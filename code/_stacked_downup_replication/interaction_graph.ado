@@ -1,4 +1,4 @@
-*! version 1.8  2026-08-25
+*! version 2.0  2026-08-25
 *! Interaction effect graph for triple-interaction DiD models.
 
 capture program drop interaction_graph
@@ -24,22 +24,6 @@ program define interaction_graph
     else {
         display as error "Input must be .ster or .csv"
         exit 198
-    }
-
-    if "`yrange'" == "" {
-        if "`type'" == "politician" {
-            local ymin = -26
-            local ymax = 40
-        }
-        else {
-            local ymin = -26
-            local ymax = 66
-        }
-    }
-    else {
-        tokenize `yrange'
-        local ymin = `1'
-        local ymax = `2'
     }
 
     foreach numero of numlist `estimates' {
@@ -139,19 +123,37 @@ program define interaction_graph
         local pos3 = lincoms_treat1[3]
         local pos4 = (`pos2' + `pos3') / 2
 
-        * Keep the historical layout: group labels sit beside their estimates,
-        * while only the Pre/Post headers occupy a band above every 95% CI.
-        * Horizontal offsets keep labels and the p-value clear of dots, arrows,
-        * brackets, and confidence limits without moving labels to new rows.
-        quietly summarize lincoms_treat3 in 1/3, meanonly
+        * Confidence intervals are not plotted and therefore never determine
+        * the display range. Production ranges are fixed by analysis type;
+        * yrange() remains an explicit override for other callers.
+        quietly summarize lincoms_treat1 in 1/3, meanonly
         local observed_min = min(r(min), 0)
-        quietly summarize lincoms_treat2 in 1/3, meanonly
         local observed_max = max(r(max), 0)
-        local observed_span = max(`observed_max' - `observed_min', 1)
-        local padding = max(`observed_span' * .10, 1)
-        local label_high = `observed_max' + 1.75 * `padding'
-        local ymin = min(`ymin', `observed_min' - `padding')
-        local ymax = max(`ymax', `observed_max' + 2.65 * `padding')
+        local observed_span = max(`observed_max' - `observed_min', 1e-8)
+
+        if "`yrange'" == "" {
+            if "`type'" == "politician" {
+                local ymin = -3
+                local ymax = 12
+            }
+            else {
+                local ymin = -10
+                local ymax = 100
+            }
+        }
+        else {
+            tokenize `yrange'
+            local ymin = `1'
+            local ymax = `2'
+        }
+        local label_offset = max((`observed_min' - `ymin') / 2, ///
+            .02 * (`ymax' - `ymin'))
+        local post_label_y = `pos2' - `label_offset'
+        * Align the period labels on the untreated-post label's y-coordinate.
+        local pre_label_y = `post_label_y'
+
+        * Pre/Post are period labels and sit beneath the corresponding pre and
+        * untreated-post points, inside the dynamically padded plotting range.
 
         if "`type'" == "politician" {
             quietly replace sec = 0.9 in 1
@@ -159,51 +161,55 @@ program define interaction_graph
             * exactly the same horizontal coordinate.
             quietly replace sec = 3.25 in 2
             quietly replace sec = 3.25 in 3
-            quietly replace sec = 4.68 in 4
+            quietly replace sec = 5.18 in 4
             twoway ///
                 (pcarrowi `pos1' .95 `pos2' 3.25, color(black)) ///
                 (pcarrowi `pos1' .95 `pos3' 3.25, color(black)) ///
                 (scatter lincoms_treat1 sec in 1, msymbol(O) color(black) msize(3)) ///
                 (scatter lincoms_treat1 sec in 2/3, msymbol(O) color(black) msize(3)) ///
-                (pci `pos2' 4.55 `pos2' 4.68, color(black)) ///
-                (pci `pos2' 4.68 `pos3' 4.68, color(black)) ///
-                (pci `pos3' 4.55 `pos3' 4.68, color(black)) ///
-                (pci `pos4' 4.68 `pos4' 4.72, color(black)), ///
+                (pci `pos2' 5.05 `pos2' 5.18, color(black)) ///
+                (pci `pos2' 5.18 `pos3' 5.18, color(black)) ///
+                (pci `pos3' 5.05 `pos3' 5.18, color(black)) ///
+                (pci `pos4' 5.18 `pos4' 5.22, color(black)), ///
                 text(`pos1' .72 "Non-Agricultural" "Politician", place(w) size(3.5) justification(right)) ///
-                text(`pos2' 3.48 "Non-Agricultural" "Politician", place(e) size(3.5) justification(left)) ///
+                text(`pos1' 3.48 "Non-Agricultural" "Politician", place(e) size(3.5) justification(left)) ///
                 text(`pos3' 3.48 "Agricultural" "Politician", place(e) size(3.5) justification(left)) ///
                 legend(off) ///
-                text(`label_high' .90 "Pre", place(c) size(3.5)) ///
-                text(`label_high' 3.25 "Post", place(c) size(3.5)) ///
-                text(`pos4' 4.92 "p-value = `pval'", place(e) size(3)) ///
+                text(`pre_label_y' .90 "Pre", place(c) size(3.5)) ///
+                text(`post_label_y' 3.25 "Post", place(c) size(3.5)) ///
+                text(`pos4' 5.42 "p-value = `pval'", place(e) size(3)) ///
                 xlabel(, nogrid nolabels) xtitle(" ") ///
                 ytitle("Effect of Down>Up on Number of Fires (x 1,000)") ///
-                xscale(range(-.35 6.25) off) yscale(range(`ymin' `ymax')) ///
+                xscale(range(-.35 6.85) off) yscale(range(`ymin' `ymax')) ///
+                ylabel(-3(3)12) ///
+                graphregion(margin(small)) plotregion(margin(small)) ///
                 yline(0, lcolor(black%75))
         }
         else {
             quietly replace sec = .9 in 1
             quietly replace sec = 3.50 in 2
             quietly replace sec = 3.50 in 3
-            quietly replace sec = 4.70 in 4
+            quietly replace sec = 5.10 in 4
             twoway ///
                 (pcarrowi `pos1' .95 `pos2' 3.50, color(black)) ///
                 (pcarrowi `pos1' .95 `pos3' 3.50, color(black)) ///
                 (scatter lincoms_treat1 sec in 2/3, msymbol(O) color(black) msize(3)) ///
                 (scatter lincoms_treat1 sec in 1, msymbol(O) color(black) msize(3)) ///
-                (pci `pos2' 4.40 `pos2' 4.50, color(black)) ///
-                (pci `pos2' 4.50 `pos3' 4.50, color(black)) ///
-                (pci `pos3' 4.40 `pos3' 4.50, color(black)) ///
-                (pci `pos4' 4.50 `pos4' 4.58, color(black)), ///
-                text(`pos1' .70 "Before protest", place(w) size(3.5) justification(right)) ///
-                text(`pos2' 3.74 "No Protest", place(e) size(3.5) justification(left)) ///
+                (pci `pos2' 5.00 `pos2' 5.10, color(black)) ///
+                (pci `pos2' 5.10 `pos3' 5.10, color(black)) ///
+                (pci `pos3' 5.00 `pos3' 5.10, color(black)) ///
+                (pci `pos4' 5.10 `pos4' 5.18, color(black)), ///
+                text(4 .70 "Before protest", place(w) size(3.5) justification(right)) ///
+                text(4 3.74 "No Protest", place(e) size(3.5) justification(left)) ///
                 text(`pos3' 3.74 "Protest", place(e) size(3.5) justification(left)) ///
-                text(`label_high' .90 "Pre", place(c) size(3.5)) ///
-                text(`label_high' 3.50 "Post", place(c) size(3.5)) ///
-                text(`pos4' 4.82 "p = `pval'", place(e) size(3)) ///
-                legend(off) xlabel(, nogrid nolabels) ylabel(#6) xtitle(" ") ///
+                text(`pre_label_y' .90 "Pre", place(c) size(3.5)) ///
+                text(`post_label_y' 3.50 "Post", place(c) size(3.5)) ///
+                text(`pos4' 5.38 "p = `pval'", place(e) size(3)) ///
+                legend(off) xlabel(, nogrid nolabels) xtitle(" ") ///
                 ytitle("Effect of Down>Up on Number of Fires (x 1,000)") ///
-                xscale(range(-.4 5.4) off) yscale(range(`ymin' `ymax')) ///
+                xscale(range(-.4 6.0) off) yscale(range(`ymin' `ymax')) ///
+                ylabel(-10(10)100) ///
+                graphregion(margin(small)) plotregion(margin(small)) ///
                 yline(0, lcolor(black%75))
         }
 

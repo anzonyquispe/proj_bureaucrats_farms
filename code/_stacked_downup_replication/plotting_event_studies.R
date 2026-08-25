@@ -507,6 +507,14 @@ event_cases <- list(
     ylim_original = c(-40, 20), ylim_rotated = c(-40, 30)
   ),
   event_case(
+    id = "final_stacked_area_rice",
+    csv_stem = "stacked_event_study_5pre", model = "evreg2",
+    rows = 39:49, columns = c(3, 4, 43:53),
+    figure_base = "stacked_event_study_5pre_rural_riceP",
+    pre = 5, post = 6, omitted = 0,
+    ylim_original = c(-80, 50), ylim_rotated = c(-80, 50)
+  ),
+  event_case(
     id = "final_stacked_population_baseline",
     csv_stem = "stacked_event_study_pop_5pre", model = "evreg1",
     rows = 15:25, columns = c(3, 4, 19:29),
@@ -534,6 +542,15 @@ event_cases <- list(
     xlab = "Years from Election", ylim_original = c(-20, 50),
     csv_middle = "_acpop",
     csv_tail = "_controls_both"
+  ),
+  event_case(
+    id = "final_politician_fe03_rice",
+    csv_stem = "_app_16_polischar_fe12_evst_all",
+    model = "evreg2", rows = 33:41, columns = c(3, 4, 37:45),
+    figure_base = "_app_16_polischar_fe12_evst_all_rural_acpop_riceP_5",
+    pre = 5, post = 5, omitted = -1,
+    xlab = "Years from Election",
+    csv_middle = "_acpop", csv_tail = "_controls_both"
   ),
   # event_case(
   #   id = "legacy_main_baseline",
@@ -970,8 +987,11 @@ run_pattern_case <- function(csv, model, pattern, base, pre, post,
 # omitted-period, and alternative-window registry cases.
 production_main_case_ids <- c(
   "final_stacked_area_baseline",
+  "final_stacked_area_rice",
   "final_stacked_population_baseline",
-  "final_politician_fe03_baseline"
+  "final_stacked_population_rice",
+  "final_politician_fe03_baseline",
+  "final_politician_fe03_rice"
 )
 event_case_ids <- vapply(event_cases, `[[`, character(1L), "id")
 event_cases <- event_cases[event_case_ids %in% production_main_case_ids]
@@ -1139,6 +1159,12 @@ if ("protest" %in% args$families) {
     protest_csv, "evreg1",
     "relative_year_bin_aux#1\\.treat$",
     paste0("_app_17_5km_fe12_evst_all", s, "_rural_fe03_1"),
+    4, 2, display_coefficients = 5L, result_suffix = args$suffix
+  )
+  run_pattern_case(
+    protest_csv, "evreg2",
+    "relative_year_bin_aux#1\\.treat#1\\.rice_prod_aclvl_ahigh$",
+    paste0("_app_17_5km_fe12_evst_all", s, "_rural_fe03_riceP"),
     4, 2, display_coefficients = 5L, result_suffix = args$suffix
   )
 }

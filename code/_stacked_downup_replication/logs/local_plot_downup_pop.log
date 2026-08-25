@@ -1,0 +1,20 @@
+Warning message:
+package 'ggplot2' was built under R version 4.5.3 
+HonestDiD parallel workers: 2
+Running registered result: final_stacked_population_baseline
+Generated: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/stacked_event_study_pop_5pre_rural_1_ori.png
+Generated: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/stacked_event_study_pop_5pre_rural_1_rotated.png
+Generated: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/stacked_event_study_pop_5pre_rural_1_honest2.png
+Generated: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/stacked_event_study_pop_5pre_rural_1_rot_honest2.png
+Running registered result: final_stacked_population_rice
+Generated: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/stacked_event_study_pop_5pre_rural_riceP_ori.png
+Generated: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/stacked_event_study_pop_5pre_rural_riceP_rotated.png
+Generated: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/stacked_event_study_pop_5pre_rural_riceP_honest2.png
+Generated: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/stacked_event_study_pop_5pre_rural_riceP_rot_honest2.png
+Warning messages:
+1: In grDevices::dev.off() : agg could not write to the given file
+2: In .warnIfNotSymmPSD(sigma) :
+  matrix sigma not numerically positive semi-definite (smallest eigenvalue was -4.19803e-16)
+3: In .warnIfNotSymmPSD(sigma) :
+  matrix sigma not numerically positive semi-definite (smallest eigenvalue was -4.19803e-16)
+All requested event-study and HonestDiD plots completed.
