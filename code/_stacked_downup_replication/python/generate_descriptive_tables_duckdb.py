@@ -35,6 +35,23 @@ def find_first(paths: list[Path]) -> Path:
     raise FileNotFoundError("None of these inputs exists:\n" + "\n".join(map(str, paths)))
 
 
+def csv_columns(con: duckdb.DuckDBPyConnection, path: Path,
+                options: str) -> set[str]:
+    rows = con.execute(
+        f"DESCRIBE SELECT * FROM read_csv_auto('{sql_path(path)}', {options})"
+    ).fetchall()
+    return {str(row[0]) for row in rows}
+
+
+def relative_year_column(columns: set[str], path: Path) -> str:
+    for candidate in ("relative_year_bin", "relative_year"):
+        if candidate in columns:
+            return candidate
+    raise ValueError(
+        f"{path} has neither relative_year_bin nor relative_year"
+    )
+
+
 def load_dta_lookup(con: duckdb.DuckDBPyConnection, name: str, path: Path,
                     columns: list[str]) -> None:
     # pandas.read_stata uses its bundled parser and avoids requiring pyreadstat,
@@ -85,7 +102,10 @@ def summarize(con: duckdb.DuckDBPyConnection, table: str,
             fmt_number(stats.get(f"sd_{index}")) if continuous else "",
             fmt_number(stats.get(f"min_{index}")) if continuous else "",
             fmt_number(stats.get(f"max_{index}")) if continuous else "",
-            fmt_number(stats[f"n_{index}"], integer=True),
+            fmt_number(
+                stats[f"n_{index}"] if continuous else stats["total_n"],
+                integer=True,
+            ),
             fmt_number(stats[f"u_{index}"], integer=True),
         ])
     LOG.info("%s: %s observations", table, fmt_number(stats["total_n"], True))
@@ -156,6 +176,14 @@ def main() -> int:
             raise FileNotFoundError(path)
 
     csv_options = "header=true, auto_detect=true, sample_size=1000000, null_padding=true"
+    protest_relative = relative_year_column(
+        csv_columns(con, protest_csv, csv_options), protest_csv
+    )
+    politician_relative = relative_year_column(
+        csv_columns(con, politician_csv, csv_options), politician_csv
+    )
+    LOG.info("Protest relative-year column: %s", protest_relative)
+    LOG.info("Politician relative-year column: %s", politician_relative)
     LOG.info("Building main descriptive sample")
     con.execute(f"""
         CREATE OR REPLACE TABLE desc_main AS
@@ -180,8 +208,8 @@ def main() -> int:
         SELECT p.unique_small_grid_id, p.year, p.month, p.ac_uq_id, p.province,
                a.ac_area_tr, p.cohort,
                concat(CAST(p.province AS VARCHAR),'|',CAST(p.election_year AS VARCHAR)) AS legislature,
-               p.relative_year_bin,
-               CAST((p.relative_year_bin>=0) AND (p.treat=1) AS INTEGER) AS protest,
+               p."{protest_relative}" AS relative_year_bin,
+               CAST((p."{protest_relative}">=0) AND (p.treat=1) AS INTEGER) AS protest,
                p."count"*1000 AS fires,
                p.rice_prod_aclvl_ahigh
         FROM read_csv_auto('{sql_path(protest_csv)}', {csv_options}) p
@@ -190,7 +218,7 @@ def main() -> int:
         JOIN area_lookup_clean a
           ON CAST(p.unique_small_grid_id AS VARCHAR)=a.grid_key
          AND p.month=a.month AND p.year=a.year
-        WHERE p.relative_year_bin BETWEEN -4 AND 4
+        WHERE p."{protest_relative}" BETWEEN -4 AND 4
           AND (p.year < 2022 OR (p.year=2022 AND p.month<=8))
           AND p."count" IS NOT NULL AND p.treat IS NOT NULL
           AND p.downup_ac_pop IS NOT NULL AND p.wind_direction IS NOT NULL
@@ -205,15 +233,18 @@ def main() -> int:
         SELECT p.unique_small_grid_id, p.year, p.month, p.ac_uq_id, p.province,
                p.election_year, p.cohort,
                concat(CAST(p.province AS VARCHAR),'|',CAST(p.election_year AS VARCHAR)) AS legislature,
-               p.self_profession_nomiss AS agricultural_politician,
-               p.relative_year_bin,
-               CAST((p.relative_year_bin>=0) AND (p.treat=1) AS INTEGER) AS switching_agri,
+               CASE WHEN p.self_profession_nomiss=1 THEN
+                    concat(CAST(p.ac_uq_id AS VARCHAR),'|',
+                           CAST(p.election_year AS VARCHAR))
+               END AS agricultural_politician,
+               p."{politician_relative}" AS relative_year_bin,
+               CAST((p."{politician_relative}">=0) AND (p.treat=1) AS INTEGER) AS switching_agri,
                p."count"*1000 AS fires,
                p.rice_prod_aclvl_ahigh
         FROM read_csv_auto('{sql_path(politician_csv)}', {csv_options}) p
         JOIN rural_lookup_clean r
           ON CAST(p.unique_small_grid_id AS VARCHAR)=r.grid_key AND r.is_rural=1
-        WHERE p.relative_year_bin BETWEEN -5 AND 4
+        WHERE p."{politician_relative}" BETWEEN -5 AND 4
           AND (p.year < 2022 OR (p.year=2022 AND p.month<=8))
           AND p."count" IS NOT NULL AND p.treat IS NOT NULL
           AND p.downup_ac_pop IS NOT NULL AND p.wind_direction IS NOT NULL
