@@ -2,8 +2,8 @@ param(
     [string]$RepositoryRoot = "C:\Users\eunic\OneDrive\Documents\GitHub\proj_bureaucrats_farms",
     [string]$DataRoot = "C:\Users\eunic\Dropbox\sa_fires\proj_bureaucrats_farms",
     [string]$RscriptCommand = "Rscript",
-    [string]$Families = "main,politician,protest",
-    [string]$Cases = "",
+    [string]$Families = "main,protest",
+    [string]$Cases = "final_stacked_population_baseline,final_politician_fe03_baseline",
     [switch]$IncludeHonestDiD
 )
 
@@ -19,7 +19,7 @@ if (-not (Test-Path -LiteralPath $tablesPath)) {
 }
 
 $requiredControlCsv = @(
-    "_app_16_polischar_fe12_evst_all_rural_controls_both.csv",
+    "stacked_event_study_pop_5pre_rural.csv",
     "_app_16_polischar_fe12_evst_all_rural_acpop_controls_both.csv",
     "_app_17_5km_fe12_evst_all_rural.csv"
 )

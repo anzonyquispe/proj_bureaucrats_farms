@@ -70,7 +70,7 @@ gen agri_politician = post_ * treat
 * Retain exactly the sample selected by the richest interacted population DiD.
 local common_rhs ///
     "ib0.post_##ib0.treat##ib0.downup_ac_pop wind_direction av_wind_speed"
-do "${code}/exploratory_analysis/rice_high_subsample/_apply_rice_high_subsample.do"
+do "${code}/_apply_analysis_subsample.do"
 quietly reghdfejl countk ///
     `common_rhs', ///
     absorb(unique_small_grid_id_cohort ///
@@ -147,7 +147,7 @@ local lab_countk                "Number of Fires (in 1,000 units)"
 local lab_rice_prod_aclvl_ahigh "High Rice Production (AC level)"
 
 capture file close texout
-file open texout using "${tables}/_politicians_stacked_descriptive${sample}.tex", write replace
+file open texout using "${tables}/_politicians_stacked_descriptive${sample}${ster_suffix}.tex", write replace
 file write texout "\begin{tabular}{lrrrrrr}" _n
 file write texout "\toprule" _n
 file write texout " & Mean & SD & Min & Max & Observations & Unique Obs.\\\\" _n
@@ -185,4 +185,4 @@ foreach v of local colsel {
 file write texout "\bottomrule" _n
 file write texout "\end{tabular}" _n
 file close texout
-display as result "Generated: ${tables}/_politicians_stacked_descriptive${sample}.tex"
+display as result "Generated: ${tables}/_politicians_stacked_descriptive${sample}${ster_suffix}.tex"

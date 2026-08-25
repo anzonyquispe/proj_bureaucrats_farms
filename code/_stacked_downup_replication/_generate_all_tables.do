@@ -121,7 +121,7 @@ end
 ********************************************************************************
 
 est clear
-estread using "${tables}/main_did_downup_area_ac${sample}_rural_stacked.ster"
+estread using "${tables}/main_did_downup_area_ac${sample}_rural_stacked${ster_suffix}.ster"
 _set_main_fe_tags
 _strip_zeros_stats, models(eq1 eq2 eq3 eq4) stats(ymean)
 
@@ -150,7 +150,7 @@ esttab eq1 eq2 eq3 eq4 using ///
     postfoot("\hline" "\end{tabular}" "}")
 
 est clear
-estread using "${tables}/_main_4_protest_5km_fe12_did_downup${sample}_rural.ster"
+estread using "${tables}/_main_4_protest_5km_fe12_did_downup${sample}_rural${ster_suffix}.ster"
 _strip_zeros_stats, models(evreg1 evreg2 evreg3 evreg4 evreg5 evreg6) stats(ymean ymean2)
 
 esttab evreg1 evreg2 evreg3 evreg4 evreg5 evreg6 using ///
@@ -183,7 +183,7 @@ esttab evreg1 evreg2 evreg3 evreg4 evreg5 evreg6 using ///
     postfoot("\hline" "\end{tabular}" "}")
 
 est clear
-estread using "${tables}/_main_5_polischar_fe12_did_downup_inter${sample}_rural.ster"
+estread using "${tables}/_main_5_polischar_fe12_did_downup_inter${sample}_rural${ster_suffix}.ster"
 _strip_zeros_stats, models(evreg1 evreg2) stats(ymean ymean2)
 
 esttab evreg1 evreg2 using ///
@@ -220,13 +220,13 @@ esttab evreg1 evreg2 using ///
 * 1. Main DiD Table (_main_1_did)
 ********************************************************************************
 est clear
-estread using "${tables}/main_did_downup_pop_ac${sample}_rural_stacked.ster"
+estread using "${tables}/main_did_downup_pop_ac${sample}_rural_stacked${ster_suffix}.ster"
 _set_main_fe_tags
 _strip_zeros_stats, models(eq1 eq2 eq3 eq4) stats(ymean)
 
 * Four-column progression: no FE; month-year x cohort; grid x cohort plus
 * month-year x cohort; grid x cohort plus AC x month-year x cohort.
-esttab eq1 eq2 eq3 eq4 using "${tables}/main_did_downup_ac${sample}_rural_acpop.tex", ///
+esttab eq1 eq2 eq3 eq4 using "${tables}/main_did_downup_ac${sample}_rural_acpop${ster_suffix}.tex", ///
     replace ///
     cells(b(fmt(3) star) se(par fmt(3))) ///
     star(* 0.10 ** 0.05 *** 0.01) ///
@@ -258,10 +258,10 @@ display "Generated: main_did_downup_ac_rural_acpop.tex"
 * 2. Bureaucrat-Politician DiD (_main_3_bureau_polisc_did)
 ********************************************************************************
 est clear
-estread using "${tables}/_main_3_bureau_polisc_did${sample}_rural_stacked.ster"
+estread using "${tables}/_main_3_bureau_polisc_did${sample}_rural_stacked${ster_suffix}.ster"
 _strip_zeros_stats, models(eq1 eq2 eq3 eq4) stats(ymean ymean2)
 
-esttab eq1 eq2 eq3 eq4 using "${tables}/_main_3_bureau_polisc_did${sample}_rural_acpop.tex", ///
+esttab eq1 eq2 eq3 eq4 using "${tables}/_main_3_bureau_polisc_did${sample}_rural_acpop${ster_suffix}.tex", ///
     replace ///
     cells(b(fmt(3) star) se(par fmt(3))) ///
     star(* 0.10 ** 0.05 *** 0.01) ///
@@ -294,7 +294,7 @@ display "Generated: _main_3_bureau_polisc_did_rural_acpop.tex"
 ********************************************************************************
 {
 est clear
-estread using "${tables}/_main_4_protest_5km_fe12_did_downup${sample}_rural_acpop.ster"
+estread using "${tables}/_main_4_protest_5km_fe12_did_downup${sample}_rural_acpop${ster_suffix}.ster"
 _strip_zeros_stats, models(evreg1 evreg2 evreg3 evreg4 evreg5 evreg6) stats(ymean ymean2)
 
 
@@ -328,7 +328,7 @@ forval i = 4(1)6 {
 * Panel A: estimated coefficients
 *---------------------------------------------------------------
 esttab evreg1 evreg2 evreg3 evreg4 evreg5 evreg6 ///
-    using "${tables}/_main_4_protest_5km_fe12_did_downup${sample}_rural_acpop_new.tex", ///
+    using "${tables}/_main_4_protest_5km_fe12_did_downup${sample}_rural_acpop_new${ster_suffix}.tex", ///
     replace fragment ///
     cells(b(fmt(3) star) se(par fmt(3))) ///
     star(* 0.10 ** 0.05 *** 0.01) ///
@@ -363,7 +363,7 @@ esttab evreg1 evreg2 evreg3 evreg4 evreg5 evreg6 ///
 * Start at evreg2 because the row label spans two columns; this reproduces the
 * legacy alignment (two empty model cells followed by estimates in 4--6).
 esttab evreg2 evreg3 evreg4 evreg5 evreg6 ///
-    using "${tables}/_main_4_protest_5km_fe12_did_downup${sample}_rural_acpop_new.tex", ///
+    using "${tables}/_main_4_protest_5km_fe12_did_downup${sample}_rural_acpop_new${ster_suffix}.tex", ///
     append fragment ///
     cells(none) ///
     stats(ysum1 ysd1 ysum2 ysd2 ysum3 ysd3 ysum4 ysd4, ///
@@ -382,7 +382,7 @@ esttab evreg2 evreg3 evreg4 evreg5 evreg6 ///
 * Footer: sample info and fixed effects
 *---------------------------------------------------------------
 esttab evreg1 evreg2 evreg3 evreg4 evreg5 evreg6 ///
-    using "${tables}/_main_4_protest_5km_fe12_did_downup${sample}_rural_acpop_new.tex", ///
+    using "${tables}/_main_4_protest_5km_fe12_did_downup${sample}_rural_acpop_new${ster_suffix}.tex", ///
     append fragment ///
     cells(none) ///
     stats(N acq gridfe time electionfe provtrendfe ymean_clean ymean2_clean, ///
@@ -405,7 +405,7 @@ display "Generated: _main_4_protest_5km_fe12_did_downup_rural_acpop_new.tex"
 ********************************************************************************
 {
 est clear
-estread using "${tables}/_main_5_polischar_fe12_did_downup_inter${sample}_rural_acpop.ster"
+estread using "${tables}/_main_5_polischar_fe12_did_downup_inter${sample}_rural_acpop${ster_suffix}.ster"
 _strip_zeros_stats, models(evreg1 evreg2 evreg3 evreg4 evreg5 evreg6) stats(ymean ymean2)
 
 forval i = 4/6 {
@@ -437,7 +437,7 @@ forval i = 4/6 {
 * Panel A: estimated coefficients
 *---------------------------------------------------------------
 esttab evreg1 evreg2 evreg3 evreg4 evreg5 evreg6 ///
-    using "${tables}/_main_5_polischar_fe12_did_downup_inter${sample}_rural_acpop.tex", ///
+    using "${tables}/_main_5_polischar_fe12_did_downup_inter${sample}_rural_acpop${ster_suffix}.tex", ///
     replace fragment ///
     cells(b(fmt(3) star) se(par fmt(3))) ///
     star(* 0.10 ** 0.05 *** 0.01) ///
@@ -472,7 +472,7 @@ esttab evreg1 evreg2 evreg3 evreg4 evreg5 evreg6 ///
 * Start at evreg2 because the row label spans two columns. The two regular-DiD
 * model cells are blank and the lincom estimates appear under columns 4--6.
 esttab evreg2 evreg3 evreg4 evreg5 evreg6 ///
-    using "${tables}/_main_5_polischar_fe12_did_downup_inter${sample}_rural_acpop.tex", ///
+    using "${tables}/_main_5_polischar_fe12_did_downup_inter${sample}_rural_acpop${ster_suffix}.tex", ///
     append fragment ///
     cells(none) ///
     stats(ysum1 ysd1 ysum2 ysd2 ysum3 ysd3 ysum4 ysd4, ///
@@ -491,7 +491,7 @@ esttab evreg2 evreg3 evreg4 evreg5 evreg6 ///
 * Footer: sample info and fixed effects
 *---------------------------------------------------------------
 esttab evreg1 evreg2 evreg3 evreg4 evreg5 evreg6 ///
-    using "${tables}/_main_5_polischar_fe12_did_downup_inter${sample}_rural_acpop.tex", ///
+    using "${tables}/_main_5_polischar_fe12_did_downup_inter${sample}_rural_acpop${ster_suffix}.tex", ///
     append fragment ///
     cells(none) ///
     stats(N acq gridfe time electionfe provtrendfe ymean_clean ymean2_clean, ///
@@ -513,11 +513,11 @@ display "Generated: _main_5_polischar_fe12_did_downup_inter_rural_acpop.tex"
 * 5. Alternative DVs (_app_7_main_did_downup_area_ac_dv)
 ********************************************************************************
 est clear
-estread using "${tables}/_app_7_main_did_downup_area_ac_dv${sample}_rural_stacked.ster"
+estread using "${tables}/_app_7_main_did_downup_area_ac_dv${sample}_rural_stacked${ster_suffix}.ster"
 _strip_zeros_stats, models(eq1 eq2 eq3) stats(ymean)
 
 esttab eq1 eq2 eq3 ///
-    using "${tables}/_app_7_main_did_downup_area_ac_dv${sample}_rural_acpop.tex", ///
+    using "${tables}/_app_7_main_did_downup_area_ac_dv${sample}_rural_acpop${ster_suffix}.tex", ///
     replace ///
     cells(b(fmt(4) star) se(par fmt(4))) ///
     star(* 0.10 ** 0.05 *** 0.01) ///
@@ -547,11 +547,11 @@ display "Generated: _app_7_main_did_downup_area_ac_dv_rural_acpop.tex"
 * 6. DiD by Year (_app_8_main_did_by_year)
 ********************************************************************************
 est clear
-estread using "${tables}/_app_8_main_did_by_year${sample}_rural_stacked.ster"
+estread using "${tables}/_app_8_main_did_by_year${sample}_rural_stacked${ster_suffix}.ster"
 _strip_zeros_stats, models(eq1 eq2 eq3 eq4 eq5 eq6 eq7 eq8 eq9 eq10) stats(ymean)
 
 esttab eq1 eq2 eq3 eq4 eq5 eq6 eq7 eq8 eq9 eq10 ///
-    using "${tables}/_app_8_main_did_by_year${sample}_rural_acpop.tex", ///
+    using "${tables}/_app_8_main_did_by_year${sample}_rural_acpop${ster_suffix}.tex", ///
     replace ///
     cells(b(fmt(3) star) se(par fmt(3))) ///
     star(* 0.10 ** 0.05 *** 0.01) ///
@@ -579,11 +579,11 @@ display "Generated: _app_8_main_did_by_year_rural_acpop.tex"
 * 7. DiD by State (_app_9_main_did_by_state)
 ********************************************************************************
 est clear
-estread using "${tables}/_app_9_main_did_by_state${sample}_rural_stacked.ster"
+estread using "${tables}/_app_9_main_did_by_state${sample}_rural_stacked${ster_suffix}.ster"
 _strip_zeros_stats, models(eq1 eq2 eq3 eq4) stats(ymean)
 
 esttab eq1 eq2 eq3 eq4 ///
-    using "${tables}/_app_9_main_did_by_state${sample}_rural_acpop.tex", ///
+    using "${tables}/_app_9_main_did_by_state${sample}_rural_acpop${ster_suffix}.tex", ///
     replace ///
     cells(b(fmt(3) star) se(par fmt(3))) ///
     star(* 0.10 ** 0.05 *** 0.01) ///
@@ -610,12 +610,13 @@ display "Generated: _app_9_main_did_by_state_rural_acpop.tex"
 ********************************************************************************
 * 8. Rice Moderators (_app_10_did_rice_moderators)
 ********************************************************************************
+if "$production_only" != "1" {
 est clear
-capture noisily estread using "${tables}/_app_10_did_rice_moderators_rural_stacked.ster"
+capture noisily estread using "${tables}/_app_10_did_rice_moderators_rural_stacked${ster_suffix}.ster"
 _strip_zeros_stats, models(eq1 eq2 eq3) stats(ymean ymean2 ymean3)
 
 capture noisily esttab eq1 eq2 eq3 ///
-    using "${tables}/_app_10_did_rice_moderators${sample}_rural_acpop.tex", ///
+    using "${tables}/_app_10_did_rice_moderators${sample}_rural_acpop${ster_suffix}.tex", ///
     replace ///
     cells(b(fmt(3) star) se(par fmt(3))) ///
     star(* 0.10 ** 0.05 *** 0.01) ///
@@ -648,16 +649,18 @@ capture noisily esttab eq1 eq2 eq3 ///
     postfoot("\hline" "\end{tabular}")
 
 display "Generated: _app_10_did_rice_moderators_rural_acpop.tex"
+}
 
 ********************************************************************************
 * 9. Politician Rice Mods (_app_14_polischar_fe12_did_ricemods)
 ********************************************************************************
+if "$production_only" != "1" {
 est clear
-capture noisily estread using "${tables}/_app_14_polischar_fe12_did_ricemods${sample}_rural_stacked.ster"
+capture noisily estread using "${tables}/_app_14_polischar_fe12_did_ricemods${sample}_rural_stacked${ster_suffix}.ster"
 _strip_zeros_stats, models(evreg1 evreg2 evreg3 evreg4) stats(ymean ymean2 ymean3)
 
 capture noisily esttab evreg1 evreg2 evreg3 evreg4 ///
-    using "${tables}/_app_14_polischar_fe12_did_ricemods${sample}_rural_acpop.tex", ///
+    using "${tables}/_app_14_polischar_fe12_did_ricemods${sample}_rural_acpop${ster_suffix}.tex", ///
     replace ///
     cells(b(fmt(3) star) se(par fmt(3))) ///
     star(* 0.10 ** 0.05 *** 0.01) ///
@@ -692,16 +695,18 @@ capture noisily esttab evreg1 evreg2 evreg3 evreg4 ///
     postfoot("\hline" "\end{tabular}" "}")
 
 display "Generated: _app_14_polischar_fe12_did_ricemods_rural_acpop.tex"
+}
 
 ********************************************************************************
 * 10. Politician FE DiD (_app_15_polischar_fe12_did)
 ********************************************************************************
+if "$production_only" != "1" {
 est clear
-capture noisily estread using "${tables}/_app_15_polischar_fe12_did${sample}_rural_stacked.ster"
+capture noisily estread using "${tables}/_app_15_polischar_fe12_did${sample}_rural_stacked${ster_suffix}.ster"
 _strip_zeros_stats, models(evreg1 evreg2 evreg3) stats(ymean)
 
 capture noisily esttab evreg1 evreg2 evreg3 ///
-    using "${tables}/_app_15_polischar_fe12_did${sample}_rural_acpop.tex", ///
+    using "${tables}/_app_15_polischar_fe12_did${sample}_rural_acpop${ster_suffix}.tex", ///
     replace ///
     cells(b(fmt(3) star) se(par fmt(3))) ///
     star(* 0.10 ** 0.05 *** 0.01) ///
@@ -726,16 +731,17 @@ capture noisily esttab evreg1 evreg2 evreg3 ///
     postfoot("\hline" "\end{tabular}" "}")
 
 display "Generated: _app_15_polischar_fe12_did_rural_acpop.tex"
+}
 
 ********************************************************************************
 * 11. Treatment-definition tables actively input by main.tex
 ********************************************************************************
 est clear
-estread using "${tables}/_app_6_main_did_treat_definition${sample}_rural_acpop.ster"
+estread using "${tables}/_app_6_main_did_treat_definition${sample}_rural_acpop${ster_suffix}.ster"
 _strip_zeros_stats, models(eq1 eq2 eq3 eq4 eq5 eq6 eq7) stats(ymean)
 
 esttab eq1 eq2 eq3 eq4 eq5 using ///
-    "${tables}/_app_6_main_did_treat_definition${sample}_rural_acpop_new.tex", ///
+    "${tables}/_app_6_main_did_treat_definition${sample}_rural_acpop_new${ster_suffix}.tex", ///
     replace cells(b(fmt(4) star) se(par fmt(4))) ///
     star(* 0.10 ** 0.05 *** 0.01) ///
     keep(downup_ac_pop downup_ac downup_1sd_pop down_percent_pop downup_diff_percent_pop) ///
@@ -761,7 +767,7 @@ esttab eq1 eq2 eq3 eq4 eq5 using ///
     postfoot("\hline" "\end{tabular}")
 
 esttab eq1 eq2 eq3 eq4 eq6 eq5 using ///
-    "${tables}/_app_6_main_did_treat_definition${sample}_rural_acpop_new2.tex", ///
+    "${tables}/_app_6_main_did_treat_definition${sample}_rural_acpop_new2${ster_suffix}.tex", ///
     replace cells(b(fmt(4) star) se(par fmt(4))) ///
     star(* 0.10 ** 0.05 *** 0.01) ///
     keep(downup_ac_pop downup_ac downup_1sd_pop down_percent_pop down_percent downup_diff_percent_pop) ///
@@ -788,7 +794,7 @@ esttab eq1 eq2 eq3 eq4 eq6 eq5 using ///
     postfoot("\hline" "\end{tabular}")
 
 esttab eq1 eq2 eq3 eq6 eq5 eq7 using ///
-    "${tables}/_app_6_main_did_treat_definition${sample}_rural_acpop_new3.tex", ///
+    "${tables}/_app_6_main_did_treat_definition${sample}_rural_acpop_new3${ster_suffix}.tex", ///
     replace cells(b(fmt(4) star) se(par fmt(4))) ///
     star(* 0.10 ** 0.05 *** 0.01) ///
     rename(1.downup_ac_pop downup_ac_pop) ///
@@ -823,11 +829,11 @@ display "Generated: _app_6_main_did_treat_definition_rural_acpop_new[1-3].tex"
 * 12. Population placebo within 13 km
 ********************************************************************************
 est clear
-estread using "${tables}/_app_11_placebo_pop_13km${sample}_rural.ster"
+estread using "${tables}/_app_11_placebo_pop_13km${sample}_rural${ster_suffix}.ster"
 _strip_zeros_stats, models(eq1 eq2 eq3) stats(ymean)
 
 esttab eq1 eq2 eq3 using ///
-    "${tables}/_app_11_placebo_pop_13km${sample}_rural.tex", ///
+    "${tables}/_app_11_placebo_pop_13km${sample}_rural${ster_suffix}.tex", ///
     replace ///
     cells(b(fmt(3) star) se(par fmt(3))) ///
     star(* 0.10 ** 0.05 *** 0.01) ///
@@ -854,12 +860,13 @@ display "Generated: _app_11_placebo_pop_13km_rural.tex"
 ********************************************************************************
 * 13. Downwind Heterogeneity (_app_20_did_downwind_hm)
 ********************************************************************************
+if "$production_only" != "1" {
 est clear
-estread using "${tables}/_app_20_did_downwind_hm_rural_stacked.ster"
+estread using "${tables}/_app_20_did_downwind_hm_rural_stacked${ster_suffix}.ster"
 _strip_zeros_stats, models(eq1 eq2 eq3 eq4) stats(ymean)
 _strip_zeros_stats, models(eq1 eq2 eq3 eq4) stats(ymean2)
 
-esttab eq1 eq2 eq3 eq4 using "${tables}/_app_20_did_downwind_hm${sample}_rural_acpop.tex", ///
+esttab eq1 eq2 eq3 eq4 using "${tables}/_app_20_did_downwind_hm${sample}_rural_acpop${ster_suffix}.tex", ///
     replace ///
     cells(b(fmt(3) star) se(par fmt(3))) ///
     star(* 0.10 ** 0.05 *** 0.01) ///
@@ -884,6 +891,7 @@ esttab eq1 eq2 eq3 eq4 using "${tables}/_app_20_did_downwind_hm${sample}_rural_a
     postfoot("\hline" "\end{tabular}" "}")
 
 display "Generated: _app_20_did_downwind_hm_rural_acpop.tex"
+}
 
 ********************************************************************************
 * Side-by-side comparison document
@@ -892,8 +900,10 @@ display "Generated: _app_20_did_downwind_hm_rural_acpop.tex"
 * so the two can be eyeballed in a single PDF.
 ********************************************************************************
 
+if "$production_only" != "1" {
+
 tempname cmp
-file open `cmp' using "${tables}/_comparison_downup_ac_vs_acpop${sample}.tex", write replace
+file open `cmp' using "${tables}/_comparison_downup_ac_vs_acpop${sample}${ster_suffix}.tex", write replace
 
 file write `cmp' "\documentclass[10pt]{article}" _n
 file write `cmp' "\usepackage[margin=0.6in]{geometry}" _n
@@ -982,7 +992,13 @@ file close `cmp'
 
 display "Comparison document: ${tables}/_comparison_downup_ac_vs_acpop${sample}.tex"
 display "Compile with: pdflatex ${tables}/_comparison_downup_ac_vs_acpop${sample}.tex"
+}
 
 ********************************************************************************
-display "Table pass completed. Missing .ster files or model names were reported above; available tables were generated."
+if "$production_only" == "1" {
+    display as result "Production table pass completed."
+}
+else {
+    display "Table pass completed. Missing optional .ster files or model names were reported above; available tables were generated."
+}
 ********************************************************************************

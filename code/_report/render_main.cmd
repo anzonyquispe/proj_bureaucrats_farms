@@ -3,8 +3,8 @@ setlocal
 
 set "REPORT_DIR=%~dp0"
 set "OUTPUT_DIR=%REPORT_DIR%output"
-set "TEX_FILE=main_v2.tex"
-set "JOB_NAME=main_v2"
+set "TEX_FILE=main_v3.tex"
+set "JOB_NAME=main_v3"
 
 where pdflatex >nul 2>&1
 if errorlevel 1 (

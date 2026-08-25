@@ -1,4 +1,4 @@
-*! version 1.6  2026-08-22
+*! version 1.7  2026-08-25
 *! Interaction effect graph for triple-interaction DiD models.
 
 capture program drop interaction_graph
@@ -139,15 +139,20 @@ program define interaction_graph
         local pos3 = lincoms_treat1[3]
         local pos4 = (`pos2' + `pos3') / 2
 
-        * Keep every displayed point visible when the default range is too narrow.
-        if "`yrange'" == "" {
-            quietly summarize lincoms_treat1 in 1/3, meanonly
-            local observed_min = min(r(min), 0)
-            local observed_max = max(r(max), 0)
-            local padding = max((`observed_max' - `observed_min') * .12, 1)
-            local ymin = `observed_min' - `padding'
-            local ymax = `observed_max' + `padding'
-        }
+        * Reserve an annotation band strictly above every displayed 95% CI.
+        * This prevents category labels and the p-value from touching points,
+        * arrows, or confidence limits under any coefficient scale.
+        quietly summarize lincoms_treat3 in 1/3, meanonly
+        local observed_min = min(r(min), 0)
+        quietly summarize lincoms_treat2 in 1/3, meanonly
+        local observed_max = max(r(max), 0)
+        local observed_span = max(`observed_max' - `observed_min', 1)
+        local padding = max(`observed_span' * .10, 1)
+        local label_low  = `observed_max' + 1.25 * `padding'
+        local label_mid  = `observed_max' + 2.35 * `padding'
+        local label_high = `observed_max' + 3.45 * `padding'
+        local ymin = min(`ymin', `observed_min' - `padding')
+        local ymax = max(`ymax', `observed_max' + 4.35 * `padding')
 
         if "`type'" == "politician" {
             quietly replace sec = 0.9 in 1
@@ -156,8 +161,6 @@ program define interaction_graph
             quietly replace sec = 3.25 in 2
             quietly replace sec = 3.25 in 3
             quietly replace sec = 4.68 in 4
-            local text_ypos = `ymin' + (`ymax' - `ymin') * .05
-
             twoway ///
                 (pcarrowi `pos1' .95 `pos2' 3.25, color(black)) ///
                 (pcarrowi `pos1' .95 `pos3' 3.25, color(black)) ///
@@ -168,12 +171,12 @@ program define interaction_graph
                 (pci `pos3' 4.55 `pos3' 4.68, color(black)) ///
                 (pci `pos4' 4.68 `pos4' 4.72, color(black)), ///
                 legend(off) ///
-                text(`pos1' .77 "Non-Agricultural" "Politician", place(w) size(3.5) justification(left)) ///
-                text(`pos2' 3.42 "Non-Agricultural" "Politician", place(e) size(3.5) justification(left)) ///
-                text(`pos3' 3.42 "Agricultural" "Politician", place(e) size(3.5) justification(left)) ///
-                text(`text_ypos' .9 "Pre", place(c) size(3.5)) ///
-                text(`text_ypos' 3.25 "Post", place(c) size(3.5)) ///
-                text(`pos4' 4.75 "p-value" "`pval'", place(e) size(3)) ///
+                text(`label_high' .90 "Pre", place(c) size(3.5)) ///
+                text(`label_mid' .90 "Non-Agricultural" "Politician", place(c) size(3.2)) ///
+                text(`label_high' 3.25 "Post", place(c) size(3.5)) ///
+                text(`label_mid' 2.75 "Non-Agricultural" "Politician", place(c) size(3.2)) ///
+                text(`label_low' 3.75 "Agricultural" "Politician", place(c) size(3.2)) ///
+                text(`label_high' 4.75 "p-value = `pval'", place(c) size(3)) ///
                 xlabel(, nogrid nolabels) xtitle(" ") ///
                 ytitle("Effect of Down>Up on Number of Fires (x 1,000)") ///
                 xscale(range(-.35 5.5) off) yscale(range(`ymin' `ymax')) ///
@@ -184,8 +187,6 @@ program define interaction_graph
             quietly replace sec = 3.50 in 2
             quietly replace sec = 3.50 in 3
             quietly replace sec = 4.70 in 4
-            local text_ypos = `ymin' + (`ymax' - `ymin') * .05
-
             twoway ///
                 (pcarrowi `pos1' .95 `pos2' 3.50, color(black)) ///
                 (pcarrowi `pos1' .95 `pos3' 3.50, color(black)) ///
@@ -195,12 +196,12 @@ program define interaction_graph
                 (pci `pos2' 4.50 `pos3' 4.50, color(black)) ///
                 (pci `pos3' 4.40 `pos3' 4.50, color(black)) ///
                 (pci `pos4' 4.50 `pos4' 4.58, color(black)), ///
-                text(`pos1' .75 "Before protest", place(w) size(3.5)) ///
-                text(`text_ypos' .9 "Pre", place(c) size(3.5)) ///
-                text(`pos2' 4.15 "No Protest", place(w) size(3.5)) ///
-                text(`pos3' 4.15 "Protest", place(w) size(3.5)) ///
-                text(`text_ypos' 3.5 "Post", place(c) size(3.5)) ///
-                text(`pos4' 4.6 "p = `pval'", place(e) size(3)) ///
+                text(`label_high' .90 "Pre", place(c) size(3.5)) ///
+                text(`label_mid' .90 "Before protest", place(c) size(3.2)) ///
+                text(`label_high' 3.50 "Post", place(c) size(3.5)) ///
+                text(`label_mid' 3.05 "No Protest", place(c) size(3.2)) ///
+                text(`label_low' 3.95 "Protest", place(c) size(3.2)) ///
+                text(`label_high' 4.75 "p = `pval'", place(c) size(3)) ///
                 legend(off) xlabel(, nogrid nolabels) ylabel(#6) xtitle(" ") ///
                 ytitle("Effect of Down>Up on Number of Fires (x 1,000)") ///
                 xscale(range(-.4 5.4) off) yscale(range(`ymin' `ymax')) ///

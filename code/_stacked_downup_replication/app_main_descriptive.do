@@ -58,7 +58,7 @@ else {
 * Retain exactly the sample selected by the richest population DiD model.
 local controls wind_direction av_wind_speed
 local cluster ac_uq_id#cohort#monthyear unique_small_grid_id#cohort
-do "${code}/exploratory_analysis/rice_high_subsample/_apply_rice_high_subsample.do"
+do "${code}/_apply_analysis_subsample.do"
 quietly reghdfejl countk downup_ac_pop `controls', ///
     absorb(grid_id#cohort ac_id#monthyear#cohort) cluster(`cluster')
 gen byte descriptive_sample = e(sample)
@@ -127,7 +127,7 @@ local lab_wind_direction        "Wind Direction"
 local lab_rice_prod_aclvl_ahigh "Rice Production"
 
 capture file close texout
-file open texout using "${tables}/descriptives_main${sample}.tex", write replace
+file open texout using "${tables}/descriptives_main${sample}${ster_suffix}.tex", write replace
 file write texout "\begin{tabular}{lrrrrrr}" _n
 file write texout "\toprule" _n
 file write texout " & Mean & SD & Min & Max & Observations & Unique Obs.\\\\" _n
@@ -166,4 +166,4 @@ foreach v of local colsel {
 file write texout "\bottomrule" _n
 file write texout "\end{tabular}" _n
 file close texout
-display as result "Generated: ${tables}/descriptives_main${sample}.tex"
+display as result "Generated: ${tables}/descriptives_main${sample}${ster_suffix}.tex"

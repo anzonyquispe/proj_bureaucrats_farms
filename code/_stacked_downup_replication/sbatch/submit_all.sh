@@ -8,9 +8,24 @@ REPLICATION_ROOT="${REPLICATION_ROOT:-/groups/sgulzar/sa_fires/proj_bureaucrats_
 REPLICATION_CODE="${REPLICATION_CODE:-/users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication}"
 LOCATION="${LOCATION:-shell}"
 SAMPLE="${SAMPLE:-none}"
+ANALYSIS_SUBSAMPLE="${ANALYSIS_SUBSAMPLE:-all}"
+OUTPUT_TAG="${OUTPUT_TAG:-}"
+JOB_PREFIX="${JOB_PREFIX:-}"
 RURAL_VAR="is_rural"
 EVENT_FE_LIST="${EVENT_FE_LIST:-1}"
 PROTEST_CPUS=3
+
+case "${SAMPLE}" in
+  none|""|_sample) ;;
+  *) echo "ERROR: SAMPLE must be none, empty, or _sample." >&2; exit 64 ;;
+esac
+case "${ANALYSIS_SUBSAMPLE}" in
+  all|rice_high) ;;
+  *) echo "ERROR: ANALYSIS_SUBSAMPLE must be all or rice_high." >&2; exit 64 ;;
+esac
+if [[ "${ANALYSIS_SUBSAMPLE}" == "rice_high" && -z "${OUTPUT_TAG}" ]]; then
+  OUTPUT_TAG="_rice_high"
+fi
 
 mkdir -p "${REPLICATION_CODE}/logs"
 cd "${REPLICATION_CODE}"
@@ -44,12 +59,13 @@ submit_job() {
   shift 4
   local id
   if [[ "${scheduler}" == "slurm" ]]; then
-    local -a options=(--parsable --job-name="${name}" --cpus-per-task="${cpus}")
+    local -a options=(--parsable --job-name="${JOB_PREFIX}${name}" \
+      --cpus-per-task="${cpus}" --output=/dev/null --error=/dev/null)
     [[ -n "${dependency}" ]] && options+=(--dependency="afterok:${dependency}")
     id=$(sbatch "${options[@]}" "${script}" "$@")
     id="${id%%;*}"
   else
-    local -a options=(-terse -V -N "${name}")
+    local -a options=(-terse -V -N "${JOB_PREFIX}${name}" -j y -o /dev/null)
     if (( cpus > 1 )); then options+=(-pe smp "${cpus}"); fi
     [[ -n "${dependency}" ]] && options+=(-hold_jid "${dependency}")
     id=$(qsub "${options[@]}" "${script}" "$@")
@@ -62,16 +78,24 @@ submit_stata() {
   local name="$1" dofile="$2" fe_list="$3" suffix="$4"
   local downup="${5:-none}" stacked="${6:-none}" output="${7:-none}"
   local cpus=1
+  if [[ -n "${OUTPUT_TAG}" ]]; then
+    [[ "${suffix}" == "none" ]] && suffix=""
+    suffix="${suffix}${OUTPUT_TAG}"
+  fi
+  [[ -z "${suffix}" ]] && suffix="none"
   if [[ "${stacked}" == "stacked_data_protest5km" ]]; then
     cpus="${PROTEST_CPUS}"
   fi
   submit_job "${name}" "sbatch/run_dofile.sbatch" "" "${cpus}" \
     "${dofile}" "${REPLICATION_ROOT}" "${REPLICATION_CODE}" "${LOCATION}" \
     "${SAMPLE}" "${RURAL_VAR}" "${fe_list}" "${suffix}" \
-    "${downup}" "${stacked}" "${output}"
+    "${downup}" "${stacked}" "${output}" all "${ANALYSIS_SUBSAMPLE}"
 }
 
 declare -a table_ids event_ids interaction_ids neighbour_ids
+
+echo "Submission mode: sample=${SAMPLE}; subsample=${ANALYSIS_SUBSAMPLE}; output_tag=${OUTPUT_TAG:-<none>}"
+echo "Permanent logs: ${REPLICATION_CODE}/logs/<job-name>_<job-id>.stata.log"
 
 # Main and appendix table estimates. Each call is a distinct scheduler job.
 table_ids+=("$(submit_stata main_did_area _main_1_did.do 1/4 _stacked downup_ac combined_dt main_did_downup_area_ac)")
@@ -115,23 +139,30 @@ if [[ "${scheduler}" == "sge" ]]; then
   neighbour_dep=$(join_ids , "${neighbour_ids[@]}")
 fi
 
+post_suffix="${OUTPUT_TAG:-none}"
+
 # LaTeX tables, event-study CSV export, and event-study R figures are local
 # post-processing steps. They consume the synchronized repository-level .ster
 # files through _run_local_ster_postprocessing.do and plotting_event_studies.R.
 interaction_plot_job=$(submit_job interaction_plots sbatch/run_dofile.sbatch "${interaction_dep}" 1 \
   _generate_interaction_plots.do "${REPLICATION_ROOT}" "${REPLICATION_CODE}" "${LOCATION}" \
-  "${SAMPLE}" "${RURAL_VAR}" 1 none none none none)
+  "${SAMPLE}" "${RURAL_VAR}" 1 "${post_suffix}" none none none all "${ANALYSIS_SUBSAMPLE}")
 neighbour_plot_job=$(submit_job neighbour_plot sbatch/run_dofile.sbatch "${neighbour_dep}" 1 \
   _main_6_neighbour_plot.do "${REPLICATION_ROOT}" "${REPLICATION_CODE}" "${LOCATION}" \
-  "${SAMPLE}" "${RURAL_VAR}" 1 none none none none)
+  "${SAMPLE}" "${RURAL_VAR}" 1 "${post_suffix}" none none none all "${ANALYSIS_SUBSAMPLE}")
 
-# Non-regression figures extracted from the source notebooks.
-design_job=$(submit_job design_maps sbatch/run_python.sbatch "" 1 \
-  generate_design_maps.py "${REPLICATION_ROOT}" "${REPLICATION_CODE}" "${SAMPLE}" "${RURAL_VAR}")
-desc_fig_job=$(submit_job descriptive_figures sbatch/run_python.sbatch "" 1 \
-  generate_descriptive_figures.py "${REPLICATION_ROOT}" "${REPLICATION_CODE}" "${SAMPLE}" "${RURAL_VAR}")
-protest_fig_job=$(submit_job protest_figures sbatch/run_python.sbatch "" 1 \
-  generate_protest_figures.py "${REPLICATION_ROOT}" "${REPLICATION_CODE}" "${SAMPLE}" "${RURAL_VAR}")
+# Mode-invariant source figures are generated once for the complete, unfiltered
+# run. Sample or rice-high tests must never overwrite those production figures.
+if [[ "${SAMPLE}" != "_sample" && "${ANALYSIS_SUBSAMPLE}" == "all" ]]; then
+  design_job=$(submit_job design_maps sbatch/run_python.sbatch "" 1 \
+    generate_design_maps.py "${REPLICATION_ROOT}" "${REPLICATION_CODE}" "${SAMPLE}" "${RURAL_VAR}")
+  desc_fig_job=$(submit_job descriptive_figures sbatch/run_python.sbatch "" 1 \
+    generate_descriptive_figures.py "${REPLICATION_ROOT}" "${REPLICATION_CODE}" "${SAMPLE}" "${RURAL_VAR}")
+  protest_fig_job=$(submit_job protest_figures sbatch/run_python.sbatch "" 1 \
+    generate_protest_figures.py "${REPLICATION_ROOT}" "${REPLICATION_CODE}" "${SAMPLE}" "${RURAL_VAR}")
+else
+  echo "Skipping mode-invariant source figures outside the full/all run."
+fi
 
 echo "Scheduler: ${scheduler}"
 echo "Cluster estimation jobs submitted."

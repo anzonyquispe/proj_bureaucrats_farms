@@ -1,30 +1,16 @@
 @echo off
 setlocal EnableExtensions
 
-rem Promote the current exploratory FE03 politician event-study result to the
-rem main-results naming convention, then generate original, rotated, and both
-rem HonestDiD sensitivity plots. No Stata regression is rerun.
+rem Generate the politician FE03 original, rotated, and HonestDiD figures from
+rem the production event-study result. No Stata regression is rerun.
 
 for %%I in ("%~dp0..\..") do set "REPO=%%~fI"
-set "SOURCE_DIR=%REPO%\tables\exploratory_analysis\cohort_eventtime_fe_sweep"
 set "TABLE_DIR=%REPO%\tables"
-set "SOURCE_STEM=politician_byprov_cohorttime_fe03_event_rural_acpop_all"
-set "TARGET_STEM=_app_16_polischar_fe03_evst_main_acpop_rural"
 set "PLOT_SCRIPT=%REPO%\code\_stacked_downup_replication\plotting_event_studies.R"
 
-if not exist "%SOURCE_DIR%\%SOURCE_STEM%.csv" (
-    echo ERROR: Missing FE03 CSV: "%SOURCE_DIR%\%SOURCE_STEM%.csv"
+if not exist "%TABLE_DIR%\_app_16_polischar_fe12_evst_all_rural_acpop_controls_both.csv" (
+    echo ERROR: Missing production politician FE03 CSV.
     exit /b 66
-)
-if not exist "%SOURCE_DIR%\%SOURCE_STEM%.ster" (
-    echo ERROR: Missing FE03 STER: "%SOURCE_DIR%\%SOURCE_STEM%.ster"
-    exit /b 66
-)
-
-copy /Y "%SOURCE_DIR%\%SOURCE_STEM%.csv" "%TABLE_DIR%\%TARGET_STEM%.csv" >nul || exit /b 1
-copy /Y "%SOURCE_DIR%\%SOURCE_STEM%.ster" "%TABLE_DIR%\%TARGET_STEM%.ster" >nul || exit /b 1
-if exist "%SOURCE_DIR%\%SOURCE_STEM%_scalars.csv" (
-    copy /Y "%SOURCE_DIR%\%SOURCE_STEM%_scalars.csv" "%TABLE_DIR%\%TARGET_STEM%_scalars.csv" >nul || exit /b 1
 )
 
 set "RSCRIPT=C:\Program Files\R\R-4.5.0\bin\Rscript.exe"

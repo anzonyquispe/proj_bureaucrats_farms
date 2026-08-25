@@ -110,7 +110,7 @@ gen moderator = 0
 * Baseline plus the only substantive event-study moderator.
 local moderators_list moderator rice_prod_aclvl_ahigh
 
-do "${code}/exploratory_analysis/rice_high_subsample/_apply_rice_high_subsample.do"
+do "${code}/_apply_analysis_subsample.do"
 
 tempfile analysis_base
 save `analysis_base'
@@ -139,6 +139,16 @@ foreach control_sample in $control_samples {
 
     display as text "Politician event study: controls=`control_sample', downup=${downup_var}, N=" _N
 
+    * Use the richest rice-moderated FE03 event study to define a common sample
+    * for the baseline and moderated estimates.
+    quietly reghdfejl countk ///
+        ib`base'.relative_year_bin_aux##ib0.treat##ib0.rice_prod_aclvl_ahigh ///
+        wind_direction av_wind_speed, absorb(`fe1') vce(cluster ac_elec_yr)
+    gen byte common_sample = e(sample)
+    keep if common_sample
+    drop common_sample
+    local common_n = _N
+
     egen tag_ac = tag(ac_uq_id)
     count if tag_ac == 1
     local numacs = r(N)
@@ -160,6 +170,7 @@ foreach control_sample in $control_samples {
             local fespec `fe`fe''
             reghdfejl countk `rhs' if `fcond', ///
                 absorb(`fespec') vce(cluster ac_elec_yr)
+            assert e(N) == `common_n'
 
             estadd scalar ymean  = `ymean'
             estadd scalar ymean2 = `ymean2'
@@ -177,11 +188,8 @@ foreach control_sample in $control_samples {
 
     local outbase "${tables}/_app_16_polischar_fe12_evst_all${sample}_rural${ster_suffix}`control_suffix'"
     estwrite evreg* using "`outbase'.ster", replace
-    estsave_csv `estimate_names' using "`outbase'.csv", replace
     confirm file "`outbase'.ster"
-    confirm file "`outbase'.csv"
-    confirm file "`outbase'_scalars.csv"
-    display as result "Saved: `outbase'.ster and `outbase'.csv"
+    display as result "Saved: `outbase'.ster"
 }
 
 ********************************************************************************

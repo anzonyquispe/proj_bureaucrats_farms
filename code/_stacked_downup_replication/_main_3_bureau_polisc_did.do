@@ -51,7 +51,9 @@ preserve
 		save `dta'
 	restore
 	
-	merge m:1 unique_small_grid_id month year using `dta', keep(3) nogen
+	merge m:1 unique_small_grid_id month year using `dta', keep(master match)
+	assert _merge == 3
+	drop _merge
 
 
 
@@ -125,7 +127,7 @@ else {
 * Project-standard event-time and moderator variables.
 gen relative_year_bin = floor(relative_monthyear / 12)
 gen moderator = downup_dummy
-do "${code}/exploratory_analysis/rice_high_subsample/_apply_rice_high_subsample.do"
+do "${code}/_apply_analysis_subsample.do"
 
 ********************************************************************************
 * DiD Regressions

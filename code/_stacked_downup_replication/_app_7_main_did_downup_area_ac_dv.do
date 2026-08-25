@@ -101,7 +101,17 @@ else {
 
 
 * Count unique ACs
-do "${code}/exploratory_analysis/rice_high_subsample/_apply_rice_high_subsample.do"
+do "${code}/_apply_analysis_subsample.do"
+
+* Use the richest production FE and the complete covariate set to define one
+* observation sample for every alternative dependent variable.
+quietly reghdfejl countk downup_ac_pop av_wind_speed wind_direction, ///
+    absorb(grid_id#cohort ac_id#monthyear#cohort) ///
+    cluster(ac_uq_id#cohort#monthyear unique_small_grid_id#cohort)
+gen byte common_sample = e(sample)
+keep if common_sample
+drop common_sample
+local common_n = _N
 
 egen tag_ac = tag(ac_id)
 count if tag_ac == 1
@@ -143,6 +153,7 @@ global cluster ac_uq_id#cohort#monthyear unique_small_grid_id#cohort
 * Eq1: Any Fire
 reghdfejl anyfire downup_ac_pop $controls , ///
     absorb($setfe ) cluster($cluster )
+assert e(N) == `common_n'
 estadd local gridfe "Y"
 estadd local acmonthfe "Y"
 estadd scalar ymean = `meandv1'
@@ -153,6 +164,7 @@ est store eq1
 * Eq2: Log Fires
 reghdfejl logfire downup_ac_pop $controls , ///
     absorb($setfe ) cluster($cluster )
+assert e(N) == `common_n'
 estadd local gridfe "Y"
 estadd local acmonthfe "Y"
 estadd scalar ymean = `meandv2'
@@ -163,6 +175,7 @@ est store eq2
 * Eq3: Mean Brightness
 reghdfejl mean_brightness downup_ac_pop $controls , ///
     absorb($setfe ) cluster($cluster )
+assert e(N) == `common_n'
 estadd local gridfe "Y"
 estadd local acmonthfe "Y"
 estadd scalar ymean = `meandv3'

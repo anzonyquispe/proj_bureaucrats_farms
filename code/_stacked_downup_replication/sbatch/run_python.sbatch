@@ -23,6 +23,21 @@ PYTHON_ENV="${PYTHON_ENV:-/groups/sgulzar/india_forest_land/downup_geo}"
 PYTHON_BIN="${PYTHON_BIN:-${PYTHON_ENV}/bin/python}"
 if [[ "${SAMPLE}" == "none" ]]; then SAMPLE=""; fi
 
+if ! type module >/dev/null 2>&1; then
+  if [[ "${FARMS_LOGIN_RETRY:-0}" == "1" ]]; then
+    echo "ERROR: the module command is unavailable even in a login shell." >&2
+    exit 127
+  fi
+  export FARMS_LOGIN_RETRY=1
+  exec /bin/bash -l "$0" "$@"
+fi
+
+mkdir -p "${REPLICATION_CODE}/logs"
+SCHEDULER_JOB_NAME="${SLURM_JOB_NAME:-${JOB_NAME:-farms_python}}"
+SCHEDULER_JOB_ID="${SLURM_JOB_ID:-${JOB_ID:-$$}}"
+PYTHON_LOG="${REPLICATION_CODE}/logs/${SCHEDULER_JOB_NAME}_${SCHEDULER_JOB_ID}.python.log"
+exec > >(tee -a "${PYTHON_LOG}") 2>&1
+
 module purge 2>/dev/null || true
 if [[ ! -x "${PYTHON_BIN}" ]]; then
   echo "Python executable is missing or not executable: ${PYTHON_BIN}" >&2
@@ -47,6 +62,7 @@ export VECLIB_MAXIMUM_THREADS=1
 export BLIS_NUM_THREADS=1
 
 echo "Python environment: ${PYTHON_ENV}"
+echo "Permanent Python log: ${PYTHON_LOG}"
 "${PYTHON_BIN}" -c 'import sys; print("Python executable:", sys.executable); print("Python version:", sys.version.split()[0])'
 
 case "${SCRIPT}" in

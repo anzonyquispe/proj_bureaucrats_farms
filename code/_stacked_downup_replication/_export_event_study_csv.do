@@ -52,14 +52,32 @@ local failed = 0
 
 foreach ster_file of local ster_files {
     * A sample smoke test must never rewrite production CSV/scalar outputs.
-    local matches_sample = "$sample" == "" | strpos("`ster_file'", "$sample") > 0
+    local matches_sample = strpos("`ster_file'", "_sample") == 0
+    if "$sample" != "" {
+        local matches_sample = strpos("`ster_file'", "$sample") > 0
+    }
+    local matches_suffix = strpos("`ster_file'", "_rice_high") == 0
+    if "$ster_suffix" != "" {
+        local matches_suffix = strpos("`ster_file'", "$ster_suffix") > 0
+    }
     local is_event = ///
         strpos("`ster_file'", "main_event_study") == 1 | ///
         strpos("`ster_file'", "stacked_event_study") == 1 | ///
         strpos("`ster_file'", "_app_16_polischar_fe12_evst_all") == 1 | ///
         strpos("`ster_file'", "_app_17_5km_fe12_evst_all") == 1
 
-    if `is_event' & `matches_sample' {
+    * The production Windows bridge exports only the three selected main
+    * results. Legacy standalone use may still export the wider event set.
+    if "$production_only" == "1" {
+        local is_event = ///
+            strpos("`ster_file'", "stacked_event_study_5pre") == 1 | ///
+            strpos("`ster_file'", "stacked_event_study_pop_5pre") == 1 | ///
+            (strpos("`ster_file'", "_app_16_polischar_fe12_evst_all") == 1 & ///
+             strpos("`ster_file'", "_rural_acpop") > 0) | ///
+            strpos("`ster_file'", "_app_17_5km_fe12_evst_all") == 1
+    }
+
+    if `is_event' & `matches_sample' & `matches_suffix' {
         est clear
         capture noisily estread using "${tables}/`ster_file'"
         if _rc {

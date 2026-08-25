@@ -76,7 +76,7 @@ gen moderator = ${downup_var}
 local dep_var countk
 local moderators_list ${downup_var}
 local fe1 "unique_small_grid_id_cohort relative_year_bin_aux#cohort_id"
-do "${code}/exploratory_analysis/rice_high_subsample/_apply_rice_high_subsample.do"
+do "${code}/_apply_analysis_subsample.do"
 
 egen tag_ac = tag(ac_uq_id)
 count if tag_ac == 1

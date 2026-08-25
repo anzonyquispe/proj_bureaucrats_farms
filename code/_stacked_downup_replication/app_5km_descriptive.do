@@ -61,6 +61,8 @@ assert cohort_term_start <= cohort
 assert inrange(cohort_analysis_max - cohort_term_start, 0, 59)
 bysort cohort_id: assert cohort == cohort[1]
 bysort cohort_id: assert cohort_election_year == cohort_election_year[1]
+bysort cohort_id: assert cohort_term_start == cohort_term_start[1]
+bysort cohort_id: assert cohort_analysis_max == cohort_analysis_max[1]
 
 capture confirm variable relative_year_bin
 if _rc {
@@ -68,10 +70,10 @@ if _rc {
 }
 assert relative_year_bin == floor((monthyear - cohort) / 12)
 keep if year < 2022 | (year == 2022 & month <= 8)
-count if relative_year_bin == -5
-display as text "Observations dropped at relative_year_bin == -5: " r(N)
-drop if relative_year_bin == -5
-display as text "Canonical protest sample: natural support after dropping -5"
+keep if inrange(relative_year_bin, -4, 4)
+quietly summarize relative_year_bin
+assert r(min) >= -4 & r(max) <= 4
+display as text "Canonical protest descriptive support: [" r(min) ", " r(max) "]"
 
 * Prefer raw count and rebuild the scaled regression outcome.
 capture drop countk
@@ -105,7 +107,7 @@ gen protest = post_ * treat
 * Retain exactly the sample selected by the richest interacted population DiD.
 local common_rhs ///
     "ib0.post_##ib0.treat##ib0.downup_ac_pop wind_direction av_wind_speed"
-do "${code}/exploratory_analysis/rice_high_subsample/_apply_rice_high_subsample.do"
+do "${code}/_apply_analysis_subsample.do"
 quietly reghdfejl countk `common_rhs', ///
     absorb(unique_small_grid_id_cohort relativeyear_cohort ///
            province_cohort#election_year ///
@@ -178,7 +180,7 @@ local lab_countk                "Number of Fires (in 1,000 units)"
 local lab_rice_prod_aclvl_ahigh "High Rice Production (AC level)"
 
 capture file close texout
-file open texout using "${tables}/_protest_stacked_descriptive${sample}.tex", write replace
+file open texout using "${tables}/_protest_stacked_descriptive${sample}${ster_suffix}.tex", write replace
 file write texout "\begin{tabular}{lrrrrrr}" _n
 file write texout "\toprule" _n
 file write texout " & Mean & SD & Min & Max & Observations & Unique Obs.\\\\" _n
@@ -216,4 +218,4 @@ foreach v of local colsel {
 file write texout "\bottomrule" _n
 file write texout "\end{tabular}" _n
 file close texout
-display as result "Generated: ${tables}/_protest_stacked_descriptive${sample}.tex"
+display as result "Generated: ${tables}/_protest_stacked_descriptive${sample}${ster_suffix}.tex"

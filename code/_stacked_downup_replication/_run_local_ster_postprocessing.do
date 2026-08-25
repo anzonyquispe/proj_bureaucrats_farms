@@ -39,8 +39,8 @@ display as text "Local .ster input folder: ${tables}"
 * Both production analyses use their final pooled samples. Protest produces a
 * single ster containing FE1-FE5 for the baseline and rice-production result.
 local control_sters ///
-    "_app_16_polischar_fe12_evst_all${sample}_rural_acpop_controls_both.ster" ///
-    "_app_17_5km_fe12_evst_all${sample}_rural.ster"
+    "_app_16_polischar_fe12_evst_all${sample}_rural_acpop${ster_suffix}_controls_both.ster" ///
+    "_app_17_5km_fe12_evst_all${sample}_rural${ster_suffix}.ster"
 
 local missing_controls = 0
 foreach ster_file of local control_sters {

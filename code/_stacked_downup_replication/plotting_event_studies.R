@@ -1,9 +1,9 @@
 #!/usr/bin/env Rscript
 
 # Single entry point for every event-study and HonestDiD plot produced by the
-# stacked/down-up replication package. Politician robustness files retain their
-# historical control suffixes; the production protest family uses one pooled
-# sample and reports the baseline and rice-production interaction for FE1-FE5.
+# stacked/down-up replication package. The production entry point generates
+# only the main downup_ac_pop, selected politician FE03, and pooled protest
+# baseline event studies. Exploratory registries remain inactive below.
 #
 # RStudio use:
 #   1. Open this file in RStudio.
@@ -63,7 +63,7 @@ RSTUDIO_CONFIG <- list(
   output_root = detected_repo_root,
   sample = "",
   # Production plot families only.
-  families = c("main", "politician", "protest"),
+  families = c("main", "protest"),
   # For the main family, optionally list registry IDs; empty means all cases.
   cases = character(),
   # HonestDiD is opt-in after selecting the preferred main specification.
@@ -83,6 +83,7 @@ parse_args <- function(args) {
       "REPLICATION_OUTPUT_ROOT", unset = RSTUDIO_CONFIG$output_root
     ),
     sample = Sys.getenv("REPLICATION_SAMPLE", unset = RSTUDIO_CONFIG$sample),
+    suffix = Sys.getenv("REPLICATION_OUTPUT_TAG", unset = ""),
     families = Sys.getenv(
       "REPLICATION_PLOT_FAMILIES",
       unset = paste(RSTUDIO_CONFIG$families, collapse = ",")
@@ -110,6 +111,10 @@ parse_args <- function(args) {
       i <- i + if (has_value) 2L else 1L
     } else if (args[[i]] == "--output-root" && i < length(args)) {
       out$output_root <- args[[i + 1L]]
+      i <- i + 2L
+    } else if (args[[i]] == "--suffix" && i < length(args)) {
+      out$suffix <- args[[i + 1L]]
+      if (identical(out$suffix, "none")) out$suffix <- ""
       i <- i + 2L
     } else if (args[[i]] == "--families" && i < length(args)) {
       out$families <- args[[i + 1L]]
@@ -254,12 +259,25 @@ plot_event <- function(event_data, file_base, num_pre, num_post,
     sprintf("Pre Avg = %.3f (%.3f)", pre[["estimate"]], pre[["se"]]),
     sprintf("Post Avg = %.3f (%.3f)", post[["estimate"]], post[["se"]])
   )
-  original_range <- diff(range(c(full$lower, full$upper), na.rm = TRUE))
+  original_bounds <- range(c(full$lower, full$upper), na.rm = TRUE)
+  original_range <- diff(original_bounds)
+  if (!is.finite(original_range) || original_range <= 0) original_range <- 1
+  original_step <- original_range * 0.08
   annotation_data <- data.table(
     time = min(full$time),
-    value = max(full$upper, na.rm = TRUE) - (0:2) * original_range * 0.07,
+    value = max(full$upper, na.rm = TRUE) + (3:1) * original_step,
     label = annotation_labels
   )
+  original_auto_ylim <- c(
+    original_bounds[[1L]] - original_step,
+    max(annotation_data$value) + original_step
+  )
+  if (!is.null(ylim_original)) {
+    original_auto_ylim <- c(
+      min(ylim_original[[1L]], original_auto_ylim[[1L]]),
+      max(ylim_original[[2L]], original_auto_ylim[[2L]])
+    )
+  }
 
   plot_theme <- theme_classic(base_size = 12) +
     theme(
@@ -278,10 +296,10 @@ plot_event <- function(event_data, file_base, num_pre, num_post,
     geom_text(
       data = annotation_data,
       aes(x = time, y = value, label = label),
-      inherit.aes = FALSE, hjust = 0, vjust = 1, size = 4
+      inherit.aes = FALSE, hjust = 0, vjust = 0.5, size = 4
     ) +
-    plot_theme
-  if (!is.null(ylim_original)) original <- original + coord_cartesian(ylim = ylim_original)
+    plot_theme +
+    coord_cartesian(ylim = original_auto_ylim, clip = "off")
   original_path <- file.path(figure_dir, paste0(file_base, "_ori.png"))
   ggsave(original_path, original, width = 8, height = 4, dpi = 300)
   message("Generated: ", original_path)
@@ -319,12 +337,25 @@ plot_event <- function(event_data, file_base, num_pre, num_post,
     lower_rot = rotated - 1.96 * se,
     upper_rot = rotated + 1.96 * se
   )]
-  rotated_range <- diff(range(c(full$lower_rot, full$upper_rot), na.rm = TRUE))
+  rotated_bounds <- range(c(full$lower_rot, full$upper_rot), na.rm = TRUE)
+  rotated_range <- diff(rotated_bounds)
+  if (!is.finite(rotated_range) || rotated_range <= 0) rotated_range <- 1
+  rotated_step <- rotated_range * 0.08
   rotated_annotation_data <- data.table(
     time = min(full$time),
-    value = max(full$upper_rot, na.rm = TRUE) - (0:2) * rotated_range * 0.07,
+    value = max(full$upper_rot, na.rm = TRUE) + (3:1) * rotated_step,
     label = rotated_annotation_labels
   )
+  rotated_auto_ylim <- c(
+    rotated_bounds[[1L]] - rotated_step,
+    max(rotated_annotation_data$value) + rotated_step
+  )
+  if (!is.null(ylim_rotated)) {
+    rotated_auto_ylim <- c(
+      min(ylim_rotated[[1L]], rotated_auto_ylim[[1L]]),
+      max(ylim_rotated[[2L]], rotated_auto_ylim[[2L]])
+    )
+  }
   rotated_plot <- ggplot(full, aes(time, rotated)) +
     geom_ribbon(
       aes(ymin = lower_rot, ymax = upper_rot),
@@ -339,12 +370,10 @@ plot_event <- function(event_data, file_base, num_pre, num_post,
     geom_text(
       data = rotated_annotation_data,
       aes(x = time, y = value, label = label),
-      inherit.aes = FALSE, hjust = 0, vjust = 1, size = 4
+      inherit.aes = FALSE, hjust = 0, vjust = 0.5, size = 4
     ) +
-    plot_theme
-  if (!is.null(ylim_rotated)) {
-    rotated_plot <- rotated_plot + coord_cartesian(ylim = ylim_rotated)
-  }
+    plot_theme +
+    coord_cartesian(ylim = rotated_auto_ylim, clip = "off")
   rotated_path <- file.path(figure_dir, paste0(file_base, "_rotated.png"))
   ggsave(rotated_path, rotated_plot, width = 8, height = 4, dpi = 300)
   message("Generated: ", rotated_path)
@@ -394,7 +423,7 @@ event_case <- function(id, csv_stem, model, rows, columns, figure_base,
                        pre, post, omitted = -1,
                        xlab = "Time from Treatment (months)",
                        ylim_original = NULL, ylim_rotated = NULL,
-                       required = TRUE) {
+                       required = TRUE, csv_middle = "", csv_tail = "") {
   list(
     id = id,
     csv_stem = csv_stem,
@@ -408,18 +437,23 @@ event_case <- function(id, csv_stem, model, rows, columns, figure_base,
     xlab = xlab,
     ylim_original = ylim_original,
     ylim_rotated = ylim_rotated,
-    required = required
+    required = required,
+    csv_middle = csv_middle,
+    csv_tail = csv_tail
   )
 }
 
-run_registered_case <- function(spec, sample_suffix) {
+run_registered_case <- function(spec, sample_suffix, output_suffix) {
   message("Running registered result: ", spec$id)
   run_case(
-    csv = paste0(spec$csv_stem, sample_suffix, "_rural.csv"),
+    csv = paste0(
+      spec$csv_stem, sample_suffix, "_rural", spec$csv_middle, output_suffix,
+      spec$csv_tail, ".csv"
+    ),
     model = spec$model,
     rows = spec$rows,
     columns = spec$columns,
-    base = paste0(spec$figure_base, sample_suffix),
+    base = paste0(spec$figure_base, sample_suffix, output_suffix),
     pre = spec$pre,
     post = spec$post,
     omitted = spec$omitted,
@@ -486,11 +520,13 @@ event_cases <- list(
   # the baseline event study without a moderator interaction.
   event_case(
     id = "final_politician_fe03_baseline",
-    csv_stem = "_app_16_polischar_fe03_evst_main_acpop",
+    csv_stem = "_app_16_polischar_fe12_evst_all",
     model = "evreg1", rows = 13:21, columns = c(3, 4, 17:25),
     figure_base = "_app_16_polischar_fe03_evst_main_rural_acpop_1",
     pre = 5, post = 5, omitted = -1,
-    xlab = "Years from Election", ylim_original = c(-20, 50)
+    xlab = "Years from Election", ylim_original = c(-20, 50),
+    csv_middle = "_acpop",
+    csv_tail = "_controls_both"
   ),
   # event_case(
   #   id = "legacy_main_baseline",
@@ -926,7 +962,6 @@ run_pattern_case <- function(csv, model, pattern, base, pre, post,
 production_main_case_ids <- c(
   "final_stacked_area_baseline",
   "final_stacked_population_baseline",
-  "final_stacked_population_rice",
   "final_politician_fe03_baseline"
 )
 event_case_ids <- vapply(event_cases, `[[`, character(1L), "id")
@@ -949,7 +984,8 @@ if (length(args$cases)) {
 
 if ("main" %in% args$families) {
   invisible(lapply(
-    selected_event_cases, run_registered_case, sample_suffix = s
+    selected_event_cases, run_registered_case, sample_suffix = s,
+    output_suffix = args$suffix
   ))
 }
 
@@ -1088,18 +1124,12 @@ for (analysis_suffix in "_acpop") {
 # only -4,...,+1.
 if ("protest" %in% args$families) {
   protest_csv <- paste0(
-    "_app_17_5km_fe12_evst_all", s, "_rural.csv"
+    "_app_17_5km_fe12_evst_all", s, "_rural", args$suffix, ".csv"
   )
   run_pattern_case(
     protest_csv, "evreg1",
     "relative_year_bin_aux#1\\.treat$",
-    paste0("_app_17_5km_fe12_evst_all", s, "_rural_fe03_1"),
-    4, 2, display_coefficients = 5L
-  )
-  run_pattern_case(
-    protest_csv, "evreg2",
-    "relative_year_bin_aux#1\\.treat#1\\.rice_prod_aclvl_ahigh$",
-    paste0("_app_17_5km_fe12_evst_all", s, "_rural_fe03_riceP_2"),
+    paste0("_app_17_5km_fe12_evst_all", s, args$suffix, "_rural_fe03_1"),
     4, 2, display_coefficients = 5L
   )
 }

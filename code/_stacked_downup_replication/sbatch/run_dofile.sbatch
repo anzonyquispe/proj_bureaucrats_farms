@@ -83,7 +83,8 @@ module purge 2>/dev/null || true
 module load stata gcc
 
 # Match Stata and linked numerical libraries to the scheduler allocation.
-# Protest-stack jobs receive 10; every other job receives 1.
+# Match numerical-library threads to the job allocation (three for production
+# protest jobs and one for the other production Stata jobs).
 export OMP_NUM_THREADS="${ALLOCATED_CPUS}"
 export OPENBLAS_NUM_THREADS="${ALLOCATED_CPUS}"
 export MKL_NUM_THREADS="${ALLOCATED_CPUS}"

@@ -69,11 +69,10 @@ if _rc {
 }
 assert relative_year_bin == floor((monthyear - cohort) / 12)
 keep if year < 2022 | (year == 2022 & month <= 8)
-count if relative_year_bin == -5
-display as text "Observations dropped at relative_year_bin == -5: " r(N)
-drop if relative_year_bin == -5
+keep if inrange(relative_year_bin, -4, 4)
 quietly summarize relative_year_bin
-display as text "Canonical protest DiD support: [" r(min) ", " r(max) "]"
+assert r(min) >= -4 & r(max) <= 4
+display as text "Canonical protest DiD support restricted to: [" r(min) ", " r(max) "]"
 * Always express the fire-count outcome in thousands.
 capture drop countk
 gen countk = count * 1000
@@ -115,7 +114,7 @@ local moderators_list moderator ${downup_var}
 * Anchor every regular and interacted model to the sample retained by the
 * richest FE specification with the full downup interaction.
 local common_rhs "ib0.post_##ib0.treat##ib0.${downup_var} wind_direction av_wind_speed"
-do "${code}/exploratory_analysis/rice_high_subsample/_apply_rice_high_subsample.do"
+do "${code}/_apply_analysis_subsample.do"
 
 quietly reghdfejl countk `common_rhs', ///
     absorb(`fe3' relativeyear_cohort) vce(cluster ac_area_tr)

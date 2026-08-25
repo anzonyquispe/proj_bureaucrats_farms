@@ -150,7 +150,7 @@ local estimates ""
 * Define the common sample with the richest displayed specification. This
 * captures missing regressors and observations removed by the HDFE singleton
 * logic before any of the less saturated models are estimated.
-do "${code}/exploratory_analysis/rice_high_subsample/_apply_rice_high_subsample.do"
+do "${code}/_apply_analysis_subsample.do"
 
 quietly reghdfejl countk ${downup_var} `controls', ///
     absorb(grid_id#cohort ac_id#monthyear#cohort) cluster(`cluster')

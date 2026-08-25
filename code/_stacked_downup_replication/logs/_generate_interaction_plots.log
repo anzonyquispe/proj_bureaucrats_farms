@@ -1,0 +1,101 @@
+
+  ___  ____  ____  ____  ____ ®
+ /__    /   ____/   /   ____/      18.0
+___/   /   /___/   /   /___/       MP—Parallel Edition
+
+ Statistics and Data Science       Copyright 1985-2023 StataCorp LLC
+                                   StataCorp
+                                   4905 Lakeway Drive
+                                   College Station, Texas 77845 USA
+                                   800-STATA-PC        https://www.stata.com
+                                   979-696-4600        stata@stata.com
+
+Stata license: Single-user 4-core  perpetual
+Serial number: 501806366048
+  Licensed to: Any Name
+               Any Name
+
+Notes:
+      1. Stata is running in batch mode.
+      2. Unicode is supported; see help unicode_advice.
+      3. More than 2 billion observations are allowed; see help obs_advice.
+      4. Maximum number of variables is set to 5,000 but can be increased;
+          see help set_maxvar.
+
+. do C:\Users\eunic\OneDrive\Documents\GitHub\proj_bureaucrats_farms\code\_stac
+> ked_downup_replication\_generate_interaction_plots.do 
+
+. *****************************************************************************
+> ***
+. * Generate every interaction figure from independently produced .ster files
+. *****************************************************************************
+> ***
+. 
+. version 17
+
+. set more off
+
+. 
+. if "$root" == "" {
+.     clear all
+.     global location     "dbox"
+.     global sample       ""
+.     global is_rural_var "is_rural"
+.     global fe_list      "1"
+.     global ster_suffix  ""
+.     global shell "/groups/sgulzar/sa_fires/proj_bureaucrats_farms"
+.     global dbox  "C:/Users/eunic/Dropbox/sa_fires/proj_bureaucrats_farms"
+.     global code_shell "/users/aquisper/proj_bureaucrats_farms/code/_stacked_d
+> ownup_replication"
+.     global code_dbox "C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucra
+> ts_farms/code/_stacked_downup_replication"
+.     if "$location" == "dbox" {
+.         global root "$dbox"
+.         global code "$code_dbox"
+.     }
+.     else {
+.         global root "$shell"
+.         global code "$code_shell"
+.     }
+. }
+
+. 
+. global tables  "${code}/../../tables"
+
+. global figures "${code}/../../figures"
+
+. capture mkdir "${figures}/Interaction_downwind"
+
+. quietly do "${code}/interaction_graph.ado"
+
+. 
+. * Population-weighted figures actively referenced by main.tex.
+. est clear
+
+. interaction_graph using ///
+>     "${tables}/_app_18_protest_5km_fe12_did_downup_plot${sample}_rural_acpop$
+> {ster_suffix}.ster", ///
+>     estimates(1) ///
+>     output("${figures}/_app_18_protest_5km_fe12_did_downup_plot_rural_acpop${
+> sample}${ster_suffix}") ///
+>     type(protest) modvar(downup_ac_pop)
+
+-------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+-----------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with
+             |                                 Julia
+-------------------------------------------------------------------------------
+(results evreg1 are active now)
+
+INTERACTION AUDIT (CONTROL-PRE STANDARDIZED): protest, estimate evreg1, moderat
+> or downup_ac_pop
+Control pre  : b =     0.000000   95% CI [    0.000000,     0.000000]   90% CI 
+> [    0.000000,     0.000000]
+Control post : b =    -1.608441   95% CI [   -6.603688,     3.386805]   90% CI 
+> [   -5.799864,     2.582981]
+Treated post : b =    83.499519   95% CI [    5.228715,   161.770322]   90% CI 
+> [   17.823880,   149.175157]
+Difference   : b =    85.107960   SE =    40.460604   95% CI [    5.748524,   1
+> 64.467395]   90% CI [   18.518869,   151.697050]   p =  0.035575

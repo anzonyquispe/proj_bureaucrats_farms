@@ -70,10 +70,10 @@ if _rc {
 }
 assert relative_year_bin == floor((monthyear - cohort) / 12)
 keep if year < 2022 | (year == 2022 & month <= 8)
-count if relative_year_bin == -5
-display as text "Observations dropped at relative_year_bin == -5: " r(N)
-drop if relative_year_bin == -5
-display as text "Canonical protest sample: full same-term support except relative year -5"
+keep if inrange(relative_year_bin, -4, 4)
+quietly summarize relative_year_bin
+assert r(min) >= -4 & r(max) <= 4
+display as text "Canonical protest interaction support: [" r(min) ", " r(max) "]"
 
 merge m:1 unique_small_grid_id using ///
     "${int_data}/ghs_grid_classification_2000.dta", ///
@@ -109,7 +109,7 @@ gen moderator = ${downup_var}
 local dep_var countk
 local moderators_list ${downup_var}
 local fe3 "unique_small_grid_id_cohort province_cohort#election_year province_cohort#c.monthyear relativeyear_cohort"
-do "${code}/exploratory_analysis/rice_high_subsample/_apply_rice_high_subsample.do"
+do "${code}/_apply_analysis_subsample.do"
 
 egen tag_ac = tag(ac_uq_id)
 count if tag_ac == 1

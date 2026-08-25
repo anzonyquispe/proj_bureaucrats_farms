@@ -51,7 +51,9 @@ preserve
 		save `dta'
 	restore
 	
-	merge m:1 unique_small_grid_id month year using `dta', keep(3) nogen
+	merge m:1 unique_small_grid_id month year using `dta', keep(master match)
+	assert _merge == 3
+	drop _merge
 
 
 * Merge with rural classification
@@ -61,7 +63,11 @@ drop _merge
 
 
 * Total POP
-merge m:1 ac_uq_id using "${root}/data_output/intermediate/AC_total_pop.dta" , keep(3) nogen
+merge m:1 ac_uq_id using ///
+    "${root}/data_output/intermediate/AC_total_pop.dta", ///
+    keep(master match)
+assert _merge == 3
+drop _merge
 
 
 * Keep only rural grids
@@ -138,7 +144,7 @@ egen cluster_acmonth = group(ac_id monthyear)
 global controls av_wind_speed wind_direction
 
 * Eq1: downup_ac_pop (exclude grid 116147 as in R code)
-do "${code}/exploratory_analysis/rice_high_subsample/_apply_rice_high_subsample.do"
+do "${code}/_apply_analysis_subsample.do"
 
 reghdfejl countk downup_ac_pop $controls if grid_id != 116147, ///
     absorb(grid_id#cohort ac_id#monthyear#cohort) cluster(grid_id cluster_acmonth)

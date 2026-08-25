@@ -34,39 +34,39 @@ quietly do "${code}/interaction_graph.ado"
 * Population-weighted figures actively referenced by main.tex.
 est clear
 interaction_graph using ///
-    "${tables}/_app_18_protest_5km_fe12_did_downup_plot${sample}_rural_acpop.ster", ///
+    "${tables}/_app_18_protest_5km_fe12_did_downup_plot${sample}_rural_acpop${ster_suffix}.ster", ///
     estimates(1) ///
-    output("${figures}/_app_18_protest_5km_fe12_did_downup_plot_rural_acpop${sample}") ///
+    output("${figures}/_app_18_protest_5km_fe12_did_downup_plot_rural_acpop${sample}${ster_suffix}") ///
     type(protest) modvar(downup_ac_pop)
-copy "${figures}/_app_18_protest_5km_fe12_did_downup_plot_rural_acpop${sample}_1.png" ///
-     "${figures}/_app_18_protest_5km_fe12_did_downup_plot_rural_acpop${sample}.png", replace
+copy "${figures}/_app_18_protest_5km_fe12_did_downup_plot_rural_acpop${sample}${ster_suffix}_1.png" ///
+     "${figures}/_app_18_protest_5km_fe12_did_downup_plot_rural_acpop${sample}${ster_suffix}.png", replace
 
 est clear
 interaction_graph using ///
-    "${tables}/_app_19_polischar_fe12_did_downup_inter_plot${sample}_rural_acpop.ster", ///
+    "${tables}/_app_19_polischar_fe12_did_downup_inter_plot${sample}_rural_acpop${ster_suffix}.ster", ///
     estimates(1) ///
-    output("${figures}/_app_19_polischar_fe12_did_downup_inter_plot_rural_acpop${sample}") ///
+    output("${figures}/_app_19_polischar_fe12_did_downup_inter_plot_rural_acpop${sample}${ster_suffix}") ///
     type(politician) modvar(downup_ac_pop)
-copy "${figures}/_app_19_polischar_fe12_did_downup_inter_plot_rural_acpop${sample}_1.png" ///
-     "${figures}/_app_19_polischar_fe12_did_downup_inter_plot_rural_acpop${sample}.png", replace
+copy "${figures}/_app_19_polischar_fe12_did_downup_inter_plot_rural_acpop${sample}${ster_suffix}_1.png" ///
+     "${figures}/_app_19_polischar_fe12_did_downup_inter_plot_rural_acpop${sample}${ster_suffix}.png", replace
 
 * Area-weighted counterparts retained under their historical names.
 est clear
 interaction_graph using ///
-    "${tables}/_app_18_protest_5km_fe12_did_downup_plot${sample}_rural.ster", ///
+    "${tables}/_app_18_protest_5km_fe12_did_downup_plot${sample}_rural${ster_suffix}.ster", ///
     estimates(1) ///
-    output("${figures}/Interaction_downwind/_app_downup_rel_protest${sample}") ///
+    output("${figures}/Interaction_downwind/_app_downup_rel_protest${sample}${ster_suffix}") ///
     type(protest) modvar(downup_ac)
-copy "${figures}/Interaction_downwind/_app_downup_rel_protest${sample}_1.png" ///
-     "${figures}/Interaction_downwind/_app_downup_rel_protest${sample}.png", replace
+copy "${figures}/Interaction_downwind/_app_downup_rel_protest${sample}${ster_suffix}_1.png" ///
+     "${figures}/Interaction_downwind/_app_downup_rel_protest${sample}${ster_suffix}.png", replace
 
 est clear
 interaction_graph using ///
-    "${tables}/_app_19_polischar_fe12_did_downup_inter_plot${sample}_rural.ster", ///
+    "${tables}/_app_19_polischar_fe12_did_downup_inter_plot${sample}_rural${ster_suffix}.ster", ///
     estimates(1) ///
-    output("${figures}/Interaction_downwind/_app_downup_rel_polischar${sample}") ///
+    output("${figures}/Interaction_downwind/_app_downup_rel_polischar${sample}${ster_suffix}") ///
     type(politician) modvar(downup_ac)
-copy "${figures}/Interaction_downwind/_app_downup_rel_polischar${sample}_1.png" ///
-     "${figures}/Interaction_downwind/_app_downup_rel_polischar${sample}.png", replace
+copy "${figures}/Interaction_downwind/_app_downup_rel_polischar${sample}${ster_suffix}_1.png" ///
+     "${figures}/Interaction_downwind/_app_downup_rel_polischar${sample}${ster_suffix}.png", replace
 
 display as result "Generated protest and politician interaction figures in ${figures}"

@@ -1,10 +1,11 @@
 ********************************************************************************
 * Canonical protest event study: FE3 implementation based on the RA's
-* _app_21_5km_allfe_same_term.do, estimating all naturally observed event years.
+* _app_21_5km_allfe_same_term.do, estimated over event years -4 through +4.
 *
 * Authoritative input: stacked_data_protest5km_election_sameterm.csv.
 * Controls are pooled exactly as supplied by that stack. There is no
-* control_type filter and no moderator/heterogeneity regression in this file.
+* control_type filter. The zero moderator produces the production baseline;
+* the native rice-production moderator is retained for the table output.
 ********************************************************************************
 
 if "$root" == "" {
@@ -57,9 +58,15 @@ assert !missing(ac_area_tr)
 confirm variable cohort_id
 confirm variable cohort_election_year
 confirm variable cohort_term_start
+confirm variable cohort_analysis_max
 assert monthyear >= cohort_term_start
+assert monthyear <= cohort_analysis_max
 assert cohort_term_start <= cohort
+assert inrange(cohort_analysis_max - cohort_term_start, 0, 59)
+bysort cohort_id: assert cohort == cohort[1]
 bysort cohort_id: assert cohort_election_year == cohort_election_year[1]
+bysort cohort_id: assert cohort_term_start == cohort_term_start[1]
+bysort cohort_id: assert cohort_analysis_max == cohort_analysis_max[1]
 
 capture confirm variable relative_year_bin
 if _rc {
@@ -81,13 +88,11 @@ keep if ${is_rural_var} == 1
 keep if year < 2022 | (year == 2022 & month <= 8)
 display as text "Observations after rural and date filters: " _N
 
-* Match the reference sample: remove only its earliest -5 bin and estimate all
-* remaining naturally observed event years. Plotting can impose a narrower
-* display window without changing the estimation sample.
-count if relative_year_bin == -5
-display as text "Observations dropped at relative_year_bin == -5: " r(N)
-drop if relative_year_bin == -5
+* Estimate the agreed -4 through +4 support. Plotting displays -4 through +1
+* without changing the regression used to estimate the retained coefficients.
+keep if inrange(relative_year_bin, -4, 4)
 quietly summarize relative_year_bin
+assert r(min) >= -4 & r(max) <= 4
 display as text "Canonical protest event-study support retained: [" ///
     r(min) ", " r(max) "]"
 
@@ -135,7 +140,18 @@ local fe3 "unique_small_grid_id_cohort province_cohort#c.monthyear"
 gen byte moderator = 0
 local moderators_list moderator rice_prod_aclvl_ahigh
 
-do "${code}/exploratory_analysis/rice_high_subsample/_apply_rice_high_subsample.do"
+do "${code}/_apply_analysis_subsample.do"
+
+* Use the richest rice-moderated FE3 event study to define the common sample
+* used by both production event-study estimates.
+quietly reghdfejl `dep_var' ///
+    ib`base'.relative_year_bin_aux##ib0.treat##ib0.rice_prod_aclvl_ahigh ///
+    wind_direction av_wind_speed, ///
+    absorb(`fe3' relativeyear_cohort) vce(cluster ac_area_tr)
+gen byte common_sample = e(sample)
+keep if common_sample
+drop common_sample
+local common_n = _N
 
 egen byte tag_ac = tag(ac_uq_id)
 quietly count if tag_ac
@@ -168,13 +184,14 @@ foreach fe of numlist $fe_list {
         reghdfejl `dep_var' `rhs' if `filter1', ///
             absorb(`fespec' relativeyear_cohort) ///
             vce(cluster ac_area_tr)
+        assert e(N) == `common_n'
 
         * Preserve structural sanity checks for the naturally retained support.
         if e(N) <= 0 | e(N_clust) <= 1 {
             display as error "FE3 returned an empty sample or insufficient clusters."
             exit 459
         }
-        display as result "PASS: FE3 estimated over full natural event support."
+        display as result "PASS: FE3 estimated over event support -4 through +4."
 
         estadd scalar ymean  = `ymean'
         estadd scalar ymean2 = `ymean2'
@@ -195,10 +212,7 @@ foreach fe of numlist $fe_list {
 local outbase ///
     "${tables}/_app_17_5km_fe12_evst_all${sample}_rural${ster_suffix}"
 estwrite `estimate_names' using "`outbase'.ster", replace
-estsave_csv `estimate_names' using "`outbase'.csv", replace
 confirm file "`outbase'.ster"
-confirm file "`outbase'.csv"
-confirm file "`outbase'_scalars.csv"
-display as result "Saved canonical full-support FE3 protest results: `outbase'.ster and .csv"
+display as result "Saved canonical FE3 protest results: `outbase'.ster"
 
 ********************************************************************************
