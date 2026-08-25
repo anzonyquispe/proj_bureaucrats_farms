@@ -1,0 +1,657 @@
+[2026-08-24 20:01:25] ST[2026-08-24 20:01:25] START politician FE=5; event study + D[2026-08-24 20:01:25] IN[2026-08-24 20:01:25] INPUT politicians_cha  Activating project at `~/.julia/en project at `~/.julia/enviro    Demean Variables: [==>                       >         1/22    Demean Variables: [=====>                           ]  3/22    Demean Variables: [========>               ========>            Demean Variables: [=====Demean Variables: [=========>           Demean Variables: [============>           ============>        Demean Variables: [=====Demean Variables: [===============>      Demean Variables: [==================>     ==================    Demean Variables: [=====Demean Variables: [==================    Demean Variables: [=====Demean Variables: [==================    Demean Variables: [=    Demean Variables: [==================    Demean Variables: [=====Demean Variables: [==================    Demean Variables: [=====Demean Variables: [==================    Demean Variables: [=====Demean Variables: [==================    Demean Variables: [=    Demean Variables: [==================    Demean Variables: [=====Demean Variables: [==================[?25h[2K[ Info: RHS-variable rel[ Info: RHS-variable relative_year_bin_aux: 1.0 is collinear [ Info: RHS-variable rel[ Info: RHS-variable relative_year_bin_aux: 2.0 is collinear [ Info: RHS-variable rel[ Info: RHS-variable relative_year_bin_aux: 3.0 is collinear [ Info: RHS-variable rel[ Info: RHS-variable relative_year_bin_aux: 4.0 is collinear [ Info: RHS-variable rel[ Info: RHS-variable relative_year_bin_aux: 6.0 is collinear [ Info: RHS-variable rel[ Info: RHS-variable relative_year_bin_aux: 7.0 is collinear [ Info: RHS-variable rel[ Info: RHS-variable relative_year_bin_aux: 8.0 is collinear [ Info: RHS-variable rel[ Info: RHS-variable relative_year_bin_aux: 9.0 is collinear [ Info: RHS-variable rel[ Info: RHS-variable relative_year_bin_aux: 10.0 is collinear [ Info: RHS-variable tre[ Info: RHS-variable treat: 1.0 is collinear   Activating project at   Activating project at `~/.ju  Activating project at   Activating project at `~/.julia/enviro    Demean Variables: [====>Demean Variables: [====>    ]  1/10    Demean Variables: [=======>                =======>             Demean Variables: [=====Demean Variables: [=============>       Demean Variables: [=====Demean Variables: [=================    Demean Variables: [=====Demean Variables: [=================    Demean Variables: [=====Demean Variables: [=================    Demean Variables: [=====Demean Variables: [=================    Demean Variables: [================================>]  10/10[?25h[2K[ Info: RHS-variable pos[ Info: RHS-variable post_: 1.0 is collinear [ Info: RHS-variable tre[ Info: RHS-variable treat: 1.0 is collinear   Activating project at `~/.julia/en project at `~/.ju
+===== STATA TRANSCRIPT 
+=====
+  ___  ____  ____  ____
+  ___  ____  ____  ____  ____ ®
+ /__    /   ____/   /   ____/      StataNow 19.5
+___/   /   /___/   /   /___/       MP—Parallel Edition
+
+ Statistics and Data Science       Copyright 1985-2025 StataCorp LLC
+                                   StataCorp
+                                   4905 Lakeway Drive
+                                   College Station, Texas 77845 USA
+                                   800-782-8272        https://www.stata.com
+                                   979-696-4600        service@stata.com
+
+Stata license: 4-user 16-core network, expiring 14 Sep 2026
+Serial number: 501909301589
+  Licensed to: University of Notre Dame
+               Notre Dame, IN 46556
+
+Notes:
+      1. Stata is running in batch mode.
+      2. Unicode is supported; see help unicode_advice.
+      3. More than 2 billion observations are allowed; see help obs_advice.
+      4. Maximum number of variables is set to 5,000 but can be increased;
+          see help set_maxvar.
+
+. do /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication/ex
+> ploratory_analysis/cohort_eventtime_fe_sweep/_politician_byprov_cohort_eventt
+> ime_fe_sweep.do 5 
+
+. *****************************************************************************
+> ***
+. * Politician-by-province FE sweep with cohort-specific relative-year fixed ef
+> fects.
+. *
+. * Input: politicians_characteristics_byprov.csv
+. * Sample: unchanged treated/control composition; rural; through August 2022;
+. *         relative years -5,...,4.
+. * POL_CTIME_STAGE selects "event", "did", or "both". The independent FE
+. * rerun sets it to "both": politician event study plus DiD interaction only.
+. * When stage="both", one import and one prepared sample are used for both
+. * loops. No preserve/restore or analysis-data reload is used.
+. *****************************************************************************
+> ***
+. version 17
+
+. clear all
+
+. set more off
+
+. set processors 1
+    The maximum number of processors or cores being used is changed from 16
+    to 1.  It can be set to any number between 1 and 16
+
+. 
+. args fe_arg
+
+. local fe_env : environment POL_CTIME_FE_LIST
+
+. local sample_env : environment ANALYSIS_SAMPLE_SUFFIX
+
+. local stage_env : environment POL_CTIME_STAGE
+
+. if "`stage_env'" == "" local stage_env "both"
+
+. if !inlist("`stage_env'", "event", "did", "both") {
+.     display as error "POL_CTIME_STAGE must be event, did, or both."
+.     exit 198
+. }
+
+. 
+. * Standalone defaults for the five standard sbatch parameters.
+. global location     "shell"
+
+. global sample       "`sample_env'"
+
+. global is_rural_var "is_rural"
+
+. global fe_list      "1/32"
+
+. global ster_suffix  "_acpop"
+
+. global root "/groups/sgulzar/sa_fires/proj_bureaucrats_farms"
+
+. global code "/users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_repl
+> ication"
+
+. if "`fe_arg'" != "" global fe_list "`fe_arg'"
+
+. else if "`fe_env'" != "" global fe_list "`fe_env'"
+
+. 
+. foreach selected_fe of numlist $fe_list {
+  2.     if !inrange(`selected_fe', 1, 32) {
+  3.         display as error "Every FE id must be from 1 through 32."
+  4.         exit 198
+  5.     }
+  6. }
+
+. 
+. global int_data "${root}/data_output/intermediate"
+
+. global tables "${code}/../../tables/exploratory_analysis/cohort_eventtime_fe_
+> sweep"
+
+. capture mkdir "${code}/../../tables/exploratory_analysis"
+
+. capture mkdir "${tables}"
+
+. 
+. local input_file "${int_data}/politicians_characteristics_byprov${sample}.csv
+> "
+
+. confirm file "`input_file'"
+
+. display as text "Input: `input_file' | FE list: $fe_list | stage: `stage_env'
+> "
+Input: /groups/sgulzar/sa_fires/proj_bureaucrats_farms/data_output/intermediate
+> /politicians_characteristics_byprov.csv | FE list: 5 | stage: both
+
+. import delimited using "`input_file'", clear varnames(1)
+(encoding automatically selected: ISO-8859-1)
+(27 vars, 16,496,199 obs)
+
+. 
+. capture confirm variable relative_year_bin
+
+. if _rc {
+.     confirm variable relative_year
+.     rename relative_year relative_year_bin
+. }
+
+. local required unique_small_grid_id province ac_uq_id count month year ///
+>     monthyear downup_ac_pop av_wind_speed wind_direction election_year ///
+>     yeargov treat control_type cohort cohort_id cohort_province relative_year
+> _bin
+
+. foreach variable of local required {
+  2.     capture confirm variable `variable'
+  3.     if _rc {
+  4.         display as error "Required variable absent: `variable'"
+  5.         exit 111
+  6.     }
+  7. }
+
+. 
+. assert cohort_id == floor(cohort_id) & cohort_id > 0
+
+. assert inlist(treat, 0, 1)
+
+. assert control_type == 0 if treat == 1
+
+. assert inlist(control_type, 1, 2) if treat == 0
+
+. 
+. gen double countk = count * 1000
+
+. merge m:1 unique_small_grid_id using ///
+>     "${int_data}/ghs_grid_classification_2000.dta", ///
+>     keep(master match) keepusing(is_rural)
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                             0
+    Matched                        16,496,199  (_merge==3)
+    -----------------------------------------
+
+. count if _merge == 1
+  0
+
+. display as text "Rows without rural classification: " r(N)
+Rows without rural classification: 0
+
+. drop _merge
+
+. keep if ${is_rural_var} == 1
+(4,219,068 observations deleted)
+
+. keep if year < 2022 | (year == 2022 & month <= 8)
+(2,358,054 observations deleted)
+
+. keep if inrange(relative_year_bin, -5, 4)
+(1,650,238 observations deleted)
+
+. 
+. gen byte fe_complete = 1
+
+. local complete_vars unique_small_grid_id province ac_uq_id month year ///
+>     monthyear election_year yeargov cohort cohort_id cohort_province countk /
+> //
+>     downup_ac_pop av_wind_speed wind_direction treat control_type relative_ye
+> ar_bin
+
+. foreach variable of local complete_vars {
+  2.     replace fe_complete = 0 if missing(`variable')
+  3. }
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+
+. count if fe_complete == 0
+  0
+
+. display as text "Rows removed by common complete-case restriction: " r(N)
+Rows removed by common complete-case restriction: 0
+
+. drop if fe_complete == 0
+(0 observations deleted)
+
+. drop fe_complete
+
+. 
+. sort cohort_id unique_small_grid_id monthyear
+
+. by cohort_id: assert province == province[1]
+
+. by cohort_id: assert cohort == cohort[1]
+
+. by cohort_id: assert cohort_province == cohort_province[1]
+
+. by cohort_id unique_small_grid_id: assert treat == treat[1]
+
+. by cohort_id unique_small_grid_id: assert control_type == control_type[1]
+
+. isid unique_small_grid_id monthyear cohort_id treat
+
+. 
+. quietly summarize relative_year_bin
+
+. assert r(min) == -5
+
+. assert r(max) == 4
+
+. gen int relative_year_bin_aux = relative_year_bin + 6
+
+. local base = 5
+
+. 
+. egen long unique_small_grid_id_cohort = group(unique_small_grid_id cohort_id)
+
+. egen long province_cohort = group(province cohort_id)
+
+. egen long monthyearco = group(monthyear cohort_id)
+
+. egen long ac_elec_yr = group(ac_uq_id election_year cohort_id)
+
+. 
+. egen byte cohort_tag = tag(cohort_id)
+
+. count if cohort_tag
+  8
+
+. local number_cohorts = r(N)
+
+. drop cohort_tag
+
+. display as result "Validated province-election cohorts: `number_cohorts'"
+Validated province-election cohorts: 8
+
+. 
+. local fe1  "unique_small_grid_id_cohort"
+
+. local fe2  "unique_small_grid_id_cohort monthyearco"
+
+. local fe3  "unique_small_grid_id_cohort province_cohort#c.monthyear"
+
+. local fe4  "unique_small_grid_id_cohort yeargov"
+
+. local fe5  "unique_small_grid_id_cohort province_cohort#election_year"
+
+. local fe6  "unique_small_grid_id_cohort province_cohort#election_year#yeargov
+> "
+
+. local fe7  "unique_small_grid_id_cohort monthyearco province_cohort#c.monthye
+> ar"
+
+. local fe8  "unique_small_grid_id_cohort monthyearco yeargov"
+
+. local fe9  "unique_small_grid_id_cohort monthyearco province_cohort#election_
+> year"
+
+. local fe1cohort monthyearco provicohort monthyearco province_cohort#election_
+> year#yeargov"
+
+. local fe11 "unique_small_grid_id_cohort province_cohort#c.monthyear yeargov"
+
+. local fe12 "unique_small_grid_id_cohort province_cohort#c.monthyear province_
+> cohort#election_year"
+
+. local fe13 "unique_small_grid_id_cohort province_cohort#c.monthyear province_
+> cohort#election_year#yeargov"
+
+. local fe14 "unique_small_grid_id_cohort yeargov province_cohort#election_year
+> "
+
+. local fe15 "unique_small_grid_id_cohort yeargov province_cohort#election_year
+> #yeargov"
+
+. local fe16 "unique_small_grid_id_cohort province_cohort#election_year provinc
+> e_cohort#election_year#yeargov"
+
+. local fe17 "unique_small_grid_id_cohort monthyearco province_cohort#c.monthye
+> ar yeargov"
+
+. local fe18 "unique_small_grid_id_cohort monthyearco province_cohort#c.monthye
+> ar province_cohort#election_year"
+
+. local fe19 "unique_small_grid_id_cohort monthyearco province_cohort#c.monthye
+> ar province_cohort#election_year#yeargov"
+
+. local fe20 "unique_small_grid_id_cohort monthyearco yeargov province_cohort#e
+> lection_year"
+
+. local fe21 "unique_small_grid_id_cohort monthyearco yeargov province_cohort#e
+> lection_year#yeargov"
+
+. local fe22 "unique_small_grid_id_cohort monthyearco province_cohort#election_
+> year province_cohort#election_year#yeargov"
+
+. local fe23 "unique_small_grid_id_cohort province_cohort#c.monthyear yeargov p
+> rovince_cohort#election_year"
+
+. local fe24 "unique_small_grid_id_cohort province_cohort#c.monthyear yeargov p
+> rovince_cohort#election_year#yeargov"
+
+. local fe25 "unique_small_grid_id_cohort province_cohort#c.monthyear province_
+> cohort#election_year province_cohort#election_year#yeargov"
+
+. local fe26 "unique_small_grid_id_cohort yeargov province_cohort#election_year
+>  province_cohort#election_year#yeargov"
+
+. local fe27 "unique_small_grid_id_cohort monthyearco province_cohort#c.monthye
+> ar yeargov province_cohort#election_year"
+
+. local fe28 "unique_small_grid_id_cohort monthyearco province_cohort#c.monthye
+> ar yeargov province_cohort#election_year#yeargov"
+
+. local fe29 "unique_small_grid_id_cohort monthyearco province_cohort#c.monthye
+> ar province_cohort#election_year province_cohort#election_year#yeargov"
+
+. local fe30 "unique_small_grid_id_cohort monthyearco yeargov province_cohort#e
+> lection_year province_cohort#election_year#yeargov"
+
+. local fe31 "unique_small_grid_id_cohort province_cohort#c.monthyear yeargov p
+> rovince_cohort#election_year province_cohort#election_year#yeargov"
+
+. local fe32 "unique_small_grid_id_cohort monthyearco province_cohort#c.monthye
+> ar yeargov province_cohort#election_year province_cohort#election_year#yeargo
+> v"
+
+. 
+. * Common statistics. moderator=0 preserves the required event-study structure
+> .
+. gen byte moderator = 0
+
+. * local moderators_list moderator downup_ac rice_area_aclvl_ahigh rice_harvar
+> ea_aclvl_ahigh rice_prod_aclvl_ahigh
+. local moderators_list moderator
+
+. quietly summarize countk if treat == 1 & relative_year_bin <= -1
+
+. local ymean = r(mean)
+
+. quietly summarize countk if treat == 1 & relative_year_bin <= -1 & moderator 
+> == 1
+
+. local ymean2 = r(mean)
+
+. egen byte tag_ac = tag(ac_uq_id)
+
+. count if tag_ac
+  695
+
+. local numacs = r(N)
+
+. drop tag_ac
+
+. count if treat == 1
+  3,303,499
+
+. local n_treated = r(N)
+
+. count if treat == 0
+  4,965,340
+
+. local n_control = r(N)
+
+. 
+. *****************************************************************************
+> ***
+. * Event studies: all requested FEs, same loaded and filtered data.
+. *****************************************************************************
+> ***
+. if inlist("`stage_env'", "event", "both") {
+.     foreach mod of local moderators_list {
+  2.         replace moderator = `mod'
+  3.         local rhs "ib`base'.relative_year_bin_aux##ib0.treat##ib0.`mod' wi
+> nd_direction av_wind_speed"
+  4.         foreach selected_fe of numlist $fe_list {
+  5.             local original_fespec "`fe`selected_fe''"
+  6.             local fespec "`original_fespec' relative_year_bin_aux#cohort_i
+> d"
+  7.             local tag : display %02.0f `selected_fe'
+  8.             local tag = strtrim("`tag'")
+  9.             display as result "POLITICIAN EVENT FE `selected_fe': `fespec'
+> "
+ 10.             est clear
+ 11.             reghdfejl countk `rhs', absorb(`fespec') vce(cluster ac_elec_y
+> r)
+ 12.             estadd scalar ymean = `ymean'
+ 13.             estadd scalar ymean2 = `ymean2'
+ 14.             estadd scalar acq = `numacs'
+ 15.             estadd scalar fe_id = `selected_fe'
+ 16.             estadd scalar n_treated = `n_treated'
+ 17.             estadd scalar n_control = `n_control'
+ 18.             estadd scalar n_cohorts = `number_cohorts'
+ 19.             estadd local smpl "Rural"
+ 20.             estadd local fespec "`fespec'"
+ 21.             estadd local mod "`mod'"
+ 22.             estadd local controls "unchanged full control composition"
+ 23.             estadd local cohortvar "cohort_id"
+ 24.             est store evreg1
+ 25.             local out "${tables}/politician_byprov_cohorttime_fe`tag'_even
+> t_rural${ster_suffix}_all"
+ 26.             estwrite evreg1 using "`out'.ster", replace
+ 27.             confirm file "`out'.ster"
+ 28.         }
+ 29.     }
+(0 real changes made)
+POLITICIAN EVENT FE 5: unique_small_grid_id_cohort province_cohort#election_yea
+> r relative_year_bin_aux#cohort_id
+(MWFE estimator converged in 11 iterations)
+
+HDFE linear regression with Julia                 Number of obs   =  8,268,839
+Absorbing 3 HDFE groups                           F(  11,   2183) =      30.94
+Statistics cluster-robust                         Prob > F        =     0.0000
+                                                  R-squared       =     0.1081
+                                                  Adj R-squared   =     0.0967
+Number of clusters (ac_elec_yr) =       2183      Within R-sq.    =     0.0078
+                                                  Root MSE        =   963.0952
+
+                         (Std. err. adjusted for 2,183 clusters in ac_elec_yr)
+------------------------------------------------------------------------------
+             |               Robust
+      countk | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+relative_y~x |
+          1  |          0  (omitted)
+          2  |          0  (omitted)
+          3  |          0  (omitted)
+          4  |          0  (omitted)
+          6  |          0  (omitted)
+          7  |          0  (omitted)
+          8  |          0  (omitted)
+          9  |          0  (omitted)
+         10  |          0  (omitted)
+             |
+     1.treat |          0  (omitted)
+wind_direc~n |  -.8364337   .0495733   -16.87   0.000    -.9336495   -.7392179
+av_wind_sp~d |   84.51744   6.765835    12.49   0.000     71.24929    97.78559
+             |
+relative_y~x#|
+       treat |
+        1 1  |  -.8667307   7.736856    -0.11   0.911     -16.0391    14.30564
+        2 1  |   8.095252   5.803252     1.39   0.163    -3.285223    19.47573
+        3 1  |   7.640611    6.39446     1.19   0.232    -4.899253    20.18048
+        4 1  |    4.28891   5.886087     0.73   0.466    -7.254008    15.83183
+        6 1  |   14.05586   6.189048     2.27   0.023     1.918817     26.1929
+        7 1  |    21.0402   6.632989     3.17   0.002     8.032572    34.04784
+        8 1  |   16.08683   7.260339     2.22   0.027     1.848934    30.32473
+        9 1  |   19.21243   8.068803     2.38   0.017     3.389092    35.03576
+       10 1  |   12.48809   8.705596     1.43   0.152    -4.584026    29.56021
+------------------------------------------------------------------------------
+
+added scalar:
+              e(ymean) =  105.23059
+
+added scalar:
+             e(ymean2) =  .
+
+added scalar:
+                e(acq) =  695
+
+added scalar:
+              e(fe_id) =  5
+
+added scalar:
+          e(n_treated) =  3303499
+
+added scalar:
+          e(n_control) =  4965340
+
+added scalar:
+          e(n_cohorts) =  8
+
+added macro:
+               e(smpl) : "Rural"
+
+added macro:
+             e(fespec) : "unique_small_grhort#election_
+> year rehort#election_
+> year relative_year_bin_aux#cohort_id"
+
+added macro:
+                e(mod) : "moderator"
+
+added macro:
+           e(controls) : "unchanged full control composition"
+
+added macro:
+          e(cohortvar) : "cohort_id"
+(saving evreg1)
+(file /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication/.
+> ./../tables/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_
+> cohorttime_fe05_event_rural_acpop_all.ster saved)
+. }
+
+. 
+. *****************************************************************************
+> ***
+. * DiD interactions: same rows and same data in memory; no preserve/restore.
+. *****************************************************************************
+> ***
+. if inlist("`stage_env'", "did", "both") {
+.     gen byte post_ = relative_year_bin >= 0
+.     quietly summarize countk if treat == 1 & relative_year_bin <= -1 & downup
+> _ac_pop == 1
+.     local ymean2 = r(mean)
+.     local rhs "ib0.post_##ib0.treat##ib0.downup_ac_pop wind_direction av_wind
+> _speed"
+.     foreach selected_fe of numlist $fe_list {
+  2.         local original_fespec "`fe`selected_fe''"
+  3.         local fespec "`original_fespec' relative_year_bin_aux#cohort_id"
+  4.         local tag : display %02.0f `selected_fe'
+  5.         local tag = strtrim("`tag'")
+  6.         display as result "POLITICIAN DID FE `selected_fe': `fespec'"
+  7.         est clear
+  8.         reghdfejl countk `rhs', absorb(`fespec') vce(cluster ac_elec_yr)
+  9.         estadd scalar ymean = `ymean'
+ 10.         estadd scalar ymean2 = `ymean2'
+ 11.         estadd scalar acq = `numacs'
+ 12.         estadd scalar fe_id = `selected_fe'
+ 13.         estadd scalar n_treated = `n_treated'
+ 14.         estadd scalar n_control = `n_control'
+ 15.         estadd scalar n_cohorts = `number_cohorts'
+ 16.         estadd local smpl "Rural"
+ 17.         estadd local fespec "`fespec'"
+ 18.         estadd local mod "downup_ac_pop"
+ 19.         estadd local controls "unchanged full control composition"
+ 20.         estadd local cohortvar "cohort_id"
+ 21.         est store evreg1
+ 22.         local out "${tables}/politician_byprov_cohorttime_fe`tag'_did_inte
+> raction_rural${ster_suffix}_all"
+ 23.         estwrite evreg1 using "`out'.ster", replace
+ 24.         confirm file "`out'.ster"
+ 25.     }
+POLITICIAN DID FE 5: unique_small_grid_id_cohort province_cohort#election_year 
+> relative_year_bin_aux#cohort_id
+(MWFE estimator converged in 11 iterations)
+
+HDFE linear regression with Julia                 Number of obs   =  8,268,839
+Absorbing 3 HDFE groups                           F(   7,   2183) =      48.24
+Statistics cluster-robust                         Prob > F        =     0.0000
+                                                  R-squared       =     0.1081
+                                                  Adj R-squared   =     0.0967
+Number of clusters (ac_elec_yr) =       2183      Within R-sq.    =     0.0078
+                                                  Root MSE        =   963.0952
+
+                         (Std. err. adjusted for 2,183 clusters in ac_elec_yr)
+------------------------------------------------------------------------------
+             |               Robust
+      countk | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+     1.post_ |          0  (omitted)
+     1.treat |          0  (omitted)
+1.downup_a~p |   4.164889   4.707002     0.88   0.376    -5.065783    13.39556
+wind_direc~n |  -.8364098   .0495633   -16.88   0.000     -.933606   -.7392136
+av_wind_sp~d |   84.51688   6.764365    12.49   0.000     71.25161    97.78214
+             |
+ post_#treat |
+        1 1  |   10.92854    6.34344     1.72   0.085    -1.511272    23.36835
+             |
+       post_#|
+downup_ac_~p |
+        1 1  |  -.8395962   5.591662    -0.15   0.881    -11.80513    10.12594
+             |
+       treat#|
+downup_ac_~p |
+        1 1  |  -3.032446   6.312065    -0.48   0.631    -15.41073    9.345837
+             |
+ post_#treat#|
+downup_ac_~p |
+      1 1 1  |   3.027183   8.391197     0.36   0.718    -13.42838    19.48275
+------------------------------------------------------------------------------
+
+added scalar:
+              e(ymean) =  105.23059
+
+added scalar:
+             e(ymean2) =  106.12406
+
+added scalar:
+                e(acq) =  695
+
+added scalar:
+              e(fe_id) =  5
+
+added scalar:
+          e(n_treated) =  3303499
+
+added scalar:
+          e(n_control) =  4965340
+
+added scalar:
+          e(n_cohorts) =  8
+
+added macro:
+               e(smpl) : "Rural"
+
+added macro:
+             e(fespec) : "unique_small_grid_id_cohort province_cohort#election_
+> year relative_year_bin_aux#cohort_id"
+
+added macro:
+                e(mod) : "downup_ac_pop"
+
+added macro:
+           e(controls) : "unchanged full control composition"
+
+added macro:
+          e(cohortvar) : "cohort_id"
+(saving evreg1)
+(file /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication/.
+> ./../tables/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_
+> cohorttime_fe05_did_interaction_rural_acpop_all.ster saved)
+. }
+
+. 
+. display as result "COMPLETED politician cohort-event-time FE sweep: $fe_list;
+>  stage=`stage_env'"
+COMPLETED politician cohort-event-time FE sweep: 5; stage=[2026-08-24 20:06:54] CO[2026-08-24 20:06:54] CO[2026-08-24 20:06:54] EV[2026-08-24 20:06:54] EVENT OUTPUT /users/aquisper/proj_bureaucrats_farms/tables/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_cohorttime_fe05_eve[2026-08-24 20:06:54] DI[2026-08-24 20:06:54] DID OUTPUT   /users/aquisper/proj_bureaucrats_farms/tables/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_cohorttime_fe05_did_interaction_rural_acpop_all.ster
