@@ -9,7 +9,6 @@ from pathlib import Path
 
 import duckdb
 import pandas as pd
-import pyreadstat
 
 
 LOG = logging.getLogger("descriptive_tables")
@@ -38,7 +37,9 @@ def find_first(paths: list[Path]) -> Path:
 
 def load_dta_lookup(con: duckdb.DuckDBPyConnection, name: str, path: Path,
                     columns: list[str]) -> None:
-    frame, _ = pyreadstat.read_dta(str(path), usecols=columns)
+    # pandas.read_stata uses its bundled parser and avoids requiring pyreadstat,
+    # which is not installed in the production downup_geo environment.
+    frame = pd.read_stata(path, columns=columns, convert_categoricals=False)
     con.register(f"_{name}_frame", frame)
     con.execute(f"CREATE OR REPLACE TABLE {name} AS SELECT * FROM _{name}_frame")
     con.unregister(f"_{name}_frame")
