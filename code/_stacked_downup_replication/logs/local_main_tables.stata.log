@@ -3,7 +3,7 @@
        log:  C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/co
 > de/_stacked_downup_replication/logs/local_main_tables.stata.log
   log type:  text
- opened on:  25 Aug 2026, 11:35:57
+ opened on:  25 Aug 2026, 15:30:09
 
 . 
 . display as text "Local stage: `stage'"
@@ -1478,7 +1478,7 @@ added macro:
         e(ymean_clean) : "0.04"
 
 added macro:
-        e(ymean_clean) : "12.394"
+        e(ymean_clean) : "12.416"
 
 . 
 . esttab eq1 eq2 eq3 ///
@@ -1935,10 +1935,6 @@ added macro:
 >             "\hline") ///
 >     posthead("") prefoot("\hline") ///
 >     postfoot("\hline" "\end{tabular}")
-(file
-    C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/code/_sta
-    > cked_downup_replication/../../tables/_app_6_main_did_treat_definition_r
-    > ural_acpop.tex not found)
 (output written to C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_fa
 > rms/code/_stacked_downup_replication/../../tables/_app_6_main_did_treat_defin
 > ition_rural_acpop.tex)
@@ -2293,6 +2289,10 @@ Treated post : b =    83.499519   95% CI [    5.228715,   161.770322]   90% CI
 > [   17.823880,   149.175157]
 Difference   : b =    85.107960   SE =    40.460604   95% CI [    5.748524,   1
 > 64.467395]   90% CI [   18.518869,   151.697050]   p =  0.035575
+(file
+    C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/code/_sta
+    > cked_downup_replication/../../figures/_app_18_protest_5km_fe12_did_down
+    > up_plot_rural_acpop_1.png not found)
 file
     C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/code/_sta
     > cked_downup_replication/../../figures/_app_18_protest_5km_fe12_did_down
@@ -2305,6 +2305,9 @@ Exported: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/code/
 > }${ster_suffix}_1.png" ///
 >      "${figures}/_app_18_protest_5km_fe12_did_downup_plot_rural_acpop${sample
 > }${ster_suffix}.png", replace
+
+. erase "${figures}/_app_18_protest_5km_fe12_did_downup_plot_rural_acpop${sampl
+> e}${ster_suffix}_1.png"
 
 . 
 . est clear
@@ -2330,12 +2333,16 @@ INTERACTION AUDIT (CONTROL-PRE STANDARDIZED): politician, estimate evreg1, mode
 > rator downup_ac_pop
 Control pre  : b =     0.000000   95% CI [    0.000000,     0.000000]   90% CI 
 > [    0.000000,     0.000000]
-Control post : b =    -0.839596   95% CI [  -11.805121,    10.125929]   90% CI 
-> [  -10.040957,     8.361765]
-Treated post : b =    10.083680   95% CI [   -7.721682,    27.889042]   90% CI 
-> [   -4.857106,    25.024467]
-Difference   : b =    10.923277   SE =     6.657825   95% CI [   -2.133060,    
-> 23.979613]   90% CI [   -0.032521,    21.879074]   p =  0.101011
+Control post : b =    -0.907364   95% CI [  -11.943260,    10.128532]   90% CI 
+> [  -10.167774,     8.353046]
+Treated post : b =    10.192064   95% CI [   -7.689526,    28.073653]   90% CI 
+> [   -4.812686,    25.196814]
+Difference   : b =    11.099428   SE =     6.681548   95% CI [   -2.003430,    
+> 24.202285]   90% CI [    0.104594,    22.094261]   p =  0.096816
+(file
+    C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/code/_sta
+    > cked_downup_replication/../../figures/_app_19_polischar_fe12_did_downup
+    > _inter_plot_rural_acpop_1.png not found)
 file
     C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/code/_sta
     > cked_downup_replication/../../figures/_app_19_polischar_fe12_did_downup
@@ -2348,6 +2355,9 @@ Exported: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/code/
 > mple}${ster_suffix}_1.png" ///
 >      "${figures}/_app_19_polischar_fe12_did_downup_inter_plot_rural_acpop${sa
 > mple}${ster_suffix}.png", replace
+
+. erase "${figures}/_app_19_polischar_fe12_did_downup_inter_plot_rural_acpop${s
+> ample}${ster_suffix}_1.png"
 
 . 
 . * Area-weighted counterparts retained under their historical names.
@@ -2417,12 +2427,12 @@ INTERACTION AUDIT (CONTROL-PRE STANDARDIZED): politician, estimate evreg1, mode
 > rator downup_ac
 Control pre  : b =     0.000000   95% CI [    0.000000,     0.000000]   90% CI 
 > [    0.000000,     0.000000]
-Control post : b =    -1.589622   95% CI [  -11.493605,     8.314362]   90% CI 
-> [   -9.900225,     6.720982]
-Treated post : b =     8.479823   95% CI [   -8.185460,    25.145106]   90% CI 
-> [   -5.504304,    22.463949]
-Difference   : b =    10.069444   SE =     6.454755   95% CI [   -2.588662,    
-> 22.727550]   90% CI [   -0.552191,    20.691079]   p =  0.118904
+Control post : b =    -0.907364   95% CI [  -11.943260,    10.128532]   90% CI 
+> [  -10.167774,     8.353046]
+Treated post : b =    10.192064   95% CI [   -7.689526,    28.073653]   90% CI 
+> [   -4.812686,    25.196814]
+Difference   : b =    11.099428   SE =     6.681548   95% CI [   -2.003430,    
+> 24.202285]   90% CI [    0.104594,    22.094261]   p =  0.096816
 file
     C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/code/_sta
     > cked_downup_replication/../../figures/Interaction_downwind/_app_downup_
@@ -2460,5 +2470,5 @@ LOCAL MAIN POST-PROCESSING STAGE COMPLETED: tables
        log:  C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/co
 > de/_stacked_downup_replication/logs/local_main_tables.stata.log
   log type:  text
- closed on:  25 Aug 2026, 11:36:14
+ closed on:  25 Aug 2026, 15:30:30
 -------------------------------------------------------------------------------

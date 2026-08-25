@@ -11,10 +11,4 @@ Generated: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figur
 Generated: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/_app_16_polischar_fe12_evst_all_rural_acpop_riceP_5_rotated.png
 Generated: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/_app_16_polischar_fe12_evst_all_rural_acpop_riceP_5_honest2.png
 Generated: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/_app_16_polischar_fe12_evst_all_rural_acpop_riceP_5_rot_honest2.png
-Warning messages:
-1: In grDevices::dev.off() : agg could not write to the given file
-2: In .warnIfNotSymmPSD(sigma) :
-  matrix sigma not numerically positive semi-definite (smallest eigenvalue was -8.94152e-14)
-3: In .warnIfNotSymmPSD(sigma) :
-  matrix sigma not numerically positive semi-definite (smallest eigenvalue was -8.94152e-14)
 All requested event-study and HonestDiD plots completed.

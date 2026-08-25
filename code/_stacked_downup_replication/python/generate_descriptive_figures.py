@@ -19,6 +19,10 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--output-root", required=True, type=Path)
     parser.add_argument("--sample", default="")
     parser.add_argument("--rural-var", default="is_rural")
+    parser.add_argument(
+        "--only", choices=("all", "panelview"), default="all",
+        help="Generate every descriptive figure or only panelview_self_profession.",
+    )
     return parser.parse_args()
 
 
@@ -118,11 +122,15 @@ def relative_time_histogram(intermediate: Path, figures: Path, sample: str, rura
 
 def politician_panel(intermediate: Path, figures: Path, sample: str) -> None:
     use = ["unique_small_grid_id", "monthyear", "self_profession_nomiss"]
-    data = pd.read_csv(
-        require(intermediate / f"0_master_dataset{sample}.csv"),
-        usecols=use,
-        low_memory=False,
-    )
+    parquet = intermediate / f"0_master_dataset{sample}.parquet"
+    if parquet.exists():
+        data = pd.read_parquet(parquet, columns=use)
+    else:
+        data = pd.read_csv(
+            require(intermediate / f"0_master_dataset{sample}.csv"),
+            usecols=use,
+            low_memory=False,
+        )
     data["self_profession_nomiss"] = data.self_profession_nomiss.fillna(0).astype(int)
     wide = data.pivot_table(
         index="unique_small_grid_id",
@@ -131,8 +139,9 @@ def politician_panel(intermediate: Path, figures: Path, sample: str) -> None:
         aggfunc="max",
     ).fillna(0).sort_index().sort_index(axis=1)
     matrix = wide.to_numpy(float)
-    height = max(6, matrix.shape[0] * 0.02)
-    width = max(10, matrix.shape[1] * 0.06)
+    # Keep the raster within Matplotlib's pixel limits for the full grid panel.
+    height = min(40, max(6, matrix.shape[0] * 0.02))
+    width = min(24, max(10, matrix.shape[1] * 0.06))
     fig, ax = plt.subplots(figsize=(width, height))
     ax.imshow(
         matrix,
@@ -168,8 +177,9 @@ def main() -> None:
     intermediate = options.root / "data_output" / "intermediate"
     figures = options.output_root / "figures"
     figures.mkdir(parents=True, exist_ok=True)
-    monthly_figures(intermediate, figures, options.sample, options.rural_var)
-    relative_time_histogram(intermediate, figures, options.sample, options.rural_var)
+    if options.only == "all":
+        monthly_figures(intermediate, figures, options.sample, options.rural_var)
+        relative_time_histogram(intermediate, figures, options.sample, options.rural_var)
     politician_panel(intermediate, figures, options.sample)
     print("Generated monthly, relative-time, and politician panel-view figures.")
 
