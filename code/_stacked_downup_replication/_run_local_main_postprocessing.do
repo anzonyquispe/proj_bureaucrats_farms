@@ -1,6 +1,6 @@
 ********************************************************************************
 * Environment-driven local post-processing bridge.
-* FARMS_LOCAL_STAGE must be export or tables. The PowerShell launcher runs the
+* FARMS_LOCAL_STAGE must be export, tables, or interactions. The launcher runs the
 * export first, then runs tables and interaction figures in parallel with the
 * four R event-study/HonestDiD processes.
 ********************************************************************************
@@ -22,8 +22,8 @@ if "`repo'" == "" {
 if "`data_root'" == "" local data_root "`repo'"
 if "`sample'" == "none" local sample ""
 if "`suffix'" == "none" local suffix ""
-if !inlist("`stage'", "export", "tables") {
-    display as error "FARMS_LOCAL_STAGE must be export or tables."
+if !inlist("`stage'", "export", "tables", "interactions") {
+    display as error "FARMS_LOCAL_STAGE must be export, tables, or interactions."
     exit 198
 }
 
@@ -55,8 +55,11 @@ display as text "Output suffix: ${ster_suffix}"
 if "`stage'" == "export" {
     do "${code}/_export_event_study_csv.do"
 }
-else {
+else if "`stage'" == "tables" {
     do "${code}/_generate_all_tables.do"
+    do "${code}/_generate_interaction_plots.do"
+}
+else {
     do "${code}/_generate_interaction_plots.do"
 }
 

@@ -6,6 +6,8 @@ set "REPO_DIR=%REPORT_DIR%..\.."
 set "OUTPUT_DIR=%REPORT_DIR%output"
 set "TEX_FILE=main_v3_abovemedian.tex"
 set "JOB_NAME=main_v3_abovemedian"
+set "ALLOW_MISSING=0"
+if /I "%~1"=="allow-missing" set "ALLOW_MISSING=1"
 
 where pdflatex >nul 2>&1
 if errorlevel 1 (
@@ -13,22 +15,27 @@ if errorlevel 1 (
     exit /b 1
 )
 
-rem Do not let LaTeX's fallback file lookup silently mix unrestricted results
-rem into the above-median report when post-processing is incomplete.
-for %%F in (
-    "figures\stacked_event_study_5pre_rural_1_ori_rice_high.png"
-    "figures\stacked_event_study_pop_5pre_rural_1_ori_rice_high.png"
-    "figures\_app_16_polischar_fe03_evst_main_rural_acpop_1_ori_rice_high.png"
-    "figures\_app_17_5km_fe12_evst_all_rural_fe03_1_ori_rice_high.png"
-    "tables\main_did_downup_ac_rural_acpop_rice_high.tex"
-    "tables\_main_4_protest_5km_fe12_did_downup_rural_acpop_new_rice_high.tex"
-    "tables\_main_5_polischar_fe12_did_downup_inter_rural_acpop_rice_high.tex"
-) do (
-    if not exist "%REPO_DIR%\%%~F" (
-        echo ERROR: Missing above-median output: %REPO_DIR%\%%~F
-        echo Run code\_stacked_downup_replication\run_abovemedian_postprocessing.ps1 first.
-        exit /b 1
+if "%ALLOW_MISSING%"=="0" (
+    rem Do not let LaTeX's fallback file lookup silently mix unrestricted results
+    rem into the above-median report when post-processing is incomplete.
+    for %%F in (
+        "figures\stacked_event_study_5pre_rural_1_ori_rice_high.png"
+        "figures\stacked_event_study_pop_5pre_rural_1_ori_rice_high.png"
+        "figures\_app_16_polischar_fe03_evst_main_rural_acpop_1_ori_rice_high.png"
+        "figures\_app_17_5km_fe12_evst_all_rural_fe03_1_ori_rice_high.png"
+        "tables\main_did_downup_ac_rural_acpop_rice_high.tex"
+        "tables\_main_4_protest_5km_fe12_did_downup_rural_acpop_new_rice_high.tex"
+        "tables\_main_5_polischar_fe12_did_downup_inter_rural_acpop_rice_high.tex"
+    ) do (
+        if not exist "%REPO_DIR%\%%~F" (
+            echo ERROR: Missing above-median output: %REPO_DIR%\%%~F
+            echo Run code\_stacked_downup_replication\run_abovemedian_postprocessing.ps1 first.
+            exit /b 1
+        )
     )
+) else (
+    echo WARNING: rendering a provisional report with missing above-median results.
+    echo Missing suffixed inputs will use the unrestricted report fallback.
 )
 
 if not exist "%OUTPUT_DIR%" mkdir "%OUTPUT_DIR%"

@@ -257,37 +257,45 @@ display "Generated: main_did_downup_ac_rural_acpop.tex"
 ********************************************************************************
 * 2. Bureaucrat-Politician DiD (_main_3_bureau_polisc_did)
 ********************************************************************************
-est clear
-estread using "${tables}/_main_3_bureau_polisc_did${sample}_rural_stacked${ster_suffix}.ster"
-_strip_zeros_stats, models(eq1 eq2 eq3 eq4) stats(ymean ymean2)
+capture confirm file ///
+    "${tables}/_main_3_bureau_polisc_did${sample}_rural_stacked${ster_suffix}.ster"
+if _rc {
+    display as error ///
+        "SKIPPED OPTIONAL TABLE: missing bureaucrat-politician ster for ${ster_suffix}"
+}
+else {
+    est clear
+    estread using "${tables}/_main_3_bureau_polisc_did${sample}_rural_stacked${ster_suffix}.ster"
+    _strip_zeros_stats, models(eq1 eq2 eq3 eq4) stats(ymean ymean2)
 
-esttab eq1 eq2 eq3 eq4 using "${tables}/_main_3_bureau_polisc_did${sample}_rural_acpop${ster_suffix}.tex", ///
-    replace ///
-    cells(b(fmt(3) star) se(par fmt(3))) ///
-    star(* 0.10 ** 0.05 *** 0.01) ///
-    keep(downup_ac_pop downup_dummy downup_interaction) ///
-    order( downup_dummy downup_ac_pop downup_interaction) ///
-    varlabels(downup_ac_pop "Down\$>\$ Up Politician" ///
-              downup_dummy "Down\$>\$ Up Bureaucrat" ///
-              downup_interaction "Down\$>\$ Up Pol. \$\times\$ Down\$>\$ Up Bur.") ///
-    stats(N nacs ndists monthyearfe gridfe acmonthfe distmonthfe ymean_clean, ///
-          fmt(%12.0fc %12.0fc %12.0fc %s %s %s %s %s) ///
-          labels("Observations" "N Assembly Constituencies" "N Districts" ///
-                 "Month-Year \$\times\$ Cohort FE" "Grid \$\times\$ Cohort FE" ///
-                 "AC \$\times\$ Month-Year \$\times\$ Cohort FE" ///
-                 "District \$\times\$ Month-Year \$\times\$ Cohort FE" "Mean DV")) ///
-    nomtitles nonumbers ///
-    collabels(none) ///
-    nobaselevels ///
-    prehead("{\def\sym#1{\ifmmode^{#1}\else\(^{#1}\)\fi}" ///
-            "\begin{tabular}{l*{4}{c}}" ///
-            "\hline" ///
-            " & (1) & (2) & (3) & (4) \\" ///
-            " & \multicolumn{4}{c}{Number of Fires (in 1,000 units)} \\ \hline") ///
-    posthead("") ///
-    postfoot("\hline" "\end{tabular}" "}")
+    esttab eq1 eq2 eq3 eq4 using "${tables}/_main_3_bureau_polisc_did${sample}_rural_acpop${ster_suffix}.tex", ///
+        replace ///
+        cells(b(fmt(3) star) se(par fmt(3))) ///
+        star(* 0.10 ** 0.05 *** 0.01) ///
+        keep(downup_ac_pop downup_dummy downup_interaction) ///
+        order( downup_dummy downup_ac_pop downup_interaction) ///
+        varlabels(downup_ac_pop "Down\$>\$ Up Politician" ///
+                  downup_dummy "Down\$>\$ Up Bureaucrat" ///
+                  downup_interaction "Down\$>\$ Up Pol. \$\times\$ Down\$>\$ Up Bur.") ///
+        stats(N nacs ndists monthyearfe gridfe acmonthfe distmonthfe ymean_clean, ///
+              fmt(%12.0fc %12.0fc %12.0fc %s %s %s %s %s) ///
+              labels("Observations" "N Assembly Constituencies" "N Districts" ///
+                     "Month-Year \$\times\$ Cohort FE" "Grid \$\times\$ Cohort FE" ///
+                     "AC \$\times\$ Month-Year \$\times\$ Cohort FE" ///
+                     "District \$\times\$ Month-Year \$\times\$ Cohort FE" "Mean DV")) ///
+        nomtitles nonumbers ///
+        collabels(none) ///
+        nobaselevels ///
+        prehead("{\def\sym#1{\ifmmode^{#1}\else\(^{#1}\)\fi}" ///
+                "\begin{tabular}{l*{4}{c}}" ///
+                "\hline" ///
+                " & (1) & (2) & (3) & (4) \\" ///
+                " & \multicolumn{4}{c}{Number of Fires (in 1,000 units)} \\ \hline") ///
+        posthead("") ///
+        postfoot("\hline" "\end{tabular}" "}")
 
-display "Generated: _main_3_bureau_polisc_did_rural_acpop.tex"
+    display "Generated: _main_3_bureau_polisc_did_rural_acpop.tex"
+}
 
 ********************************************************************************
 * 3. Protest DiD with Downup (_main_4_protest_5km_fe12_did_downup)

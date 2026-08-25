@@ -1,0 +1,46 @@
+{
+\def\sym#1{\ifmmode^{#1}\else\(^{#1}\)\fi}
+\begin{tabular}{l*{6}{c}}
+\hline
+            &\multicolumn{1}{c}{(1)}         &\multicolumn{1}{c}{(2)}         &\multicolumn{1}{c}{(3)}         &\multicolumn{1}{c}{(4)}         &\multicolumn{1}{c}{(5)}         &\multicolumn{1}{c}{(6)}         \\
+            & \multicolumn{6}{c}{Number of Fires (in 1,000 units)} \\ \hline
+\multicolumn{7}{l}{\textbf{Panel A: Estimated Coefficients}} \\ \hline
+(1) Post $\times$ Switch Agric&      26.159\sym{***}&      26.159\sym{***}&      25.806\sym{***}&      25.657\sym{**} &      25.657\sym{**} &      25.150\sym{**} \\
+            &     (8.831)         &     (8.831)         &     (8.837)         &    (11.274)         &    (11.274)         &    (11.268)         \\
+(2) Down $>$ Up&                     &                     &                     &      10.674         &      10.674         &      11.069         \\
+            &                     &                     &                     &     (8.158)         &     (8.158)         &     (8.165)         \\
+(3) Post $\times$ Down $>$ Up&                     &                     &                     &      -1.947         &      -1.947         &      -2.179         \\
+            &                     &                     &                     &     (9.734)         &     (9.734)         &     (9.755)         \\
+(4) Switch Agric  $\times$ Down $>$ Up&                     &                     &                     &     -10.517         &     -10.517         &     -10.818         \\
+            &                     &                     &                     &    (10.212)         &    (10.212)         &    (10.221)         \\
+(5) Post $\times$ Switch Agric  $\times$ Down $>$ Up&                     &                     &                     &       0.991         &       0.991         &       1.296         \\
+            &                     &                     &                     &    (13.562)         &    (13.562)         &    (13.556)         \\
+
+
+
+
+\hline
+\multicolumn{7}{l}{\textbf{Panel B: Linear Combinations}} \\ \hline
+\multicolumn{2}{l}{(2) Down$>$Up Effect, pre-period of no-switch politicians}&            &            &      10.674&      10.674&      11.069\\
+            &            &            &     (8.158)&     (8.158)&     (8.165)\\
+\multicolumn{2}{l}{(2+3) Down$>$Up Effect, post-period of no-switch politicians}&            &            &       8.727&       8.727&       8.890\\
+            &            &            &     (6.391)&     (6.391)&     (6.420)\\
+\multicolumn{2}{l}{(1+2+3+4+5) Down$>$Up Effect, post-period of switch politicians}&            &            &24.858\sym{**}&24.858\sym{**}&24.518\sym{**}\\
+            &            &            &    (10.919)&    (10.919)&    (10.961)\\
+\multicolumn{2}{l}{(1+2+3+4+5)-(2+3) Differential Down$>$Up effect, post period}&            &            &      16.131&      16.131&      15.628\\
+            &            &            &    (11.629)&    (11.629)&    (11.664)\\
+
+
+
+\hline
+Observations&   3,717,813&   3,717,813&   3,717,813&   3,717,813&   3,717,813&   3,717,813\\
+N Assembly Constituencies&         335&         335&         335&         335&         335&         335\\
+Grid $\times$ Cohort FE&           Y&           Y&           Y&           Y&           Y&           Y\\
+Relative Time $\times$ Cohort FE&           Y&           Y&           Y&           Y&           Y&           Y\\
+Legislature $\times$ Cohort FE&           N&           Y&           Y&           N&           Y&           Y\\
+Province Trend $\times$ Cohort FE&           N&           N&           Y&           N&           N&           Y\\
+Mean DV     &     194.691&     194.691&     194.691&     194.691&     194.691&     194.691\\
+Mean DV2 (Down$>$Up=1)&            &            &            &      194.35&      194.35&      194.35\\
+\hline
+\end{tabular}
+}

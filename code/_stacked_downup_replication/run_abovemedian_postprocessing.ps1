@@ -4,7 +4,8 @@ param(
     [string]$StataExecutable = "C:\Program Files\Stata18\StataMP-64.exe",
     [string]$RscriptExecutable = "C:\Program Files\R\R-4.5.0\bin\Rscript.exe",
     [ValidateRange(5, 10)]
-    [int]$MaxCores = 10
+    [int]$MaxCores = 10,
+    [switch]$AllowMissingResults
 )
 
 $ErrorActionPreference = "Stop"
@@ -56,7 +57,9 @@ if ($missingInputs.Count) {
     $message = "Above-median cluster outputs are missing from the repository tables folder:`n" +
         ($missingInputs -join "`n") +
         "`nCopy or pull these files locally, then rerun this script."
-    throw $message
+    if (-not $AllowMissingResults) { throw $message }
+    Write-Warning $message
+    Write-Warning "Continuing with all available above-median estimates."
 }
 
 Write-Host "Generating above-median tables, event studies, HonestDiD, and interactions."
@@ -94,7 +97,9 @@ $missingFigures = $expectedFigures | Where-Object {
     -not (Test-Path -LiteralPath (Join-Path $figures $_))
 }
 if ($missingFigures.Count) {
-    throw "Above-median post-processing did not generate:`n$($missingFigures -join "`n")"
+    $message = "Above-median post-processing did not generate:`n$($missingFigures -join "`n")"
+    if (-not $AllowMissingResults) { throw $message }
+    Write-Warning $message
 }
 
 $expectedTables = @(
@@ -115,7 +120,9 @@ $missingTables = $expectedTables | Where-Object {
     -not (Test-Path -LiteralPath (Join-Path $tables $_))
 }
 if ($missingTables.Count) {
-    throw "Above-median table generation did not produce:`n$($missingTables -join "`n")"
+    $message = "Above-median table generation did not produce:`n$($missingTables -join "`n")"
+    if (-not $AllowMissingResults) { throw $message }
+    Write-Warning $message
 }
 
 Write-Host "Rendering main_v3_abovemedian.pdf."

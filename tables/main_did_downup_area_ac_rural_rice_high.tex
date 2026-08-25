@@ -1,0 +1,19 @@
+{
+\def\sym#1{\ifmmode^{#1}\else\(^{#1}\)\fi}
+\begin{tabular}{l*{4}{c}}
+\hline
+            &\multicolumn{1}{c}{(1)}         &\multicolumn{1}{c}{(2)}         &\multicolumn{1}{c}{(3)}         &\multicolumn{1}{c}{(4)}         \\
+            & \multicolumn{4}{c}{Number of Fires (in 1,000 units)} \\ \hline
+
+Down $>$ Up &      -7.990\sym{**} &     -27.769\sym{***}&    -117.187\sym{***}&      -3.969         \\
+            &     (3.869)         &     (2.620)         &     (4.656)         &     (2.799)         \\
+\hline
+Observations&  16,706,004         &  16,706,004         &  16,706,004         &  16,706,004         \\
+N Assembly Constituencies&         398         &         398         &         398         &         398         \\
+Month-Year $\times$ Cohort FE&           N         &           Y         &           Y         &           N         \\
+Grid $\times$ Cohort FE&           N         &           N         &           Y         &           Y         \\
+AC $\times$ Month-Year $\times$ Cohort FE&           N         &           N         &           N         &           Y         \\
+Mean DV     &      148.69         &      148.69         &      148.69         &      148.69         \\
+\hline
+\end{tabular}
+}

@@ -1,0 +1,394 @@
+
+  ___  ____  ____  ____  ____ ®
+ /__    /   ____/   /   ____/      18.0
+___/   /   /___/   /   /___/       MP—Parallel Edition
+
+ Statistics and Data Science       Copyright 1985-2023 StataCorp LLC
+                                   StataCorp
+                                   4905 Lakeway Drive
+                                   College Station, Texas 77845 USA
+                                   800-STATA-PC        https://www.stata.com
+                                   979-696-4600        stata@stata.com
+
+Stata license: Single-user 4-core  perpetual
+Serial number: 501806366048
+  Licensed to: Any Name
+               Any Name
+
+Notes:
+      1. Stata is running in batch mode.
+      2. Unicode is supported; see help unicode_advice.
+      3. More than 2 billion observations are allowed; see help obs_advice.
+      4. Maximum number of variables is set to 5,000 but can be increased;
+          see help set_maxvar.
+
+. do C:\Users\eunic\OneDrive\Documents\GitHub\proj_bureaucrats_farms\code\_stac
+> ked_downup_replication\_run_local_main_postprocessing.do 
+
+. *****************************************************************************
+> ***
+. * Environment-driven local post-processing bridge.
+. * FARMS_LOCAL_STAGE must be export, tables, or interactions. The launcher run
+> s the
+. * export first, then runs tables and interaction figures in parallel with the
+. * four R event-study/HonestDiD processes.
+. *****************************************************************************
+> ***
+. 
+. version 17
+
+. clear all
+
+. set more off
+
+. 
+. local repo        : environment FARMS_LOCAL_REPO
+
+. local data_root   : environment FARMS_LOCAL_DATA_ROOT
+
+. local sample      : environment FARMS_LOCAL_SAMPLE
+
+. local suffix      : environment FARMS_LOCAL_SUFFIX
+
+. local stage       : environment FARMS_LOCAL_STAGE
+
+. 
+. if "`repo'" == "" {
+.     display as error "FARMS_LOCAL_REPO is required."
+.     exit 198
+. }
+
+. if "`data_root'" == "" local data_root "`repo'"
+
+. if "`sample'" == "none" local sample ""
+
+. if "`suffix'" == "none" local suffix ""
+
+. if !inlist("`stage'", "export", "tables", "interactions") {
+.     display as error "FARMS_LOCAL_STAGE must be export, tables, or interactio
+> ns."
+.     exit 198
+. }
+
+. 
+. global location "dbox"
+
+. global root "`data_root'"
+
+. global repo "`repo'"
+
+. global code "${repo}/code/_stacked_downup_replication"
+
+. global tables "${repo}/tables"
+
+. global figures "${repo}/figures"
+
+. global sample "`sample'"
+
+. global ster_suffix "`suffix'"
+
+. global is_rural_var "is_rural"
+
+. global fe_list "1"
+
+. global production_only "1"
+
+. 
+. capture mkdir "${tables}"
+
+. capture mkdir "${figures}"
+
+. capture mkdir "${code}/logs"
+
+. adopath ++ "${code}"
+  [1]              "C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_f
+> arms/code/_stacked_downup_replication"
+  [2]  (BASE)      "C:\Program Files\Stata18\ado\base/"
+  [3]  (SITE)      "C:\Program Files\Stata18\ado\site/"
+  [4]              "."
+  [5]  (PERSONAL)  "C:\Users\eunic\ado\personal/"
+  [6]  (PLUS)      "C:\Users\eunic\ado\plus/"
+  [7]  (OLDPLACE)  "c:\ado/"
+
+. 
+. capture log close _all
+
+. log using "${code}/logs/local_main_`stage'${sample}${ster_suffix}.stata.log",
+>  ///
+>     replace text name(mainpost)
+-------------------------------------------------------------------------------
+      name:  mainpost
+       log:  C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/co
+> de/_stacked_downup_replication/logs/local_main_interactions_rice_high.stata.l
+> og
+  log type:  text
+ opened on:  25 Aug 2026, 08:29:38
+
+. 
+. display as text "Local stage: `stage'"
+Local stage: interactions
+
+. display as text "Sample suffix: ${sample}"
+Sample suffix: 
+
+. display as text "Output suffix: ${ster_suffix}"
+Output suffix: _rice_high
+
+. 
+. if "`stage'" == "export" {
+.     do "${code}/_export_event_study_csv.do"
+. }
+
+. else if "`stage'" == "tables" {
+.     do "${code}/_generate_all_tables.do"
+.     do "${code}/_generate_interaction_plots.do"
+. }
+
+. else {
+.     do "${code}/_generate_interaction_plots.do"
+
+. *****************************************************************************
+> ***
+. * Generate every interaction figure from independently produced .ster files
+. *****************************************************************************
+> ***
+. 
+. version 17
+
+. set more off
+
+. set graphics off
+
+. 
+. if "$root" == "" {
+.     clear all
+.     global location     "dbox"
+.     global sample       ""
+.     global is_rural_var "is_rural"
+.     global fe_list      "1"
+.     global ster_suffix  ""
+.     global shell "/groups/sgulzar/sa_fires/proj_bureaucrats_farms"
+.     global dbox  "C:/Users/eunic/Dropbox/sa_fires/proj_bureaucrats_farms"
+.     global code_shell "/users/aquisper/proj_bureaucrats_farms/code/_stacked_d
+> ownup_replication"
+.     global code_dbox "C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucra
+> ts_farms/code/_stacked_downup_replication"
+.     if "$location" == "dbox" {
+.         global root "$dbox"
+.         global code "$code_dbox"
+.     }
+.     else {
+.         global root "$shell"
+.         global code "$code_shell"
+.     }
+. }
+
+. 
+. global tables  "${code}/../../tables"
+
+. global figures "${code}/../../figures"
+
+. capture mkdir "${figures}/Interaction_downwind"
+
+. quietly do "${code}/interaction_graph.ado"
+
+. 
+. * Population-weighted figures actively referenced by main.tex.
+. est clear
+
+. interaction_graph using ///
+>     "${tables}/_app_18_protest_5km_fe12_did_downup_plot${sample}_rural_acpop$
+> {ster_suffix}.ster", ///
+>     estimates(1) ///
+>     output("${figures}/_app_18_protest_5km_fe12_did_downup_plot_rural_acpop${
+> sample}${ster_suffix}") ///
+>     type(protest) modvar(downup_ac_pop)
+
+-------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+-----------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with
+             |                                 Julia
+-------------------------------------------------------------------------------
+(results evreg1 are active now)
+
+INTERACTION AUDIT (CONTROL-PRE STANDARDIZED): protest, estimate evreg1, moderat
+> or downup_ac_pop
+Control pre  : b =     0.000000   95% CI [    0.000000,     0.000000]   90% CI 
+> [    0.000000,     0.000000]
+Control post : b =     0.409544   95% CI [   -9.016536,     9.835624]   90% CI 
+> [   -7.498798,     8.317886]
+Treated post : b =    84.291619   95% CI [   -8.382434,   176.965673]   90% CI 
+> [    6.539453,   162.043786]
+Difference   : b =    83.882075   SE =    48.378052   95% CI [  -11.053345,   1
+> 78.817496]   90% CI [    4.232655,   163.531496]   p =  0.083250
+file
+    C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/code/_sta
+    > cked_downup_replication/../../figures/_app_18_protest_5km_fe12_did_down
+    > up_plot_rural_acpop_rice_high_1.png saved as PNG format
+Exported: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/code/
+> _stacked_downup_replication/../../figures/_app_18_protest_5km_fe12_did_downup
+> _plot_rural_acpop_rice_high_1.png
+
+. copy "${figures}/_app_18_protest_5km_fe12_did_downup_plot_rural_acpop${sample
+> }${ster_suffix}_1.png" ///
+>      "${figures}/_app_18_protest_5km_fe12_did_downup_plot_rural_acpop${sample
+> }${ster_suffix}.png", replace
+
+. 
+. est clear
+
+. interaction_graph using ///
+>     "${tables}/_app_19_polischar_fe12_did_downup_inter_plot${sample}_rural_ac
+> pop${ster_suffix}.ster", ///
+>     estimates(1) ///
+>     output("${figures}/_app_19_polischar_fe12_did_downup_inter_plot_rural_acp
+> op${sample}${ster_suffix}") ///
+>     type(politician) modvar(downup_ac_pop)
+
+-------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+-----------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with
+             |                                 Julia
+-------------------------------------------------------------------------------
+(results evreg1 are active now)
+
+INTERACTION AUDIT (CONTROL-PRE STANDARDIZED): politician, estimate evreg1, mode
+> rator downup_ac_pop
+Control pre  : b =     0.000000   95% CI [    0.000000,     0.000000]   90% CI 
+> [    0.000000,     0.000000]
+Control post : b =    -1.947293   95% CI [  -21.046760,    17.152174]   90% CI 
+> [  -17.971720,    14.077134]
+Treated post : b =    14.183884   95% CI [  -16.787807,    45.155576]   90% CI 
+> [  -11.801323,    40.169092]
+Difference   : b =    16.131177   SE =    11.629201   95% CI [   -6.688017,    
+> 38.950371]   90% CI [   -3.014096,    35.276450]   p =  0.165698
+file
+    C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/code/_sta
+    > cked_downup_replication/../../figures/_app_19_polischar_fe12_did_downup
+    > _inter_plot_rural_acpop_rice_high_1.png saved as PNG format
+Exported: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/code/
+> _stacked_downup_replication/../../figures/_app_19_polischar_fe12_did_downup_i
+> nter_plot_rural_acpop_rice_high_1.png
+
+. copy "${figures}/_app_19_polischar_fe12_did_downup_inter_plot_rural_acpop${sa
+> mple}${ster_suffix}_1.png" ///
+>      "${figures}/_app_19_polischar_fe12_did_downup_inter_plot_rural_acpop${sa
+> mple}${ster_suffix}.png", replace
+
+. 
+. * Area-weighted counterparts retained under their historical names.
+. est clear
+
+. interaction_graph using ///
+>     "${tables}/_app_18_protest_5km_fe12_did_downup_plot${sample}_rural${ster_
+> suffix}.ster", ///
+>     estimates(1) ///
+>     output("${figures}/Interaction_downwind/_app_downup_rel_protest${sample}$
+> {ster_suffix}") ///
+>     type(protest) modvar(downup_ac)
+
+-------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+-----------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with
+             |                                 Julia
+-------------------------------------------------------------------------------
+(results evreg1 are active now)
+
+INTERACTION AUDIT (CONTROL-PRE STANDARDIZED): protest, estimate evreg1, moderat
+> or downup_ac
+Control pre  : b =     0.000000   95% CI [    0.000000,     0.000000]   90% CI 
+> [    0.000000,     0.000000]
+Control post : b =     1.676731   95% CI [   -7.657335,    11.010798]   90% CI 
+> [   -6.154413,     9.507876]
+Treated post : b =    81.875701   95% CI [   -8.245980,   171.997382]   90% CI 
+> [    6.264937,   157.486465]
+Difference   : b =    80.198970   SE =    47.021767   95% CI [  -12.074925,   1
+> 72.472864]   90% CI [    2.782530,   157.615409]   p =  0.088402
+file
+    C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/code/_sta
+    > cked_downup_replication/../../figures/Interaction_downwind/_app_downup_
+    > rel_protest_rice_high_1.png saved as PNG format
+Exported: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/code/
+> _stacked_downup_replication/../../figures/Interaction_downwind/_app_downup_re
+> l_protest_rice_high_1.png
+
+. copy "${figures}/Interaction_downwind/_app_downup_rel_protest${sample}${ster_
+> suffix}_1.png" ///
+>      "${figures}/Interaction_downwind/_app_downup_rel_protest${sample}${ster_
+> suffix}.png", replace
+
+. 
+. est clear
+
+. interaction_graph using ///
+>     "${tables}/_app_19_polischar_fe12_did_downup_inter_plot${sample}_rural${s
+> ter_suffix}.ster", ///
+>     estimates(1) ///
+>     output("${figures}/Interaction_downwind/_app_downup_rel_polischar${sample
+> }${ster_suffix}") ///
+>     type(politician) modvar(downup_ac)
+
+-------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+-----------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with
+             |                                 Julia
+-------------------------------------------------------------------------------
+(results evreg1 are active now)
+
+INTERACTION AUDIT (CONTROL-PRE STANDARDIZED): politician, estimate evreg1, mode
+> rator downup_ac
+Control pre  : b =     0.000000   95% CI [    0.000000,     0.000000]   90% CI 
+> [    0.000000,     0.000000]
+Control post : b =    -1.514813   95% CI [  -18.620297,    15.590670]   90% CI 
+> [  -15.866291,    12.836664]
+Treated post : b =    15.028311   95% CI [  -14.151233,    44.207854]   90% CI 
+> [   -9.453287,    39.509908]
+Difference   : b =    16.543124   SE =    11.333165   95% CI [   -5.695179,    
+> 38.781428]   90% CI [   -2.114783,    35.201031]   p =  0.144670
+file
+    C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/code/_sta
+    > cked_downup_replication/../../figures/Interaction_downwind/_app_downup_
+    > rel_polischar_rice_high_1.png saved as PNG format
+Exported: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/code/
+> _stacked_downup_replication/../../figures/Interaction_downwind/_app_downup_re
+> l_polischar_rice_high_1.png
+
+. copy "${figures}/Interaction_downwind/_app_downup_rel_polischar${sample}${ste
+> r_suffix}_1.png" ///
+>      "${figures}/Interaction_downwind/_app_downup_rel_polischar${sample}${ste
+> r_suffix}.png", replace
+
+. 
+. display as result "Generated protest and politician interaction figures in ${
+> figures}"
+Generated protest and politician interaction figures in C:/Users/eunic/OneDrive
+> /Documents/GitHub/proj_bureaucrats_farms/code/_stacked_downup_replication/../
+> ../figures
+
+. 
+end of do-file
+. }
+
+. 
+. display as result "LOCAL MAIN POST-PROCESSING STAGE COMPLETED: `stage'"
+LOCAL MAIN POST-PROCESSING STAGE COMPLETED: interactions
+
+. log close mainpost
+      name:  mainpost
+       log:  C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/co
+> de/_stacked_downup_replication/logs/local_main_interactions_rice_high.stata.l
+> og
+  log type:  text
+ closed on:  25 Aug 2026, 08:29:41
+-------------------------------------------------------------------------------
+
+. 
+end of do-file
