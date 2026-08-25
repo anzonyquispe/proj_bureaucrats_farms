@@ -71,8 +71,8 @@ quietly summarize countk if treat == 1 & relative_year_bin <= -1 & moderator == 
 local ymean2 = r(mean)
 
 local if1 ""
-local if2 "if downup_ac == 1"
-local if3 "if downup_ac == 0"
+local if2 "if downup_ac_pop == 1"
+local if3 "if downup_ac_pop == 0"
 local fe1 "grid_id#cohort ac_id#monthyear#cohort"
 
 est clear
