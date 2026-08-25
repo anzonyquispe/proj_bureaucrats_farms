@@ -1,0 +1,7 @@
+[2026-08-25 12:55:00] Generating the three full-sample descriptive tables
+Python: /groups/sgulzar/india_forest_land/downup_geo/bin/python
+Threads: 10; memory limit: 100GB
+Traceback (most recent call last):
+  File "/users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication/python/generate_descriptive_tables_duckdb.py", line 12, in <module>
+    import pyreadstat
+ModuleNotFoundError: No module named 'pyreadstat'
