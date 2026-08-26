@@ -1,18 +1,14 @@
-[2026-08-25 14:05:42] Generating the three full-sample descriptive tables
+[2026-08-26 15:04:23] Generating descriptives from exact Stata e(sample) CSVs
 Python: /groups/sgulzar/india_forest_land/downup_geo/bin/python
 Threads: 10; memory limit: 100GB
-2026-08-25 14:05:48,694 | INFO | Loaded 158775 rows into rural_lookup
-2026-08-25 14:05:49,067 | INFO | Loaded 14837592 rows into area_lookup
-2026-08-25 14:05:57,009 | INFO | Protest relative-year column: relative_year
-2026-08-25 14:05:57,009 | INFO | Politician relative-year column: relative_year
-2026-08-25 14:05:57,009 | INFO | Building main descriptive sample
-2026-08-25 14:06:07,873 | INFO | Building protest descriptive sample
-2026-08-25 14:06:40,620 | INFO | Building politician descriptive sample
-2026-08-25 14:06:59,204 | INFO | desc_main: 36,897,937 observations
-2026-08-25 14:06:59,208 | INFO | Generated /users/aquisper/proj_bureaucrats_farms/tables/descriptives_main.tex
-2026-08-25 14:06:59,822 | INFO | desc_protest: 63,557,119 observations
-2026-08-25 14:06:59,825 | INFO | Generated /users/aquisper/proj_bureaucrats_farms/tables/_protest_stacked_descriptive.tex
-2026-08-25 14:06:59,984 | INFO | desc_politician: 8,268,839 observations
-2026-08-25 14:06:59,988 | INFO | Generated /users/aquisper/proj_bureaucrats_farms/tables/_politicians_stacked_descriptive.tex
-[2026-08-25 14:07:00] Completed descriptive tables
-Outputs: /users/aquisper/proj_bureaucrats_farms/tables
+Sample suffix: <full sample>
+2026-08-26 15:04:33,999 | INFO | Protest relative-year column: relative_year_bin
+2026-08-26 15:04:33,999 | INFO | Politician relative-year column: relative_year_bin
+2026-08-26 15:04:33,999 | INFO | Building main descriptives from exact specification-4 e(sample)
+Traceback (most recent call last):
+  File "/users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication/python/generate_descriptive_tables_duckdb.py", line 250, in <module>
+    raise SystemExit(main())
+                     ^^^^^^
+  File "/users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication/python/generate_descriptive_tables_duckdb.py", line 150, in main
+    con.execute(f"""
+_duckdb.CatalogException: Catalog Error: Existing object desc_main is of type Table, trying to replace with type View
