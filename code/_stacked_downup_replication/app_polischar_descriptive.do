@@ -28,61 +28,16 @@ if "$root" == "" {
 global int_data "${root}/data_output/intermediate"
 global tables   "${code}/../../tables"
 
-import delimited using "${int_data}/politicians_characteristics_byprov${sample}.csv", ///
+* Exact sample exported by the richest interacted politician DiD.
+import delimited using ///
+    "${int_data}/politician_downup_ac_pop_esample${sample}.csv", ///
     clear varnames(1) case(preserve)
+display as text "Politician richest-DiD descriptive sample: " _N
 
-capture confirm variable relative_year_bin
-if _rc {
-    rename relative_year relative_year_bin
-}
-
-capture drop countk
-gen countk = count * 1000
-
-merge m:1 unique_small_grid_id using ///
-    "${int_data}/ghs_grid_classification_2000.dta", ///
-    keep(master match) keepusing(is_rural) nogen
-keep if ${is_rural_var} == 1
-keep if year < 2022 | (year == 2022 & month <= 8)
-keep if inrange(relative_year_bin, -5, 4)
-
-confirm variable cohort_id
-confirm variable cohort_province
-confirm variable control_type
-assert cohort_id == floor(cohort_id) & cohort_id > 0
-sort cohort_id unique_small_grid_id monthyear
-by cohort_id: assert province == province[1]
-by cohort_id: assert cohort == cohort[1]
-by cohort_id: assert cohort_province == cohort_province[1]
-
+capture drop prov legis_govyear agri_politician
 egen prov = group(province)
 egen legis_govyear = group(province election_year)
-egen unique_small_grid_id_cohort = group(unique_small_grid_id cohort_id)
-capture drop province_cohort
-egen province_cohort = group(province cohort_id)
-egen ac_elec_yr = group(ac_uq_id election_year cohort_id)
-quietly summarize relative_year_bin
-local rmin = r(min)
-gen int relative_year_bin_aux = relative_year_bin - `rmin' + 1
-gen post_ = relative_year_bin >= 0
 gen agri_politician = post_ * treat
-
-* Retain exactly the sample selected by the richest interacted population DiD.
-local common_rhs ///
-    "ib0.post_##ib0.treat##ib0.downup_ac_pop wind_direction av_wind_speed"
-do "${code}/_apply_analysis_subsample.do"
-quietly reghdfejl countk ///
-    `common_rhs', ///
-    absorb(unique_small_grid_id_cohort ///
-           relative_year_bin_aux#cohort_id ///
-           province_cohort#election_year ///
-           province_cohort#c.monthyear) ///
-    vce(cluster ac_elec_yr)
-gen byte descriptive_sample = e(sample)
-quietly count if descriptive_sample
-display as text "Politician richest-DiD descriptive sample: " r(N)
-keep if descriptive_sample
-drop descriptive_sample
 
 capture program drop _fmt_num
 program define _fmt_num, rclass

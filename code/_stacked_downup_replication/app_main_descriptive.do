@@ -27,46 +27,15 @@ if "$root" == "" {
 global int_data "${root}/data_output/intermediate"
 global tables   "${code}/../../tables"
 
-import delimited using "${int_data}/combined_dt_pop${sample}.csv", ///
+* This file is written directly by specification 4 of _main_1_did.do.
+* Reading it guarantees exact identity between the regression and descriptive
+* samples without rerunning a costly HDFE model.
+import delimited using ///
+    "${int_data}/main_downup_ac_pop_esample${sample}.csv", ///
     clear varnames(1) case(preserve)
+display as text "Main specification-4 descriptive sample: " _N
 
-capture drop countk
-gen countk = count * 1000
-keep if inrange(relative_monthyear, -5, 6)
-
-merge m:1 unique_small_grid_id using ///
-    "${int_data}/ghs_grid_classification_2000.dta", ///
-    keep(master match) keepusing(is_rural) nogen
-keep if ${is_rural_var} == 1
-keep if year < 2022 | (year == 2022 & month <= 8)
-
-capture confirm numeric variable unique_small_grid_id
-if _rc {
-    encode unique_small_grid_id, gen(grid_id)
-}
-else {
-    gen grid_id = unique_small_grid_id
-}
-capture confirm numeric variable ac_uq_id
-if _rc {
-    encode ac_uq_id, gen(ac_id)
-}
-else {
-    gen ac_id = ac_uq_id
-}
-
-* Retain exactly the sample selected by the richest population DiD model.
-local controls wind_direction av_wind_speed
-local cluster ac_uq_id#cohort#monthyear unique_small_grid_id#cohort
-do "${code}/_apply_analysis_subsample.do"
-quietly reghdfejl countk downup_ac_pop `controls', ///
-    absorb(grid_id#cohort ac_id#monthyear#cohort) cluster(`cluster')
-gen byte descriptive_sample = e(sample)
-quietly count if descriptive_sample
-display as text "Main richest-DiD descriptive sample: " r(N)
-keep if descriptive_sample
-drop descriptive_sample
-
+capture drop prov
 egen prov = group(province)
 
 capture program drop _fmt_num

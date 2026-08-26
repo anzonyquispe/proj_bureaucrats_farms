@@ -28,96 +28,17 @@ if "$root" == "" {
 global int_data "${root}/data_output/intermediate"
 global tables   "${code}/../../tables"
 
-local protest_input ///
-    "${int_data}/stacked_data_protest5km_election_sameterm${sample}.csv"
-capture confirm file "`protest_input'"
-if _rc {
-    local protest_input ///
-        "${int_data}/cohortes_protest_term/stacked_data_protest5km_election_sameterm${sample}.csv"
-}
-capture confirm file "`protest_input'"
-if _rc {
-    local protest_input ///
-        "${int_data}/cohorts_protest_term/stacked_data_protest5km_election_sameterm${sample}.csv"
-}
-confirm file "`protest_input'"
-display as text "Final same-term protest input: `protest_input'"
-import delimited using "`protest_input'", clear varnames(1) case(preserve)
+* Exact sample exported by the richest interacted protest DiD, already
+* restricted to relative years [-4, 1].
+import delimited using ///
+    "${int_data}/protest_downup_ac_pop_esample${sample}.csv", ///
+    clear varnames(1) case(preserve)
+display as text "Protest richest-DiD descriptive sample: " _N
 
-merge m:1 unique_small_grid_id month year using ///
-    "${int_data}/grid_month_ac_area_tr.dta", ///
-    keep(master match) keepusing(ac_area_tr)
-assert _merge == 3
-drop _merge
-assert !missing(ac_area_tr)
-
-confirm variable cohort_id
-confirm variable cohort_election_year
-confirm variable cohort_term_start
-confirm variable cohort_analysis_max
-assert monthyear >= cohort_term_start
-assert monthyear <= cohort_analysis_max
-assert cohort_term_start <= cohort
-assert inrange(cohort_analysis_max - cohort_term_start, 0, 59)
-bysort cohort_id: assert cohort == cohort[1]
-bysort cohort_id: assert cohort_election_year == cohort_election_year[1]
-bysort cohort_id: assert cohort_term_start == cohort_term_start[1]
-bysort cohort_id: assert cohort_analysis_max == cohort_analysis_max[1]
-
-capture confirm variable relative_year_bin
-if _rc {
-    rename relative_year relative_year_bin
-}
-assert relative_year_bin == floor((monthyear - cohort) / 12)
-keep if year < 2022 | (year == 2022 & month <= 8)
-keep if inrange(relative_year_bin, -4, 4)
-quietly summarize relative_year_bin
-assert r(min) >= -4 & r(max) <= 4
-display as text "Canonical protest descriptive support: [" r(min) ", " r(max) "]"
-
-* Prefer raw count and rebuild the scaled regression outcome.
-capture drop countk
-gen countk = count * 1000
-
-merge m:1 unique_small_grid_id using ///
-    "${int_data}/ghs_grid_classification_2000.dta", ///
-    keep(master match) keepusing(is_rural) nogen
-keep if ${is_rural_var} == 1
-
+capture drop prov legis_govyear protest
 egen prov = group(province)
 egen legis_govyear = group(province election_year)
-egen unique_small_grid_id_cohort = group(unique_small_grid_id cohort_id)
-egen province_cohort = group(province cohort_id)
-egen relativeyear_cohort = group(relative_year_bin cohort_id)
-
-bysort unique_small_grid_id_cohort: egen byte has_pre = max(relative_year_bin < 0)
-bysort unique_small_grid_id_cohort: egen byte has_post = max(relative_year_bin >= 0)
-egen byte unit_tag = tag(unique_small_grid_id_cohort)
-quietly count if unit_tag
-local units_before = r(N)
-quietly count if unit_tag & has_pre == 1 & has_post == 1
-local units_balanced = r(N)
-display as text "Grid-cohort units with pre and post periods: `units_balanced' of `units_before'"
-keep if has_pre == 1 & has_post == 1
-assert has_pre == 1 & has_post == 1
-drop unit_tag has_pre has_post
-gen post_ = relative_year_bin >= 0
 gen protest = post_ * treat
-
-* Retain exactly the sample selected by the richest interacted population DiD.
-local common_rhs ///
-    "ib0.post_##ib0.treat##ib0.downup_ac_pop wind_direction av_wind_speed"
-do "${code}/_apply_analysis_subsample.do"
-quietly reghdfejl countk `common_rhs', ///
-    absorb(unique_small_grid_id_cohort relativeyear_cohort ///
-           province_cohort#election_year ///
-           province_cohort#c.monthyear) ///
-    vce(cluster ac_area_tr)
-gen byte descriptive_sample = e(sample)
-quietly count if descriptive_sample
-display as text "Protest richest-DiD descriptive sample: " r(N)
-keep if descriptive_sample
-drop descriptive_sample
 
 capture program drop _fmt_num
 program define _fmt_num, rclass

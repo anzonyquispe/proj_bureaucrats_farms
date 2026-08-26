@@ -70,9 +70,9 @@ if _rc {
 }
 assert relative_year_bin == floor((monthyear - cohort) / 12)
 keep if year < 2022 | (year == 2022 & month <= 8)
-keep if inrange(relative_year_bin, -4, 4)
+keep if inrange(relative_year_bin, -4, 1)
 quietly summarize relative_year_bin
-assert r(min) >= -4 & r(max) <= 4
+assert r(min) >= -4 & r(max) <= 1
 display as text "Canonical protest interaction support: [" r(min) ", " r(max) "]"
 
 merge m:1 unique_small_grid_id using ///

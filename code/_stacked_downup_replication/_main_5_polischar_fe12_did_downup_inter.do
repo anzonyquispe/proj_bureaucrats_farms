@@ -92,6 +92,11 @@ display as text "Common estimation sample: `common_n' of `candidate_n' observati
 keep if common_sample
 drop common_sample
 
+isid unique_small_grid_id monthyear cohort_id treat
+export delimited using ///
+    "${int_data}/politician_downup_ac_pop_esample${sample}.csv", replace
+display as result "Exported politician richest-DiD sample: `common_n' rows"
+
 egen tag_ac = tag(ac_uq_id)
 count if tag_ac == 1
 local numacs = r(N)

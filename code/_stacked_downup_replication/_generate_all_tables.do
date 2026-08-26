@@ -312,17 +312,20 @@ forval i = 4(1)6 {
     lincom 1.downup_ac_pop
     _add_lincom 1
 
-    lincom 1.downup_ac_pop + 1.post_#1.downup_ac_pop
+    lincom 1.post_ + 1.downup_ac_pop + 1.post_#1.downup_ac_pop
     _add_lincom 2
 
-    lincom 1.post_#1.treat + 1.downup_ac_pop + ///
+    lincom 1.post_ + 1.treat + 1.downup_ac_pop + ///
+           1.post_#1.treat + ///
            1.post_#1.downup_ac_pop + 1.treat#1.downup_ac_pop + ///
            1.post_#1.treat#1.downup_ac_pop
     _add_lincom 3
 
-    lincom (1.post_#1.treat + 1.downup_ac_pop + ///
+    lincom (1.post_ + 1.treat + 1.downup_ac_pop + ///
+           1.post_#1.treat + ///
            1.post_#1.downup_ac_pop + 1.treat#1.downup_ac_pop + ///
-           1.post_#1.treat#1.downup_ac_pop) - (1.downup_ac_pop + ///
+           1.post_#1.treat#1.downup_ac_pop) - (1.post_ + ///
+           1.downup_ac_pop + ///
            1.post_#1.downup_ac_pop)
     _add_lincom 4
 
@@ -368,9 +371,7 @@ esttab evreg1 evreg2 evreg3 evreg4 evreg5 evreg6 ///
 *---------------------------------------------------------------
 * Panel B: linear combinations
 *---------------------------------------------------------------
-* Start at evreg2 because the row label spans two columns; this reproduces the
-* legacy alignment (two empty model cells followed by estimates in 4--6).
-esttab evreg2 evreg3 evreg4 evreg5 evreg6 ///
+esttab evreg1 evreg2 evreg3 evreg4 evreg5 evreg6 ///
     using "${tables}/_main_4_protest_5km_fe12_did_downup${sample}_rural_acpop_new${ster_suffix}.tex", ///
     append fragment ///
     cells(none) ///
@@ -422,17 +423,20 @@ forval i = 4/6 {
     lincom 1.downup_ac_pop
     _add_lincom 1
 
-    lincom 1.downup_ac_pop + 1.post_#1.downup_ac_pop
+    lincom 1.post_ + 1.downup_ac_pop + 1.post_#1.downup_ac_pop
     _add_lincom 2
 
-    lincom 1.post_#1.treat + 1.downup_ac_pop + ///
+    lincom 1.post_ + 1.treat + 1.downup_ac_pop + ///
+           1.post_#1.treat + ///
            1.post_#1.downup_ac_pop + 1.treat#1.downup_ac_pop + ///
            1.post_#1.treat#1.downup_ac_pop
     _add_lincom 3
 
-    lincom (1.post_#1.treat + 1.downup_ac_pop + ///
+    lincom (1.post_ + 1.treat + 1.downup_ac_pop + ///
+           1.post_#1.treat + ///
            1.post_#1.downup_ac_pop + 1.treat#1.downup_ac_pop + ///
-           1.post_#1.treat#1.downup_ac_pop) - (1.downup_ac_pop + ///
+           1.post_#1.treat#1.downup_ac_pop) - (1.post_ + ///
+           1.downup_ac_pop + ///
            1.post_#1.downup_ac_pop)
     _add_lincom 4
 
@@ -477,9 +481,7 @@ esttab evreg1 evreg2 evreg3 evreg4 evreg5 evreg6 ///
 *---------------------------------------------------------------
 * Panel B: linear combinations
 *---------------------------------------------------------------
-* Start at evreg2 because the row label spans two columns. The two regular-DiD
-* model cells are blank and the lincom estimates appear under columns 4--6.
-esttab evreg2 evreg3 evreg4 evreg5 evreg6 ///
+esttab evreg1 evreg2 evreg3 evreg4 evreg5 evreg6 ///
     using "${tables}/_main_5_polischar_fe12_did_downup_inter${sample}_rural_acpop${ster_suffix}.tex", ///
     append fragment ///
     cells(none) ///

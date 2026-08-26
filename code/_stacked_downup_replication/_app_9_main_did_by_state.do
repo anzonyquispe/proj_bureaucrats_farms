@@ -37,31 +37,13 @@ global figure_farms "${code}/../../figures"
 * Import Data
 ********************************************************************************
 
-import delimited using "${int_farms}/combined_dt_pop${sample}.csv", clear varnames(1)
-keep if inrange(relative_monthyear, -5, 6)
-display as text "Final event-study sample: relative_monthyear in [-5, 6]"
-
-* Merge with rural classification
-merge m:1 unique_small_grid_id using "${root}/data_output/intermediate/ghs_grid_classification_2000.dta", keepusing(is_rural)
-keep if _merge == 3
-drop _merge
-
-* Keep only rural grids
-keep if ${is_rural_var} == 1
-
-display "Observations after rural filter: " _N
-
-* Do not drop grids that intersect more than one assembly constituency.
-* merge m:1 unique_small_grid_id using "${root}/data_output/intermediate/grids_with_more_1_ac.dta"
-* drop if dpl_ac == 1
-* drop _merge
+import delimited using ///
+    "${int_farms}/main_downup_ac_pop_esample${sample}.csv", clear varnames(1)
+display as text "Loaded canonical main specification-4 sample: " _N " rows"
 
 * Create count in thousands
 capture drop countk
 gen countk = count * 1000
-
-* Filter data: year < 2022 or (year == 2022 & month <= 8)
-keep if year < 2022 | (year == 2022 & month <= 8)
 
 * Sort data
 sort unique_small_grid_id monthyear
@@ -70,6 +52,7 @@ sort unique_small_grid_id monthyear
 * Encode IDs
 ********************************************************************************
 
+capture drop grid_id ac_id
 capture confirm numeric variable unique_small_grid_id
 if _rc {
     encode unique_small_grid_id, gen(grid_id)
@@ -127,24 +110,21 @@ forvalues prov_num = 1/`nstates' {
     preserve
     keep if province_id == `prov_num'
 
-    * Count unique ACs for this state
-    do "${code}/_apply_analysis_subsample.do"
-
-    egen tag_ac = tag(ac_id)
-    count if tag_ac == 1
-    local numacs`i' = r(N)
-
-    * Project-standard treated-group pre-treatment means for this state.
-    gen relative_year_bin = floor(relative_monthyear / 12)
-    gen moderator = 0
-    quietly summarize countk if treat == 1 & relative_year_bin <= -1
-    local meandv`i' = r(mean)
-    quietly summarize countk if treat == 1 & relative_year_bin <= -1 & moderator == 1
-    local meandv2`i' = r(mean)
-
     * Run regression
     reghdfejl countk downup_ac_pop $controls, ///
         absorb(grid_id#cohort ac_id#monthyear#cohort) cluster($cluster)
+    gen byte state_sample = e(sample)
+
+    * Statistics use the exact state-regression sample, itself restricted to
+    * the canonical specification-4 population sample.
+    egen byte tag_ac = tag(ac_id) if state_sample == 1
+    quietly count if tag_ac == 1
+    local numacs`i' = r(N)
+    gen byte moderator = 0
+    quietly summarize countk if treat == 1 & relative_monthyear <= -1 & state_sample == 1
+    local meandv`i' = r(mean)
+    quietly summarize countk if treat == 1 & relative_monthyear <= -1 & moderator == 1 & state_sample == 1
+    local meandv2`i' = r(mean)
 
     * Store statistics
     estadd local gridfe "Y"

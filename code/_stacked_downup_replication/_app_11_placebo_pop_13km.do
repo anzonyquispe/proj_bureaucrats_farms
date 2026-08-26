@@ -29,18 +29,20 @@ import delimited using "${int_data}/stacked_downup_13kmpl${sample}.csv", ///
 keep if inrange(relative_monthyear, -5, 6)
 display as text "Final event-study sample: relative_monthyear in [-5, 6]"
 
+* Restrict the placebo stack to the exact observation keys retained by
+* specification 4 of the main population DiD.
+merge m:1 unique_small_grid_id monthyear cohort using ///
+    "${int_data}/main_downup_ac_pop_esample_keys${sample}.dta"
+quietly count if _merge == 2
+assert r(N) == 0
+keep if _merge == 3
+drop _merge
+display as text "Placebo rows in canonical main sample: " _N
+
 rename downup_13kmpl downup_pop_13km
 capture drop countk
 gen countk = count * 1000
-gen relative_year_bin = relative_monthyear
 gen moderator = 0
-
-merge m:1 unique_small_grid_id using ///
-    "${int_data}/ghs_grid_classification_2000.dta", ///
-    keep(master match) keepusing(is_rural)
-drop _merge
-keep if ${is_rural_var} == 1
-keep if year < 2022 | (year == 2022 & month <= 8)
 
 capture confirm numeric variable unique_small_grid_id
 if _rc {
@@ -59,16 +61,7 @@ else {
 }
 
 egen cluster_acmonth = group(ac_id monthyear)
-do "${code}/_apply_analysis_subsample.do"
-
-egen tag_ac = tag(ac_id)
-count if tag_ac == 1
-local numacs = r(N)
-
-quietly summarize countk if treat == 1 & relative_year_bin <= -1
-local ymean = r(mean)
-quietly summarize countk if treat == 1 & relative_year_bin <= -1 & moderator == 1
-local ymean2 = r(mean)
+bysort unique_small_grid_id: egen byte ever_downup_pop_13km = max(downup_pop_13km)
 
 local if1 ""
 local if2 "if downup_ac_pop == 1"
@@ -84,9 +77,20 @@ forvalues i = 1/3 {
         }
         reghdfejl countk downup_pop_13km av_wind_speed wind_direction `if`i'', ///
             absorb(`fe`fe'') cluster(grid_id cluster_acmonth)
-        estadd scalar ymean = `ymean'
-        estadd scalar ymean2 = `ymean2'
-        estadd scalar acq = `numacs'
+        capture drop placebo_sample tag_ac
+        gen byte placebo_sample = e(sample)
+        egen byte tag_ac = tag(ac_id) if placebo_sample == 1
+        quietly count if tag_ac == 1
+        local numacs`i' = r(N)
+        quietly summarize countk if ever_downup_pop_13km == 1 & ///
+            downup_pop_13km == 0 & placebo_sample == 1
+        local ymean`i' = r(mean)
+        quietly summarize countk if ever_downup_pop_13km == 1 & ///
+            downup_pop_13km == 0 & moderator == 1 & placebo_sample == 1
+        local ymean2`i' = r(mean)
+        estadd scalar ymean = `ymean`i''
+        estadd scalar ymean2 = `ymean2`i''
+        estadd scalar acq = `numacs`i''
         estadd local smpl "Rural"
         estadd local gridfe "Y"
         estadd local acmonthfe "Y"

@@ -90,9 +90,9 @@ display as text "Observations after rural and date filters: " _N
 
 * Estimate the agreed -4 through +4 support. Plotting displays -4 through +1
 * without changing the regression used to estimate the retained coefficients.
-keep if inrange(relative_year_bin, -4, 4)
+keep if inrange(relative_year_bin, -4, 1)
 quietly summarize relative_year_bin
-assert r(min) >= -4 & r(max) <= 4
+assert r(min) >= -4 & r(max) <= 1
 display as text "Canonical protest event-study support retained: [" ///
     r(min) ", " r(max) "]"
 

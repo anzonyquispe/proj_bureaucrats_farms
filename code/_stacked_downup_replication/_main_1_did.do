@@ -164,10 +164,26 @@ display as text "Common estimation sample: `common_n' of `candidate_n' observati
 keep if common_sample
 drop common_sample
 
+* The population specification is the canonical observation sample used by
+* every main robustness table and by the main descriptive-statistics table.
+* Export both the full rows requested for audit/reuse and a compact key file
+* for stacks (such as the 13 km placebo) that carry additional variables.
+if "${downup_var}" == "downup_ac_pop" {
+    isid unique_small_grid_id monthyear cohort
+    export delimited using ///
+        "${int_data}/main_downup_ac_pop_esample${sample}.csv", replace
+    preserve
+        keep unique_small_grid_id monthyear cohort
+        isid unique_small_grid_id monthyear cohort
+        save "${int_data}/main_downup_ac_pop_esample_keys${sample}.dta", replace
+    restore
+    display as result "Exported canonical specification-4 sample: `common_n' rows"
+}
+
 * Summary statistics and AC counts describe that common estimation sample.
-quietly summarize countk if treat == 1 & relative_year_bin <= -1
+quietly summarize countk if treat == 1 & relative_monthyear <= -1
 local ymean = r(mean)
-quietly summarize countk if treat == 1 & relative_year_bin <= -1 & moderator == 1
+quietly summarize countk if treat == 1 & relative_monthyear <= -1 & moderator == 1
 local ymean2 = r(mean)
 quietly levelsof ac_id, local(ac_levels)
 local numacs : word count `ac_levels'

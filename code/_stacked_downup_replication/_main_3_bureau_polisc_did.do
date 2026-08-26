@@ -161,6 +161,11 @@ assert `common_n' > 0
 keep if common_sample
 drop common_sample
 
+isid unique_small_grid_id monthyear cohort
+export delimited using ///
+    "${int_farms}/bureau_polisc_downup_ac_pop_esample${sample}.csv", replace
+display as result "Exported bureaucrat-politician specification-4 sample: `common_n' rows"
+
 * All table statistics are now calculated on the anchored estimation sample.
 egen tag_assembly = tag(assembly_id)
 quietly count if tag_assembly == 1
@@ -170,9 +175,9 @@ egen tag_district = tag(district_id)
 quietly count if tag_district == 1
 local numdist = r(N)
 
-quietly summarize countk if treat == 1 & relative_year_bin <= -1
+quietly summarize countk if treat == 1 & relative_monthyear <= -1
 local meandv = r(mean)
-quietly summarize countk if treat == 1 & relative_year_bin <= -1 & moderator == 1
+quietly summarize countk if treat == 1 & relative_monthyear <= -1 & moderator == 1
 local meandv2 = r(mean)
 
 display as text "Anchored common sample: `common_n' observations"

@@ -37,33 +37,16 @@ global figure_farms "${code}/../../figures"
 * Import Data
 ********************************************************************************
 
-* The new stack is CSV and already retains mean_brightness.
-import delimited "${root}/data_output/intermediate/combined_dt_pop${sample}.csv", clear
-keep if inrange(relative_monthyear, -5, 6)
-display as text "Final event-study sample: relative_monthyear in [-5, 6]"
-
-
-* Merge with rural classification
-merge m:1 unique_small_grid_id using "${root}/data_output/intermediate/ghs_grid_classification_2000.dta", keepusing(is_rural)
-keep if _merge == 3
-drop _merge
-
-* Keep only rural grids
-keep if ${is_rural_var} == 1
-
-display "Observations after rural filter: " _N
-
-* Do not drop grids that intersect more than one assembly constituency.
-* merge m:1 unique_small_grid_id using "${root}/data_output/intermediate/grids_with_more_1_ac.dta"
-* drop if dpl_ac == 1
-* drop _merge
+* Use exactly the specification-4 population sample from the main DiD.
+import delimited ///
+    "${root}/data_output/intermediate/main_downup_ac_pop_esample${sample}.csv", ///
+    clear varnames(1)
+local common_n = _N
+display as text "Loaded canonical main specification-4 sample: `common_n' rows"
 
 * Create count in thousands
 capture drop countk
 gen countk = count * 1000
-
-* Filter data: year < 2022 or (year == 2022 & month <= 8)
-keep if year < 2022 | (year == 2022 & month <= 8)
 
 ********************************************************************************
 * Create dependent variables
@@ -82,6 +65,7 @@ replace mean_brightness = 0 if missing(mean_brightness)
 * Encode IDs
 ********************************************************************************
 
+capture drop grid_id ac_id
 capture confirm numeric variable unique_small_grid_id
 if _rc {
     encode unique_small_grid_id, gen(grid_id)
@@ -100,19 +84,6 @@ else {
 
 
 
-* Count unique ACs
-do "${code}/_apply_analysis_subsample.do"
-
-* Use the richest production FE and the complete covariate set to define one
-* observation sample for every alternative dependent variable.
-quietly reghdfejl countk downup_ac_pop av_wind_speed wind_direction, ///
-    absorb(grid_id#cohort ac_id#monthyear#cohort) ///
-    cluster(ac_uq_id#cohort#monthyear unique_small_grid_id#cohort)
-gen byte common_sample = e(sample)
-keep if common_sample
-drop common_sample
-local common_n = _N
-
 egen tag_ac = tag(ac_id)
 count if tag_ac == 1
 local numacs = r(N)
@@ -120,19 +91,18 @@ local numacs = r(N)
 ********************************************************************************
 * Project-standard treated-group pre-treatment means for each dependent variable.
 ********************************************************************************
-gen relative_year_bin = floor(relative_monthyear / 12)
 gen moderator = 0
-quietly summarize anyfire if treat == 1 & relative_year_bin <= -1
+quietly summarize anyfire if treat == 1 & relative_monthyear <= -1
 local meandv1 = r(mean)
-quietly summarize anyfire if treat == 1 & relative_year_bin <= -1 & moderator == 1
+quietly summarize anyfire if treat == 1 & relative_monthyear <= -1 & moderator == 1
 local meandv1_mod = r(mean)
-quietly summarize logfire if treat == 1 & relative_year_bin <= -1
+quietly summarize logfire if treat == 1 & relative_monthyear <= -1
 local meandv2 = r(mean)
-quietly summarize logfire if treat == 1 & relative_year_bin <= -1 & moderator == 1
+quietly summarize logfire if treat == 1 & relative_monthyear <= -1 & moderator == 1
 local meandv2_mod = r(mean)
-quietly summarize mean_brightness if treat == 1 & relative_year_bin <= -1
+quietly summarize mean_brightness if treat == 1 & relative_monthyear <= -1
 local meandv3 = r(mean)
-quietly summarize mean_brightness if treat == 1 & relative_year_bin <= -1 & moderator == 1
+quietly summarize mean_brightness if treat == 1 & relative_monthyear <= -1 & moderator == 1
 local meandv3_mod = r(mean)
 
 ********************************************************************************
