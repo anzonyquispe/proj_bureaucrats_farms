@@ -312,21 +312,18 @@ forval i = 4(1)6 {
     lincom 1.downup_ac_pop
     _add_lincom 1
 
-    lincom 1.post_ + 1.downup_ac_pop + 1.post_#1.downup_ac_pop
+    lincom 1.post_#1.downup_ac_pop
     _add_lincom 2
 
-    lincom 1.post_ + 1.treat + 1.downup_ac_pop + ///
-           1.post_#1.treat + ///
-           1.post_#1.downup_ac_pop + 1.treat#1.downup_ac_pop + ///
+    lincom 1.post_#1.treat + 1.post_#1.downup_ac_pop + ///
+           1.treat#1.downup_ac_pop + ///
            1.post_#1.treat#1.downup_ac_pop
     _add_lincom 3
 
-    lincom (1.post_ + 1.treat + 1.downup_ac_pop + ///
-           1.post_#1.treat + ///
-           1.post_#1.downup_ac_pop + 1.treat#1.downup_ac_pop + ///
-           1.post_#1.treat#1.downup_ac_pop) - (1.post_ + ///
-           1.downup_ac_pop + ///
-           1.post_#1.downup_ac_pop)
+    lincom (1.post_#1.treat + 1.post_#1.downup_ac_pop + ///
+           1.treat#1.downup_ac_pop + ///
+           1.post_#1.treat#1.downup_ac_pop) - ///
+           (1.post_#1.downup_ac_pop)
     _add_lincom 4
 
     est store evreg`i'
@@ -371,16 +368,19 @@ esttab evreg1 evreg2 evreg3 evreg4 evreg5 evreg6 ///
 *---------------------------------------------------------------
 * Panel B: linear combinations
 *---------------------------------------------------------------
-esttab evreg1 evreg2 evreg3 evreg4 evreg5 evreg6 ///
+* The row label spans the label column plus model column (1). Therefore the
+* five cells below must correspond to model columns (2)--(6); evreg2 and
+* evreg3 are blank, and the lincoms stored in evreg4--evreg6 land correctly.
+esttab evreg2 evreg3 evreg4 evreg5 evreg6 ///
     using "${tables}/_main_4_protest_5km_fe12_did_downup${sample}_rural_acpop_new${ster_suffix}.tex", ///
     append fragment ///
     cells(none) ///
     stats(ysum1 ysd1 ysum2 ysd2 ysum3 ysd3 ysum4 ysd4, ///
           fmt(%s %s %s %s %s %s %s %s) ///
-          labels("\multicolumn{2}{l}{(2) Down\$>\$Up Effect, pre-period in no protest areas}" " " ///
-                 "\multicolumn{2}{l}{(2+3) Down\$>\$Up Effect, post-period in no protest areas}" " " ///
-                 "\multicolumn{2}{l}{(1+2+3+4+5) Down\$>\$Up Effect, post-period in protest areas}" " " ///
-                 "\multicolumn{2}{l}{(1+2+3+4+5)-(2+3) Differential Down\$>\$Up effect, post period}" " ")) ///
+          labels("\multicolumn{2}{l}{Down\$>\$Up Effect, pre-period in no protest areas (2)}" "\multicolumn{2}{l}{}" ///
+                 "\multicolumn{2}{l}{Down\$>\$Up Effect, post-period in no protest areas (3)}" "\multicolumn{2}{l}{}" ///
+                 "\multicolumn{2}{l}{Down\$>\$Up Effect, post-period in protest areas (1+3+4+5)}" "\multicolumn{2}{l}{}" ///
+                 "\multicolumn{2}{l}{Differential downwind effect, post period (1+3+4+5)-(3)}" "\multicolumn{2}{l}{}")) ///
     nomtitles nonumbers collabels(none) nobaselevels noobs ///
     prehead("") posthead("") ///
     prefoot("\hline" ///
@@ -423,21 +423,18 @@ forval i = 4/6 {
     lincom 1.downup_ac_pop
     _add_lincom 1
 
-    lincom 1.post_ + 1.downup_ac_pop + 1.post_#1.downup_ac_pop
+    lincom 1.post_#1.downup_ac_pop
     _add_lincom 2
 
-    lincom 1.post_ + 1.treat + 1.downup_ac_pop + ///
-           1.post_#1.treat + ///
-           1.post_#1.downup_ac_pop + 1.treat#1.downup_ac_pop + ///
+    lincom 1.post_#1.treat + 1.post_#1.downup_ac_pop + ///
+           1.treat#1.downup_ac_pop + ///
            1.post_#1.treat#1.downup_ac_pop
     _add_lincom 3
 
-    lincom (1.post_ + 1.treat + 1.downup_ac_pop + ///
-           1.post_#1.treat + ///
-           1.post_#1.downup_ac_pop + 1.treat#1.downup_ac_pop + ///
-           1.post_#1.treat#1.downup_ac_pop) - (1.post_ + ///
-           1.downup_ac_pop + ///
-           1.post_#1.downup_ac_pop)
+    lincom (1.post_#1.treat + 1.post_#1.downup_ac_pop + ///
+           1.treat#1.downup_ac_pop + ///
+           1.post_#1.treat#1.downup_ac_pop) - ///
+           (1.post_#1.downup_ac_pop)
     _add_lincom 4
 
     est store evreg`i'
@@ -481,16 +478,19 @@ esttab evreg1 evreg2 evreg3 evreg4 evreg5 evreg6 ///
 *---------------------------------------------------------------
 * Panel B: linear combinations
 *---------------------------------------------------------------
-esttab evreg1 evreg2 evreg3 evreg4 evreg5 evreg6 ///
+* The row label spans the label column plus model column (1). Therefore the
+* five cells below must correspond to model columns (2)--(6); evreg2 and
+* evreg3 are blank, and the lincoms stored in evreg4--evreg6 land correctly.
+esttab evreg2 evreg3 evreg4 evreg5 evreg6 ///
     using "${tables}/_main_5_polischar_fe12_did_downup_inter${sample}_rural_acpop${ster_suffix}.tex", ///
     append fragment ///
     cells(none) ///
     stats(ysum1 ysd1 ysum2 ysd2 ysum3 ysd3 ysum4 ysd4, ///
           fmt(%s %s %s %s %s %s %s %s) ///
-          labels("\multicolumn{2}{l}{(2) Down\$>\$Up Effect, pre-period of no-switch politicians}" " " ///
-                 "\multicolumn{2}{l}{(2+3) Down\$>\$Up Effect, post-period of no-switch politicians}" " " ///
-                 "\multicolumn{2}{l}{(1+2+3+4+5) Down\$>\$Up Effect, post-period of switch politicians}" " " ///
-                 "\multicolumn{2}{l}{(1+2+3+4+5)-(2+3) Differential Down\$>\$Up effect, post period}" " ")) ///
+          labels("\multicolumn{2}{l}{Down\$>\$Up Effect, pre-period of no-switch politicians (2)}" "\multicolumn{2}{l}{}" ///
+                 "\multicolumn{2}{l}{Down\$>\$Up Effect, post-period of no-switch politicians (3)}" "\multicolumn{2}{l}{}" ///
+                 "\multicolumn{2}{l}{Down\$>\$Up Effect, post-period of switch politicians (1+3+4+5)}" "\multicolumn{2}{l}{}" ///
+                 "\multicolumn{2}{l}{Differential downwind effect, post period (1+3+4+5)-(3)}" "\multicolumn{2}{l}{}")) ///
     nomtitles nonumbers collabels(none) nobaselevels noobs ///
     prehead("") posthead("") ///
     prefoot("\hline" ///

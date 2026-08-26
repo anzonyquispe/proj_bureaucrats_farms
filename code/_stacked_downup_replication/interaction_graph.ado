@@ -1,4 +1,4 @@
-*! version 2.0  2026-08-25
+*! version 2.1  2026-08-26
 *! Interaction effect graph for triple-interaction DiD models.
 
 capture program drop interaction_graph
@@ -138,7 +138,7 @@ program define interaction_graph
             }
             else {
                 local ymin = -10
-                local ymax = 100
+                local ymax = 200
             }
         }
         else {
@@ -208,7 +208,7 @@ program define interaction_graph
                 legend(off) xlabel(, nogrid nolabels) xtitle(" ") ///
                 ytitle("Effect of Down>Up on Number of Fires (x 1,000)") ///
                 xscale(range(-.4 6.0) off) yscale(range(`ymin' `ymax')) ///
-                ylabel(-10(10)100) ///
+                ylabel(-10 0(20)200) ///
                 graphregion(margin(small)) plotregion(margin(small)) ///
                 yline(0, lcolor(black%75))
         }

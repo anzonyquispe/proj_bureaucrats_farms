@@ -19,15 +19,17 @@ REPLICATION_REPO="${REPLICATION_REPO:-/users/aquisper/proj_bureaucrats_farms}"
 REPLICATION_CODE="${REPLICATION_CODE:-${REPLICATION_REPO}/code/_stacked_downup_replication}"
 PYTHON_ENV="${PYTHON_ENV:-/groups/sgulzar/india_forest_land/downup_geo}"
 PYTHON_BIN="${PYTHON_ENV}/bin/python"
+SAMPLE_SUFFIX="${SAMPLE:-}"
 LOG_DIR="${REPLICATION_CODE}/logs"
 LOG_FILE="${LOG_DIR}/generate_descriptive_tables_duckdb.log"
 
 mkdir -p "${LOG_DIR}"
 exec > >(tee "${LOG_FILE}") 2>&1
 
-echo "[$(date '+%F %T')] Generating the three full-sample descriptive tables"
+echo "[$(date '+%F %T')] Generating descriptives from exact Stata e(sample) CSVs"
 echo "Python: ${PYTHON_BIN}"
 echo "Threads: 10; memory limit: 100GB"
+echo "Sample suffix: ${SAMPLE_SUFFIX:-<full sample>}"
 
 if [[ ! -x "${PYTHON_BIN}" ]]; then
   echo "ERROR: Python is missing: ${PYTHON_BIN}" >&2
@@ -40,7 +42,7 @@ export OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1
 "${PYTHON_BIN}" "${REPLICATION_CODE}/python/generate_descriptive_tables_duckdb.py" \
   --root "${REPLICATION_ROOT}" \
   --output-root "${REPLICATION_REPO}" \
-  --sample "" \
+  --sample "${SAMPLE_SUFFIX}" \
   --threads 10 \
   --memory-limit 100GB
 

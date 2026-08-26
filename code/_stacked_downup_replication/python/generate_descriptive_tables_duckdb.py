@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
-"""Generate the three production descriptive-statistics LaTeX tables."""
+"""Generate production descriptives directly from Stata e(sample) exports."""
 
 from __future__ import annotations
 
 import argparse
 import logging
+import math
 from pathlib import Path
 
 import duckdb
-import pandas as pd
 
 
 LOG = logging.getLogger("descriptive_tables")
@@ -28,13 +28,6 @@ def sql_path(path: Path) -> str:
     return str(path.resolve()).replace("'", "''")
 
 
-def find_first(paths: list[Path]) -> Path:
-    for path in paths:
-        if path.exists():
-            return path
-    raise FileNotFoundError("None of these inputs exists:\n" + "\n".join(map(str, paths)))
-
-
 def csv_columns(con: duckdb.DuckDBPyConnection, path: Path,
                 options: str) -> set[str]:
     rows = con.execute(
@@ -52,20 +45,14 @@ def relative_year_column(columns: set[str], path: Path) -> str:
     )
 
 
-def load_dta_lookup(con: duckdb.DuckDBPyConnection, name: str, path: Path,
-                    columns: list[str]) -> None:
-    # pandas.read_stata uses its bundled parser and avoids requiring pyreadstat,
-    # which is not installed in the production downup_geo environment.
-    frame = pd.read_stata(path, columns=columns, convert_categoricals=False)
-    con.register(f"_{name}_frame", frame)
-    con.execute(f"CREATE OR REPLACE TABLE {name} AS SELECT * FROM _{name}_frame")
-    con.unregister(f"_{name}_frame")
-    LOG.info("Loaded %s rows into %s", len(frame), name)
-
-
 def fmt_number(value: object, integer: bool = False) -> str:
-    if value is None or pd.isna(value):
+    if value is None:
         return ""
+    try:
+        if math.isnan(float(value)):
+            return ""
+    except (TypeError, ValueError):
+        pass
     if integer:
         return f"{int(value):,}"
     text = f"{float(value):,.3f}".rstrip("0").rstrip(".")
@@ -143,35 +130,10 @@ def main() -> int:
     con.execute(f"SET temp_directory='{sql_path(intermediate / '_duckdb_tmp_descriptives')}'")
     con.execute("SET preserve_insertion_order=false")
 
-    rural_path = intermediate / "ghs_grid_classification_2000.dta"
-    area_path = intermediate / "grid_month_ac_area_tr.dta"
-    load_dta_lookup(con, "rural_lookup", rural_path,
-                    ["unique_small_grid_id", "is_rural"])
-    load_dta_lookup(con, "area_lookup", area_path,
-                    ["unique_small_grid_id", "month", "year", "ac_area_tr"])
-    con.execute("""
-        CREATE OR REPLACE TABLE rural_lookup_clean AS
-        SELECT CAST(unique_small_grid_id AS VARCHAR) AS grid_key,
-               max(is_rural) AS is_rural
-        FROM rural_lookup GROUP BY 1
-    """)
-    con.execute("""
-        CREATE OR REPLACE TABLE area_lookup_clean AS
-        SELECT CAST(unique_small_grid_id AS VARCHAR) AS grid_key,
-               CAST(month AS INTEGER) AS month,
-               CAST(year AS INTEGER) AS year,
-               max(ac_area_tr) AS ac_area_tr
-        FROM area_lookup GROUP BY 1,2,3
-    """)
-
-    main_csv = intermediate / f"combined_dt_pop{sample}.csv"
-    politician_csv = intermediate / f"politicians_characteristics_byprov{sample}.csv"
-    protest_csv = find_first([
-        intermediate / f"stacked_data_protest5km_election_sameterm{sample}.csv",
-        intermediate / "cohortes_protest_term" / f"stacked_data_protest5km_election_sameterm{sample}.csv",
-        intermediate / "cohorts_protest_term" / f"stacked_data_protest5km_election_sameterm{sample}.csv",
-    ])
-    for path in (main_csv, politician_csv):
+    main_csv = intermediate / f"main_downup_ac_pop_esample{sample}.csv"
+    politician_csv = intermediate / f"politician_downup_ac_pop_esample{sample}.csv"
+    protest_csv = intermediate / f"protest_downup_ac_pop_esample{sample}.csv"
+    for path in (main_csv, politician_csv, protest_csv):
         if not path.exists():
             raise FileNotFoundError(path)
 
@@ -184,52 +146,31 @@ def main() -> int:
     )
     LOG.info("Protest relative-year column: %s", protest_relative)
     LOG.info("Politician relative-year column: %s", politician_relative)
-    LOG.info("Building main descriptive sample")
+    LOG.info("Building main descriptives from exact specification-4 e(sample)")
     con.execute(f"""
-        CREATE OR REPLACE TABLE desc_main AS
+        CREATE OR REPLACE VIEW desc_main AS
         SELECT p.unique_small_grid_id, p.year, p.month, p.ac_uq_id, p.province,
                p."count" AS fires, p.downup_ac_pop, p.av_wind_speed,
                p.wind_direction, p.rice_prod_aclvl_ahigh
         FROM read_csv_auto('{sql_path(main_csv)}', {csv_options}) p
-        JOIN rural_lookup_clean r
-          ON CAST(p.unique_small_grid_id AS VARCHAR)=r.grid_key AND r.is_rural=1
-        WHERE p.relative_monthyear BETWEEN -5 AND 6
-          AND (p.year < 2022 OR (p.year=2022 AND p.month<=8))
-          AND p."count" IS NOT NULL AND p.downup_ac_pop IS NOT NULL
-          AND p.av_wind_speed IS NOT NULL AND p.wind_direction IS NOT NULL
-          AND p.rice_prod_aclvl_ahigh IS NOT NULL AND p.cohort IS NOT NULL
-          AND p.monthyear IS NOT NULL AND p.ac_uq_id IS NOT NULL
-          AND p.unique_small_grid_id IS NOT NULL
     """)
 
-    LOG.info("Building protest descriptive sample")
+    LOG.info("Building protest descriptives from exact richest-DiD e(sample)")
     con.execute(f"""
-        CREATE OR REPLACE TABLE desc_protest AS
+        CREATE OR REPLACE VIEW desc_protest AS
         SELECT p.unique_small_grid_id, p.year, p.month, p.ac_uq_id, p.province,
-               a.ac_area_tr, p.cohort,
+               p.ac_area_tr, p.cohort,
                concat(CAST(p.province AS VARCHAR),'|',CAST(p.election_year AS VARCHAR)) AS legislature,
                p."{protest_relative}" AS relative_year_bin,
                CAST((p."{protest_relative}">=0) AND (p.treat=1) AS INTEGER) AS protest,
-               p."count"*1000 AS fires,
+               p.countk AS fires,
                p.rice_prod_aclvl_ahigh
         FROM read_csv_auto('{sql_path(protest_csv)}', {csv_options}) p
-        JOIN rural_lookup_clean r
-          ON CAST(p.unique_small_grid_id AS VARCHAR)=r.grid_key AND r.is_rural=1
-        JOIN area_lookup_clean a
-          ON CAST(p.unique_small_grid_id AS VARCHAR)=a.grid_key
-         AND p.month=a.month AND p.year=a.year
-        WHERE p."{protest_relative}" BETWEEN -4 AND 4
-          AND (p.year < 2022 OR (p.year=2022 AND p.month<=8))
-          AND p."count" IS NOT NULL AND p.treat IS NOT NULL
-          AND p.downup_ac_pop IS NOT NULL AND p.wind_direction IS NOT NULL
-          AND p.av_wind_speed IS NOT NULL AND p.rice_prod_aclvl_ahigh IS NOT NULL
-          AND p.cohort_id IS NOT NULL AND p.election_year IS NOT NULL
-          AND p.monthyear IS NOT NULL AND p.ac_uq_id IS NOT NULL
     """)
 
-    LOG.info("Building politician descriptive sample")
+    LOG.info("Building politician descriptives from exact richest-DiD e(sample)")
     con.execute(f"""
-        CREATE OR REPLACE TABLE desc_politician AS
+        CREATE OR REPLACE VIEW desc_politician AS
         SELECT p.unique_small_grid_id, p.year, p.month, p.ac_uq_id, p.province,
                p.election_year, p.cohort,
                concat(CAST(p.province AS VARCHAR),'|',CAST(p.election_year AS VARCHAR)) AS legislature,
@@ -239,19 +180,31 @@ def main() -> int:
                END AS agricultural_politician,
                p."{politician_relative}" AS relative_year_bin,
                CAST((p."{politician_relative}">=0) AND (p.treat=1) AS INTEGER) AS switching_agri,
-               p."count"*1000 AS fires,
+               p.countk AS fires,
                p.rice_prod_aclvl_ahigh
         FROM read_csv_auto('{sql_path(politician_csv)}', {csv_options}) p
-        JOIN rural_lookup_clean r
-          ON CAST(p.unique_small_grid_id AS VARCHAR)=r.grid_key AND r.is_rural=1
-        WHERE p."{politician_relative}" BETWEEN -5 AND 4
-          AND (p.year < 2022 OR (p.year=2022 AND p.month<=8))
-          AND p."count" IS NOT NULL AND p.treat IS NOT NULL
-          AND p.downup_ac_pop IS NOT NULL AND p.wind_direction IS NOT NULL
-          AND p.av_wind_speed IS NOT NULL AND p.rice_prod_aclvl_ahigh IS NOT NULL
-          AND p.cohort_id IS NOT NULL AND p.election_year IS NOT NULL
-          AND p.monthyear IS NOT NULL AND p.ac_uq_id IS NOT NULL
     """)
+
+    for table, source in (
+        ("desc_main", main_csv),
+        ("desc_politician", politician_csv),
+        ("desc_protest", protest_csv),
+    ):
+        source_n = con.execute(
+            f"SELECT count(*) FROM read_csv_auto('{sql_path(source)}', {csv_options})"
+        ).fetchone()[0]
+        table_n = con.execute(f"SELECT count(*) FROM {table}").fetchone()[0]
+        if source_n != table_n:
+            raise RuntimeError(
+                f"{table} changed the exported e(sample): source={source_n:,}, "
+                f"descriptive={table_n:,}"
+            )
+        LOG.info(
+            "Validated %s: %s rows exactly match %s",
+            table,
+            f"{table_n:,}",
+            source,
+        )
 
     main_rows = [
         ("Grid", "unique_small_grid_id", False), ("Year", "year", False),

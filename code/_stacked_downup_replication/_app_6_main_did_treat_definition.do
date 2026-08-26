@@ -144,6 +144,7 @@ gen byte esample = e(sample)
 egen tag_ac = tag(ac_id) if esample == 1
 count if tag_ac == 1
 local numacs = r(N)
+capture drop moderator
 gen moderator = rice_prod_aclvl_ahigh
 quietly summarize countk if treat == 1 & relative_monthyear <= -1 & esample == 1
 local meandv1 = r(mean)
