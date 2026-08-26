@@ -978,3 +978,96 @@ added macro:
 
 added macro:
                 e(mod) : "downup_ac_pop"
+(MWFE estimator converged in 45 iterations)
+
+HDFE linear regression with Julia                 Number of obs   = 63,240,134
+Absorbing 4 HDFE groups                           F(   7,   1653) =      32.94
+Statistics cluster-robust                         Prob > F        =     0.0000
+                                                  R-squared       =     0.1085
+                                                  Adj R-squared   =     0.0913
+Number of clusters (ac_area_tr) =       1654      Within R-sq.    =     0.0092
+                                                  Root MSE        =   923.3731
+
+                         (Std. err. adjusted for 1,654 clusters in ac_area_tr)
+------------------------------------------------------------------------------
+             |               Robust
+      countk | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+     1.post_ |          0  (omitted)
+     1.treat |          0  (omitted)
+1.downup_a~p |   4.471905   4.562105     0.98   0.327    -4.476207    13.42002
+wind_direc~n |  -.8743937   .0713786   -12.25   0.000    -1.014396   -.7343917
+av_wind_sp~d |   126.5454   13.03949     9.70   0.000     100.9698    152.1211
+             |
+ post_#treat |
+        1 1  |   99.76939   21.54396     4.63   0.000     57.51307    142.0257
+             |
+       post_#|
+downup_ac_~p |
+        1 1  |  -1.631072   2.545466    -0.64   0.522     -6.62375    3.361605
+             |
+       treat#|
+downup_ac_~p |
+        1 1  |  -24.09524   30.80897    -0.78   0.434    -84.52396    36.33348
+             |
+ post_#treat#|
+downup_ac_~p |
+      1 1 1  |   9.548677   19.43563     0.49   0.623    -28.57238    47.66973
+------------------------------------------------------------------------------
+
+added scalar:
+              e(ymean) =  473.10874
+
+added scalar:
+             e(ymean2) =  459.31537
+
+added scalar:
+                e(acq) =  808
+
+added macro:
+               e(smpl) : "Rural"
+
+added macro:
+             e(fespec) : "unique_small_grid_id_cohort province_cohort#election_
+> year province_cohort#c.monthyear relativeyear_cohort"
+
+added macro:
+             e(gridfe) : "Y"
+
+added macro:
+               e(time) : "Y"
+
+added macro:
+         e(electionfe) : "Y"
+
+added macro:
+        e(provtrendfe) : "Y"
+
+added macro:
+                e(mod) : "downup_ac_pop"
+
+. 
+. estwrite evreg1 evreg2 evreg3 evreg4 evreg5 evreg6 using ///
+>     "${tables}/_main_4_protest_5km_fe12_did_downup${sample}_rural${ster_suffi
+> x}.ster", replace
+(saving evreg1)
+(saving evreg2)
+(saving evreg3)
+(saving evreg4)
+(saving evreg5)
+(saving evreg6)
+(file /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication/.
+> ./../tables/_main_4_protest_5km_fe12_did_downup_rural_acpop.ster saved)
+
+. 
+. *****************************************************************************
+> ***
+. 
+end of do-file
+
+. 
+. display as result "COMPLETED: `dofile' at $S_DATE $S_TIME"
+COMPLETED: _main_4_protest_5km_fe12_did_downup.do at 26 Aug 2026 14:26:24
+
+. 
+end of do-file
