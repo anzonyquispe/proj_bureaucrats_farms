@@ -1,14 +1,24 @@
-[2026-08-26 15:04:23] Generating descriptives from exact Stata e(sample) CSVs
+[2026-08-26 15:10:02] Generating descriptives from exact Stata e(sample) CSVs
 Python: /groups/sgulzar/india_forest_land/downup_geo/bin/python
 Threads: 10; memory limit: 100GB
 Sample suffix: <full sample>
-2026-08-26 15:04:33,999 | INFO | Protest relative-year column: relative_year_bin
-2026-08-26 15:04:33,999 | INFO | Politician relative-year column: relative_year_bin
-2026-08-26 15:04:33,999 | INFO | Building main descriptives from exact specification-4 e(sample)
-Traceback (most recent call last):
-  File "/users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication/python/generate_descriptive_tables_duckdb.py", line 250, in <module>
-    raise SystemExit(main())
-                     ^^^^^^
-  File "/users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication/python/generate_descriptive_tables_duckdb.py", line 150, in main
-    con.execute(f"""
-_duckdb.CatalogException: Catalog Error: Existing object desc_main is of type Table, trying to replace with type View
+2026-08-26 15:10:12,098 | INFO | Main province column: province
+2026-08-26 15:10:12,100 | INFO | Protest relative-year column: relative_year_bin
+2026-08-26 15:10:12,100 | INFO | Politician relative-year column: relative_year_bin
+2026-08-26 15:10:12,100 | INFO | Building main descriptives from exact specification-4 e(sample)
+2026-08-26 15:10:16,350 | INFO | Dropped existing TABLE desc_main before rebuilding
+2026-08-26 15:10:18,833 | INFO | Building protest descriptives from exact richest-DiD e(sample)
+2026-08-26 15:10:18,867 | INFO | Dropped existing TABLE desc_protest before rebuilding
+2026-08-26 15:10:22,559 | INFO | Building politician descriptives from exact richest-DiD e(sample)
+2026-08-26 15:10:22,566 | INFO | Dropped existing TABLE desc_politician before rebuilding
+2026-08-26 15:10:43,253 | INFO | Validated desc_main: 36,758,771 rows exactly match /groups/sgulzar/sa_fires/proj_bureaucrats_farms/data_output/intermediate/main_downup_ac_pop_esample.csv
+2026-08-26 15:10:50,800 | INFO | Validated desc_politician: 8,268,839 rows exactly match /groups/sgulzar/sa_fires/proj_bureaucrats_farms/data_output/intermediate/politician_downup_ac_pop_esample.csv
+2026-08-26 15:11:30,842 | INFO | Validated desc_protest: 63,240,134 rows exactly match /groups/sgulzar/sa_fires/proj_bureaucrats_farms/data_output/intermediate/protest_downup_ac_pop_esample.csv
+2026-08-26 15:11:35,757 | INFO | desc_main: 36,758,771 observations
+2026-08-26 15:11:35,813 | INFO | Generated /users/aquisper/proj_bureaucrats_farms/tables/descriptives_main.tex
+2026-08-26 15:11:44,665 | INFO | desc_protest: 63,240,134 observations
+2026-08-26 15:11:44,667 | INFO | Generated /users/aquisper/proj_bureaucrats_farms/tables/_protest_stacked_descriptive.tex
+2026-08-26 15:11:48,803 | INFO | desc_politician: 8,268,839 observations
+2026-08-26 15:11:48,805 | INFO | Generated /users/aquisper/proj_bureaucrats_farms/tables/_politicians_stacked_descriptive.tex
+[2026-08-26 15:11:49] Completed descriptive tables
+Outputs: /users/aquisper/proj_bureaucrats_farms/tables
