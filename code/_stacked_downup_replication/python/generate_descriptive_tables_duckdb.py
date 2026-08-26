@@ -45,6 +45,35 @@ def relative_year_column(columns: set[str], path: Path) -> str:
     )
 
 
+def first_existing_column(columns: set[str], candidates: tuple[str, ...],
+                          path: Path, label: str) -> str:
+    """Return the first supported source-column name with a clear failure."""
+    for candidate in candidates:
+        if candidate in columns:
+            return candidate
+    raise ValueError(
+        f"{path} has no supported {label} column; expected one of "
+        f"{', '.join(candidates)}"
+    )
+
+
+def drop_relation(con: duckdb.DuckDBPyConnection, name: str) -> None:
+    """Drop a retained DuckDB table or view so reruns are idempotent."""
+    row = con.execute(
+        """
+        SELECT table_type
+        FROM information_schema.tables
+        WHERE table_schema = current_schema() AND table_name = ?
+        """,
+        [name],
+    ).fetchone()
+    if row is None:
+        return
+    object_type = "VIEW" if str(row[0]).upper() == "VIEW" else "TABLE"
+    con.execute(f'DROP {object_type} "{name}"')
+    LOG.info("Dropped existing %s %s before rebuilding", object_type, name)
+
+
 def fmt_number(value: object, integer: bool = False) -> str:
     if value is None:
         return ""
@@ -138,24 +167,32 @@ def main() -> int:
             raise FileNotFoundError(path)
 
     csv_options = "header=true, auto_detect=true, sample_size=1000000, null_padding=true"
-    protest_relative = relative_year_column(
-        csv_columns(con, protest_csv, csv_options), protest_csv
+    main_columns = csv_columns(con, main_csv, csv_options)
+    protest_columns = csv_columns(con, protest_csv, csv_options)
+    politician_columns = csv_columns(con, politician_csv, csv_options)
+    main_province = first_existing_column(
+        main_columns, ("province", "prov"), main_csv, "province"
     )
+    protest_relative = relative_year_column(protest_columns, protest_csv)
     politician_relative = relative_year_column(
-        csv_columns(con, politician_csv, csv_options), politician_csv
+        politician_columns, politician_csv
     )
+    LOG.info("Main province column: %s", main_province)
     LOG.info("Protest relative-year column: %s", protest_relative)
     LOG.info("Politician relative-year column: %s", politician_relative)
     LOG.info("Building main descriptives from exact specification-4 e(sample)")
+    drop_relation(con, "desc_main")
     con.execute(f"""
         CREATE OR REPLACE VIEW desc_main AS
-        SELECT p.unique_small_grid_id, p.year, p.month, p.ac_uq_id, p.province,
+        SELECT p.unique_small_grid_id, p.year, p.month, p.ac_uq_id,
+               p."{main_province}" AS province,
                p."count" AS fires, p.downup_ac_pop, p.av_wind_speed,
                p.wind_direction, p.rice_prod_aclvl_ahigh
         FROM read_csv_auto('{sql_path(main_csv)}', {csv_options}) p
     """)
 
     LOG.info("Building protest descriptives from exact richest-DiD e(sample)")
+    drop_relation(con, "desc_protest")
     con.execute(f"""
         CREATE OR REPLACE VIEW desc_protest AS
         SELECT p.unique_small_grid_id, p.year, p.month, p.ac_uq_id, p.province,
@@ -169,6 +206,7 @@ def main() -> int:
     """)
 
     LOG.info("Building politician descriptives from exact richest-DiD e(sample)")
+    drop_relation(con, "desc_politician")
     con.execute(f"""
         CREATE OR REPLACE VIEW desc_politician AS
         SELECT p.unique_small_grid_id, p.year, p.month, p.ac_uq_id, p.province,
