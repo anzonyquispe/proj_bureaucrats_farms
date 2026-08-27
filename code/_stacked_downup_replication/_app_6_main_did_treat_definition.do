@@ -134,6 +134,9 @@ reghdfejl countk downup_ac_pop $controls, ///
     absorb(grid_id#cohort ac_id#monthyear#cohort) cluster(grid_id cluster_acmonth)
 assert e(N) == `common_n'
 gen byte esample = e(sample)
+assert esample == 1
+display as text "Mean-DV universe is the saved specification-4 e(sample): " ///
+    %12.0fc `common_n' " observations"
 
 {
 ********************************************************************************
