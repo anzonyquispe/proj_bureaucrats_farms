@@ -22,12 +22,14 @@ if not exist "%RSCRIPT%" set "RSCRIPT=Rscript"
     --families main ^
     --cases final_politician_fe03_baseline ^
     --honest ^
-    --honest-cores 5
+    --honest-cores 10
 if errorlevel 1 exit /b %errorlevel%
 
 for %%F in (
     "%REPO%\figures\_app_16_polischar_fe03_evst_main_rural_acpop_1_ori.png"
     "%REPO%\figures\_app_16_polischar_fe03_evst_main_rural_acpop_1_rotated.png"
+    "%REPO%\figures\_app_16_polischar_fe03_evst_main_rural_acpop_1_honest1.png"
+    "%REPO%\figures\_app_16_polischar_fe03_evst_main_rural_acpop_1_rot_honest1.png"
     "%REPO%\figures\_app_16_polischar_fe03_evst_main_rural_acpop_1_honest2.png"
     "%REPO%\figures\_app_16_polischar_fe03_evst_main_rural_acpop_1_rot_honest2.png"
 ) do (

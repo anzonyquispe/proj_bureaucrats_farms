@@ -69,10 +69,9 @@ RSTUDIO_CONFIG <- list(
   # HonestDiD is opt-in after selecting the preferred main specification.
   # Set TRUE in RStudio, or use -IncludeHonestDiD in the PowerShell runner.
   honest = FALSE,
-  # There are five values in the HonestDiD sensitivity grid, so more than five
-  # workers would remain idle. Override with --honest-cores or
-  # HONESTDID_CORES when needed.
-  honest_cores = 5L
+  # Both HonestDiD sensitivity analyses use ten grid values, allowing ten
+  # parallel workers. Override with --honest-cores or HONESTDID_CORES.
+  honest_cores = 10L
 )
 # -----------------------------------------------------------------------
 
@@ -174,7 +173,7 @@ parse_args <- function(args) {
   if (is.na(out$honest_cores) || out$honest_cores < 1L) {
     stop("--honest-cores must be a positive integer.", call. = FALSE)
   }
-  out$honest_cores <- min(out$honest_cores, 5L)
+  out$honest_cores <- min(out$honest_cores, 10L)
   out
 }
 
@@ -188,7 +187,8 @@ mean_test <- function(beta, vcov, indices) {
   )
 }
 
-save_honest <- function(beta, vcov, file_base, suffix, pre, post, m_max = 1) {
+save_honest <- function(beta, vcov, file_base, prefix, result_suffix,
+                        pre, post, m_max = 1) {
   original <- HonestDiD::constructOriginalCS(
     betahat = beta,
     sigma = vcov,
@@ -196,7 +196,35 @@ save_honest <- function(beta, vcov, file_base, suffix, pre, post, m_max = 1) {
     numPostPeriods = post
   )
   original$Mbar <- 0
-  sensitivity <- HonestDiD::createSensitivityResults(
+
+  # HonestDiD 1: relative-magnitudes restriction. The target parameter is the
+  # equally weighted average of every estimated post-treatment coefficient;
+  # the omitted event period is absent from beta and receives no weight.
+  relative_magnitudes <-
+    HonestDiD::createSensitivityResults_relativeMagnitudes(
+      betahat = beta,
+      sigma = vcov,
+      numPrePeriods = pre,
+      numPostPeriods = post,
+      Mbarvec = seq(0.05, m_max, length.out = 10L),
+      l_vec = rep(1 / post, post),
+      parallel = honest_parallel
+    )
+  relative_plot <-
+    HonestDiD::createSensitivityPlot_relativeMagnitudes(
+      relative_magnitudes, original
+    ) +
+    labs(y = "Effect on Fires (1,000 units)", title = "") +
+    theme_classic(base_size = 12) +
+    theme(legend.position = "none")
+  relative_path <- file.path(
+    figure_dir, paste0(file_base, prefix, "1", result_suffix, ".png")
+  )
+  ggsave(relative_path, plot = relative_plot, width = 8, height = 4, dpi = 300)
+  message("Generated: ", relative_path)
+
+  # HonestDiD 2: smoothness restriction, retained under the existing names.
+  smoothness <- HonestDiD::createSensitivityResults(
     betahat = beta,
     sigma = vcov,
     numPrePeriods = pre,
@@ -205,13 +233,17 @@ save_honest <- function(beta, vcov, file_base, suffix, pre, post, m_max = 1) {
     l_vec = rep(1 / post, post),
     parallel = honest_parallel
   )
-  plot <- HonestDiD::createSensitivityPlot(sensitivity, original) +
+  smoothness_plot <- HonestDiD::createSensitivityPlot(smoothness, original) +
     labs(y = "Effect on Fires (1,000 units)", title = "") +
     theme_classic(base_size = 12) +
     theme(legend.position = "none")
-  path <- file.path(figure_dir, paste0(file_base, suffix, ".png"))
-  ggsave(path, plot = plot, width = 8, height = 4, dpi = 300)
-  message("Generated: ", path)
+  smoothness_path <- file.path(
+    figure_dir, paste0(file_base, prefix, "2", result_suffix, ".png")
+  )
+  ggsave(
+    smoothness_path, plot = smoothness_plot, width = 8, height = 4, dpi = 300
+  )
+  message("Generated: ", smoothness_path)
 }
 
 plot_event <- function(event_data, file_base, num_pre, num_post,
@@ -386,12 +418,12 @@ plot_event <- function(event_data, file_base, num_pre, num_post,
   if (isTRUE(generate_honest)) {
     save_honest(
       event_data$beta, vcov, file_base,
-      paste0("_honest2", result_suffix), honest_pre, num_post
+      "_honest", result_suffix, honest_pre, num_post
     )
     rotated_beta <- full[time != omitted, rotated]
     save_honest(
       rotated_beta, rotated_vcov, file_base,
-      paste0("_rot_honest2", result_suffix), honest_pre, num_post
+      "_rot_honest", result_suffix, honest_pre, num_post
     )
   }
 }

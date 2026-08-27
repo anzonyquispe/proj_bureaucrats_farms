@@ -140,30 +140,70 @@ gen byte esample = e(sample)
 * Calculate Mean DV for each treatment definition
 ********************************************************************************
 
-* Project-standard treated-group pre-treatment means and AC count.
+* AC count and treatment-specific dependent-variable means. Every calculation
+* is restricted to the common specification-4 estimation sample.
 egen tag_ac = tag(ac_id) if esample == 1
 count if tag_ac == 1
 local numacs = r(N)
 capture drop moderator
 gen moderator = rice_prod_aclvl_ahigh
-quietly summarize countk if treat == 1 & relative_monthyear <= -1 & esample == 1
+
+* Canonical pre/post indicator for the downup_ac_pop reference mean.
+capture confirm variable post
+if _rc {
+    gen byte post = relative_monthyear >= 0 if !missing(relative_monthyear)
+}
+confirm numeric variable post
+assert inlist(post, 0, 1) if esample == 1
+assert post == (relative_monthyear >= 0) if !missing(relative_monthyear)
+
+* Canonical downup_ac_pop treatment: use the stack's treatment-group indicator
+* and its pre-period, exactly treat == 1 and post == 0.
+quietly count if treat == 1 & post == 0 & esample == 1
+assert r(N) > 0
+local meandv1_n = r(N)
+quietly summarize countk if treat == 1 & post == 0 & esample == 1
 local meandv1 = r(mean)
-quietly summarize countk if treat == 1 & relative_monthyear <= -1 & moderator == 1 & esample == 1
+quietly summarize countk if treat == 1 & post == 0 & moderator == 1 & esample == 1
 local meandv1_mod = r(mean)
 
-* Binary alternatives use their own ever-treated definition. The reported
-* outcome mean is among grids that are ever treated while treatment is zero.
-bysort unique_small_grid_id: egen byte ever_downup_ac = max(downup_ac)
+* Other dummy treatments define ever-treated separately as the grid-level
+* maximum. Report mean(Y) for ever-treated grids when that same treatment is 0.
+bysort grid_id: egen byte ever_downup_ac = max(downup_ac)
+quietly count if ever_downup_ac == 1 & downup_ac == 0 & esample == 1
+assert r(N) > 0
+local meandv2_n = r(N)
 quietly summarize countk if ever_downup_ac == 1 & downup_ac == 0 & esample == 1
 local meandv2 = r(mean)
 quietly summarize countk if ever_downup_ac == 1 & downup_ac == 0 & moderator == 1 & esample == 1
 local meandv2_mod = r(mean)
 
-bysort unique_small_grid_id: egen byte ever_downup_1sd_pop = max(downup_1sd_pop)
+bysort grid_id: egen byte ever_downup_1sd_pop = max(downup_1sd_pop)
+quietly count if ever_downup_1sd_pop == 1 & downup_1sd_pop == 0 & esample == 1
+assert r(N) > 0
+local meandv3_n = r(N)
 quietly summarize countk if ever_downup_1sd_pop == 1 & downup_1sd_pop == 0 & esample == 1
 local meandv3 = r(mean)
 quietly summarize countk if ever_downup_1sd_pop == 1 & downup_1sd_pop == 0 & moderator == 1 & esample == 1
 local meandv3_mod = r(mean)
+
+* Continuous treatments: there is no zero/one ever-treated classification, so
+* report the unconditional mean(Y) in the common estimation sample.
+quietly count if esample == 1
+local meandv_cont_n = r(N)
+quietly summarize countk if esample == 1
+local meandv_cont = r(mean)
+quietly summarize countk if moderator == 1 & esample == 1
+local meandv_cont_mod = r(mean)
+
+display as text "Mean-DV sample, Down>Up (Pop), treat=1 and post=0: " %12.0fc `meandv1_n'
+display as result "Mean DV, Down>Up (Pop): " %12.3f `meandv1'
+display as text "Mean-DV sample, Down>Up (Area) ever-treated at zero: " %12.0fc `meandv2_n'
+display as result "Mean DV, Down>Up (Area): " %12.3f `meandv2'
+display as text "Mean-DV sample, Down>Up by 1 SD ever-treated at zero: " %12.0fc `meandv3_n'
+display as result "Mean DV, Down>Up by 1 SD: " %12.3f `meandv3'
+display as text "Mean-DV sample, continuous definitions: " %12.0fc `meandv_cont_n'
+display as result "Mean DV, continuous definitions: " %12.3f `meandv_cont'
 }
 
 estadd local gridfe "Y"
@@ -201,8 +241,8 @@ reghdfejl countk down_percent_pop $controls if  esample == 1, ///
 assert e(N) == `common_n'
 estadd local gridfe "Y"
 estadd local acmonthfe "Y"
-estadd scalar ymean = `meandv1'
-estadd scalar ymean2 = `meandv1_mod'
+estadd scalar ymean = `meandv_cont'
+estadd scalar ymean2 = `meandv_cont_mod'
 estadd scalar acq = `numacs'
 est store eq4
 
@@ -212,8 +252,8 @@ reghdfejl countk downup_diff_percent_pop $controls if  esample == 1, ///
 assert e(N) == `common_n'
 estadd local gridfe "Y"
 estadd local acmonthfe "Y"
-estadd scalar ymean = `meandv1'
-estadd scalar ymean2 = `meandv1_mod'
+estadd scalar ymean = `meandv_cont'
+estadd scalar ymean2 = `meandv_cont_mod'
 estadd scalar acq = `numacs'
 est store eq5
 
@@ -224,8 +264,8 @@ reghdfejl countk down_percent $controls if  esample == 1, ///
 assert e(N) == `common_n'
 estadd local gridfe "Y"
 estadd local acmonthfe "Y"
-estadd scalar ymean = `meandv1'
-estadd scalar ymean2 = `meandv1_mod'
+estadd scalar ymean = `meandv_cont'
+estadd scalar ymean2 = `meandv_cont_mod'
 estadd scalar acq = `numacs'
 est store eq6
 

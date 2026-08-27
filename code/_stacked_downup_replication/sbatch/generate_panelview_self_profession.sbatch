@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
-# Regenerate only panelview_self_profession.png from the updated cluster master.
+# Regenerate the AC-level politician panel view from the election panel.
 
 #SBATCH --job-name=panelview_selfprof
 #SBATCH --cpus-per-task=1
-#SBATCH --mem=120G
-#SBATCH --time=12:00:00
+#SBATCH --mem=16G
+#SBATCH --time=01:00:00
 #SBATCH --output=/dev/null
 #SBATCH --error=/dev/null
 #$ -N panelview_selfprof
@@ -19,8 +19,7 @@ set -euo pipefail
 DATA_ROOT="${REPLICATION_ROOT:-/groups/sgulzar/sa_fires/proj_bureaucrats_farms}"
 REPO="${REPLICATION_REPO:-/users/aquisper/proj_bureaucrats_farms}"
 CODE="${REPLICATION_CODE:-${REPO}/code/_stacked_downup_replication}"
-PYTHON_ENV="${PYTHON_ENV:-/groups/sgulzar/india_forest_land/downup_geo}"
-PYTHON_BIN="${PYTHON_ENV}/bin/python"
+RSCRIPT_BIN="${RSCRIPT_BIN:-Rscript}"
 LOG_DIR="${CODE}/logs"
 LOG_FILE="${LOG_DIR}/panelview_self_profession.log"
 
@@ -28,21 +27,20 @@ mkdir -p "${LOG_DIR}" "${REPO}/figures"
 exec > >(tee "${LOG_FILE}") 2>&1
 
 echo "[$(date '+%F %T')] Regenerating panelview_self_profession.png"
-echo "Input: ${DATA_ROOT}/data_output/intermediate/0_master_dataset.parquet"
+echo "Input: ${DATA_ROOT}/data_output/intermediate/panel_data_election_year.dta"
+echo "Sampling: 10% of ACs independently within province; seed=20260826"
 
-if [[ ! -x "${PYTHON_BIN}" ]]; then
-  echo "ERROR: Python executable is missing: ${PYTHON_BIN}" >&2
+if command -v module >/dev/null 2>&1; then
+  module load R/4.4.0/gcc/11.5.0
+fi
+if ! command -v "${RSCRIPT_BIN}" >/dev/null 2>&1; then
+  echo "ERROR: Rscript is unavailable: ${RSCRIPT_BIN}" >&2
   exit 69
 fi
 
-export PATH="${PYTHON_ENV}/bin:${PATH}"
-export MPLBACKEND=Agg
-export OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1
-
-"${PYTHON_BIN}" "${CODE}/python/generate_descriptive_figures.py" \
-  --root "${DATA_ROOT}" \
-  --output-root "${REPO}" \
-  --only panelview
+"${RSCRIPT_BIN}" "${CODE}/generate_panelview_self_profession.R" \
+  "${DATA_ROOT}" "${REPO}"
 
 test -s "${REPO}/figures/panelview_self_profession.png"
+test -s "${REPO}/tables/panelview_self_profession_selected_acs.csv"
 echo "[$(date '+%F %T')] Completed: ${REPO}/figures/panelview_self_profession.png"

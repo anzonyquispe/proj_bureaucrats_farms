@@ -37,58 +37,29 @@ if (Select-String -LiteralPath $exportLog -Pattern '^r\([1-9][0-9]*\);\s*$' -Qui
     throw "Event-study export failed. Inspect $exportLog"
 }
 
-Write-Host "Stage 2/2: plotting event studies and HonestDiD with 10 total workers."
-$common = @(
+Write-Host "Stage 2/2: plotting event studies and both HonestDiD methods with 10 total workers."
+$arguments = @(
     $plotter, "--root", $DataRoot, "--output-root", $RepositoryRoot,
     "--sample", "none", "--suffix", "none", "--honest",
-    "--honest-cores", "5"
+    "--honest-cores", "10", "--families", "main,protest", "--cases",
+    "final_stacked_area_baseline,final_stacked_area_rice,final_stacked_population_baseline,final_stacked_population_rice,final_politician_fe03_baseline,final_politician_fe03_rice"
 )
 
-$jobs = @(
-    @{
-        Name = "downup";
-        Args = $common + @(
-            "--families", "main", "--cases",
-            "final_stacked_area_baseline,final_stacked_area_rice,final_stacked_population_baseline,final_stacked_population_rice"
-        )
-    },
-    @{
-        Name = "politician_protest";
-        Args = $common + @(
-            "--families", "main,protest", "--cases",
-            "final_politician_fe03_baseline,final_politician_fe03_rice"
-        )
-    }
-)
-
-$running = foreach ($job in $jobs) {
-    $stdout = Join-Path $logDir "local_event_honest_$($job.Name).stdout.log"
-    $stderr = Join-Path $logDir "local_event_honest_$($job.Name).stderr.log"
-    $process = Start-Process -FilePath $RscriptExecutable `
-        -ArgumentList $job.Args -WorkingDirectory $RepositoryRoot `
-        -WindowStyle Hidden -PassThru -RedirectStandardOutput $stdout `
-        -RedirectStandardError $stderr
-    [pscustomobject]@{ Name=$job.Name; Process=$process; Stdout=$stdout; Stderr=$stderr }
+$stdout = Join-Path $logDir "local_event_honest_main.stdout.log"
+$stderr = Join-Path $logDir "local_event_honest_main.stderr.log"
+$finalLog = Join-Path $logDir "local_event_honest_main.log"
+$process = Start-Process -FilePath $RscriptExecutable `
+    -ArgumentList $arguments -WorkingDirectory $RepositoryRoot `
+    -WindowStyle Hidden -PassThru -Wait -RedirectStandardOutput $stdout `
+    -RedirectStandardError $stderr
+$content = @()
+if (Test-Path $stdout) { $content += Get-Content $stdout }
+if (Test-Path $stderr) { $content += Get-Content $stderr }
+Set-Content -LiteralPath $finalLog -Value $content
+Remove-Item $stdout,$stderr -Force -ErrorAction SilentlyContinue
+if (-not (Select-String -LiteralPath $finalLog `
+        -Pattern '^All requested event-study and HonestDiD plots completed\.$' -Quiet)) {
+    throw "Event-study/HonestDiD plotting failed. Inspect $finalLog"
 }
-
-$failures = @()
-foreach ($job in $running) {
-    $job.Process.WaitForExit()
-    $job.Process.Refresh()
-    $content = @()
-    if (Test-Path $job.Stdout) { $content += Get-Content $job.Stdout }
-    if (Test-Path $job.Stderr) { $content += Get-Content $job.Stderr }
-    $finalLog = Join-Path $logDir "local_event_honest_$($job.Name).log"
-    Set-Content -LiteralPath $finalLog -Value $content
-    Remove-Item $job.Stdout,$job.Stderr -Force -ErrorAction SilentlyContinue
-    if (-not (Select-String -LiteralPath $finalLog `
-            -Pattern '^All requested event-study and HonestDiD plots completed\.$' -Quiet)) {
-        $failures += "$($job.Name): $finalLog"
-    }
-}
-
-if ($failures.Count) {
-    throw "Event-study/HonestDiD plotting failed:`n$($failures -join "`n")"
-}
-Write-Host "Completed all main event-study, rotated, and HonestDiD figures."
+Write-Host "Completed all main event-study, rotated, HonestDiD relative-magnitudes, and HonestDiD smoothness figures."
 Write-Host "Outputs: $(Join-Path $RepositoryRoot 'figures')"

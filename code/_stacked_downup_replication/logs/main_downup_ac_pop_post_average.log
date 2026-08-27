@@ -1,0 +1,139 @@
+-------------------------------------------------------------------------------
+      name:  postavg
+       log:  C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/co
+> de/_stacked_downup_replication/logs/main_downup_ac_pop_post_average.log
+  log type:  text
+ opened on:  26 Aug 2026, 22:44:57
+
+. 
+. adopath ++ "`code'"
+  [1]              "C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_f
+> arms/code/_stacked_downup_replication"
+  [2]  (BASE)      "C:\Program Files\Stata18\ado\base/"
+  [3]  (SITE)      "C:\Program Files\Stata18\ado\site/"
+  [4]              "."
+  [5]  (PERSONAL)  "C:\Users\eunic\ado\personal/"
+  [6]  (PLUS)      "C:\Users\eunic\ado\plus/"
+  [7]  (OLDPLACE)  "c:\ado/"
+
+. estimates clear
+
+. estread using "`tables'/stacked_event_study_pop_5pre_rural.ster"
+
+-------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+-----------------------------------------------------------------
+      evreg1 | reghdfejl    countk         25  HDFE linear regression with
+             |                                 Julia
+      evreg2 | reghdfejl    countk         49  HDFE linear regression with
+             |                                 Julia
+-------------------------------------------------------------------------------
+
+. estimates restore evreg1
+(results evreg1 are active now)
+
+. 
+. display as text "Main downup_ac_pop event study: evreg1"
+Main downup_ac_pop event study: evreg1
+
+. display as text "Omitted event period: 0"
+Omitted event period: 0
+
+. display as text "Six post-treatment periods: +1 through +6"
+Six post-treatment periods: +1 through +6
+
+. 
+. tempname output
+
+. file open `output' using ///
+>     "`tables'/main_downup_ac_pop_post_coefficients.csv", ///
+>     write text replace
+
+. file write `output' "relative_period,coefficient,se,pvalue,ci95_lower,ci95_up
+> per" _n
+
+. 
+. foreach period of numlist -5/-1 1/6 {
+  2.     local category = `period' + 6
+  3.     local term "`category'.relative_year_bin_aux#1.treat"
+  4.     quietly lincom _b[`term']
+  5.     display as result ///
+>         "EVENT `period': b=" %12.6f r(estimate) ///
+>         "  SE=" %12.6f r(se) ///
+>         "  p=" %9.6f r(p) ///
+>         "  95% CI=[" %12.6f r(lb) ", " %12.6f r(ub) "]"
+  6.     file write `output' ///
+>         "`period'," %18.10f (r(estimate)) "," %18.10f (r(se)) "," ///
+>         %18.10f (r(p)) "," %18.10f (r(lb)) "," %18.10f (r(ub)) _n
+  7. }
+EVENT -5: b=    6.632889  SE=    3.062719  p= 0.030335  95% CI=[    0.630063,  
+>   12.635716]
+EVENT -4: b=    1.578413  SE=    2.574392  p= 0.539797  95% CI=[   -3.467308,  
+>    6.624134]
+EVENT -3: b=   -0.478219  SE=    2.976757  p= 0.872368  95% CI=[   -6.312563,  
+>    5.356125]
+EVENT -2: b=    3.967534  SE=    2.812789  p= 0.158382  95% CI=[   -1.545438,  
+>    9.480507]
+EVENT -1: b=   -0.297139  SE=    2.801774  p= 0.915540  95% CI=[   -5.788521,  
+>    5.194244]
+EVENT 1: b=    4.026594  SE=    4.195120  p= 0.337142  95% CI=[   -4.195702,   
+>  12.248890]
+EVENT 2: b=   -2.854159  SE=    3.339007  p= 0.392666  95% CI=[   -9.398501,   
+>   3.690184]
+EVENT 3: b=  -15.739375  SE=    2.912522  p= 0.000000  95% CI=[  -21.447822,   
+> -10.030929]
+EVENT 4: b=  -18.850084  SE=    3.212201  p= 0.000000  95% CI=[  -25.145891,   
+> -12.554276]
+EVENT 5: b=  -22.263875  SE=    3.877434  p= 0.000000  95% CI=[  -29.863517,   
+> -14.664234]
+EVENT 6: b=   -6.173599  SE=    4.936784  p= 0.211106  95% CI=[  -15.849530,   
+>   3.502332]
+
+. 
+. lincom ( ///
+>     _b[7.relative_year_bin_aux#1.treat]  + ///
+>     _b[8.relative_year_bin_aux#1.treat]  + ///
+>     _b[9.relative_year_bin_aux#1.treat]  + ///
+>     _b[10.relative_year_bin_aux#1.treat] + ///
+>     _b[11.relative_year_bin_aux#1.treat] + ///
+>     _b[12.relative_year_bin_aux#1.treat] ///
+>     ) / 6
+
+ ( 1)  .1666667*7.relative_year_bin_aux#1.treat +
+       .1666667*8.relative_year_bin_aux#1.treat +
+       .1666667*9.relative_year_bin_aux#1.treat +
+       .1666667*10.relative_year_bin_aux#1.treat +
+       .1666667*11.relative_year_bin_aux#1.treat +
+       .1666667*12.relative_year_bin_aux#1.treat = 0
+
+------------------------------------------------------------------------------
+      countk | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+         (1) |  -10.30908   2.490637    -4.14   0.000    -15.19065   -5.427517
+------------------------------------------------------------------------------
+
+. 
+. display as result ///
+>     "AVERAGE POST (+1 to +6): b=" %12.6f r(estimate) ///
+>     "  SE=" %12.6f r(se) ///
+>     "  p=" %9.6f r(p) ///
+>     "  95% CI=[" %12.6f r(lb) ", " %12.6f r(ub) "]"
+AVERAGE POST (+1 to +6): b=  -10.309083  SE=    2.490637  p= 0.000035  95% CI=[
+>   -15.190649,    -5.427517]
+
+. 
+. file write `output' ///
+>     "average_1_to_6," %18.10f (r(estimate)) "," %18.10f (r(se)) "," ///
+>     %18.10f (r(p)) "," %18.10f (r(lb)) "," %18.10f (r(ub)) _n
+
+. file close `output'
+
+. 
+. log close postavg
+      name:  postavg
+       log:  C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/co
+> de/_stacked_downup_replication/logs/main_downup_ac_pop_post_average.log
+  log type:  text
+ closed on:  26 Aug 2026, 22:44:57
+-------------------------------------------------------------------------------

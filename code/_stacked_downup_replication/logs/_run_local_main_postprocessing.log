@@ -1,3 +1,121 @@
+
+  ___  ____  ____  ____  ____ ®
+ /__    /   ____/   /   ____/      18.0
+___/   /   /___/   /   /___/       MP—Parallel Edition
+
+ Statistics and Data Science       Copyright 1985-2023 StataCorp LLC
+                                   StataCorp
+                                   4905 Lakeway Drive
+                                   College Station, Texas 77845 USA
+                                   800-STATA-PC        https://www.stata.com
+                                   979-696-4600        stata@stata.com
+
+Stata license: Single-user 4-core  perpetual
+Serial number: 501806366048
+  Licensed to: Any Name
+               Any Name
+
+Notes:
+      1. Stata is running in batch mode.
+      2. Unicode is supported; see help unicode_advice.
+      3. More than 2 billion observations are allowed; see help obs_advice.
+      4. Maximum number of variables is set to 5,000 but can be increased;
+          see help set_maxvar.
+
+. do C:\Users\eunic\OneDrive\Documents\GitHub\proj_bureaucrats_farms\code\_stac
+> ked_downup_replication\_run_local_main_postprocessing.do 
+
+. *****************************************************************************
+> ***
+. * Environment-driven local post-processing bridge.
+. * FARMS_LOCAL_STAGE must be export, tables, or interactions. The launcher run
+> s the
+. * export first, then runs tables and interaction figures in parallel with the
+. * four R event-study/HonestDiD processes.
+. *****************************************************************************
+> ***
+. 
+. version 17
+
+. clear all
+
+. set more off
+
+. 
+. local repo        : environment FARMS_LOCAL_REPO
+
+. local data_root   : environment FARMS_LOCAL_DATA_ROOT
+
+. local sample      : environment FARMS_LOCAL_SAMPLE
+
+. local suffix      : environment FARMS_LOCAL_SUFFIX
+
+. local stage       : environment FARMS_LOCAL_STAGE
+
+. 
+. if "`repo'" == "" {
+.     display as error "FARMS_LOCAL_REPO is required."
+.     exit 198
+. }
+
+. if "`data_root'" == "" local data_root "`repo'"
+
+. if "`sample'" == "none" local sample ""
+
+. if "`suffix'" == "none" local suffix ""
+
+. if !inlist("`stage'", "export", "tables", "interactions") {
+.     display as error "FARMS_LOCAL_STAGE must be export, tables, or interactio
+> ns."
+.     exit 198
+. }
+
+. 
+. global location "dbox"
+
+. global root "`data_root'"
+
+. global repo "`repo'"
+
+. global code "${repo}/code/_stacked_downup_replication"
+
+. global tables "${repo}/tables"
+
+. global figures "${repo}/figures"
+
+. global sample "`sample'"
+
+. global ster_suffix "`suffix'"
+
+. global is_rural_var "is_rural"
+
+. global fe_list "1"
+
+. global production_only "1"
+
+. 
+. capture mkdir "${tables}"
+
+. capture mkdir "${figures}"
+
+. capture mkdir "${code}/logs"
+
+. adopath ++ "${code}"
+  [1]              "C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_f
+> arms/code/_stacked_downup_replication"
+  [2]  (BASE)      "C:\Program Files\Stata18\ado\base/"
+  [3]  (SITE)      "C:\Program Files\Stata18\ado\site/"
+  [4]              "."
+  [5]  (PERSONAL)  "C:\Users\eunic\ado\personal/"
+  [6]  (PLUS)      "C:\Users\eunic\ado\plus/"
+  [7]  (OLDPLACE)  "c:\ado/"
+
+. 
+. capture log close _all
+
+. log using "${code}/logs/local_main_`stage'${sample}${ster_suffix}.stata.log",
+>  ///
+>     replace text name(mainpost)
 -------------------------------------------------------------------------------
       name:  mainpost
        log:  C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/co
@@ -3494,3 +3612,6 @@ LOCAL MAIN POST-PROCESSING STAGE COMPLETED: export
   log type:  text
  closed on:  27 Aug 2026, 07:28:55
 -------------------------------------------------------------------------------
+
+. 
+end of do-file

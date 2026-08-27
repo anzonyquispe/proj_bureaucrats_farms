@@ -146,13 +146,14 @@ global cluster unique_small_grid_id#cohort district_id#cohort#monthyear
 ********************************************************************************
 * Anchor every column and every footer statistic to the final specification.
 *
-* Run the most restrictive grid x cohort + AC x month-year x cohort regression
-* first.  AC x month-year cells are finer than district x month-year cells and
-* therefore determine the singleton-safe common sample for every column.
+* Run displayed specification 4 first and use its e(sample) for every column
+* and every footer statistic.  This guarantees that N, the number of ACs, the
+* number of districts, and the outcome means all describe exactly the sample
+* used by the final table specification.
 ********************************************************************************
 
 quietly reghdfejl countk downup_dummy downup_ac_pop downup_interaction $controls, ///
-    absorb(grid_id#cohort assembly_id#monthyear#cohort) ///
+    absorb(grid_id#cohort district_id#monthyear#cohort) ///
     cluster($cluster)
 gen byte common_sample = e(sample)
 quietly count if common_sample
@@ -164,15 +165,16 @@ drop common_sample
 isid unique_small_grid_id monthyear cohort
 export delimited using ///
     "${int_farms}/bureau_polisc_downup_ac_pop_esample${sample}.csv", replace
-display as result "Exported bureaucrat-politician specification-4 sample: `common_n' rows"
+display as result "Exported bureaucrat-politician displayed-specification-4 sample: `common_n' rows"
 
-* All table statistics are now calculated on the anchored estimation sample.
-egen tag_assembly = tag(assembly_id)
-quietly count if tag_assembly == 1
+* Count the original identifiers—not encoded working copies—on the anchored
+* estimation sample used by the table.
+egen tag_assembly = tag(ac_uq_id)
+quietly count if tag_assembly == 1 & !missing(ac_uq_id)
 local numacs = r(N)
 
-egen tag_district = tag(district_id)
-quietly count if tag_district == 1
+egen tag_district = tag(distr_id)
+quietly count if tag_district == 1 & !missing(distr_id)
 local numdist = r(N)
 
 quietly summarize countk if treat == 1 & relative_monthyear <= -1

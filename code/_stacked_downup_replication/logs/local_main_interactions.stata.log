@@ -3,7 +3,7 @@
        log:  C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/co
 > de/_stacked_downup_replication/logs/local_main_interactions.stata.log
   log type:  text
- opened on:  25 Aug 2026, 12:34:33
+ opened on:  26 Aug 2026, 18:22:32
 
 . 
 . display as text "Local stage: `stage'"
@@ -281,5 +281,5 @@ LOCAL MAIN POST-PROCESSING STAGE COMPLETED: interactions
        log:  C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/co
 > de/_stacked_downup_replication/logs/local_main_interactions.stata.log
   log type:  text
- closed on:  25 Aug 2026, 12:36:58
+ closed on:  26 Aug 2026, 18:23:03
 -------------------------------------------------------------------------------

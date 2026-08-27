@@ -750,17 +750,17 @@ est clear
 estread using "${tables}/_app_6_main_did_treat_definition${sample}_rural_acpop${ster_suffix}.ster"
 _strip_zeros_stats, models(eq1 eq2 eq3 eq4 eq5 eq6 eq7) stats(ymean)
 
-esttab eq1 eq2 eq3 eq6 eq5 eq7 using ///
+* Exclude eq2: the downup_ac area treatment is no longer reported here.
+esttab eq1 eq3 eq6 eq5 eq7 using ///
     "${tables}/_app_6_main_did_treat_definition${sample}_rural_acpop${ster_suffix}.tex", ///
     replace cells(b(fmt(4) star) se(par fmt(4))) ///
     star(* 0.10 ** 0.05 *** 0.01) ///
     rename(1.downup_ac_pop downup_ac_pop) ///
-    keep(downup_ac_pop downup_ac downup_1sd_pop down_percent ///
+    keep(downup_ac_pop downup_1sd_pop down_percent ///
          downup_diff_percent_pop 1.downup_ac_pop#1.rice_prod_aclvl_ahigh) ///
-    order(downup_ac_pop downup_ac downup_1sd_pop down_percent ///
+    order(downup_ac_pop downup_1sd_pop down_percent ///
           downup_diff_percent_pop 1.downup_ac_pop#1.rice_prod_aclvl_ahigh) ///
     varlabels(downup_ac_pop "Down\$>\$Up (Pop)" ///
-              downup_ac "Down\$>\$Up (Area)" ///
               downup_1sd_pop "Down\$>\$Up by 1std" ///
               down_percent "Downwind over total Population" ///
               downup_diff_percent_pop "Down-Up Percent" ///
@@ -772,10 +772,10 @@ esttab eq1 eq2 eq3 eq6 eq5 eq7 using ///
                  "Assembly \$\times\$ Month-Year \$\times\$ Cohort FE" ///
                  "Mean DV")) ///
     nomtitles nonumbers collabels(none) nobaselevels ///
-    prehead("\begin{tabular}{lcccccc}" ///
-            "\hline" ///
-            "& (1) & (2) & (3) & (4) & (5) & (6)\\" ///
-            "& \multicolumn{6}{c}{Number of Fires (in 1,000 units) }\\" ///
+    prehead("\begin{tabular}{lccccc}" ///
+             "\hline" ///
+             "& (1) & (2) & (3) & (4) & (5)\\" ///
+             "& \multicolumn{5}{c}{Number of Fires (in 1,000 units) }\\" ///
             "\hline") ///
     posthead("") prefoot("\hline") ///
     postfoot("\hline" "\end{tabular}")
