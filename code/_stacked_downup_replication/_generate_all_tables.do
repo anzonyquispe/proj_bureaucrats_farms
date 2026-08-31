@@ -42,6 +42,8 @@ if "$root" == "" {
 }
 
 global tables "${code}/../../tables"
+global presentation_tables "${tables}/presentations"
+capture mkdir "${presentation_tables}"
 
 ********************************************************************************
 * Helper: strip trailing zeros from one or more e()-stored stats.
@@ -303,10 +305,10 @@ else {
 {
 est clear
 estread using "${tables}/_main_4_protest_5km_fe12_did_downup${sample}_rural_acpop${ster_suffix}.ster"
-_strip_zeros_stats, models(evreg1 evreg2 evreg3 evreg4 evreg5 evreg6) stats(ymean ymean2)
+_strip_zeros_stats, models(evreg1 evreg2 evreg3 evreg4 evreg5 evreg6 evreg7 evreg8) stats(ymean ymean2)
 
 
-forval i = 4(1)6 {
+forval i = 5/8 {
     est restore evreg`i'
 
     lincom 1.downup_ac_pop
@@ -335,7 +337,7 @@ forval i = 4(1)6 {
 *---------------------------------------------------------------
 * Panel A: estimated coefficients
 *---------------------------------------------------------------
-esttab evreg1 evreg2 evreg3 evreg4 evreg5 evreg6 ///
+esttab evreg1 evreg2 evreg3 evreg4 evreg5 evreg6 evreg7 evreg8 ///
     using "${tables}/_main_4_protest_5km_fe12_did_downup${sample}_rural_acpop_new${ster_suffix}.tex", ///
     replace fragment ///
     cells(b(fmt(3) star) se(par fmt(3))) ///
@@ -358,20 +360,21 @@ esttab evreg1 evreg2 evreg3 evreg4 evreg5 evreg6 ///
     nomtitles nonumbers collabels(none) nobaselevels noobs ///
     prehead("{" ///
             "\def\sym#1{\ifmmode^{#1}\else\(^{#1}\)\fi}" ///
-            "\begin{tabular}{l*{6}{c}}" ///
+            "\begin{tabular}{l*{8}{c}}" ///
             "\hline" ///
-            "            &\multicolumn{1}{c}{(1)}         &\multicolumn{1}{c}{(2)}         &\multicolumn{1}{c}{(3)}         &\multicolumn{1}{c}{(4)}         &\multicolumn{1}{c}{(5)}         &\multicolumn{1}{c}{(6)}         \\" ///
-            "            & \multicolumn{6}{c}{Number of Fires (per 1,000 units)} \\ \hline") ///
-    posthead("\multicolumn{7}{l}{\textbf{Panel A: Estimated Coefficients}} \\ \hline") ///
+            "            & \multicolumn{8}{c}{Number of Fires (per 1,000 units)} \\" ///
+            "            & \multicolumn{4}{c}{Without Downwind Interaction} & \multicolumn{4}{c}{With Downwind Interaction} \\" ///
+            "            & (1) & (2) & (3) & (4) & (5) & (6) & (7) & (8) \\ \hline") ///
+    posthead("\multicolumn{9}{l}{\textbf{Panel A: Estimated Coefficients}} \\ \hline") ///
     prefoot("") postfoot("")
 
 *---------------------------------------------------------------
 * Panel B: linear combinations
 *---------------------------------------------------------------
 * The row label spans the label column plus model column (1). Therefore the
-* five cells below must correspond to model columns (2)--(6); evreg2 and
-* evreg3 are blank, and the lincoms stored in evreg4--evreg6 land correctly.
-esttab evreg2 evreg3 evreg4 evreg5 evreg6 ///
+* Seven cells correspond to columns (2)--(8); evreg2--evreg4 are blank,
+* and the lincoms stored in evreg5--evreg8 land in columns (5)--(8).
+esttab evreg2 evreg3 evreg4 evreg5 evreg6 evreg7 evreg8 ///
     using "${tables}/_main_4_protest_5km_fe12_did_downup${sample}_rural_acpop_new${ster_suffix}.tex", ///
     append fragment ///
     cells(none) ///
@@ -384,21 +387,21 @@ esttab evreg2 evreg3 evreg4 evreg5 evreg6 ///
     nomtitles nonumbers collabels(none) nobaselevels noobs ///
     prehead("") posthead("") ///
     prefoot("\hline" ///
-            "\multicolumn{7}{l}{\textbf{Panel B: Linear Combinations}} \\ \hline") ///
+            "\multicolumn{9}{l}{\textbf{Panel B: Linear Combinations}} \\ \hline") ///
     postfoot("")
 
 *---------------------------------------------------------------
 * Footer: sample info and fixed effects
 *---------------------------------------------------------------
-esttab evreg1 evreg2 evreg3 evreg4 evreg5 evreg6 ///
+esttab evreg1 evreg2 evreg3 evreg4 evreg5 evreg6 evreg7 evreg8 ///
     using "${tables}/_main_4_protest_5km_fe12_did_downup${sample}_rural_acpop_new${ster_suffix}.tex", ///
     append fragment ///
     cells(none) ///
-    stats(N acq gridfe time electionfe provtrendfe ymean_clean ymean2_clean, ///
-          fmt(%12.0fc %12.0fc %s %s %s %s %s %s) ///
+    stats(N acq gridfe time provtrendfe ymean_clean ymean2_clean, ///
+          fmt(%12.0fc %12.0fc %s %s %s %s %s) ///
           labels("Observations" "N Assembly Constituencies" ///
                  "Grid \$\times\$ Cohort FE" "Relative Time \$\times\$ Cohort FE" ///
-                 "Legislature \$\times\$ Cohort FE" "Province Trend \$\times\$ Cohort FE" ///
+                 "Province Trend \$\times\$ Cohort FE" ///
                  "Mean DV" "Mean DV2 (Down\$>\$Up=1)")) ///
     nomtitles nonumbers collabels(none) nobaselevels noobs ///
     prehead("") posthead("") ///
@@ -415,9 +418,9 @@ display "Generated: _main_4_protest_5km_fe12_did_downup_rural_acpop_new.tex"
 {
 est clear
 estread using "${tables}/_main_5_polischar_fe12_did_downup_inter${sample}_rural_acpop${ster_suffix}.ster"
-_strip_zeros_stats, models(evreg1 evreg2 evreg3 evreg4 evreg5 evreg6) stats(ymean ymean2)
+_strip_zeros_stats, models(evreg1 evreg2 evreg3 evreg4 evreg5 evreg6 evreg7 evreg8) stats(ymean ymean2)
 
-forval i = 4/6 {
+forval i = 5/8 {
     est restore evreg`i'
 
     lincom 1.downup_ac_pop
@@ -445,7 +448,7 @@ forval i = 4/6 {
 *---------------------------------------------------------------
 * Panel A: estimated coefficients
 *---------------------------------------------------------------
-esttab evreg1 evreg2 evreg3 evreg4 evreg5 evreg6 ///
+esttab evreg1 evreg2 evreg3 evreg4 evreg5 evreg6 evreg7 evreg8 ///
     using "${tables}/_main_5_polischar_fe12_did_downup_inter${sample}_rural_acpop${ster_suffix}.tex", ///
     replace fragment ///
     cells(b(fmt(3) star) se(par fmt(3))) ///
@@ -468,11 +471,12 @@ esttab evreg1 evreg2 evreg3 evreg4 evreg5 evreg6 ///
     nomtitles nonumbers collabels(none) nobaselevels noobs ///
     prehead("{" ///
             "\def\sym#1{\ifmmode^{#1}\else\(^{#1}\)\fi}" ///
-            "\begin{tabular}{l*{6}{c}}" ///
+            "\begin{tabular}{l*{8}{c}}" ///
             "\hline" ///
-            "            &\multicolumn{1}{c}{(1)}         &\multicolumn{1}{c}{(2)}         &\multicolumn{1}{c}{(3)}         &\multicolumn{1}{c}{(4)}         &\multicolumn{1}{c}{(5)}         &\multicolumn{1}{c}{(6)}         \\" ///
-            "            & \multicolumn{6}{c}{Number of Fires (in 1,000 units)} \\ \hline") ///
-    posthead("\multicolumn{7}{l}{\textbf{Panel A: Estimated Coefficients}} \\ \hline") ///
+            "            & \multicolumn{8}{c}{Number of Fires (in 1,000 units)} \\" ///
+            "            & \multicolumn{4}{c}{Without Downwind Interaction} & \multicolumn{4}{c}{With Downwind Interaction} \\" ///
+            "            & (1) & (2) & (3) & (4) & (5) & (6) & (7) & (8) \\ \hline") ///
+    posthead("\multicolumn{9}{l}{\textbf{Panel A: Estimated Coefficients}} \\ \hline") ///
     prefoot("") postfoot("")
 
 *---------------------------------------------------------------
@@ -481,7 +485,7 @@ esttab evreg1 evreg2 evreg3 evreg4 evreg5 evreg6 ///
 * The row label spans the label column plus model column (1). Therefore the
 * five cells below must correspond to model columns (2)--(6); evreg2 and
 * evreg3 are blank, and the lincoms stored in evreg4--evreg6 land correctly.
-esttab evreg2 evreg3 evreg4 evreg5 evreg6 ///
+esttab evreg2 evreg3 evreg4 evreg5 evreg6 evreg7 evreg8 ///
     using "${tables}/_main_5_polischar_fe12_did_downup_inter${sample}_rural_acpop${ster_suffix}.tex", ///
     append fragment ///
     cells(none) ///
@@ -494,21 +498,21 @@ esttab evreg2 evreg3 evreg4 evreg5 evreg6 ///
     nomtitles nonumbers collabels(none) nobaselevels noobs ///
     prehead("") posthead("") ///
     prefoot("\hline" ///
-            "\multicolumn{7}{l}{\textbf{Panel B: Linear Combinations}} \\ \hline") ///
+            "\multicolumn{9}{l}{\textbf{Panel B: Linear Combinations}} \\ \hline") ///
     postfoot("")
 
 *---------------------------------------------------------------
 * Footer: sample info and fixed effects
 *---------------------------------------------------------------
-esttab evreg1 evreg2 evreg3 evreg4 evreg5 evreg6 ///
+esttab evreg1 evreg2 evreg3 evreg4 evreg5 evreg6 evreg7 evreg8 ///
     using "${tables}/_main_5_polischar_fe12_did_downup_inter${sample}_rural_acpop${ster_suffix}.tex", ///
     append fragment ///
     cells(none) ///
-    stats(N acq gridfe time electionfe provtrendfe ymean_clean ymean2_clean, ///
-          fmt(%12.0fc %12.0fc %s %s %s %s %s %s) ///
+    stats(N acq gridfe time provtrendfe ymean_clean ymean2_clean, ///
+          fmt(%12.0fc %12.0fc %s %s %s %s %s) ///
           labels("Observations" "N Assembly Constituencies" ///
                  "Grid \$\times\$ Cohort FE" "Relative Time \$\times\$ Cohort FE" ///
-                 "Legislature \$\times\$ Cohort FE" "Province Trend \$\times\$ Cohort FE" ///
+                 "Province Trend \$\times\$ Cohort FE" ///
                  "Mean DV" "Mean DV2 (Down\$>\$Up=1)")) ///
     nomtitles nonumbers collabels(none) nobaselevels noobs ///
     prehead("") posthead("") ///
@@ -618,94 +622,93 @@ esttab eq1 eq2 eq3 eq4 ///
 display "Generated: _app_9_main_did_by_state_rural_acpop.tex"
 
 ********************************************************************************
-* 8. Rice Moderators (_app_10_did_rice_moderators)
+* 8. Presentation rice-production heterogeneity tables
+* Each table begins with a no-FE baseline. A10 then uses its monthly
+* downwind FE sequence; A13/A14 use the annual cohort FE sequence.
 ********************************************************************************
-if "$production_only" != "1" {
+
+* A10: Downwind exposure x high rice production
 est clear
-capture noisily estread using "${tables}/_app_10_did_rice_moderators_rural_stacked${ster_suffix}.ster"
-_strip_zeros_stats, models(eq1 eq2 eq3) stats(ymean ymean2 ymean3)
-
-capture noisily esttab eq1 eq2 eq3 ///
-    using "${tables}/_app_10_did_rice_moderators${sample}_rural_acpop${ster_suffix}.tex", ///
-    replace ///
-    cells(b(fmt(3) star) se(par fmt(3))) ///
+estread using "${tables}/_app_10_did_rice_moderators${sample}_rural_acpop${ster_suffix}.ster"
+_strip_zeros_stats, models(eq1 eq2 eq3 eq4 eq5 eq6 eq7 eq8) stats(ymean ymean2)
+esttab eq1 eq2 eq3 eq4 eq5 eq6 eq7 eq8 using ///
+    "${presentation_tables}/_app_10_did_rice_moderators_rural${sample}${ster_suffix}.tex", ///
+    replace cells(b(fmt(3) star) se(par fmt(3))) ///
     star(* 0.10 ** 0.05 *** 0.01) ///
-    keep(1.downup_ac_pop ///
-         1.downup_ac_pop#1.rice_area_aclvl_ahigh ///
-         1.downup_ac_pop#1.rice_harvarea_aclvl_ahigh ///
-         1.downup_ac_pop#1.rice_prod_aclvl_ahigh) ///
-    order(1.downup_ac_pop ///
-          1.downup_ac_pop#1.rice_area_aclvl_ahigh ///
-          1.downup_ac_pop#1.rice_harvarea_aclvl_ahigh ///
-          1.downup_ac_pop#1.rice_prod_aclvl_ahigh) ///
-    varlabels(1.downup_ac_pop "Down\$>\$up AC (Pop)" ///
-              1.downup_ac_pop#1.rice_area_aclvl_ahigh "Down\$>\$up AC (Pop) \$\times\$ Above Median Rice Area" ///
-              1.downup_ac_pop#1.rice_harvarea_aclvl_ahigh "Down\$>\$up AC (Pop) \$\times\$ Above Median Harvested Rice Area" ///
-              1.downup_ac_pop#1.rice_prod_aclvl_ahigh "Down\$>\$up AC (Pop) \$\times\$ Above Median Rice Production") ///
-    stats(N acq gridfe acmonthfe ymean_clean ymean2_clean ymean3_clean, ///
-          fmt(%12.0fc %12.0fc %s %s %s %s %s) ///
-          labels("Observations" "N Assembly Constituencies" "Grid FE" ///
-                 "AC \$\times\$ Month-Year FE" "Mean DV" "Mean DV2" "Mean DV3")) ///
-    nomtitles nonumbers ///
-    collabels(none) ///
-    nobaselevels ///
-    prehead("\begin{tabular}{lccc}" ///
-            "      \hline" ///
-            "       & \multicolumn{3}{c}{Number of Fires (in 1,000 units) - Rural Grids}\\" ///
-            "                                                              & (1)            & (2)            & (3)\\\\  " ///
-            "      \midrule") ///
-    posthead("") ///
-    prefoot("\hline") ///
-    postfoot("\hline" "\end{tabular}")
+    keep(1.downup_ac_pop 1.downup_ac_pop#1.rice_prod_aclvl_ahigh) ///
+    order(1.downup_ac_pop 1.downup_ac_pop#1.rice_prod_aclvl_ahigh) ///
+    varlabels(1.downup_ac_pop "Down\$>\$Up" ///
+        1.downup_ac_pop#1.rice_prod_aclvl_ahigh ///
+        "Down\$>\$Up \$\times\$ High Rice Production") ///
+    stats(N acq gridfe time actimefe ymean_clean ymean2_clean, ///
+        fmt(%12.0fc %12.0fc %s %s %s %s %s) ///
+        labels("Observations" "N Assembly Constituencies" ///
+        "Grid \$\times\$ Cohort FE" "Relative Month \$\times\$ Cohort FE" ///
+        "AC \$\times\$ Relative Month \$\times\$ Cohort FE" "Mean DV" ///
+        "Mean DV, High Rice Production")) ///
+    nomtitles nonumbers collabels(none) nobaselevels ///
+    prehead("{\def\sym#1{\ifmmode^{#1}\else\(^{#1}\)\fi}" ///
+        "\begin{tabular}{l*{8}{c}}" "\hline" ///
+        " & \multicolumn{8}{c}{Number of Fires (in 1,000 units)} \\" ///
+        " & \multicolumn{4}{c}{Without Rice Interaction} & \multicolumn{4}{c}{With Rice Interaction} \\" ///
+        " & (1) & (2) & (3) & (4) & (5) & (6) & (7) & (8) \\ \hline") ///
+    posthead("") prefoot("\hline") postfoot("\hline" "\end{tabular}" "}")
 
-display "Generated: _app_10_did_rice_moderators_rural_acpop.tex"
-}
-
-********************************************************************************
-* 9. Politician Rice Mods (_app_14_polischar_fe12_did_ricemods)
-********************************************************************************
-if "$production_only" != "1" {
+* A13: Protest x high rice production
 est clear
-capture noisily estread using "${tables}/_app_14_polischar_fe12_did_ricemods${sample}_rural_stacked${ster_suffix}.ster"
-_strip_zeros_stats, models(evreg1 evreg2 evreg3 evreg4) stats(ymean ymean2 ymean3)
-
-capture noisily esttab evreg1 evreg2 evreg3 evreg4 ///
-    using "${tables}/_app_14_polischar_fe12_did_ricemods${sample}_rural_acpop${ster_suffix}.tex", ///
-    replace ///
-    cells(b(fmt(3) star) se(par fmt(3))) ///
+estread using "${tables}/_app_13_protest_5km_fe12_did_ricemods${sample}_rural_acpop${ster_suffix}.ster"
+_strip_zeros_stats, models(eq1 eq2 eq3 eq4 eq5 eq6 eq7 eq8) stats(ymean ymean2)
+esttab eq1 eq2 eq3 eq4 eq5 eq6 eq7 eq8 using ///
+    "${presentation_tables}/_app_13_protest_5km_fe12_did_ricemods_rural${sample}${ster_suffix}.tex", ///
+    replace cells(b(fmt(3) star) se(par fmt(3))) ///
     star(* 0.10 ** 0.05 *** 0.01) ///
-    keep(1.post_#1.treat ///
-         1.post_#1.treat#1.rice_area_aclvl_ahigh ///
-         1.post_#1.treat#1.rice_harvarea_aclvl_ahigh ///
-         1.post_#1.treat#1.rice_prod_aclvl_ahigh) ///
-    order(1.post_#1.treat ///
-          1.post_#1.treat#1.rice_area_aclvl_ahigh ///
-          1.post_#1.treat#1.rice_harvarea_aclvl_ahigh ///
-          1.post_#1.treat#1.rice_prod_aclvl_ahigh) ///
+    keep(1.post_#1.treat 1.post_#1.treat#1.rice_prod_aclvl_ahigh) ///
+    order(1.post_#1.treat 1.post_#1.treat#1.rice_prod_aclvl_ahigh) ///
+    varlabels(1.post_#1.treat "Post \$\times\$ Protest" ///
+        1.post_#1.treat#1.rice_prod_aclvl_ahigh ///
+        "Post \$\times\$ Protest \$\times\$ High Rice Production") ///
+    stats(N acq gridfe time provtrendfe ymean_clean ymean2_clean, ///
+        fmt(%12.0fc %12.0fc %s %s %s %s %s) ///
+        labels("Observations" "N Assembly Constituencies" ///
+        "Grid \$\times\$ Cohort FE" "Relative Time \$\times\$ Cohort FE" ///
+        "Province Trend \$\times\$ Cohort FE" "Mean DV" ///
+        "Mean DV, High Rice Production")) ///
+    nomtitles nonumbers collabels(none) nobaselevels ///
+    prehead("{\def\sym#1{\ifmmode^{#1}\else\(^{#1}\)\fi}" ///
+        "\begin{tabular}{l*{8}{c}}" "\hline" ///
+        " & \multicolumn{8}{c}{Number of Fires (in 1,000 units)} \\" ///
+        " & \multicolumn{4}{c}{Without Rice Interaction} & \multicolumn{4}{c}{With Rice Interaction} \\" ///
+        " & (1) & (2) & (3) & (4) & (5) & (6) & (7) & (8) \\ \hline") ///
+    posthead("") prefoot("\hline") postfoot("\hline" "\end{tabular}" "}")
+
+* A14: Agricultural politician x high rice production
+est clear
+estread using "${tables}/_app_14_polischar_fe12_did_ricemods${sample}_rural_acpop${ster_suffix}.ster"
+_strip_zeros_stats, models(eq1 eq2 eq3 eq4 eq5 eq6 eq7 eq8) stats(ymean ymean2)
+esttab eq1 eq2 eq3 eq4 eq5 eq6 eq7 eq8 using ///
+    "${presentation_tables}/_app_14_polischar_fe12_did_ricemods_rural${sample}${ster_suffix}.tex", ///
+    replace cells(b(fmt(3) star) se(par fmt(3))) ///
+    star(* 0.10 ** 0.05 *** 0.01) ///
+    keep(1.post_#1.treat 1.post_#1.treat#1.rice_prod_aclvl_ahigh) ///
+    order(1.post_#1.treat 1.post_#1.treat#1.rice_prod_aclvl_ahigh) ///
     varlabels(1.post_#1.treat "Post \$\times\$ Agriculturalist" ///
-              1.post_#1.treat#1.rice_area_aclvl_ahigh "Post \$\times\$ Agriculturalist \$\times\$ Rice Areas" ///
-              1.post_#1.treat#1.rice_harvarea_aclvl_ahigh "Post \$\times\$ Agriculturalist \$\times\$ Harvested Rice Area" ///
-              1.post_#1.treat#1.rice_prod_aclvl_ahigh "Post \$\times\$ Agriculturalist \$\times\$ Rice Production") ///
-    stats(N acq gridfe time electionfe provtrendfe ymean_clean ymean2_clean ymean3_clean, ///
-          fmt(%12.0fc %12.0fc %s %s %s %s %s %s %s) ///
-          labels("Observations" "N Assembly Constituencies" ///
-                 "Grid  \$\times\$ Cohort FE" "Relative Time FE" "Legislature  \$\times\$ Cohort FE" "Province  \$\times\$ Cohort Trend FE" ///
-                 "Mean DV" "Mean DV2" "Mean DV3")) ///
-    nomtitles nonumbers ///
-    collabels(none) ///
-    nobaselevels ///
-    prehead("{" ///
-            "\def\sym#1{\ifmmode^{#1}\else\(^{#1}\)\fi}" ///
-            "\begin{tabular}{l*{4}{c}}" ///
-            "\hline" ///
-            "            &\multicolumn{1}{c}{(1)}         &\multicolumn{1}{c}{(2)}         &\multicolumn{1}{c}{(3)} &\multicolumn{1}{c}{(4)}         \\" ///
-            "            & \multicolumn{4}{c}{Number of Fires (in 1,000 units)} \\ \hline") ///
-    posthead("") ///
-    prefoot("\hline") ///
-    postfoot("\hline" "\end{tabular}" "}")
+        1.post_#1.treat#1.rice_prod_aclvl_ahigh ///
+        "Post \$\times\$ Agriculturalist \$\times\$ High Rice Production") ///
+    stats(N acq gridfe time provtrendfe ymean_clean ymean2_clean, ///
+        fmt(%12.0fc %12.0fc %s %s %s %s %s) ///
+        labels("Observations" "N Assembly Constituencies" ///
+        "Grid \$\times\$ Cohort FE" "Relative Time \$\times\$ Cohort FE" ///
+        "Province Trend \$\times\$ Cohort FE" "Mean DV" ///
+        "Mean DV, High Rice Production")) ///
+    nomtitles nonumbers collabels(none) nobaselevels ///
+    prehead("{\def\sym#1{\ifmmode^{#1}\else\(^{#1}\)\fi}" ///
+        "\begin{tabular}{l*{8}{c}}" "\hline" ///
+        " & \multicolumn{8}{c}{Number of Fires (in 1,000 units)} \\" ///
+        " & \multicolumn{4}{c}{Without Rice Interaction} & \multicolumn{4}{c}{With Rice Interaction} \\" ///
+        " & (1) & (2) & (3) & (4) & (5) & (6) & (7) & (8) \\ \hline") ///
+    posthead("") prefoot("\hline") postfoot("\hline" "\end{tabular}" "}")
 
-display "Generated: _app_14_polischar_fe12_did_ricemods_rural_acpop.tex"
-}
+display "Generated three updated presentation rice-production tables."
 
 ********************************************************************************
 * 10. Politician FE DiD (_app_15_polischar_fe12_did)

@@ -1,6 +1,6 @@
 ********************************************************************************
-* Politician-characteristics DiD: three regular specifications followed by
-* the same three specifications interacted with downup_ac_pop.
+* Politician-characteristics DiD: four regular specifications followed by
+* the same four specifications interacted with downup_ac_pop.
 * Final input and FE follow politician_byprov_fe_sweep.
 ********************************************************************************
 
@@ -11,7 +11,7 @@ if "$root" == "" {
     global location     "shell"
     global sample       ""
     global is_rural_var "is_rural"
-    global fe_list      "1/3"
+    global fe_list      "0/3"
     global ster_suffix  "_acpop"
     global shell "/groups/sgulzar/sa_fires/proj_bureaucrats_farms"
     global dbox  "/Users/anzony.quisperojas/Library/CloudStorage/Dropbox/sa_fires/proj_bureaucrats_farms"
@@ -68,12 +68,20 @@ egen ac_elec_yr = group(ac_uq_id election_year cohort_id)
 quietly summarize relative_year_bin
 local rmin = r(min)
 gen int relative_year_bin_aux = relative_year_bin - `rmin' + 1
+egen relativeyear_cohort = group(relative_year_bin cohort_id)
 gen post_ = relative_year_bin >= 0
 gen moderator = 0
+gen byte nofe = 1
 
-local fe1 "unique_small_grid_id_cohort relative_year_bin_aux#cohort_id"
-local fe2 "unique_small_grid_id_cohort relative_year_bin_aux#cohort_id province_cohort#election_year"
-local fe3 "unique_small_grid_id_cohort relative_year_bin_aux#cohort_id province_cohort#election_year province_cohort#c.monthyear"
+* Presentation/main-table FE progression:
+*   (0) no FE (constant-only absorbed category)
+*   (1) grid x cohort
+*   (2) grid x cohort + relative year x cohort
+*   (3) grid x cohort + relative year x cohort + province x cohort trend
+local fe0 "nofe"
+local fe1 "unique_small_grid_id_cohort"
+local fe2 "unique_small_grid_id_cohort relativeyear_cohort"
+local fe3 "unique_small_grid_id_cohort relativeyear_cohort province_cohort#c.monthyear"
 local moderators_list moderator ${downup_var}
 
 * Anchor every regular and interacted model to the sample retained by the
@@ -121,11 +129,12 @@ foreach mod of local moderators_list {
         estadd scalar acq = `numacs'
         estadd local smpl "Rural"
         estadd local fespec "`fe`fe''"
-        estadd local gridfe "Y"
-        estadd local time "Y"
-        local election_label = cond(`fe' >= 2, "Y", "N")
+        local grid_label = cond(`fe' == 0, "N", "Y")
+        estadd local gridfe "`grid_label'"
+        local time_label = cond(`fe' >= 2, "Y", "N")
         local provtrend_label = cond(`fe' == 3, "Y", "N")
-        estadd local electionfe "`election_label'"
+        estadd local time "`time_label'"
+        estadd local electionfe "N"
         estadd local provtrendfe "`provtrend_label'"
         estadd local mod "`mod'"
         local estname evreg`i'
@@ -134,7 +143,7 @@ foreach mod of local moderators_list {
     }
 }
 
-estwrite evreg1 evreg2 evreg3 evreg4 evreg5 evreg6 using ///
+estwrite evreg1 evreg2 evreg3 evreg4 evreg5 evreg6 evreg7 evreg8 using ///
     "${tables}/_main_5_polischar_fe12_did_downup_inter${sample}_rural${ster_suffix}.ster", replace
 
 ********************************************************************************

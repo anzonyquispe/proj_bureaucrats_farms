@@ -3,7 +3,7 @@
        log:  C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/co
 > de/_stacked_downup_replication/logs/local_main_interactions.stata.log
   log type:  text
- opened on:  26 Aug 2026, 18:22:32
+ opened on:  27 Aug 2026, 12:18:02
 
 . 
 . display as text "Local stage: `stage'"
@@ -63,6 +63,11 @@ Output suffix:
 .         global code "$code_shell"
 .     }
 . }
+
+. 
+. * Direct local runs generate only the two production population-weighted
+. * figures. Set production_only=0 explicitly to request historical area plots.
+. if "$production_only" == "" global production_only "1"
 
 . 
 . global tables  "${code}/../../tables"
@@ -175,91 +180,34 @@ Exported: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/code/
 > ample}${ster_suffix}_1.png"
 
 . 
-. * Area-weighted counterparts retained under their historical names.
-. est clear
-
-. interaction_graph using ///
->     "${tables}/_app_18_protest_5km_fe12_did_downup_plot${sample}_rural${ster_
-> suffix}.ster", ///
->     estimates(1) ///
->     output("${figures}/Interaction_downwind/_app_downup_rel_protest${sample}$
-> {ster_suffix}") ///
->     type(protest) modvar(downup_ac)
-
--------------------------------------------------------------------------------
-             |           Dependent  Number of        
-        Name | Command    variable     param.  Title 
--------------+-----------------------------------------------------------------
-      evreg1 | reghdfejl    countk          9  HDFE linear regression with
-             |                                 Julia
--------------------------------------------------------------------------------
-(results evreg1 are active now)
-
-INTERACTION AUDIT (CONTROL-PRE STANDARDIZED): protest, estimate evreg1, moderat
-> or downup_ac
-Control pre  : b =     0.000000   95% CI [    0.000000,     0.000000]   90% CI 
-> [    0.000000,     0.000000]
-Control post : b =    -1.285161   95% CI [   -6.272143,     3.701822]   90% CI 
-> [   -5.469649,     2.899328]
-Treated post : b =    80.531854   95% CI [    4.421219,   156.642489]   90% CI 
-> [   16.668774,   144.394934]
-Difference   : b =    81.817015   SE =    39.334895   95% CI [    4.665546,   1
-> 58.968483]   90% CI [   17.080590,   146.553439]   p =  0.037678
-file
-    C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/code/_sta
-    > cked_downup_replication/../../figures/Interaction_downwind/_app_downup_
-    > rel_protest_1.png saved as PNG format
-Exported: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/code/
-> _stacked_downup_replication/../../figures/Interaction_downwind/_app_downup_re
-> l_protest_1.png
-
-. copy "${figures}/Interaction_downwind/_app_downup_rel_protest${sample}${ster_
-> suffix}_1.png" ///
->      "${figures}/Interaction_downwind/_app_downup_rel_protest${sample}${ster_
-> suffix}.png", replace
-
-. 
-. est clear
-
-. interaction_graph using ///
->     "${tables}/_app_19_polischar_fe12_did_downup_inter_plot${sample}_rural${s
+. * Area-weighted historical figures are excluded from the production pass.
+. if "$production_only" != "1" {
+.     est clear
+.     interaction_graph using ///
+>         "${tables}/_app_18_protest_5km_fe12_did_downup_plot${sample}_rural${s
 > ter_suffix}.ster", ///
->     estimates(1) ///
->     output("${figures}/Interaction_downwind/_app_downup_rel_polischar${sample
-> }${ster_suffix}") ///
->     type(politician) modvar(downup_ac)
-
--------------------------------------------------------------------------------
-             |           Dependent  Number of        
-        Name | Command    variable     param.  Title 
--------------+-----------------------------------------------------------------
-      evreg1 | reghdfejl    countk          9  HDFE linear regression with
-             |                                 Julia
--------------------------------------------------------------------------------
-(results evreg1 are active now)
-
-INTERACTION AUDIT (CONTROL-PRE STANDARDIZED): politician, estimate evreg1, mode
-> rator downup_ac
-Control pre  : b =     0.000000   95% CI [    0.000000,     0.000000]   90% CI 
-> [    0.000000,     0.000000]
-Control post : b =    -0.907364   95% CI [  -11.943260,    10.128532]   90% CI 
-> [  -10.167774,     8.353046]
-Treated post : b =    10.192064   95% CI [   -7.689526,    28.073653]   90% CI 
-> [   -4.812686,    25.196814]
-Difference   : b =    11.099428   SE =     6.681548   95% CI [   -2.003430,    
-> 24.202285]   90% CI [    0.104594,    22.094261]   p =  0.096816
-file
-    C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/code/_sta
-    > cked_downup_replication/../../figures/Interaction_downwind/_app_downup_
-    > rel_polischar_1.png saved as PNG format
-Exported: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/code/
-> _stacked_downup_replication/../../figures/Interaction_downwind/_app_downup_re
-> l_polischar_1.png
-
-. copy "${figures}/Interaction_downwind/_app_downup_rel_polischar${sample}${ste
-> r_suffix}_1.png" ///
->      "${figures}/Interaction_downwind/_app_downup_rel_polischar${sample}${ste
-> r_suffix}.png", replace
+>         estimates(1) ///
+>         output("${figures}/Interaction_downwind/_app_downup_rel_protest${samp
+> le}${ster_suffix}") ///
+>         type(protest) modvar(downup_ac)
+.     copy "${figures}/Interaction_downwind/_app_downup_rel_protest${sample}${s
+> ter_suffix}_1.png" ///
+>          "${figures}/Interaction_downwind/_app_downup_rel_protest${sample}${s
+> ter_suffix}.png", replace
+. 
+.     est clear
+.     interaction_graph using ///
+>         "${tables}/_app_19_polischar_fe12_did_downup_inter_plot${sample}_rura
+> l${ster_suffix}.ster", ///
+>         estimates(1) ///
+>         output("${figures}/Interaction_downwind/_app_downup_rel_polischar${sa
+> mple}${ster_suffix}") ///
+>         type(politician) modvar(downup_ac)
+.     copy "${figures}/Interaction_downwind/_app_downup_rel_polischar${sample}$
+> {ster_suffix}_1.png" ///
+>          "${figures}/Interaction_downwind/_app_downup_rel_polischar${sample}$
+> {ster_suffix}.png", replace
+. }
 
 . 
 . display as result "Generated protest and politician interaction figures in ${
@@ -281,5 +229,5 @@ LOCAL MAIN POST-PROCESSING STAGE COMPLETED: interactions
        log:  C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/co
 > de/_stacked_downup_replication/logs/local_main_interactions.stata.log
   log type:  text
- closed on:  26 Aug 2026, 18:23:03
+ closed on:  27 Aug 2026, 12:18:29
 -------------------------------------------------------------------------------

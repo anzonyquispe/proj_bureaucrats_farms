@@ -1,5 +1,5 @@
 ********************************************************************************
-* Protest DiD: three regular specifications followed by the same three
+* Protest DiD: four regular specifications followed by the same four
 * specifications interacted with downup_ac_pop.
 ********************************************************************************
 
@@ -10,7 +10,7 @@ if "$root" == "" {
     global location     "shell"
     global sample       ""
     global is_rural_var "is_rural"
-    global fe_list      "1/3"
+    global fe_list      "0/3"
     global ster_suffix  "_acpop"
     global shell "/groups/sgulzar/sa_fires/proj_bureaucrats_farms"
     global dbox  "/Users/anzony.quisperojas/Library/CloudStorage/Dropbox/sa_fires/proj_bureaucrats_farms"
@@ -105,10 +105,17 @@ drop unit_tag has_pre has_post
 
 gen post_ = relative_year_bin >= 0
 gen moderator = 0
+gen byte nofe = 1
 
+* Presentation/main-table FE progression:
+*   (0) no FE (constant-only absorbed category)
+*   (1) grid x cohort
+*   (2) grid x cohort + relative year x cohort
+*   (3) grid x cohort + relative year x cohort + province x cohort trend
+local fe0 "nofe"
 local fe1 "unique_small_grid_id_cohort"
-local fe2 "unique_small_grid_id_cohort province_cohort#election_year"
-local fe3 "unique_small_grid_id_cohort province_cohort#election_year province_cohort#c.monthyear"
+local fe2 "unique_small_grid_id_cohort relativeyear_cohort"
+local fe3 "unique_small_grid_id_cohort relativeyear_cohort province_cohort#c.monthyear"
 local moderators_list moderator ${downup_var}
 
 * Anchor every regular and interacted model to the sample retained by the
@@ -117,7 +124,7 @@ local common_rhs "ib0.post_##ib0.treat##ib0.${downup_var} wind_direction av_wind
 do "${code}/_apply_analysis_subsample.do"
 
 quietly reghdfejl countk `common_rhs', ///
-    absorb(`fe3' relativeyear_cohort) vce(cluster ac_area_tr)
+    absorb(`fe3') vce(cluster ac_area_tr)
 gen byte common_sample = e(sample)
 quietly count
 local candidate_n = r(N)
@@ -148,7 +155,7 @@ foreach mod of local moderators_list {
     local ymean2 = r(mean)
     foreach fe of numlist $fe_list {
         reghdfejl countk `rhs', ///
-            absorb(`fe`fe'' relativeyear_cohort) vce(cluster ac_area_tr)
+            absorb(`fe`fe'') vce(cluster ac_area_tr)
         if e(N) != `common_n' {
             display as error "FE specification `fe' with moderator `mod' changed the anchored sample."
             exit 459
@@ -157,12 +164,13 @@ foreach mod of local moderators_list {
         estadd scalar ymean2 = `ymean2'
         estadd scalar acq = `numacs'
         estadd local smpl "Rural"
-        estadd local fespec "`fe`fe'' relativeyear_cohort"
-        estadd local gridfe "Y"
-        estadd local time "Y"
-        local election_label = cond(`fe' >= 2, "Y", "N")
+        estadd local fespec "`fe`fe''"
+        local grid_label = cond(`fe' == 0, "N", "Y")
+        estadd local gridfe "`grid_label'"
+        local time_label = cond(`fe' >= 2, "Y", "N")
         local provtrend_label = cond(`fe' == 3, "Y", "N")
-        estadd local electionfe "`election_label'"
+        estadd local time "`time_label'"
+        estadd local electionfe "N"
         estadd local provtrendfe "`provtrend_label'"
         estadd local mod "`mod'"
         local estname evreg`i'
@@ -171,7 +179,7 @@ foreach mod of local moderators_list {
     }
 }
 
-estwrite evreg1 evreg2 evreg3 evreg4 evreg5 evreg6 using ///
+estwrite evreg1 evreg2 evreg3 evreg4 evreg5 evreg6 evreg7 evreg8 using ///
     "${tables}/_main_4_protest_5km_fe12_did_downup${sample}_rural${ster_suffix}.ster", replace
 
 ********************************************************************************

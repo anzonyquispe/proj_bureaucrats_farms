@@ -27,6 +27,10 @@ if "$root" == "" {
     }
 }
 
+* Direct local runs generate only the two production population-weighted
+* figures. Set production_only=0 explicitly to request historical area plots.
+if "$production_only" == "" global production_only "1"
+
 global tables  "${code}/../../tables"
 global figures "${code}/../../figures"
 capture mkdir "${figures}/Interaction_downwind"
@@ -53,23 +57,25 @@ copy "${figures}/_app_19_polischar_fe12_did_downup_inter_plot_rural_acpop${sampl
      "${figures}/_app_19_polischar_fe12_did_downup_inter_plot_rural_acpop${sample}${ster_suffix}.png", replace
 erase "${figures}/_app_19_polischar_fe12_did_downup_inter_plot_rural_acpop${sample}${ster_suffix}_1.png"
 
-* Area-weighted counterparts retained under their historical names.
-est clear
-interaction_graph using ///
-    "${tables}/_app_18_protest_5km_fe12_did_downup_plot${sample}_rural${ster_suffix}.ster", ///
-    estimates(1) ///
-    output("${figures}/Interaction_downwind/_app_downup_rel_protest${sample}${ster_suffix}") ///
-    type(protest) modvar(downup_ac)
-copy "${figures}/Interaction_downwind/_app_downup_rel_protest${sample}${ster_suffix}_1.png" ///
-     "${figures}/Interaction_downwind/_app_downup_rel_protest${sample}${ster_suffix}.png", replace
+* Area-weighted historical figures are excluded from the production pass.
+if "$production_only" != "1" {
+    est clear
+    interaction_graph using ///
+        "${tables}/_app_18_protest_5km_fe12_did_downup_plot${sample}_rural${ster_suffix}.ster", ///
+        estimates(1) ///
+        output("${figures}/Interaction_downwind/_app_downup_rel_protest${sample}${ster_suffix}") ///
+        type(protest) modvar(downup_ac)
+    copy "${figures}/Interaction_downwind/_app_downup_rel_protest${sample}${ster_suffix}_1.png" ///
+         "${figures}/Interaction_downwind/_app_downup_rel_protest${sample}${ster_suffix}.png", replace
 
-est clear
-interaction_graph using ///
-    "${tables}/_app_19_polischar_fe12_did_downup_inter_plot${sample}_rural${ster_suffix}.ster", ///
-    estimates(1) ///
-    output("${figures}/Interaction_downwind/_app_downup_rel_polischar${sample}${ster_suffix}") ///
-    type(politician) modvar(downup_ac)
-copy "${figures}/Interaction_downwind/_app_downup_rel_polischar${sample}${ster_suffix}_1.png" ///
-     "${figures}/Interaction_downwind/_app_downup_rel_polischar${sample}${ster_suffix}.png", replace
+    est clear
+    interaction_graph using ///
+        "${tables}/_app_19_polischar_fe12_did_downup_inter_plot${sample}_rural${ster_suffix}.ster", ///
+        estimates(1) ///
+        output("${figures}/Interaction_downwind/_app_downup_rel_polischar${sample}${ster_suffix}") ///
+        type(politician) modvar(downup_ac)
+    copy "${figures}/Interaction_downwind/_app_downup_rel_polischar${sample}${ster_suffix}_1.png" ///
+         "${figures}/Interaction_downwind/_app_downup_rel_polischar${sample}${ster_suffix}.png", replace
+}
 
 display as result "Generated protest and politician interaction figures in ${figures}"
