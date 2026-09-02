@@ -1,0 +1,22 @@
+{\def\sym#1{\ifmmode^{#1}\else\(^{#1}\)\fi}
+\begin{tabular}{l*{8}{c}}
+\hline
+ & \multicolumn{8}{c}{Number of Fires (in 1,000 units)} \\
+ & \multicolumn{4}{c}{Without Rice Interaction} & \multicolumn{4}{c}{With Rice Interaction} \\
+ & (1) & (2) & (3) & (4) & (5) & (6) & (7) & (8) \\ \hline
+
+Down$>$Up   &       3.027         &      45.927\sym{***}&     -37.125\sym{***}&      -5.435\sym{***}&       7.960\sym{***}&       3.607\sym{**} &     -70.226\sym{***}&      -4.427\sym{**} \\
+            &     (2.168)         &     (2.230)         &     (2.397)         &     (1.644)         &     (1.384)         &     (1.547)         &     (2.861)         &     (1.755)         \\
+Down$>$Up $\times$ High Rice Production&                     &                     &                     &                     &     -26.050\sym{***}&      86.870\sym{***}&      69.341\sym{***}&      -2.071         \\
+            &                     &                     &                     &                     &     (4.417)         &     (4.520)         &     (4.448)         &     (3.327)         \\
+\hline
+Observations&  36,758,771         &  36,758,771         &  36,758,771         &  36,758,771         &  36,758,771         &  36,758,771         &  36,758,771         &  36,758,771         \\
+N Assembly Constituencies&         797         &         797         &         797         &         797         &         797         &         797         &         797         &         797         \\
+Grid $\times$ Cohort FE&           N         &           Y         &           Y         &           Y         &           N         &           Y         &           Y         &           Y         \\
+Relative Month $\times$ Cohort FE&           N         &           N         &           Y         &           N         &           N         &           N         &           Y         &           N         \\
+AC $\times$ Relative Month $\times$ Cohort FE&           N         &           N         &           N         &           Y         &           N         &           N         &           N         &           Y         \\
+Mean DV     &                     &                     &                     &                     &                     &                     &                     &                     \\
+Mean DV, High Rice Production&                     &                     &                     &                     &                     &                     &                     &                     \\
+\hline
+\end{tabular}
+}

@@ -1,0 +1,22 @@
+{\def\sym#1{\ifmmode^{#1}\else\(^{#1}\)\fi}
+\begin{tabular}{l*{8}{c}}
+\hline
+ & \multicolumn{8}{c}{Number of Fires (in 1,000 units)} \\
+ & \multicolumn{4}{c}{Without Rice Interaction} & \multicolumn{4}{c}{With Rice Interaction} \\
+ & (1) & (2) & (3) & (4) & (5) & (6) & (7) & (8) \\ \hline
+
+Post $\times$ Protest&      52.218\sym{***}&     164.771\sym{***}&     154.679\sym{***}&     104.440\sym{***}&       5.875         &      10.830\sym{*}  &      -3.261         &     -11.675\sym{*}  \\
+            &    (20.133)         &    (18.923)         &    (18.421)         &    (19.550)         &     (6.689)         &     (6.016)         &     (6.359)         &     (6.559)         \\
+Post $\times$ Protest $\times$ High Rice Production&                     &                     &                     &                     &      85.843\sym{***}&     181.665\sym{***}&     187.068\sym{***}&     147.307\sym{***}\\
+            &                     &                     &                     &                     &    (27.785)         &    (24.990)         &    (24.750)         &    (25.772)         \\
+\hline
+Observations&  63,240,134         &  63,240,134         &  63,240,134         &  63,240,134         &  63,240,134         &  63,240,134         &  63,240,134         &  63,240,134         \\
+N Assembly Constituencies&         808         &         808         &         808         &         808         &         808         &         808         &         808         &         808         \\
+Grid $\times$ Cohort FE&           N         &           Y         &           Y         &           Y         &           N         &           Y         &           Y         &           Y         \\
+Relative Time $\times$ Cohort FE&           N         &           N         &           Y         &           Y         &           N         &           N         &           Y         &           Y         \\
+Province Trend $\times$ Cohort FE&           N         &           N         &           N         &           Y         &           N         &           N         &           N         &           Y         \\
+Mean DV     &     473.109         &     473.109         &     473.109         &     473.109         &     473.109         &     473.109         &     473.109         &     473.109         \\
+Mean DV, High Rice Production&                     &                     &                     &                     &     592.523         &     592.523         &     592.523         &     592.523         \\
+\hline
+\end{tabular}
+}
