@@ -5,9 +5,11 @@
 * Window and omitted period match the main population event study: -5 to +6,
 * with relative month 0 omitted.
 *
-* IMPORTANT: the main AC x month-year x cohort FE cannot be used here because
-* it absorbs this calendar-month outcome exactly. We retain grid x cohort FE,
-* the production sample restrictions, weather controls, and clustering.
+* We estimate two specifications to demonstrate the identifying issue:
+*   FE1: grid x cohort.
+*   FE2: grid x cohort + relative month x cohort.
+* FE2 should absorb this deterministic calendar-month outcome within each
+* cohort-relative-month cell, leaving no meaningful treatment interaction.
 ********************************************************************************
 
 if "$root" == "" {
@@ -19,7 +21,7 @@ if "$root" == "" {
     global location     "shell"
     global sample       ""
     global is_rural_var "is_rural"
-    global fe_list      "1"
+    global fe_list      "1/2"
     global ster_suffix  ""
 
     global shell "/groups/sgulzar/sa_fires/proj_bureaucrats_farms"
@@ -81,6 +83,7 @@ gen byte moderator = 0
 local moderators_list moderator
 local dep_var fire_season_start
 local fe1 "unique_small_grid_id#cohort"
+local fe2 "unique_small_grid_id#cohort relative_year_bin_aux#cohort"
 
 do "${code}/_apply_analysis_subsample.do"
 

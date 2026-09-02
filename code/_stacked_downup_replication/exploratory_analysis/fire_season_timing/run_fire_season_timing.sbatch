@@ -17,5 +17,5 @@ mkdir -p "${LOG_DIR}"
 
 exec bash "${CODE}/sbatch/run_dofile.sbatch" \
   exploratory_analysis/fire_season_timing/fire_season_start_event_study.do \
-  "${DATA_ROOT}" "${CODE}" shell "${SAMPLE_ARG}" is_rural 1 none \
+  "${DATA_ROOT}" "${CODE}" shell "${SAMPLE_ARG}" is_rural 1/2 none \
   downup_ac_pop none none all "${ANALYSIS_SUBSAMPLE}"
