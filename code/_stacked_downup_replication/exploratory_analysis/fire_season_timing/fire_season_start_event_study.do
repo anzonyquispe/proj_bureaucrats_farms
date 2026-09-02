@@ -5,11 +5,11 @@
 * Window and omitted period match the main population event study: -5 to +6,
 * with relative month 0 omitted.
 *
-* We estimate two specifications to demonstrate the identifying issue:
-*   FE1: grid x cohort.
-*   FE2: grid x cohort + relative month x cohort.
-* FE2 should absorb this deterministic calendar-month outcome within each
-* cohort-relative-month cell, leaving no meaningful treatment interaction.
+* We estimate two specifications, both retaining the main event-study FE:
+*   FE1: grid x cohort + AC x month-year x cohort.
+*   FE2: FE1 + relative month x cohort.
+* Both should absorb this deterministic calendar-month outcome, leaving no
+* meaningful treatment interaction.
 ********************************************************************************
 
 if "$root" == "" {
@@ -82,8 +82,8 @@ isid unique_small_grid_id monthyear cohort treat
 gen byte moderator = 0
 local moderators_list moderator
 local dep_var fire_season_start
-local fe1 "unique_small_grid_id#cohort"
-local fe2 "unique_small_grid_id#cohort relative_year_bin_aux#cohort"
+local fe1 "unique_small_grid_id#cohort ac_uq_id#monthyear#cohort"
+local fe2 "unique_small_grid_id#cohort ac_uq_id#monthyear#cohort relative_year_bin_aux#cohort"
 
 do "${code}/_apply_analysis_subsample.do"
 
