@@ -85,6 +85,70 @@ extract_event <- function(model_name, specification_label) {
   event
 }
 
+# Exact equivalent of Stata's
+#   lincom k.relative_year_bin_aux + k.relative_year_bin_aux#1.treat
+# including the covariance between the two estimated coefficients.
+extract_treated_path <- function(model_name, specification_label) {
+  model <- saved[reg == model_name]
+  if (nrow(model) == 0L) stop("Missing model in saved results: ", model_name)
+
+  main_rows <- grep(
+    "^[0-9]+[a-z]*[.]relative_year_bin_aux$",
+    model$var
+  )
+  interaction_rows <- grep(
+    "relative_year_bin_aux#1[.]treat$",
+    model$var
+  )
+  main_levels <- as.integer(sub("[^0-9].*$", "", model$var[main_rows]))
+  interaction_levels <- as.integer(
+    sub("[^0-9].*$", "", model$var[interaction_rows])
+  )
+  levels <- sort(intersect(main_levels, interaction_levels))
+  if (length(levels) != 11L) {
+    stop(
+      "Expected 11 estimable treated-path periods for ", model_name,
+      "; found ", length(levels)
+    )
+  }
+
+  event <- rbindlist(lapply(levels, function(level) {
+    main_row <- main_rows[match(level, main_levels)]
+    interaction_row <- interaction_rows[match(level, interaction_levels)]
+    main_variance <- model[[paste0("cov", main_row)]][main_row]
+    interaction_variance <- model[[paste0("cov", interaction_row)]][interaction_row]
+    covariance <- model[[paste0("cov", interaction_row)]][main_row]
+    variance <- main_variance + interaction_variance + 2 * covariance
+    standard_error <- sqrt(max(variance, 0))
+
+    data.table(
+      relative_month = level - 6L,
+      estimate = 100 * (
+        model$beta[main_row] + model$beta[interaction_row]
+      ),
+      se = 100 * standard_error,
+      specification = specification_label
+    )
+  }))
+  event[, `:=`(
+    lower = estimate - 1.96 * se,
+    upper = estimate + 1.96 * se
+  )]
+  event <- rbind(
+    event,
+    data.table(
+      relative_month = 0L,
+      estimate = 0,
+      se = 0,
+      lower = 0,
+      upper = 0,
+      specification = specification_label
+    )
+  )
+  setorder(event, relative_month)
+  event
+}
+
 event_fe1 <- extract_event(
   "evreg1",
   "Grid x cohort + AC x month-year x cohort FE"
@@ -94,6 +158,16 @@ event_fe2 <- extract_event(
   "Grid x cohort + AC x month-year x cohort + relative month x cohort FE"
 )
 event <- rbind(event_fe1, event_fe2)
+
+treated_fe1 <- extract_treated_path(
+  "evreg1",
+  "Grid x cohort + AC x month-year x cohort FE"
+)
+treated_fe2 <- extract_treated_path(
+  "evreg2",
+  "Grid x cohort + AC x month-year x cohort + relative month x cohort FE"
+)
+treated_event <- rbind(treated_fe1, treated_fe2)
 
 base_plot <- function(plot_data) ggplot(plot_data, aes(relative_month, estimate)) +
   geom_ribbon(aes(ymin = lower, ymax = upper), fill = "#279FF5", alpha = 0.2) +
@@ -112,6 +186,12 @@ base_plot <- function(plot_data) ggplot(plot_data, aes(relative_month, estimate)
     panel.grid.minor = element_blank()
   )
 
+treated_plot <- function(plot_data) base_plot(plot_data) +
+  labs(
+    x = "Months from Downwind-Treatment Switch",
+    y = "Treated-group October-November Window (percentage points)"
+  )
+
 output_fe1 <- file.path(
   figure_dir,
   paste0("fire_season_start_event_study", sample, "_rural_fe1.png")
@@ -124,6 +204,36 @@ output_comparison <- file.path(
   figure_dir,
   paste0("fire_season_start_event_study", sample, "_rural_comparison.png")
 )
+output_treated_fe1 <- file.path(
+  figure_dir,
+  paste0(
+    "fire_season_start_event_study", sample,
+    "_rural_treated_lincom_fe1.png"
+  )
+)
+output_treated_fe2 <- file.path(
+  figure_dir,
+  paste0(
+    "fire_season_start_event_study", sample,
+    "_rural_treated_lincom_fe2.png"
+  )
+)
+output_treated_comparison <- file.path(
+  figure_dir,
+  paste0(
+    "fire_season_start_event_study", sample,
+    "_rural_treated_lincom_comparison.png"
+  )
+)
+output_treated_csv <- file.path(
+  result_dir,
+  paste0(
+    "fire_season_start_event_study", sample,
+    "_rural_treated_lincom.csv"
+  )
+)
+
+fwrite(treated_event, output_treated_csv)
 
 ggsave(output_fe1, base_plot(event_fe1), width = 8, height = 4, dpi = 300)
 ggsave(output_fe2, base_plot(event_fe2), width = 8, height = 4, dpi = 300)
@@ -134,6 +244,31 @@ ggsave(
   height = 4.5,
   dpi = 300
 )
+ggsave(
+  output_treated_fe1,
+  treated_plot(treated_fe1),
+  width = 8,
+  height = 4,
+  dpi = 300
+)
+ggsave(
+  output_treated_fe2,
+  treated_plot(treated_fe2),
+  width = 8,
+  height = 4,
+  dpi = 300
+)
+ggsave(
+  output_treated_comparison,
+  treated_plot(treated_event) + facet_wrap(~specification, nrow = 1),
+  width = 12,
+  height = 4.5,
+  dpi = 300
+)
 message("Generated: ", output_fe1)
 message("Generated: ", output_fe2)
 message("Generated: ", output_comparison)
+message("Generated: ", output_treated_fe1)
+message("Generated: ", output_treated_fe2)
+message("Generated: ", output_treated_comparison)
+message("Generated: ", output_treated_csv)
