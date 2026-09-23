@@ -1,0 +1,2539 @@
+
+  ___  ____  ____  ____  ____ ®
+ /__    /   ____/   /   ____/      18.0
+___/   /   /___/   /   /___/       MP—Parallel Edition
+
+ Statistics and Data Science       Copyright 1985-2023 StataCorp LLC
+                                   StataCorp
+                                   4905 Lakeway Drive
+                                   College Station, Texas 77845 USA
+                                   800-STATA-PC        https://www.stata.com
+                                   979-696-4600        stata@stata.com
+
+Stata license: Single-user 4-core  perpetual
+Serial number: 501806366048
+  Licensed to: Any Name
+               Any Name
+
+Notes:
+      1. Stata is running in batch mode.
+      2. Unicode is supported; see help unicode_advice.
+      3. More than 2 billion observations are allowed; see help obs_advice.
+      4. Maximum number of variables is set to 5,000 but can be increased;
+          see help set_maxvar.
+
+. do _generate_all_tables.do 
+
+. *****************************************************************************
+> ***
+. * _generate_all_tables.do
+. * Single LaTeX-table entry point for rural area and population specifications
+. * Run this AFTER analysis do-files have produced .ster files.
+. *
+. * NOTE: the stacked analyses (main_1, main_3, app_7, app_8, app_9, app_10,
+. * app_20) now read the "_rural_stacked.ster" files those do-files write.
+. * The analyses not yet converted to the stacked design (main_4, main_5,
+. * app_14, app_15) still read their "_rural_acpop.ster" files.
+. * The .tex output filenames are unchanged (_rural_acpop.tex) so downstream
+. * \input's keep resolving.
+. *
+. * Also writes a single side-by-side comparison document:
+. *   ${tables}/_comparison_downup_ac_vs_acpop.tex
+. * which \input's BOTH the original (_rural.tex) and the new (_rural_acpop.tex
+> )
+. * tables so they can be eyeballed in one PDF.
+. *
+. * This dofile is intended to run LOCALLY (location="dbox") - it reads ster
+. * files and writes tex. The analysis dofiles handle the cluster work.
+. *****************************************************************************
+> ***
+. 
+. *****************************************************************************
+> ***
+. * Setup
+. *****************************************************************************
+> ***
+. 
+. if "$root" == "" {
+.     clear all
+.     set more off
+. 
+.     global location "dbox"
+.     global sample ""
+. 
+.     global shell "/groups/sgulzar/sa_fires/proj_bureaucrats_farms"
+.     global dbox "C:/Users/eunic/Dropbox/sa_fires/proj_bureaucrats_farms"
+.     global code_shell "/users/aquisper/proj_bureaucrats_farms/code/_stacked_d
+> ownup_replication"
+.     global code_dbox "C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucra
+> ts_farms/code/_stacked_downup_replication"
+. 
+.     if "$location" == "dbox" {
+.         global root "$dbox"
+.         global code "$code_dbox"
+.     }
+.     else {
+.         global root "$shell"
+.         global code "$code_shell"
+.     }
+. }
+
+. 
+. global tables "${code}/../../tables"
+
+. 
+. *****************************************************************************
+> ***
+. * Helper: strip trailing zeros from one or more e()-stored stats.
+. *****************************************************************************
+> ***
+. 
+. capture program drop _strip_zeros_stats
+
+. program define _strip_zeros_stats
+  1.     syntax , Models(string) Stats(string)
+  2.     foreach m of local models {
+  3.         capture estimates restore `m'
+  4.         if _rc continue
+  5.         foreach s of local stats {
+  6.             capture local rnum = e(`s')
+  7.             if _rc continue
+  8.             local raw = strtrim(string(`rnum', "%9.3f"))
+  9.             local cleaned = regexr(regexr("`raw'", "0+$", ""), "\.$", "")
+ 10.             estadd local `s'_clean "`cleaned'"
+ 11.         }
+ 12.         estimates store `m'
+ 13.     }
+ 14. end
+
+. 
+. * The stacked main-DiD ster files predate reliable string-local roundtripping
+. * through estread. Reattach the known FE tags so the original Y/N rows render
+> .
+. capture program drop _set_main_fe_tags
+
+. program define _set_main_fe_tags
+  1.     forvalues i = 1/4 {
+  2.         local monthyearfe "N"
+  3.         local acfe "N"
+  4.         local acmonthfe "N"
+  5.         local gridfe "N"
+  6.         if `i' == 2 {
+  7.             local monthyearfe "Y"
+  8.             local acfe "Y"
+  9.         }
+ 10.         if `i' == 3 local acmonthfe "Y"
+ 11.         if `i' == 4 {
+ 12.             local acmonthfe "Y"
+ 13.             local gridfe "Y"
+ 14.         }
+ 15.         estimates restore eq`i'
+ 16.         estadd local monthyearfe "`monthyearfe'", replace
+ 17.         estadd local acfe "`acfe'", replace
+ 18.         estadd local acmonthfe "`acmonthfe'", replace
+ 19.         estadd local gridfe "`gridfe'", replace
+ 20.         estimates store eq`i'
+ 21.     }
+ 22. end
+
+. 
+. 
+. * Program to add a lincom result with stars + SE in parentheses
+. capture program drop _add_lincom
+
+. program define _add_lincom
+  1.     args k   // suffix number for the stored stat
+  2.     local b  = r(estimate)
+  3.     local se = r(se)
+  4.     * two-sided p-value (use r(df) if available, otherwise normal)
+.     if r(df) != . & r(df) > 0 {
+  5.         local p = 2*ttail(r(df), abs(`b'/`se'))
+  6.     }
+  7.     else {
+  8.         local p = 2*normal(-abs(`b'/`se'))
+  9.     }
+ 10.     local stars ""
+ 11.     if `p' < 0.01      local stars "\sym{***}"
+ 12.     else if `p' < 0.05 local stars "\sym{**}"
+ 13.     else if `p' < 0.10 local stars "\sym{*}"
+ 14.     estadd local ysum`k' = string(`b', "%12.3fc") + "`stars'"
+ 15.     estadd local ysd`k'  = "(" + string(`se', "%12.3fc") + ")"
+ 16. end
+
+. 
+. 
+. *****************************************************************************
+> ***
+. * 0. Area-weighted tables generated by the new stacked master
+. *****************************************************************************
+> ***
+. 
+. est clear
+
+. estread using "${tables}/main_did_downup_area_ac${sample}_rural_stacked.ster"
+
+-------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+-----------------------------------------------------------------
+         eq1 | regress      countk          4  Linear regression
+         eq2 | reghdfejl    countk          3  HDFE linear regression with
+             |                                 Julia
+         eq3 | reghdfejl    countk          3  HDFE linear regression with
+             |                                 Julia
+         eq4 | reghdfejl    countk          3  HDFE linear regression with
+             |                                 Julia
+-------------------------------------------------------------------------------
+
+. _set_main_fe_tags
+(results eq1 are active now)
+
+added macro:
+        e(monthyearfe) : "N"
+
+added macro:
+               e(acfe) : "N"
+
+added macro:
+          e(acmonthfe) : "N"
+
+added macro:
+             e(gridfe) : "N"
+(results eq2 are active now)
+
+added macro:
+        e(monthyearfe) : "Y"
+
+added macro:
+               e(acfe) : "Y"
+
+added macro:
+          e(acmonthfe) : "N"
+
+added macro:
+             e(gridfe) : "N"
+(results eq3 are active now)
+
+added macro:
+        e(monthyearfe) : "N"
+
+added macro:
+               e(acfe) : "N"
+
+added macro:
+          e(acmonthfe) : "Y"
+
+added macro:
+             e(gridfe) : "N"
+(results eq4 are active now)
+
+added macro:
+        e(monthyearfe) : "N"
+
+added macro:
+               e(acfe) : "N"
+
+added macro:
+          e(acmonthfe) : "Y"
+
+added macro:
+             e(gridfe) : "Y"
+
+. _strip_zeros_stats, models(eq1 eq2 eq3 eq4) stats(ymean)
+
+added macro:
+        e(ymean_clean) : "152.183"
+
+added macro:
+        e(ymean_clean) : "152.183"
+
+added macro:
+        e(ymean_clean) : "152.183"
+
+added macro:
+        e(ymean_clean) : "152.183"
+
+. 
+. esttab eq1 eq2 eq3 eq4 using ///
+>     "${tables}/main_did_downup_area_ac${sample}_rural.tex", ///
+>     replace ///
+>     cells(b(fmt(3) star) se(par fmt(3))) ///
+>     star(* 0.10 ** 0.05 *** 0.01) ///
+>     keep(downup_ac) order(downup_ac) ///
+>     varlabels(downup_ac "Down \$>\$ Up") ///
+>     stats(N acq monthyearfe acfe acmonthfe gridfe ymean_clean, ///
+>           fmt(%12.0fc %12.0fc %s %s %s %s %s) ///
+>           labels("Observations" "N Assembly Constituencies" ///
+>                  "Month-Year FE" "AC FE" "AC \$\times\$ Month-Year FE" ///
+>                  "Grid FE" "Mean DV")) ///
+>     nomtitles nonumbers collabels(none) nobaselevels ///
+>     prehead("{" ///
+>             "\def\sym#1{\ifmmode^{#1}\else\(^{#1}\)\fi}" ///
+>             "\begin{tabular}{l*{4}{c}}" ///
+>             "\hline" ///
+>             "            &\multicolumn{1}{c}{(1)}         &\multicolumn{1}{c}
+> {(2)}         &\multicolumn{1}{c}{(3)}         &\multicolumn{1}{c}{(4)}      
+>    \\" ///
+>             "            & \multicolumn{4}{c}{Number of Fires (in 1,000 units
+> )} \\ \hline") ///
+>     posthead("") ///
+>     postfoot("\hline" "\end{tabular}" "}")
+(output written to C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_fa
+> rms/code/_stacked_downup_replication/../../tables/main_did_downup_area_ac_rur
+> al.tex)
+
+. 
+. est clear
+
+. estread using "${tables}/_main_4_protest_5km_fe12_did_downup${sample}_rural.s
+> ter"
+
+-------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+-----------------------------------------------------------------
+      evreg1 | reghdfejl    countk          5  HDFE linear regression with
+             |                                 Julia
+      evreg2 | reghdfejl    countk          5  HDFE linear regression with
+             |                                 Julia
+      evreg3 | reghdfejl    countk          5  HDFE linear regression with
+             |                                 Julia
+      evreg4 | reghdfejl    countk          9  HDFE linear regression with
+             |                                 Julia
+      evreg5 | reghdfejl    countk          9  HDFE linear regression with
+             |                                 Julia
+      evreg6 | reghdfejl    countk          9  HDFE linear regression with
+             |                                 Julia
+-------------------------------------------------------------------------------
+
+. _strip_zeros_stats, models(evreg1 evreg2 evreg3 evreg4 evreg5 evreg6) stats(y
+> mean ymean2)
+
+added macro:
+        e(ymean_clean) : "446.213"
+
+added macro:
+       e(ymean2_clean) : ""
+
+added macro:
+        e(ymean_clean) : "446.213"
+
+added macro:
+       e(ymean2_clean) : ""
+
+added macro:
+        e(ymean_clean) : "446.213"
+
+added macro:
+       e(ymean2_clean) : ""
+
+added macro:
+        e(ymean_clean) : "446.213"
+
+added macro:
+       e(ymean2_clean) : "439.722"
+
+added macro:
+        e(ymean_clean) : "446.213"
+
+added macro:
+       e(ymean2_clean) : "439.722"
+
+added macro:
+        e(ymean_clean) : "446.213"
+
+added macro:
+       e(ymean2_clean) : "439.722"
+
+. 
+. esttab evreg1 evreg2 evreg3 evreg4 evreg5 evreg6 using ///
+>     "${tables}/_main_4_protest_5km_fe12_did_downup${sample}_rural.tex", ///
+>     replace ///
+>     cells(b(fmt(3) star) se(par fmt(3))) ///
+>     star(* 0.10 ** 0.05 *** 0.01) ///
+>     keep(1.post_#1.treat 1.downup_ac 1.post_#1.downup_ac ///
+>          1.treat#1.downup_ac 1.post_#1.treat#1.downup_ac) ///
+>     order(1.post_#1.treat 1.downup_ac 1.post_#1.downup_ac ///
+>           1.treat#1.downup_ac 1.post_#1.treat#1.downup_ac) ///
+>     varlabels(1.post_#1.treat "Post \$\times\$ Protest" ///
+>               1.downup_ac "Down \$>\$ Up" ///
+>               1.post_#1.downup_ac "Post \$\times\$ Down \$>\$ Up" ///
+>               1.treat#1.downup_ac "Protest \$\times\$ Down \$>\$ Up" ///
+>               1.post_#1.treat#1.downup_ac "Post \$\times\$ Protest \$\times\$
+>  Down \$>\$ Up") ///
+>     stats(N acq gridfe time electionfe provtrendfe ymean_clean ymean2_clean, 
+> ///
+>           fmt(%12.0fc %12.0fc %s %s %s %s %s %s) ///
+>           labels("Observations" "N Assembly Constituencies" ///
+>                  "Grid FE" "Relative Time FE" "Legislature FE" ///
+>                  "Province Trend FE" "Mean DV" "Mean DV2 (Down\$>\$Up=1)")) /
+> //
+>     nomtitles nonumbers collabels(none) nobaselevels ///
+>     prehead("{" ///
+>             "\def\sym#1{\ifmmode^{#1}\else\(^{#1}\)\fi}" ///
+>             "\begin{tabular}{l*{6}{c}}" ///
+>             "\hline" ///
+>             "            &\multicolumn{1}{c}{(1)}         &\multicolumn{1}{c}
+> {(2)}         &\multicolumn{1}{c}{(3)}         &\multicolumn{1}{c}{(4)}      
+>    &\multicolumn{1}{c}{(5)}         &\multicolumn{1}{c}{(6)}         \\" ///
+>             "            & \multicolumn{6}{c}{Number of Fires (in 1,000 units
+> )} \\ \hline") ///
+>     posthead("") prefoot("\hline") ///
+>     postfoot("\hline" "\end{tabular}" "}")
+(output written to C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_fa
+> rms/code/_stacked_downup_replication/../../tables/_main_4_protest_5km_fe12_di
+> d_downup_rural.tex)
+
+. 
+. est clear
+
+. estread using "${tables}/_main_5_polischar_fe12_did_downup_inter${sample}_rur
+> al.ster"
+
+-------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+-----------------------------------------------------------------
+      evreg1 | reghdfejl    countk          5  HDFE linear regression with
+             |                                 Julia
+      evreg2 | reghdfejl    countk          5  HDFE linear regression with
+             |                                 Julia
+      evreg3 | reghdfejl    countk          5  HDFE linear regression with
+             |                                 Julia
+      evreg4 | reghdfejl    countk          9  HDFE linear regression with
+             |                                 Julia
+      evreg5 | reghdfejl    countk          9  HDFE linear regression with
+             |                                 Julia
+      evreg6 | reghdfejl    countk          9  HDFE linear regression with
+             |                                 Julia
+-------------------------------------------------------------------------------
+
+. _strip_zeros_stats, models(evreg1 evreg2 evreg3 evreg4 evreg5 evreg6) stats(y
+> mean ymean2)
+
+added macro:
+        e(ymean_clean) : "120.687"
+
+added macro:
+       e(ymean2_clean) : ""
+
+added macro:
+        e(ymean_clean) : "120.687"
+
+added macro:
+       e(ymean2_clean) : ""
+
+added macro:
+        e(ymean_clean) : "120.687"
+
+added macro:
+       e(ymean2_clean) : ""
+
+added macro:
+        e(ymean_clean) : "120.687"
+
+added macro:
+       e(ymean2_clean) : "122.057"
+
+added macro:
+        e(ymean_clean) : "120.687"
+
+added macro:
+       e(ymean2_clean) : "122.057"
+
+added macro:
+        e(ymean_clean) : "120.687"
+
+added macro:
+       e(ymean2_clean) : "122.057"
+
+. 
+. esttab evreg1 evreg2 evreg3 evreg4 evreg5 evreg6 using ///
+>     "${tables}/_main_5_polischar_fe12_did_downup_inter${sample}_rural.tex", /
+> //
+>     replace ///
+>     cells(b(fmt(3) star) se(par fmt(3))) ///
+>     star(* 0.10 ** 0.05 *** 0.01) ///
+>     keep(1.post_#1.treat 1.downup_ac 1.post_#1.downup_ac ///
+>          1.treat#1.downup_ac 1.post_#1.treat#1.downup_ac) ///
+>     order(1.post_#1.treat 1.downup_ac 1.post_#1.downup_ac ///
+>           1.treat#1.downup_ac 1.post_#1.treat#1.downup_ac) ///
+>     varlabels(1.post_#1.treat "Post \$\times\$ Agriculturalist" ///
+>               1.downup_ac "Down \$>\$ Up" ///
+>               1.post_#1.downup_ac "Post \$\times\$ Down \$>\$ Up" ///
+>               1.treat#1.downup_ac "Agriculturalist \$\times\$ Down \$>\$ Up" 
+> ///
+>               1.post_#1.treat#1.downup_ac "Post \$\times\$ Agriculturalist \$
+> \times\$ Down \$>\$ Up") ///
+>     stats(N acq gridfe time electionfe provtrendfe ymean_clean ymean2_clean, 
+> ///
+>           fmt(%12.0fc %12.0fc %s %s %s %s %s %s) ///
+>           labels("Observations" "N Assembly Constituencies" ///
+>                  "Grid FE" "Relative Time FE" "Legislature FE" ///
+>                  "Province Linear Time Trend FE" "Mean DV" ///
+>                  "Mean DV (Down \$>\$ Up=1)")) ///
+>     nomtitles nonumbers collabels(none) nobaselevels ///
+>     prehead("{" ///
+>             "\def\sym#1{\ifmmode^{#1}\else\(^{#1}\)\fi}" ///
+>             "\begin{tabular}{l*{6}{c}}" ///
+>             "\hline" ///
+>             "            &\multicolumn{1}{c}{(1)}         &\multicolumn{1}{c}
+> {(2)}         &\multicolumn{1}{c}{(3)}         &\multicolumn{1}{c}{(4)}      
+>    &\multicolumn{1}{c}{(5)}         &\multicolumn{1}{c}{(6)}         \\" ///
+>             "            & \multicolumn{6}{c}{Number of Fires (in 1,000 units
+> )} \\ \hline") ///
+>     posthead("") prefoot("\hline") ///
+>     postfoot("\hline" "\end{tabular}" "}")
+(output written to C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_fa
+> rms/code/_stacked_downup_replication/../../tables/_main_5_polischar_fe12_did_
+> downup_inter_rural.tex)
+
+. 
+. *****************************************************************************
+> ***
+. * 1. Main DiD Table (_main_1_did)
+. *****************************************************************************
+> ***
+. est clear
+
+. estread using "${tables}/main_did_downup_pop_ac${sample}_rural_stacked.ster"
+
+-------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+-----------------------------------------------------------------
+         eq1 | regress      countk          4  Linear regression
+         eq2 | reghdfejl    countk          3  HDFE linear regression with
+             |                                 Julia
+         eq3 | reghdfejl    countk          3  HDFE linear regression with
+             |                                 Julia
+         eq4 | reghdfejl    countk          3  HDFE linear regression with
+             |                                 Julia
+-------------------------------------------------------------------------------
+
+. _set_main_fe_tags
+(results eq1 are active now)
+
+added macro:
+        e(monthyearfe) : "N"
+
+added macro:
+               e(acfe) : "N"
+
+added macro:
+          e(acmonthfe) : "N"
+
+added macro:
+             e(gridfe) : "N"
+(results eq2 are active now)
+
+added macro:
+        e(monthyearfe) : "Y"
+
+added macro:
+               e(acfe) : "Y"
+
+added macro:
+          e(acmonthfe) : "N"
+
+added macro:
+             e(gridfe) : "N"
+(results eq3 are active now)
+
+added macro:
+        e(monthyearfe) : "N"
+
+added macro:
+               e(acfe) : "N"
+
+added macro:
+          e(acmonthfe) : "Y"
+
+added macro:
+             e(gridfe) : "N"
+(results eq4 are active now)
+
+added macro:
+        e(monthyearfe) : "N"
+
+added macro:
+               e(acfe) : "N"
+
+added macro:
+          e(acmonthfe) : "Y"
+
+added macro:
+             e(gridfe) : "Y"
+
+. _strip_zeros_stats, models(eq2 eq3 eq4) stats(ymean)
+
+added macro:
+        e(ymean_clean) : "153.216"
+
+added macro:
+        e(ymean_clean) : "153.216"
+
+added macro:
+        e(ymean_clean) : "153.216"
+
+. 
+. * The manuscript's original main table reports the three fixed-effect models
+. * (the no-FE diagnostic eq1 remains in the ster file but is not displayed).
+. esttab eq2 eq3 eq4 using "${tables}/main_did_downup_ac${sample}_rural_acpop.t
+> ex", ///
+>     replace ///
+>     cells(b(fmt(3) star) se(par fmt(3))) ///
+>     star(* 0.10 ** 0.05 *** 0.01) ///
+>     keep(downup_ac_pop) ///
+>     order(downup_ac_pop) ///
+>     varlabels(downup_ac_pop "Down \$>\$ Up") ///
+>     stats(N acq monthyearfe acfe acmonthfe gridfe ymean_clean, ///
+>           fmt(%12.0fc %12.0fc %s %s %s %s %s) ///
+>           labels("Observations" "N Assembly Constituencies" ///
+>                  "Month-Year FE" "AC \$\times\$ Cohort FE" ///
+>                  "AC \$\times\$ Month-Year \$\times\$ Cohort FE" ///
+>                  "Grid \$\times\$ Cohort FE" "Mean DV")) ///
+>     nomtitles nonumbers ///
+>     collabels(none) ///
+>     nobaselevels ///
+>     prehead("{" ///
+>             "\def\sym#1{\ifmmode^{#1}\else\(^{#1}\)\fi}" ///
+>             "\begin{tabular}{l*{3}{c}}" ///
+>             "\hline" ///
+>             "            &\multicolumn{1}{c}{(1)}         &\multicolumn{1}{c}
+> {(2)}         &\multicolumn{1}{c}{(3)}             \\" ///
+>             "            & \multicolumn{3}{c}{Number of Fires (in 1,000 units
+> )} \\ \hline") ///
+>     posthead("") ///
+>     postfoot("\hline" "\end{tabular}" "}")
+(output written to C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_fa
+> rms/code/_stacked_downup_replication/../../tables/main_did_downup_ac_rural_ac
+> pop.tex)
+
+. 
+. display "Generated: main_did_downup_ac_rural_acpop.tex"
+Generated: main_did_downup_ac_rural_acpop.tex
+
+. 
+. *****************************************************************************
+> ***
+. * 2. Bureaucrat-Politician DiD (_main_3_bureau_polisc_did)
+. *****************************************************************************
+> ***
+. est clear
+
+. estread using "${tables}/_main_3_bureau_polisc_did${sample}_rural_stacked.ste
+> r"
+
+-------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+-----------------------------------------------------------------
+         eq1 | regress      countk          6  Linear regression
+         eq2 | reghdfejl    countk          5  HDFE linear regression with
+             |                                 Julia
+         eq3 | reghdfejl    countk          5  HDFE linear regression with
+             |                                 Julia
+         eq4 | reghdfejl    countk          5  HDFE linear regression with
+             |                                 Julia
+         eq5 | reghdfejl    countk          5  HDFE linear regression with
+             |                                 Julia
+-------------------------------------------------------------------------------
+
+. _strip_zeros_stats, models(eq1 eq2 eq3 eq4 eq5) stats(ymean ymean2)
+
+added macro:
+        e(ymean_clean) : "153.216"
+
+added macro:
+       e(ymean2_clean) : "151.037"
+
+added macro:
+        e(ymean_clean) : "153.216"
+
+added macro:
+       e(ymean2_clean) : "151.037"
+
+added macro:
+        e(ymean_clean) : "153.216"
+
+added macro:
+       e(ymean2_clean) : "151.037"
+
+added macro:
+        e(ymean_clean) : "153.216"
+
+added macro:
+       e(ymean2_clean) : "151.037"
+
+added macro:
+        e(ymean_clean) : "153.216"
+
+added macro:
+       e(ymean2_clean) : "151.037"
+
+. 
+. esttab eq1 eq2 eq3 eq4 eq5 using "${tables}/_main_3_bureau_polisc_did${sample
+> }_rural_acpop.tex", ///
+>     replace ///
+>     cells(b(fmt(3) star) se(par fmt(3))) ///
+>     star(* 0.10 ** 0.05 *** 0.01) ///
+>     keep(downup_ac_pop downup_dummy downup_interaction) ///
+>     order( downup_dummy downup_ac_pop downup_interaction) ///
+>     varlabels(downup_ac_pop "Down\$>\$ Up Politician (Pop)" ///
+>               downup_dummy "Down\$>\$ Up Bureaucrat" ///
+>               downup_interaction "Down\$>\$ Up Pol. (Pop) \$\times\$ Down\$>\
+> $ Up Bur.") ///
+>     stats(N nacs ndists monthyearfe acfe  acmonthfe distmonthfe gridfe ymean2
+> _clean, ///
+>           fmt(%12.0fc %12.0fc %12.0fc %s %s %s %s %s %s) ///
+>           labels("Observations" "N Assembly Constituencies" "N Districts" ///
+>                  "Month-Year FE" "AC FE" "AC \$\times\$ Month-Year FE" "Distr
+> ict \$\times\$ Month-Year FE" "Grid FE" "Mean DV")) ///
+>     nomtitles nonumbers ///
+>     collabels(none) ///
+>     nobaselevels ///
+>     prehead("{\def\sym#1{\ifmmode^{#1}\else\(^{#1}\)\fi}" ///
+>             "\begin{tabular}{l*{5}{c}}" ///
+>             "\hline" ///
+>             " & (1) & (2) & (3) & (4) & (5) \\" ///
+>             " & \multicolumn{5}{c}{Number of Fires (in 1,000 units)} \\ \hlin
+> e") ///
+>     posthead("") ///
+>     postfoot("\hline" "\end{tabular}" "}")
+(output written to C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_fa
+> rms/code/_stacked_downup_replication/../../tables/_main_3_bureau_polisc_did_r
+> ural_acpop.tex)
+
+. 
+. display "Generated: _main_3_bureau_polisc_did_rural_acpop.tex"
+Generated: _main_3_bureau_polisc_did_rural_acpop.tex
+
+. 
+. *****************************************************************************
+> ***
+. * 3. Protest DiD with Downup (_main_4_protest_5km_fe12_did_downup)
+. *****************************************************************************
+> ***
+. {
+. est clear
+. estread using "${tables}/_main_4_protest_5km_fe12_did_downup${sample}_rural_a
+> cpop.ster"
+
+-------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+-----------------------------------------------------------------
+      evreg1 | reghdfejl    countk          5  HDFE linear regression with
+             |                                 Julia
+      evreg2 | reghdfejl    countk          5  HDFE linear regression with
+             |                                 Julia
+      evreg3 | reghdfejl    countk          5  HDFE linear regression with
+             |                                 Julia
+      evreg4 | reghdfejl    countk          9  HDFE linear regression with
+             |                                 Julia
+      evreg5 | reghdfejl    countk          9  HDFE linear regression with
+             |                                 Julia
+      evreg6 | reghdfejl    countk          9  HDFE linear regression with
+             |                                 Julia
+-------------------------------------------------------------------------------
+. _strip_zeros_stats, models(evreg1 evreg2 evreg3 evreg4 evreg5 evreg6) stats(y
+> mean ymean2 ymean3)
+
+added macro:
+        e(ymean_clean) : "446.213"
+
+added macro:
+       e(ymean2_clean) : ""
+
+added macro:
+       e(ymean3_clean) : ""
+
+added macro:
+        e(ymean_clean) : "446.213"
+
+added macro:
+       e(ymean2_clean) : ""
+
+added macro:
+       e(ymean3_clean) : ""
+
+added macro:
+        e(ymean_clean) : "446.213"
+
+added macro:
+       e(ymean2_clean) : ""
+
+added macro:
+       e(ymean3_clean) : ""
+
+added macro:
+        e(ymean_clean) : "446.213"
+
+added macro:
+       e(ymean2_clean) : "440.214"
+
+added macro:
+       e(ymean3_clean) : ""
+
+added macro:
+        e(ymean_clean) : "446.213"
+
+added macro:
+       e(ymean2_clean) : "440.214"
+
+added macro:
+       e(ymean3_clean) : ""
+
+added macro:
+        e(ymean_clean) : "446.213"
+
+added macro:
+       e(ymean2_clean) : "440.214"
+
+added macro:
+       e(ymean3_clean) : ""
+. 
+. 
+. forval i = 4(1)6 {
+  2.     est restore evreg`i'
+  3. 
+.     lincom 1.downup_ac_pop
+  4.     _add_lincom 1
+  5. 
+.     lincom 1.post_ + 1.downup_ac_pop + ///
+>            1.post_#1.downup_ac_pop
+  6.     _add_lincom 2
+  7. 
+.     lincom 1.post_ + 1.treat + 1.downup_ac_pop + ///
+>            1.post_#1.treat + 1.post_#1.downup_ac_pop + 1.treat#1.downup_ac_po
+> p + ///
+>            1.post_#1.treat#1.downup_ac_pop
+  8.     _add_lincom 3
+  9. 
+.     lincom (1.post_ + 1.treat + 1.downup_ac_pop + ///
+>            1.post_#1.treat + 1.post_#1.downup_ac_pop + 1.treat#1.downup_ac_po
+> p + ///
+>            1.post_#1.treat#1.downup_ac_pop) - (1.post_ + 1.downup_ac_pop + //
+> /
+>            1.post_#1.downup_ac_pop)
+ 10.     _add_lincom 4
+ 11. 
+.     est store evreg`i'
+ 12. }
+(results evreg4 are active now)
+
+ ( 1)  1.downup_ac_pop = 0
+
+------------------------------------------------------------------------------
+      countk | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+         (1) |   4.261487   .6428848     6.63   0.000     3.001422    5.521551
+------------------------------------------------------------------------------
+
+added macro:
+              e(ysum1) : "4.261\sym{***}"
+
+added macro:
+               e(ysd1) : "(0.643)"
+
+ ( 1)  1o.post_ + 1.downup_ac_pop + 1.post_#1.downup_ac_pop = 0
+
+------------------------------------------------------------------------------
+      countk | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+         (1) |   3.871159   .9591967     4.04   0.000     1.991118    5.751199
+------------------------------------------------------------------------------
+
+added macro:
+              e(ysum2) : "3.871\sym{***}"
+
+added macro:
+               e(ysd2) : "(0.959)"
+
+ ( 1)  1o.post_ + 1o.treat + 1.downup_ac_pop + 1.post_#1.treat +
+       1.post_#1.downup_ac_pop + 1.treat#1.downup_ac_pop +
+       1.post_#1.treat#1.downup_ac_pop = 0
+
+------------------------------------------------------------------------------
+      countk | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+         (1) |   4.615328     24.031     0.19   0.848    -42.48581    51.71647
+------------------------------------------------------------------------------
+
+added macro:
+              e(ysum3) : "4.615"
+
+added macro:
+               e(ysd3) : "(24.031)"
+
+ ( 1)  1o.treat + 1.post_#1.treat + 1.treat#1.downup_ac_pop +
+       1.post_#1.treat#1.downup_ac_pop = 0
+
+------------------------------------------------------------------------------
+      countk | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+         (1) |   .7441691   24.11046     0.03   0.975    -46.51271    48.00105
+------------------------------------------------------------------------------
+
+added macro:
+              e(ysum4) : "0.744"
+
+added macro:
+               e(ysd4) : "(24.110)"
+(results evreg5 are active now)
+
+ ( 1)  1.downup_ac_pop = 0
+
+------------------------------------------------------------------------------
+      countk | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+         (1) |    4.10341   .6419064     6.39   0.000     2.845263    5.361557
+------------------------------------------------------------------------------
+
+added macro:
+              e(ysum1) : "4.103\sym{***}"
+
+added macro:
+               e(ysd1) : "(0.642)"
+
+ ( 1)  1o.post_ + 1.downup_ac_pop + 1.post_#1.downup_ac_pop = 0
+
+------------------------------------------------------------------------------
+      countk | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+         (1) |    3.71272   .9595762     3.87   0.000     1.831935    5.593504
+------------------------------------------------------------------------------
+
+added macro:
+              e(ysum2) : "3.713\sym{***}"
+
+added macro:
+               e(ysd2) : "(0.960)"
+
+ ( 1)  1o.post_ + 1o.treat + 1.downup_ac_pop + 1.post_#1.treat +
+       1.post_#1.downup_ac_pop + 1.treat#1.downup_ac_pop +
+       1.post_#1.treat#1.downup_ac_pop = 0
+
+------------------------------------------------------------------------------
+      countk | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+         (1) |   71.72213   23.41339     3.06   0.002     25.83151    117.6127
+------------------------------------------------------------------------------
+
+added macro:
+              e(ysum3) : "71.722\sym{***}"
+
+added macro:
+               e(ysd3) : "(23.413)"
+
+ ( 1)  1o.treat + 1.post_#1.treat + 1.treat#1.downup_ac_pop +
+       1.post_#1.treat#1.downup_ac_pop = 0
+
+------------------------------------------------------------------------------
+      countk | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+         (1) |   68.00941   23.49298     2.89   0.004      21.9628     114.056
+------------------------------------------------------------------------------
+
+added macro:
+              e(ysum4) : "68.009\sym{***}"
+
+added macro:
+               e(ysd4) : "(23.493)"
+(results evreg6 are active now)
+
+ ( 1)  1.downup_ac_pop = 0
+
+------------------------------------------------------------------------------
+      countk | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+         (1) |   4.107002   .6418842     6.40   0.000     2.848899    5.365105
+------------------------------------------------------------------------------
+
+added macro:
+              e(ysum1) : "4.107\sym{***}"
+
+added macro:
+               e(ysd1) : "(0.642)"
+
+ ( 1)  1o.post_ + 1.downup_ac_pop + 1.post_#1.downup_ac_pop = 0
+
+------------------------------------------------------------------------------
+      countk | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+         (1) |   3.716529   .9601698     3.87   0.000     1.834581    5.598477
+------------------------------------------------------------------------------
+
+added macro:
+              e(ysum2) : "3.717\sym{***}"
+
+added macro:
+               e(ysd2) : "(0.960)"
+
+ ( 1)  1o.post_ + 1o.treat + 1.downup_ac_pop + 1.post_#1.treat +
+       1.post_#1.downup_ac_pop + 1.treat#1.downup_ac_pop +
+       1.post_#1.treat#1.downup_ac_pop = 0
+
+------------------------------------------------------------------------------
+      countk | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+         (1) |   63.42125   23.42268     2.71   0.007     17.51243    109.3301
+------------------------------------------------------------------------------
+
+added macro:
+              e(ysum3) : "63.421\sym{***}"
+
+added macro:
+               e(ysd3) : "(23.423)"
+
+ ( 1)  1o.treat + 1.post_#1.treat + 1.treat#1.downup_ac_pop +
+       1.post_#1.treat#1.downup_ac_pop = 0
+
+------------------------------------------------------------------------------
+      countk | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+         (1) |   59.70472   23.50611     2.54   0.011     13.63237    105.7771
+------------------------------------------------------------------------------
+
+added macro:
+              e(ysum4) : "59.705\sym{**}"
+
+added macro:
+               e(ysd4) : "(23.506)"
+. 
+. 
+. 
+. 
+. *---------------------------------------------------------------
+. * Panel A: estimated coefficients
+. *---------------------------------------------------------------
+. esttab evreg1 evreg2 evreg3 evreg4 evreg5 evreg6 ///
+>     using "${tables}/_main_4_protest_5km_fe12_did_downup${sample}_rural_acpop
+> _new.tex", ///
+>     replace fragment ///
+>     cells(b(fmt(3) star) se(par fmt(3))) ///
+>     star(* 0.10 ** 0.05 *** 0.01) ///
+>     keep(1.post_#1.treat ///
+>           1.downup_ac_pop ///
+>           1.post_#1.downup_ac_pop ///
+>           1.treat#1.downup_ac_pop ///
+>           1.post_#1.treat#1.downup_ac_pop) ///
+>     order(1.post_#1.treat ///
+>           1.downup_ac_pop ///
+>           1.post_#1.downup_ac_pop ///
+>           1.treat#1.downup_ac_pop ///
+>           1.post_#1.treat#1.downup_ac_pop) ///
+>     varlabels(1.post_#1.treat "(1) Post \$\times\$ Protest" ///
+>               1.downup_ac_pop "(2) Down \$>\$ Up" ///
+>               1.post_#1.downup_ac_pop "(3) Post \$\times\$ Down \$>\$ Up" ///
+>               1.treat#1.downup_ac_pop "(4) Protest \$\times\$ Down \$>\$ Up" 
+> ///
+>               1.post_#1.treat#1.downup_ac_pop "(5) Post \$\times\$ Protest \$
+> \times\$ Down \$>\$ Up") ///
+>     nomtitles nonumbers collabels(none) nobaselevels noobs ///
+>     prehead("{" ///
+>             "\def\sym#1{\ifmmode^{#1}\else\(^{#1}\)\fi}" ///
+>             "\begin{tabular}{l*{6}{c}}" ///
+>             "\hline" ///
+>             "            &\multicolumn{1}{c}{(1)}         &\multicolumn{1}{c}
+> {(2)}         &\multicolumn{1}{c}{(3)}         &\multicolumn{1}{c}{(4)}      
+>    &\multicolumn{1}{c}{(5)}         &\multicolumn{1}{c}{(6)}         \\" ///
+>             "            & \multicolumn{6}{c}{Number of Fires (per 1,000 unit
+> s)} \\ \hline") ///
+>     posthead("\multicolumn{7}{l}{\textbf{Panel A: Estimated Coefficients}} \\
+>  \hline") ///
+>     prefoot("") postfoot("")
+(output written to C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_fa
+> rms/code/_stacked_downup_replication/../../tables/_main_4_protest_5km_fe12_di
+> d_downup_rural_acpop_new.tex)
+. 
+. *---------------------------------------------------------------
+. * Panel B: linear combinations
+. *---------------------------------------------------------------
+. * Start at evreg2 because the row label spans two columns; this reproduces th
+> e
+. * legacy alignment (two empty model cells followed by estimates in 4--6).
+. esttab evreg2 evreg3 evreg4 evreg5 evreg6 ///
+>     using "${tables}/_main_4_protest_5km_fe12_did_downup${sample}_rural_acpop
+> _new.tex", ///
+>     append fragment ///
+>     cells(none) ///
+>     stats(ysum1 ysd1 ysum2 ysd2 ysum3 ysd3 ysum4 ysd4, ///
+>           fmt(%s %s %s %s %s %s %s %s) ///
+>           labels("\multicolumn{2}{l}{(2) Down\$>\$Up Effect, pre-period in no
+>  protest areas}" " " ///
+>                  "\multicolumn{2}{l}{(2+3) Down\$>\$Up Effect, post-period in
+>  no protest areas}" " " ///
+>                  "\multicolumn{2}{l}{(1+2+3+4+5) Down\$>\$Up Effect, post-per
+> iod in protest areas}" " " ///
+>                  "\multicolumn{2}{l}{(1+2+3+4+5)-(2+3) Differential Down\$>\$
+> Up effect, post period}" " ")) ///
+>     nomtitles nonumbers collabels(none) nobaselevels noobs ///
+>     prehead("") posthead("") ///
+>     prefoot("\hline" ///
+>             "\multicolumn{7}{l}{\textbf{Panel B: Linear Combinations}} \\ \hl
+> ine") ///
+>     postfoot("")
+(output written to C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_fa
+> rms/code/_stacked_downup_replication/../../tables/_main_4_protest_5km_fe12_di
+> d_downup_rural_acpop_new.tex)
+. 
+. *---------------------------------------------------------------
+. * Footer: sample info and fixed effects
+. *---------------------------------------------------------------
+. esttab evreg1 evreg2 evreg3 evreg4 evreg5 evreg6 ///
+>     using "${tables}/_main_4_protest_5km_fe12_did_downup${sample}_rural_acpop
+> _new.tex", ///
+>     append fragment ///
+>     cells(none) ///
+>     stats(N acq gridfe time electionfe provtrendfe ymean_clean ymean2_clean, 
+> ///
+>           fmt(%12.0fc %12.0fc %s %s %s %s %s %s) ///
+>           labels("Observations" "N Assembly Constituencies" ///
+>                  "Grid FE" "Relative Time FE" "Legislature FE" "Province Tren
+> d FE" ///
+>                  "Mean DV" "Mean DV2 (Down\$>\$Up=1)")) ///
+>     nomtitles nonumbers collabels(none) nobaselevels noobs ///
+>     prehead("") posthead("") ///
+>     prefoot("\hline") ///
+>     postfoot("\hline" "\end{tabular}" "}")
+(output written to C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_fa
+> rms/code/_stacked_downup_replication/../../tables/_main_4_protest_5km_fe12_di
+> d_downup_rural_acpop_new.tex)
+. 
+. display "Generated: _main_4_protest_5km_fe12_did_downup_rural_acpop_new.tex"
+Generated: _main_4_protest_5km_fe12_did_downup_rural_acpop_new.tex
+. }
+
+. 
+. 
+. *****************************************************************************
+> ***
+. * 4. Politician Char DiD with Downup (_main_5_polischar_fe12_did_downup_inter
+> )
+. *****************************************************************************
+> ***
+. {
+. est clear
+. estread using "${tables}/_main_5_polischar_fe12_did_downup_inter${sample}_rur
+> al_acpop.ster"
+
+-------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+-----------------------------------------------------------------
+      evreg1 | reghdfejl    countk          5  HDFE linear regression with
+             |                                 Julia
+      evreg2 | reghdfejl    countk          5  HDFE linear regression with
+             |                                 Julia
+      evreg3 | reghdfejl    countk          5  HDFE linear regression with
+             |                                 Julia
+      evreg4 | reghdfejl    countk          9  HDFE linear regression with
+             |                                 Julia
+      evreg5 | reghdfejl    countk          9  HDFE linear regression with
+             |                                 Julia
+      evreg6 | reghdfejl    countk          9  HDFE linear regression with
+             |                                 Julia
+-------------------------------------------------------------------------------
+. _strip_zeros_stats, models(evreg1 evreg2 evreg3 evreg4 evreg5 evreg6) stats(y
+> mean ymean2 ymean3)
+
+added macro:
+        e(ymean_clean) : "120.687"
+
+added macro:
+       e(ymean2_clean) : ""
+
+added macro:
+       e(ymean3_clean) : ""
+
+added macro:
+        e(ymean_clean) : "120.687"
+
+added macro:
+       e(ymean2_clean) : ""
+
+added macro:
+       e(ymean3_clean) : ""
+
+added macro:
+        e(ymean_clean) : "120.687"
+
+added macro:
+       e(ymean2_clean) : ""
+
+added macro:
+       e(ymean3_clean) : ""
+
+added macro:
+        e(ymean_clean) : "120.687"
+
+added macro:
+       e(ymean2_clean) : "121.718"
+
+added macro:
+       e(ymean3_clean) : ""
+
+added macro:
+        e(ymean_clean) : "120.687"
+
+added macro:
+       e(ymean2_clean) : "121.718"
+
+added macro:
+       e(ymean3_clean) : ""
+
+added macro:
+        e(ymean_clean) : "120.687"
+
+added macro:
+       e(ymean2_clean) : "121.718"
+
+added macro:
+       e(ymean3_clean) : ""
+. 
+. 
+. forval i = 4(1)6 {
+  2.     est restore evreg`i'
+  3. 
+.     lincom 1.downup_ac_pop
+  4.     _add_lincom 1
+  5. 
+.     lincom 1.post_ + 1.downup_ac_pop + ///
+>            1.post_#1.downup_ac_pop
+  6.     _add_lincom 2
+  7. 
+.     lincom 1.post_ + 1.treat + 1.downup_ac_pop + ///
+>            1.post_#1.treat + 1.post_#1.downup_ac_pop + 1.treat#1.downup_ac_po
+> p + ///
+>            1.post_#1.treat#1.downup_ac_pop
+  8.     _add_lincom 3
+  9. 
+.     lincom (1.post_ + 1.treat + 1.downup_ac_pop + ///
+>            1.post_#1.treat + 1.post_#1.downup_ac_pop + 1.treat#1.downup_ac_po
+> p + ///
+>            1.post_#1.treat#1.downup_ac_pop) - (1.post_ + 1.downup_ac_pop + //
+> /
+>            1.post_#1.downup_ac_pop)
+ 10.     _add_lincom 4
+ 11. 
+.     est store evreg`i'
+ 12. }
+(results evreg4 are active now)
+
+ ( 1)  1.downup_ac_pop = 0
+
+------------------------------------------------------------------------------
+      countk | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+         (1) |   4.782579   1.955505     2.45   0.014     .9492573    8.615901
+------------------------------------------------------------------------------
+
+added macro:
+              e(ysum1) : "4.783\sym{**}"
+
+added macro:
+               e(ysd1) : "(1.956)"
+
+ ( 1)  1o.post_ + 1.downup_ac_pop + 1.post_#1.downup_ac_pop = 0
+
+------------------------------------------------------------------------------
+      countk | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+         (1) |    3.29579   1.937032     1.70   0.089    -.5013199      7.0929
+------------------------------------------------------------------------------
+
+added macro:
+              e(ysum2) : "3.296\sym"
+
+added macro:
+               e(ysd2) : "(1.937)"
+
+ ( 1)  1o.post_ + 1o.treat + 1.downup_ac_pop + 1.post_#1.treat +
+       1.post_#1.downup_ac_pop + 1.treat#1.downup_ac_pop +
+       1.post_#1.treat#1.downup_ac_pop = 0
+
+------------------------------------------------------------------------------
+      countk | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+         (1) |    29.1324   5.665614     5.14   0.000     18.02626    40.23854
+------------------------------------------------------------------------------
+
+added macro:
+              e(ysum3) : "29.132\sym{***}"
+
+added macro:
+               e(ysd3) : "(5.666)"
+
+ ( 1)  1o.treat + 1.post_#1.treat + 1.treat#1.downup_ac_pop +
+       1.post_#1.treat#1.downup_ac_pop = 0
+
+------------------------------------------------------------------------------
+      countk | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+         (1) |   25.83661   5.771791     4.48   0.000     14.52233    37.15089
+------------------------------------------------------------------------------
+
+added macro:
+              e(ysum4) : "25.837\sym{***}"
+
+added macro:
+               e(ysd4) : "(5.772)"
+(results evreg5 are active now)
+
+ ( 1)  1.downup_ac_pop = 0
+
+------------------------------------------------------------------------------
+      countk | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+         (1) |   5.160713   1.944516     2.65   0.008     1.348934    8.972493
+------------------------------------------------------------------------------
+
+added macro:
+              e(ysum1) : "5.161\sym{***}"
+
+added macro:
+               e(ysd1) : "(1.945)"
+
+ ( 1)  1o.post_ + 1.downup_ac_pop + 1.post_#1.downup_ac_pop = 0
+
+------------------------------------------------------------------------------
+      countk | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+         (1) |   2.400258    1.94379     1.23   0.217    -1.410099    6.210615
+------------------------------------------------------------------------------
+
+added macro:
+              e(ysum2) : "2.400"
+
+added macro:
+               e(ysd2) : "(1.944)"
+
+ ( 1)  1o.post_ + 1o.treat + 1.downup_ac_pop + 1.post_#1.treat +
+       1.post_#1.downup_ac_pop + 1.treat#1.downup_ac_pop +
+       1.post_#1.treat#1.downup_ac_pop = 0
+
+------------------------------------------------------------------------------
+      countk | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+         (1) |   13.02769   5.851658     2.23   0.026     1.556846    24.49853
+------------------------------------------------------------------------------
+
+added macro:
+              e(ysum3) : "13.028\sym{**}"
+
+added macro:
+               e(ysd3) : "(5.852)"
+
+ ( 1)  1o.treat + 1.post_#1.treat + 1.treat#1.downup_ac_pop +
+       1.post_#1.treat#1.downup_ac_pop = 0
+
+------------------------------------------------------------------------------
+      countk | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+         (1) |   10.62743   5.951572     1.79   0.074    -1.039272    22.29413
+------------------------------------------------------------------------------
+
+added macro:
+              e(ysum4) : "10.627\sym"
+
+added macro:
+               e(ysd4) : "(5.952)"
+(results evreg6 are active now)
+
+ ( 1)  1.downup_ac_pop = 0
+
+------------------------------------------------------------------------------
+      countk | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+         (1) |   5.073245   1.948381     2.60   0.009     1.253888    8.892601
+------------------------------------------------------------------------------
+
+added macro:
+              e(ysum1) : "5.073\sym{***}"
+
+added macro:
+               e(ysd1) : "(1.948)"
+
+ ( 1)  1o.post_ + 1.downup_ac_pop + 1.post_#1.downup_ac_pop = 0
+
+------------------------------------------------------------------------------
+      countk | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+         (1) |   2.307444    1.94857     1.18   0.236    -1.512283    6.127172
+------------------------------------------------------------------------------
+
+added macro:
+              e(ysum2) : "2.307"
+
+added macro:
+               e(ysd2) : "(1.949)"
+
+ ( 1)  1o.post_ + 1o.treat + 1.downup_ac_pop + 1.post_#1.treat +
+       1.post_#1.downup_ac_pop + 1.treat#1.downup_ac_pop +
+       1.post_#1.treat#1.downup_ac_pop = 0
+
+------------------------------------------------------------------------------
+      countk | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+         (1) |   13.42479   5.865871     2.29   0.022     1.926092    24.92349
+------------------------------------------------------------------------------
+
+added macro:
+              e(ysum3) : "13.425\sym{**}"
+
+added macro:
+               e(ysd3) : "(5.866)"
+
+ ( 1)  1o.treat + 1.post_#1.treat + 1.treat#1.downup_ac_pop +
+       1.post_#1.treat#1.downup_ac_pop = 0
+
+------------------------------------------------------------------------------
+      countk | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+         (1) |   11.11735   5.966474     1.86   0.062    -.5785619    22.81326
+------------------------------------------------------------------------------
+
+added macro:
+              e(ysum4) : "11.117\sym"
+
+added macro:
+               e(ysd4) : "(5.966)"
+. 
+. 
+. 
+. *---------------------------------------------------------------
+. * Panel A: estimated coefficients
+. *---------------------------------------------------------------
+. esttab evreg1 evreg2 evreg3 evreg4 evreg5 evreg6 ///
+>     using "${tables}/_main_5_polischar_fe12_did_downup_inter${sample}_rural_a
+> cpop.tex", ///
+>     replace fragment ///
+>     cells(b(fmt(3) star) se(par fmt(3))) ///
+>     star(* 0.10 ** 0.05 *** 0.01) ///
+>     keep(1.post_#1.treat ///
+>           1.downup_ac_pop ///
+>           1.post_#1.downup_ac_pop ///
+>           1.treat#1.downup_ac_pop ///
+>           1.post_#1.treat#1.downup_ac_pop) ///
+>     order(1.post_#1.treat ///
+>           1.downup_ac_pop ///
+>           1.post_#1.downup_ac_pop ///
+>           1.treat#1.downup_ac_pop ///
+>           1.post_#1.treat#1.downup_ac_pop) ///
+>     varlabels(1.post_#1.treat "(1) Post \$\times\$ Switch Agric" ///
+>               1.downup_ac_pop "(2) Down \$>\$ Up" ///
+>               1.post_#1.downup_ac_pop "(3) Post \$\times\$ Down \$>\$ Up" ///
+>               1.treat#1.downup_ac_pop "(4) Switch Agric  \$\times\$ Down \$>\
+> $ Up" ///
+>               1.post_#1.treat#1.downup_ac_pop "(5) Post \$\times\$ Switch Agr
+> ic  \$\times\$ Down \$>\$ Up") ///
+>     nomtitles nonumbers collabels(none) nobaselevels noobs ///
+>     prehead("{" ///
+>             "\def\sym#1{\ifmmode^{#1}\else\(^{#1}\)\fi}" ///
+>             "\begin{tabular}{l*{6}{c}}" ///
+>             "\hline" ///
+>             "            &\multicolumn{1}{c}{(1)}         &\multicolumn{1}{c}
+> {(2)}         &\multicolumn{1}{c}{(3)}         &\multicolumn{1}{c}{(4)}      
+>    &\multicolumn{1}{c}{(5)}         &\multicolumn{1}{c}{(6)}         \\" ///
+>             "            & \multicolumn{6}{c}{Number of Fires (in 1,000 units
+> )} \\ \hline") ///
+>     posthead("\multicolumn{7}{l}{\textbf{Panel A: Estimated Coefficients}} \\
+>  \hline") ///
+>     prefoot("") postfoot("")
+(output written to C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_fa
+> rms/code/_stacked_downup_replication/../../tables/_main_5_polischar_fe12_did_
+> downup_inter_rural_acpop.tex)
+. 
+. *---------------------------------------------------------------
+. * Panel B: linear combinations
+. *---------------------------------------------------------------
+. * Start at evreg2 because the row label spans two columns; this reproduces th
+> e
+. * legacy alignment (two empty model cells followed by estimates in 4--6).
+. esttab evreg2 evreg3 evreg4 evreg5 evreg6 ///
+>     using "${tables}/_main_5_polischar_fe12_did_downup_inter${sample}_rural_a
+> cpop.tex", ///
+>     append fragment ///
+>     cells(none) ///
+>     stats(ysum1 ysd1 ysum2 ysd2 ysum3 ysd3 ysum4 ysd4, ///
+>           fmt(%s %s %s %s %s %s %s %s) ///
+>           labels("\multicolumn{2}{l}{(2) Down\$>\$Up Effect, pre-period of no
+> -switch politicians}" " " ///
+>                  "\multicolumn{2}{l}{(2+3) Down\$>\$Up Effect, post-period of
+>  no-switch politicians}" " " ///
+>                  "\multicolumn{2}{l}{(1+2+3+4+5) Down\$>\$Up Effect, post-per
+> iod of switch politicians}" " " ///
+>                  "\multicolumn{2}{l}{(1+2+3+4+5)-(2+3) Differential Down\$>\$
+> Up effect, post period}" " ")) ///
+>     nomtitles nonumbers collabels(none) nobaselevels noobs ///
+>     prehead("") posthead("") ///
+>     prefoot("\hline" ///
+>             "\multicolumn{7}{l}{\textbf{Panel B: Linear Combinations}} \\ \hl
+> ine") ///
+>     postfoot("")
+(output written to C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_fa
+> rms/code/_stacked_downup_replication/../../tables/_main_5_polischar_fe12_did_
+> downup_inter_rural_acpop.tex)
+. 
+. *---------------------------------------------------------------
+. * Footer: sample info and fixed effects
+. *---------------------------------------------------------------
+. esttab evreg1 evreg2 evreg3 evreg4 evreg5 evreg6 ///
+>     using "${tables}/_main_5_polischar_fe12_did_downup_inter${sample}_rural_a
+> cpop.tex", ///
+>     append fragment ///
+>     cells(none) ///
+>     stats(N acq gridfe time electionfe provtrendfe ymean_clean ymean2_clean, 
+> ///
+>           fmt(%12.0fc %12.0fc %s %s %s %s %s %s) ///
+>           labels("Observations" "N Assembly Constituencies" ///
+>                  "Grid FE" "Relative Time FE" "Legislature FE" "Province Tren
+> d FE" ///
+>                  "Mean DV" "Mean DV2 (Down\$>\$Up=1)")) ///
+>     nomtitles nonumbers collabels(none) nobaselevels noobs ///
+>     prehead("") posthead("") ///
+>     prefoot("\hline") ///
+>     postfoot("\hline" "\end{tabular}" "}")
+(output written to C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_fa
+> rms/code/_stacked_downup_replication/../../tables/_main_5_polischar_fe12_did_
+> downup_inter_rural_acpop.tex)
+. 
+. display "Generated: _main_5_polischar_fe12_did_downup_inter_rural_acpop.tex"
+Generated: _main_5_polischar_fe12_did_downup_inter_rural_acpop.tex
+.         }
+
+. 
+. 
+. *****************************************************************************
+> ***
+. * 5. Alternative DVs (_app_7_main_did_downup_area_ac_dv)
+. *****************************************************************************
+> ***
+. est clear
+
+. estread using "${tables}/_app_7_main_did_downup_area_ac_dv${sample}_rural_sta
+> cked.ster"
+
+-------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+-----------------------------------------------------------------
+         eq1 | reghdfejl   anyfire          3  HDFE linear regression with
+             |                                 Julia
+         eq2 | reghdfejl   logfire          3  HDFE linear regression with
+             |                                 Julia
+         eq3 | reghdfejl mean_brigh~s       3  HDFE linear regression with
+             |                                 Julia
+-------------------------------------------------------------------------------
+
+. _strip_zeros_stats, models(eq1 eq2 eq3) stats(ymean)
+
+added macro:
+        e(ymean_clean) : "0.05"
+
+added macro:
+        e(ymean_clean) : "0.059"
+
+added macro:
+        e(ymean_clean) : "16.548"
+
+. 
+. esttab eq1 eq2 eq3 ///
+>     using "${tables}/_app_7_main_did_downup_area_ac_dv${sample}_rural_acpop.t
+> ex", ///
+>     replace ///
+>     cells(b(fmt(4) star) se(par fmt(4))) ///
+>     star(* 0.10 ** 0.05 *** 0.01) ///
+>     keep(downup_ac_pop) ///
+>     varlabels(downup_ac_pop "Down \$>\$ Up") ///
+>     stats(N acq gridfe acmonthfe ymean_clean, ///
+>           fmt(%12.0fc %12.0fc %s %s %s) ///
+>           labels("Observations" "N Assembly Constituencies" ///
+>                  "Grid FE \$\times\$ Cohort" ///
+>                  "Assembly \$\times\$ Month-Year \$\times\$ Cohort FE" ///
+>                  "Mean DV")) ///
+>     nomtitles nonumbers ///
+>     collabels(none) ///
+>     nobaselevels ///
+>     prehead("\begin{tabular}{lccc}" ///
+>             "\tabularnewline \hline" ///
+>             "& (1) & (2) & (3)\\" ///
+>             "& Any Fire & Log (N) Fires & Mean Brightness\\" ///
+>             "\hline") ///
+>     posthead("") ///
+>     prefoot("\hline") ///
+>     postfoot("\hline" "\end{tabular}")
+(output written to C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_fa
+> rms/code/_stacked_downup_replication/../../tables/_app_7_main_did_downup_area
+> _ac_dv_rural_acpop.tex)
+
+. 
+. display "Generated: _app_7_main_did_downup_area_ac_dv_rural_acpop.tex"
+Generated: _app_7_main_did_downup_area_ac_dv_rural_acpop.tex
+
+. 
+. *****************************************************************************
+> ***
+. * 6. DiD by Year (_app_8_main_did_by_year)
+. *****************************************************************************
+> ***
+. est clear
+
+. estread using "${tables}/_app_8_main_did_by_year${sample}_rural_stacked.ster"
+
+-------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+-----------------------------------------------------------------
+         eq1 | reghdfejl    countk          3  HDFE linear regression with
+             |                                 Julia
+         eq2 | reghdfejl    countk          3  HDFE linear regression with
+             |                                 Julia
+         eq3 | reghdfejl    countk          3  HDFE linear regression with
+             |                                 Julia
+         eq4 | reghdfejl    countk          3  HDFE linear regression with
+             |                                 Julia
+         eq5 | reghdfejl    countk          3  HDFE linear regression with
+             |                                 Julia
+         eq6 | reghdfejl    countk          3  HDFE linear regression with
+             |                                 Julia
+         eq7 | reghdfejl    countk          3  HDFE linear regression with
+             |                                 Julia
+         eq8 | reghdfejl    countk          3  HDFE linear regression with
+             |                                 Julia
+         eq9 | reghdfejl    countk          3  HDFE linear regression with
+             |                                 Julia
+        eq10 | reghdfejl    countk          3  HDFE linear regression with
+             |                                 Julia
+-------------------------------------------------------------------------------
+
+. _strip_zeros_stats, models(eq1 eq2 eq3 eq4 eq5 eq6 eq7 eq8 eq9 eq10) stats(ym
+> ean)
+
+added macro:
+        e(ymean_clean) : "151.139"
+
+added macro:
+        e(ymean_clean) : "141.492"
+
+added macro:
+        e(ymean_clean) : "145.732"
+
+added macro:
+        e(ymean_clean) : "151.219"
+
+added macro:
+        e(ymean_clean) : "180.108"
+
+added macro:
+        e(ymean_clean) : "151.672"
+
+added macro:
+        e(ymean_clean) : "162.715"
+
+added macro:
+        e(ymean_clean) : "104.452"
+
+added macro:
+        e(ymean_clean) : "168.627"
+
+added macro:
+        e(ymean_clean) : "175.076"
+
+. 
+. esttab eq1 eq2 eq3 eq4 eq5 eq6 eq7 eq8 eq9 eq10 ///
+>     using "${tables}/_app_8_main_did_by_year${sample}_rural_acpop.tex", ///
+>     replace ///
+>     cells(b(fmt(3) star) se(par fmt(3))) ///
+>     star(* 0.10 ** 0.05 *** 0.01) ///
+>     keep(downup_ac_pop) ///
+>     varlabels(downup_ac_pop "Down\$>\$Up") ///
+>     stats(N acq gridfe acmonthfe ymean_clean, ///
+>           fmt(%12.0fc %12.0fc %s %s %s) ///
+>           labels("Observations" "N Assembly Constituencies" ///
+>                  "Grid FE \$\times\$ Cohort" ///
+>                  "Assembly \$\times\$ Month-Year \$\times\$ Cohort FE" ///
+>                  "Mean DV")) ///
+>     nomtitles nonumbers ///
+>     collabels(none) ///
+>     nobaselevels ///
+>     prehead("\begin{tabular}{lcccccccccc} \hline" ///
+>             " & (1) & (2) & (3) & (4) & (5) & (6) & (7) & (8) & (9) & (10) \\
+> " ///
+>             " & \multicolumn{10}{c}{Number of Fires (per 1,000 units)}\\" ///
+>             " & 2012/2013 & 2013/2014 & 2014/2015 & 2015/2016 & 2016/2017 & 2
+> 017/2018 & 2018/2019 & 2019/2020 & 2020/2021 & 2021/2022 \\ \hline") ///
+>     posthead("") ///
+>     postfoot("\hline" "\end{tabular}")
+(output written to C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_fa
+> rms/code/_stacked_downup_replication/../../tables/_app_8_main_did_by_year_rur
+> al_acpop.tex)
+
+. 
+. display "Generated: _app_8_main_did_by_year_rural_acpop.tex"
+Generated: _app_8_main_did_by_year_rural_acpop.tex
+
+. 
+. *****************************************************************************
+> ***
+. * 7. DiD by State (_app_9_main_did_by_state)
+. *****************************************************************************
+> ***
+. est clear
+
+. estread using "${tables}/_app_9_main_did_by_state${sample}_rural_stacked.ster
+> "
+
+-------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+-----------------------------------------------------------------
+         eq1 | reghdfejl    countk          3  HDFE linear regression with
+             |                                 Julia
+         eq2 | reghdfejl    countk          3  HDFE linear regression with
+             |                                 Julia
+         eq3 | reghdfejl    countk          3  HDFE linear regression with
+             |                                 Julia
+         eq4 | reghdfejl    countk          3  HDFE linear regression with
+             |                                 Julia
+-------------------------------------------------------------------------------
+
+. _strip_zeros_stats, models(eq1 eq2 eq3 eq4) stats(ymean)
+
+added macro:
+        e(ymean_clean) : "50.911"
+
+added macro:
+        e(ymean_clean) : "155.027"
+
+added macro:
+        e(ymean_clean) : "764.769"
+
+added macro:
+        e(ymean_clean) : "47.208"
+
+. 
+. esttab eq1 eq2 eq3 eq4 ///
+>     using "${tables}/_app_9_main_did_by_state${sample}_rural_acpop.tex", ///
+>     replace ///
+>     cells(b(fmt(3) star) se(par fmt(3))) ///
+>     star(* 0.10 ** 0.05 *** 0.01) ///
+>     keep(downup_ac_pop) ///
+>     varlabels(downup_ac_pop "Down\$>\$Up (Pop)") ///
+>     stats(N acq gridfe acmonthfe ymean_clean, ///
+>           fmt(%12.0fc %12.0fc %s %s %s) ///
+>           labels("Observations" "N Assembly Constituencies" ///
+>                  "Grid FE  \$\times\$ Cohort" ///
+>                  "Assembly \$\times\$ Month-Year \$\times\$ Cohort FE" ///
+>                  "Mean DV")) ///
+>     nomtitles nonumbers ///
+>     collabels(none) ///
+>     nobaselevels ///
+>     prehead("\begin{tabular}{lcccc} \hline" ///
+>             " & (1) & (2) & (3) & (4) \\" ///
+>             " & \multicolumn{4}{c}{Number of Fires (in 1,000 units)}\\" ///
+>             " & Bihar & Haryana & Punjab & Uttar Pradesh \\ \hline") ///
+>     posthead("") ///
+>     postfoot("\hline" "\end{tabular}")
+(output written to C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_fa
+> rms/code/_stacked_downup_replication/../../tables/_app_9_main_did_by_state_ru
+> ral_acpop.tex)
+
+. 
+. display "Generated: _app_9_main_did_by_state_rural_acpop.tex"
+Generated: _app_9_main_did_by_state_rural_acpop.tex
+
+. 
+. *****************************************************************************
+> ***
+. * 8. Rice Moderators (_app_10_did_rice_moderators)
+. *****************************************************************************
+> ***
+. est clear
+
+. capture noisily estread using "${tables}/_app_10_did_rice_moderators_rural_st
+> acked.ster"
+
+-------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+-----------------------------------------------------------------
+         eq1 | reghdfejl    countk          5  HDFE linear regression with
+             |                                 Julia
+         eq2 | reghdfejl    countk          5  HDFE linear regression with
+             |                                 Julia
+         eq3 | reghdfejl    countk          5  HDFE linear regression with
+             |                                 Julia
+-------------------------------------------------------------------------------
+
+. _strip_zeros_stats, models(eq1 eq2 eq3) stats(ymean ymean2 ymean3)
+
+added macro:
+        e(ymean_clean) : "173.248"
+
+added macro:
+       e(ymean2_clean) : "130.75"
+
+added macro:
+       e(ymean3_clean) : "233.336"
+
+added macro:
+        e(ymean_clean) : "173.248"
+
+added macro:
+       e(ymean2_clean) : "61.101"
+
+added macro:
+       e(ymean3_clean) : "315.929"
+
+added macro:
+        e(ymean_clean) : "173.248"
+
+added macro:
+       e(ymean2_clean) : "48.534"
+
+added macro:
+       e(ymean3_clean) : "301.609"
+
+. 
+. capture noisily esttab eq1 eq2 eq3 ///
+>     using "${tables}/_app_10_did_rice_moderators${sample}_rural_acpop.tex", /
+> //
+>     replace ///
+>     cells(b(fmt(3) star) se(par fmt(3))) ///
+>     star(* 0.10 ** 0.05 *** 0.01) ///
+>     keep(1.downup_ac_pop ///
+>          1.downup_ac_pop#1.rice_area_aclvl_ahigh ///
+>          1.downup_ac_pop#1.rice_harvarea_aclvl_ahigh ///
+>          1.downup_ac_pop#1.rice_prod_aclvl_ahigh) ///
+>     order(1.downup_ac_pop ///
+>           1.downup_ac_pop#1.rice_area_aclvl_ahigh ///
+>           1.downup_ac_pop#1.rice_harvarea_aclvl_ahigh ///
+>           1.downup_ac_pop#1.rice_prod_aclvl_ahigh) ///
+>     varlabels(1.downup_ac_pop "Down\$>\$up AC (Pop)" ///
+>               1.downup_ac_pop#1.rice_area_aclvl_ahigh "Down\$>\$up AC (Pop) \
+> $\times\$ Above Median Rice Area" ///
+>               1.downup_ac_pop#1.rice_harvarea_aclvl_ahigh "Down\$>\$up AC (Po
+> p) \$\times\$ Above Median Harvested Rice Area" ///
+>               1.downup_ac_pop#1.rice_prod_aclvl_ahigh "Down\$>\$up AC (Pop) \
+> $\times\$ Above Median Rice Production") ///
+>     stats(N acq gridfe acmonthfe ymean_clean ymean2_clean ymean3_clean, ///
+>           fmt(%12.0fc %12.0fc %s %s %s %s %s) ///
+>           labels("Observations" "N Assembly Constituencies" "Grid FE" ///
+>                  "AC \$\times\$ Month-Year FE" "Mean DV" "Mean DV2" "Mean DV3
+> ")) ///
+>     nomtitles nonumbers ///
+>     collabels(none) ///
+>     nobaselevels ///
+>     prehead("\begin{tabular}{lccc}" ///
+>             "      \hline" ///
+>             "       & \multicolumn{3}{c}{Number of Fires (in 1,000 units) - R
+> ural Grids}\\" ///
+>             "                                                              & 
+> (1)            & (2)            & (3)\\\\  " ///
+>             "      \midrule") ///
+>     posthead("") ///
+>     prefoot("\hline") ///
+>     postfoot("\hline" "\end{tabular}")
+(output written to C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_fa
+> rms/code/_stacked_downup_replication/../../tables/_app_10_did_rice_moderators
+> _rural_acpop.tex)
+
+. 
+. display "Generated: _app_10_did_rice_moderators_rural_acpop.tex"
+Generated: _app_10_did_rice_moderators_rural_acpop.tex
+
+. 
+. *****************************************************************************
+> ***
+. * 9. Politician Rice Mods (_app_14_polischar_fe12_did_ricemods)
+. *****************************************************************************
+> ***
+. est clear
+
+. capture noisily estread using "${tables}/_app_14_polischar_fe12_did_ricemods$
+> {sample}_rural_stacked.ster"
+
+-------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+-----------------------------------------------------------------
+      evreg1 | reghdfejl    countk          5  HDFE linear regression with
+             |                                 Julia
+      evreg2 | reghdfejl    countk          9  HDFE linear regression with
+             |                                 Julia
+      evreg3 | reghdfejl    countk          9  HDFE linear regression with
+             |                                 Julia
+      evreg4 | reghdfejl    countk          9  HDFE linear regression with
+             |                                 Julia
+-------------------------------------------------------------------------------
+
+. _strip_zeros_stats, models(evreg1 evreg2 evreg3 evreg4) stats(ymean ymean2 ym
+> ean3)
+
+added macro:
+        e(ymean_clean) : "200.662"
+
+added macro:
+       e(ymean2_clean) : "200.662"
+
+added macro:
+       e(ymean3_clean) : ""
+
+added macro:
+        e(ymean_clean) : "200.662"
+
+added macro:
+       e(ymean2_clean) : "107.351"
+
+added macro:
+       e(ymean3_clean) : ""
+
+added macro:
+        e(ymean_clean) : "200.662"
+
+added macro:
+       e(ymean2_clean) : "44.741"
+
+added macro:
+       e(ymean3_clean) : ""
+
+added macro:
+        e(ymean_clean) : "200.662"
+
+added macro:
+       e(ymean2_clean) : "39.083"
+
+added macro:
+       e(ymean3_clean) : ""
+
+. 
+. capture noisily esttab evreg1 evreg2 evreg3 evreg4 ///
+>     using "${tables}/_app_14_polischar_fe12_did_ricemods${sample}_rural_acpop
+> .tex", ///
+>     replace ///
+>     cells(b(fmt(3) star) se(par fmt(3))) ///
+>     star(* 0.10 ** 0.05 *** 0.01) ///
+>     keep(1.post_#1.treat ///
+>          1.post_#1.treat#1.rice_area_aclvl_ahigh ///
+>          1.post_#1.treat#1.rice_harvarea_aclvl_ahigh ///
+>          1.post_#1.treat#1.rice_prod_aclvl_ahigh) ///
+>     order(1.post_#1.treat ///
+>           1.post_#1.treat#1.rice_area_aclvl_ahigh ///
+>           1.post_#1.treat#1.rice_harvarea_aclvl_ahigh ///
+>           1.post_#1.treat#1.rice_prod_aclvl_ahigh) ///
+>     varlabels(1.post_#1.treat "Post \$\times\$ Agriculturalist" ///
+>               1.post_#1.treat#1.rice_area_aclvl_ahigh "Post \$\times\$ Agricu
+> lturalist \$\times\$ Rice Areas" ///
+>               1.post_#1.treat#1.rice_harvarea_aclvl_ahigh "Post \$\times\$ Ag
+> riculturalist \$\times\$ Harvested Rice Area" ///
+>               1.post_#1.treat#1.rice_prod_aclvl_ahigh "Post \$\times\$ Agricu
+> lturalist \$\times\$ Rice Production") ///
+>     stats(N acq gridfe time electionfe provtrendfe ymean_clean ymean2_clean y
+> mean3_clean, ///
+>           fmt(%12.0fc %12.0fc %s %s %s %s %s %s %s) ///
+>           labels("Observations" "N Assembly Constituencies" ///
+>                  "Grid  \$\times\$ Cohort FE" "Relative Time FE" "Legislature
+>   \$\times\$ Cohort FE" "Province  \$\times\$ Cohort Trend FE" ///
+>                  "Mean DV" "Mean DV2" "Mean DV3")) ///
+>     nomtitles nonumbers ///
+>     collabels(none) ///
+>     nobaselevels ///
+>     prehead("{" ///
+>             "\def\sym#1{\ifmmode^{#1}\else\(^{#1}\)\fi}" ///
+>             "\begin{tabular}{l*{4}{c}}" ///
+>             "\hline" ///
+>             "            &\multicolumn{1}{c}{(1)}         &\multicolumn{1}{c}
+> {(2)}         &\multicolumn{1}{c}{(3)} &\multicolumn{1}{c}{(4)}         \\" /
+> //
+>             "            & \multicolumn{4}{c}{Number of Fires (in 1,000 units
+> )} \\ \hline") ///
+>     posthead("") ///
+>     prefoot("\hline") ///
+>     postfoot("\hline" "\end{tabular}" "}")
+(output written to C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_fa
+> rms/code/_stacked_downup_replication/../../tables/_app_14_polischar_fe12_did_
+> ricemods_rural_acpop.tex)
+
+. 
+. display "Generated: _app_14_polischar_fe12_did_ricemods_rural_acpop.tex"
+Generated: _app_14_polischar_fe12_did_ricemods_rural_acpop.tex
+
+. 
+. *****************************************************************************
+> ***
+. * 10. Politician FE DiD (_app_15_polischar_fe12_did)
+. *****************************************************************************
+> ***
+. est clear
+
+. capture noisily estread using "${tables}/_app_15_polischar_fe12_did${sample}_
+> rural_stacked.ster"
+
+-------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+-----------------------------------------------------------------
+      evreg1 | reghdfejl    countk          5  HDFE linear regression with
+             |                                 Julia
+      evreg2 | reghdfejl    countk          5  HDFE linear regression with
+             |                                 Julia
+      evreg3 | reghdfejl    countk          5  HDFE linear regression with
+             |                                 Julia
+-------------------------------------------------------------------------------
+
+. _strip_zeros_stats, models(evreg1 evreg2 evreg3) stats(ymean)
+
+added macro:
+        e(ymean_clean) : "200.662"
+
+added macro:
+        e(ymean_clean) : "200.662"
+
+added macro:
+        e(ymean_clean) : "200.662"
+
+. 
+. capture noisily esttab evreg1 evreg2 evreg3 ///
+>     using "${tables}/_app_15_polischar_fe12_did${sample}_rural_acpop.tex", //
+> /
+>     replace ///
+>     cells(b(fmt(3) star) se(par fmt(3))) ///
+>     star(* 0.10 ** 0.05 *** 0.01) ///
+>     keep(1.post_#1.treat) ///
+>     order(1.post_#1.treat) ///
+>     varlabels(1.post_#1.treat "Post \$\times\$ Agriculturalist") ///
+>     stats(N acq gridfe time electionfe provtrendfe ymean_clean, ///
+>           fmt(%12.0fc %12.0fc %s %s %s %s %s) ///
+>           labels("Observations" "N Assembly Constituencies" ///
+>                  "Grid \$\times\$ Cohort FE" "Relative Time FE" "Legislature 
+>  \$\times\$ Cohort FE" "Province  \$\times\$ Cohort Trend FE" "Mean DV")) ///
+>     nomtitles nonumbers ///
+>     collabels(none) ///
+>     nobaselevels ///
+>     prehead("{" ///
+>             "\def\sym#1{\ifmmode^{#1}\else\(^{#1}\)\fi}" ///
+>             "\begin{tabular}{l*{3}{c}}" ///
+>             "\hline" ///
+>             "            &\multicolumn{1}{c}{(1)}         &\multicolumn{1}{c}
+> {(2)}         &\multicolumn{1}{c}{(3)}         \\" ///
+>             "            & \multicolumn{3}{c}{Number of Fires (in 1,000 units
+> ) } \\ \hline") ///
+>     posthead("") ///
+>     prefoot("\hline") ///
+>     postfoot("\hline" "\end{tabular}" "}")
+(output written to C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_fa
+> rms/code/_stacked_downup_replication/../../tables/_app_15_polischar_fe12_did_
+> rural_acpop.tex)
+
+. 
+. display "Generated: _app_15_polischar_fe12_did_rural_acpop.tex"
+Generated: _app_15_polischar_fe12_did_rural_acpop.tex
+
+. 
+. *****************************************************************************
+> ***
+. * 11. Treatment-definition tables actively input by main.tex
+. *****************************************************************************
+> ***
+. est clear
+
+. estread using "${tables}/_app_6_main_did_treat_definition${sample}_rural_acpo
+> p.ster"
+
+-------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+-----------------------------------------------------------------
+         eq1 | reghdfejl    countk          3  HDFE linear regression with
+             |                                 Julia
+         eq2 | reghdfejl    countk          3  HDFE linear regression with
+             |                                 Julia
+         eq3 | reghdfejl    countk          3  HDFE linear regression with
+             |                                 Julia
+         eq4 | reghdfejl    countk          3  HDFE linear regression with
+             |                                 Julia
+         eq5 | reghdfejl    countk          3  HDFE linear regression with
+             |                                 Julia
+         eq6 | reghdfejl    countk          3  HDFE linear regression with
+             |                                 Julia
+         eq7 | reghdfejl    countk          5  HDFE linear regression with
+             |                                 Julia
+-------------------------------------------------------------------------------
+
+. _strip_zeros_stats, models(eq1 eq2 eq3 eq4 eq5 eq6 eq7) stats(ymean)
+
+added macro:
+        e(ymean_clean) : "153.264"
+
+added macro:
+        e(ymean_clean) : "153.264"
+
+added macro:
+        e(ymean_clean) : "153.264"
+
+added macro:
+        e(ymean_clean) : "153.264"
+
+added macro:
+        e(ymean_clean) : "153.264"
+
+added macro:
+        e(ymean_clean) : "153.264"
+
+added macro:
+        e(ymean_clean) : "153.264"
+
+. 
+. esttab eq1 eq2 eq3 eq4 eq5 using ///
+>     "${tables}/_app_6_main_did_treat_definition${sample}_rural_acpop_new.tex"
+> , ///
+>     replace cells(b(fmt(4) star) se(par fmt(4))) ///
+>     star(* 0.10 ** 0.05 *** 0.01) ///
+>     keep(downup_ac_pop downup_ac downup_1sd_pop down_percent_pop downup_diff_
+> percent_pop) ///
+>     order(downup_ac_pop downup_ac downup_1sd_pop down_percent_pop downup_diff
+> _percent_pop) ///
+>     varlabels(downup_ac_pop "Down\$>\$Up (Pop)" ///
+>               downup_ac "Down\$>\$Up (Area)" ///
+>               downup_1sd_pop "Down\$>\$Up by 1std" ///
+>               down_percent_pop "Downwind over total Population" ///
+>               downup_diff_percent_pop "Down-Up Percent") ///
+>     stats(N acq gridfe acmonthfe ymean_clean, ///
+>           fmt(%12.0fc %12.0fc %s %s %s) ///
+>           labels("Observations" "N Assembly Constituencies" ///
+>                  "Grid \$\times\$ Cohort FE" ///
+>                  "Assembly \$\times\$ Month-Year \$\times\$ Cohort FE" ///
+>                  "Mean DV")) ///
+>     nomtitles nonumbers collabels(none) nobaselevels ///
+>     prehead("\begin{tabular}{lccccc}" ///
+>             "\hline" ///
+>             "& (1) & (2) & (3) & (4) & (5)\\" ///
+>             "& \multicolumn{5}{c}{Number of Fires (in 1,000 units) }\\" ///
+>             "\hline") ///
+>     posthead("") prefoot("\hline") ///
+>     postfoot("\hline" "\end{tabular}")
+(output written to C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_fa
+> rms/code/_stacked_downup_replication/../../tables/_app_6_main_did_treat_defin
+> ition_rural_acpop_new.tex)
+
+. 
+. esttab eq1 eq2 eq3 eq4 eq6 eq5 using ///
+>     "${tables}/_app_6_main_did_treat_definition${sample}_rural_acpop_new2.tex
+> ", ///
+>     replace cells(b(fmt(4) star) se(par fmt(4))) ///
+>     star(* 0.10 ** 0.05 *** 0.01) ///
+>     keep(downup_ac_pop downup_ac downup_1sd_pop down_percent_pop down_percent
+>  downup_diff_percent_pop) ///
+>     order(downup_ac_pop downup_ac downup_1sd_pop down_percent_pop down_percen
+> t downup_diff_percent_pop) ///
+>     varlabels(downup_ac_pop "Down\$>\$Up (Pop)" ///
+>               downup_ac "Down\$>\$Up (Area)" ///
+>               downup_1sd_pop "Down\$>\$Up by 1std" ///
+>               down_percent_pop "Downwind over total Population" ///
+>               down_percent "Downwind over total Population V2" ///
+>               downup_diff_percent_pop "Down-Up Percent") ///
+>     stats(N acq gridfe acmonthfe ymean_clean, ///
+>           fmt(%12.0fc %12.0fc %s %s %s) ///
+>           labels("Observations" "N Assembly Constituencies" ///
+>                  "Grid \$\times\$ Cohort FE" ///
+>                  "Assembly \$\times\$ Month-Year \$\times\$ Cohort FE" ///
+>                  "Mean DV")) ///
+>     nomtitles nonumbers collabels(none) nobaselevels ///
+>     prehead("\begin{tabular}{lcccccc}" ///
+>             "\hline" ///
+>             "& (1) & (2) & (3) & (4) & (5) & (6)\\" ///
+>             "& \multicolumn{6}{c}{Number of Fires (in 1,000 units) }\\" ///
+>             "\hline") ///
+>     posthead("") prefoot("\hline") ///
+>     postfoot("\hline" "\end{tabular}")
+(output written to C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_fa
+> rms/code/_stacked_downup_replication/../../tables/_app_6_main_did_treat_defin
+> ition_rural_acpop_new2.tex)
+
+. 
+. esttab eq1 eq2 eq3 eq6 eq5 eq7 using ///
+>     "${tables}/_app_6_main_did_treat_definition${sample}_rural_acpop_new3.tex
+> ", ///
+>     replace cells(b(fmt(4) star) se(par fmt(4))) ///
+>     star(* 0.10 ** 0.05 *** 0.01) ///
+>     rename(1.downup_ac_pop downup_ac_pop) ///
+>     keep(downup_ac_pop downup_ac downup_1sd_pop down_percent ///
+>          downup_diff_percent_pop 1.downup_ac_pop#1.rice_prod_aclvl_ahigh) ///
+>     order(downup_ac_pop downup_ac downup_1sd_pop down_percent ///
+>           downup_diff_percent_pop 1.downup_ac_pop#1.rice_prod_aclvl_ahigh) //
+> /
+>     varlabels(downup_ac_pop "Down\$>\$Up (Pop)" ///
+>               downup_ac "Down\$>\$Up (Area)" ///
+>               downup_1sd_pop "Down\$>\$Up by 1std" ///
+>               down_percent "Downwind over total Population" ///
+>               downup_diff_percent_pop "Down-Up Percent" ///
+>               1.downup_ac_pop#1.rice_prod_aclvl_ahigh "Down\$>\$Up (Pop) \$\t
+> imes\$ Above Median Rice Production") ///
+>     stats(N acq gridfe acmonthfe ymean_clean, ///
+>           fmt(%12.0fc %12.0fc %s %s %s) ///
+>           labels("Observations" "N Assembly Constituencies" ///
+>                  "Grid \$\times\$ Cohort FE" ///
+>                  "Assembly \$\times\$ Month-Year \$\times\$ Cohort FE" ///
+>                  "Mean DV")) ///
+>     nomtitles nonumbers collabels(none) nobaselevels ///
+>     prehead("\begin{tabular}{lcccccc}" ///
+>             "\hline" ///
+>             "& (1) & (2) & (3) & (4) & (5) & (6)\\" ///
+>             "& \multicolumn{6}{c}{Number of Fires (in 1,000 units) }\\" ///
+>             "\hline") ///
+>     posthead("") prefoot("\hline") ///
+>     postfoot("\hline" "\end{tabular}")
+(output written to C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_fa
+> rms/code/_stacked_downup_replication/../../tables/_app_6_main_did_treat_defin
+> ition_rural_acpop_new3.tex)
+
+. 
+. display "Generated: _app_6_main_did_treat_definition_rural_acpop_new[1-3].tex
+> "
+Generated: _app_6_main_did_treat_definition_rural_acpop_new[1-3].tex
+
+. 
+. *****************************************************************************
+> ***
+. * 12. Population placebo within 13 km
+. *****************************************************************************
+> ***
+. est clear
+
+. estread using "${tables}/_app_11_placebo_pop_13km${sample}_rural.ster"
+
+-------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+-----------------------------------------------------------------
+         eq1 | reghdfejl    countk          3  HDFE linear regression with
+             |                                 Julia
+         eq2 | reghdfejl    countk          3  HDFE linear regression with
+             |                                 Julia
+         eq3 | reghdfejl    countk          3  HDFE linear regression with
+             |                                 Julia
+-------------------------------------------------------------------------------
+
+. _strip_zeros_stats, models(eq1 eq2 eq3) stats(ymean)
+
+added macro:
+        e(ymean_clean) : "182.464"
+
+added macro:
+        e(ymean_clean) : "182.464"
+
+added macro:
+        e(ymean_clean) : "182.464"
+
+. 
+. esttab eq1 eq2 eq3 using ///
+>     "${tables}/_app_11_placebo_pop_13km${sample}_rural.tex", ///
+>     replace ///
+>     cells(b(fmt(3) star) se(par fmt(3))) ///
+>     star(* 0.10 ** 0.05 *** 0.01) ///
+>     keep(downup_pop_13km) order(downup_pop_13km) ///
+>     varlabels(downup_pop_13km "Down\$>\$Up (Placebo)") ///
+>     stats(N acq gridfe acmonthfe ymean_clean, ///
+>           fmt(%12.0fc %12.0fc %s %s %s) ///
+>           labels("Observations" "N Assembly Constituencies" ///
+>                  "Grid \$\times\$ Cohort FE" ///
+>                  "AC \$\times\$ Month-Year \$\times\$ Cohort FE" ///
+>                  "Mean DV")) ///
+>     nomtitles nonumbers collabels(none) nobaselevels ///
+>     prehead("\begin{tabular}{lccc}" ///
+>             "\hline" ///
+>             "& \multicolumn{3}{c}{Number of Fires (in 1,000 units)}\\" ///
+>             "& Full Sample & Treated for Politicians & Control for Politician
+> s \\" ///
+>             "& (1) & (2) & (3) \\" ///
+>             "\midrule") ///
+>     posthead("") prefoot("\hline") ///
+>     postfoot("\hline" "\end{tabular}")
+(output written to C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_fa
+> rms/code/_stacked_downup_replication/../../tables/_app_11_placebo_pop_13km_ru
+> ral.tex)
+
+. 
+. display "Generated: _app_11_placebo_pop_13km_rural.tex"
+Generated: _app_11_placebo_pop_13km_rural.tex
+
+. 
+. *****************************************************************************
+> ***
+. * 13. Downwind Heterogeneity (_app_20_did_downwind_hm)
+. *****************************************************************************
+> ***
+. est clear
+
+. estread using "${tables}/_app_20_did_downwind_hm_rural_stacked.ster"
+
+-------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+-----------------------------------------------------------------
+         eq1 | regress      countk         11  Linear regression
+         eq2 | reghdfejl    countk          5  HDFE linear regression with
+             |                                 Julia
+         eq3 | reghdfejl    countk          5  HDFE linear regression with
+             |                                 Julia
+         eq4 | reghdfejl    countk          5  HDFE linear regression with
+             |                                 Julia
+-------------------------------------------------------------------------------
+
+. _strip_zeros_stats, models(eq1 eq2 eq3 eq4) stats(ymean)
+
+added macro:
+        e(ymean_clean) : "539.585"
+
+added macro:
+        e(ymean_clean) : "539.585"
+
+added macro:
+        e(ymean_clean) : "539.585"
+
+added macro:
+        e(ymean_clean) : "539.585"
+
+. _strip_zeros_stats, models(eq1 eq2 eq3 eq4) stats(ymean2)
+
+added macro:
+       e(ymean2_clean) : "1107.366"
+
+added macro:
+       e(ymean2_clean) : "1107.366"
+
+added macro:
+       e(ymean2_clean) : "1107.366"
+
+added macro:
+       e(ymean2_clean) : "1107.366"
+
+. 
+. esttab eq1 eq2 eq3 eq4 using "${tables}/_app_20_did_downwind_hm${sample}_rura
+> l_acpop.tex", ///
+>     replace ///
+>     cells(b(fmt(3) star) se(par fmt(3))) ///
+>     star(* 0.10 ** 0.05 *** 0.01) ///
+>     keep(1.downup_ac_pop 1.downup_ac_pop#1.rice_prod_aclvl_ahigh ) ///
+>     order(1.downup_ac_pop 1.downup_ac_pop#1.rice_prod_aclvl_ahigh) ///
+>     varlabels(1.downup_ac_pop "Down \$>\$ Up (Pop)" 1.downup_ac_pop#1.rice_pr
+> od_aclvl_ahigh "Down \$>\$ Up (Pop) \$\times\$ Rice Production" ) ///
+>     stats(N acq monthyearfe acfe acmonthfe gridfe ymean_clean ymean2_clean, /
+> //
+>           fmt(%12.0fc %12.0fc %s %s %s %s %s %s) ///
+>           labels("Observations" "N Assembly Constituencies" ///
+>                  "Month-Year FE" "AC FE" "AC \$\times\$ Month-Year FE" ///
+>                  "Grid FE" "Mean DV" "ymean2\_clean")) ///
+>     nomtitles nonumbers ///
+>     collabels(none) ///
+>     nobaselevels ///
+>     prehead("{" ///
+>             "\def\sym#1{\ifmmode^{#1}\else\(^{#1}\)\fi}" ///
+>             "\begin{tabular}{l*{4}{c}}" ///
+>             "\hline" ///
+>             "            &\multicolumn{1}{c}{(1)}         &\multicolumn{1}{c}
+> {(2)}         &\multicolumn{1}{c}{(3)}         &\multicolumn{1}{c}{(4)}      
+>    \\" ///
+>             "            & \multicolumn{4}{c}{Number of Fires (in 1,000 units
+> )} \\ \hline") ///
+>     posthead("") ///
+>     postfoot("\hline" "\end{tabular}" "}")
+(output written to C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_fa
+> rms/code/_stacked_downup_replication/../../tables/_app_20_did_downwind_hm_rur
+> al_acpop.tex)
+
+. 
+. display "Generated: _app_20_did_downwind_hm_rural_acpop.tex"
+Generated: _app_20_did_downwind_hm_rural_acpop.tex
+
+. 
+. *****************************************************************************
+> ***
+. * Side-by-side comparison document
+. * Writes ${tables}/_comparison_downup_ac_vs_acpop.tex
+. * Each section \input's the original (_rural.tex) and the new (_rural_acpop.t
+> ex)
+. * so the two can be eyeballed in a single PDF.
+. *****************************************************************************
+> ***
+. 
+. tempname cmp
+
+. file open `cmp' using "${tables}/_comparison_downup_ac_vs_acpop${sample}.tex"
+> , write replace
+
+. 
+. file write `cmp' "\documentclass[10pt]{article}" _n
+
+. file write `cmp' "\usepackage[margin=0.6in]{geometry}" _n
+
+. file write `cmp' "\usepackage{booktabs}" _n
+
+. file write `cmp' "\usepackage{array}" _n
+
+. file write `cmp' "\usepackage{multirow}" _n
+
+. file write `cmp' "\usepackage{xcolor}" _n
+
+. file write `cmp' "\usepackage{colortbl}" _n
+
+. file write `cmp' "\usepackage{tabularx}" _n
+
+. file write `cmp' "\usepackage{graphicx}" _n
+
+. file write `cmp' "\usepackage{adjustbox}" _n
+
+. file write `cmp' "\usepackage{amsmath}" _n
+
+. file write `cmp' "\usepackage{amssymb}" _n
+
+. file write `cmp' "\usepackage{titlesec}" _n
+
+. file write `cmp' "\providecommand{\sym}[1]{\ifmmode^{#1}\else\(^{#1}\)\fi}" _
+> n
+
+. file write `cmp' "\titleformat{\section}{\normalfont\Large\bfseries\color{blu
+> e!60!black}}{\thesection}{1em}{}" _n
+
+. file write `cmp' "\newcommand{\OLD}[1]{\begin{center}\colorbox{red!8}{\parbox
+> {0.97\linewidth}{\textbf{\textcolor{red!60!black}{ORIGINAL (downup\_ac):}}\pa
+> r\vspace{0.4em}\centering\begin{adjustbox}{max width=\linewidth}#1\end{adjust
+> box}}}\end{center}}" _n
+
+. file write `cmp' "\newcommand{\NEW}[1]{\begin{center}\colorbox{green!8}{\parb
+> ox{0.97\linewidth}{\textbf{\textcolor{green!50!black}{NEW (downup\_ac\_pop):}
+> }\par\vspace{0.4em}\centering\begin{adjustbox}{max width=\linewidth}#1\end{ad
+> justbox}}}\end{center}}" _n
+
+. file write `cmp' "\begin{document}" _n
+
+. file write `cmp' "\begin{center}{\Huge\bfseries Rural Replication Comparison}
+> \\[0.4em]" _n
+
+. file write `cmp' "{\large Treatment: \texttt{downup\_ac} vs \texttt{downup\_a
+> c\_pop}}\\[0.4em]" _n
+
+. file write `cmp' "{\normalsize Generated \today}\end{center}" _n
+
+. file write `cmp' "\vspace{1em}" _n
+
+. file write `cmp' "\noindent Each section shows the original specification (re
+> d, treatment = \texttt{downup\_ac}) above the new specification (green, treat
+> ment = \texttt{downup\_ac\_pop}). Both tex files are produced by the \texttt{
+> \_generate\_all\_tables} dofiles in \texttt{code/\_replication\_rural} and \t
+> exttt{code/\_replication\_rural\_acpop}.\par" _n
+
+. file write `cmp' "\newpage" _n
+
+. 
+. * Emit a comparison section: title (already TeX-escaped), old tex stem, new t
+> ex stem
+. capture program drop _cmpsection
+
+. program define _cmpsection
+  1.     args fh title old new
+  2.     file write `fh' "\section{`title'}" _n
+  3.     file write `fh' "\noindent\textbf{Original file:} \texttt{`old'}\par" 
+> _n
+  4.     file write `fh' "\OLD{\IfFileExists{`old'}{\input{`old'}}{\textit{(mis
+> sing: `old')}}}" _n
+  5.     file write `fh' "\vspace{0.4em}" _n
+  6.     file write `fh' "\noindent\textbf{New file:} \texttt{`new'}\par" _n
+  7.     file write `fh' "\NEW{\IfFileExists{`new'}{\input{`new'}}{\textit{(mis
+> sing: `new')}}}" _n
+  8.     file write `fh' "\clearpage" _n
+  9. end
+
+. 
+. _cmpsection `cmp' "Main DiD (\_main\_1\_did)" ///
+>     "main_did_downup_area_ac${sample}_rural.tex" ///
+>     "main_did_downup_ac${sample}_rural_acpop.tex"
+
+. 
+. _cmpsection `cmp' "Bureaucrat $\times$ Politician DiD (\_main\_3\_bureau\_pol
+> isc\_did)" ///
+>     "_main_3_bureau_polisc_did${sample}_rural.tex" ///
+>     "_main_3_bureau_polisc_did${sample}_rural_acpop.tex"
+
+. 
+. _cmpsection `cmp' "Protest DiD with Down$>$Up (\_main\_4\_protest\_5km\_fe12\
+> _did\_downup)" ///
+>     "_main_4_protest_5km_fe12_did_downup${sample}_rural.tex" ///
+>     "_main_4_protest_5km_fe12_did_downup${sample}_rural_acpop_new.tex"
+
+. 
+. _cmpsection `cmp' "Politician Char DiD with Down$>$Up (\_main\_5\_polischar\_
+> fe12\_did\_downup\_inter)" ///
+>     "_main_5_polischar_fe12_did_downup_inter${sample}_rural.tex" ///
+>     "_main_5_polischar_fe12_did_downup_inter${sample}_rural_acpop.tex"
+
+. 
+. _cmpsection `cmp' "Alternative DVs (\_app\_7\_main\_did\_downup\_area\_ac\_dv
+> )" ///
+>     "_app_7_main_did_downup_area_ac_dv${sample}_rural.tex" ///
+>     "_app_7_main_did_downup_area_ac_dv${sample}_rural_acpop.tex"
+
+. 
+. _cmpsection `cmp' "DiD by Year (\_app\_8\_main\_did\_by\_year)" ///
+>     "_app_8_main_did_by_year${sample}_rural.tex" ///
+>     "_app_8_main_did_by_year${sample}_rural_acpop.tex"
+
+. 
+. _cmpsection `cmp' "DiD by State (\_app\_9\_main\_did\_by\_state)" ///
+>     "_app_9_main_did_by_state${sample}_rural.tex" ///
+>     "_app_9_main_did_by_state${sample}_rural_acpop.tex"
+
+. 
+. _cmpsection `cmp' "Rice Moderators (\_app\_10\_did\_rice\_moderators)" ///
+>     "_app_10_did_rice_moderators${sample}_rural.tex" ///
+>     "_app_10_did_rice_moderators${sample}_rural_acpop.tex"
+
+. 
+. _cmpsection `cmp' "Politician Rice Mods (\_app\_14\_polischar\_fe12\_did\_ric
+> emods)" ///
+>     "_app_14_polischar_fe12_did_ricemods${sample}_rural.tex" ///
+>     "_app_14_polischar_fe12_did_ricemods${sample}_rural_acpop.tex"
+
+. 
+. _cmpsection `cmp' "Politician FE DiD (\_app\_15\_polischar\_fe12\_did)" ///
+>     "_app_15_polischar_fe12_did${sample}_rural.tex" ///
+>     "_app_15_polischar_fe12_did${sample}_rural_acpop.tex"
+
+. 
+. _cmpsection `cmp' "Downwind Heterogeneity (\_app\_20\_did\_downwind\_hm)" ///
+>     "_app_20_did_downwind_hm${sample}_rural.tex" ///
+>     "_app_20_did_downwind_hm${sample}_rural_acpop.tex"
+
+. 
+. file write `cmp' "\end{document}" _n
+
+. file close `cmp'
+
+. 
+. display "Comparison document: ${tables}/_comparison_downup_ac_vs_acpop${sampl
+> e}.tex"
+Comparison document: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_
+> farms/code/_stacked_downup_replication/../../tables/_comparison_downup_ac_vs_
+> acpop.tex
+
+. display "Compile with: pdflatex ${tables}/_comparison_downup_ac_vs_acpop${sam
+> ple}.tex"
+Compile with: pdflatex C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrat
+> s_farms/code/_stacked_downup_replication/../../tables/_comparison_downup_ac_v
+> s_acpop.tex
+
+. 
+. *****************************************************************************
+> ***
+. display "Table pass completed. Missing .ster files or model names were report
+> ed above; available tables were generated."
+Table pass completed. Missing .ster files or model names were reported above; a
+> vailable tables were generated.
+
+. *****************************************************************************
+> ***
+. 
+end of do-file

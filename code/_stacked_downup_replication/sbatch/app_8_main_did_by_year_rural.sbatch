@@ -3,7 +3,6 @@
 #$ -m abe
 #$ -q largemem
 #$ -N main_8_did_acp_stck
-#$ -pe smp 2
 #$ -cwd
 
 module load stata gcc

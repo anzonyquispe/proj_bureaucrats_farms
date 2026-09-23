@@ -1,0 +1,45 @@
+\documentclass[]{article}
+\setlength{\pdfpagewidth}{8.5in} \setlength{\pdfpageheight}{11in}
+\begin{document}
+\begin{tabular}{lccccc} \hline
+ &  & (1) & (2) & (3) & (5) \\
+VARIABLES & LABELS & N Fires & N Fires & N Fires & N Fires \\ \hline
+ &  &  &  &  &  \\
+0b.downup\_dummy\_ac\#0b.rice\_ahigh\#0b.maj\_agri\_Pop &  & 0 & 0 & 0 & 0 \\
+ &  & (0) & (0) & (0) & (0) \\
+0b.downup\_dummy\_ac\#0b.rice\_ahigh\#1.maj\_agri\_Pop &  & 0.0234*** & 0.0283*** & 0.0303*** & 0.00785*** \\
+ &  & (0.00358) & (0.00458) & (0.00469) & (0.00276) \\
+0b.downup\_dummy\_ac\#1.rice\_ahigh\#0b.maj\_agri\_Pop &  & 0.143*** & 0.00577* & 0.00540* & 0.0166*** \\
+ &  & (0.00525) & (0.00301) & (0.00308) & (0.00216) \\
+0b.downup\_dummy\_ac\#1.rice\_ahigh\#1.maj\_agri\_Pop &  & 0.157*** & 0.00482** & 0.00241 & -0.000868 \\
+ &  & (0.00678) & (0.00238) & (0.00298) & (0.00250) \\
+1.downup\_dummy\_ac\#0b.rice\_ahigh\#0b.maj\_agri\_Pop &  & -0.00411** & -0.00380** & -0.00248 & -0.00493*** \\
+ &  & (0.00192) & (0.00179) & (0.00186) & (0.00135) \\
+1.downup\_dummy\_ac\#0b.rice\_ahigh\#1.maj\_agri\_Pop &  & 0.0179*** & 0.0270*** & 0.0234*** &  \\
+ &  & (0.00491) & (0.00660) & (0.00677) &  \\
+1.downup\_dummy\_ac\#1.rice\_ahigh\#0b.maj\_agri\_Pop &  & 0.131*** & -0.0112*** & -0.00962*** &  \\
+ &  & (0.00498) & (0.00297) & (0.00304) &  \\
+1o.downup\_dummy\_ac\#1o.rice\_ahigh\#1o.maj\_agri\_Pop &  &  & 0 & 0 & 0 \\
+ &  &  & (0) & (0) & (0) \\
+av\_wind\_speed & av\_wind\_speed &  & -0.0313*** &  & 0.0210 \\
+ &  &  & (0.00977) &  & (0.0150) \\
+rollav\_wind\_direction\_cellid\_month & rollav\_wind\_direction\_cellid\_month &  & -1.71e-06 &  & -0.000129 \\
+ &  &  & (6.42e-05) &  & (8.64e-05) \\
+1.downup\_dummy\_ac\#1.rice\_ahigh\#1.maj\_agri\_Pop &  & 0.160*** &  &  &  \\
+ &  & (0.00701) &  &  &  \\
+1o.downup\_dummy\_ac\#0b.rice\_ahigh\#1o.maj\_agri\_Pop &  &  &  &  & 0 \\
+ &  &  &  &  & (0) \\
+1o.downup\_dummy\_ac\#1o.rice\_ahigh\#0b.maj\_agri\_Pop &  &  &  &  & 0 \\
+ &  &  &  &  & (0) \\
+ &  &  &  &  &  \\
+Observations &  & 12,015,840 & 12,015,360 & 12,015,840 & 12,015,360 \\
+Month year fe &  & N & N & Y & N \\
+AC fe &  & N & N & Y & N \\
+Controls &  & N & Y & N & Y \\
+AC x Month fe &  & N & Y & N & Y \\
+Grid fe &  & N & N & N & Y \\
+ Mean DV &  & 0.0371 & 0.0371 & 0.0371 & 0.0371 \\ \hline
+\multicolumn{6}{c}{ Robust standard errors in parentheses} \\
+\multicolumn{6}{c}{ *** p$<$0.01, ** p$<$0.05, * p$<$0.1} \\
+\end{tabular}
+\end{document}

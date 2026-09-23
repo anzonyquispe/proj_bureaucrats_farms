@@ -1,24 +1,19 @@
 ********************************************************************************
-* _main_4_protest_5km_fe12_did_downup_rural.do
-* Protest DiD analysis with downup_ac moderator - RURAL GRIDS ONLY
-* 6 columns: 3 FE specs × 2 moderator types (baseline + downup_ac)
-********************************************************************************
-
-********************************************************************************
-* Setup - Only set globals if running standalone (not from master)
+* Protest DiD: four regular specifications followed by the same four
+* specifications interacted with downup_ac_pop.
 ********************************************************************************
 
 if "$root" == "" {
     clear all
     set more off
-
-    * Set toggles for standalone run
-    global location "shell"
-    global sample ""
-
+    * Standalone defaults for the five sbatch-array parameters.
+    global location     "shell"
+    global sample       ""
+    global is_rural_var "is_rural"
+    global fe_list      "0/3"
+    global ster_suffix  "_acpop"
     global shell "/groups/sgulzar/sa_fires/proj_bureaucrats_farms"
-    global dbox "/Users/anzony.quisperojas/Library/CloudStorage/Dropbox/sa_fires/proj_bureaucrats_farms"
-
+    global dbox  "/Users/anzony.quisperojas/Library/CloudStorage/Dropbox/sa_fires/proj_bureaucrats_farms"
     if "$location" == "dbox" {
         global root "$dbox"
     }
@@ -26,92 +21,165 @@ if "$root" == "" {
         global root "$shell"
     }
 }
+if "$downup_var" == "" {
+    global downup_var "downup_ac_pop"
+}
 
-cd "${root}"
+global int_data "${root}/data_output/intermediate"
+global tables   "${code}/../../tables"
 
-********************************************************************************
-* Import Data
-********************************************************************************
+local protest_input ///
+    "${int_data}/stacked_data_protest5km_election_sameterm${sample}.csv"
+capture confirm file "`protest_input'"
+if _rc {
+    local protest_input ///
+        "${int_data}/cohortes_protest_term/stacked_data_protest5km_election_sameterm${sample}.csv"
+}
+capture confirm file "`protest_input'"
+if _rc {
+    local protest_input ///
+        "${int_data}/cohorts_protest_term/stacked_data_protest5km_election_sameterm${sample}.csv"
+}
+confirm file "`protest_input'"
+display as text "Final same-term protest input: `protest_input'"
+import delimited using "`protest_input'", clear varnames(1)
 
-import delimited using "${root}/data_output/intermediate/stacked_data_protest${sample}.csv", clear varnames(1)
-
-* Merge with rice moderators
-merge m:1 unique_small_grid_id ac_uq_id using "data_output/intermediate/rice_moderators.dta"
-keep if _merge == 3
+merge m:1 unique_small_grid_id month year using ///
+    "${int_data}/grid_month_ac_area_tr.dta", ///
+    keep(master match) keepusing(ac_area_tr)
+assert _merge == 3
 drop _merge
+assert !missing(ac_area_tr)
 
-* Merge with rural classification
-merge m:1 unique_small_grid_id using "${root}/data_output/intermediate/ghs_grid_classification_2000.dta", keepusing(is_rural)
-keep if _merge == 3
+confirm variable cohort_id
+confirm variable cohort_election_year
+confirm variable cohort_term_start
+confirm variable cohort_analysis_max
+assert monthyear >= cohort_term_start
+assert monthyear <= cohort_analysis_max
+assert cohort_term_start <= cohort
+assert inrange(cohort_analysis_max - cohort_term_start, 0, 59)
+bysort cohort_id: assert cohort == cohort[1]
+bysort cohort_id: assert cohort_election_year == cohort_election_year[1]
+bysort cohort_id: assert cohort_term_start == cohort_term_start[1]
+bysort cohort_id: assert cohort_analysis_max == cohort_analysis_max[1]
+capture confirm variable relative_year_bin
+if _rc {
+    rename relative_year relative_year_bin
+}
+assert relative_year_bin == floor((monthyear - cohort) / 12)
+keep if year < 2022 | (year == 2022 & month <= 8)
+keep if inrange(relative_year_bin, -4, 1)
+quietly summarize relative_year_bin
+assert r(min) >= -4 & r(max) <= 1
+display as text "Canonical protest DiD support restricted to: [" r(min) ", " r(max) "]"
+* Always express the fire-count outcome in thousands.
+capture drop countk
+gen countk = count * 1000
+
+merge m:1 unique_small_grid_id using ///
+    "${int_data}/ghs_grid_classification_2000.dta", ///
+    keep(master match) keepusing(is_rural)
 drop _merge
+keep if ${is_rural_var} == 1
 
-* Keep only rural grids
-keep if is_rural == 1
+egen unique_small_grid_id_cohort = group(unique_small_grid_id cohort_id)
+capture drop province_cohort
+egen province_cohort = group(province cohort_id)
+egen monthyearco = group(monthyear cohort_id)
+egen relativeyear_cohort = group(relative_year_bin cohort_id)
 
-display "Observations after rural filter: " _N
+* The production stack must already contain both sides of the switch for every
+* retained grid-cohort. Fail loudly instead of silently changing the sample.
+bysort unique_small_grid_id_cohort: egen byte has_pre = max(relative_year_bin < 0)
+bysort unique_small_grid_id_cohort: egen byte has_post = max(relative_year_bin >= 0)
+egen byte unit_tag = tag(unique_small_grid_id_cohort)
+quietly count if unit_tag
+local units_before = r(N)
+quietly count if unit_tag & has_pre == 1 & has_post == 1
+local units_balanced = r(N)
+display as text "Grid-cohort units with pre and post periods: `units_balanced' of `units_before'"
+keep if has_pre == 1 & has_post == 1
+assert has_pre == 1 & has_post == 1
+drop unit_tag has_pre has_post
 
-********************************************************************************
-* Generate Variables
-********************************************************************************
-
-sum relative_year_bin
-local rmin = r(min)
 gen post_ = relative_year_bin >= 0
 gen moderator = 0
+gen byte nofe = 1
 
-local dep_var countk
-local rhs "ib0.post_##ib0.treat##ib0.moderator wind_direction av_wind_speed"
+* Presentation/main-table FE progression:
+*   (0) no FE (constant-only absorbed category)
+*   (1) grid x cohort
+*   (2) grid x cohort + relative year x cohort
+*   (3) grid x cohort + relative year x cohort + province x cohort trend
+local fe0 "nofe"
+local fe1 "unique_small_grid_id_cohort"
+local fe2 "unique_small_grid_id_cohort relativeyear_cohort"
+local fe3 "unique_small_grid_id_cohort relativeyear_cohort province_cohort#c.monthyear"
+local moderators_list moderator ${downup_var}
 
-* FE specifications
-local fe1 "unique_small_grid_id_cohort relative_year_bin"
-local fe2 "unique_small_grid_id_cohort relative_year_bin province_cohort#election_year"
-local fe3 "unique_small_grid_id_cohort relative_year_bin province_cohort#election_year province_cohort#c.monthyear "
+* Anchor every regular and interacted model to the sample retained by the
+* richest FE specification with the full downup interaction.
+local common_rhs "ib0.post_##ib0.treat##ib0.${downup_var} wind_direction av_wind_speed"
+do "${code}/_apply_analysis_subsample.do"
 
-* Statistics
-quietly summarize `dep_var' if treat == 0 & relative_year_bin <= -1
-local ymean_fmt = string(r(mean), "%9.3f")
-unique ac_uq_id
-local numacs = r(unique)
+quietly reghdfejl countk `common_rhs', ///
+    absorb(`fe3') vce(cluster ac_area_tr)
+gen byte common_sample = e(sample)
+quietly count
+local candidate_n = r(N)
+quietly count if common_sample
+local common_n = r(N)
+display as text "Common-sample anchor: interacted FE specification 3"
+display as text "Common estimation sample: `common_n' of `candidate_n' observations"
+keep if common_sample
+drop common_sample
 
-********************************************************************************
-* Run Regressions
-********************************************************************************
+isid unique_small_grid_id monthyear cohort_id treat
+export delimited using ///
+    "${int_data}/protest_downup_ac_pop_esample${sample}.csv", replace
+display as result "Exported protest richest-DiD sample: `common_n' rows"
 
+egen tag_ac = tag(ac_uq_id)
+count if tag_ac == 1
+local numacs = r(N)
+
+est clear
 local i = 1
-
-foreach mod in 0 1 {
-
-    if `mod' == 0 {
-        replace moderator = 0
-    }
-    else {
-        replace moderator = downup_ac
-        replace moderator = . if downup_ac == .
-    }
-
-    foreach fe of numlist 1/3 {
-
-        reghdfejl `dep_var' `rhs', absorb(`fe`fe'') cluster(ac_area_tr)
-
-        * Store FE indicators
-        estadd local gridfe "Y"
-		estadd local time "Y"
-		estadd local electionfe = cond(`fe' >= 2, "Y", "N")
-        estadd local provtrendfe = cond(`fe' == 3, "Y", "N")
-        estadd local ymean "`ymean_fmt'"
-        estadd local acq "`numacs'"
-
-        est store evreg`i'
+foreach mod of local moderators_list {
+    replace moderator = `mod'
+    local rhs "ib0.post_##ib0.treat##ib0.`mod' wind_direction av_wind_speed"
+    quietly summarize countk if treat == 1 & relative_year_bin <= -1
+    local ymean = r(mean)
+    quietly summarize countk if treat == 1 & relative_year_bin <= -1 & moderator == 1
+    local ymean2 = r(mean)
+    foreach fe of numlist $fe_list {
+        reghdfejl countk `rhs', ///
+            absorb(`fe`fe'') vce(cluster ac_area_tr)
+        if e(N) != `common_n' {
+            display as error "FE specification `fe' with moderator `mod' changed the anchored sample."
+            exit 459
+        }
+        estadd scalar ymean = `ymean'
+        estadd scalar ymean2 = `ymean2'
+        estadd scalar acq = `numacs'
+        estadd local smpl "Rural"
+        estadd local fespec "`fe`fe''"
+        local grid_label = cond(`fe' == 0, "N", "Y")
+        estadd local gridfe "`grid_label'"
+        local time_label = cond(`fe' >= 2, "Y", "N")
+        local provtrend_label = cond(`fe' == 3, "Y", "N")
+        estadd local time "`time_label'"
+        estadd local electionfe "N"
+        estadd local provtrendfe "`provtrend_label'"
+        estadd local mod "`mod'"
+        local estname evreg`i'
         local i = `i' + 1
+        est store `estname'
     }
 }
 
-********************************************************************************
-* Save ster file
-********************************************************************************
-
-estwrite evreg* using "${root}/tex/paper/tables/_main_4_protest_5km_fe12_did_downup${sample}_rural.ster", replace
-
-display "Ster: ${root}/tex/paper/tables/_main_4_protest_5km_fe12_did_downup${sample}_rural.ster"
+estwrite evreg1 evreg2 evreg3 evreg4 evreg5 evreg6 evreg7 evreg8 using ///
+    "${tables}/_main_4_protest_5km_fe12_did_downup${sample}_rural${ster_suffix}.ster", replace
 
 ********************************************************************************

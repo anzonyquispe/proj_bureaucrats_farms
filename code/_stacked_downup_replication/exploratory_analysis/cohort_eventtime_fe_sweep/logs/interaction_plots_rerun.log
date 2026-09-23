@@ -1,0 +1,1069 @@
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+      name:  interaction_plots
+       log:  C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/code/_stacked_downup_replication/exploratory_analysis/cohort_eventtime_fe_sweep/logs/interaction_plots_rerun.log
+  log type:  text
+ opened on:  21 Aug 2026, 07:21:45
+
+. 
+. quietly do "`code'/interaction_graph.ado"
+
+. 
+. foreach analysis in politician protest {
+  2.     forvalues fe = 1/32 {
+  3.         local tag : display %02.0f `fe'
+  4.         local tag = strtrim("`tag'")
+  5. 
+.         if "`analysis'" == "politician" {
+  6.             local prefix "politician_byprov_cohorttime_fe`tag'"
+  7.             local graph_type "politician"
+  8.         }
+  9.         else {
+ 10.             local prefix "protest_never_cohorttime_fe`tag'"
+ 11.             local graph_type "protest"
+ 12.         }
+ 13. 
+.         local input "`tables'/`prefix'_did_interaction_rural_acpop_all.ster"
+ 14.         local output "`figures'/`prefix'_did_interaction_rural_acpop_all"
+ 15.         confirm file "`input'"
+ 16. 
+.         est clear
+ 17.         interaction_graph using "`input'", estimates(1) ///
+>             output("`output'") type(`graph_type') modvar(downup_ac_pop)
+ 18.         confirm file "`output'_1.png"
+ 19.     }
+ 20. }
+
+--------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+------------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with Julia
+--------------------------------------------------------------------------------
+(results evreg1 are active now)
+
+INTERACTION AUDIT (CONTROL-PRE STANDARDIZED): politician, estimate evreg1, moderator downup_ac_pop
+Control pre  : b =     0.000000   95% CI [    0.000000,     0.000000]   90% CI [    0.000000,     0.000000]
+Control post : b =    -0.902982   95% CI [  -12.082902,    10.276937]   90% CI [  -10.284226,     8.478262]
+Treated post : b =    10.369040   95% CI [   -7.573222,    28.311302]   90% CI [   -4.686590,    25.424670]
+Difference   : b =    11.272022   SE =     6.691565   95% CI [   -1.850595,    24.394640]   90% CI [    0.260630,    22.283414]   p =  0.092228
+file C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_cohorttime_fe01_did_interaction_rural_acpop_all_1.png saved as PNG format
+Exported: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_cohorttime_fe01_did_interaction_rural_acpop_all_1.png
+
+--------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+------------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with Julia
+--------------------------------------------------------------------------------
+(results evreg1 are active now)
+
+INTERACTION AUDIT (CONTROL-PRE STANDARDIZED): politician, estimate evreg1, moderator downup_ac_pop
+Control pre  : b =     0.000000   95% CI [    0.000000,     0.000000]   90% CI [    0.000000,     0.000000]
+Control post : b =    -1.787336   95% CI [  -12.842381,     9.267710]   90% CI [  -11.063796,     7.489124]
+Treated post : b =     8.326433   95% CI [   -9.232131,    25.884998]   90% CI [   -6.407231,    23.060097]
+Difference   : b =    10.113769   SE =     6.668875   95% CI [   -2.964351,    23.191890]   90% CI [   -0.860284,    21.087823]   p =  0.129524
+file C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_cohorttime_fe02_did_interaction_rural_acpop_all_1.png saved as PNG format
+Exported: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_cohorttime_fe02_did_interaction_rural_acpop_all_1.png
+
+--------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+------------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with Julia
+--------------------------------------------------------------------------------
+(results evreg1 are active now)
+
+INTERACTION AUDIT (CONTROL-PRE STANDARDIZED): politician, estimate evreg1, moderator downup_ac_pop
+Control pre  : b =     0.000000   95% CI [    0.000000,     0.000000]   90% CI [    0.000000,     0.000000]
+Control post : b =    -0.995270   95% CI [  -12.246794,    10.256254]   90% CI [  -10.436598,     8.446058]
+Treated post : b =    10.391107   95% CI [   -7.626850,    28.409063]   90% CI [   -4.728040,    25.510254]
+Difference   : b =    11.386377   SE =     6.715486   95% CI [   -1.783150,    24.555904]   90% CI [    0.335622,    22.437131]   p =  0.090118
+file C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_cohorttime_fe03_did_interaction_rural_acpop_all_1.png saved as PNG format
+Exported: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_cohorttime_fe03_did_interaction_rural_acpop_all_1.png
+
+--------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+------------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with Julia
+--------------------------------------------------------------------------------
+(results evreg1 are active now)
+
+INTERACTION AUDIT (CONTROL-PRE STANDARDIZED): politician, estimate evreg1, moderator downup_ac_pop
+Control pre  : b =     0.000000   95% CI [    0.000000,     0.000000]   90% CI [    0.000000,     0.000000]
+Control post : b =    -0.902982   95% CI [  -12.082905,    10.276940]   90% CI [  -10.284229,     8.478264]
+Treated post : b =    10.369040   95% CI [   -7.573157,    28.311237]   90% CI [   -4.686536,    25.424616]
+Difference   : b =    11.272022   SE =     6.691522   95% CI [   -1.850511,    24.394555]   90% CI [    0.260701,    22.283343]   p =  0.092226
+file C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_cohorttime_fe04_did_interaction_rural_acpop_all_1.png saved as PNG format
+Exported: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_cohorttime_fe04_did_interaction_rural_acpop_all_1.png
+
+--------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+------------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with Julia
+--------------------------------------------------------------------------------
+(results evreg1 are active now)
+
+INTERACTION AUDIT (CONTROL-PRE STANDARDIZED): politician, estimate evreg1, moderator downup_ac_pop
+Control pre  : b =     0.000000   95% CI [    0.000000,     0.000000]   90% CI [    0.000000,     0.000000]
+Control post : b =    -0.902982   95% CI [  -12.082913,    10.276949]   90% CI [  -10.284236,     8.478271]
+Treated post : b =    10.369040   95% CI [   -7.573243,    28.311323]   90% CI [   -4.686608,    25.424688]
+Difference   : b =    11.272022   SE =     6.691577   95% CI [   -1.850619,    24.394663]   90% CI [    0.260611,    22.283434]   p =  0.092229
+file C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_cohorttime_fe05_did_interaction_rural_acpop_all_1.png saved as PNG format
+Exported: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_cohorttime_fe05_did_interaction_rural_acpop_all_1.png
+
+--------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+------------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with Julia
+--------------------------------------------------------------------------------
+(results evreg1 are active now)
+
+INTERACTION AUDIT (CONTROL-PRE STANDARDIZED): politician, estimate evreg1, moderator downup_ac_pop
+Control pre  : b =     0.000000   95% CI [    0.000000,     0.000000]   90% CI [    0.000000,     0.000000]
+Control post : b =    -0.902982   95% CI [  -12.082947,    10.276983]   90% CI [  -10.284264,     8.478300]
+Treated post : b =    10.369040   95% CI [   -7.573294,    28.311374]   90% CI [   -4.686651,    25.424731]
+Difference   : b =    11.272022   SE =     6.691596   95% CI [   -1.850656,    24.394701]   90% CI [    0.260579,    22.283465]   p =  0.092229
+file C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_cohorttime_fe06_did_interaction_rural_acpop_all_1.png saved as PNG format
+Exported: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_cohorttime_fe06_did_interaction_rural_acpop_all_1.png
+
+--------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+------------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with Julia
+--------------------------------------------------------------------------------
+(results evreg1 are active now)
+
+INTERACTION AUDIT (CONTROL-PRE STANDARDIZED): politician, estimate evreg1, moderator downup_ac_pop
+Control pre  : b =     0.000000   95% CI [    0.000000,     0.000000]   90% CI [    0.000000,     0.000000]
+Control post : b =    -1.787336   95% CI [  -12.842378,     9.267706]   90% CI [  -11.063793,     7.489122]
+Treated post : b =     8.326433   95% CI [   -9.232143,    25.885010]   90% CI [   -6.407241,    23.060108]
+Difference   : b =    10.113769   SE =     6.668879   95% CI [   -2.964358,    23.191897]   90% CI [   -0.860291,    21.087829]   p =  0.129524
+file C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_cohorttime_fe07_did_interaction_rural_acpop_all_1.png saved as PNG format
+Exported: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_cohorttime_fe07_did_interaction_rural_acpop_all_1.png
+
+--------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+------------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with Julia
+--------------------------------------------------------------------------------
+(results evreg1 are active now)
+
+INTERACTION AUDIT (CONTROL-PRE STANDARDIZED): politician, estimate evreg1, moderator downup_ac_pop
+Control pre  : b =     0.000000   95% CI [    0.000000,     0.000000]   90% CI [    0.000000,     0.000000]
+Control post : b =    -1.787336   95% CI [  -12.842381,     9.267709]   90% CI [  -11.063795,     7.489124]
+Treated post : b =     8.326433   95% CI [   -9.232150,    25.885017]   90% CI [   -6.407246,    23.060113]
+Difference   : b =    10.113769   SE =     6.668882   95% CI [   -2.964364,    23.191903]   90% CI [   -0.860295,    21.087834]   p =  0.129524
+file C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_cohorttime_fe08_did_interaction_rural_acpop_all_1.png saved as PNG format
+Exported: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_cohorttime_fe08_did_interaction_rural_acpop_all_1.png
+
+--------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+------------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with Julia
+--------------------------------------------------------------------------------
+(results evreg1 are active now)
+
+INTERACTION AUDIT (CONTROL-PRE STANDARDIZED): politician, estimate evreg1, moderator downup_ac_pop
+Control pre  : b =     0.000000   95% CI [    0.000000,     0.000000]   90% CI [    0.000000,     0.000000]
+Control post : b =    -1.787336   95% CI [  -12.842392,     9.267721]   90% CI [  -11.063805,     7.489133]
+Treated post : b =     8.326433   95% CI [   -9.232149,    25.885016]   90% CI [   -6.407245,    23.060112]
+Difference   : b =    10.113769   SE =     6.668881   95% CI [   -2.964363,    23.191901]   90% CI [   -0.860294,    21.087833]   p =  0.129524
+file C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_cohorttime_fe09_did_interaction_rural_acpop_all_1.png saved as PNG format
+Exported: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_cohorttime_fe09_did_interaction_rural_acpop_all_1.png
+
+--------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+------------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with Julia
+--------------------------------------------------------------------------------
+(results evreg1 are active now)
+
+INTERACTION AUDIT (CONTROL-PRE STANDARDIZED): politician, estimate evreg1, moderator downup_ac_pop
+Control pre  : b =     0.000000   95% CI [    0.000000,     0.000000]   90% CI [    0.000000,     0.000000]
+Control post : b =    -1.787336   95% CI [  -12.842417,     9.267745]   90% CI [  -11.063826,     7.489154]
+Treated post : b =     8.326433   95% CI [   -9.232203,    25.885070]   90% CI [   -6.407291,    23.060158]
+Difference   : b =    10.113769   SE =     6.668901   95% CI [   -2.964403,    23.191942]   90% CI [   -0.860328,    21.087867]   p =  0.129526
+file C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_cohorttime_fe10_did_interaction_rural_acpop_all_1.png saved as PNG format
+Exported: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_cohorttime_fe10_did_interaction_rural_acpop_all_1.png
+
+--------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+------------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with Julia
+--------------------------------------------------------------------------------
+(results evreg1 are active now)
+
+INTERACTION AUDIT (CONTROL-PRE STANDARDIZED): politician, estimate evreg1, moderator downup_ac_pop
+Control pre  : b =     0.000000   95% CI [    0.000000,     0.000000]   90% CI [    0.000000,     0.000000]
+Control post : b =    -0.991350   95% CI [  -12.242186,    10.259486]   90% CI [  -10.432101,     8.449401]
+Treated post : b =    10.396064   95% CI [   -7.621450,    28.413579]   90% CI [   -4.722711,    25.514840]
+Difference   : b =    11.387414   SE =     6.715462   95% CI [   -1.782067,    24.556896]   90% CI [    0.336698,    22.438131]   p =  0.090087
+file C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_cohorttime_fe11_did_interaction_rural_acpop_all_1.png saved as PNG format
+Exported: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_cohorttime_fe11_did_interaction_rural_acpop_all_1.png
+
+--------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+------------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with Julia
+--------------------------------------------------------------------------------
+(results evreg1 are active now)
+
+INTERACTION AUDIT (CONTROL-PRE STANDARDIZED): politician, estimate evreg1, moderator downup_ac_pop
+Control pre  : b =     0.000000   95% CI [    0.000000,     0.000000]   90% CI [    0.000000,     0.000000]
+Control post : b =    -0.995780   95% CI [  -12.247308,    10.255748]   90% CI [  -10.437112,     8.445552]
+Treated post : b =    10.389715   95% CI [   -7.628267,    28.407697]   90% CI [   -4.729453,    25.508883]
+Difference   : b =    11.385495   SE =     6.715493   95% CI [   -1.784047,    24.555037]   90% CI [    0.334728,    22.436262]   p =  0.090143
+file C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_cohorttime_fe12_did_interaction_rural_acpop_all_1.png saved as PNG format
+Exported: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_cohorttime_fe12_did_interaction_rural_acpop_all_1.png
+
+--------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+------------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with Julia
+--------------------------------------------------------------------------------
+(results evreg1 are active now)
+
+INTERACTION AUDIT (CONTROL-PRE STANDARDIZED): politician, estimate evreg1, moderator downup_ac_pop
+Control pre  : b =     0.000000   95% CI [    0.000000,     0.000000]   90% CI [    0.000000,     0.000000]
+Control post : b =    -0.995810   95% CI [  -12.247393,    10.255772]   90% CI [  -10.437188,     8.445567]
+Treated post : b =    10.389704   95% CI [   -7.628350,    28.407757]   90% CI [   -4.729524,    25.508932]
+Difference   : b =    11.385514   SE =     6.715518   95% CI [   -1.784077,    24.555106]   90% CI [    0.334706,    22.436323]   p =  0.090144
+file C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_cohorttime_fe13_did_interaction_rural_acpop_all_1.png saved as PNG format
+Exported: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_cohorttime_fe13_did_interaction_rural_acpop_all_1.png
+
+--------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+------------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with Julia
+--------------------------------------------------------------------------------
+(results evreg1 are active now)
+
+INTERACTION AUDIT (CONTROL-PRE STANDARDIZED): politician, estimate evreg1, moderator downup_ac_pop
+Control pre  : b =     0.000000   95% CI [    0.000000,     0.000000]   90% CI [    0.000000,     0.000000]
+Control post : b =    -0.902982   95% CI [  -12.082918,    10.276953]   90% CI [  -10.284239,     8.478275]
+Treated post : b =    10.369040   95% CI [   -7.573244,    28.311324]   90% CI [   -4.686609,    25.424689]
+Difference   : b =    11.272022   SE =     6.691581   95% CI [   -1.850627,    24.394671]   90% CI [    0.260604,    22.283441]   p =  0.092229
+file C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_cohorttime_fe14_did_interaction_rural_acpop_all_1.png saved as PNG format
+Exported: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_cohorttime_fe14_did_interaction_rural_acpop_all_1.png
+
+--------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+------------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with Julia
+--------------------------------------------------------------------------------
+(results evreg1 are active now)
+
+INTERACTION AUDIT (CONTROL-PRE STANDARDIZED): politician, estimate evreg1, moderator downup_ac_pop
+Control pre  : b =     0.000000   95% CI [    0.000000,     0.000000]   90% CI [    0.000000,     0.000000]
+Control post : b =    -0.902982   95% CI [  -12.082947,    10.276982]   90% CI [  -10.284264,     8.478299]
+Treated post : b =    10.369040   95% CI [   -7.573308,    28.311388]   90% CI [   -4.686663,    25.424743]
+Difference   : b =    11.272022   SE =     6.691602   95% CI [   -1.850668,    24.394712]   90% CI [    0.260569,    22.283475]   p =  0.092230
+file C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_cohorttime_fe15_did_interaction_rural_acpop_all_1.png saved as PNG format
+Exported: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_cohorttime_fe15_did_interaction_rural_acpop_all_1.png
+
+--------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+------------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with Julia
+--------------------------------------------------------------------------------
+(results evreg1 are active now)
+
+INTERACTION AUDIT (CONTROL-PRE STANDARDIZED): politician, estimate evreg1, moderator downup_ac_pop
+Control pre  : b =     0.000000   95% CI [    0.000000,     0.000000]   90% CI [    0.000000,     0.000000]
+Control post : b =    -0.902982   95% CI [  -12.082958,    10.276994]   90% CI [  -10.284274,     8.478309]
+Treated post : b =    10.369040   95% CI [   -7.573311,    28.311391]   90% CI [   -4.686665,    25.424745]
+Difference   : b =    11.272022   SE =     6.691601   95% CI [   -1.850665,    24.394710]   90% CI [    0.260571,    22.283473]   p =  0.092230
+file C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_cohorttime_fe16_did_interaction_rural_acpop_all_1.png saved as PNG format
+Exported: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_cohorttime_fe16_did_interaction_rural_acpop_all_1.png
+
+--------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+------------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with Julia
+--------------------------------------------------------------------------------
+(results evreg1 are active now)
+
+INTERACTION AUDIT (CONTROL-PRE STANDARDIZED): politician, estimate evreg1, moderator downup_ac_pop
+Control pre  : b =     0.000000   95% CI [    0.000000,     0.000000]   90% CI [    0.000000,     0.000000]
+Control post : b =    -1.787336   95% CI [  -12.842386,     9.267714]   90% CI [  -11.063800,     7.489128]
+Treated post : b =     8.326433   95% CI [   -9.232160,    25.885026]   90% CI [   -6.407254,    23.060121]
+Difference   : b =    10.113769   SE =     6.668885   95% CI [   -2.964370,    23.191909]   90% CI [   -0.860300,    21.087839]   p =  0.129525
+file C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_cohorttime_fe17_did_interaction_rural_acpop_all_1.png saved as PNG format
+Exported: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_cohorttime_fe17_did_interaction_rural_acpop_all_1.png
+
+--------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+------------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with Julia
+--------------------------------------------------------------------------------
+(results evreg1 are active now)
+
+INTERACTION AUDIT (CONTROL-PRE STANDARDIZED): politician, estimate evreg1, moderator downup_ac_pop
+Control pre  : b =     0.000000   95% CI [    0.000000,     0.000000]   90% CI [    0.000000,     0.000000]
+Control post : b =    -1.787336   95% CI [  -12.842401,     9.267729]   90% CI [  -11.063813,     7.489141]
+Treated post : b =     8.326433   95% CI [   -9.232164,    25.885031]   90% CI [   -6.407258,    23.060125]
+Difference   : b =    10.113769   SE =     6.668888   95% CI [   -2.964377,    23.191916]   90% CI [   -0.860306,    21.087845]   p =  0.129525
+file C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_cohorttime_fe18_did_interaction_rural_acpop_all_1.png saved as PNG format
+Exported: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_cohorttime_fe18_did_interaction_rural_acpop_all_1.png
+
+--------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+------------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with Julia
+--------------------------------------------------------------------------------
+(results evreg1 are active now)
+
+INTERACTION AUDIT (CONTROL-PRE STANDARDIZED): politician, estimate evreg1, moderator downup_ac_pop
+Control pre  : b =     0.000000   95% CI [    0.000000,     0.000000]   90% CI [    0.000000,     0.000000]
+Control post : b =    -1.787336   95% CI [  -12.842415,     9.267744]   90% CI [  -11.063825,     7.489153]
+Treated post : b =     8.326433   95% CI [   -9.232202,    25.885069]   90% CI [   -6.407290,    23.060157]
+Difference   : b =    10.113769   SE =     6.668904   95% CI [   -2.964409,    23.191947]   90% CI [   -0.860333,    21.087871]   p =  0.129526
+file C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_cohorttime_fe19_did_interaction_rural_acpop_all_1.png saved as PNG format
+Exported: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_cohorttime_fe19_did_interaction_rural_acpop_all_1.png
+
+--------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+------------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with Julia
+--------------------------------------------------------------------------------
+(results evreg1 are active now)
+
+INTERACTION AUDIT (CONTROL-PRE STANDARDIZED): politician, estimate evreg1, moderator downup_ac_pop
+Control pre  : b =     0.000000   95% CI [    0.000000,     0.000000]   90% CI [    0.000000,     0.000000]
+Control post : b =    -1.787336   95% CI [  -12.842391,     9.267720]   90% CI [  -11.063805,     7.489133]
+Treated post : b =     8.326433   95% CI [   -9.232162,    25.885029]   90% CI [   -6.407256,    23.060123]
+Difference   : b =    10.113769   SE =     6.668887   95% CI [   -2.964375,    23.191913]   90% CI [   -0.860304,    21.087843]   p =  0.129525
+file C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_cohorttime_fe20_did_interaction_rural_acpop_all_1.png saved as PNG format
+Exported: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_cohorttime_fe20_did_interaction_rural_acpop_all_1.png
+
+--------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+------------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with Julia
+--------------------------------------------------------------------------------
+(results evreg1 are active now)
+
+INTERACTION AUDIT (CONTROL-PRE STANDARDIZED): politician, estimate evreg1, moderator downup_ac_pop
+Control pre  : b =     0.000000   95% CI [    0.000000,     0.000000]   90% CI [    0.000000,     0.000000]
+Control post : b =    -1.787336   95% CI [  -12.842428,     9.267756]   90% CI [  -11.063835,     7.489163]
+Treated post : b =     8.326433   95% CI [   -9.232213,    25.885080]   90% CI [   -6.407299,    23.060166]
+Difference   : b =    10.113769   SE =     6.668904   95% CI [   -2.964407,    23.191946]   90% CI [   -0.860332,    21.087870]   p =  0.129526
+file C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_cohorttime_fe21_did_interaction_rural_acpop_all_1.png saved as PNG format
+Exported: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_cohorttime_fe21_did_interaction_rural_acpop_all_1.png
+
+--------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+------------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with Julia
+--------------------------------------------------------------------------------
+(results evreg1 are active now)
+
+INTERACTION AUDIT (CONTROL-PRE STANDARDIZED): politician, estimate evreg1, moderator downup_ac_pop
+Control pre  : b =     0.000000   95% CI [    0.000000,     0.000000]   90% CI [    0.000000,     0.000000]
+Control post : b =    -1.787336   95% CI [  -12.842437,     9.267766]   90% CI [  -11.063843,     7.489171]
+Treated post : b =     8.326433   95% CI [   -9.232218,    25.885085]   90% CI [   -6.407304,    23.060170]
+Difference   : b =    10.113769   SE =     6.668908   95% CI [   -2.964415,    23.191954]   90% CI [   -0.860338,    21.087877]   p =  0.129526
+file C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_cohorttime_fe22_did_interaction_rural_acpop_all_1.png saved as PNG format
+Exported: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_cohorttime_fe22_did_interaction_rural_acpop_all_1.png
+
+--------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+------------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with Julia
+--------------------------------------------------------------------------------
+(results evreg1 are active now)
+
+INTERACTION AUDIT (CONTROL-PRE STANDARDIZED): politician, estimate evreg1, moderator downup_ac_pop
+Control pre  : b =     0.000000   95% CI [    0.000000,     0.000000]   90% CI [    0.000000,     0.000000]
+Control post : b =    -0.993478   95% CI [  -12.244468,    10.257512]   90% CI [  -10.434358,     8.447402]
+Treated post : b =    10.393352   95% CI [   -7.624336,    28.411039]   90% CI [   -4.725569,    25.512273]
+Difference   : b =    11.386830   SE =     6.715456   95% CI [   -1.782640,    24.556300]   90% CI [    0.336123,    22.437536]   p =  0.090104
+file C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_cohorttime_fe23_did_interaction_rural_acpop_all_1.png saved as PNG format
+Exported: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_cohorttime_fe23_did_interaction_rural_acpop_all_1.png
+
+--------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+------------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with Julia
+--------------------------------------------------------------------------------
+(results evreg1 are active now)
+
+INTERACTION AUDIT (CONTROL-PRE STANDARDIZED): politician, estimate evreg1, moderator downup_ac_pop
+Control pre  : b =     0.000000   95% CI [    0.000000,     0.000000]   90% CI [    0.000000,     0.000000]
+Control post : b =    -0.990323   95% CI [  -12.239178,    10.258533]   90% CI [  -10.429412,     8.448767]
+Treated post : b =    10.395351   95% CI [   -7.620291,    28.410994]   90% CI [   -4.721854,    25.512557]
+Difference   : b =    11.385674   SE =     6.714866   95% CI [   -1.782638,    24.553986]   90% CI [    0.335939,    22.435409]   p =  0.090108
+file C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_cohorttime_fe24_did_interaction_rural_acpop_all_1.png saved as PNG format
+Exported: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_cohorttime_fe24_did_interaction_rural_acpop_all_1.png
+
+--------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+------------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with Julia
+--------------------------------------------------------------------------------
+(results evreg1 are active now)
+
+INTERACTION AUDIT (CONTROL-PRE STANDARDIZED): politician, estimate evreg1, moderator downup_ac_pop
+Control pre  : b =     0.000000   95% CI [    0.000000,     0.000000]   90% CI [    0.000000,     0.000000]
+Control post : b =    -0.996131   95% CI [  -12.247737,    10.255474]   90% CI [  -10.437528,     8.445266]
+Treated post : b =    10.388865   95% CI [   -7.629209,    28.406938]   90% CI [   -4.730380,    25.508109]
+Difference   : b =    11.384996   SE =     6.715524   95% CI [   -1.784606,    24.554598]   90% CI [    0.334178,    22.435813]   p =  0.090159
+file C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_cohorttime_fe25_did_interaction_rural_acpop_all_1.png saved as PNG format
+Exported: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_cohorttime_fe25_did_interaction_rural_acpop_all_1.png
+
+--------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+------------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with Julia
+--------------------------------------------------------------------------------
+(results evreg1 are active now)
+
+INTERACTION AUDIT (CONTROL-PRE STANDARDIZED): politician, estimate evreg1, moderator downup_ac_pop
+Control pre  : b =     0.000000   95% CI [    0.000000,     0.000000]   90% CI [    0.000000,     0.000000]
+Control post : b =    -0.902982   95% CI [  -12.082963,    10.276998]   90% CI [  -10.284277,     8.478313]
+Treated post : b =    10.369040   95% CI [   -7.573316,    28.311396]   90% CI [   -4.686669,    25.424749]
+Difference   : b =    11.272022   SE =     6.691603   95% CI [   -1.850670,    24.394715]   90% CI [    0.260567,    22.283477]   p =  0.092230
+file C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_cohorttime_fe26_did_interaction_rural_acpop_all_1.png saved as PNG format
+Exported: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_cohorttime_fe26_did_interaction_rural_acpop_all_1.png
+
+--------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+------------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with Julia
+--------------------------------------------------------------------------------
+(results evreg1 are active now)
+
+INTERACTION AUDIT (CONTROL-PRE STANDARDIZED): politician, estimate evreg1, moderator downup_ac_pop
+Control pre  : b =     0.000000   95% CI [    0.000000,     0.000000]   90% CI [    0.000000,     0.000000]
+Control post : b =    -1.787336   95% CI [  -12.842399,     9.267727]   90% CI [  -11.063811,     7.489139]
+Treated post : b =     8.326433   95% CI [   -9.232165,    25.885032]   90% CI [   -6.407259,    23.060125]
+Difference   : b =    10.113769   SE =     6.668884   95% CI [   -2.964369,    23.191907]   90% CI [   -0.860299,    21.087838]   p =  0.129525
+file C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_cohorttime_fe27_did_interaction_rural_acpop_all_1.png saved as PNG format
+Exported: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_cohorttime_fe27_did_interaction_rural_acpop_all_1.png
+
+--------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+------------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with Julia
+--------------------------------------------------------------------------------
+(results evreg1 are active now)
+
+INTERACTION AUDIT (CONTROL-PRE STANDARDIZED): politician, estimate evreg1, moderator downup_ac_pop
+Control pre  : b =     0.000000   95% CI [    0.000000,     0.000000]   90% CI [    0.000000,     0.000000]
+Control post : b =    -1.787336   95% CI [  -12.842432,     9.267761]   90% CI [  -11.063839,     7.489167]
+Treated post : b =     8.326433   95% CI [   -9.232232,    25.885099]   90% CI [   -6.407315,    23.060182]
+Difference   : b =    10.113769   SE =     6.668909   95% CI [   -2.964419,    23.191957]   90% CI [   -0.860341,    21.087880]   p =  0.129526
+file C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_cohorttime_fe28_did_interaction_rural_acpop_all_1.png saved as PNG format
+Exported: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_cohorttime_fe28_did_interaction_rural_acpop_all_1.png
+
+--------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+------------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with Julia
+--------------------------------------------------------------------------------
+(results evreg1 are active now)
+
+INTERACTION AUDIT (CONTROL-PRE STANDARDIZED): politician, estimate evreg1, moderator downup_ac_pop
+Control pre  : b =     0.000000   95% CI [    0.000000,     0.000000]   90% CI [    0.000000,     0.000000]
+Control post : b =    -1.787336   95% CI [  -12.842443,     9.267771]   90% CI [  -11.063847,     7.489176]
+Treated post : b =     8.326433   95% CI [   -9.232231,    25.885098]   90% CI [   -6.407314,    23.060181]
+Difference   : b =    10.113769   SE =     6.668914   95% CI [   -2.964427,    23.191966]   90% CI [   -0.860348,    21.087887]   p =  0.129526
+file C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_cohorttime_fe29_did_interaction_rural_acpop_all_1.png saved as PNG format
+Exported: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_cohorttime_fe29_did_interaction_rural_acpop_all_1.png
+
+--------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+------------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with Julia
+--------------------------------------------------------------------------------
+(results evreg1 are active now)
+
+INTERACTION AUDIT (CONTROL-PRE STANDARDIZED): politician, estimate evreg1, moderator downup_ac_pop
+Control pre  : b =     0.000000   95% CI [    0.000000,     0.000000]   90% CI [    0.000000,     0.000000]
+Control post : b =    -1.787336   95% CI [  -12.842442,     9.267770]   90% CI [  -11.063847,     7.489175]
+Treated post : b =     8.326433   95% CI [   -9.232196,    25.885062]   90% CI [   -6.407285,    23.060151]
+Difference   : b =    10.113769   SE =     6.668896   95% CI [   -2.964392,    23.191931]   90% CI [   -0.860319,    21.087858]   p =  0.129525
+file C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_cohorttime_fe30_did_interaction_rural_acpop_all_1.png saved as PNG format
+Exported: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_cohorttime_fe30_did_interaction_rural_acpop_all_1.png
+
+--------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+------------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with Julia
+--------------------------------------------------------------------------------
+(results evreg1 are active now)
+
+INTERACTION AUDIT (CONTROL-PRE STANDARDIZED): politician, estimate evreg1, moderator downup_ac_pop
+Control pre  : b =     0.000000   95% CI [    0.000000,     0.000000]   90% CI [    0.000000,     0.000000]
+Control post : b =    -0.993283   95% CI [  -12.243632,    10.257066]   90% CI [  -10.433626,     8.447059]
+Treated post : b =    10.391338   95% CI [   -7.625615,    28.408290]   90% CI [   -4.726967,    25.509642]
+Difference   : b =    11.384621   SE =     6.715248   95% CI [   -1.784440,    24.553682]   90% CI [    0.334258,    22.434985]   p =  0.090156
+file C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_cohorttime_fe31_did_interaction_rural_acpop_all_1.png saved as PNG format
+Exported: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_cohorttime_fe31_did_interaction_rural_acpop_all_1.png
+
+--------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+------------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with Julia
+--------------------------------------------------------------------------------
+(results evreg1 are active now)
+
+INTERACTION AUDIT (CONTROL-PRE STANDARDIZED): politician, estimate evreg1, moderator downup_ac_pop
+Control pre  : b =     0.000000   95% CI [    0.000000,     0.000000]   90% CI [    0.000000,     0.000000]
+Control post : b =    -1.787336   95% CI [  -12.842450,     9.267778]   90% CI [  -11.063854,     7.489182]
+Treated post : b =     8.326433   95% CI [   -9.232233,    25.885100]   90% CI [   -6.407316,    23.060183]
+Difference   : b =    10.113769   SE =     6.668911   95% CI [   -2.964422,    23.191961]   90% CI [   -0.860344,    21.087882]   p =  0.129526
+file C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_cohorttime_fe32_did_interaction_rural_acpop_all_1.png saved as PNG format
+Exported: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_cohorttime_fe32_did_interaction_rural_acpop_all_1.png
+
+--------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+------------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with Julia
+--------------------------------------------------------------------------------
+(results evreg1 are active now)
+
+INTERACTION AUDIT (CONTROL-PRE STANDARDIZED): protest, estimate evreg1, moderator downup_ac_pop
+Control pre  : b =     0.000000   95% CI [    0.000000,     0.000000]   90% CI [    0.000000,     0.000000]
+Control post : b =    -0.719421   95% CI [   -2.614503,     1.175662]   90% CI [   -2.309814,     0.870973]
+Treated post : b =     5.600961   95% CI [  -42.067070,    53.268992]   90% CI [  -34.403063,    45.604984]
+Difference   : b =     6.320381   SE =    24.361072   95% CI [  -41.427710,    54.068473]   90% CI [  -33.750831,    46.391593]   p =  0.795292
+file C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/cohort_eventtime_fe_sweep/protest_never_cohorttime_fe01_did_interaction_rural_acpop_all_1.png saved as PNG format
+Exported: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/cohort_eventtime_fe_sweep/protest_never_cohorttime_fe01_did_interaction_rural_acpop_all_1.png
+
+--------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+------------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with Julia
+--------------------------------------------------------------------------------
+(results evreg1 are active now)
+
+INTERACTION AUDIT (CONTROL-PRE STANDARDIZED): protest, estimate evreg1, moderator downup_ac_pop
+Control pre  : b =     0.000000   95% CI [    0.000000,     0.000000]   90% CI [    0.000000,     0.000000]
+Control post : b =     0.425761   95% CI [   -1.436207,     2.287729]   90% CI [   -1.136842,     1.988364]
+Treated post : b =     1.435580   95% CI [  -44.779066,    47.650227]   90% CI [  -37.348732,    40.219893]
+Difference   : b =     1.009820   SE =    23.618854   95% CI [  -45.283513,    47.303152]   90% CI [  -37.840528,    39.860167]   p =  0.965897
+file C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/cohort_eventtime_fe_sweep/protest_never_cohorttime_fe02_did_interaction_rural_acpop_all_1.png saved as PNG format
+Exported: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/cohort_eventtime_fe_sweep/protest_never_cohorttime_fe02_did_interaction_rural_acpop_all_1.png
+
+--------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+------------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with Julia
+--------------------------------------------------------------------------------
+(results evreg1 are active now)
+
+INTERACTION AUDIT (CONTROL-PRE STANDARDIZED): protest, estimate evreg1, moderator downup_ac_pop
+Control pre  : b =     0.000000   95% CI [    0.000000,     0.000000]   90% CI [    0.000000,     0.000000]
+Control post : b =    -0.505819   95% CI [   -2.413309,     1.401672]   90% CI [   -2.106625,     1.094988]
+Treated post : b =    32.467332   95% CI [  -14.889586,    79.824251]   90% CI [   -7.275599,    72.210264]
+Difference   : b =    32.973151   SE =    24.203953   95% CI [  -14.466984,    80.413287]   90% CI [   -6.839617,    72.785920]   p =  0.173109
+file C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/cohort_eventtime_fe_sweep/protest_never_cohorttime_fe03_did_interaction_rural_acpop_all_1.png saved as PNG format
+Exported: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/cohort_eventtime_fe_sweep/protest_never_cohorttime_fe03_did_interaction_rural_acpop_all_1.png
+
+--------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+------------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with Julia
+--------------------------------------------------------------------------------
+(results evreg1 are active now)
+
+INTERACTION AUDIT (CONTROL-PRE STANDARDIZED): protest, estimate evreg1, moderator downup_ac_pop
+Control pre  : b =     0.000000   95% CI [    0.000000,     0.000000]   90% CI [    0.000000,     0.000000]
+Control post : b =    -0.630094   95% CI [   -2.528661,     1.268473]   90% CI [   -2.223412,     0.963224]
+Treated post : b =     5.003618   95% CI [  -42.559751,    52.566986]   90% CI [  -34.912571,    44.919806]
+Difference   : b =     5.633712   SE =    24.306933   95% CI [  -42.008267,    53.275691]   90% CI [  -34.348448,    45.615872]   p =  0.816715
+file C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/cohort_eventtime_fe_sweep/protest_never_cohorttime_fe04_did_interaction_rural_acpop_all_1.png saved as PNG format
+Exported: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/cohort_eventtime_fe_sweep/protest_never_cohorttime_fe04_did_interaction_rural_acpop_all_1.png
+
+--------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+------------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with Julia
+--------------------------------------------------------------------------------
+(results evreg1 are active now)
+
+INTERACTION AUDIT (CONTROL-PRE STANDARDIZED): protest, estimate evreg1, moderator downup_ac_pop
+Control pre  : b =     0.000000   95% CI [    0.000000,     0.000000]   90% CI [    0.000000,     0.000000]
+Control post : b =    -0.746602   95% CI [   -2.640634,     1.147429]   90% CI [   -2.336114,     0.842909]
+Treated post : b =    60.011392   95% CI [   13.803058,   106.219726]   90% CI [   21.232377,    98.790407]
+Difference   : b =    60.757994   SE =    23.613105   95% CI [   14.475930,   107.040058]   90% CI [   21.917104,    99.598885]   p =  0.010083
+file C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/cohort_eventtime_fe_sweep/protest_never_cohorttime_fe05_did_interaction_rural_acpop_all_1.png saved as PNG format
+Exported: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/cohort_eventtime_fe_sweep/protest_never_cohorttime_fe05_did_interaction_rural_acpop_all_1.png
+
+--------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+------------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with Julia
+--------------------------------------------------------------------------------
+(results evreg1 are active now)
+
+INTERACTION AUDIT (CONTROL-PRE STANDARDIZED): protest, estimate evreg1, moderator downup_ac_pop
+Control pre  : b =     0.000000   95% CI [    0.000000,     0.000000]   90% CI [    0.000000,     0.000000]
+Control post : b =    -1.267554   95% CI [   -3.141432,     0.606324]   90% CI [   -2.840152,     0.305044]
+Treated post : b =    16.555699   95% CI [  -27.900883,    61.012281]   90% CI [  -20.753208,    53.864606]
+Difference   : b =    17.823253   SE =    22.715907   95% CI [  -26.700289,    62.346795]   90% CI [  -19.541849,    55.188354]   p =  0.432683
+file C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/cohort_eventtime_fe_sweep/protest_never_cohorttime_fe06_did_interaction_rural_acpop_all_1.png saved as PNG format
+Exported: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/cohort_eventtime_fe_sweep/protest_never_cohorttime_fe06_did_interaction_rural_acpop_all_1.png
+
+--------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+------------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with Julia
+--------------------------------------------------------------------------------
+(results evreg1 are active now)
+
+INTERACTION AUDIT (CONTROL-PRE STANDARDIZED): protest, estimate evreg1, moderator downup_ac_pop
+Control pre  : b =     0.000000   95% CI [    0.000000,     0.000000]   90% CI [    0.000000,     0.000000]
+Control post : b =     0.676205   95% CI [   -1.193359,     2.545769]   90% CI [   -0.892773,     2.245183]
+Treated post : b =    29.869397   95% CI [  -16.573017,    76.311811]   90% CI [   -9.106062,    68.844857]
+Difference   : b =    29.193193   SE =    23.738078   95% CI [  -17.333820,    75.720205]   90% CI [   -9.853264,    68.239649]   p =  0.218777
+file C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/cohort_eventtime_fe_sweep/protest_never_cohorttime_fe07_did_interaction_rural_acpop_all_1.png saved as PNG format
+Exported: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/cohort_eventtime_fe_sweep/protest_never_cohorttime_fe07_did_interaction_rural_acpop_all_1.png
+
+--------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+------------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with Julia
+--------------------------------------------------------------------------------
+(results evreg1 are active now)
+
+INTERACTION AUDIT (CONTROL-PRE STANDARDIZED): protest, estimate evreg1, moderator downup_ac_pop
+Control pre  : b =     0.000000   95% CI [    0.000000,     0.000000]   90% CI [    0.000000,     0.000000]
+Control post : b =     0.455082   95% CI [   -1.409036,     2.319201]   90% CI [   -1.109325,     2.019490]
+Treated post : b =     1.307973   95% CI [  -44.863755,    47.479701]   90% CI [  -37.440321,    40.056267]
+Difference   : b =     0.852891   SE =    23.596687   95% CI [  -45.396994,    47.102775]   90% CI [  -37.960994,    39.666775]   p =  0.971167
+file C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/cohort_eventtime_fe_sweep/protest_never_cohorttime_fe08_did_interaction_rural_acpop_all_1.png saved as PNG format
+Exported: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/cohort_eventtime_fe_sweep/protest_never_cohorttime_fe08_did_interaction_rural_acpop_all_1.png
+
+--------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+------------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with Julia
+--------------------------------------------------------------------------------
+(results evreg1 are active now)
+
+INTERACTION AUDIT (CONTROL-PRE STANDARDIZED): protest, estimate evreg1, moderator downup_ac_pop
+Control pre  : b =     0.000000   95% CI [    0.000000,     0.000000]   90% CI [    0.000000,     0.000000]
+Control post : b =     0.387360   95% CI [   -1.468050,     2.242771]   90% CI [   -1.169739,     1.944460]
+Treated post : b =    58.979841   95% CI [   13.855944,   104.103737]   90% CI [   21.110909,    96.848773]
+Difference   : b =    58.592480   SE =    23.059545   95% CI [   13.395402,   103.789559]   90% CI [   20.662133,    96.522828]   p =  0.011059
+file C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/cohort_eventtime_fe_sweep/protest_never_cohorttime_fe09_did_interaction_rural_acpop_all_1.png saved as PNG format
+Exported: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/cohort_eventtime_fe_sweep/protest_never_cohorttime_fe09_did_interaction_rural_acpop_all_1.png
+
+--------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+------------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with Julia
+--------------------------------------------------------------------------------
+(results evreg1 are active now)
+
+INTERACTION AUDIT (CONTROL-PRE STANDARDIZED): protest, estimate evreg1, moderator downup_ac_pop
+Control pre  : b =     0.000000   95% CI [    0.000000,     0.000000]   90% CI [    0.000000,     0.000000]
+Control post : b =    -0.108196   95% CI [   -1.937116,     1.720723]   90% CI [   -1.643064,     1.426672]
+Treated post : b =    17.418275   95% CI [  -26.520759,    61.357309]   90% CI [  -19.456295,    54.292845]
+Difference   : b =    17.526471   SE =    22.454599   95% CI [  -26.484903,    61.537845]   90% CI [  -19.408808,    54.461750]   p =  0.435083
+file C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/cohort_eventtime_fe_sweep/protest_never_cohorttime_fe10_did_interaction_rural_acpop_all_1.png saved as PNG format
+Exported: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/cohort_eventtime_fe_sweep/protest_never_cohorttime_fe10_did_interaction_rural_acpop_all_1.png
+
+--------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+------------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with Julia
+--------------------------------------------------------------------------------
+(results evreg1 are active now)
+
+INTERACTION AUDIT (CONTROL-PRE STANDARDIZED): protest, estimate evreg1, moderator downup_ac_pop
+Control pre  : b =     0.000000   95% CI [    0.000000,     0.000000]   90% CI [    0.000000,     0.000000]
+Control post : b =    -0.474715   95% CI [   -2.388878,     1.439449]   90% CI [   -2.081122,     1.131692]
+Treated post : b =    32.676251   95% CI [  -15.612962,    80.965464]   90% CI [   -7.849081,    73.201583]
+Difference   : b =    33.150965   SE =    24.681242   95% CI [  -15.224664,    81.526595]   90% CI [   -7.446890,    73.748820]   p =  0.179225
+file C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/cohort_eventtime_fe_sweep/protest_never_cohorttime_fe11_did_interaction_rural_acpop_all_1.png saved as PNG format
+Exported: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/cohort_eventtime_fe_sweep/protest_never_cohorttime_fe11_did_interaction_rural_acpop_all_1.png
+
+--------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+------------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with Julia
+--------------------------------------------------------------------------------
+(results evreg1 are active now)
+
+INTERACTION AUDIT (CONTROL-PRE STANDARDIZED): protest, estimate evreg1, moderator downup_ac_pop
+Control pre  : b =     0.000000   95% CI [    0.000000,     0.000000]   90% CI [    0.000000,     0.000000]
+Control post : b =    -0.970226   95% CI [   -2.869532,     0.929080]   90% CI [   -2.564164,     0.623712]
+Treated post : b =    38.706685   95% CI [   -7.599014,    85.012385]   90% CI [   -0.154041,    77.567412]
+Difference   : b =    39.676912   SE =    23.664112   95% CI [   -6.705127,    86.058950]   90% CI [    0.752121,    78.601703]   p =  0.093614
+file C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/cohort_eventtime_fe_sweep/protest_never_cohorttime_fe12_did_interaction_rural_acpop_all_1.png saved as PNG format
+Exported: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/cohort_eventtime_fe_sweep/protest_never_cohorttime_fe12_did_interaction_rural_acpop_all_1.png
+
+--------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+------------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with Julia
+--------------------------------------------------------------------------------
+(results evreg1 are active now)
+
+INTERACTION AUDIT (CONTROL-PRE STANDARDIZED): protest, estimate evreg1, moderator downup_ac_pop
+Control pre  : b =     0.000000   95% CI [    0.000000,     0.000000]   90% CI [    0.000000,     0.000000]
+Control post : b =    -1.308459   95% CI [   -3.189453,     0.572534]   90% CI [   -2.887029,     0.270110]
+Treated post : b =    17.713912   95% CI [  -27.008127,    62.435951]   90% CI [  -19.817772,    55.245597]
+Difference   : b =    19.022372   SE =    22.851683   95% CI [  -25.767294,    63.812038]   90% CI [  -18.566067,    56.610810]   p =  0.405172
+file C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/cohort_eventtime_fe_sweep/protest_never_cohorttime_fe13_did_interaction_rural_acpop_all_1.png saved as PNG format
+Exported: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/cohort_eventtime_fe_sweep/protest_never_cohorttime_fe13_did_interaction_rural_acpop_all_1.png
+
+--------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+------------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with Julia
+--------------------------------------------------------------------------------
+(results evreg1 are active now)
+
+INTERACTION AUDIT (CONTROL-PRE STANDARDIZED): protest, estimate evreg1, moderator downup_ac_pop
+Control pre  : b =     0.000000   95% CI [    0.000000,     0.000000]   90% CI [    0.000000,     0.000000]
+Control post : b =    -0.718575   95% CI [   -2.612940,     1.175790]   90% CI [   -2.308366,     0.871216]
+Treated post : b =    58.711995   95% CI [   12.366925,   105.057065]   90% CI [   19.818229,    97.605761]
+Difference   : b =    59.430570   SE =    23.683285   95% CI [   13.010953,   105.850188]   90% CI [   20.474242,    98.386899]   p =  0.012097
+file C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/cohort_eventtime_fe_sweep/protest_never_cohorttime_fe14_did_interaction_rural_acpop_all_1.png saved as PNG format
+Exported: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/cohort_eventtime_fe_sweep/protest_never_cohorttime_fe14_did_interaction_rural_acpop_all_1.png
+
+--------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+------------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with Julia
+--------------------------------------------------------------------------------
+(results evreg1 are active now)
+
+INTERACTION AUDIT (CONTROL-PRE STANDARDIZED): protest, estimate evreg1, moderator downup_ac_pop
+Control pre  : b =     0.000000   95% CI [    0.000000,     0.000000]   90% CI [    0.000000,     0.000000]
+Control post : b =    -1.267547   95% CI [   -3.141427,     0.606333]   90% CI [   -2.840147,     0.305053]
+Treated post : b =    16.555625   95% CI [  -27.900606,    61.011856]   90% CI [  -20.752987,    53.864238]
+Difference   : b =    17.823172   SE =    22.715727   95% CI [  -26.700017,    62.346361]   90% CI [  -19.541633,    55.187978]   p =  0.432682
+file C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/cohort_eventtime_fe_sweep/protest_never_cohorttime_fe15_did_interaction_rural_acpop_all_1.png saved as PNG format
+Exported: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/cohort_eventtime_fe_sweep/protest_never_cohorttime_fe15_did_interaction_rural_acpop_all_1.png
+
+--------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+------------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with Julia
+--------------------------------------------------------------------------------
+(results evreg1 are active now)
+
+INTERACTION AUDIT (CONTROL-PRE STANDARDIZED): protest, estimate evreg1, moderator downup_ac_pop
+Control pre  : b =     0.000000   95% CI [    0.000000,     0.000000]   90% CI [    0.000000,     0.000000]
+Control post : b =    -1.267547   95% CI [   -3.141427,     0.606333]   90% CI [   -2.840147,     0.305053]
+Treated post : b =    16.555655   95% CI [  -27.900645,    61.011955]   90% CI [  -20.753015,    53.864326]
+Difference   : b =    17.823202   SE =    22.715765   95% CI [  -26.700062,    62.346466]   90% CI [  -19.541666,    55.188070]   p =  0.432682
+file C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/cohort_eventtime_fe_sweep/protest_never_cohorttime_fe16_did_interaction_rural_acpop_all_1.png saved as PNG format
+Exported: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/cohort_eventtime_fe_sweep/protest_never_cohorttime_fe16_did_interaction_rural_acpop_all_1.png
+
+--------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+------------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with Julia
+--------------------------------------------------------------------------------
+(results evreg1 are active now)
+
+INTERACTION AUDIT (CONTROL-PRE STANDARDIZED): protest, estimate evreg1, moderator downup_ac_pop
+Control pre  : b =     0.000000   95% CI [    0.000000,     0.000000]   90% CI [    0.000000,     0.000000]
+Control post : b =     0.666760   95% CI [   -1.202527,     2.536047]   90% CI [   -0.901985,     2.235505]
+Treated post : b =    29.079635   95% CI [  -17.332621,    75.491890]   90% CI [   -9.870515,    68.029785]
+Difference   : b =    28.412875   SE =    23.722553   95% CI [  -18.083709,    74.909458]   90% CI [  -10.608045,    67.433795]   p =  0.231034
+file C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/cohort_eventtime_fe_sweep/protest_never_cohorttime_fe17_did_interaction_rural_acpop_all_1.png saved as PNG format
+Exported: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/cohort_eventtime_fe_sweep/protest_never_cohorttime_fe17_did_interaction_rural_acpop_all_1.png
+
+--------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+------------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with Julia
+--------------------------------------------------------------------------------
+(results evreg1 are active now)
+
+INTERACTION AUDIT (CONTROL-PRE STANDARDIZED): protest, estimate evreg1, moderator downup_ac_pop
+Control pre  : b =     0.000000   95% CI [    0.000000,     0.000000]   90% CI [    0.000000,     0.000000]
+Control post : b =     0.266967   95% CI [   -1.586098,     2.120032]   90% CI [   -1.288164,     1.822099]
+Treated post : b =    38.006011   95% CI [   -6.982227,    82.994248]   90% CI [    0.250926,    75.761095]
+Difference   : b =    37.739043   SE =    22.992103   95% CI [   -7.325848,    82.803935]   90% CI [   -0.080370,    75.558457]   p =  0.100723
+file C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/cohort_eventtime_fe_sweep/protest_never_cohorttime_fe18_did_interaction_rural_acpop_all_1.png saved as PNG format
+Exported: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/cohort_eventtime_fe_sweep/protest_never_cohorttime_fe18_did_interaction_rural_acpop_all_1.png
+
+--------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+------------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with Julia
+--------------------------------------------------------------------------------
+(results evreg1 are active now)
+
+INTERACTION AUDIT (CONTROL-PRE STANDARDIZED): protest, estimate evreg1, moderator downup_ac_pop
+Control pre  : b =     0.000000   95% CI [    0.000000,     0.000000]   90% CI [    0.000000,     0.000000]
+Control post : b =    -0.108213   95% CI [   -1.937127,     1.720702]   90% CI [   -1.643077,     1.426652]
+Treated post : b =    17.412187   95% CI [  -26.526220,    61.350594]   90% CI [  -19.461857,    54.286231]
+Difference   : b =    17.520400   SE =    22.454278   95% CI [  -26.490346,    61.531145]   90% CI [  -19.414352,    54.455151]   p =  0.435236
+file C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/cohort_eventtime_fe_sweep/protest_never_cohorttime_fe19_did_interaction_rural_acpop_all_1.png saved as PNG format
+Exported: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/cohort_eventtime_fe_sweep/protest_never_cohorttime_fe19_did_interaction_rural_acpop_all_1.png
+
+--------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+------------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with Julia
+--------------------------------------------------------------------------------
+(results evreg1 are active now)
+
+INTERACTION AUDIT (CONTROL-PRE STANDARDIZED): protest, estimate evreg1, moderator downup_ac_pop
+Control pre  : b =     0.000000   95% CI [    0.000000,     0.000000]   90% CI [    0.000000,     0.000000]
+Control post : b =     0.456822   95% CI [   -1.392806,     2.306450]   90% CI [   -1.095425,     2.009069]
+Treated post : b =    56.858288   95% CI [   11.294002,   102.422575]   90% CI [   18.619772,    95.096805]
+Difference   : b =    56.401466   SE =    23.284816   95% CI [   10.762853,   102.040080]   90% CI [   18.100573,    94.702359]   p =  0.015429
+file C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/cohort_eventtime_fe_sweep/protest_never_cohorttime_fe20_did_interaction_rural_acpop_all_1.png saved as PNG format
+Exported: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/cohort_eventtime_fe_sweep/protest_never_cohorttime_fe20_did_interaction_rural_acpop_all_1.png
+
+--------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+------------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with Julia
+--------------------------------------------------------------------------------
+(results evreg1 are active now)
+
+INTERACTION AUDIT (CONTROL-PRE STANDARDIZED): protest, estimate evreg1, moderator downup_ac_pop
+Control pre  : b =     0.000000   95% CI [    0.000000,     0.000000]   90% CI [    0.000000,     0.000000]
+Control post : b =    -0.108212   95% CI [   -1.937132,     1.720707]   90% CI [   -1.643080,     1.426656]
+Treated post : b =    17.418264   95% CI [  -26.520755,    61.357284]   90% CI [  -19.456293,    54.292822]
+Difference   : b =    17.526477   SE =    22.454593   95% CI [  -26.484886,    61.537840]   90% CI [  -19.408793,    54.461747]   p =  0.435083
+file C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/cohort_eventtime_fe_sweep/protest_never_cohorttime_fe21_did_interaction_rural_acpop_all_1.png saved as PNG format
+Exported: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/cohort_eventtime_fe_sweep/protest_never_cohorttime_fe21_did_interaction_rural_acpop_all_1.png
+
+--------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+------------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with Julia
+--------------------------------------------------------------------------------
+(results evreg1 are active now)
+
+INTERACTION AUDIT (CONTROL-PRE STANDARDIZED): protest, estimate evreg1, moderator downup_ac_pop
+Control pre  : b =     0.000000   95% CI [    0.000000,     0.000000]   90% CI [    0.000000,     0.000000]
+Control post : b =    -0.108205   95% CI [   -1.937126,     1.720717]   90% CI [   -1.643074,     1.426665]
+Treated post : b =    17.418245   95% CI [  -26.520725,    61.357215]   90% CI [  -19.456272,    54.292762]
+Difference   : b =    17.526449   SE =    22.454566   95% CI [  -26.484861,    61.537759]   90% CI [  -19.408776,    54.461675]   p =  0.435083
+file C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/cohort_eventtime_fe_sweep/protest_never_cohorttime_fe22_did_interaction_rural_acpop_all_1.png saved as PNG format
+Exported: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/cohort_eventtime_fe_sweep/protest_never_cohorttime_fe22_did_interaction_rural_acpop_all_1.png
+
+--------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+------------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with Julia
+--------------------------------------------------------------------------------
+(results evreg1 are active now)
+
+INTERACTION AUDIT (CONTROL-PRE STANDARDIZED): protest, estimate evreg1, moderator downup_ac_pop
+Control pre  : b =     0.000000   95% CI [    0.000000,     0.000000]   90% CI [    0.000000,     0.000000]
+Control post : b =    -0.853966   95% CI [   -2.754381,     1.046450]   90% CI [   -2.448835,     0.740903]
+Treated post : b =    38.540438   95% CI [   -8.021416,    85.102292]   90% CI [   -0.535258,    77.616134]
+Difference   : b =    39.394404   SE =    23.795614   95% CI [   -7.245382,    86.034190]   90% CI [    0.253305,    78.535502]   p =  0.097823
+file C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/cohort_eventtime_fe_sweep/protest_never_cohorttime_fe23_did_interaction_rural_acpop_all_1.png saved as PNG format
+Exported: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/cohort_eventtime_fe_sweep/protest_never_cohorttime_fe23_did_interaction_rural_acpop_all_1.png
+
+--------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+------------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with Julia
+--------------------------------------------------------------------------------
+(results evreg1 are active now)
+
+INTERACTION AUDIT (CONTROL-PRE STANDARDIZED): protest, estimate evreg1, moderator downup_ac_pop
+Control pre  : b =     0.000000   95% CI [    0.000000,     0.000000]   90% CI [    0.000000,     0.000000]
+Control post : b =    -1.295234   95% CI [   -3.173570,     0.583103]   90% CI [   -2.871573,     0.281106]
+Treated post : b =    17.315478   95% CI [  -27.305872,    61.936827]   90% CI [  -20.131706,    54.762661]
+Difference   : b =    18.610711   SE =    22.800190   95% CI [  -26.078026,    63.299449]   90% CI [  -18.893026,    56.114448]   p =  0.414360
+file C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/cohort_eventtime_fe_sweep/protest_never_cohorttime_fe24_did_interaction_rural_acpop_all_1.png saved as PNG format
+Exported: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/cohort_eventtime_fe_sweep/protest_never_cohorttime_fe24_did_interaction_rural_acpop_all_1.png
+
+--------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+------------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with Julia
+--------------------------------------------------------------------------------
+(results evreg1 are active now)
+
+INTERACTION AUDIT (CONTROL-PRE STANDARDIZED): protest, estimate evreg1, moderator downup_ac_pop
+Control pre  : b =     0.000000   95% CI [    0.000000,     0.000000]   90% CI [    0.000000,     0.000000]
+Control post : b =    -1.293326   95% CI [   -3.171462,     0.584810]   90% CI [   -2.869498,     0.282845]
+Treated post : b =    17.297494   95% CI [  -27.320926,    61.915914]   90% CI [  -20.147231,    54.742219]
+Difference   : b =    18.590821   SE =    22.798696   95% CI [  -26.094989,    63.276631]   90% CI [  -18.910460,    56.092101]   p =  0.414828
+file C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/cohort_eventtime_fe_sweep/protest_never_cohorttime_fe25_did_interaction_rural_acpop_all_1.png saved as PNG format
+Exported: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/cohort_eventtime_fe_sweep/protest_never_cohorttime_fe25_did_interaction_rural_acpop_all_1.png
+
+--------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+------------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with Julia
+--------------------------------------------------------------------------------
+(results evreg1 are active now)
+
+INTERACTION AUDIT (CONTROL-PRE STANDARDIZED): protest, estimate evreg1, moderator downup_ac_pop
+Control pre  : b =     0.000000   95% CI [    0.000000,     0.000000]   90% CI [    0.000000,     0.000000]
+Control post : b =    -1.267542   95% CI [   -3.141422,     0.606339]   90% CI [   -2.840142,     0.305059]
+Treated post : b =    16.555613   95% CI [  -27.900549,    61.011774]   90% CI [  -20.752942,    53.864167]
+Difference   : b =    17.823154   SE =    22.715695   95% CI [  -26.699972,    62.346281]   90% CI [  -19.541599,    55.187907]   p =  0.432681
+file C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/cohort_eventtime_fe_sweep/protest_never_cohorttime_fe26_did_interaction_rural_acpop_all_1.png saved as PNG format
+Exported: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/cohort_eventtime_fe_sweep/protest_never_cohorttime_fe26_did_interaction_rural_acpop_all_1.png
+
+--------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+------------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with Julia
+--------------------------------------------------------------------------------
+(results evreg1 are active now)
+
+INTERACTION AUDIT (CONTROL-PRE STANDARDIZED): protest, estimate evreg1, moderator downup_ac_pop
+Control pre  : b =     0.000000   95% CI [    0.000000,     0.000000]   90% CI [    0.000000,     0.000000]
+Control post : b =     0.398971   95% CI [   -1.450497,     2.248439]   90% CI [   -1.153141,     1.951084]
+Treated post : b =    39.041901   95% CI [   -6.562914,    84.646716]   90% CI [    0.769373,    77.314430]
+Difference   : b =    38.642930   SE =    23.307705   95% CI [   -7.040545,    84.326405]   90% CI [    0.304388,    76.981472]   p =  0.097335
+file C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/cohort_eventtime_fe_sweep/protest_never_cohorttime_fe27_did_interaction_rural_acpop_all_1.png saved as PNG format
+Exported: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/cohort_eventtime_fe_sweep/protest_never_cohorttime_fe27_did_interaction_rural_acpop_all_1.png
+
+--------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+------------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with Julia
+--------------------------------------------------------------------------------
+(results evreg1 are active now)
+
+INTERACTION AUDIT (CONTROL-PRE STANDARDIZED): protest, estimate evreg1, moderator downup_ac_pop
+Control pre  : b =     0.000000   95% CI [    0.000000,     0.000000]   90% CI [    0.000000,     0.000000]
+Control post : b =    -0.108229   95% CI [   -1.937139,     1.720681]   90% CI [   -1.643089,     1.426631]
+Treated post : b =    17.412182   95% CI [  -26.526215,    61.350580]   90% CI [  -19.461854,    54.286218]
+Difference   : b =    17.520411   SE =    22.454277   95% CI [  -26.490332,    61.531155]   90% CI [  -19.414339,    54.455161]   p =  0.435236
+file C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/cohort_eventtime_fe_sweep/protest_never_cohorttime_fe28_did_interaction_rural_acpop_all_1.png saved as PNG format
+Exported: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/cohort_eventtime_fe_sweep/protest_never_cohorttime_fe28_did_interaction_rural_acpop_all_1.png
+
+--------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+------------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with Julia
+--------------------------------------------------------------------------------
+(results evreg1 are active now)
+
+INTERACTION AUDIT (CONTROL-PRE STANDARDIZED): protest, estimate evreg1, moderator downup_ac_pop
+Control pre  : b =     0.000000   95% CI [    0.000000,     0.000000]   90% CI [    0.000000,     0.000000]
+Control post : b =    -0.108215   95% CI [   -1.937132,     1.720701]   90% CI [   -1.643081,     1.426650]
+Treated post : b =    17.413658   95% CI [  -26.524854,    61.352171]   90% CI [  -19.460474,    54.287791]
+Difference   : b =    17.521874   SE =    22.454333   95% CI [  -26.488979,    61.532726]   90% CI [  -19.412968,    54.456715]   p =  0.435199
+file C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/cohort_eventtime_fe_sweep/protest_never_cohorttime_fe29_did_interaction_rural_acpop_all_1.png saved as PNG format
+Exported: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/cohort_eventtime_fe_sweep/protest_never_cohorttime_fe29_did_interaction_rural_acpop_all_1.png
+
+--------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+------------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with Julia
+--------------------------------------------------------------------------------
+(results evreg1 are active now)
+
+INTERACTION AUDIT (CONTROL-PRE STANDARDIZED): protest, estimate evreg1, moderator downup_ac_pop
+Control pre  : b =     0.000000   95% CI [    0.000000,     0.000000]   90% CI [    0.000000,     0.000000]
+Control post : b =    -0.108229   95% CI [   -1.937147,     1.720689]   90% CI [   -1.643096,     1.426638]
+Treated post : b =    17.418205   95% CI [  -26.520787,    61.357196]   90% CI [  -19.456330,    54.292739]
+Difference   : b =    17.526434   SE =    22.454579   95% CI [  -26.484901,    61.537769]   90% CI [  -19.408813,    54.461681]   p =  0.435084
+file C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/cohort_eventtime_fe_sweep/protest_never_cohorttime_fe30_did_interaction_rural_acpop_all_1.png saved as PNG format
+Exported: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/cohort_eventtime_fe_sweep/protest_never_cohorttime_fe30_did_interaction_rural_acpop_all_1.png
+
+--------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+------------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with Julia
+--------------------------------------------------------------------------------
+(results evreg1 are active now)
+
+INTERACTION AUDIT (CONTROL-PRE STANDARDIZED): protest, estimate evreg1, moderator downup_ac_pop
+Control pre  : b =     0.000000   95% CI [    0.000000,     0.000000]   90% CI [    0.000000,     0.000000]
+Control post : b =    -1.282956   95% CI [   -3.159611,     0.593700]   90% CI [   -2.857885,     0.291973]
+Treated post : b =    17.059539   95% CI [  -27.505296,    61.624373]   90% CI [  -20.340216,    54.459294]
+Difference   : b =    18.342495   SE =    22.771285   95% CI [  -26.289588,    62.974578]   90% CI [  -19.113697,    55.798686]   p =  0.420530
+file C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/cohort_eventtime_fe_sweep/protest_never_cohorttime_fe31_did_interaction_rural_acpop_all_1.png saved as PNG format
+Exported: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/cohort_eventtime_fe_sweep/protest_never_cohorttime_fe31_did_interaction_rural_acpop_all_1.png
+
+--------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+------------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with Julia
+--------------------------------------------------------------------------------
+(results evreg1 are active now)
+
+INTERACTION AUDIT (CONTROL-PRE STANDARDIZED): protest, estimate evreg1, moderator downup_ac_pop
+Control pre  : b =     0.000000   95% CI [    0.000000,     0.000000]   90% CI [    0.000000,     0.000000]
+Control post : b =    -0.108240   95% CI [   -1.937153,     1.720672]   90% CI [   -1.643103,     1.426622]
+Treated post : b =    17.413640   95% CI [  -26.524884,    61.352163]   90% CI [  -19.460502,    54.287781]
+Difference   : b =    17.521880   SE =    22.454341   95% CI [  -26.488988,    61.532747]   90% CI [  -19.412974,    54.456734]   p =  0.435198
+file C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/cohort_eventtime_fe_sweep/protest_never_cohorttime_fe32_did_interaction_rural_acpop_all_1.png saved as PNG format
+Exported: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/exploratory_analysis/cohort_eventtime_fe_sweep/protest_never_cohorttime_fe32_did_interaction_rural_acpop_all_1.png
+
+. 
+. display as result "COMPLETED 64 interaction plots: politician and protest FE01-FE32"
+COMPLETED 64 interaction plots: politician and protest FE01-FE32
+
+. log close interaction_plots
+      name:  interaction_plots
+       log:  C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/code/_stacked_downup_replication/exploratory_analysis/cohort_eventtime_fe_sweep/logs/interaction_plots_rerun.log
+  log type:  text
+ closed on:  21 Aug 2026, 07:24:32
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------

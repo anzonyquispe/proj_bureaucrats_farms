@@ -1,0 +1,210 @@
+
+  ___  ____  ____  ____  ____ ®
+ /__    /   ____/   /   ____/      StataNow 19.5
+___/   /   /___/   /   /___/       MP—Parallel Edition
+
+ Statistics and Data Science       Copyright 1985-2025 StataCorp LLC
+                                   StataCorp
+                                   4905 Lakeway Drive
+                                   College Station, Texas 77845 USA
+                                   800-782-8272        https://www.stata.com
+                                   979-696-4600        service@stata.com
+
+Stata license: 4-user 16-core network, expiring 14 Sep 2026
+Serial number: 501909301589
+  Licensed to: University of Notre Dame
+               Notre Dame, IN 46556
+
+Notes:
+      1. Stata is running in batch mode.
+      2. Unicode is supported; see help unicode_advice.
+      3. More than 2 billion observations are allowed; see help obs_advice.
+      4. Maximum number of variables is set to 5,000 but can be increased;
+          see help set_maxvar.
+
+. do /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication/ex
+> ploratory_analysis/cohort_eventtime_fe_sweep/_postprocess_cohort_eventtime_fe
+> _sweep.do protest 28 
+
+. *****************************************************************************
+> ***
+. * Export CSVs and interaction plots from cohort-event-time FE sweep STER file
+> s.
+. * No analysis dataset is loaded. This runs only after all assigned regression
+> s.
+. *****************************************************************************
+> ***
+. version 17
+
+. clear all
+
+. set more off
+
+. 
+. args analysis_arg fe_arg
+
+. if !inlist("`analysis_arg'", "politician", "protest") {
+.     display as error "First argument must be politician or protest."
+.     exit 198
+. }
+
+. if "`fe_arg'" == "" {
+.     display as error "Second argument must be an FE numlist."
+.     exit 198
+. }
+
+. foreach fe of numlist `fe_arg' {
+  2.     if !inrange(`fe', 1, 32) exit 198
+  3. }
+
+. 
+. global code "/users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_repl
+> ication"
+
+. global tables "${code}/../../tables/exploratory_analysis/cohort_eventtime_fe_
+> sweep"
+
+. global figures "${code}/../../figures/exploratory_analysis/cohort_eventtime_f
+> e_sweep"
+
+. capture mkdir "${code}/../../figures/exploratory_analysis"
+
+. capture mkdir "${figures}"
+
+. 
+. capture program drop estsave_csv
+
+. quietly do "${code}/estsave_csv.ado"
+
+. quietly do "${code}/interaction_graph.ado"
+
+. 
+. foreach fe of numlist `fe_arg' {
+  2.     local tag : display %02.0f `fe'
+  3.     local tag = strtrim("`tag'")
+  4.     if "`analysis_arg'" == "politician" {
+  5.         local prefix "politician_byprov_cohorttime_fe`tag'"
+  6.         local graph_type "politician"
+  7.     }
+  8.     else {
+  9.         local prefix "protest_never_cohorttime_fe`tag'"
+ 10.         local graph_type "protest"
+ 11.     }
+ 12. 
+.     local event "${tables}/`prefix'_event_rural_acpop_all"
+ 13.     confirm file "`event'.ster"
+ 14.     est clear
+ 15.     estread using "`event'.ster"
+ 16.     quietly estimates dir
+ 17.     local names `r(names)'
+ 18.     estsave_csv `names' using "`event'.csv", replace
+ 19.     confirm file "`event'.csv"
+ 20.     confirm file "`event'_scalars.csv"
+ 21. 
+.     local did "${tables}/`prefix'_did_interaction_rural_acpop_all"
+ 22.     confirm file "`did'.ster"
+ 23.     est clear
+ 24.     estread using "`did'.ster"
+ 25.     quietly estimates dir
+ 26.     local names `r(names)'
+ 27.     estsave_csv `names' using "`did'.csv", replace
+ 28.     confirm file "`did'.csv"
+ 29.     confirm file "`did'_scalars.csv"
+ 30. 
+.     est clear
+ 31.     interaction_graph using "`did'.ster", estimates(1) ///
+>         output("${figures}/`prefix'_did_interaction_rural_acpop_all") ///
+>         type(`graph_type') modvar(downup_ac_pop)
+ 32.     confirm file "${figures}/`prefix'_did_interaction_rural_acpop_all_1.pn
+> g"
+ 33. }
+
+-------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+-----------------------------------------------------------------
+      evreg1 | reghdfejl    countk         21  HDFE linear regression with
+             |                                 Julia
+-------------------------------------------------------------------------------
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+(21 missing values generated)
+Estimates exported to /users/aquisper/proj_bureaucrats_farms/code/_stacked_down
+> up_replication/../../tables/exploratory_analysis/cohort_eventtime_fe_sweep/pr
+> otest_never_cohorttime_fe28_event_rural_acpop_all.csv
+
+-------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+-----------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with
+             |                                 Julia
+-------------------------------------------------------------------------------
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+(9 missing values generated)
+Estimates exported to /users/aquisper/proj_bureaucrats_farms/code/_stacked_down
+> up_replication/../../tables/exploratory_analysis/cohort_eventtime_fe_sweep/pr
+> otest_never_cohorttime_fe28_did_interaction_rural_acpop_all.csv
+
+-------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+-----------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with
+             |                                 Julia
+-------------------------------------------------------------------------------
+(results evreg1 are active now)
+number of observations will be reset to 4
+Press any key to continue, or Break to abort
+Number of observations (_N) was 0, now 4.
+(4 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(file /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication/.
+> ./../figures/exploratory_analysis/cohort_eventtime_fe_sweep/protest_never_coh
+> orttime_fe28_did_interaction_rural_acpop_all_1.png not found)
+file /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication/..
+> /../figures/exploratory_analysis/cohort_eventtime_fe_sweep/protest_never_coho
+> rttime_fe28_did_interaction_rural_acpop_all_1.png written in PNG format
+Exported: /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replicati
+> on/../../figures/exploratory_analysis/cohort_eventtime_fe_sweep/protest_never
+> _cohorttime_fe28_did_interaction_rural_acpop_all_1.png
+
+. 
+. display as result "COMPLETED `analysis_arg' postprocessing: FE `fe_arg'"
+COMPLETED protest postprocessing: FE 28
+
+. 
+. 
+end of do-file

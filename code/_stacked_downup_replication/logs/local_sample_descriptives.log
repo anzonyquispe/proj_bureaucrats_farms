@@ -1,0 +1,549 @@
+-------------------------------------------------------------------------------
+      name:  <unnamed>
+       log:  C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/co
+> de/_stacked_downup_replication/logs/local_sample_descriptives.log
+  log type:  text
+ opened on:  24 Aug 2026, 15:32:49
+
+. do "${code}/app_main_descriptive.do"
+
+. *****************************************************************************
+> ***
+. * Descriptive table for the main rural stacked downup_ac_pop DiD sample
+. * Output actively referenced by main.tex: tables/descriptives_main.tex
+. *****************************************************************************
+> ***
+. 
+. version 17
+
+. clear
+
+. set more off
+
+. 
+. if "$root" == "" {
+.     * Standalone defaults for the five cluster parameters.
+.     global location     "shell"
+.     global sample       ""
+.     global is_rural_var "is_rural"
+.     global fe_list      "1"
+.     global ster_suffix  ""
+.     global shell "/groups/sgulzar/sa_fires/proj_bureaucrats_farms"
+.     global dbox  "/Users/anzony.quisperojas/Library/CloudStorage/Dropbox/sa_f
+> ires/proj_bureaucrats_farms"
+.     if "$location" == "dbox" {
+.         global root "$dbox"
+.     }
+.     else {
+.         global root "$shell"
+.     }
+. }
+
+. 
+. global int_data "${root}/data_output/intermediate"
+
+. global tables   "${code}/../../tables"
+
+. 
+. import delimited using "${int_data}/combined_dt_pop${sample}.csv", ///
+>     clear varnames(1) case(preserve)
+(encoding automatically selected: UTF-8)
+(20 vars, 493,809 obs)
+
+. 
+. capture drop countk
+
+. gen countk = count * 1000
+
+. keep if inrange(relative_monthyear, -5, 6)
+(191,697 observations deleted)
+
+. 
+. merge m:1 unique_small_grid_id using ///
+>     "${int_data}/ghs_grid_classification_2000.dta", ///
+>     keep(master match) keepusing(is_rural) nogen
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                             0
+    Matched                           302,112  
+    -----------------------------------------
+
+. keep if ${is_rural_var} == 1
+(69,674 observations deleted)
+
+. keep if year < 2022 | (year == 2022 & month <= 8)
+(41,705 observations deleted)
+
+. 
+. capture confirm numeric variable unique_small_grid_id
+
+. if _rc {
+.     encode unique_small_grid_id, gen(grid_id)
+. }
+
+. else {
+.     gen grid_id = unique_small_grid_id
+. }
+
+. capture confirm numeric variable ac_uq_id
+
+. if _rc {
+.     encode ac_uq_id, gen(ac_id)
+. }
+
+. else {
+.     gen ac_id = ac_uq_id
+. }
+
+. 
+. * Retain exactly the sample selected by the richest population DiD model.
+. local controls wind_direction av_wind_speed
+
+. local cluster ac_uq_id#cohort#monthyear unique_small_grid_id#cohort
+
+. do "${code}/exploratory_analysis/rice_high_subsample/_apply_rice_high_subsamp
+> le.do"
+
+. *****************************************************************************
+> ***
+. * Optional exploratory restriction: ACs with above-median rice production.
+. *
+. * Called after an analysis dataset and its required merge fields are loaded,
+. * but before the first regression/common-sample regression.  It is inert unle
+> ss
+. * $analysis_subsample is "rice_high".
+. *****************************************************************************
+> ***
+. 
+. if "$analysis_subsample" == "rice_high" {
+.     capture confirm variable rice_prod_aclvl_ahigh
+.     if _rc {
+.         display as error ///
+>             "rice_prod_aclvl_ahigh is missing from the stacked dataset. " ///
+>             "Regenerate it from 0_master_dataset with the data-generation pip
+> eline."
+.         exit 111
+.     }
+. 
+.     assert inlist(rice_prod_aclvl_ahigh, 0, 1)
+.     quietly count
+.     local rice_before = r(N)
+.     keep if rice_prod_aclvl_ahigh == 1
+.     quietly count
+.     local rice_after = r(N)
+.     if `rice_after' == 0 {
+.         display as error "The rice-high exploratory restriction removed every
+>  row."
+.         exit 2000
+.     }
+.     display as result "EXPLORATORY SAMPLE: rice_prod_aclvl_ahigh == 1"
+.     display as result "Rows retained: `rice_after' of `rice_before'"
+. }
+
+. 
+end of do-file
+
+. quietly reghdfejl countk downup_ac_pop `controls', ///
+>     absorb(grid_id#cohort ac_id#monthyear#cohort) cluster(`cluster')
+
+. gen byte descriptive_sample = e(sample)
+
+. quietly count if descriptive_sample
+
+. display as text "Main richest-DiD descriptive sample: " r(N)
+Main richest-DiD descriptive sample: 56537
+
+. keep if descriptive_sample
+(134,196 observations deleted)
+
+. drop descriptive_sample
+
+. 
+. egen prov = group(province)
+
+. 
+. capture program drop _fmt_num
+
+. program define _fmt_num, rclass
+  1.     args x
+  2.     if missing(`x') {
+  3.         return local out ""
+  4.         exit
+  5.     }
+  6.     local out : display %15.3fc `x'
+  7.     local out = strtrim("`out'")
+  8.     while substr("`out'", -1, 1) == "0" & strpos("`out'", ".") > 0 {
+  9.         local out = substr("`out'", 1, strlen("`out'") - 1)
+ 10.     }
+ 11.     if substr("`out'", -1, 1) == "." {
+ 12.         local out = substr("`out'", 1, strlen("`out'") - 1)
+ 13.     }
+ 14.     return local out "`out'"
+ 15. end
+
+. 
+. capture program drop _fmt_int
+
+. program define _fmt_int, rclass
+  1.     args x
+  2.     if missing(`x') {
+  3.         return local out ""
+  4.         exit
+  5.     }
+  6.     local out : display %20.0fc `x'
+  7.     local out = strtrim("`out'")
+  8.     return local out "`out'"
+  9. end
+
+. 
+. capture program drop _unique_count
+
+. program define _unique_count, rclass
+  1.     syntax varname
+  2.     preserve
+  3.         keep `varlist'
+  4.         drop if missing(`varlist')
+  5.         duplicates drop
+  6.         count
+  7.         return scalar n = r(N)
+  8.     restore
+  9. end
+
+. 
+. local colsel unique_small_grid_id year month ac_uq_id prov count ///
+>     downup_ac_pop av_wind_speed wind_direction rice_prod_aclvl_ahigh
+
+. local uniquevars unique_small_grid_id year month ac_uq_id prov
+
+. 
+. local lab_unique_small_grid_id  "Grid ID"
+
+. local lab_year                  "Year"
+
+. local lab_month                 "Month"
+
+. local lab_ac_uq_id              "Assembly"
+
+. local lab_prov                  "Province"
+
+. local lab_count                 "Number of Fires"
+
+. local lab_downup_ac_pop         "Down \$\times\$ Up AC Pop"
+
+. local lab_av_wind_speed         "Average Wind Speed"
+
+. local lab_wind_direction        "Wind Direction"
+
+. local lab_rice_prod_aclvl_ahigh "Rice Production"
+
+. 
+. capture file close texout
+
+. file open texout using "${tables}/descriptives_main${sample}.tex", write repl
+> ace
+
+. file write texout "\begin{tabular}{lrrrrrr}" _n
+
+. file write texout "\toprule" _n
+
+. file write texout " & Mean & SD & Min & Max & Observations & Unique Obs.\\\\"
+>  _n
+
+. file write texout "\midrule" _n
+
+. 
+. foreach v of local colsel {
+  2.     local meanfmt ""
+  3.     local sdfmt ""
+  4.     local minfmt ""
+  5.     local maxfmt ""
+  6.     local Nfmt ""
+  7.     local ufmt ""
+  8.     if strpos(" `uniquevars' ", " `v' ") {
+  9.         quietly _unique_count `v'
+ 10.         _fmt_int `r(n)'
+ 11.         local ufmt "`r(out)'"
+ 12.     }
+ 13.     else {
+ 14.         quietly summarize `v'
+ 15.         _fmt_num `r(mean)'
+ 16.         local meanfmt "`r(out)'"
+ 17.         _fmt_num `r(sd)'
+ 18.         local sdfmt "`r(out)'"
+ 19.         _fmt_num `r(min)'
+ 20.         local minfmt "`r(out)'"
+ 21.         _fmt_num `r(max)'
+ 22.         local maxfmt "`r(out)'"
+ 23.         quietly count if !missing(`v')
+ 24.         _fmt_int `r(N)'
+ 25.         local Nfmt "`r(out)'"
+ 26.     }
+ 27.     local vlabel "`lab_`v''"
+ 28.     file write texout "`vlabel' & `meanfmt' & `sdfmt' & `minfmt' & `maxfmt
+> ' & `Nfmt' & `ufmt'\\\\" _n
+ 29. }
+
+. 
+. file write texout "\bottomrule" _n
+
+. file write texout "\end{tabular}" _n
+
+. file close texout
+
+. display as result "Generated: ${tables}/descriptives_main${sample}.tex"
+Generated: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/code
+> /_stacked_downup_replication/../../tables/descriptives_main_sample.tex
+
+. 
+end of do-file
+
+. do "${code}/app_5km_descriptive.do"
+
+. *****************************************************************************
+> ***
+. * Descriptive table for the stacked protest sample
+. * Output actively referenced by main.tex:
+. *   tables/_protest_stacked_descriptive.tex
+. *****************************************************************************
+> ***
+. 
+. version 17
+
+. clear
+
+. set more off
+
+. 
+. if "$root" == "" {
+.     * Standalone defaults for the five cluster parameters.
+.     global location     "shell"
+.     global sample       ""
+.     global is_rural_var "is_rural"
+.     global fe_list      "1"
+.     global ster_suffix  ""
+.     global shell "/groups/sgulzar/sa_fires/proj_bureaucrats_farms"
+.     global dbox  "/Users/anzony.quisperojas/Library/CloudStorage/Dropbox/sa_f
+> ires/proj_bureaucrats_farms"
+.     if "$location" == "dbox" {
+.         global root "$dbox"
+.     }
+.     else {
+.         global root "$shell"
+.     }
+. }
+
+. 
+. global int_data "${root}/data_output/intermediate"
+
+. global tables   "${code}/../../tables"
+
+. 
+. local protest_input ///
+>     "${int_data}/stacked_data_protest5km_election_sameterm${sample}.csv"
+
+. capture confirm file "`protest_input'"
+
+. if _rc {
+.     local protest_input ///
+>         "${int_data}/cohortes_protest_term/stacked_data_protest5km_election_s
+> ameterm${sample}.csv"
+. }
+
+. capture confirm file "`protest_input'"
+
+. if _rc {
+.     local protest_input ///
+>         "${int_data}/cohorts_protest_term/stacked_data_protest5km_election_sa
+> meterm${sample}.csv"
+. }
+
+. confirm file "`protest_input'"
+
+. display as text "Final same-term protest input: `protest_input'"
+Final same-term protest input: C:/Users/eunic/Dropbox/sa_fires/proj_bureaucrats
+> _farms/data_output/intermediate/stacked_data_protest5km_election_sameterm_sam
+> ple.csv
+
+. import delimited using "`protest_input'", clear varnames(1) case(preserve)
+(encoding automatically selected: ISO-8859-1)
+(29 vars, 511,686 obs)
+
+. 
+. merge m:1 unique_small_grid_id month year using ///
+>     "${int_data}/grid_month_ac_area_tr.dta", ///
+>     keep(master match) keepusing(ac_area_tr)
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                             0
+    Matched                           511,686  (_merge==3)
+    -----------------------------------------
+
+. assert _merge == 3
+
+. drop _merge
+
+. assert !missing(ac_area_tr)
+
+. 
+. confirm variable cohort_id
+
+. confirm variable cohort_election_year
+
+. confirm variable cohort_term_start
+
+. confirm variable cohort_analysis_max
+
+. assert monthyear >= cohort_term_start
+
+. assert monthyear <= cohort_analysis_max
+
+. assert cohort_term_start <= cohort
+
+. assert inrange(cohort_analysis_max - cohort_term_start, 0, 59)
+
+. bysort cohort_id: assert cohort == cohort[1]
+
+. bysort cohort_id: assert cohort_election_year == cohort_election_year[1]
+
+. 
+. capture confirm variable relative_year_bin
+
+. if _rc {
+.     rename relative_year relative_year_bin
+. }
+
+. assert relative_year_bin == floor((monthyear - cohort) / 12)
+
+. keep if year < 2022 | (year == 2022 & month <= 8)
+(48,842 observations deleted)
+
+. count if relative_year_bin == -5
+  14,722
+
+. display as text "Observations dropped at relative_year_bin == -5: " r(N)
+Observations dropped at relative_year_bin == -5: 14722
+
+. drop if relative_year_bin == -5
+(14,722 observations deleted)
+
+. display as text "Canonical protest sample: natural support after dropping -5"
+Canonical protest sample: natural support after dropping -5
+
+. 
+. * Prefer raw count and rebuild the scaled regression outcome.
+. capture drop countk
+
+. gen countk = count * 1000
+
+. 
+. merge m:1 unique_small_grid_id using ///
+>     "${int_data}/ghs_grid_classification_2000.dta", ///
+>     keep(master match) keepusing(is_rural) nogen
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                             0
+    Matched                           448,122  
+    -----------------------------------------
+
+. keep if ${is_rural_var} == 1
+(90,486 observations deleted)
+
+. 
+. egen prov = group(province)
+
+. egen legis_govyear = group(province election_year)
+
+. egen unique_small_grid_id_cohort = group(unique_small_grid_id cohort_id)
+
+. egen province_cohort = group(province cohort_id)
+
+. egen relativeyear_cohort = group(relative_year_bin cohort_id)
+
+. 
+. bysort unique_small_grid_id_cohort: egen byte has_pre = max(relative_year_bin
+>  < 0)
+
+. bysort unique_small_grid_id_cohort: egen byte has_post = max(relative_year_bi
+> n >= 0)
+
+. egen byte unit_tag = tag(unique_small_grid_id_cohort)
+
+. quietly count if unit_tag
+
+. local units_before = r(N)
+
+. quietly count if unit_tag & has_pre == 1 & has_post == 1
+
+. local units_balanced = r(N)
+
+. display as text "Grid-cohort units with pre and post periods: `units_balanced
+> ' of `units_before'"
+Grid-cohort units with pre and post periods: 6855 of 6924
+
+. keep if has_pre == 1 & has_post == 1
+(1,449 observations deleted)
+
+. assert has_pre == 1 & has_post == 1
+
+. drop unit_tag has_pre has_post
+
+. gen post_ = relative_year_bin >= 0
+
+. gen protest = post_ * treat
+
+. 
+. * Retain exactly the sample selected by the richest interacted population DiD
+> .
+. local common_rhs ///
+>     "ib0.post_##ib0.treat##ib0.downup_ac_pop wind_direction av_wind_speed"
+
+. do "${code}/exploratory_analysis/rice_high_subsample/_apply_rice_high_subsamp
+> le.do"
+
+. *****************************************************************************
+> ***
+. * Optional exploratory restriction: ACs with above-median rice production.
+. *
+. * Called after an analysis dataset and its required merge fields are loaded,
+. * but before the first regression/common-sample regression.  It is inert unle
+> ss
+. * $analysis_subsample is "rice_high".
+. *****************************************************************************
+> ***
+. 
+. if "$analysis_subsample" == "rice_high" {
+.     capture confirm variable rice_prod_aclvl_ahigh
+.     if _rc {
+.         display as error ///
+>             "rice_prod_aclvl_ahigh is missing from the stacked dataset. " ///
+>             "Regenerate it from 0_master_dataset with the data-generation pip
+> eline."
+.         exit 111
+.     }
+. 
+.     assert inlist(rice_prod_aclvl_ahigh, 0, 1)
+.     quietly count
+.     local rice_before = r(N)
+.     keep if rice_prod_aclvl_ahigh == 1
+.     quietly count
+.     local rice_after = r(N)
+.     if `rice_after' == 0 {
+.         display as error "The rice-high exploratory restriction removed every
+>  row."
+.         exit 2000
+.     }
+.     display as result "EXPLORATORY SAMPLE: rice_prod_aclvl_ahigh == 1"
+.     display as result "Rows retained: `rice_after' of `rice_before'"
+. }
+
+. 
+end of do-file
+
+. quietly reghdfejl countk `common_rhs', ///
+>     absorb(unique_small_grid_id_cohort relativeyear_cohort ///
+>            province_cohort#election_year ///
+>            province_cohort#c.monthyear) ///
+>     vce(cluster ac_area_tr)

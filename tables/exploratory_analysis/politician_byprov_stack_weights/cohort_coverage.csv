@@ -1,0 +1,9 @@
+cohort_id,province,cohort_year,cohort_month,min_event,max_event,treated_full_window,control_full_window,full_window,included,reason
+1,Haryana,2014,11,-3,4,FALSE,FALSE,FALSE,TRUE,Included: contributes from event time -3 to 4
+2,Bihar,2015,12,-4,4,FALSE,FALSE,FALSE,TRUE,Included: contributes from event time -4 to 4
+3,Punjab,2017,4,-5,4,TRUE,TRUE,TRUE,TRUE,Included: contributes from event time -5 to 4
+4,Uttar Pradesh,2017,4,-5,4,TRUE,TRUE,TRUE,TRUE,Included: contributes from event time -5 to 4
+5,Haryana,2019,11,-5,4,TRUE,TRUE,TRUE,TRUE,Included: contributes from event time -5 to 4
+6,Bihar,2020,12,-5,4,TRUE,TRUE,TRUE,TRUE,Included: contributes from event time -5 to 4
+7,Punjab,2022,4,-5,2,FALSE,FALSE,FALSE,TRUE,Included: contributes from event time -5 to 2
+8,Uttar Pradesh,2022,4,-5,2,FALSE,FALSE,FALSE,TRUE,Included: contributes from event time -5 to 2

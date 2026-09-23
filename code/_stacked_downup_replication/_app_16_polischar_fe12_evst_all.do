@@ -1,164 +1,195 @@
-*-------------------------------------------------------------------------------
-* _app_16_polischar_fe12_evst_all_rural.do
-* Politician Characteristics Event Study - RURAL GRIDS ONLY
-* Output: _app_16_polischar_fe12_evst_all_rural.csv
-*-------------------------------------------------------------------------------
-
 ********************************************************************************
-* Setup - Only set globals if running standalone (not from master)
+* Politician-characteristics event study (rural stacked sample)
+*
+* Input: politicians_characteristics_byprov${sample}.csv.
+* Final sample: the input's unchanged treated/control composition, as in the
+* politician_byprov_fe_sweep exploratory analysis. The canonical output keeps
+* the historical _controls_both suffix for downstream plotting compatibility.
+* Final FE (selected as FE03): grid x province-election cohort_id,
+* province-cohort linear month-year trends, and event year x cohort_id.
+*
+* The caller selects downup_ac or downup_ac_pop through $downup_var and uses
+* $ster_suffix (normally "" or "_acpop") to keep the two result families apart.
 ********************************************************************************
 
 if "$root" == "" {
     clear all
     set more off
 
-    * Set toggles for standalone run
-    global location "shell"
-    global sample ""
+    * Standalone defaults for the five sbatch-array parameters:
+    * location, sample, is_rural_var, fe_list, and ster_suffix.
+    global location     "shell"
+    global sample       ""
+    global is_rural_var "is_rural"
+    global fe_list      "1"
+    global ster_suffix  ""
+    global control_samples "both"
 
     global shell "/groups/sgulzar/sa_fires/proj_bureaucrats_farms"
-    global dbox "/Users/anzony.quisperojas/Library/CloudStorage/Dropbox/sa_fires/proj_bureaucrats_farms"
+    global dbox  "/Users/anzony.quisperojas/Library/CloudStorage/Dropbox/sa_fires/proj_bureaucrats_farms"
+    global code_shell "/users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication"
+    global code_dbox  "/Users/anzony.quisperojas/Documents/GitHub/proj_bureaucrats_farms/code/_stacked_downup_replication"
 
     if "$location" == "dbox" {
         global root "$dbox"
+        global code "$code_dbox"
     }
     else {
         global root "$shell"
+        global code "$code_shell"
     }
-	* Load custom ado for exporting results
-	qui do "${root}/code/_replication_rural/estsave_csv.ado"
-
+    quietly do "${code}/estsave_csv.ado"
 }
 
+if "$downup_var" == "" {
+    global downup_var "downup_ac_pop"
+}
+if "$control_samples" == "" {
+    global control_samples "both"
+}
 
-*-------------------------------------------------------------------------------
-* Import and Merge Data
-*-------------------------------------------------------------------------------
+global int_data "${root}/data_output/intermediate"
+global tables   "${code}/../../tables"
 
-// Importing data from csv
-import delimited using "${root}/data_output/intermediate/politicians_characteristics${sample}.csv", ///
+import delimited using "${int_data}/politicians_characteristics_byprov${sample}.csv", ///
     clear varnames(1)
-	
-	drop downup_ac 
 
-preserve
-		import delimited using "${root}/data_output/intermediate/0_master_dataset.csv", ///
-    clear varnames(1)
-		keep unique_small_grid_id month year downup_ac_pop
-		tempfile dta
-		save `dta'
-	restore
-	
-	merge m:1 unique_small_grid_id month year using `dta', keep(3) nogen
-	
-	rename  downup_ac_pop downup_ac
+* The new stack stores relative_year; retain the established analysis name.
+capture confirm variable relative_year_bin
+if _rc {
+    confirm variable relative_year
+    rename relative_year relative_year_bin
+}
 
-* Merge with rice moderators
-merge m:1 unique_small_grid_id ac_uq_id using "${root}/data_output/intermediate/rice_moderators.dta"
-keep if _merge == 3
+* Always express the fire-count outcome in thousands.
+capture drop countk
+gen countk = count * 1000
+
+merge m:1 unique_small_grid_id using ///
+    "${int_data}/ghs_grid_classification_2000.dta", ///
+    keep(master match) keepusing(is_rural)
 drop _merge
+keep if ${is_rural_var} == 1
+keep if year < 2022 | (year == 2022 & month <= 8)
+keep if inrange(relative_year_bin, -5, 4)
 
-* Merge with rural classification
-merge m:1 unique_small_grid_id using "${root}/data_output/intermediate/ghs_grid_classification_2000.dta", keepusing(is_rural)
-keep if _merge == 3
-drop _merge
+* The politician stack carries the only substantive rice moderator used here.
+confirm variable rice_prod_aclvl_ahigh
+assert inlist(rice_prod_aclvl_ahigh, 0, 1)
 
-* Keep only rural grids
-keep if is_rural == 1
+confirm variable control_type
+confirm variable cohort_id
+confirm variable cohort_province
+assert control_type == 0 if treat == 1
+assert inlist(control_type, 1, 2) if treat == 0
+assert cohort_id == floor(cohort_id) & cohort_id > 0
 
-display "Observations after rural filter: " _N
+sort cohort_id unique_small_grid_id monthyear
+by cohort_id: assert province == province[1]
+by cohort_id: assert cohort == cohort[1]
+by cohort_id: assert cohort_province == cohort_province[1]
+by cohort_id unique_small_grid_id: assert treat == treat[1]
+by cohort_id unique_small_grid_id: assert control_type == control_type[1]
+isid unique_small_grid_id monthyear cohort_id treat
 
-*-------------------------------------------------------------------------------
-* Generate Variables
-*-------------------------------------------------------------------------------
+egen unique_small_grid_id_cohort = group(unique_small_grid_id cohort_id)
+egen province_cohort = group(province cohort_id)
+egen ac_elec_yr = group(ac_uq_id election_year cohort_id)
 
-* Date
-gen date_ym = ym(year, month)
-
-* Generation of Fixed Effects
-egen unique_small_grid_id_cohort = group(unique_small_grid_id cohort)
-egen monthyearco = group(month year cohort)
-egen ac_elec_yr = group(ac_uq_id election_year cohort)
-egen province_cohort = group(cohort province)
-
-* Government year
-bys ac_uq_id election_year: egen min_monthyear = min(date_ym)
-gen gov_year = date_ym - min_monthyear
-replace gov_year = gov_year / 12
-g yeargov = int(gov_year + 1)
-
-* Generation of Relative Years
-sum relative_year_bin
+quietly summarize relative_year_bin
 local rmin = r(min)
 gen relative_year_bin_aux = relative_year_bin - `rmin' + 1
 local base = -1 - `rmin' + 1
-dis `base'
-g post_ = (relative_year_bin >= 0)
 
-*-------------------------------------------------------------------------------
-* Regression Setup
-*-------------------------------------------------------------------------------
+* Final FE03 selected by the province-cohort exploratory sweep.
+local fe1 "unique_small_grid_id_cohort province_cohort#c.monthyear relative_year_bin_aux#cohort_id"
 
-gen countk = count * 1000
-local dep_var countk
-
-
-* FE13 specification
-local fe12 "unique_small_grid_id_cohort province_cohort#c.monthyear province_cohort#election_year"
-
-* Filters
-local filter1 "1"   // all sample
-
-* Moderator variables
-local moderators_list moderator downup_ac rice_area_aclvl_ahigh rice_harvarea_aclvl_ahigh rice_prod_aclvl_ahigh
-
-*-------------------------------------------------------------------------------
-* Loop over moderators
-*-------------------------------------------------------------------------------
-
-local i = 1
+local filter1 "1"
 gen moderator = 0
 
-foreach mod of local moderators_list {
-	
-	local rhs "ib`base'.relative_year_bin_aux##ib0.treat##ib0.`mod' wind_direction av_wind_speed"
+* Baseline plus the only substantive event-study moderator.
+local moderators_list moderator rice_prod_aclvl_ahigh
 
-    replace moderator = `mod'
+do "${code}/_apply_analysis_subsample.do"
 
-    * Select filter condition
-    local fcond `filter1'
+tempfile analysis_base
+save `analysis_base'
 
-    * Compute mean of dep var where untreated
-    quietly summarize `dep_var' if `fcond' & treat == 0 & relative_year_bin < 0
-    local ymean = r(mean)
+foreach control_sample in $control_samples {
+    if !inlist("`control_sample'", "never", "both", "notyet") {
+        display as error "Unknown control sample: `control_sample'"
+        exit 198
+    }
+    use `analysis_base', clear
 
-    * Count number of unique ACs in subsample
-    unique ac_uq_id if `fcond'
-    local numacs = r(unique)
+    local control_suffix "_controls_never"
+    if "`control_sample'" == "never" {
+        keep if treat == 1 | control_type == 1
+    }
+    else if "`control_sample'" == "both" {
+        local control_suffix "_controls_both"
+    }
+    else if "`control_sample'" == "notyet" {
+        keep if treat == 1 | control_type == 2
+        local control_suffix "_controls_notyet"
+        display as error ///
+            "CAUTION: control_type 2 is the legacy partial-zero-spell group; " ///
+            "it is not a pure not-yet-treated sample."
+    }
 
-    * Select FE spec
-    local fespec `fe12'
+    display as text "Politician event study: controls=`control_sample', downup=${downup_var}, N=" _N
 
-    * Run regression with clustering
-    reghdfejl `dep_var' `rhs' if `fcond', absorb(`fespec') vce(cluster ac_elec_yr)
+    * Use the richest rice-moderated FE03 event study to define a common sample
+    * for the baseline and moderated estimates.
+    quietly reghdfejl countk ///
+        ib`base'.relative_year_bin_aux##ib0.treat##ib0.rice_prod_aclvl_ahigh ///
+        wind_direction av_wind_speed, absorb(`fe1') vce(cluster ac_elec_yr)
+    gen byte common_sample = e(sample)
+    keep if common_sample
+    drop common_sample
+    local common_n = _N
 
-    * Store coefficient + SE of main var
-    est store evreg`i'
-    estadd scalar ymean = `ymean'
-    estadd scalar acq = `numacs'
-    estadd local sample "Rural"
-    * FE indicators for FE13 specification
-    estadd local gridfe "Y"
-    estadd local mtyr "Y"
-    estadd local provtrend "Y"
-    estadd local yeargov "Y"
+    egen tag_ac = tag(ac_uq_id)
+    count if tag_ac == 1
+    local numacs = r(N)
 
-    local i = `i' + 1
-    display("`i'")
+    est clear
+    local i = 1
+    local estimate_names ""
+    foreach mod of local moderators_list {
+        replace moderator = `mod'
+        local rhs "ib`base'.relative_year_bin_aux##ib0.treat##ib0.`mod' wind_direction av_wind_speed"
+        local fcond `filter1'
+
+        quietly summarize countk if treat == 1 & relative_year_bin <= -1 & `fcond'
+        local ymean = r(mean)
+        quietly summarize countk if treat == 1 & relative_year_bin <= -1 & moderator == 1 & `fcond'
+        local ymean2 = r(mean)
+
+        foreach fe of numlist $fe_list {
+            local fespec `fe`fe''
+            reghdfejl countk `rhs' if `fcond', ///
+                absorb(`fespec') vce(cluster ac_elec_yr)
+            assert e(N) == `common_n'
+
+            estadd scalar ymean  = `ymean'
+            estadd scalar ymean2 = `ymean2'
+            estadd scalar acq    = `numacs'
+            estadd local smpl "Rural"
+            estadd local fespec "fe`fe'"
+            estadd local mod "`mod'"
+            estadd local controls "`control_sample'"
+            local estname evreg`i'
+            local i = `i' + 1
+            est store `estname'
+            local estimate_names "`estimate_names' `estname'"
+        }
+    }
+
+    local outbase "${tables}/_app_16_polischar_fe12_evst_all${sample}_rural${ster_suffix}`control_suffix'"
+    estwrite evreg* using "`outbase'.ster", replace
+    confirm file "`outbase'.ster"
+    display as result "Saved: `outbase'.ster"
 }
 
-*-------------------------------------------------------------------------------
-* Export Results
-*-------------------------------------------------------------------------------
-
-estsave_csv evreg1 evreg2 evreg3 evreg4 evreg5 using "${root}/tex/paper/tables/_app_16_polischar_fe12_evst_all${sample}_rural_stacked.csv", replace
+********************************************************************************

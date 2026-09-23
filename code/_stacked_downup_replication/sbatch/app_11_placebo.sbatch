@@ -3,7 +3,6 @@
 #$ -m abe
 #$ -q largemem
 #$ -N app_11_placebo
-#$ -pe smp 2
 #$ -cwd
 
 module load stata gcc

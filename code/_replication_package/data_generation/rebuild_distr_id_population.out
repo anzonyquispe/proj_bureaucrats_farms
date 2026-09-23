@@ -1,0 +1,11 @@
+2026-08-06 07:46:29 | INFO | Importing panel, wind, and population columns
+2026-08-06 07:46:40 | INFO | Panel rows: 14,837,592
+2026-08-06 07:46:40 | INFO | Rows missing rolling direction: 0
+2026-08-06 07:46:40 | INFO | Direction convention: counterclockwise from East, normalized [0, 360)
+2026-08-06 07:46:41 | INFO | Ordered same-AC pairs: 16,803,654
+2026-08-06 07:47:04 | INFO | Applying the directional population lookup
+2026-08-06 07:47:13 | INFO | Completed population stage: /groups/sgulzar/sa_fires/proj_bureaucrats_farms/data_output/intermediate/data_2012_2024_grid_ac_downup_pop.parquet
+2026-08-06 07:47:13 | INFO | rows: 14,837,592
+2026-08-06 07:47:13 | INFO | grids: 100,254
+2026-08-06 07:47:13 | INFO | months: 148
+2026-08-06 07:47:13 | INFO | missing_wind: 0

@@ -1,0 +1,25 @@
+relative_month,estimate,se,specification,lower,upper
+-5,4.01557959979e-10,7.71585711450128e-06,Grid x cohort + AC x month-year x cohort FE,-1.51226783864625e-05,1.51234815023825e-05
+-4,2.9662919681e-10,7.01580703558044e-06,Grid x cohort + AC x month-year x cohort FE,-1.37506851605409e-05,1.37512784189345e-05
+-3,-1.45046912944e-11,6.539281773903e-06,Grid x cohort + AC x month-year x cohort FE,-1.28170067815412e-05,1.28169777721586e-05
+-2,-3.24324588303e-10,6.40358507869615e-06,Grid x cohort + AC x month-year x cohort FE,-1.25513510788328e-05,1.25507024296562e-05
+-1,2.62983075286e-10,7.28871580473543e-06,Grid x cohort + AC x month-year x cohort FE,-1.42856199942062e-05,1.42861459603567e-05
+0,0,0,Grid x cohort + AC x month-year x cohort FE,0,0
+1,-7.35263314339e-11,5.98920830185426e-06,Grid x cohort + AC x month-year x cohort FE,-1.17389217979658e-05,1.17387747453029e-05
+2,4.77735027266e-10,3.91068090440782e-06,Grid x cohort + AC x month-year x cohort FE,-7.66445683761207e-06,7.6654123076666e-06
+3,5.3017127641e-10,4.40778066391693e-06,Grid x cohort + AC x month-year x cohort FE,-8.63871993000078e-06,8.6397802725536e-06
+4,3.82199097591e-10,4.89889280360369e-06,Grid x cohort + AC x month-year x cohort FE,-9.60144769596564e-06,9.60221209416082e-06
+5,3.55979380167e-10,5.49606141605059e-06,Grid x cohort + AC x month-year x cohort FE,-1.0771924396079e-05,1.07726363548393e-05
+6,1.09301955812e-09,5.07466360775766e-06,Grid x cohort + AC x month-year x cohort FE,-9.9452476516469e-06,9.94743369076314e-06
+-5,-8.98815600302e-08,7.64580276388948e-06,Grid x cohort + AC x month-year x cohort + relative month x cohort FE,-1.50756549772536e-05,1.48958918571932e-05
+-4,-8.4453163456e-08,7.17549223332448e-06,Grid x cohort + AC x month-year x cohort + relative month x cohort FE,-1.4148417940772e-05,1.397951161386e-05
+-3,-4.96567609907e-08,1.00863675040621e-05,Grid x cohort + AC x month-year x cohort + relative month x cohort FE,-1.98189370689524e-05,1.9719623546971e-05
+-2,-4.16110939518e-08,8.51032559690874e-06,Grid x cohort + AC x month-year x cohort + relative month x cohort FE,-1.67218492638929e-05,1.66386270759893e-05
+-1,-3.24334113314e-08,6.17075400744512e-06,Grid x cohort + AC x month-year x cohort + relative month x cohort FE,-1.21271112659238e-05,1.2062244443261e-05
+0,0,0,Grid x cohort + AC x month-year x cohort + relative month x cohort FE,0,0
+1,-8.01998171054e-08,4.18432552622283e-06,Grid x cohort + AC x month-year x cohort + relative month x cohort FE,-8.28147784850216e-06,8.12107821429136e-06
+2,-9.14946757706e-08,4.73097819841732e-06,Grid x cohort + AC x month-year x cohort + relative month x cohort FE,-9.36421194466855e-06,9.18122259312735e-06
+3,-9.7713103736e-08,5.37038025327816e-06,Grid x cohort + AC x month-year x cohort + relative month x cohort FE,-1.06236584001612e-05,1.04282321926892e-05
+4,-1.01520375038e-07,5.84139561259978e-06,Grid x cohort + AC x month-year x cohort + relative month x cohort FE,-1.15506557757336e-05,1.13476150256576e-05
+5,-9.13063368538e-08,6.22111263155555e-06,Grid x cohort + AC x month-year x cohort + relative month x cohort FE,-1.22846870947027e-05,1.21020744209951e-05
+6,-9.25319545543e-08,6.0648113779243e-06,Grid x cohort + AC x month-year x cohort + relative month x cohort FE,-1.19795622552859e-05,1.17944983461773e-05

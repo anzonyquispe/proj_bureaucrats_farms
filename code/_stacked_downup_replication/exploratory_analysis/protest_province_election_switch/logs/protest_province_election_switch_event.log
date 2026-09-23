@@ -1,0 +1,1811 @@
+From github.com:anzonyquispe/proj_bureaucrats_farms
+ * branch            replication_data -> FETCH_HEAD
+Already on 'replication_data'
+Your branch is up to date with 'origin/replication_data'.
+From github.com:anzonyquispe/proj_bureaucrats_farms
+ * branch            replication_data -> FETCH_HEAD
+Already up to date.
+[2026-08-22 15:40:38] git HEAD=d7b84ad
+Loading CRC_default/1.1
+Starting exploratory_analysis/protest_province_election_switch/_protest_province_election_switch_event_study.do with 5 CPU(s).
+Permanent Stata log: /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication/logs/pr_pes_event_1377809.stata.log
+
+  ___  ____  ____  ____  ____ ®
+ /__    /   ____/   /   ____/      StataNow 19.5
+___/   /   /___/   /   /___/       MP—Parallel Edition
+
+ Statistics and Data Science       Copyright 1985-2025 StataCorp LLC
+                                   StataCorp
+                                   4905 Lakeway Drive
+                                   College Station, Texas 77845 USA
+                                   800-782-8272        https://www.stata.com
+                                   979-696-4600        service@stata.com
+
+Stata license: 4-user 16-core network, expiring 14 Sep 2026
+Serial number: 501909301589
+  Licensed to: University of Notre Dame
+               Notre Dame, IN 46556
+
+Notes:
+      1. Stata is running in batch mode.
+      2. Unicode is supported; see help unicode_advice.
+      3. More than 2 billion observations are allowed; see help obs_advice.
+      4. Maximum number of variables is set to 5,000 but can be increased;
+          see help set_maxvar.
+
+. do /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication/sb
+> atch/_run_dofile.do 
+
+. *****************************************************************************
+> ***
+. * Environment bridge: one invocation runs exactly one result-generating dofil
+> e.
+. *****************************************************************************
+> ***
+. 
+. version 17
+
+. set more off
+
+. 
+. local dofile        : environment FARMS_DOFILE
+
+. local root          : environment FARMS_ROOT
+
+. local code          : environment FARMS_CODE
+
+. local location      : environment FARMS_LOCATION
+
+. local sample        : environment FARMS_SAMPLE
+
+. local is_rural_var  : environment FARMS_RURAL_VAR
+
+. local fe_list       : environment FARMS_FE_LIST
+
+. local ster_suffix   : environment FARMS_STER_SUFFIX
+
+. local downup_var    : environment FARMS_DOWNUP_VAR
+
+. local stacked_file  : environment FARMS_STACKED_FILE
+
+. local did_output    : environment FARMS_DID_OUTPUT
+
+. local control_samples : environment FARMS_CONTROL_SAMPLES
+
+. local processors    : environment FARMS_CPUS
+
+. 
+. if "`processors'" == "" local processors "1"
+
+. set processors `processors'
+    The maximum number of processors or cores being used is changed from 16
+    to 5.  It can be set to any number between 1 and 16
+
+. 
+. if "`dofile'" == "" {
+.     display as error "FARMS_DOFILE is empty; use sbatch/run_dofile.sbatch."
+.     exit 198
+. }
+
+. if "`root'" == "" {
+.     display as error "FARMS_ROOT is empty; use sbatch/run_dofile.sbatch."
+.     exit 198
+. }
+
+. if "`code'" == "" {
+.     display as error "FARMS_CODE is empty; use sbatch/run_dofile.sbatch."
+.     exit 198
+. }
+
+. 
+. if "`sample'" == "none" local sample ""
+
+. if "`ster_suffix'" == "none" local ster_suffix ""
+
+. if "`downup_var'" == "none" local downup_var ""
+
+. if "`stacked_file'" == "none" local stacked_file ""
+
+. if "`did_output'" == "none" local did_output ""
+
+. if "`control_samples'" == "all" local control_samples ""
+
+. 
+. global root          "`root'"
+
+. global code          "`code'"
+
+. global location      "`location'"
+
+. global sample        "`sample'"
+
+. global is_rural_var  "`is_rural_var'"
+
+. global fe_list       "`fe_list'"
+
+. global ster_suffix   "`ster_suffix'"
+
+. global downup_var    "`downup_var'"
+
+. global stacked_file  "`stacked_file'"
+
+. global did_output    "`did_output'"
+
+. global control_samples "`control_samples'"
+
+. 
+. global int_data    "${root}/data_output/intermediate"
+
+. global int_farms   "${int_data}"
+
+. global tables      "${code}/../../tables"
+
+. global table_farms "${tables}"
+
+. global figures     "${code}/../../figures"
+
+. global figure_farms "${figures}"
+
+. 
+. capture mkdir "${tables}"
+
+. capture mkdir "${figures}"
+
+. capture mkdir "${code}/logs"
+
+. 
+. adopath ++ "${code}"
+  [1]              "/users/aquisper/proj_bureaucrats_farms/code/_stacked_downup
+> _replication"
+  [2]  (BASE)      "/software/s/stata/19.5/ado/base/"
+  [3]  (SITE)      "/software/s/stata/ado/"
+  [4]              "."
+  [5]  (PERSONAL)  "~/ado/personal/"
+  [6]  (PLUS)      "~/ado/plus/"
+  [7]  (OLDPLACE)  "~/ado/"
+
+. capture noisily do "${code}/estsave_csv.ado"
+
+. *! estsave_csv v1.2 - Export stored estimates and covariance matrices to CSV
+. program define estsave_csv
+  1.     version 14.0
+  2.     syntax namelist using/, [replace append]
+  3. 
+.     local outfile `"`using'"'
+  4.     tempfile coef_all coef_cur scalar_all scalar_cur
+  5.     local first = 1
+  6. 
+.     foreach est of local namelist {
+  7.         quietly estimates restore `est'
+  8.         matrix b = e(b)
+  9.         matrix V = e(V)
+ 10.         local k = colsof(b)
+ 11.         local cnames : colfullnames b
+ 12. 
+.         preserve
+ 13.         clear
+ 14.         quietly set obs `k'
+ 15.         gen strL reg = "`est'"
+ 16.         gen strL var = ""
+ 17.         gen double beta = .
+ 18.         capture local ymean_val `"`e(ymean)'"'
+ 19.         if !_rc & `"`ymean_val'"' != "" gen strL ymean = `"`ymean_val'"'
+ 20.         else gen strL ymean = ""
+ 21. 
+.         forvalues j = 1/`k' {
+ 22.             local nm : word `j' of `cnames'
+ 23.             quietly replace var = "`nm'" in `j'
+ 24.             quietly replace beta = b[1, `j'] in `j'
+ 25.             gen double cov`j' = .
+ 26.         }
+ 27.         forvalues i = 1/`k' {
+ 28.             forvalues j = 1/`k' {
+ 29.                 quietly replace cov`j' = V[`i', `j'] in `i'
+ 30.             }
+ 31.         }
+ 32.         quietly save `coef_cur', replace
+ 33.         if `first' quietly save `coef_all', replace
+ 34.         else {
+ 35.             quietly use `coef_all', clear
+ 36.             quietly append using `coef_cur'
+ 37.             quietly save `coef_all', replace
+ 38.         }
+ 39.         restore
+ 40. 
+.         preserve
+ 41.         clear
+ 42.         quietly set obs 1
+ 43.         gen strL reg = "`est'"
+ 44.         local escalars : e(scalars)
+ 45.         foreach sc of local escalars {
+ 46.             local scval = e(`sc')
+ 47.             local safe = subinstr("`sc'", "-", "_", .)
+ 48.             capture gen double `safe' = `scval'
+ 49.             if _rc capture gen double sc_`safe' = `scval'
+ 50.         }
+ 51.         local emacros : e(macros)
+ 52.         foreach mc of local emacros {
+ 53.             capture local mcval `"`e(`mc')'"'
+ 54.             if !_rc & `"`mcval'"' != "" {
+ 55.                 if strlen(`"`mcval'"') > 244 local mcval = substr(`"`mcval
+> '"', 1, 244)
+ 56.                 local safe = subinstr("`mc'", "-", "_", .)
+ 57.                 capture gen strL `safe' = `"`mcval'"'
+ 58.                 if _rc capture gen strL mc_`safe' = `"`mcval'"'
+ 59.             }
+ 60.         }
+ 61.         quietly save `scalar_cur', replace
+ 62.         if `first' {
+ 63.             quietly save `scalar_all', replace
+ 64.             local first = 0
+ 65.         }
+ 66.         else {
+ 67.             quietly use `scalar_all', clear
+ 68.             quietly append using `scalar_cur'
+ 69.             quietly save `scalar_all', replace
+ 70.         }
+ 71.         restore
+ 72.     }
+ 73. 
+.     local basefile = subinstr(`"`outfile'"', ".csv", "", .)
+ 74.     quietly use `coef_all', clear
+ 75.     order reg var beta ymean
+ 76.     quietly export delimited using "`basefile'.csv", `replace' `append'
+ 77.     quietly use `scalar_all', clear
+ 78.     quietly export delimited using "`basefile'_scalars.csv", `replace' `ap
+> pend'
+ 79.     display as result "Estimates exported to `basefile'.csv"
+ 80. end
+
+. 
+. 
+end of do-file
+
+. capture noisily do "${code}/estload_csv.ado"
+
+. *! estload_csv v1.0 - Reconstruct estimate objects exported by estsave_csv
+. program define estload_csv
+  1.     version 14.0
+  2.     syntax using/
+  3. 
+.     local infile `"`using'"'
+  4.     local basefile = subinstr(`"`infile'"', ".csv", "", .)
+  5.     preserve
+  6.     quietly import delimited using "`basefile'.csv", clear varnames(1)
+  7.     quietly levelsof reg, local(regs)
+  8. 
+.     foreach r of local regs {
+  9.         preserve
+ 10.         quietly keep if reg == "`r'"
+ 11.         local k = _N
+ 12.         matrix b = J(1, `k', .)
+ 13.         matrix V = J(`k', `k', .)
+ 14.         local varnames ""
+ 15.         forvalues i = 1/`k' {
+ 16.             local vname = var[`i']
+ 17.             local varnames `"`varnames' `vname'"'
+ 18.             matrix b[1, `i'] = beta[`i']
+ 19.             forvalues j = 1/`k' {
+ 20.                 matrix V[`i', `j'] = cov`j'[`i']
+ 21.             }
+ 22.         }
+ 23.         matrix colnames b = `varnames'
+ 24.         matrix rownames V = `varnames'
+ 25.         matrix colnames V = `varnames'
+ 26.         restore, preserve
+ 27.         quietly ereturn post b V
+ 28.         estimates store `r'
+ 29.         display as text "Loaded estimate: `r'"
+ 30.     }
+ 31.     restore
+ 32. end
+
+. 
+. 
+end of do-file
+
+. 
+. display "============================================================"
+============================================================
+
+. display "Independent dofile job: `dofile'"
+Independent dofile job: exploratory_analysis/protest_province_election_switch/_
+> protest_province_election_switch_event_study.do
+
+. display "Data root: ${root}"
+Data root: /groups/sgulzar/sa_fires/proj_bureaucrats_farms
+
+. display "Tables output: ${tables}"
+Tables output: /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_repl
+> ication/../../tables
+
+. display "Figures output: ${figures}"
+Figures output: /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_rep
+> lication/../../figures
+
+. display "Code root: ${code}"
+Code root: /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replicat
+> ion
+
+. display "Sample: ${sample}; rural: ${is_rural_var}; FE: ${fe_list}"
+Sample: ; rural: is_rural; FE: 1/5
+
+. display "Suffix: ${ster_suffix}; moderator: ${downup_var}"
+Suffix: ; moderator: 
+
+. display "Control samples: ${control_samples}"
+Control samples: 
+
+. display "Stata processors: " c(processors)
+Stata processors: 5
+
+. display "============================================================"
+============================================================
+
+. 
+. do "${code}/`dofile'"
+
+. *****************************************************************************
+> ***
+. * Exploratory protest event study using province-election-switch cohorts.
+. *
+. * Cohort key: province x election year x switching month.
+. * Controls: pooled never-treated and censored not-yet-treated grids.
+. * FE: FE1-FE5 below, each augmented with event year x cohort_id.
+. *****************************************************************************
+> ***
+. 
+. if "$root" == "" {
+.     clear all
+.     set more off
+. 
+.     * Standalone defaults for the five sbatch-array parameters:
+.     * location, sample, is_rural_var, fe_list, and ster_suffix.
+.     global location     "shell"
+.     global sample       ""
+.     global is_rural_var "is_rural"
+.     global fe_list      "1/5"
+.     global ster_suffix  ""
+. 
+.     global shell "/groups/sgulzar/sa_fires/proj_bureaucrats_farms"
+.     global dbox  "C:/Users/eunic/Dropbox/sa_fires/proj_bureaucrats_farms"
+.     global code_shell "/users/aquisper/proj_bureaucrats_farms/code/_stacked_d
+> ownup_replication"
+.     global code_dbox "C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucra
+> ts_farms/code/_stacked_downup_replication"
+. 
+.     if "$location" == "dbox" {
+.         global root "$dbox"
+.         global code "$code_dbox"
+.     }
+.     else {
+.         global root "$shell"
+.         global code "$code_shell"
+.     }
+.     quietly do "${code}/estsave_csv.ado"
+. }
+
+. 
+. global int_data "${root}/data_output/intermediate"
+
+. global tables   "${code}/../../tables"
+
+. local output_dir "${tables}/exploratory_analysis/protest_province_election_sw
+> itch"
+
+. capture mkdir "${tables}/exploratory_analysis"
+
+. capture mkdir "`output_dir'"
+
+. 
+. local input ///
+>     "${int_data}/stacked_data_protest5km_province_election_switch${sample}.cs
+> v"
+
+. confirm file "`input'"
+
+. display as text "Input: `input'"
+Input: /groups/sgulzar/sa_fires/proj_bureaucrats_farms/data_output/intermediate
+> /stacked_data_protest5km_province_election_switch.csv
+
+. import delimited using "`input'", clear varnames(1)
+(encoding automatically selected: ISO-8859-1)
+(40 vars, 71,063,267 obs)
+
+. 
+. * Construction invariants are checked again at estimation time.
+. confirm variable cohort_id
+
+. confirm variable cohort_province
+
+. confirm variable cohort_election_year
+
+. confirm variable cohort_term_start
+
+. confirm variable cohort_term_end
+
+. confirm variable control_type
+
+. assert province == cohort_province
+
+. assert monthyear >= cohort_term_start
+
+. assert monthyear < cohort_term_end
+
+. assert year < 2022 | (year == 2022 & month <= 8)
+
+. assert relative_monthyear == monthyear - cohort
+
+. assert relative_year_bin == floor(relative_monthyear / 12)
+
+. assert protest5km == (monthyear >= cohort) if treat == 1
+
+. assert protest5km == 0 if treat == 0
+
+. assert control_type == 0 if treat == 1
+
+. assert inlist(control_type, 1, 2) if treat == 0
+
+. 
+. bysort cohort_id: assert cohort == cohort[1]
+
+. bysort cohort_id: assert cohort_province == cohort_province[1]
+
+. bysort cohort_id: assert cohort_election_year == cohort_election_year[1]
+
+. bysort cohort_id: assert cohort_term_start == cohort_term_start[1]
+
+. bysort cohort_id: assert cohort_term_end == cohort_term_end[1]
+
+. 
+. * Each retained grid-cohort must be an uninterrupted monthly sequence. For a
+. * not-yet-treated control, that sequence ends immediately before its own swit
+> ch.
+. bysort cohort_id unique_small_grid_id (monthyear): ///
+>     assert monthyear == monthyear[_n-1] + 1 if _n > 1
+
+. 
+. * Match the reference sample definition and use the authoritative rice flag.
+. capture drop rice_prod_aclvl_ahigh
+
+. merge m:1 unique_small_grid_id ac_uq_id using ///
+>     "${int_data}/rice_moderators.dta", ///
+>     keepusing(rice_prod_aclvl_ahigh)
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                        12,760
+        from master                    12,600  (_merge==1)
+        from using                        160  (_merge==2)
+
+    Matched                        71,050,667  (_merge==3)
+    -----------------------------------------
+
+. keep if _merge == 3
+(12,760 observations deleted)
+
+. drop _merge
+
+. assert inlist(rice_prod_aclvl_ahigh, 0, 1)
+
+. 
+. merge m:1 unique_small_grid_id using ///
+>     "${int_data}/ghs_grid_classification_2000.dta", ///
+>     keepusing(is_rural)
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                        58,584
+        from master                         0  (_merge==1)
+        from using                     58,584  (_merge==2)
+
+    Matched                        71,050,667  (_merge==3)
+    -----------------------------------------
+
+. keep if _merge == 3
+(58,584 observations deleted)
+
+. drop _merge
+
+. keep if ${is_rural_var} == 1
+(13,588,594 observations deleted)
+
+. 
+. * Follow the reference dofile: remove only relative year -5.
+. drop if relative_year_bin == -5
+(2,059,948 observations deleted)
+
+. 
+. recast int election_year, force
+
+. recast byte yeargov, force
+
+. 
+. egen unique_small_grid_id_cohort = group(unique_small_grid_id cohort_id)
+
+. egen monthyearco                 = group(month year cohort_id)
+
+. egen province_cohort             = group(cohort_id province)
+
+. egen relativeyear_cohort         = group(relative_year_bin cohort_id)
+
+. egen ac_elec_yr                  = group(ac_uq_id cohort_election_year cohort
+> _id)
+
+. 
+. * Rural/rice filtering can remove rows, so enforce pre/post support again.
+. bysort unique_small_grid_id_cohort: egen byte has_pre  = max(relative_year_bi
+> n < 0)
+
+. bysort unique_small_grid_id_cohort: egen byte has_post = max(relative_year_bi
+> n >= 0)
+
+. egen byte unit_tag = tag(unique_small_grid_id_cohort)
+
+. quietly count if unit_tag
+
+. local units_before = r(N)
+
+. quietly count if unit_tag & has_pre == 1 & has_post == 1
+
+. local units_balanced = r(N)
+
+. display as text "Grid-cohort units with pre and post: `units_balanced' of `un
+> its_before'"
+Grid-cohort units with pre and post: 1062027 of 1062027
+
+. keep if has_pre == 1 & has_post == 1
+(0 observations deleted)
+
+. drop unit_tag has_pre has_post
+
+. 
+. quietly summarize relative_year_bin
+
+. local rmin = r(min)
+
+. gen relative_year_bin_aux = relative_year_bin - `rmin' + 1
+
+. local base = -1 - `rmin' + 1
+
+. 
+. capture drop countk
+
+. gen countk = count * 1000
+
+. local dep_var countk
+
+. local filter1 "1"
+
+. 
+. local fe1 "unique_small_grid_id_cohort"
+
+. local fe2 "unique_small_grid_id_cohort monthyearco"
+
+. local fe3 "unique_small_grid_id_cohort province_cohort#c.monthyear"
+
+. local fe4 "unique_small_grid_id_cohort yeargov"
+
+. local fe5 "unique_small_grid_id_cohort province_cohort#election_year"
+
+. 
+. gen byte moderator = 0
+
+. * local moderators_list moderator downup_ac rice_area_aclvl_ahigh rice_harvar
+> ea_aclvl_ahigh rice_prod_aclvl_ahigh
+. local moderators_list moderator rice_prod_aclvl_ahigh
+
+. 
+. egen byte tag_ac = tag(ac_uq_id)
+
+. quietly count if tag_ac
+
+. local numacs = r(N)
+
+. drop tag_ac
+
+. 
+. est clear
+
+. local i = 1
+
+. local estimate_names ""
+
+. foreach fe of numlist $fe_list {
+  2.     local fespec `fe`fe''
+  3.     display _newline as text "FE`fe': `fespec' + relativeyear_cohort"
+  4. 
+.     foreach mod of local moderators_list {
+  5.         replace moderator = `mod'
+  6.         local rhs ///
+>             "ib`base'.relative_year_bin_aux##ib0.treat##ib0.`mod' wind_direct
+> ion av_wind_speed"
+  7. 
+.         quietly summarize `dep_var' if treat == 1 & relative_year_bin <= -1 &
+>  `filter1'
+  8.         local ymean = r(mean)
+  9.         quietly summarize `dep_var' if treat == 1 & relative_year_bin <= -
+> 1 & moderator == 1 & `filter1'
+ 10.         local ymean2 = r(mean)
+ 11. 
+.         reghdfejl `dep_var' `rhs' if `filter1', ///
+>             absorb(`fespec' relativeyear_cohort) ///
+>             vce(cluster ac_elec_yr)
+ 12. 
+.         estadd scalar ymean  = `ymean'
+ 13.         estadd scalar ymean2 = `ymean2'
+ 14.         estadd scalar acq    = `numacs'
+ 15.         estadd local smpl "Rural"
+ 16.         estadd local fespec "FE`fe': `fespec' relativeyear_cohort"
+ 17.         estadd local mod "`mod'"
+ 18.         estadd local controls "pooled"
+ 19. 
+.         local estname evreg`i'
+ 20.         local estimate_names "`estimate_names' `estname'"
+ 21.         local i = `i' + 1
+ 22.         est store `estname'
+ 23.     }
+ 24. }
+
+FE1: unique_small_grid_id_cohort + relativeyear_cohort
+(0 real changes made)
+(MWFE estimator converged in 8 iterations)
+
+HDFE linear regression with Julia                 Number of obs   = 55,402,125
+Absorbing 2 HDFE groups                           F(   8,  10961) =     345.61
+Statistics cluster-robust                         Prob > F        =     0.0000
+                                                  R-squared       =     0.1115
+                                                  Adj R-squared   =     0.0941
+Number of clusters (ac_elec_yr) =      10961      Within R-sq.    =     0.0097
+                                                  Root MSE        =   970.2775
+
+                        (Std. err. adjusted for 10,961 clusters in ac_elec_yr)
+------------------------------------------------------------------------------
+             |               Robust
+      countk | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+relative_y~x |
+          1  |          0  (omitted)
+          2  |          0  (omitted)
+          3  |          0  (omitted)
+          5  |          0  (omitted)
+          6  |          0  (omitted)
+          7  |          0  (omitted)
+             |
+     1.treat |          0  (omitted)
+wind_direc~n |   -.952843   .0207194   -45.99   0.000    -.9934568   -.9122293
+av_wind_sp~d |   88.06269   2.878618    30.59   0.000     82.42008     93.7053
+             |
+relative_y~x#|
+       treat |
+        1 1  |  -30.53223   11.22824    -2.72   0.007     -52.5416   -8.522861
+        2 1  |  -9.009693   8.785846    -1.03   0.305    -26.23154     8.21215
+        3 1  |   11.07741   8.764853     1.26   0.206    -6.103287     28.2581
+        5 1  |   17.58746   8.937188     1.97   0.049     .0689622    35.10597
+        6 1  |   96.58494   22.15626     4.36   0.000     53.15467    140.0152
+        7 1  |   17.67936   21.83888     0.81   0.418    -25.12878    60.48751
+------------------------------------------------------------------------------
+
+added scalar:
+              e(ymean) =  473.10874
+
+added scalar:
+             e(ymean2) =  .
+
+added scalar:
+                e(acq) =  808
+
+added macro:
+               e(smpl) : "Rural"
+
+added macro:
+             e(fespec) : "FE1: unique_small_grid_id_cohort relativeyear_cohort"
+
+added macro:
+                e(mod) : "moderator"
+
+added macro:
+           e(controls) : "pooled"
+(25,700,847 real changes made)
+(MWFE estimator converged in 8 iterations)
+
+HDFE linear regression with Julia                 Number of obs   = 55,402,125
+Absorbing 2 HDFE groups                           F(  20,  10961) =     153.56
+Statistics cluster-robust                         Prob > F        =     0.0000
+                                                  R-squared       =     0.1115
+                                                  Adj R-squared   =     0.0941
+Number of clusters (ac_elec_yr) =      10961      Within R-sq.    =     0.0098
+                                                  Root MSE        =   970.2639
+
+                        (Std. err. adjusted for 10,961 clusters in ac_elec_yr)
+------------------------------------------------------------------------------
+             |               Robust
+      countk | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+relative_y~x |
+          1  |          0  (omitted)
+          2  |          0  (omitted)
+          3  |          0  (omitted)
+          5  |          0  (omitted)
+          6  |          0  (omitted)
+          7  |          0  (omitted)
+             |
+     1.treat |          0  (omitted)
+1.rice_pro~h |          0  (omitted)
+wind_direc~n |  -.9521572   .0207236   -45.95   0.000    -.9927793   -.9115352
+av_wind_sp~d |    88.0179    2.87895    30.57   0.000     82.37464    93.66117
+             |
+relative_y~x#|
+       treat |
+        1 1  |  -.4590912   5.195238    -0.09   0.930     -10.6427    9.724513
+        2 1  |  -5.353014   5.502211    -0.97   0.331    -16.13834    5.432312
+        3 1  |  -4.643155   4.462104    -1.04   0.298    -13.38968    4.103374
+        5 1  |  -10.48484   7.079599    -1.48   0.139    -24.36213    3.392451
+        6 1  |  -.5813115   7.595736    -0.08   0.939    -15.47032     14.3077
+        7 1  |    29.0426   15.46976     1.88   0.060    -1.280924    59.36611
+             |
+relative_y~x#|
+rice_prod_~h |
+        1 1  |   23.97475   2.068126    11.59   0.000     19.92085    28.02865
+        2 1  |    31.7881   2.084992    15.25   0.000     27.70114    35.87506
+        3 1  |   13.53735   2.132366     6.35   0.000     9.357527    17.71717
+        5 1  |   12.28212   2.064224     5.95   0.000     8.235869    16.32837
+        6 1  |   14.23864   3.417027     4.17   0.000     7.540652    20.93663
+        7 1  |  -111.3777   17.76127    -6.27   0.000     -146.193   -76.56246
+             |
+       treat#|
+rice_prod_~h |
+        1 1  |          0  (omitted)
+             |
+relative_y~x#|
+       treat#|
+rice_prod_~h |
+      1 1 1  |  -34.34918   14.67841    -2.34   0.019     -63.1215    -5.57685
+      2 1 1  |  -1.138485   12.12139    -0.09   0.925     -24.8986    22.62163
+      3 1 1  |   22.10277   12.15478     1.82   0.069    -1.722801    45.92834
+      5 1 1  |    36.8282   13.49011     2.73   0.006     10.38515    63.27125
+      6 1 1  |   130.6049    30.1151     4.34   0.000     71.57389    189.6359
+      7 1 1  |   37.24124   29.27886     1.27   0.203    -20.15061     94.6331
+------------------------------------------------------------------------------
+
+added scalar:
+              e(ymean) =  473.10874
+
+added scalar:
+             e(ymean2) =  592.52287
+
+added scalar:
+                e(acq) =  808
+
+added macro:
+               e(smpl) : "Rural"
+
+added macro:
+             e(fespec) : "FE1: unique_small_grid_id_cohort relativeyear_cohort"
+
+added macro:
+                e(mod) : "rice_prod_aclvl_ahigh"
+
+added macro:
+           e(controls) : "pooled"
+
+FE2: unique_small_grid_id_cohort monthyearco + relativeyear_cohort
+(0 real changes made)
+(MWFE estimator converged in 9 iterations)
+
+HDFE linear regression with Julia                 Number of obs   = 55,402,125
+Absorbing 3 HDFE groups                           F(  20,  10961) =      40.93
+Statistics cluster-robust                         Prob > F        =     0.0000
+                                                  R-squared       =     0.3748
+                                                  Adj R-squared   =     0.3626
+Number of clusters (ac_elec_yr) =      10961      Within R-sq.    =     0.0008
+                                                  Root MSE        =   813.9078
+
+                        (Std. err. adjusted for 10,961 clusters in ac_elec_yr)
+------------------------------------------------------------------------------
+             |               Robust
+      countk | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+relative_y~x |
+          1  |          0  (omitted)
+          2  |          0  (omitted)
+          3  |          0  (omitted)
+          5  |          0  (omitted)
+          6  |          0  (omitted)
+          7  |          0  (omitted)
+             |
+     1.treat |          0  (omitted)
+ 1.moderator |          0  (omitted)
+wind_direc~n |  -.1395723   .0073276   -19.05   0.000    -.1539357   -.1252089
+av_wind_sp~d |  -97.76499   5.263726   -18.57   0.000    -108.0828   -87.44714
+             |
+relative_y~x#|
+       treat |
+        1 1  |  -1.466783   4.762809    -0.31   0.758    -10.80275    7.869182
+        2 1  |  -3.726708   5.141189    -0.72   0.469    -13.80437     6.35095
+        3 1  |  -7.654056   4.374532    -1.75   0.080    -16.22893    .9208157
+        5 1  |  -10.37517   6.735292    -1.54   0.123    -23.57756    2.827215
+        6 1  |   3.538405   7.693763     0.46   0.646    -11.54276    18.61957
+        7 1  |   22.04077   16.45121     1.34   0.180    -10.20657    54.28811
+             |
+relative_y~x#|
+   moderator |
+        1 1  |   31.59987   2.015649    15.68   0.000     27.64884    35.55091
+        2 1  |   39.77549   2.080147    19.12   0.000     35.69803    43.85296
+        3 1  |   21.98288   2.144285    10.25   0.000     17.77969    26.18606
+        5 1  |   12.27392    2.04321     6.01   0.000     8.268862    16.27898
+        6 1  |   7.088558   3.547198     2.00   0.046     .1354103    14.04171
+        7 1  |   -146.192   17.75511    -8.23   0.000    -180.9952   -111.3887
+             |
+       treat#|
+   moderator |
+        1 1  |          0  (omitted)
+             |
+relative_y~x#|
+       treat#|
+   moderator |
+      1 1 1  |  -31.17073   14.75968    -2.11   0.035    -60.10237   -2.239096
+      2 1 1  |  -2.718456   11.86875    -0.23   0.819    -25.98334    20.54643
+      3 1 1  |     26.096   12.04314     2.17   0.030     2.489273    49.70272
+      5 1 1  |   41.14922   13.11154     3.14   0.002     15.44823    66.85021
+      6 1 1  |   124.8411   30.05786     4.15   0.000     65.92223    183.7599
+      7 1 1  |   50.88613   29.44875     1.73   0.084    -6.838733     108.611
+------------------------------------------------------------------------------
+
+added scalar:
+              e(ymean) =  473.10874
+
+added scalar:
+             e(ymean2) =  592.52287
+
+added scalar:
+                e(acq) =  808
+
+added macro:
+               e(smpl) : "Rural"
+
+added macro:
+             e(fespec) : "FE2: unique_small_grid_id_cohort monthyearco relative
+> year_cohort"
+
+added macro:
+                e(mod) : "moderator"
+
+added macro:
+           e(controls) : "pooled"
+(0 real changes made)
+(MWFE estimator converged in 9 iterations)
+
+HDFE linear regression with Julia                 Number of obs   = 55,402,125
+Absorbing 3 HDFE groups                           F(  20,  10961) =      40.93
+Statistics cluster-robust                         Prob > F        =     0.0000
+                                                  R-squared       =     0.3748
+                                                  Adj R-squared   =     0.3626
+Number of clusters (ac_elec_yr) =      10961      Within R-sq.    =     0.0008
+                                                  Root MSE        =   813.9078
+
+                        (Std. err. adjusted for 10,961 clusters in ac_elec_yr)
+------------------------------------------------------------------------------
+             |               Robust
+      countk | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+relative_y~x |
+          1  |          0  (omitted)
+          2  |          0  (omitted)
+          3  |          0  (omitted)
+          5  |          0  (omitted)
+          6  |          0  (omitted)
+          7  |          0  (omitted)
+             |
+     1.treat |          0  (omitted)
+1.rice_pro~h |          0  (omitted)
+wind_direc~n |  -.1395723   .0073276   -19.05   0.000    -.1539357   -.1252089
+av_wind_sp~d |  -97.76499   5.263726   -18.57   0.000    -108.0828   -87.44714
+             |
+relative_y~x#|
+       treat |
+        1 1  |  -1.466783   4.762809    -0.31   0.758    -10.80275    7.869182
+        2 1  |  -3.726708   5.141189    -0.72   0.469    -13.80437     6.35095
+        3 1  |  -7.654056   4.374532    -1.75   0.080    -16.22893    .9208157
+        5 1  |  -10.37517   6.735292    -1.54   0.123    -23.57756    2.827215
+        6 1  |   3.538405   7.693763     0.46   0.646    -11.54276    18.61957
+        7 1  |   22.04077   16.45121     1.34   0.180    -10.20657    54.28811
+             |
+relative_y~x#|
+rice_prod_~h |
+        1 1  |   31.59987   2.015649    15.68   0.000     27.64884    35.55091
+        2 1  |   39.77549   2.080147    19.12   0.000     35.69803    43.85296
+        3 1  |   21.98288   2.144285    10.25   0.000     17.77969    26.18606
+        5 1  |   12.27392    2.04321     6.01   0.000     8.268862    16.27898
+        6 1  |   7.088558   3.547198     2.00   0.046     .1354103    14.04171
+        7 1  |   -146.192   17.75511    -8.23   0.000    -180.9952   -111.3887
+             |
+       treat#|
+rice_prod_~h |
+        1 1  |          0  (omitted)
+             |
+relative_y~x#|
+       treat#|
+rice_prod_~h |
+      1 1 1  |  -31.17073   14.75968    -2.11   0.035    -60.10237   -2.239096
+      2 1 1  |  -2.718456   11.86875    -0.23   0.819    -25.98334    20.54643
+      3 1 1  |     26.096   12.04314     2.17   0.030     2.489273    49.70272
+      5 1 1  |   41.14922   13.11154     3.14   0.002     15.44823    66.85021
+      6 1 1  |   124.8411   30.05786     4.15   0.000     65.92223    183.7599
+      7 1 1  |   50.88613   29.44875     1.73   0.084    -6.838733     108.611
+------------------------------------------------------------------------------
+
+added scalar:
+              e(ymean) =  473.10874
+
+added scalar:
+             e(ymean2) =  592.52287
+
+added scalar:
+                e(acq) =  808
+
+added macro:
+               e(smpl) : "Rural"
+
+added macro:
+             e(fespec) : "FE2: unique_small_grid_id_cohort monthyearco relative
+> year_cohort"
+
+added macro:
+                e(mod) : "rice_prod_aclvl_ahigh"
+
+added macro:
+           e(controls) : "pooled"
+
+FE3: unique_small_grid_id_cohort province_cohort#c.monthyear + relativeyear_coh
+> ort
+(0 real changes made)
+(MWFE estimator converged in 25 iterations)
+
+HDFE linear regression with Julia                 Number of obs   = 55,402,125
+Absorbing 3 HDFE groups                           F(  20,  10961) =     121.29
+Statistics cluster-robust                         Prob > F        =     0.0000
+                                                  R-squared       =     0.1354
+                                                  Adj R-squared   =     0.1185
+Number of clusters (ac_elec_yr) =      10961      Within R-sq.    =     0.0089
+                                                  Root MSE        =   957.1467
+
+                        (Std. err. adjusted for 10,961 clusters in ac_elec_yr)
+------------------------------------------------------------------------------
+             |               Robust
+      countk | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+relative_y~x |
+          1  |          0  (omitted)
+          2  |          0  (omitted)
+          3  |          0  (omitted)
+          5  |          0  (omitted)
+          6  |          0  (omitted)
+          7  |          0  (omitted)
+             |
+     1.treat |          0  (omitted)
+ 1.moderator |          0  (omitted)
+wind_direc~n |  -.9359332   .0243605   -38.42   0.000    -.9836841   -.8881822
+av_wind_sp~d |    107.572   3.731416    28.83   0.000     100.2578    114.8863
+             |
+relative_y~x#|
+       treat |
+        1 1  |   -.267051   5.160996    -0.05   0.959    -10.38353    9.849431
+        2 1  |  -5.421494   5.475494    -0.99   0.322    -16.15445    5.311461
+        3 1  |  -4.570693   4.489239    -1.02   0.309    -13.37041    4.229026
+        5 1  |   -11.2528    7.10408    -1.58   0.113    -25.17808    2.672478
+        6 1  |  -1.181107   7.572802    -0.16   0.876    -16.02517    13.66295
+        7 1  |   28.47513   15.60148     1.83   0.068    -2.106583    59.05684
+             |
+relative_y~x#|
+   moderator |
+        1 1  |   24.22861    2.07078    11.70   0.000     20.16951    28.28771
+        2 1  |   31.74455   2.089982    15.19   0.000     27.64781    35.84129
+        3 1  |   13.42759   2.137042     6.28   0.000     9.238606    17.61658
+        5 1  |   12.49217   2.056379     6.07   0.000     8.461295    16.52304
+        6 1  |   14.85026   3.422547     4.34   0.000     8.141445    21.55907
+        7 1  |  -107.6186   17.88587    -6.02   0.000    -142.6781   -72.55906
+             |
+       treat#|
+   moderator |
+        1 1  |          0  (omitted)
+             |
+relative_y~x#|
+       treat#|
+   moderator |
+      1 1 1  |  -34.28469   14.70196    -2.33   0.020    -63.10318   -5.466207
+      2 1 1  |  -2.032147    12.0788    -0.17   0.866    -25.70877    21.64447
+      3 1 1  |   21.23302   12.17543     1.74   0.081    -2.633024    45.09906
+      5 1 1  |   44.65368   13.38308     3.34   0.001     18.42043    70.88694
+      6 1 1  |   133.9686   30.19989     4.44   0.000     74.77136    193.1658
+      7 1 1  |   41.02201   29.52693     1.39   0.165     -16.8561    98.90012
+------------------------------------------------------------------------------
+
+added scalar:
+              e(ymean) =  473.10874
+
+added scalar:
+             e(ymean2) =  592.52287
+
+added scalar:
+                e(acq) =  808
+
+added macro:
+               e(smpl) : "Rural"
+
+added macro:
+             e(fespec) : "FE3: unique_small_grid_id_cohort province_cohort#c.mo
+> nthyear relativeyear_cohort"
+
+added macro:
+                e(mod) : "moderator"
+
+added macro:
+           e(controls) : "pooled"
+(0 real changes made)
+(MWFE estimator converged in 25 iterations)
+
+HDFE linear regression with Julia                 Number of obs   = 55,402,125
+Absorbing 3 HDFE groups                           F(  20,  10961) =     121.29
+Statistics cluster-robust                         Prob > F        =     0.0000
+                                                  R-squared       =     0.1354
+                                                  Adj R-squared   =     0.1185
+Number of clusters (ac_elec_yr) =      10961      Within R-sq.    =     0.0089
+                                                  Root MSE        =   957.1467
+
+                        (Std. err. adjusted for 10,961 clusters in ac_elec_yr)
+------------------------------------------------------------------------------
+             |               Robust
+      countk | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+relative_y~x |
+          1  |          0  (omitted)
+          2  |          0  (omitted)
+          3  |          0  (omitted)
+          5  |          0  (omitted)
+          6  |          0  (omitted)
+          7  |          0  (omitted)
+             |
+     1.treat |          0  (omitted)
+1.rice_pro~h |          0  (omitted)
+wind_direc~n |  -.9359332   .0243605   -38.42   0.000    -.9836841   -.8881822
+av_wind_sp~d |    107.572   3.731416    28.83   0.000     100.2578    114.8863
+             |
+relative_y~x#|
+       treat |
+        1 1  |   -.267051   5.160996    -0.05   0.959    -10.38353    9.849431
+        2 1  |  -5.421494   5.475494    -0.99   0.322    -16.15445    5.311461
+        3 1  |  -4.570693   4.489239    -1.02   0.309    -13.37041    4.229026
+        5 1  |   -11.2528    7.10408    -1.58   0.113    -25.17808    2.672478
+        6 1  |  -1.181107   7.572802    -0.16   0.876    -16.02517    13.66295
+        7 1  |   28.47513   15.60148     1.83   0.068    -2.106583    59.05684
+             |
+relative_y~x#|
+rice_prod_~h |
+        1 1  |   24.22861    2.07078    11.70   0.000     20.16951    28.28771
+        2 1  |   31.74455   2.089982    15.19   0.000     27.64781    35.84129
+        3 1  |   13.42759   2.137042     6.28   0.000     9.238606    17.61658
+        5 1  |   12.49217   2.056379     6.07   0.000     8.461295    16.52304
+        6 1  |   14.85026   3.422547     4.34   0.000     8.141445    21.55907
+        7 1  |  -107.6186   17.88587    -6.02   0.000    -142.6781   -72.55906
+             |
+       treat#|
+rice_prod_~h |
+        1 1  |          0  (omitted)
+             |
+relative_y~x#|
+       treat#|
+rice_prod_~h |
+      1 1 1  |  -34.28469   14.70196    -2.33   0.020    -63.10318   -5.466207
+      2 1 1  |  -2.032147    12.0788    -0.17   0.866    -25.70877    21.64447
+      3 1 1  |   21.23302   12.17543     1.74   0.081    -2.633024    45.09906
+      5 1 1  |   44.65368   13.38308     3.34   0.001     18.42043    70.88694
+      6 1 1  |   133.9686   30.19989     4.44   0.000     74.77136    193.1658
+      7 1 1  |   41.02201   29.52693     1.39   0.165     -16.8561    98.90012
+------------------------------------------------------------------------------
+
+added scalar:
+              e(ymean) =  473.10874
+
+added scalar:
+             e(ymean2) =  592.52287
+
+added scalar:
+                e(acq) =  808
+
+added macro:
+               e(smpl) : "Rural"
+
+added macro:
+             e(fespec) : "FE3: unique_small_grid_id_cohort province_cohort#c.mo
+> nthyear relativeyear_cohort"
+
+added macro:
+                e(mod) : "rice_prod_aclvl_ahigh"
+
+added macro:
+           e(controls) : "pooled"
+
+FE4: unique_small_grid_id_cohort yeargov + relativeyear_cohort
+(0 real changes made)
+(MWFE estimator converged in 20 iterations)
+
+HDFE linear regression with Julia                 Number of obs   = 55,402,125
+Absorbing 3 HDFE groups                           F(  20,  10961) =     149.36
+Statistics cluster-robust                         Prob > F        =     0.0000
+                                                  R-squared       =     0.1118
+                                                  Adj R-squared   =     0.0944
+Number of clusters (ac_elec_yr) =      10961      Within R-sq.    =     0.0098
+                                                  Root MSE        =   970.1219
+
+                        (Std. err. adjusted for 10,961 clusters in ac_elec_yr)
+------------------------------------------------------------------------------
+             |               Robust
+      countk | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+relative_y~x |
+          1  |          0  (omitted)
+          2  |          0  (omitted)
+          3  |          0  (omitted)
+          5  |          0  (omitted)
+          6  |          0  (omitted)
+          7  |          0  (omitted)
+             |
+     1.treat |          0  (omitted)
+ 1.moderator |          0  (omitted)
+wind_direc~n |  -.9635564   .0207716   -46.39   0.000    -1.004273   -.9228403
+av_wind_sp~d |    82.5388   3.140093    26.29   0.000     76.38365    88.69395
+             |
+relative_y~x#|
+       treat |
+        1 1  |  -.7254133   5.210518    -0.14   0.889    -10.93897    9.488142
+        2 1  |  -5.551574   5.515843    -1.01   0.314    -16.36362    5.260473
+        3 1  |  -4.785338   4.456514    -1.07   0.283    -13.52091    3.950234
+        5 1  |  -10.73633   7.118113    -1.51   0.132    -24.68912    3.216451
+        6 1  |  -.7020342   7.594662    -0.09   0.926    -15.58894    14.18487
+        7 1  |   28.98044     15.428     1.88   0.060    -1.261216     59.2221
+             |
+relative_y~x#|
+   moderator |
+        1 1  |   23.80891   2.067804    11.51   0.000     19.75564    27.86218
+        2 1  |    31.7253   2.086349    15.21   0.000     27.63568    35.81492
+        3 1  |   13.50224   2.133199     6.33   0.000     9.320786     17.6837
+        5 1  |   12.16855   2.066349     5.89   0.000     8.118134    16.21897
+        6 1  |   14.05055   3.422975     4.10   0.000     7.340898    20.76019
+        7 1  |  -112.4628   17.72673    -6.34   0.000    -147.2103   -77.71518
+             |
+       treat#|
+   moderator |
+        1 1  |          0  (omitted)
+             |
+relative_y~x#|
+       treat#|
+   moderator |
+      1 1 1  |  -34.14119   14.68117    -2.33   0.020    -62.91894   -5.363439
+      2 1 1  |  -.9950594   12.12846    -0.08   0.935    -24.76904    22.77892
+      3 1 1  |   22.22819   12.15388     1.83   0.067    -1.595606    46.05198
+      5 1 1  |   37.11152    13.5099     2.75   0.006     10.62968    63.59336
+      6 1 1  |   130.6876   30.11665     4.34   0.000     71.65353    189.7217
+      7 1 1  |   37.43254   29.22236     1.28   0.200    -19.84855    94.71364
+------------------------------------------------------------------------------
+
+added scalar:
+              e(ymean) =  473.10874
+
+added scalar:
+             e(ymean2) =  592.52287
+
+added scalar:
+                e(acq) =  808
+
+added macro:
+               e(smpl) : "Rural"
+
+added macro:
+             e(fespec) : "FE4: unique_small_grid_id_cohort yeargov relativeyear
+> _cohort"
+
+added macro:
+                e(mod) : "moderator"
+
+added macro:
+           e(controls) : "pooled"
+(0 real changes made)
+(MWFE estimator converged in 20 iterations)
+
+HDFE linear regression with Julia                 Number of obs   = 55,402,125
+Absorbing 3 HDFE groups                           F(  20,  10961) =     149.36
+Statistics cluster-robust                         Prob > F        =     0.0000
+                                                  R-squared       =     0.1118
+                                                  Adj R-squared   =     0.0944
+Number of clusters (ac_elec_yr) =      10961      Within R-sq.    =     0.0098
+                                                  Root MSE        =   970.1219
+
+                        (Std. err. adjusted for 10,961 clusters in ac_elec_yr)
+------------------------------------------------------------------------------
+             |               Robust
+      countk | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+relative_y~x |
+          1  |          0  (omitted)
+          2  |          0  (omitted)
+          3  |          0  (omitted)
+          5  |          0  (omitted)
+          6  |          0  (omitted)
+          7  |          0  (omitted)
+             |
+     1.treat |          0  (omitted)
+1.rice_pro~h |          0  (omitted)
+wind_direc~n |  -.9635564   .0207716   -46.39   0.000    -1.004273   -.9228403
+av_wind_sp~d |    82.5388   3.140093    26.29   0.000     76.38365    88.69395
+             |
+relative_y~x#|
+       treat |
+        1 1  |  -.7254133   5.210518    -0.14   0.889    -10.93897    9.488142
+        2 1  |  -5.551574   5.515843    -1.01   0.314    -16.36362    5.260473
+        3 1  |  -4.785338   4.456514    -1.07   0.283    -13.52091    3.950234
+        5 1  |  -10.73633   7.118113    -1.51   0.132    -24.68912    3.216451
+        6 1  |  -.7020342   7.594662    -0.09   0.926    -15.58894    14.18487
+        7 1  |   28.98044     15.428     1.88   0.060    -1.261216     59.2221
+             |
+relative_y~x#|
+rice_prod_~h |
+        1 1  |   23.80891   2.067804    11.51   0.000     19.75564    27.86218
+        2 1  |    31.7253   2.086349    15.21   0.000     27.63568    35.81492
+        3 1  |   13.50224   2.133199     6.33   0.000     9.320786     17.6837
+        5 1  |   12.16855   2.066349     5.89   0.000     8.118134    16.21897
+        6 1  |   14.05055   3.422975     4.10   0.000     7.340898    20.76019
+        7 1  |  -112.4628   17.72673    -6.34   0.000    -147.2103   -77.71518
+             |
+       treat#|
+rice_prod_~h |
+        1 1  |          0  (omitted)
+             |
+relative_y~x#|
+       treat#|
+rice_prod_~h |
+      1 1 1  |  -34.14119   14.68117    -2.33   0.020    -62.91894   -5.363439
+      2 1 1  |  -.9950594   12.12846    -0.08   0.935    -24.76904    22.77892
+      3 1 1  |   22.22819   12.15388     1.83   0.067    -1.595606    46.05198
+      5 1 1  |   37.11152    13.5099     2.75   0.006     10.62968    63.59336
+      6 1 1  |   130.6876   30.11665     4.34   0.000     71.65353    189.7217
+      7 1 1  |   37.43254   29.22236     1.28   0.200    -19.84855    94.71364
+------------------------------------------------------------------------------
+
+added scalar:
+              e(ymean) =  473.10874
+
+added scalar:
+             e(ymean2) =  592.52287
+
+added scalar:
+                e(acq) =  808
+
+added macro:
+               e(smpl) : "Rural"
+
+added macro:
+             e(fespec) : "FE4: unique_small_grid_id_cohort yeargov relativeyear
+> _cohort"
+
+added macro:
+                e(mod) : "rice_prod_aclvl_ahigh"
+
+added macro:
+           e(controls) : "pooled"
+
+FE5: unique_small_grid_id_cohort province_cohort#election_year + relativeyear_c
+> ohort
+(0 real changes made)
+(MWFE estimator converged in 8 iterations)
+
+HDFE linear regression with Julia                 Number of obs   = 55,402,125
+Absorbing 3 HDFE groups                           F(  20,  10961) =     153.56
+Statistics cluster-robust                         Prob > F        =     0.0000
+                                                  R-squared       =     0.1115
+                                                  Adj R-squared   =     0.0941
+Number of clusters (ac_elec_yr) =      10961      Within R-sq.    =     0.0098
+                                                  Root MSE        =   970.2645
+
+                        (Std. err. adjusted for 10,961 clusters in ac_elec_yr)
+------------------------------------------------------------------------------
+             |               Robust
+      countk | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+relative_y~x |
+          1  |          0  (omitted)
+          2  |          0  (omitted)
+          3  |          0  (omitted)
+          5  |          0  (omitted)
+          6  |          0  (omitted)
+          7  |          0  (omitted)
+             |
+     1.treat |          0  (omitted)
+ 1.moderator |          0  (omitted)
+wind_direc~n |  -.9521572   .0207236   -45.95   0.000    -.9927793   -.9115352
+av_wind_sp~d |    88.0179   2.878952    30.57   0.000     82.37464    93.66117
+             |
+relative_y~x#|
+       treat |
+        1 1  |  -.4590912   5.195242    -0.09   0.930     -10.6427     9.72452
+        2 1  |  -5.353014   5.502214    -0.97   0.331    -16.13835    5.432318
+        3 1  |  -4.643155   4.462104    -1.04   0.298    -13.38968    4.103375
+        5 1  |  -10.48484   7.079607    -1.48   0.139    -24.36215    3.392467
+        6 1  |  -.5813115   7.595699    -0.08   0.939    -15.47025    14.30763
+        7 1  |    29.0426   15.46979     1.88   0.060    -1.280984    59.36617
+             |
+relative_y~x#|
+   moderator |
+        1 1  |   23.97475   2.068127    11.59   0.000     19.92085    28.02865
+        2 1  |    31.7881   2.084993    15.25   0.000     27.70114    35.87506
+        3 1  |   13.53735   2.132367     6.35   0.000     9.357524    17.71717
+        5 1  |   12.28212   2.064225     5.95   0.000     8.235867    16.32837
+        6 1  |   14.23864   3.417029     4.17   0.000     7.540648    20.93663
+        7 1  |  -111.3777   17.76128    -6.27   0.000    -146.1931   -76.56243
+             |
+       treat#|
+   moderator |
+        1 1  |          0  (omitted)
+             |
+relative_y~x#|
+       treat#|
+   moderator |
+      1 1 1  |  -34.34918   14.67841    -2.34   0.019    -63.12152   -5.576835
+      2 1 1  |  -1.138485    12.1214    -0.09   0.925    -24.89861    22.62164
+      3 1 1  |   22.10277   12.15479     1.82   0.069    -1.722814    45.92835
+      5 1 1  |    36.8282   13.49012     2.73   0.006     10.38514    63.27126
+      6 1 1  |   130.6049   30.11506     4.34   0.000     71.57397    189.6359
+      7 1 1  |   37.24124    29.2789     1.27   0.203    -20.15069    94.63318
+------------------------------------------------------------------------------
+
+added scalar:
+              e(ymean) =  473.10874
+
+added scalar:
+             e(ymean2) =  592.52287
+
+added scalar:
+                e(acq) =  808
+
+added macro:
+               e(smpl) : "Rural"
+
+added macro:
+             e(fespec) : "FE5: unique_small_grid_id_cohort province_cohort#elec
+> tion_year relativeyear_cohort"
+
+added macro:
+                e(mod) : "moderator"
+
+added macro:
+           e(controls) : "pooled"
+(0 real changes made)
+(MWFE estimator converged in 8 iterations)
+
+HDFE linear regression with Julia                 Number of obs   = 55,402,125
+Absorbing 3 HDFE groups                           F(  20,  10961) =     153.56
+Statistics cluster-robust                         Prob > F        =     0.0000
+                                                  R-squared       =     0.1115
+                                                  Adj R-squared   =     0.0941
+Number of clusters (ac_elec_yr) =      10961      Within R-sq.    =     0.0098
+                                                  Root MSE        =   970.2645
+
+                        (Std. err. adjusted for 10,961 clusters in ac_elec_yr)
+------------------------------------------------------------------------------
+             |               Robust
+      countk | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+relative_y~x |
+          1  |          0  (omitted)
+          2  |          0  (omitted)
+          3  |          0  (omitted)
+          5  |          0  (omitted)
+          6  |          0  (omitted)
+          7  |          0  (omitted)
+             |
+     1.treat |          0  (omitted)
+1.rice_pro~h |          0  (omitted)
+wind_direc~n |  -.9521572   .0207236   -45.95   0.000    -.9927793   -.9115352
+av_wind_sp~d |    88.0179   2.878952    30.57   0.000     82.37464    93.66117
+             |
+relative_y~x#|
+       treat |
+        1 1  |  -.4590912   5.195242    -0.09   0.930     -10.6427     9.72452
+        2 1  |  -5.353014   5.502214    -0.97   0.331    -16.13835    5.432318
+        3 1  |  -4.643155   4.462104    -1.04   0.298    -13.38968    4.103375
+        5 1  |  -10.48484   7.079607    -1.48   0.139    -24.36215    3.392467
+        6 1  |  -.5813115   7.595699    -0.08   0.939    -15.47025    14.30763
+        7 1  |    29.0426   15.46979     1.88   0.060    -1.280984    59.36617
+             |
+relative_y~x#|
+rice_prod_~h |
+        1 1  |   23.97475   2.068127    11.59   0.000     19.92085    28.02865
+        2 1  |    31.7881   2.084993    15.25   0.000     27.70114    35.87506
+        3 1  |   13.53735   2.132367     6.35   0.000     9.357524    17.71717
+        5 1  |   12.28212   2.064225     5.95   0.000     8.235867    16.32837
+        6 1  |   14.23864   3.417029     4.17   0.000     7.540648    20.93663
+        7 1  |  -111.3777   17.76128    -6.27   0.000    -146.1931   -76.56243
+             |
+       treat#|
+rice_prod_~h |
+        1 1  |          0  (omitted)
+             |
+relative_y~x#|
+       treat#|
+rice_prod_~h |
+      1 1 1  |  -34.34918   14.67841    -2.34   0.019    -63.12152   -5.576835
+      2 1 1  |  -1.138485    12.1214    -0.09   0.925    -24.89861    22.62164
+      3 1 1  |   22.10277   12.15479     1.82   0.069    -1.722814    45.92835
+      5 1 1  |    36.8282   13.49012     2.73   0.006     10.38514    63.27126
+      6 1 1  |   130.6049   30.11506     4.34   0.000     71.57397    189.6359
+      7 1 1  |   37.24124    29.2789     1.27   0.203    -20.15069    94.63318
+------------------------------------------------------------------------------
+
+added scalar:
+              e(ymean) =  473.10874
+
+added scalar:
+             e(ymean2) =  592.52287
+
+added scalar:
+                e(acq) =  808
+
+added macro:
+               e(smpl) : "Rural"
+
+added macro:
+             e(fespec) : "FE5: unique_small_grid_id_cohort province_cohort#elec
+> tion_year relativeyear_cohort"
+
+added macro:
+                e(mod) : "rice_prod_aclvl_ahigh"
+
+added macro:
+           e(controls) : "pooled"
+
+. 
+. local outbase "`output_dir'/protest_province_election_switch_event${sample}_r
+> ural${ster_suffix}"
+
+. estwrite `estimate_names' using "`outbase'.ster", replace
+(saving evreg1)
+(saving evreg2)
+(saving evreg3)
+(saving evreg4)
+(saving evreg5)
+(saving evreg6)
+(saving evreg7)
+(saving evreg8)
+(saving evreg9)
+(saving evreg10)
+(file /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication/.
+> ./../tables/exploratory_analysis/protest_province_election_switch/protest_pro
+> vince_election_switch_event_rural.ster saved)
+
+. estsave_csv `estimate_names' using "`outbase'.csv", replace
+(15 missing values generated)
+(15 missing values generated)
+(15 missing values generated)
+(15 missing values generated)
+(15 missing values generated)
+(15 missing values generated)
+(15 missing values generated)
+(15 missing values generated)
+(15 missing values generated)
+(15 missing values generated)
+(15 missing values generated)
+(15 missing values generated)
+(15 missing values generated)
+(15 missing values generated)
+(15 missing values generated)
+(15 missing values generated)
+(15 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+(29 missing values generated)
+Estimates exported to /users/aquisper/proj_bureaucrats_farms/code/_stacked_down
+> up_replication/../../tables/exploratory_analysis/protest_province_election_sw
+> itch/protest_province_election_switch_event_rural.csv
+
+. confirm file "`outbase'.ster"
+
+. confirm file "`outbase'.csv"
+
+. confirm file "`outbase'_scalars.csv"
+
+. display as result "Saved exploratory event-study results: `outbase'"
+Saved exploratory event-study results: /users/aquisper/proj_bureaucrats_farms/c
+> ode/_stacked_downup_replication/../../tables/exploratory_analysis/protest_pro
+> vince_election_switch/protest_province_election_switch_event_rural
+
+. 
+. *****************************************************************************
+> ***
+. 
+end of do-file
+
+. 
+. display as result "COMPLETED: `dofile' at $S_DATE $S_TIME"
+COMPLETED: exploratory_analysis/protest_province_election_switch/_protest_provi
+> nce_election_switch_event_study.do at 22 Aug 2026 17:32:24
+
+. 
+end of do-file
+Stata exit status: 0
+TERM environment variable not set.

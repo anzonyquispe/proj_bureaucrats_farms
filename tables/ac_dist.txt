@@ -1,0 +1,28 @@
+			(1)	(2)	(4)	(5)	(5)	(7)	(8)
+VARIABLES	LABELS	LABELS	N Fires	N Fires	N Fires	N Fires	N Fires	N Fires	N Fires
+									
+0b.downup_dummy_ac#0b.downup_dummy			0	0	0	0	0	0	0
+			(0)	(0)	(0)	(0)	(0)	(0)	(0)
+0b.downup_dummy_ac#1.downup_dummy			-0.0300***	-0.00336	-0.0214***	-0.0264***	-0.0297***	0.00130	-0.0180***
+			(0.00358)	(0.00299)	(0.00316)	(0.00275)	(0.00304)	(0.00220)	(0.00283)
+1.downup_dummy_ac#0b.downup_dummy			-0.0127***	-0.0182***	-0.0165***	-0.00949***	-0.0114***	-0.00917***	-0.00689***
+			(0.00322)	(0.00190)	(0.00235)	(0.00206)	(0.00235)	(0.00173)	(0.00188)
+1.downup_dummy_ac#1.downup_dummy			-0.0176***	-0.00396	-0.0140***	-0.0209***	-0.0220***	-0.00514**	-0.0163***
+			(0.00354)	(0.00318)	(0.00318)	(0.00286)	(0.00306)	(0.00241)	(0.00293)
+av_wind_speed	av_wind_speed	av_wind_speed		-0.0337***		-0.0668***		0.0200	0.00678
+				(0.0111)		(0.0142)		(0.0171)	(0.0171)
+av_wind_direction	rollav_wind_direction_cellid_month	rollav_wind_direction_cellid_month		-3.82e-05		-2.22e-05		-0.000131	-0.000431***
+				(7.24e-05)		(7.84e-05)		(9.30e-05)	(9.69e-05)
+									
+Observations			12,015,840	12,015,360	12,015,840	12,015,840	12,015,840	12,015,360	12,015,840
+Month year fe			N	N	Y	N	Y	N	N
+AC fe			N	N	Y	N	N	N	N
+Dist fe			N	N	N	N	Y	N	N
+Controls			N	Y	N	Y	N	Y	Y
+AC x Month fe			N	Y	N	N	N	Y	N
+Dist x Month fe			N	N	N	Y	N	N	Y
+AC x Month x Dist fe			N	N	N	N	N	N	N
+Grid fe			N	N	N	N	N	Y	Y
+Mean DV			0.150	0.150	0.150	0.150	0.150	0.150	0.150
+Robust standard errors in parentheses									
+*** p<0.01, ** p<0.05, * p<0.1									

@@ -1,0 +1,27 @@
+[2026-08-24 06:07:36] host=d32cepyc256.crc.nd.edu job=1379521
+[2026-08-24 06:07:36] python=/groups/sgulzar/india_forest_land/downup_geo/bin/python
+[2026-08-24 06:07:36] intermediate=/groups/sgulzar/sa_fires/proj_bureaucrats_farms/data_output/intermediate
+[2026-08-24 06:07:36] sample rate=0.005 minimum units/arm/cohort=30 seed=20260824
+duckdb 1.5.5
+2026-08-24 06:07:38 | INFO | START combined_dt.csv
+2026-08-24 06:08:22 | INFO | DONE combined_dt.csv -> combined_dt_sample.csv | rows=496,454/96,776,774 | units=44,408/8,606,953 | cohorts=147 | strata=294
+2026-08-24 06:08:22 | INFO |   treat=0 sampled unit-cohorts=36,495/7,283,659
+2026-08-24 06:08:22 | INFO |   treat=1 sampled unit-cohorts=7,913/1,323,294
+2026-08-24 06:08:22 | INFO | START combined_dt_pop.csv
+2026-08-24 06:09:10 | INFO | DONE combined_dt_pop.csv -> combined_dt_pop_sample.csv | rows=493,809/95,976,111 | units=44,333/8,592,280 | cohorts=147 | strata=294
+2026-08-24 06:09:10 | INFO |   treat=0 sampled unit-cohorts=36,407/7,266,447
+2026-08-24 06:09:10 | INFO |   treat=1 sampled unit-cohorts=7,926/1,325,833
+2026-08-24 06:09:10 | INFO | START politicians_characteristics_byprov.csv
+2026-08-24 06:09:19 | INFO | DONE politicians_characteristics_byprov.csv -> politicians_characteristics_byprov_sample.csv | rows=95,345/16,496,199 | units=792/139,273 | cohorts=8 | strata=16
+2026-08-24 06:09:19 | INFO |   treat=0 sampled unit-cohorts=467/92,196
+2026-08-24 06:09:19 | INFO |   treat=1 sampled unit-cohorts=325/47,077
+2026-08-24 06:09:19 | INFO | START stacked_data_protest5km_election_sameterm.csv
+2026-08-24 06:09:38 | INFO | DONE stacked_data_protest5km_election_sameterm.csv -> stacked_data_protest5km_election_sameterm_sample.csv | rows=511,686/87,667,769 | units=8,802/1,508,151 | cohorts=44 | strata=88
+2026-08-24 06:09:38 | INFO |   treat=0 sampled unit-cohorts=7,499/1,495,364
+2026-08-24 06:09:38 | INFO |   treat=1 sampled unit-cohorts=1,303/12,787
+2026-08-24 06:09:38 | INFO | START stacked_downup_neigh.csv
+2026-08-24 06:11:04 | INFO | DONE stacked_downup_neigh.csv -> stacked_downup_neigh_sample.csv | rows=1,230,100/245,585,726 | units=139,188/27,788,391 | cohorts=118 | strata=236
+2026-08-24 06:11:04 | INFO |   treat=0 sampled unit-cohorts=117,763/23,540,191
+2026-08-24 06:11:04 | INFO |   treat=1 sampled unit-cohorts=21,425/4,248,200
+2026-08-24 06:11:04 | INFO | All 5 main-analysis samples completed.
+[2026-08-24 06:11:04] completed main-analysis samples

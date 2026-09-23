@@ -1,0 +1,77 @@
+Warning message:
+package 'ggplot2' was built under R version 4.5.3 
+HonestDiD parallel workers: 10
+Running registered result: final_stacked_area_baseline
+Generated: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/stacked_event_study_5pre_rural_1_ori.png
+Generated: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/stacked_event_study_5pre_rural_1_rotated.png
+Generated: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/stacked_event_study_5pre_rural_1_honest1.png
+Generated: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/stacked_event_study_5pre_rural_1_honest2.png
+Generated: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/stacked_event_study_5pre_rural_1_rot_honest1.png
+Generated: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/stacked_event_study_5pre_rural_1_rot_honest2.png
+Running registered result: final_stacked_area_rice
+Generated: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/stacked_event_study_5pre_rural_riceP_ori.png
+Generated: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/stacked_event_study_5pre_rural_riceP_rotated.png
+Generated: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/stacked_event_study_5pre_rural_riceP_honest1.png
+Generated: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/stacked_event_study_5pre_rural_riceP_honest2.png
+Generated: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/stacked_event_study_5pre_rural_riceP_rot_honest1.png
+Generated: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/stacked_event_study_5pre_rural_riceP_rot_honest2.png
+Running registered result: final_stacked_population_baseline
+Generated: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/stacked_event_study_pop_5pre_rural_1_ori.png
+Generated: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/stacked_event_study_pop_5pre_rural_1_rotated.png
+Generated: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/stacked_event_study_pop_5pre_rural_1_honest1.png
+Generated: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/stacked_event_study_pop_5pre_rural_1_honest2.png
+Generated: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/stacked_event_study_pop_5pre_rural_1_rot_honest1.png
+Generated: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/stacked_event_study_pop_5pre_rural_1_rot_honest2.png
+Running registered result: final_stacked_population_rice
+Generated: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/stacked_event_study_pop_5pre_rural_riceP_ori.png
+Generated: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/stacked_event_study_pop_5pre_rural_riceP_rotated.png
+Generated: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/stacked_event_study_pop_5pre_rural_riceP_honest1.png
+Generated: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/stacked_event_study_pop_5pre_rural_riceP_honest2.png
+Generated: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/stacked_event_study_pop_5pre_rural_riceP_rot_honest1.png
+Generated: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/stacked_event_study_pop_5pre_rural_riceP_rot_honest2.png
+Running registered result: final_politician_fe03_baseline
+Generated: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/_app_16_polischar_fe03_evst_main_rural_acpop_1_ori.png
+Generated: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/_app_16_polischar_fe03_evst_main_rural_acpop_1_rotated.png
+Generated: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/_app_16_polischar_fe03_evst_main_rural_acpop_1_honest1.png
+Generated: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/_app_16_polischar_fe03_evst_main_rural_acpop_1_honest2.png
+Generated: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/_app_16_polischar_fe03_evst_main_rural_acpop_1_rot_honest1.png
+Generated: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/_app_16_polischar_fe03_evst_main_rural_acpop_1_rot_honest2.png
+Running registered result: final_politician_fe03_rice
+Generated: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/_app_16_polischar_fe12_evst_all_rural_acpop_riceP_5_ori.png
+Generated: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/_app_16_polischar_fe12_evst_all_rural_acpop_riceP_5_rotated.png
+Generated: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/_app_16_polischar_fe12_evst_all_rural_acpop_riceP_5_honest1.png
+Generated: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/_app_16_polischar_fe12_evst_all_rural_acpop_riceP_5_honest2.png
+Generated: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/_app_16_polischar_fe12_evst_all_rural_acpop_riceP_5_rot_honest1.png
+Generated: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/_app_16_polischar_fe12_evst_all_rural_acpop_riceP_5_rot_honest2.png
+Warning messages:
+1: In .warnIfNotSymmPSD(sigma) :
+  matrix sigma not numerically positive semi-definite (smallest eigenvalue was -8.68142e-15)
+2: In .warnIfNotSymmPSD(sigma) :
+  matrix sigma not numerically positive semi-definite (smallest eigenvalue was -8.68142e-15)
+3: In .warnIfNotSymmPSD(sigma) :
+  matrix sigma not numerically positive semi-definite (smallest eigenvalue was -8.68142e-15)
+4: In .warnIfNotSymmPSD(sigma) :
+  matrix sigma not numerically positive semi-definite (smallest eigenvalue was -1.49984e-14)
+5: In .warnIfNotSymmPSD(sigma) :
+  matrix sigma not numerically positive semi-definite (smallest eigenvalue was -1.49984e-14)
+6: In .warnIfNotSymmPSD(sigma) :
+  matrix sigma not numerically positive semi-definite (smallest eigenvalue was -1.49984e-14)
+7: In .warnIfNotSymmPSD(sigma) :
+  matrix sigma not numerically positive semi-definite (smallest eigenvalue was -4.19803e-16)
+8: In .warnIfNotSymmPSD(sigma) :
+  matrix sigma not numerically positive semi-definite (smallest eigenvalue was -4.19803e-16)
+9: In .warnIfNotSymmPSD(sigma) :
+  matrix sigma not numerically positive semi-definite (smallest eigenvalue was -4.19803e-16)
+Generated: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/_app_17_5km_fe12_evst_all_rural_fe03_1_ori.png
+Generated: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/_app_17_5km_fe12_evst_all_rural_fe03_1_rotated.png
+Generated: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/_app_17_5km_fe12_evst_all_rural_fe03_1_honest1.png
+Generated: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/_app_17_5km_fe12_evst_all_rural_fe03_1_honest2.png
+Generated: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/_app_17_5km_fe12_evst_all_rural_fe03_1_rot_honest1.png
+Generated: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/_app_17_5km_fe12_evst_all_rural_fe03_1_rot_honest2.png
+Generated: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/_app_17_5km_fe12_evst_all_rural_fe03_riceP_ori.png
+Generated: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/_app_17_5km_fe12_evst_all_rural_fe03_riceP_rotated.png
+Generated: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/_app_17_5km_fe12_evst_all_rural_fe03_riceP_honest1.png
+Generated: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/_app_17_5km_fe12_evst_all_rural_fe03_riceP_honest2.png
+Generated: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/_app_17_5km_fe12_evst_all_rural_fe03_riceP_rot_honest1.png
+Generated: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/figures/_app_17_5km_fe12_evst_all_rural_fe03_riceP_rot_honest2.png
+All requested event-study and HonestDiD plots completed.

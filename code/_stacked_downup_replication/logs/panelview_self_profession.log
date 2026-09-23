@@ -1,0 +1,4 @@
+[2026-08-25 15:51:36] Regenerating panelview_self_profession.png
+Input: /groups/sgulzar/sa_fires/proj_bureaucrats_farms/data_output/intermediate/0_master_dataset.parquet
+Generated monthly, relative-time, and politician panel-view figures.
+[2026-08-25 15:51:48] Completed: /users/aquisper/proj_bureaucrats_farms/figures/panelview_self_profession.png

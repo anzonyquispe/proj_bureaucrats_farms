@@ -1,0 +1,30 @@
+
+\begin{table}[htbp]
+   \caption{\label{tab:protest_treat_main} Effect of Level of Downup AC Placebo 13km on Number of Fires}
+   \centering
+   \begin{tabular}{lcccc}
+      \tabularnewline \midrule \midrule
+       & \multicolumn{4}{c}{Number of Fires}\\
+                                 & (1)           & (2)           & (3)           & (4)\\  
+      \midrule
+      \emph{Variables}\\
+      DownupAC Pop               & -0.0067       &               &               &   \\   
+                                 & (0.0011)      &               &               &   \\   
+      DownupAC Pop 13km          &               & 0.0020        & -0.0007       & 0.0029\\   
+                                 &               & (0.0007)      & (0.0010)      & (0.0010)\\   
+      \hline Mean DV             & 0.1381        & 0.1407        & 0.1484        & 0.1339\\  
+      \midrule
+      \emph{Fixed-effects}\\
+      Grid                       & $\checkmark$  & $\checkmark$  & $\checkmark$  & $\checkmark$\\   
+      AC $\times$ MonthYear      & $\checkmark$  & $\checkmark$  & $\checkmark$  & $\checkmark$\\   
+      \midrule
+      \emph{Fit statistics}\\
+      \# Grid                    & 100,254       & 100,254       & 94,337        & 94,612\\  
+      \# AC $\times$ MonthYear   & 102,360       & 102,360       & 101,134       & 101,818\\  
+      Observations               & 12,030,480    & 12,030,480    & 6,041,523     & 5,988,957\\  
+      \midrule \midrule
+      \multicolumn{5}{l}{\emph{Clustered (Grid \& AC $\times$ MonthYear) standard-errors in parentheses}}\\
+   \end{tabular}
+\end{table}
+
+

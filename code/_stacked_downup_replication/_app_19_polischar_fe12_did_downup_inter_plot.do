@@ -1,23 +1,21 @@
 ********************************************************************************
-* _app_19_polischar_fe12_did_downup_inter_plot_rural.do
-* Politician characteristics DiD with downup interaction for plotting - RURAL GRIDS ONLY
+* Politician-characteristics interaction estimates used by plot generator.
+* Final input and FE follow politician_byprov_fe_sweep.
 ********************************************************************************
 
-********************************************************************************
-* Setup - Only set globals if running standalone (not from master)
-********************************************************************************
+version 17
+set more off
 
 if "$root" == "" {
     clear all
-    set more off
-
-    * Set toggles for standalone run
-    global location "shell"
-    global sample ""
-
+    * Standalone defaults for the five cluster parameters.
+    global location     "shell"
+    global sample       ""
+    global is_rural_var "is_rural"
+    global fe_list      "1"
+    global ster_suffix  ""
     global shell "/groups/sgulzar/sa_fires/proj_bureaucrats_farms"
-    global dbox "/Users/anzony.quisperojas/Library/CloudStorage/Dropbox/sa_fires/proj_bureaucrats_farms"
-
+    global dbox  "/Users/anzony.quisperojas/Library/CloudStorage/Dropbox/sa_fires/proj_bureaucrats_farms"
     if "$location" == "dbox" {
         global root "$dbox"
     }
@@ -25,105 +23,85 @@ if "$root" == "" {
         global root "$shell"
     }
 }
+if "$downup_var" == "" {
+    global downup_var "downup_ac"
+}
 
-cd "${root}"
+global int_data "${root}/data_output/intermediate"
+global tables   "${code}/../../tables"
 
-*-------------------------------------------------------------------------------
-*						Importing Data
-*-------------------------------------------------------------------------------
-
-// Importing data from csv
-
-// Importing data from csv
-import delimited using "${root}/data_output/intermediate/politicians_characteristics${sample}.csv", ///
+import delimited using "${int_data}/politicians_characteristics_byprov${sample}.csv", ///
     clear varnames(1)
-	
-	drop downup_ac 
+capture confirm variable relative_year_bin
+if _rc {
+    rename relative_year relative_year_bin
+}
 
-preserve
-		import delimited using "${root}/data_output/intermediate/0_master_dataset.csv", ///
-    clear varnames(1)
-		keep unique_small_grid_id month year downup_ac_pop
-		tempfile dta
-		save `dta'
-	restore
-	
-	merge m:1 unique_small_grid_id month year using `dta', keep(3) nogen
-	
-	rename  downup_ac_pop downup_ac
-	
-merge m:1 unique_small_grid_id ac_uq_id using  "${root}/data_output/intermediate/rice_moderators.dta"
-keep if _merge == 3
-drop _merge
+merge m:1 unique_small_grid_id using ///
+    "${int_data}/ghs_grid_classification_2000.dta", ///
+    keep(master match) keepusing(is_rural) nogen
+keep if ${is_rural_var} == 1
+keep if year < 2022 | (year == 2022 & month <= 8)
+keep if inrange(relative_year_bin, -5, 4)
 
-* Merge with rural classification
-merge m:1 unique_small_grid_id using "${root}/data_output/intermediate/ghs_grid_classification_2000.dta", keepusing(is_rural)
-keep if _merge == 3
-drop _merge
+* Do not exclude grids intersecting more than one AC.
+* merge m:1 unique_small_grid_id using "${int_data}/grids_with_more_1_ac.dta"
+* drop if dpl_ac == 1
+* drop _merge
 
-* Keep only rural grids
-keep if is_rural == 1
+capture drop countk
+gen countk = count * 1000
+confirm variable cohort_id
+confirm variable cohort_province
+confirm variable control_type
+assert cohort_id == floor(cohort_id) & cohort_id > 0
+assert control_type == 0 if treat == 1
+assert inlist(control_type, 1, 2) if treat == 0
+sort cohort_id unique_small_grid_id monthyear
+by cohort_id: assert province == province[1]
+by cohort_id: assert cohort == cohort[1]
+by cohort_id: assert cohort_province == cohort_province[1]
+by cohort_id unique_small_grid_id: assert treat == treat[1]
+by cohort_id unique_small_grid_id: assert control_type == control_type[1]
+isid unique_small_grid_id monthyear cohort_id treat
 
-display "Observations after rural filter: " _N
-
-// Date
-gen date_ym = ym(year,month)
-
-// Generation of Fixed Effects
-egen unique_small_grid_id_cohort = group(unique_small_grid_id cohort)
-egen monthyearco = group(month year cohort)
-egen ac_elec_yr = group(ac_uq_id election_year cohort)
-egen province_cohort = group(cohort province)
-
-// Government year
-bys ac_uq_id election_year: egen min_monthyear = min(date_ym)
-gen gov_year = date_ym - min_monthyear
-replace gov_year = gov_year / 12
-// g yeargov = int(gov_year + 1)
-
-
-// Generation of Relative Years
-sum relative_year_bin
+egen unique_small_grid_id_cohort = group(unique_small_grid_id cohort_id)
+egen ac_elec_yr = group(ac_uq_id election_year cohort_id)
+quietly summarize relative_year_bin
 local rmin = r(min)
-gen relative_year_bin_aux = relative_year_bin -  `rmin' + 1
-local base = -1 - `rmin' +1
-dis `base'
-g post_ = (relative_year_bin>=0)
+gen int relative_year_bin_aux = relative_year_bin - `rmin' + 1
+gen post_ = relative_year_bin >= 0
+gen moderator = ${downup_var}
 
-// Generating Ever treated cells
-bys unique_small_grid_id: egen TREAT_down = max(downup_ac)
-gen moderator = 0
-
-*-------------------------------------
-* 1. Dep var and RHS
-*-------------------------------------
-gen countk = count*1000
 local dep_var countk
+local moderators_list ${downup_var}
+local fe1 "unique_small_grid_id_cohort relative_year_bin_aux#cohort_id"
+do "${code}/_apply_analysis_subsample.do"
 
-*-------------------------------------
-* 2. Set of FE
-*-------------------------------------
+egen tag_ac = tag(ac_uq_id)
+count if tag_ac == 1
+local numacs = r(N)
 
-local rhs "ib0.post_##ib0.treat##ib0.downup_ac wind_direction av_wind_speed"
+est clear
+local i = 1
+foreach mod of local moderators_list {
+    local rhs "ib0.post_##ib0.treat##ib0.`mod' wind_direction av_wind_speed"
+    quietly summarize `dep_var' if treat == 1 & relative_year_bin <= -1
+    local ymean = r(mean)
+    quietly summarize `dep_var' if treat == 1 & relative_year_bin <= -1 & moderator == 1
+    local ymean2 = r(mean)
+    foreach fe of numlist $fe_list {
+        reghdfejl `dep_var' `rhs', absorb(`fe`fe'') vce(cluster ac_elec_yr)
+        estadd scalar ymean = `ymean'
+        estadd scalar ymean2 = `ymean2'
+        estadd scalar acq = `numacs'
+        estadd local smpl "Rural"
+        estadd local fespec "`fe`fe''"
+        estadd local mod "`mod'"
+        est store evreg`i'
+        local i = `i' + 1
+    }
+}
 
-* FE specifications
-local fe12 "unique_small_grid_id_cohort province_cohort#election_year province_cohort#c.monthyear "
-
-* Statistics
-quietly summarize `dep_var' if treat == 0 & relative_year_bin <= -1
-local ymean_fmt = string(r(mean), "%9.3f")
-unique ac_uq_id
-local numacs = r(unique)
-
-********************************************************************************
-* Run Regressions
-********************************************************************************
-
-reghdfejl `dep_var' `rhs', absorb(`fe12') cluster(ac_elec_yr)
-est store evreg1
-estwrite evreg* using "${root}/tex/paper/tables/_app_19_polischar_fe12_did_downup_inter_plot${sample}_rural_stacked.ster", replace
-
-display "Ster: ${root}/tex/paper/tables/_app_19_polischar_fe12_did_downup_inter_plot${sample}_rural_stacked.ster"
-
-********************************************************************************
-
+estwrite evreg* using ///
+    "${tables}/_app_19_polischar_fe12_did_downup_inter_plot${sample}_rural${ster_suffix}.ster", replace

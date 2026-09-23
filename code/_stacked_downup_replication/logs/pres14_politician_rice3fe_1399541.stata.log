@@ -1,0 +1,1001 @@
+
+  ___  ____  ____  ____  ____ ®
+ /__    /   ____/   /   ____/      StataNow 19.5
+___/   /   /___/   /   /___/       MP—Parallel Edition
+
+ Statistics and Data Science       Copyright 1985-2025 StataCorp LLC
+                                   StataCorp
+                                   4905 Lakeway Drive
+                                   College Station, Texas 77845 USA
+                                   800-782-8272        https://www.stata.com
+                                   979-696-4600        service@stata.com
+
+Stata license: 4-user 16-core network, expiring 14 Sep 2026
+Serial number: 501909301589
+  Licensed to: University of Notre Dame
+               Notre Dame, IN 46556
+
+Notes:
+      1. Stata is running in batch mode.
+      2. Unicode is supported; see help unicode_advice.
+      3. More than 2 billion observations are allowed; see help obs_advice.
+      4. Maximum number of variables is set to 5,000 but can be increased;
+          see help set_maxvar.
+
+. do /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication/sb
+> atch/_run_dofile.do 
+
+. *****************************************************************************
+> ***
+. * Environment bridge: one invocation runs exactly one result-generating dofil
+> e.
+. *****************************************************************************
+> ***
+. 
+. version 17
+
+. set more off
+
+. 
+. local dofile        : environment FARMS_DOFILE
+
+. local root          : environment FARMS_ROOT
+
+. local code          : environment FARMS_CODE
+
+. local location      : environment FARMS_LOCATION
+
+. local sample        : environment FARMS_SAMPLE
+
+. local is_rural_var  : environment FARMS_RURAL_VAR
+
+. local fe_list       : environment FARMS_FE_LIST
+
+. local ster_suffix   : environment FARMS_STER_SUFFIX
+
+. local downup_var    : environment FARMS_DOWNUP_VAR
+
+. local stacked_file  : environment FARMS_STACKED_FILE
+
+. local did_output    : environment FARMS_DID_OUTPUT
+
+. local control_samples : environment FARMS_CONTROL_SAMPLES
+
+. local analysis_subsample : environment FARMS_ANALYSIS_SUBSAMPLE
+
+. local processors    : environment FARMS_CPUS
+
+. 
+. if "`processors'" == "" local processors "1"
+
+. set processors `processors'
+    The maximum number of processors or cores being used is changed from 16
+    to 1.  It can be set to any number between 1 and 16
+
+. 
+. if "`dofile'" == "" {
+.     display as error "FARMS_DOFILE is empty; use sbatch/run_dofile.sbatch."
+.     exit 198
+. }
+
+. if "`root'" == "" {
+.     display as error "FARMS_ROOT is empty; use sbatch/run_dofile.sbatch."
+.     exit 198
+. }
+
+. if "`code'" == "" {
+.     display as error "FARMS_CODE is empty; use sbatch/run_dofile.sbatch."
+.     exit 198
+. }
+
+. 
+. if "`sample'" == "none" local sample ""
+
+. if "`ster_suffix'" == "none" local ster_suffix ""
+
+. if "`downup_var'" == "none" local downup_var ""
+
+. if "`stacked_file'" == "none" local stacked_file ""
+
+. if "`did_output'" == "none" local did_output ""
+
+. if "`control_samples'" == "all" local control_samples ""
+
+. if "`analysis_subsample'" == "all" local analysis_subsample ""
+
+. 
+. global root          "`root'"
+
+. global code          "`code'"
+
+. global location      "`location'"
+
+. global sample        "`sample'"
+
+. global is_rural_var  "`is_rural_var'"
+
+. global fe_list       "`fe_list'"
+
+. global ster_suffix   "`ster_suffix'"
+
+. global downup_var    "`downup_var'"
+
+. global stacked_file  "`stacked_file'"
+
+. global did_output    "`did_output'"
+
+. global control_samples "`control_samples'"
+
+. global analysis_subsample "`analysis_subsample'"
+
+. 
+. global int_data    "${root}/data_output/intermediate"
+
+. global int_farms   "${int_data}"
+
+. global tables      "${code}/../../tables"
+
+. global table_farms "${tables}"
+
+. global figures     "${code}/../../figures"
+
+. global figure_farms "${figures}"
+
+. 
+. capture mkdir "${tables}"
+
+. capture mkdir "${figures}"
+
+. capture mkdir "${code}/logs"
+
+. 
+. adopath ++ "${code}"
+  [1]              "/users/aquisper/proj_bureaucrats_farms/code/_stacked_downup
+> _replication"
+  [2]  (BASE)      "/software/s/stata/19.5/ado/base/"
+  [3]  (SITE)      "/software/s/stata/ado/"
+  [4]              "."
+  [5]  (PERSONAL)  "~/ado/personal/"
+  [6]  (PLUS)      "~/ado/plus/"
+  [7]  (OLDPLACE)  "~/ado/"
+
+. capture noisily do "${code}/estsave_csv.ado"
+
+. *! estsave_csv v1.2 - Export stored estimates and covariance matrices to CSV
+. program define estsave_csv
+  1.     version 14.0
+  2.     syntax namelist using/, [replace append]
+  3. 
+.     local outfile `"`using'"'
+  4.     tempfile coef_all coef_cur scalar_all scalar_cur
+  5.     local first = 1
+  6. 
+.     foreach est of local namelist {
+  7.         quietly estimates restore `est'
+  8.         matrix b = e(b)
+  9.         matrix V = e(V)
+ 10.         local k = colsof(b)
+ 11.         local cnames : colfullnames b
+ 12. 
+.         preserve
+ 13.         clear
+ 14.         quietly set obs `k'
+ 15.         gen strL reg = "`est'"
+ 16.         gen strL var = ""
+ 17.         gen double beta = .
+ 18.         capture local ymean_val `"`e(ymean)'"'
+ 19.         if !_rc & `"`ymean_val'"' != "" gen strL ymean = `"`ymean_val'"'
+ 20.         else gen strL ymean = ""
+ 21. 
+.         forvalues j = 1/`k' {
+ 22.             local nm : word `j' of `cnames'
+ 23.             quietly replace var = "`nm'" in `j'
+ 24.             quietly replace beta = b[1, `j'] in `j'
+ 25.             gen double cov`j' = .
+ 26.         }
+ 27.         forvalues i = 1/`k' {
+ 28.             forvalues j = 1/`k' {
+ 29.                 quietly replace cov`j' = V[`i', `j'] in `i'
+ 30.             }
+ 31.         }
+ 32.         quietly save `coef_cur', replace
+ 33.         if `first' quietly save `coef_all', replace
+ 34.         else {
+ 35.             quietly use `coef_all', clear
+ 36.             quietly append using `coef_cur'
+ 37.             quietly save `coef_all', replace
+ 38.         }
+ 39.         restore
+ 40. 
+.         preserve
+ 41.         clear
+ 42.         quietly set obs 1
+ 43.         gen strL reg = "`est'"
+ 44.         local escalars : e(scalars)
+ 45.         foreach sc of local escalars {
+ 46.             local scval = e(`sc')
+ 47.             local safe = subinstr("`sc'", "-", "_", .)
+ 48.             capture gen double `safe' = `scval'
+ 49.             if _rc capture gen double sc_`safe' = `scval'
+ 50.         }
+ 51.         local emacros : e(macros)
+ 52.         foreach mc of local emacros {
+ 53.             capture local mcval `"`e(`mc')'"'
+ 54.             if !_rc & `"`mcval'"' != "" {
+ 55.                 if strlen(`"`mcval'"') > 244 local mcval = substr(`"`mcval
+> '"', 1, 244)
+ 56.                 local safe = subinstr("`mc'", "-", "_", .)
+ 57.                 capture gen strL `safe' = `"`mcval'"'
+ 58.                 if _rc capture gen strL mc_`safe' = `"`mcval'"'
+ 59.             }
+ 60.         }
+ 61.         quietly save `scalar_cur', replace
+ 62.         if `first' {
+ 63.             quietly save `scalar_all', replace
+ 64.             local first = 0
+ 65.         }
+ 66.         else {
+ 67.             quietly use `scalar_all', clear
+ 68.             quietly append using `scalar_cur'
+ 69.             quietly save `scalar_all', replace
+ 70.         }
+ 71.         restore
+ 72.     }
+ 73. 
+.     local basefile = subinstr(`"`outfile'"', ".csv", "", .)
+ 74.     quietly use `coef_all', clear
+ 75.     order reg var beta ymean
+ 76.     quietly export delimited using "`basefile'.csv", `replace' `append'
+ 77.     quietly use `scalar_all', clear
+ 78.     quietly export delimited using "`basefile'_scalars.csv", `replace' `ap
+> pend'
+ 79.     display as result "Estimates exported to `basefile'.csv"
+ 80. end
+
+. 
+. 
+end of do-file
+
+. capture noisily do "${code}/estload_csv.ado"
+
+. *! estload_csv v1.0 - Reconstruct estimate objects exported by estsave_csv
+. program define estload_csv
+  1.     version 14.0
+  2.     syntax using/
+  3. 
+.     local infile `"`using'"'
+  4.     local basefile = subinstr(`"`infile'"', ".csv", "", .)
+  5.     preserve
+  6.     quietly import delimited using "`basefile'.csv", clear varnames(1)
+  7.     quietly levelsof reg, local(regs)
+  8. 
+.     foreach r of local regs {
+  9.         preserve
+ 10.         quietly keep if reg == "`r'"
+ 11.         local k = _N
+ 12.         matrix b = J(1, `k', .)
+ 13.         matrix V = J(`k', `k', .)
+ 14.         local varnames ""
+ 15.         forvalues i = 1/`k' {
+ 16.             local vname = var[`i']
+ 17.             local varnames `"`varnames' `vname'"'
+ 18.             matrix b[1, `i'] = beta[`i']
+ 19.             forvalues j = 1/`k' {
+ 20.                 matrix V[`i', `j'] = cov`j'[`i']
+ 21.             }
+ 22.         }
+ 23.         matrix colnames b = `varnames'
+ 24.         matrix rownames V = `varnames'
+ 25.         matrix colnames V = `varnames'
+ 26.         restore, preserve
+ 27.         quietly ereturn post b V
+ 28.         estimates store `r'
+ 29.         display as text "Loaded estimate: `r'"
+ 30.     }
+ 31.     restore
+ 32. end
+
+. 
+. 
+end of do-file
+
+. 
+. display "============================================================"
+============================================================
+
+. display "Independent dofile job: `dofile'"
+Independent dofile job: _app_14_polischar_fe12_did_ricemods.do
+
+. display "Data root: ${root}"
+Data root: /groups/sgulzar/sa_fires/proj_bureaucrats_farms
+
+. display "Tables output: ${tables}"
+Tables output: /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_repl
+> ication/../../tables
+
+. display "Figures output: ${figures}"
+Figures output: /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_rep
+> lication/../../figures
+
+. display "Code root: ${code}"
+Code root: /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replicat
+> ion
+
+. display "Sample: ${sample}; rural: ${is_rural_var}; FE: ${fe_list}"
+Sample: ; rural: is_rural; FE: 0/3
+
+. display "Suffix: ${ster_suffix}; moderator: ${downup_var}"
+Suffix: ; moderator: 
+
+. display "Control samples: ${control_samples}"
+Control samples: 
+
+. display "Analysis subsample: ${analysis_subsample}"
+Analysis subsample: 
+
+. display "Stata processors: " c(processors)
+Stata processors: 1
+
+. display "============================================================"
+============================================================
+
+. 
+. do "${code}/`dofile'"
+
+. *****************************************************************************
+> ***
+. * Presentation table A14: Agricultural politician x high rice production.
+. * Eight models: four without rice heterogeneity, followed by the same four
+. * FE specifications interacted with high rice production.
+. *****************************************************************************
+> ***
+. if "$root" == "" {
+.     clear all
+.     set more off
+.     * Standalone defaults for the five sbatch-array parameters.
+.     global location "shell"
+.     global sample ""
+.     global is_rural_var "is_rural"
+.     global fe_list "0/3"
+.     global ster_suffix ""
+.     global shell "/groups/sgulzar/sa_fires/proj_bureaucrats_farms"
+.     global dbox "C:/Users/eunic/Dropbox/sa_fires/proj_bureaucrats_farms"
+.     global code "/users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_
+> replication"
+.     if "$location" == "dbox" {
+.         global root "$dbox"
+.         global code "C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrat
+> s_farms/code/_stacked_downup_replication"
+.     }
+.     else global root "$shell"
+. }
+
+. global int_data "${root}/data_output/intermediate"
+
+. global tables "${code}/../../tables"
+
+. 
+. import delimited using ///
+>     "${int_data}/politicians_characteristics_byprov${sample}.csv", clear varn
+> ames(1)
+(encoding automatically selected: ISO-8859-1)
+(27 vars, 16,496,199 obs)
+
+. capture confirm variable relative_year_bin
+
+. if _rc rename relative_year relative_year_bin
+
+. keep if inrange(relative_year_bin, -5, 4)
+(3,667,251 observations deleted)
+
+. keep if year < 2022 | (year == 2022 & month <= 8)
+(1,731,272 observations deleted)
+
+. confirm variable rice_prod_aclvl_ahigh
+
+. drop if missing(rice_prod_aclvl_ahigh)
+(0 observations deleted)
+
+. merge m:1 unique_small_grid_id using ///
+>     "${int_data}/ghs_grid_classification_2000.dta", ///
+>     keep(master match) keepusing(is_rural)
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                             0
+    Matched                        11,097,676  (_merge==3)
+    -----------------------------------------
+
+. drop _merge
+
+. keep if ${is_rural_var} == 1
+(2,828,837 observations deleted)
+
+. 
+. capture drop countk
+
+. gen countk = count * 1000
+
+. gen byte post_ = relative_year_bin >= 0
+
+. gen byte nofe = 1
+
+. gen byte moderator = 0
+
+. egen unique_small_grid_id_cohort = group(unique_small_grid_id cohort_id)
+
+. egen relativeyear_cohort = group(relative_year_bin cohort_id)
+
+. egen province_cohort = group(province cohort_id)
+
+. egen ac_elec_yr = group(ac_uq_id election_year cohort_id)
+
+. 
+. local fe0 "nofe"
+
+. local fe1 "unique_small_grid_id_cohort"
+
+. local fe2 "unique_small_grid_id_cohort relativeyear_cohort"
+
+. local fe3 "unique_small_grid_id_cohort relativeyear_cohort province_cohort#c.
+> monthyear"
+
+. local common_rhs "ib0.post_##ib0.treat##ib0.rice_prod_aclvl_ahigh wind_direct
+> ion av_wind_speed"
+
+. do "${code}/_apply_analysis_subsample.do"
+
+. *****************************************************************************
+> ***
+. * Apply the production analysis-subsample selection after the stacked dataset
+. * and required native fields are loaded, but before any common-sample model.
+. *
+. * $analysis_subsample == ""          : retain the complete analysis sample
+. * $analysis_subsample == "rice_high" : retain above-median AC rice production
+. *****************************************************************************
+> ***
+. 
+. if "$analysis_subsample" == "rice_high" {
+.     capture confirm variable rice_prod_aclvl_ahigh
+.     if _rc {
+.         display as error ///
+>             "rice_prod_aclvl_ahigh is missing from the stacked dataset. " ///
+>             "Regenerate the stacked inputs from 0_master_dataset."
+.         exit 111
+.     }
+. 
+.     assert inlist(rice_prod_aclvl_ahigh, 0, 1)
+.     quietly count
+.     local subsample_before = r(N)
+.     keep if rice_prod_aclvl_ahigh == 1
+.     quietly count
+.     local subsample_after = r(N)
+.     if `subsample_after' == 0 {
+.         display as error "The rice-high restriction removed every row."
+.         exit 2000
+.     }
+.     display as result "ANALYSIS SAMPLE: rice_prod_aclvl_ahigh == 1"
+.     display as result "Rows retained: `subsample_after' of `subsample_before'
+> "
+. }
+
+. 
+end of do-file
+
+. quietly reghdfejl countk `common_rhs', absorb(`fe3') vce(cluster ac_elec_yr)
+
+. gen byte common_sample = e(sample)
+
+. quietly count if common_sample
+
+. local common_n = r(N)
+
+. keep if common_sample
+(0 observations deleted)
+
+. drop common_sample
+
+. 
+. egen byte tag_ac = tag(ac_uq_id)
+
+. quietly count if tag_ac
+
+. local numacs = r(N)
+
+. quietly summarize countk if treat == 1 & relative_year_bin <= -1
+
+. local ymean = r(mean)
+
+. 
+. est clear
+
+. local moderators_list moderator rice_prod_aclvl_ahigh
+
+. local i = 1
+
+. foreach mod of local moderators_list {
+  2.     replace moderator = `mod'
+  3.     local rhs "ib0.post_##ib0.treat##ib0.`mod' wind_direction av_wind_spee
+> d"
+  4.     quietly summarize countk if treat == 1 & relative_year_bin <= -1 & mod
+> erator == 1
+  5.     local ymean2 = r(mean)
+  6.     foreach fe of numlist $fe_list {
+  7.         reghdfejl countk `rhs', absorb(`fe`fe'') vce(cluster ac_elec_yr)
+  8.         assert e(N) == `common_n'
+  9.         estadd scalar ymean = `ymean'
+ 10.         estadd scalar ymean2 = `ymean2'
+ 11.         estadd scalar acq = `numacs'
+ 12.         estadd local smpl "Rural"
+ 13.         local grid_label = cond(`fe' == 0, "N", "Y")
+ 14.         estadd local gridfe "`grid_label'"
+ 15.         local time_label = cond(`fe' >= 2, "Y", "N")
+ 16.         local trend_label = cond(`fe' == 3, "Y", "N")
+ 17.         estadd local time "`time_label'"
+ 18.         estadd local provtrendfe "`trend_label'"
+ 19.         estadd local mod "`mod'"
+ 20.         est store eq`i'
+ 21.         local i = `i' + 1
+ 22.     }
+ 23. }
+(0 real changes made)
+(MWFE estimator converged in 1 iterations)
+
+HDFE linear regression with Julia                 Number of obs   =  8,268,839
+Absorbing 1 HDFE group                            F(   5,   2183) =      59.97
+Statistics cluster-robust                         Prob > F        =     0.0000
+                                                  R-squared       =     0.0085
+                                                  Adj R-squared   =     0.0085
+Number of clusters (ac_elec_yr) =       2183      Within R-sq.    =     0.0085
+                                                  Root MSE        =  1008.9950
+
+                         (Std. err. adjusted for 2,183 clusters in ac_elec_yr)
+------------------------------------------------------------------------------
+             |               Robust
+      countk | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+     1.post_ |  -54.53561   23.67451    -2.30   0.021    -100.9625   -8.108686
+     1.treat |  -103.2465   23.32012    -4.43   0.000    -148.9784   -57.51455
+wind_direc~n |  -.8483484    .054265   -15.63   0.000    -.9547648   -.7419319
+av_wind_sp~d |   -2.89506   9.241262    -0.31   0.754    -21.01765    15.22753
+             |
+ post_#treat |
+        1 1  |   79.19971   32.10438     2.47   0.014     16.24137     142.158
+------------------------------------------------------------------------------
+
+added scalar:
+              e(ymean) =  105.23059
+
+added scalar:
+             e(ymean2) =  .
+
+added scalar:
+                e(acq) =  695
+
+added macro:
+               e(smpl) : "Rural"
+
+added macro:
+             e(gridfe) : "N"
+
+added macro:
+               e(time) : "N"
+
+added macro:
+        e(provtrendfe) : "N"
+
+added macro:
+                e(mod) : "moderator"
+(MWFE estimator converged in 1 iterations)
+
+HDFE linear regression with Julia                 Number of obs   =  8,268,839
+Absorbing 1 HDFE group                            F(   4,   2183) =      86.52
+Statistics cluster-robust                         Prob > F        =     0.0000
+                                                  R-squared       =     0.1056
+                                                  Adj R-squared   =     0.0942
+Number of clusters (ac_elec_yr) =       2183      Within R-sq.    =     0.0078
+                                                  Root MSE        =   964.4308
+
+                         (Std. err. adjusted for 2,183 clusters in ac_elec_yr)
+------------------------------------------------------------------------------
+             |               Robust
+      countk | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+     1.post_ |  -17.69911   4.625684    -3.83   0.000    -26.77031   -8.627902
+     1.treat |          0  (omitted)
+wind_direc~n |  -.8258237   .0484688   -17.04   0.000    -.9208735   -.7307738
+av_wind_sp~d |   81.82124   6.651413    12.30   0.000     68.77748      94.865
+             |
+ post_#treat |
+        1 1  |    29.8983   5.608409     5.33   0.000     18.89993    40.89668
+------------------------------------------------------------------------------
+
+added scalar:
+              e(ymean) =  105.23059
+
+added scalar:
+             e(ymean2) =  .
+
+added scalar:
+                e(acq) =  695
+
+added macro:
+               e(smpl) : "Rural"
+
+added macro:
+             e(gridfe) : "Y"
+
+added macro:
+               e(time) : "N"
+
+added macro:
+        e(provtrendfe) : "N"
+
+added macro:
+                e(mod) : "moderator"
+(MWFE estimator converged in 10 iterations)
+
+HDFE linear regression with Julia                 Number of obs   =  8,268,839
+Absorbing 2 HDFE groups                           F(   3,   2183) =     112.16
+Statistics cluster-robust                         Prob > F        =     0.0000
+                                                  R-squared       =     0.1081
+                                                  Adj R-squared   =     0.0967
+Number of clusters (ac_elec_yr) =       2183      Within R-sq.    =     0.0078
+                                                  Root MSE        =   963.0951
+
+                         (Std. err. adjusted for 2,183 clusters in ac_elec_yr)
+------------------------------------------------------------------------------
+             |               Robust
+      countk | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+     1.post_ |          0  (omitted)
+     1.treat |          0  (omitted)
+wind_direc~n |  -.8363397   .0495638   -16.87   0.000    -.9335369   -.7391426
+av_wind_sp~d |   84.51684   6.765445    12.49   0.000     71.24945    97.78422
+             |
+ post_#treat |
+        1 1  |   12.46512   4.525075     2.75   0.006     3.591211    21.33902
+------------------------------------------------------------------------------
+
+added scalar:
+              e(ymean) =  105.23059
+
+added scalar:
+             e(ymean2) =  .
+
+added scalar:
+                e(acq) =  695
+
+added macro:
+               e(smpl) : "Rural"
+
+added macro:
+             e(gridfe) : "Y"
+
+added macro:
+               e(time) : "Y"
+
+added macro:
+        e(provtrendfe) : "N"
+
+added macro:
+                e(mod) : "moderator"
+(MWFE estimator converged in 19 iterations)
+
+HDFE linear regression with Julia                 Number of obs   =  8,268,839
+Absorbing 3 HDFE groups                           F(   3,   2183) =     103.57
+Statistics cluster-robust                         Prob > F        =     0.0000
+                                                  R-squared       =     0.1080
+                                                  Adj R-squared   =     0.0966
+Number of clusters (ac_elec_yr) =       2183      Within R-sq.    =     0.0077
+                                                  Root MSE        =   963.1502
+
+                         (Std. err. adjusted for 2,183 clusters in ac_elec_yr)
+------------------------------------------------------------------------------
+             |               Robust
+      countk | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+     1.post_ |          0  (omitted)
+     1.treat |          0  (omitted)
+wind_direc~n |  -.8558627    .051146   -16.73   0.000    -.9561626   -.7555628
+av_wind_sp~d |   82.43961   7.430149    11.10   0.000      67.8687    97.01051
+             |
+ post_#treat |
+        1 1  |   12.48304   4.526181     2.76   0.006     3.606971    21.35912
+------------------------------------------------------------------------------
+
+added scalar:
+              e(ymean) =  105.23059
+
+added scalar:
+             e(ymean2) =  .
+
+added scalar:
+                e(acq) =  695
+
+added macro:
+               e(smpl) : "Rural"
+
+added macro:
+             e(gridfe) : "Y"
+
+added macro:
+               e(time) : "Y"
+
+added macro:
+        e(provtrendfe) : "Y"
+
+added macro:
+                e(mod) : "moderator"
+(3,717,813 real changes made)
+(MWFE estimator converged in 1 iterations)
+
+HDFE linear regression with Julia                 Number of obs   =  8,268,839
+Absorbing 1 HDFE group                            F(   9,   2183) =      32.83
+Statistics cluster-robust                         Prob > F        =     0.0000
+                                                  R-squared       =     0.0232
+                                                  Adj R-squared   =     0.0232
+Number of clusters (ac_elec_yr) =       2183      Within R-sq.    =     0.0232
+                                                  Root MSE        =  1001.4830
+
+                         (Std. err. adjusted for 2,183 clusters in ac_elec_yr)
+------------------------------------------------------------------------------
+             |               Robust
+      countk | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+     1.post_ |   11.38906   8.140419     1.40   0.162    -4.574718    27.35284
+     1.treat |    5.10413   9.572796     0.53   0.594    -13.66861    23.87687
+1.rice_pro~h |   342.7943   32.49042    10.55   0.000     279.0789    406.5096
+wind_direc~n |   -.844099   .0522318   -16.16   0.000    -.9465282   -.7416699
+av_wind_sp~d |  -13.87119   8.579492    -1.62   0.106    -30.69602    2.953631
+             |
+ post_#treat |
+        1 1  |  -1.249072   14.61702    -0.09   0.932    -29.91379    27.41565
+             |
+       post_#|
+rice_prod_~h |
+        1 1  |  -122.4434   41.51754    -2.95   0.003    -203.8614   -41.02538
+             |
+       treat#|
+rice_prod_~h |
+        1 1  |  -191.1126   43.80696    -4.36   0.000    -277.0203   -105.2049
+             |
+ post_#treat#|
+rice_prod_~h |
+      1 1 1  |   155.9623   63.14219     2.47   0.014     32.13723    279.7874
+------------------------------------------------------------------------------
+
+added scalar:
+              e(ymean) =  105.23059
+
+added scalar:
+             e(ymean2) =  194.69149
+
+added scalar:
+                e(acq) =  695
+
+added macro:
+               e(smpl) : "Rural"
+
+added macro:
+             e(gridfe) : "N"
+
+added macro:
+               e(time) : "N"
+
+added macro:
+        e(provtrendfe) : "N"
+
+added macro:
+                e(mod) : "rice_prod_aclvl_ahigh"
+(MWFE estimator converged in 1 iterations)
+
+HDFE linear regression with Julia                 Number of obs   =  8,268,839
+Absorbing 1 HDFE group                            F(   6,   2183) =      59.65
+Statistics cluster-robust                         Prob > F        =     0.0000
+                                                  R-squared       =     0.1057
+                                                  Adj R-squared   =     0.0943
+Number of clusters (ac_elec_yr) =       2183      Within R-sq.    =     0.0079
+                                                  Root MSE        =   964.3756
+
+                         (Std. err. adjusted for 2,183 clusters in ac_elec_yr)
+------------------------------------------------------------------------------
+             |               Robust
+      countk | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+     1.post_ |   13.33107   1.940128     6.87   0.000     9.526378    17.13576
+     1.treat |          0  (omitted)
+1.rice_pro~h |          0  (omitted)
+wind_direc~n |  -.8252369   .0484525   -17.03   0.000    -.9202547   -.7302191
+av_wind_sp~d |   81.97479    6.65638    12.32   0.000     68.92129     95.0283
+             |
+ post_#treat |
+        1 1  |    .023396   4.025777     0.01   0.995    -7.871359    7.918151
+             |
+       post_#|
+rice_prod_~h |
+        1 1  |  -64.39814   9.314197    -6.91   0.000    -82.66376   -46.13252
+             |
+       treat#|
+rice_prod_~h |
+        1 1  |          0  (omitted)
+             |
+ post_#treat#|
+rice_prod_~h |
+      1 1 1  |   61.51964   11.31298     5.44   0.000     39.33432    83.70497
+------------------------------------------------------------------------------
+
+added scalar:
+              e(ymean) =  105.23059
+
+added scalar:
+             e(ymean2) =  194.69149
+
+added scalar:
+                e(acq) =  695
+
+added macro:
+               e(smpl) : "Rural"
+
+added macro:
+             e(gridfe) : "Y"
+
+added macro:
+               e(time) : "N"
+
+added macro:
+        e(provtrendfe) : "N"
+
+added macro:
+                e(mod) : "rice_prod_aclvl_ahigh"
+(MWFE estimator converged in 10 iterations)
+
+HDFE linear regression with Julia                 Number of obs   =  8,268,839
+Absorbing 2 HDFE groups                           F(   5,   2183) =      67.33
+Statistics cluster-robust                         Prob > F        =     0.0000
+                                                  R-squared       =     0.1081
+                                                  Adj R-squared   =     0.0967
+Number of clusters (ac_elec_yr) =       2183      Within R-sq.    =     0.0078
+                                                  Root MSE        =   963.0913
+
+                         (Std. err. adjusted for 2,183 clusters in ac_elec_yr)
+------------------------------------------------------------------------------
+             |               Robust
+      countk | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+     1.post_ |          0  (omitted)
+     1.treat |          0  (omitted)
+1.rice_pro~h |          0  (omitted)
+wind_direc~n |  -.8361782   .0495582   -16.87   0.000    -.9333642   -.7389921
+av_wind_sp~d |    84.4813   6.765439    12.49   0.000     71.21393    97.74867
+             |
+ post_#treat |
+        1 1  |   1.418129   4.183954     0.34   0.735    -6.786819    9.623077
+             |
+       post_#|
+rice_prod_~h |
+        1 1  |  -9.412246   5.179464    -1.82   0.069    -19.56944    .7449486
+             |
+       treat#|
+rice_prod_~h |
+        1 1  |          0  (omitted)
+             |
+ post_#treat#|
+rice_prod_~h |
+      1 1 1  |   26.07132   9.572035     2.72   0.007     7.300066    44.84257
+------------------------------------------------------------------------------
+
+added scalar:
+              e(ymean) =  105.23059
+
+added scalar:
+             e(ymean2) =  194.69149
+
+added scalar:
+                e(acq) =  695
+
+added macro:
+               e(smpl) : "Rural"
+
+added macro:
+             e(gridfe) : "Y"
+
+added macro:
+               e(time) : "Y"
+
+added macro:
+        e(provtrendfe) : "N"
+
+added macro:
+                e(mod) : "rice_prod_aclvl_ahigh"
+(MWFE estimator converged in 19 iterations)
+
+HDFE linear regression with Julia                 Number of obs   =  8,268,839
+Absorbing 3 HDFE groups                           F(   5,   2183) =      62.64
+Statistics cluster-robust                         Prob > F        =     0.0000
+                                                  R-squared       =     0.1080
+                                                  Adj R-squared   =     0.0966
+Number of clusters (ac_elec_yr) =       2183      Within R-sq.    =     0.0077
+                                                  Root MSE        =   963.1464
+
+                         (Std. err. adjusted for 2,183 clusters in ac_elec_yr)
+------------------------------------------------------------------------------
+             |               Robust
+      countk | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+     1.post_ |          0  (omitted)
+     1.treat |          0  (omitted)
+1.rice_pro~h |          0  (omitted)
+wind_direc~n |  -.8556934   .0511426   -16.73   0.000    -.9559867   -.7554001
+av_wind_sp~d |   82.40231    7.43076    11.09   0.000     67.83021    96.97441
+             |
+ post_#treat |
+        1 1  |   1.462443    4.18839     0.35   0.727    -6.751205    9.676091
+             |
+       post_#|
+rice_prod_~h |
+        1 1  |  -9.422572   5.183831    -1.82   0.069    -19.58833    .7431863
+             |
+       treat#|
+rice_prod_~h |
+        1 1  |          0  (omitted)
+             |
+ post_#treat#|
+rice_prod_~h |
+      1 1 1  |   26.00863   9.576189     2.72   0.007     7.229231    44.78803
+------------------------------------------------------------------------------
+
+added scalar:
+              e(ymean) =  105.23059
+
+added scalar:
+             e(ymean2) =  194.69149
+
+added scalar:
+                e(acq) =  695
+
+added macro:
+               e(smpl) : "Rural"
+
+added macro:
+             e(gridfe) : "Y"
+
+added macro:
+               e(time) : "Y"
+
+added macro:
+        e(provtrendfe) : "Y"
+
+added macro:
+                e(mod) : "rice_prod_aclvl_ahigh"
+
+. estwrite eq1 eq2 eq3 eq4 eq5 eq6 eq7 eq8 using ///
+>     "${tables}/_app_14_polischar_fe12_did_ricemods${sample}_rural_acpop${ster
+> _suffix}.ster", replace
+(saving eq1)
+(saving eq2)
+(saving eq3)
+(saving eq4)
+(saving eq5)
+(saving eq6)
+(saving eq7)
+(saving eq8)
+(file /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication/.
+> ./../tables/_app_14_polischar_fe12_did_ricemods_rural_acpop.ster saved)
+
+. display as result "Saved updated presentation ster: _app_14_polischar_fe12_di
+> d_ricemods${sample}_rural_acpop${ster_suffix}.ster"
+Saved updated presentation ster: _app_14_polischar_fe12_did_ricemods_rural_acpo
+> p.ster
+
+. *****************************************************************************
+> ***
+. 
+end of do-file
+
+. 
+. display as result "COMPLETED: `dofile' at $S_DATE $S_TIME"
+COMPLETED: _app_14_polischar_fe12_did_ricemods.do at 31 Aug 2026 18:13:26
+
+. 
+end of do-file

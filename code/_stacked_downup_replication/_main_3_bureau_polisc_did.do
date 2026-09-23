@@ -7,8 +7,6 @@
 ********************************************************************************
 * Setup - Only set globals if running standalone (not from master)
 ********************************************************************************
-clear all 
-macro drop _all
 if "$root" == "" {
     clear all
     set more off
@@ -16,6 +14,9 @@ if "$root" == "" {
     * Set toggles for standalone run
     global location "shell"
     global sample ""
+    global is_rural_var "is_rural"
+    global fe_list "1/4"
+    global ster_suffix ""
 
     global shell "/groups/sgulzar/sa_fires/proj_bureaucrats_farms"
     global dbox "/Users/anzony.quisperojas/Library/CloudStorage/Dropbox/sa_fires/proj_bureaucrats_farms"
@@ -29,28 +30,30 @@ if "$root" == "" {
 }
 
 global int_farms "${root}/data_output/intermediate"
-global table_farms "${root}/tex/paper/tables"
-global figure_farms "${root}/tex/paper/figures"
+global table_farms "${code}/../../tables"
+global figure_farms "${code}/../../figures"
 
 ********************************************************************************
 * Import Data
 ********************************************************************************
 
 * Getting downup_dummy & mean_brigthness
-import delimited "${root}/data_output/intermediate/combined_dt_pop.csv", clear
+import delimited "${root}/data_output/intermediate/combined_dt_pop${sample}.csv", clear
+keep if inrange(relative_monthyear, -5, 6)
+display as text "Final event-study sample: relative_monthyear in [-5, 6]"
 
 preserve
-		import delimited using "${root}/data_output/intermediate/0_master_dataset.csv", ///
+		import delimited using "${root}/data_output/intermediate/0_master_dataset${sample}.csv", ///
     clear varnames(1)
-	d*
-	
-		keep ac_uq_id unique_small_grid_id year month downup_dummy mean_brightness 
+		keep ac_uq_id unique_small_grid_id year month downup_dummy distr_id mean_brightness
 
 		tempfile dta
 		save `dta'
 	restore
 	
-	merge m:1 unique_small_grid_id month year using `dta', keep(3) nogen
+	merge m:1 unique_small_grid_id month year using `dta', keep(master match)
+	assert _merge == 3
+	drop _merge
 
 
 
@@ -60,19 +63,16 @@ keep if _merge == 3
 drop _merge
 
 * Keep only rural grids
-keep if is_rural == 1
-keep if relative_monthyear >= -5 & relative_monthyear <= 6
+keep if ${is_rural_var} == 1
+
 display "Observations after rural filter: " _N
 
 
-* Merge rice moderators if not already present
-capture confirm variable rice_area_aclvl_ahigh
-if _rc {
-    display "Merging rice moderators..."
-    merge m:1 unique_small_grid_id ac_uq_id using "${root}/data_output/intermediate/rice_moderators.dta", nogen
-}
+confirm variable rice_prod_aclvl_ahigh
+assert inlist(rice_prod_aclvl_ahigh, 0, 1)
 
 * Create count in thousands
+capture drop countk
 gen countk = count * 1000
 
 * Filter data: year < 2022 or (year == 2022 & month <= 8)
@@ -124,35 +124,10 @@ else {
     gen ac_id = ac_uq_id
 }
 
-********************************************************************************
-* Calculate statistics for table footer
-********************************************************************************
-
-* Count unique assemblies
-egen tag_assembly = tag(assembly_id)
-count if tag_assembly == 1
-local n_assemblies = r(N)
-
-* Count unique districts
-egen tag_district = tag(district_id)
-count if tag_district == 1
-local n_districts = r(N)
-
-* Calculate mean DV for control group (downup_ac_pop==0 & downup_dummy==0)
-drop treat
-bysort unique_small_grid_id: egen treat = max(downup_ac_pop)
-summarize countk if downup_ac_pop == 0 & treat == 1
-local meandv = r(mean)
-
-
-summarize countk if downup_ac_pop == 0 & downup_dummy == 0 & treat == 1
-local meandv2 = r(mean)
-
-
-unique ac_uq_id
-local numacs = r(unique)
-unique district_id
-local numdist = r(unique)
+* Project-standard event-time and moderator variables.
+gen relative_year_bin = floor(relative_monthyear / 12)
+gen moderator = downup_dummy
+do "${code}/_apply_analysis_subsample.do"
 
 ********************************************************************************
 * DiD Regressions
@@ -165,96 +140,129 @@ global setfe ac_id#cohort ac_id#monthyear#cohort
 global controls av_wind_speed wind_direction
 
 * Cluster variables (stacked: interact with cohort)
-global cluster unique_small_grid_id#cohort distr_id#cohort#monthyear
+global cluster unique_small_grid_id#cohort district_id#cohort#monthyear
 
 
-** Equalizing sample
-qui reghdfejl countk downup_dummy downup_ac_pop downup_interaction $controls , ///
-    absorb(grid_id#cohort assembly_id#monthyear#cohort) ///
-    cluster($cluster )
-	gen esample3 = e(sample)
+********************************************************************************
+* Anchor every column and every footer statistic to the final specification.
+*
+* Run displayed specification 4 first and use its e(sample) for every column
+* and every footer statistic.  This guarantees that N, the number of ACs, the
+* number of districts, and the outcome means all describe exactly the sample
+* used by the final table specification.
+********************************************************************************
 
-* Specification 1: No FE (baseline) 
-reg countk downup_dummy downup_ac_pop downup_interaction $controls if esample3 == 1 , ///
-    vce(cluster grid_id)
-estadd scalar ymean `meandv'
-estadd scalar ymean2 `meandv2'
-estadd scalar nacs `numacs'
-estadd scalar ndists `numdist'
-estadd local monthyearfe "N"
-estadd local acfe "N"
-estadd local acmonthfe "N"
-estadd local distmonthfe "N"
-estadd local gridfe "N"
-estimates store eq1
+quietly reghdfejl countk downup_dummy downup_ac_pop downup_interaction $controls, ///
+    absorb(grid_id#cohort district_id#monthyear#cohort) ///
+    cluster($cluster)
+gen byte common_sample = e(sample)
+quietly count if common_sample
+local common_n = r(N)
+assert `common_n' > 0
+keep if common_sample
+drop common_sample
 
-* Specification 2:  MonthYear FE + AC FE
-reghdfejl countk downup_dummy downup_ac_pop downup_interaction $controls if esample3 == 1 , ///
-    absorb(monthyear#cohort assembly_id#cohort) ///
-    cluster($cluster )
-estadd scalar ymean `meandv'
-estadd scalar ymean2 `meandv2'
-estadd scalar nacs `numacs'
-estadd scalar ndists `numdist'
+isid unique_small_grid_id monthyear cohort
+export delimited using ///
+    "${int_farms}/bureau_polisc_downup_ac_pop_esample${sample}.csv", replace
+display as result "Exported bureaucrat-politician displayed-specification-4 sample: `common_n' rows"
+
+* Count the original identifiers—not encoded working copies—on the anchored
+* estimation sample used by the table.
+egen tag_assembly = tag(ac_uq_id)
+quietly count if tag_assembly == 1 & !missing(ac_uq_id)
+local numacs = r(N)
+
+egen tag_district = tag(distr_id)
+quietly count if tag_district == 1 & !missing(distr_id)
+local numdist = r(N)
+
+quietly summarize countk if treat == 1 & relative_monthyear <= -1
+local meandv = r(mean)
+quietly summarize countk if treat == 1 & relative_monthyear <= -1 & moderator == 1
+local meandv2 = r(mean)
+
+display as text "Anchored common sample: `common_n' observations"
+display as text "Anchored AC count: `numacs'"
+display as text "Anchored district count: `numdist'"
+display as text "Anchored treated pre-period mean: `meandv'"
+
+* Specification 1: AC x cohort + MonthYear x cohort FE
+reghdfejl countk downup_dummy downup_ac_pop downup_interaction $controls, ///
+    absorb(assembly_id#cohort monthyear#cohort) ///
+    cluster($cluster)
+assert e(N) == `common_n'
+estadd scalar ymean = `meandv'
+estadd scalar ymean2 = `meandv2'
+estadd scalar acq = `numacs'
+estadd scalar nacs = `numacs'
+estadd scalar ndists = `numdist'
 estadd local monthyearfe "Y"
 estadd local acfe "Y"
 estadd local acmonthfe "N"
 estadd local distmonthfe "N"
 estadd local gridfe "N"
+estimates store eq1
+
+* Specification 2: Grid x cohort + MonthYear x cohort FE
+reghdfejl countk downup_dummy downup_ac_pop downup_interaction $controls, ///
+    absorb(grid_id#cohort monthyear#cohort) ///
+    cluster($cluster)
+assert e(N) == `common_n'
+estadd scalar ymean = `meandv'
+estadd scalar ymean2 = `meandv2'
+estadd scalar acq = `numacs'
+estadd scalar nacs = `numacs'
+estadd scalar ndists = `numdist'
+estadd local monthyearfe "Y"
+estadd local acfe "N"
+estadd local acmonthfe "N"
+estadd local distmonthfe "N"
+estadd local gridfe "Y"
 estimates store eq2
 
-* Specification 3:	AC x MonthYear FE
-reghdfejl countk downup_dummy downup_ac_pop downup_interaction $controls if esample3 == 1 , ///
-    absorb(assembly_id#monthyear#cohort) ///
-    cluster($cluster )
-estadd scalar ymean `meandv'
-estadd scalar ymean2 `meandv2'
-estadd scalar nacs `numacs'
-estadd scalar ndists `numdist'
-estadd local monthyearfe "N"
-estadd local acfe "N"
-estadd local acmonthfe "Y"
-estadd local distmonthfe "N"
-estadd local gridfe "N"
-estimates store eq3
-
-* Specification 4: 	AC x MonthYear FE + Grid FE
-reghdfejl countk downup_dummy downup_ac_pop downup_interaction $controls if esample3 == 1  , ///
+* Specification 3: Grid x cohort + AC x MonthYear x cohort FE
+reghdfejl countk downup_dummy downup_ac_pop downup_interaction $controls, ///
     absorb(grid_id#cohort assembly_id#monthyear#cohort) ///
-    cluster($cluster )
-estadd scalar ymean `meandv'
-estadd scalar ymean2 `meandv2'
-estadd scalar nacs `numacs'
-estadd scalar ndists `numdist'
+    cluster($cluster)
+assert e(N) == `common_n'
+estadd scalar ymean = `meandv'
+estadd scalar ymean2 = `meandv2'
+estadd scalar acq = `numacs'
+estadd scalar nacs = `numacs'
+estadd scalar ndists = `numdist'
 estadd local monthyearfe "N"
 estadd local acfe "N"
 estadd local acmonthfe "Y"
 estadd local distmonthfe "N"
 estadd local gridfe "Y"
-estimates store eq4
+estimates store eq3
 
-* Specification 5: 	Grid FE + District x MonthYear FE (alternative)
-reghdfejl countk downup_dummy downup_ac_pop downup_interaction $controls if esample3 == 1 , ///
+* Specification 4: Grid x cohort + District x MonthYear x cohort FE
+reghdfejl countk downup_dummy downup_ac_pop downup_interaction $controls, ///
     absorb(grid_id#cohort district_id#monthyear#cohort) ///
-    cluster($cluster )
-estadd scalar ymean `meandv'
-estadd scalar ymean2 `meandv2'
-estadd scalar nacs `numacs'
-estadd scalar ndists `numdist'
+    cluster($cluster)
+assert e(N) == `common_n'
+estadd scalar ymean = `meandv'
+estadd scalar ymean2 = `meandv2'
+estadd scalar acq = `numacs'
+estadd scalar nacs = `numacs'
+estadd scalar ndists = `numdist'
 estadd local monthyearfe "N"
 estadd local acfe "N"
 estadd local acmonthfe "N"
 estadd local distmonthfe "Y"
 estadd local gridfe "Y"
-estimates store eq5
+estimates store eq4
 
 
 ********************************************************************************
 * Save estimates
 ********************************************************************************
 
-estwrite eq1 eq2 eq3 eq4 eq5 using "${table_farms}/_main_3_bureau_polisc_did_rural_stacked.ster", replace
+estwrite eq1 eq2 eq3 eq4 using ///
+    "${table_farms}/_main_3_bureau_polisc_did${sample}_rural_stacked${ster_suffix}.ster", replace
 
-display "Estimates saved to: ${table_farms}/_main_3_bureau_polisc_did_rural_stacked.ster"
+display "Estimates saved to: ${table_farms}/_main_3_bureau_polisc_did${sample}_rural_stacked${ster_suffix}.ster"
 
 ********************************************************************************

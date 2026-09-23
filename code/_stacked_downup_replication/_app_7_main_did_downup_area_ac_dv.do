@@ -1,6 +1,6 @@
 ********************************************************************************
-* _app_main_did_downup_area_ac_dv_rural.do
-* Replicates _app_main_did_downup_area_ac_dv.R - RURAL GRIDS ONLY
+* Alternative dependent variables using population-based Down > Up treatment.
+* The historical output filename is retained for compatibility with main_v3.tex.
 * Different dependent variables: Any Fire, Log Fires, Mean Brightness
 ********************************************************************************
 
@@ -14,6 +14,9 @@ if "$root" == "" {
 
     global location "shell"
     global sample ""
+    global is_rural_var "is_rural"
+    global fe_list "1/3"
+    global ster_suffix ""
 
     global shell "/groups/sgulzar/sa_fires/proj_bureaucrats_farms"
     global dbox "/Users/anzony.quisperojas/Library/CloudStorage/Dropbox/sa_fires/proj_bureaucrats_farms"
@@ -28,44 +31,22 @@ if "$root" == "" {
 
 cd "${root}"
 global int_farms "${root}/data_output/intermediate"
-global table_farms "${root}/tex/paper/tables"
-global figure_farms "${root}/tex/paper/figures"
+global table_farms "${code}/../../tables"
+global figure_farms "${code}/../../figures"
 ********************************************************************************
 * Import Data
 ********************************************************************************
 
-
-* Getting downup_dummy & mean_brigthness
-import delimited "${root}/data_output/intermediate/combined_dt_pop.csv", clear
-
-preserve
-		import delimited using "${root}/data_output/intermediate/0_master_dataset.csv", ///
+* Use exactly the specification-4 population sample from the main DiD.
+import delimited ///
+    "${root}/data_output/intermediate/main_downup_ac_pop_esample${sample}.csv", ///
     clear varnames(1)
-	d*
-	
-		keep ac_uq_id unique_small_grid_id year month downup_dummy mean_brigthness 
-		tempfile dta
-		save `dta'
-	restore
-	
-	merge m:1 unique_small_grid_id month year using `dta', keep(3) nogen
-
-
-* Merge with rural classification
-merge m:1 unique_small_grid_id using "${root}/data_output/intermediate/ghs_grid_classification_2000.dta", keepusing(is_rural)
-keep if _merge == 3
-drop _merge
-
-* Keep only rural grids
-keep if is_rural == 1
-keep if relative_monthyear >= -5 & relative_monthyear <= 6
-display "Observations after rural filter: " _N
+local common_n = _N
+display as text "Loaded canonical main specification-4 sample: `common_n' rows"
 
 * Create count in thousands
+capture drop countk
 gen countk = count * 1000
-
-* Filter data: year < 2022 or (year == 2022 & month <= 8)
-keep if year < 2022 | (year == 2022 & month <= 8)
 
 ********************************************************************************
 * Create dependent variables
@@ -84,6 +65,7 @@ replace mean_brightness = 0 if missing(mean_brightness)
 * Encode IDs
 ********************************************************************************
 
+capture drop grid_id ac_id
 capture confirm numeric variable unique_small_grid_id
 if _rc {
     encode unique_small_grid_id, gen(grid_id)
@@ -102,23 +84,26 @@ else {
 
 
 
-* Count unique ACs
-unique ac_id
-local numacs = r(unique)
+egen tag_ac = tag(ac_id)
+count if tag_ac == 1
+local numacs = r(N)
 
 ********************************************************************************
-* Calculate Mean DV for control group (downup_ac_pop == 0)
+* Project-standard treated-group pre-treatment means for each dependent variable.
 ********************************************************************************
-drop treat
-bys unique_small_grid_id: egen treat = max(downup_ac_pop)
-summarize anyfire if downup_ac_pop == 0 & treat == 1
-local meandv1 = string(r(mean), "%9.4f")
-
-summarize logfire if downup_ac_pop == 0  & treat == 1
-local meandv2 = string(r(mean), "%9.4f")
-
-summarize mean_brightness if downup_ac_pop == 0  & treat == 1
-local meandv3 = string(r(mean), "%9.2f")
+gen moderator = 0
+quietly summarize anyfire if treat == 1 & relative_monthyear <= -1
+local meandv1 = r(mean)
+quietly summarize anyfire if treat == 1 & relative_monthyear <= -1 & moderator == 1
+local meandv1_mod = r(mean)
+quietly summarize logfire if treat == 1 & relative_monthyear <= -1
+local meandv2 = r(mean)
+quietly summarize logfire if treat == 1 & relative_monthyear <= -1 & moderator == 1
+local meandv2_mod = r(mean)
+quietly summarize mean_brightness if treat == 1 & relative_monthyear <= -1
+local meandv3 = r(mean)
+quietly summarize mean_brightness if treat == 1 & relative_monthyear <= -1 & moderator == 1
+local meandv3_mod = r(mean)
 
 ********************************************************************************
 * Run Regressions
@@ -138,36 +123,72 @@ global cluster ac_uq_id#cohort#monthyear unique_small_grid_id#cohort
 * Eq1: Any Fire
 reghdfejl anyfire downup_ac_pop $controls , ///
     absorb($setfe ) cluster($cluster )
+assert e(N) == `common_n'
 estadd local gridfe "Y"
 estadd local acmonthfe "Y"
-estadd local ymean "`meandv1'"
-estadd local acq "`numacs'"
+estadd scalar ymean = `meandv1'
+estadd scalar ymean2 = `meandv1_mod'
+estadd scalar acq = `numacs'
 est store eq1
 
 * Eq2: Log Fires
 reghdfejl logfire downup_ac_pop $controls , ///
     absorb($setfe ) cluster($cluster )
+assert e(N) == `common_n'
 estadd local gridfe "Y"
 estadd local acmonthfe "Y"
-estadd local ymean "`meandv2'"
-estadd local acq "`numacs'"
+estadd scalar ymean = `meandv2'
+estadd scalar ymean2 = `meandv2_mod'
+estadd scalar acq = `numacs'
 est store eq2
 
 * Eq3: Mean Brightness
 reghdfejl mean_brightness downup_ac_pop $controls , ///
     absorb($setfe ) cluster($cluster )
+assert e(N) == `common_n'
 estadd local gridfe "Y"
 estadd local acmonthfe "Y"
-estadd local ymean "`meandv3'"
-estadd local acq "`numacs'"
+estadd scalar ymean = `meandv3'
+estadd scalar ymean2 = `meandv3_mod'
+estadd scalar acq = `numacs'
 est store eq3
 
 ********************************************************************************
 * Save ster file
 ********************************************************************************
 
-estwrite eq* using "${root}/tex/paper/tables/_app_7_main_did_downup_area_ac_dv_rural_stacked.ster", replace
+estwrite eq* using ///
+    "${code}/../../tables/_app_7_main_did_downup_area_ac_dv${sample}_rural_stacked${ster_suffix}.ster", replace
 
-display "Ster: ${root}/tex/paper/tables/_app_7_main_did_downup_area_ac_dv_rural_stacked.ster"
+display "Ster: ${code}/../../tables/_app_7_main_did_downup_area_ac_dv${sample}_rural_stacked${ster_suffix}.ster"
+
+********************************************************************************
+* Write the canonical population-treatment LaTeX table in the same job.
+********************************************************************************
+
+esttab eq1 eq2 eq3 using ///
+    "${code}/../../tables/_app_7_main_did_downup_area_ac_dv${sample}_rural_acpop${ster_suffix}.tex", ///
+    replace ///
+    cells(b(fmt(4) star) se(par fmt(4))) ///
+    star(* 0.10 ** 0.05 *** 0.01) ///
+    keep(downup_ac_pop) ///
+    varlabels(downup_ac_pop "Down \$>\$ Up") ///
+    stats(N acq gridfe acmonthfe ymean, ///
+          fmt(%12.0fc %12.0fc %s %s %9.3fc) ///
+          labels("Observations" "N Assembly Constituencies" ///
+                 "Grid FE \$\times\$ Cohort" ///
+                 "Assembly \$\times\$ Month-Year \$\times\$ Cohort FE" ///
+                 "Mean DV")) ///
+    nomtitles nonumbers collabels(none) nobaselevels ///
+    prehead("\begin{tabular}{lccc}" ///
+            "\tabularnewline \hline" ///
+            "& (1) & (2) & (3)\\" ///
+            "& Any Fire & Log (N) Fires & Mean Brightness\\" ///
+            "\hline") ///
+    posthead("") prefoot("\hline") ///
+    postfoot("\hline" "\end{tabular}")
+
+display as result "Generated population-treatment table: " ///
+    "${code}/../../tables/_app_7_main_did_downup_area_ac_dv${sample}_rural_acpop${ster_suffix}.tex"
 
 ********************************************************************************

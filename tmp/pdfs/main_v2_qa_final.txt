@@ -1,0 +1,2287 @@
+     Democratic Accountability and Environmental
+                     Regulation
+        Gemma Dipoppa *                Saad Gulzar               Annalisa Pezone
+                                      Anzony Quispe §
+                                      August 11, 2026
+
+
+
+                                            Abstract
+       Environmental governance presents a core challenge for democracies: pollution
+   yields concentrated benefits and diffuse harms, weakening incentives for political ac-
+   tion. We investigate when politicians act to curb pollution, and what breaks this
+   accountability, in the context of crop-residue burning in South Asia, which kills an
+   estimated 2 million people annually. Linking satellite-detected fires, wind fields, and
+   political data across 798 rural constituencies in northern India over a decade, we use
+   a difference-in-differences design that exploits wind-direction shifts altering whether
+   smoke from a given location drifts into a politician’s own constituency or a neighbor’s.
+   When their constituents bear the pollution costs, politicians curb fires by 13 percent.
+   Yet two forces systematically undermine this accountability: sanctioning weakens as
+   organized farmer protests pressure politicians to tolerate burning, and selection fails
+   when constituencies elect politicians with private agricultural interests, both increasing
+   fires even where politicians’ own voters are harmed. These findings demonstrate that
+   democratic accountability can generate environmental protection under diffuse incen-
+   tives, but sustaining it requires institutions robust to the concentrated interests that
+   benefit from pollution.
+
+
+
+
+* Columbia University, Department of Political Science (gd2733@columbia.edu)
+ Notre Dame University, Department of Political Science, (sgulzar@nd.edu)
+New York University, Department of Politics, (ap8979@nyu.edu)
+§ Sciences Po University, Department of Economics, (anzony.quisperojas@sciencespo.fr)
+1     Introduction
+Few areas of governance reveal the limits of democratic accountability more clearly than
+environmental management. A growing body of evidence shows that voters rarely prioritize
+environmental issues (?), leaving politicians with little electoral incentive to address pollu-
+tion. Even when citizens do care about environmental problems, these preferences seldom
+translate into policies addressing environmental damage (??).1 Instead, environmental regu-
+lation often reflects the influence of concentrated and organized lobbies (????), reinforcing a
+growing pessimism about the prospects for democratic political action against environmental
+degradation.
+    Yet this pessimism raises a crucial question: do politicians ever act to protect the environ-
+ment, and if so, under what conditions?2 Studying this question is challenging because envi-
+ronmental degradation, unlike most policy domains, is a slow-moving process whose harms
+unfold gradually and often escape citizens’ immediate perception. Environmental humanities
+scholars have described this temporal disjuncture as “slow violence” (?), and political scien-
+tists argue that this very disconnect between environmental harm and lived experience helps
+explain why environmental issues remain politically marginal and why democratic systems
+so often struggle to generate sustained action against them (?).
+    In contrast to the powerful incentives for inaction on the environment described above,
+we instead document that there is still a promise of accountability: we show that politicians
+do take meaningful steps to curb pollution when their own constituents bear its toxic effects.
+However, we also demonstrate that this control is systematically undermined. Building on
+classic literature, we examine two key channels of political accountability whose erosion
+can break down politicians’ responsiveness to citizens’ welfare: sanctioning and selection.
+Specifically, we highlight how sanctioning weakens under pressure from multiple principals,
+as citizens’ interests compete with those of concentrated lobbies, and how political selection
+falters when politicians’ self-interest diverges from citizens’ well-being (?). Understanding
+these mechanisms is crucial for designing institutions that can channel democratic account-
+ability towards durable environmental improvements.
+    We study these dynamics in the context of South Asia’s air pollution crisis, one of the
+largest public health emergencies on the planet estimated to kill 2 million people every year,
+with children as one of its most vulnerable victims (?).3 Each winter, a thick smog so vast it
+is visible from space, blankets northern India as millions of farmers burn leftover crop residue
+after rice harvest. Roughly 60 percent of this seasonal pollution originates from these fires
+(??). Figure 1 shows Delhi during smog season. Despite the scale of the crisis, the visibility
+and consequentiality of the problem, and the illegality of crop burning, the practice continues
+today. This paper studies how politics explains variation in this persistence.
+    The first part of the paper examines how democratic accountability shapes political action
+towards environmental regulation. We propose that politicians will be most incentivized
+   1
+     Examples of successful action on pollution come from China (see ? for a review), where, however,
+politicians are unelected and face different incentives than in democracies (?). Moreover, scholars increasingly
+document that a transition to a democracy may be associated with poorer environmental outcomes (??).
+   2
+     In contrast to the political context, scholars have recently examined these questions within bureaucracies
+(??).
+   3
+     In comparison, COVID-19 at its peak killed 6 million people in the first two years worldwide.
+
+
+                                                       1
+         Figure 1: Gate of India, Delhi, during and after the smog season (Source: ?)
+
+
+to stop crop burning in places from which smoke pollutes their own constituents, rather
+than a neighbors’. We leverage wind as a source of variation to resolve the challenge of
+identifying when politicians’ incentives bind as wind direction determines where smoke from
+a burning field would travel. Because seasonal wind patterns in the region are broadly
+predictable, politicians will have reasonable expectations about them. When wind direction
+shifts in a month, the same 5km2 grid-cell in a politician’s constituency will switch from
+sending smoke into neighboring constituencies to sending it into the politician’s own, raising
+the political cost of inaction. We exploit these within-location changes in a difference-in-
+differences design, combining satellite-detected fires from VIIRS and MODIS (?), and wind
+direction and speed from ? across 798 rural political jurisdictions in northern India over ten
+years (2012–2022), for approximately 9 million observations.
+    We find that fires decrease by 13 percent right after a change in wind direction switches a
+location from polluting neighboring jurisdictions to a politician’s own constituency, an effect
+that is 34 percent larger in rice producing areas. These results are robust to a host of tests
+that relax the identifying assumption of the DiD design and vary how we define the outcome,
+the treatment, and the sample.
+    We further bolster our interpretation by ruling out that these findings are not explained
+by the incentives of two key non-politician actors: farmers and bureaucrats. First, if the
+decline were driven by farmers’ pro-sociality rather than by political accountability, we should
+observe fewer fires when more people live downwind from farmers. In fact, the opposite
+holds: farmers tend to burn more when their crop burning is likely to affect more people,
+and the reduction in fires emerges only when political incentives are active. Second, to test
+if bureaucrats’ incentives explain our results instead of politicians’, we use the fact that
+the jurisdictions for the two actors overlap imperfectly in India, allowing us to examine the
+impact of the same location being a source of pollution for a politician’s constituents, the
+bureaucrat’s constituents, both, or neither. We show that our results persist when a location
+is a source of pollution for politicians but not for bureaucrats, confirming that the logic of
+political incentives drives fires.4
+    Ultimately, this first finding provides powerful evidence that there are prospects for polit-
+   4
+    Interestingly, we also find that when the location pollutes both the politician’s and bureaucrat’s jurisdic-
+tions, the total reduction in fires is lower than when the location is a source of pollution only for politicians or
+only for bureaucrats. This is consistent with the interpretation that political effort is sensitive to free-riding
+considerations in the presence of incentives for action for other government agents.
+
+
+                                                         2
+ical accountability in environmental management even in a setting where action would seem
+unlikely: indeed, our evidence suggests that politicians are sensitive to environmental pol-
+lution when the well-being of their own constituents is at stake. We use this accountability
+effect as a benchmark to study its limits, focusing on the channels of weakening sanctions
+via multiple principals, farmers and citizens, and adverse selection through the election of
+self-interested politicians.
+    The second part of the paper examines how accountability weakens when it competes with
+the interests of actors who benefit from pollution-intensive activities: farmers organized into
+lobbying groups, and politicians with agricultural ties. Around the world, from truck driver
+strikes in South Korea, Canada, and the UK, to teacher protests during Covid, sectors have
+lobbied for state intervention amid rising economic pressures. We investigate this dynamic
+in the context of the largest protest movement in the world’s history, the Farmers’ Movement
+of 2020–21 in India, during which more than 25 million farmers mobilized to secure policy
+concessions, including the decriminalization of crop burning. We examine the impacts of 390
+farmers’ protest events (2020-2021) on subsequent crop burning in a stacked difference-in-
+differences framework.
+    We show that crop-residue fires increase by 21 percent following protests, consistent with
+politicians relaxing environmental control in response to intense farmer lobbying. Having
+demonstrated that protests increased the production of pollution, we next show that they
+also erode the accountability incentives to politicians’ own constituents that we document
+in the first part of this paper. To do so, we compare the reduction in fires produced by
+accountability effects before and after protests, and show that in places that did not have
+protests, the accountability-driven decrease in fires persists. In contrast, places that switch
+to having protests show significantly more crop burning afterwards. This suggests that
+politicians relax environmental control in response to concentrated lobbying pressure, even
+when such inaction harms their own constituents.
+    In addition to lobbying, we examine another set of actors who may benefit from pollution:
+politicians with agricultural ties. To capture these interests, we use variation in politicians’
+professional involvement in agriculture, which may give them a direct economic stake in
+practices associated with crop burning. We proxy these ties by collecting the candidacy
+papers of all 2,565 elected politicians in our ten-year sample and coding whether they are
+agriculturalists by profession. We then estimate the impact of a constituency switching
+from a non-agriculturalist to an agriculturalist politician on crop burning using a stacked
+difference-in-differences framework.
+    We find that when a constituency switches to electing an agriculturalist politician, the
+rate of crop burning increases by 24 percent, indicating a more permissive policy envi-
+ronment when politicians have personal stakes in agriculture. We next test whether such
+self-interest also weakens the accountability mechanisms documented in the first part of the
+paper. Specifically, we compare the reduction in fires driven by accountability before and
+after a constituency switches to electing an agricultural politician. When non-agricultural
+politicians remain in office, fires decline when politicians’ own constituents are polluted, as
+expected. In contrast, after constituencies switch to agricultural politicians, crop burning in-
+creases even where accountability incentives to reduce it are present. This pattern indicates
+that, as with lobbying, self-interest can override the pressure of political accountability, even
+when citizens directly experience the consequences.                                                 Saad/Gemm
+                                                                                                    write
+                                               3                                                    new
+                                                                                                    mech-
+                                                                                                    anisms
+Contributions: This paper makes several contributions. First, we contribute to the liter-
+ature on how governments regulate the environment, where previous research has tended to
+focuse on the bureaucracy.5 We expand this literature by centering the role of politicians: we
+ask whether and under what conditions politicians in democracies translate citizen interests
+into better environmental regulation. This contrasts with most studies that portray politi-
+cians as obstacles to, not agents of, environmental protection.6 In doing so, we join very
+recent work that has begun to probe these questions in the context of political selection by
+asking if certain politician identity, such as gender and ethnic minorities, improves environ-
+mental governance (??????). In contrast to the role of identity, we focus on accountability
+incentives and document its promise as one of the few levers that can improve environmental
+governance.
+     The second strand of literature we contribute to is on the politics of air pollution. Despite
+its scale and urgency, air pollution has received little systematic attention in political science.7
+This deficit is striking because transboundary air pollution presents a particularly poignant
+challenge to democratic accountability: ? show that polluting plants are more likely to be
+located at US state boundaries to potentially offset localized pollution impacts, while ? show
+that international Chinese air pollution shapes blame attribution in South Korea.8 Probing
+if regulatory accountability can be leveraged to control air pollution, scholars have thus far
+tended to focus on the demand side, examining conditions under which citizens consider
+air pollution to be a political problem. Instead, we turn attention towards the supply side,
+showing that politicians are sensitive to transboundary incentives, take action to prevent
+harm to their own constituents, yet are swayed by weakening sanctions and selection. By
+doing so, we bring the study of air pollution into the core of political economy and contribute
+to a broader understanding of when and why politicians act to confront diffuse environmental
+harms.
+     Finally, we also make a contribution to the study of environmental politics in South
+Asia. Nowhere is the problem of air pollution more severe than in South Asia, home to one
+in four humans, which now bears the world’s highest levels of ambient particulate pollution
+(?). Scholars across disciplines have started investigating the causes and consequences of
+crop burning, one of the largest contributors to this crisis.9 We provide the first systematic,
+large-scale analysis of the political accountability incentives that drive both the persistence
+and reduction of crop burning in Northern India, the region where most of the subcontinent’s
+air pollution originates and where political action carries profound implications for the lives
+of millions.
+   5
+     See, for instance, ????.
+   6
+     For instance, scholars have shown that campaign donations and lobbying can depress pro-environment
+votes and legal enforcement (????), elections can exacerbate environmental harms (???) (but c.f. ?),
+political control of bureaucratic assignments weakens implementation (?), and parties in power can offload
+conservation costs onto their opponents (?). Even informational nudges about voter preferences often fail to
+lead politicians to adopt pro-environmental policies (?).
+   7
+     See ? and ? for recent reviews on environment and climate change more broadly
+   8
+     A related literature in economics also studies transboundary pollution in the context of industrial emis-
+sions (???).
+   9
+     For a selection, see: ??????
+
+
+
+
+                                                      4
+2     The Management of Air Pollution
+2.1    Crop Burning in South Asia
+Air pollution is one of the foremost threats to human capital and development worldwide.
+Exposure to fine particulate matter (PM2.5) causes strokes, chronic respiratory disease, di-
+abetes, and premature mortality, with cascading effects on labor productivity, educational
+attainment, and hospitalization rates (???). The global economic cost of air pollution is
+estimated at nearly $2.9 trillion annually, or roughly 3.3 percent of global GDP (?). This
+burden falls disproportionately on the developing world: South Asia now bears the high-
+est levels of ambient PM2.5 on the planet (?), and recent epidemiological work attributes
+between 1 and 2 million premature deaths per year in India alone to ambient air pollution
+(??).
+    Agricultural emissions, and crop-residue burning in particular, are among the largest
+contributors to seasonal PM2.5 spikes in South Asia (??). Crop burning is the practice
+of setting fire to the stubble left in fields after mechanical harvesting to clear the land
+quickly and cheaply before the next sowing cycle. As farmers themselves acknowledge,
+burning is a rational response to tight economic constraints: clearing a field with a matchbox
+costs virtually nothing compared to the thousands of rupees required to rent a mechanized
+residue-management alternative (??). Yet the aggregate consequences are severe. Each
+post-monsoon season, millions of fires across Punjab, Haryana, and western Uttar Pradesh
+generate a vast plume of smoke visible from space, blanketing northern India in smog that
+persists for weeks (??).
+    The roots of this crisis trace to the Green Revolution. The introduction of high-yielding
+rice and wheat varieties, combined with public procurement guarantees and subsidized in-
+puts, entrenched a rice-wheat double-cropping system across the Indo-Gangetic Plain that
+leaves farmers with as little as ten to fifteen days between the rice harvest and wheat sowing
+(??). The Punjab Preservation of Subsoil Water Act of 2009, which delayed paddy trans-
+planting until mid-June to conserve groundwater, compressed this window further, increasing
+farmers’ reliance on fire as the fastest residue-clearing method (??).
+
+2.2    Political Salience of Crop Burning
+Crop residue burning is increasingly a politically salient environmental issue, creating elec-
+toral incentives for politicians to claim credit for reducing burning or to avoid blame when it
+persists. In a representative survey of more than 2,200 residents across all districts of Punjab
+conducted in 2020–21, ? asked respondents, “What do you think about stubble burning in
+Punjab?” Nearly two-thirds (65.1%) described stubble burning as a “Big problem, and have
+to stop now.” In addition, in a survey of 3,116 Delhi residents, (?) find that citizens blame
+the government for air pollution more than any other actor, and that 75 percent hold the
+state government of Punjab, where the burning occurs, responsible for solving crop-burning
+pollution, rather than the government of the jurisdiction where the smoke lands. Together,
+these two studies indicate broad public concern about air pollution, as well as sophisticated
+blame attribution.                                                                                 Gemma
+    In Punjab, state-level political discourse tends to center on the scale of subsidies for CRM   have a
+                                                                                                   look
+                                                                                                   at this
+                                               5
+machinery, the construction of biomass and bio-CNG plants, and the allocation of budgetary
+resources to stubble management. For example, the Governor of Punjab’s address to the
+state legislature in 2024 highlighted that the government had provided subsidies of 80 percent
+to farmer groups and 50 percent to individual farmers since 2018, distributing over 117,000
+machines, alongside investments in compressed biogas projects designed to absorb surplus
+paddy straw.10 In Haryana’s Vidhan Sabha, legislators have highlighted both punitive and
+incentive-based measures, from per-acre fines imposed by the Pollution Control Board to
+subsidies for straw management projects and briquette-making units.11
+    Importantly, opposition politicians use the same issue to hold incumbents accountable
+for implementation failures. In Punjab’s Vidhan Sabha debates, opposition members have
+alleged that funds earmarked for stubble management were diverted, and that promised
+per-acre support never materialized on the ground.12 This pattern of credit-claiming by
+incumbents and blame-attribution by opponents is consistent with a setting in which public
+opinion creates electoral incentives for responsiveness on environmental governance.
+    Crop burning appears regularly in wider public discourse as well: journalists, courts,
+and civil society groups routinely pressure the central and state governments to demonstrate
+progress, particularly during the winter smog season when air quality indices reach hazardous
+levels.
+    Taken together, the institutional architecture of anti-burning policy in India creates a
+setting in which politicians are important actors. They occupy the implementation node
+where national mandates meet local realities: they influence the deployment of machinery,
+the intensity of enforcement, the distribution of subsidies, and the political messaging around
+environmental governance. This makes the study of their incentives, and the conditions
+under which those incentives bind or break down, central to understanding the persistence
+and variation of crop burning across northern India.
+
+2.3     State Politicians’ Role in Curbing Crop Burning
+The governance of crop burning in India involves multiple tiers of government. At the na-
+tional level, the Commission for Air Quality Management (CAQM), established as a statu-
+tory body in 2021, coordinates anti-pollution frameworks across the National Capital Region
+and adjoining states, combining in-situ residue management support, such as the subsidized
+distribution of Happy Seeders, mulchers, and balers, with ex-situ programs to channel crop
+residue toward industrial uses in power plants and brick kilns.13 The CAQM directs states
+to prepare district-level and block-level action plans targeting hotspot villages, and its 2024
+amendment rules substantially increased the environmental compensation penalties for viola-
+tions.14 Nevertheless, because air pollution crosses jurisdictions, effective control requires not
+  10
+     Address of the Governor of Punjab, March 1, 2024. See also the Punjab Governor’s Address of January
+2020, which detailed the distribution of 28,609 machines through 5,439 custom hiring centers.
+  11
+     Haryana Vidhan Sabha, Bulletin No. 3, September 11, 2018; and the 45th Report of the Committee on
+the Welfare of SC/ST/OBC, 2021–22.
+  12
+     Punjab Vidhan Sabha Debates, November 29, 2017.
+  13
+     See the Commission for Air Quality Management in National Capital Region and Adjoining Areas Act,
+2021; and ?.
+  14
+     See CAQM Direction No. 84 (October 10, 2024) and the revised schedule of penalties notified in December
+2024.
+
+
+                                                     6
+just higher-level coordination but local-level implementation that is responsive to political
+incentives (?).
+    State legislators, Members of the Legislative Assembly (MLAs), are important actors in
+translating these national frameworks into local enforcement and service delivery. In India’s
+federal system, MLAs elected from single-member assembly constituencies (ACs) exercise
+considerable influence over district administrations. They shape the allocation and deploy-
+ment of subsidized crop-residue management (CRM) machinery through custom hiring cen-
+ters, direct the attention of nodal officers and village-level functionaries toward enforcement
+and monitoring, and serve as important interlocutors between farmers and the state bureau-
+cracy on agricultural policy. This role is reinforced by the structure of India’s anti-burning
+policy architecture. Since the central government launched the Promotion of Agricultural
+Mechanisation for In-Situ Management of Crop Residue scheme in 2018, over 100,000 CRM
+machines have been distributed across Punjab, Haryana, Uttar Pradesh, and Delhi, with
+subsidies of 50 percent to individual farmers and 80 percent to cooperatives and panchay-
+ats.15 The utilization of this machinery, however, depends on local-level logistics, such as
+timely delivery, operator training, equitable access across landholding sizes, and the reso-
+lution of disputes over service charges, tasks that are fundamentally shaped by politicians’
+convening power and constituency service incentives (??).
+    Beyond this informal influence, elected representatives also have a formal institutional
+role in overseeing scheme implementation at the district level. The District Development
+Coordination and Monitoring Committee (DISHA), constituted by the Ministry of Rural
+Development since 2016, brings together Members of Parliament, MLAs, and the district
+bureaucracy in a structured oversight body.16 Each district’s DISHA committee is chaired
+by the senior-most Lok Sabha MP, with all MLAs from the district serving as members
+and the District Collector acting as convenor. Meeting quarterly, the committee reviews
+the implementation of central government schemes, now covering over 100 programs across
+37 ministries, including agricultural mechanization and crop residue management, and has
+formal powers to seek information, identify bottlenecks, and demand follow-up action from
+district officials.17 This institutional arrangement gives MLAs a formal channel, alongside
+their informal leverage, through which they can press district bureaucracies on CRM machin-
+ery utilization, anti-burning enforcement, and alternative residue-management programs, or
+conversely, signal leniency when facing pressure from farmer constituents.
+    This combination of formal and informal influence extends to enforcement. District
+magistrates and pollution control boards impose environmental compensation penalties on
+farmers who burn residue, ranging from Rs. 2,500 to Rs. 15,000 per incident depending on
+landholding size.18 MLAs can intensify or relax the pressure behind this enforcement: they
+may direct district officials to step up patrols or put pressure on state level bodies to use
+remote-sensing dashboards to target hotspot villages during peak burning season. Alterna-
+  15
+     Ministry of Agriculture and Farmers Welfare, Government of India. Between 2018-19 and 2025-26,
+cumulative releases under the scheme totaled approximately Rs. 4,237 crore. See ?PIB press release, October
+2024.
+  16
+     DISHA superseded the earlier District Vigilance and Monitoring Committees. See ?.
+  17
+     As of 2024, DISHA chairpersons have been appointed in 689 of 718 districts. See ?.
+  18
+     See the Haryana Vidhan Sabha Bulletin No. 3 (September 11, 2018) for penalty schedules.
+https://haryanaassembly.gov.in/wp-content/uploads/2019/01/Bulletin-No.-3-119181st-Sitting.pdf
+
+
+                                                  7
+tively, they may signal tolerance for burning in response to farmer grievances. Enforcement
+priorities can be set at the start of the burning season and adjusted as conditions evolve,
+making political action responsive on a time-sensitive scale. This discretion makes politicians
+a critical node in the implementation chain, both potentially enabling and constraining the
+effectiveness of national policy.
+
+
+3     Politicians’ Incentives to Control Fires
+Our first objective is to establish whether accountability incentives drive politicians’ action to
+control environmental damage. In this section, we describe the data, empirical strategy, and
+results showing that responsiveness to constituents’ exposure to pollution shapes politicians’
+behavior to control crop related fires.
+
+3.1    Data
+We assemble data on the identity and characteristics of the politicians in charge of each
+constituency in the sample, as well as on the behavior of farmers, and spatially merge these
+with information on fires and wind direction. We begin by describing the political data.
+
+Assembly Constituencies: We focus on the geographical jurisdiction of the State Leg-
+islative Assembly constituency, defined according to the 2008 delimitation, which was imple-
+mented under the Delimitation Act, 2002 (?) and based on the 2001 Census. We focus on
+the states where crop burning is a major problem —Punjab, Haryana, Uttar Pradesh, and
+Bihar— restricting the sample to rural areas by dropping urban grids. We classify a grid as
+urban if it contains at least one pixel labeled “Urban” or “Dense Urban Cluster” according
+to the GHS-SMOD R2023A dataset (?), which classifies 1km2 pixels according to popula-
+tion size and density thresholds to capture the full settlement hierarchy. Constituencies that
+consist entirely of urban grids are dropped from the sample, leaving 798 of the 853 assembly
+constituencies.
+
+Politicians’ Incentives: We proxy politicians’ incentives to curb fires using variation in
+wind direction, which determines whether smoke from fires is likely to affect politicians’ own
+constituency or a neighboring one. Wind direction and speed data come from the ?, which
+is precise at a 25x25 km resolution. To approximate what politicians might expect for a
+given month–year, we compute ten-year rolling averages of wind direction using data from
+the early 2000s onward. Figure B.1 (right panel) shows that actual wind directions and their
+rolling averages closely track each other, substantiating the expectations that politicians are
+aware of prevalent wind directions in a season. In this setting, indeed, the two major seasonal
+wind shifts occur in June and August each year. Section 3.2 explains in more detail how we
+define political incentives by combining data on wind direction and constituency shapes.
+
+Fires: Our main outcome of interest is the presence and extent of crop stubble burning. We
+measure crop burning with data on fires from Nasa satellites Moderate Resolution Imaging
+Spectroradiometer (MODIS, 1km x 1km resolution) and Visible Infrared Imaging Radiometer
+
+                                                8
+Suite (VIIRS, 375m x 375m resolution) from September 2012, the first year in which VIIRS
+starts operating, to August 2022. The satellite records fires from thermal signatures, such
+that the presence of cloud cover or smoke in the atmosphere does not prevent its detection.
+The absence of forests in the area of India we study means that we can safely attribute fires
+to crop burning activity rather than to forest fires. We plot the total number of fires over
+time in Figure B.1 (left panel): each year, there are two peaks in the months of April-May
+and October-November, in correspondence with the crop burning seasons of wheat and rice
+respectively (?).19
+
+Crops: Rice is the crop responsible for the largest share of stubble burning, fol-
+lowed—though to a lesser extent—by wheat. To focus on areas most affected by crop burning,
+we collect data on average crop area and production in 2010, the latest year with micro-level
+crop data available before the start of our analysis period. The data is sourced from the ?,
+it has a resolution of 5 x 5 arc/min, corresponding to approximately twice the size of a grid
+in the final database, and is plotted in Figure B.2.
+    Our full sample includes 76,800 grid-cells which we observe in each month and year
+from September 2012 to August 2022, for a total of 9,216,000 observations. We map each
+constituency in the sample with an illustration of the gridded data in Figure 2a.
+
+3.2       Empirical Strategy
+Treatment Definition: Our treatment is designed to capture a specific accountability
+incentive. A politician has stronger reason to prevent crop burning in a location when
+the resulting smoke is likely to settle over their own constituents rather than blow into a
+neighboring constituency. Whether a given location does so depends on two things: where
+the location sits within the constituency, and which way the wind is blowing.
+    We operationalize this at the grid-cell level. For each 5km2 grid-cell centroid, we draw
+a line through the centroid perpendicular to the prevailing wind direction vector for that
+month. This line partitions the constituency into a downwind area, which would receive
+smoke from a fire in that grid-cell, and an upwind area, which would not. We then compute
+the constituency population living in each area.
+    We define a grid-cell as treated in a given month-year if the constituency population
+downwind of the grid-cell exceeds the constituency population upwind of it: a fire in a
+treated cell would impose pollution costs on most of the politician’s own voters, while a fire
+in an untreated cell would carry most of its smoke past them.20
+    For the prevailing wind direction we use ten-year rolling averages by month rather than
+realized contemporaneous wind. Seasonal wind in northern India is governed by the monsoon
+system, with two major directional reversals occurring at approximately known points in
+the calendar. Politicians can therefore anticipate, before the burning season, which parts
+of their constituency will bear the pollution costs of a fire in a given month. The monthly
+rolling average is intended to approximate that expectation, not to measure the wind on any
+particular day.
+ 19
+      Data on fires and wind are taken from ?.
+ 20
+      We show robustness to other definitions of treatment that are continuous or otherwise transformed below.
+
+
+                                                       9
+Figure 2: How Changes in Wind Direction Affect Political Calculus and Crop
+Burning
+                                    (a) Gridded Dataset
+
+
+
+
+                                                 (c) Variation in Treatment Over Time Across
+(b) Treatment Definition and Variation Example   Units
+
+
+
+
+Notes: (a) The map illustrates the 5km × 5km gridded dataset in green with constituency
+boundaries in blue. It shows the Bachhrawan assembly constituency magnified as an ex-
+ample. (b) The figures illustrate the coding of treatment. The blue arrow represents wind
+direction in a given month-year, and the numbers represent population in a grid. In the left
+panel, the population in the downwind area from a potential crop burning is larger than
+the population in the upwind area: we define this grid as treated. In the central panel, the
+downwind area is larger than the upwind area, but the population in the downwind area
+is smaller: we define this grid as control. In the right panel, a change in wind direction
+converts the same grid into the treatment group because a potential crop burning would
+now pollute the majority of the constituency’s population. (c) The maps display the spatial
+distribution of this treatment and its temporal variation in two different months. Treated
+grids are shaded in dark blue and control grids in light blue. An image covering all periods
+of analysis is located in this link.
+
+
+
+
+                                            10
+    Because wind direction shifts across the calendar, the same grid-cell can be treated in
+some months and untreated in others: a fire there would pollute its own constituency’s voters
+in one month and a neighbor’s in another. This within-grid-cell, across-month switching is
+the source of our identifying variation.
+    We present an example of treatment definition and change in status for a grid in our
+sample in Figure 2b. In Figure 2c we also illustrate how treatment varies in the full sample
+over two given months.
+    Figure 2b illustrates the coding rule and shows a grid-cell in our sample changing status
+as the wind turns. Figure 2c shows the spatial distribution of treatment in two different
+months.
+
+Estimation Strategy: Using this treatment definition to capture politicians’ accountabil-
+ity incentives, we estimate a stacked-by-event difference-in-differences model for the impact
+of a grid-cell switching to polluting most of its jurisdiction’s population on fires, leveraging
+within-grid changes in treatment status over time (?). Each cohort includes only newly
+treated observations that start treatment in a particular month, together with units not yet
+treated and never treated. We build a separate database for each cohort of treatment and
+stack these datasets into a pooled sample. For a 5km2 grid-cell i in assembly constituency
+j, month-year t, and cohort c, we estimate:
+                     Fires ict = βDown > Upict + αic + γjtc + δXit + ϵict                   (1)
+    where our dependent variable is the number of fires in a grid month-year. The coefficient
+of interest, β, captures the effect of treatment, as described above, on the number of fires
+in that grid. The high-dimensionality of our data allows for the inclusion of fine-grained
+fixed effects. First, αic are grid-cell-cohort fixed effects that absorb time-invariant factors
+for over 76,800 grid-cells in our data, such as crop suitability or economic characteristics of
+small locations. Second, γjtc are jurisdiction by month-year-cohort fixed effects that account
+for time-varying shocks at the constituency level. Xit is a vector of grid-level controls that
+includes actual wind speed and direction. Given the stacked nature of our data, we interact
+each of the fixed effects with cohort fixed effects.      Standard errors are clustered at the
+grid-cell and constituency by month-year level. The first accounts for temporal dependence
+of observations at the treatment status level (grid-cell). The second accounts for potential
+spatial correlation in wind patterns.
+    A typical concern in the standard difference-in-differences setting is that treatment might
+be assigned based on pre-existing characteristics of the unit endogenous to the outcome: for
+example, poorer areas might be more likely to receive welfare interventions. Our setting
+has instead a unique feature: treatment, which locations is more likely to be a source of
+pollution for a jurisdiction, is assigned based on changes in wind direction interacted with
+the shape of the assembly constituency polygon and its population, a quantity which is
+plausibly exogenous. This feature makes the parallel trends assumption —that treated grid-
+cells would have displayed a similar trend in fires as the control grid-cells had the wind not
+shifted, exposing a larger area of the jurisdiction to smoke— considerably more credible, as
+treatment is assigned quasi-randomly.
+    We nonetheless provide evidence consistent with the parallel trends assumption with a
+stacked-by-event event study. For relative time r from the switch to treatment, Switch, we
+
+                                              11
+estimate:
+                                   N
+                                   X
+                     Fires ict =          ζr Switchir + αic + γjtc + δXit + ϵict             (2)
+                                   r=−n
+
+using the same cohort structure and fixed effects as the main specification, where Switch is
+a dummy that takes value one when unit i is r periods away from its treatment switch, and
+zero otherwise. Our coefficients of interest ζr represents the effect of treatment status in each
+relative month before and after treatment, where the month prior to the switch is the omitted
+category. The event study differs from the table in focusing on a six-month window around
+treatment (Figure B.3). In all event studies, we adjust for the extrapolation of a linear trend
+from the pre-treatment periods, following common practice in recent difference-in-differences
+estimation (?, p. 2558). See for instance: ???.
+
+3.3    Results
+Table 3a reports the main result. When wind is expected to blow smoke into a grid’s
+assembly constituency rather than away from it, we observe 9.7 to 10.9 fewer fires per 1,000
+in each grid-month, corresponding to a reduction of approximately 5.8 to 6.6% relative to the
+average number of fires when a grid is not a source of exposure. These results are consistent
+with two interpretations, both of which we classify under the broader umbrella of political
+accountability. First, it could reflect politicians enforcement effort toward the locations
+whose smoke would fall on their own voters, reflecting either constituents’ direct demand
+or politicians’ own calculus of citizen welfare. Another possibility is that farmers anticipate
+that enforcement will be concentrated where burning would pollute the constituency, and
+do not burn as a result. This is a deterrence channel represents an accountability incentive
+because the latter is what generates variation in behavior.
+    Figure 3b plots the event study coefficients. Before switching to polluting most of the
+constituency, grids that will switch experience a similar number of fires as others. From the
+month they switch to being a source of exposure for constituents, however, the number of
+fires significantly drops. This effect correspond to a 13% reduction in fires with respect to
+baseline. The result is mainly driven by rice-producing areas where we observe 33% less
+fires with respect to baseline (Figure B.7), confirming the main result that politicians are
+significantly more likely to reduce fires when pollution would affect their own constituency.
+    To give a sense of the public health stakes of this political action, we translate the 13
+percent fire reduction into air quality and mortality estimates using atmospheric modeling
+from ?. During the post-monsoon burning season, when rice-burning effects are concentrated,         Change
+crop residue burning is estimated to contribute 26 µg m−3 to the mean population-weighted           the
+PM2.5 concentrations in India. A 13 percent reduction in fires corresponds to a reduction           num-
+of approximately 3 µg m−3 in burning-season ambient PM2.5 at the national level, and 10-            bers
+29 µg m−3 in the northwestern constituencies where burning is concentrated. In mortality
+terms, applying this proportional reduction to Lan et al.’s estimate that Punjab, Haryana,
+and Uttar Pradesh collectively account for approximately 70 percent of the 69,000 annual
+premature deaths attributable to crop burning in India would yield roughly 3,100 fewer
+premature deaths per year. These figures should be interpreted with the caveat that the
+estimated fire reduction may in part reflect spatial displacement across constituency lines
+
+                                                   12
+rather than a net decrease in total emissions: if enforcement effort in treated areas is offset
+by reduced effort elsewhere in the constituency, aggregate pollution and mortality benefits
+would be correspondingly smaller. Nonetheless, this estimate provides a useful benchmark for
+the scale of impact that would be achievable if politicians were incentivized to act uniformly
+as they do in the places and times where their accountability incentives are heightened.
+Appendix B.3 details the derivation of these figures.
+
+Robustness: We start by testing whether the findings are robust to adopting different
+definitions of treatment. In Table B.4, we define a grid-cell as treated when most of the area
+of the constituency (rather than most of its population) lies downwind from the grid, finding
+effects of similar magnitudes and significance (column 2); we standardize the independent
+variable, instead of dichotomizing it, so that the treatment coefficient can be interpreted as
+the effect of a one standard deviation increase in the size of the downwind area (column 3); we
+adopt two other continuous definitions of treatment, the share of assembly constituency area
+that is downwind (column 4) and the difference between downwind and upwind area (column
+5). In Table B.5 we vary the definition of the dependent variable, replacing the count of fires
+with a dummy equal to one when any fire took place in the grid-cell (column 1); with the
+natural logarithm of the count of fires plus one (column 2); and with a continuous variable
+capturing the average brightness of fires in a grid-month, a measure of fire intensity (column
+3). Results are robust in all cases. When we disaggregate the analysis by year, the effect
+remains negative in each of the 10 years in our sample, with more imprecisely estimated
+effects (Table B.6). When we subset by state, the magnitude of the effect varies in line with
+expectations: the drop in fires is largest in Haryana (14%), Punjab and Uttar Pradesh (5 and
+4% respectively), where agriculture is most prevalent and crop burning salient, while there
+is a positive effect in Bihar (Table B.7). We test the importance of differential pre-trends
+in Figure B.5 following the approach by ?. Panel (a) presents the standard event-study
+estimates, while Panel (b) presents the de-trended event-study estimates, as in Figure 3b,
+following ?. We follow ? in also conducting sensitivity analyses for violations of the pre-
+trends assumption using the smoothness restriction (?), showing that findings are robust
+to violations of parallel trends up to 0.75 times the size of the highest observed pre-trend
+deviations (Figure B.5c).
+
+Strategic action and inaction near constituency borders: Our next question is
+whether the main effect, a reduction in crop-related fires when constituents are exposed,
+is driven by politicians becoming more active where pollution harms their own constituency,
+by politicians becoming less active where pollution is displaced onto neighboring constituen-
+cies, or by both. To answer this question, we examine how fire activity varies with strategic
+considerations about pollution exposure.
+    When burning occurs close to an upwind border, a larger share of the smoke remains
+within the politician’s own constituency, strengthening incentives to intervene. When burn-
+ing occurs close to a downwind border, the smoke is shifted into a neighboring constituency,
+weakening incentives to act. To test if politicians respond to both these incentives, we con-
+struct a new dataset at the level of grid-cell and each assembly constituency-border pair.
+Because wind direction varies over time, the same border can be downwind in some periods
+
+
+                                              13
+       Figure 3: Effect of constituency exposure to smoke on number of fires
+
+                      (a) Main Table                                          (b) Event-study relative to exposure
+                                    (1)       (2)           (3)
+                                Number of Fires (in 1,000 units)
+   Down > Up                      -0.508   6.533∗∗∗       -0.997
+                                 (1.167)    (1.093)      (1.570)
+   Observations                63,550,441 62,551,714 62,462,012
+   N Assembly Constituencies       808        808          808
+   Month-Year FE                     Y         N             N
+   AC × Cohort FE                    Y         N             N
+   AC × Month-Year × Cohort FE       N         Y             Y
+   Grid × Cohort FE                  N         N             Y
+   Mean DV                      153.216    153.216      153.216
+
+
+
+                   (c) Effect of constituency and district exposure to smoke on N Fires
+                                                              (1)            (2)         (3)          (4)         (5)
+                                                                           Number of Fires (in 1,000 units)
+                    Down> Up Bureaucrat                    -68.093∗∗∗    -36.112∗∗∗  -2.519∗∗∗     -8.010∗∗∗   -15.619∗∗∗
+                                                             (6.180)       (1.023)    (0.761)       (0.679)      (0.773)
+                    Down> Up Politician (Pop)                 -2.720     -12.244∗∗∗   5.999∗∗∗     -6.781∗∗∗     -3.613∗
+                                                             (5.901)       (1.966)    (1.608)       (1.967)      (2.029)
+                    Down> Up Pol. (Pop) × Down> Up Bur.     19.150∗∗∗     12.824∗∗∗    0.286       11.369∗∗∗      1.236
+                                                             (6.732)       (2.294)    (1.770)       (1.879)      (2.106)
+                    Observations                           62,462,012    62,462,012 62,462,012 62,462,012      62,459,537
+                    N Assembly Constituencies                  808           808        808           808          808
+                    N Districts                                160           160        160           160          160
+                    Month-Year FE                               N             Y           N            N            N
+                    AC FE                                       N             Y           N            N            N
+                    AC × Month-Year FE                          N             N           Y            Y            N
+                    District × Month-Year FE                    N             N           N            N            Y
+                    Grid FE                                     N             N           N            Y            Y
+                    Mean DV                                  151.037       151.037    151.037       151.037     151.037
+
+Notes: (a) Results from Equation 1 of the effect of constituency exposure to smoke on the number
+of fires (in thousands) in a grid-cell and month. The treatment indicator Down>Up is a dummy
+equal to one in months and grids from which most of the assembly constituency’s population is
+exposed to smoke (i.e. when the constituency’s population in the downwind area is larger than
+the population in the upwind area from the grid). The table reports the mean of the dependent
+variable when treated grids are upwind. All regressions control for average wind speed and direction.
+Standard errors are clustered at the grid and assembly constituency × month-year level. (b) Results
+from Equation 2. The reference category is t=-1, i.e. the month before the switch. We use a stacked
+diff-in-diff to generate cohorts based on switching date. We restrict the analyses to a 6 months
+window around the switch to maximize support. The control grids are never treated grids and grids
+that are upwind around the switching date. The regression includes grid and assembly constituency
+× month-year × cohort fixed effects and controls for average wind speed and direction. Standard
+errors are clustered at the grid × cohort and assembly constituency × month-year × cohort level.
+(c) Results from Equation 1 with the additional interaction with a dummy (Down > Up Bureaucrat)
+equal to one in months and grids from which most of the district area is exposed to smoke, i.e.
+the area of the district downwind is larger than the area upwind from the grid. The table reports
+the mean of the dependent variable in grids that are upwind with respect to the borders of both
+the constituency and the district. All regressions control for average wind speed and direction.
+Standard errors are clustered at the grid and district × month-year level.
+
+
+
+                                                                    14
+and upwind in others. We calculate the distance from each grid-cell to each relevant border
+and use this time-varying proximity to examine whether politicians adjust their behavior
+strategically as opportunities to internalize or externalize pollution become stronger.
+    The results in Figure 4 reveal two patterns. First, fires decline monotonically as one
+approaches the upwind border, consistent with politicians acting to reduce fires when a
+larger share of their own constituency would bear the pollution costs. Second, fires increase
+as one approaches the downwind border, consistent with reduced effort when pollution can
+be offloaded onto neighboring constituencies.
+    Together, these results show that politicians behave strategically along both margins:
+they increase effort when their own constituents are more exposed, and they relax effort when
+the costs can be shifted elsewhere. Additionally, politicians are also acting strategically in
+increasing the intensity of their action (and inaction) depending on the intensity of pollution
+exposure —distance to the border.
+
+Figure 4: Effect of grid distance to the upwind (in blue) and downwind (in red)
+border on number fires
+                        Effect on number of fires (x 1,000 units)
+
+
+
+
+                                                                    10
+
+
+
+
+                                                                    5
+                                                                                                                     Differential effect
+                                                                                                                     at downwind border
+
+                                                                         Effect
+                                                                    0
+                                                                         at upwind border
+
+
+
+
+                                                                    -5
+                                                                     Closest                                                         Farthest
+                                                                               Distance from Assembly border segment g (quintiles)
+
+
+
+Notes: (Blue) Effect of being close to an upwind border with another constituency, where smoke
+would affect the politicians’ assembly constituency. (Red) Differential effect (from the upwind bor-
+der) of being close to a downwind border, where smoke would travel to the neighboring jurisdiction.
+All effects are plotted by quintiles of distance to the border, and the 5th quintile, the farthest, is
+used as omitted category. The regression includes grid and border × month-year fixed effects and
+control for average wind speed and direction. Standard errors are clustered at the grid and assem-
+bly constituency × month-year level.
+
+
+
+3.3.1   Alternative Interpretations
+Farmers’ Pro-sociality: A first alternative explanation is that fires may be reduced by
+farmers themselves, rather than by politicians, because farmers behave prosocially toward
+nearby residents who would be exposed to the resulting pollution. Under this account,
+farmers would care about neighbors as such, regardless of whether they belong to the same
+
+
+                                                                                                   15
+electoral constituency, since the constituency is an administrative unit with no obvious social
+or cultural meaning.
+    To assess this possibility, we construct a placebo measure of exposure based on farmers’
+local social environment rather than political boundaries. Specifically, around each grid we
+draw a placebo circle with a radius of 13 km, corresponding to the median size of an assembly
+constituency, and use it to approximate the set of nearby residents potentially relevant to
+farmers’ prosocial concerns. Figure B.4 illustrates this strategy. In this analysis, a grid is
+coded as treated when the population living downwind within the placebo circle is larger
+than the population living upwind.
+    3c Table B.8 reports the estimated treatment effect for the full sample (column 1), for       Results
+locations that are treated both in the placebo specification and from the politician’s perspec-   now
+tive (column 2), and for locations that are treated in the placebo-farmer specification but are   changed
+control areas from the politician’s perspective (column 3). We find no evidence consistent
+with farmer prosociality. The reduction in fires appears only in locations where politicians
+have incentives to act, while in places where politicians have weak or no incentives, the esti-
+mated effect is even positive. This pattern suggests that the reduction in fires is not driven
+by farmers concern for downwind residents, but by political incentives operating through
+constituency boundaries.
+
+Bureaucratic action: A second alternative explanation is that the main results are driven
+by bureaucrats’ incentives rather than by politicians’. Indeed, in previous work we show
+that bureaucrats respond to crop burning when their own districts receive the brunt of
+air pollution versus their neighbors (?). The objective here is not to make the case that
+bureaucrat incentives do not matter; rather, we want to establish that political incentives
+also matter and explore the interaction of the two. To do so, we examine whether the effect of
+pollution visibility depends on whether exposure is concentrated only within the politician’s
+constituency or also within the jurisdiction of the relevant bureaucratic authority. In other
+words, we test whether politicians still reduce fires when the same pollution would affect not
+only to their own constituents but also district residents.
+    The results are reported in Table. We continue to find that both politicians and bureau-
+crats reduce fires when their respective jurisdictions are exposed to pollution from potential
+crop burning in a location but not vice versa suggesting that political and bureaucratic in-
+centives matter on their own. However, we also find that the total effect of a location being
+a source of pollution for both the politician’s constituency and the bureaucratic district is
+smaller, suggesting that the politician’s incentive to reduce visible pollution is weakened
+once responsibility is shared with the bureaucracy. One interpretation is a coordination
+failure: when both political and administrative authorities are implicated, each may expect
+the other to bear the costs of enforcement, resulting in less action overall. The fact that
+both actors matter reflects the layered governance structure of Indian anti-burning policy,
+in which politicians and bureaucrats share overlapping responsibility.
+
+
+
+
+                                              16
+4      Mechanism
+4.1     Political Incentives Mobilize Government Machinery
+The evidence so far shows how political incentives translate into control of polluting behav-
+ior, or lack thereof. In the context section, we discussed qualitatively how politicians can
+concretely affect crop burning by galvanizing the machinery of the state. We now turn to
+examining this quantitatively.
+    Outside of legislation, where political will directly lays the foundation for policy action,
+most policy change is not implemented directly by politicians and requires that they coor-
+dinate with the bureaucracy. Therefore, for outcomes like crime reduction or increases in
+public spending, direct evidence of politicians’ role is difficult to isolate ??.
+    While, the same is true of controlling crop burning, there are two sources of data that
+allow us a peek inside how political incentives may shape political action via the bureaucracy.
+First, from 2015-2016, politicians lead meetings with district administrators across India en-
+gage to coordinate on public service provision via the institution of the District Development
+Coordination and Monitoring Committee (DISHA) as we described above. These meetings
+and their outputs give us a rare window to observe evidence of political action. Second,
+India’s eCourts data contains records of cases that relate to infringements of environmental
+laws, including crop burning. We can study how a change in political incentives impacts the
+production of these cases.
+
+DISHA Data As the DISHA institution gives politicians monitoring authority over bu-
+reaucratic action, the content of its proceedings offers a direct window into what issues
+politicians choose to raise and pursue. We focus on whether politicians table the issues of
+agriculture and air pollution, a manifestation of the political will to act on crop burning
+through institutional channels.
+    These proceedings and their associated documents are posted across hundreds of separate
+district and state government websites, with no common catalog and no standard address.
+We therefore use a web-crawl strategy that scrapes state and district websites to retrieve any
+document or webpage mentioning DISHA, extract the location and date recorded inside each
+document, and code its topic, such as documents relevant to agriculture and air pollution.
+For example, one document we retrieve contains the proceedings of a DISHA meeting held
+in Kaimur, Bihar, chaired by Shri Chhedi Paswan, Member of Parliament for Sasaram, on
+29 June 2018, which we assign to Kaimur district in June 2018. See Appendix A.3.2 for
+details of document retrieval and processing.
+    This procedure yields an unbalanced district-by-month panel of DISHA documents. To
+ensure that a zero reflects the absence of agricultural or air pollution content rather than the
+absence of any DISHA documentation, we include each district only from the first month-year
+in which at least one DISHA document is available.21
+  21
+    Prior to a district’s first documented meeting, a zero would be ambiguous: it could reflect that the issue
+was not raised, or simply that DISHA meetings had not yet been initiated or documented in that area.
+
+
+
+
+                                                     17
+Courts Data We also study enforcement action against crop burning via India’s eCourts
+records. Court cases are a measure of the state acting against crop burning, prompted
+by a combination of bureaucratic mobilization and the political pressure that activates it.
+Where DISHA captures what politicians choose to raise, court filings capture whether the
+enforcement apparatus is actually engaged.
+    We access judicial case records from the SHRUG database (?), which digitizes the Indian
+eCourts platform. We retain cases filed under the Air (Prevention and Control of Pollution)
+Act, 1981, the statute under which crop burning offenses are prosecuted. See Appendix              Anzony:
+A.3.1 for further details.                                                                         please
+    Our outcome is case filing that measures whether enforcement is initiated, signaling the       fill in
+transfer of a case from police to the judicial system, which is the margin politicians plausibly   ex-
+influence. Filings also avoid the long and variable lags between filing and judgment in Indian     actly
+district courts. The sample runs from 2012 to 2018, the period covered by the SHRUG                how
+judicial extract.                                                                                  we
+                                                                                                   filter
+Empirical Strategy We test whether DISHA meetings and court cases respond to the                   these
+same political incentives that reduce fires. Both outcomes are recorded at the district level:     cases
+DISHA meetings are convened by district, and eCourts records the location of the court             (act
+rather than the location of the offense. We construct both as district-month panels and            code
+link them to our assembly constituency-month database by mapping each constituency to              field,
+the district that contains it. 30 out of 853 assembly constituencies in our sample (3.5%)          key-
+span more than one district. Because documents and judicial case records are identified only       word
+at the district level, matching them to these constituencies would be ambiguous, and we            search,
+therefore drop them from the analysis.                                                             or
+    As we are interested in understanding politician level decisions, we aggregate our grid-       both),
+level treatment into a continuous, constituency-level measure of the incentive a politician        how
+faces, which we call Potential Exposure, capturing how much of a constituency’s population         many
+could be affected by smoke from crop burning. As above, let i index 5km2 grid-cells and j          cases
+assembly constituencies, and let Downit denote the constituency population lying downwind          the
+of grid i in month-year t, the same quantity that defines Down > Upit . Let Popj the               filter
+constituency’s total population. We define:                                                        re-
+                                                     1 X                                           turns,
+                          Potential Exposurejt =            Downit ,                      (3)      and
+                                                   Popj i∈j
+                                                                                                   whether
+    The interpretation is that Potential Exposurejt is the average number of times each con-       we
+stituent inside the politician’s own constituency potentially receives pollution from an upwind    can
+fire. We standardize Potential Exposurejt over the estimation sample (mean = 60.12, SD =           sepa-
+37.71), so a one-unit increase corresponds to a one-standard-deviation increase in the number      rate
+of own-constituency potential pollution for an average constituent.                                agri-
+    For outcome Y in constituency j and month-year t, we estimate                                  cul-
+                                                                                                   tural
+                    Yjt = λ Potential Exposurejt + µj + νt + ξXjt + ojt ,                   (4)
+                                                                                                   residue
+where µj are constituency fixed effects, νt are month-year fixed effects, and Xjt is a vector      burn-
+of controls containing the constituency’s average wind speed and direction. Standard errors        ing
+are clustered at the constituency level.                                                           from
+                                                                                                   indus-
+                                              18                                                   trial,
+                                                                                                   vehic-
+                                                                                                   ular,
+Results Table 4 presents the results. First, in Column 1, we show that a one standard
+deviation increase in citizens’ potential exposure to pollution decreases actual fires by 36
+percent (p < 0.1).
+    In columns 2 and 3 we explore DISHA outcomes and show that a one-standard-deviation
+increase in exposure increases the probability of agriculture document by 70% relative to a
+baseline rate of 0.5 mentions per 100 constituency-months, and increases the probability of
+an environment document by 60% relative to a baseline of 0.3 mentions per 100 (p < 0.1
+for both). These are large effects given how rarely these topics appear in DISHA documents
+absent accountability pressure.22
+    Turning to court cases in Columns 4 and 5, we find that a one-standard-deviation increase
+in politicians’ incentives yields no significant effect within the same month. In the following
+month, however, exposure results in 0.053 additional court cases against crop burning per
+constituency-month, a 72% increase relative to the mean (p < 0.01). This delayed response
+is consistent with the time required for enforcement actions to materialize as cases are passed
+to the judicial system only after necessary evidentiary work by the police. Given that severe
+penalties are rarely issued (on average, less than one per district every month), this represents
+a substantively meaningful enforcement response.
+    Taken together, these results show evidence for the mobilization of government machinery
+in response to changes in political incentives. However, these estimates should be interpreted
+with two caveats. Because treatment varies continuously and over time, with units switching
+in and out of treatment, the design is too complex to permit formal validation of difference-
+in-differences assumptions. The low geographic granularity of the outcome data also means
+that several coefficients are imprecisely estimated. Notwithstanding these limitations, the
+findings provide direct evidence that politicians translate accountability incentives into con-
+crete institutional action, both by steering bureaucratic attention toward crop burning in
+coordination meetings, and by directing subsequent enforcement through the courts.
+
+
+
+
+4.2     Exposure to Fires Drives Electoral Outcomes
+The previous subsection showed that politicians respond to accountability incentives by
+mobilizing state action against crop burning. To complete evidence on the way this account-
+ability mechanism operates, we now show evidence on voters: constituents should reward
+politicians who reduce fires and punish those who do not. We examine this directly by asking
+whether constituents’ actual exposure to pollution over an electoral term affects incumbent
+electoral performance.
+  22
+    Appendix Table E.1 shows that this response is specific to agriculture and the environment because
+higher potential exposure does not increase discussion of other topics; if anything, documents related to
+welfare and development declines, suggesting that politicians reallocate their agenda toward agricultural and
+environmental concerns when constituent exposure to pollution increases.
+
+
+
+
+                                                     19
+Table 1: Pollution Exposure, Politicians’ Actions, and Electoral Consequences, Count ×
+Downwind Pop
+                               (1)        (2)                (3)      (4)            (5)             (6)
+                             DISHA documents on:              Court Data              Electoral Outcomes
+                                                                                 Re-Election     Incumbent
+                           Agriculture   Environment        Casest    Casest+1   Probability Vote Share (%)
+
+ Potential Exposure        -0.0565***       0.0501
+                            (0.0214)       (0.0329)
+ Actual Exposure                                           0.125***   0.112**      -0.0664        -0.102
+                                                           (0.0389)   (0.0503)    (0.0714)       (2.221)
+
+ Observations                26,041         26,041          26,041    25,503       1,646          1,646
+ AC FE                         Y              Y               Y          Y           Y              Y
+ Month-Year FE                 Y              Y               Y          Y           -              -
+ Province x Election FE         -              -               -         -           Y              Y
+ Mean DV                      .457           .315           1.348      1.286       .314          11.185
+
+Notes: The table reports politicians’ actions (columns 1-4) and electoral outcomes (columns 5-6) by level of
+constituency exposure. Potential Exposure is the sum across grids of the number of fires recorded in the same
+calendar month of the previous year, each weighted by the constituency population lying downwind of that
+grid, normalized by the constituency’s total population, and standardized (z-scored) within the estimation
+sample. Actual Exposure is defined analogously using actual fires recorded in the constituency-month-year.
+In columns 6 and 7, both variables are averaged at the constituency-by-electoral-term level before standard-
+ization. Columns (1) and (2) use DISHA documents to report the probability that a document is recorded
+per 100 in a given month-year, for the following categories: agriculture (column 1) and environmental pollu-
+tion (column 2). Columns (3) and (4) report the change in probability of filing court cases about pollution
+in the same month and in the following month, respectively. Column (5) reports the probability that the
+incumbent politician runs for re-election. Column (6) reports the incumbent’s vote share in the following
+election. The table reports the mean of the dependent variable in the sample. All regressions in columns
+(1)-(4) control for wind direction and average wind speed. Standard errors are clustered at the constituency
+level.
+
+
+
+
+                                                      20
+Table 2: Pollution Exposure, Politicians’ Actions, and Electoral Consequences, Any Fire ×
+Downwind Population
+                               (1)        (2)               (3)      (4)           (5)             (6)
+                             DISHA documents on:             Court Data             Electoral Outcomes
+                                                                               Re-Election     Incumbent
+                           Agriculture   Environment       Casest   Casest+1   Probability Vote Share (%)
+
+ Potential Exposure         -0.0886**       0.0623
+                             (0.0347)      (0.0427)
+ Actual Exposure                                       0.172*** 0.215***         -0.0588        0.916
+                                                       (0.0478) (0.0728)        (0.0798)       (3.096)
+
+ Observations                26,041        26,041          26,041   25,503       1,646          1,646
+ AC FE                         Y             Y               Y         Y           Y              Y
+ Month-Year FE                 Y             Y               Y         Y           -              -
+ Province x Election FE         -             -               -        -           Y              Y
+ Mean DV                      .457          .315           1.348     1.286       .314          11.185
+
+Notes: The table reports politicians’ actions (columns 1-4) and electoral outcomes (columns 5-6) by level
+of constituency exposure. Potential Exposure is the sum across grids of the constituency’s population living
+downwind of a grid that experienced a fire in the same calendar month of the previous year, normalized by
+the constituency’s total population, averaged at the constituency-by-electoral-term level, and standardized
+(z-scored) within the estimation sample. Actual Exposure is defined analogously using actual fires recorded
+in the constituency-month-year. In columns 6 and 7, both variables are averaged at the constituency-
+by-electoral-term level before standardization. Columns (1) and (2) use DISHA documents to report the
+probability that a document is recorded per 100 in a given month-year, for the following categories: agri-
+culture (column 1) and environmental pollution (column 2). Columns (3) and (4) report the change in
+probability of filing court cases about pollution in the same month and in the following month, respectively.
+Column (5) reports the probability that the incumbent politician runs for re-election. Column (6) reports
+the incumbent’s vote share in the following election. The table reports the mean of the dependent variable in
+the sample. All regressions in columns (1)-(4) control for wind direction and average wind speed. Standard
+errors are clustered at the constituency level.
+
+
+
+
+                                                      21
+Table 3: Pollution Exposure, Politicians’ Actions, and Electoral Consequences, rural grid ×
+Count × Downwind Pop
+                               (1)        (2)                (3)      (4)            (5)             (6)
+                             DISHA documents on:              Court Data              Electoral Outcomes
+                                                                                 Re-Election     Incumbent
+                           Agriculture   Environment        Casest    Casest+1   Probability Vote Share (%)
+
+ Potential Exposure         -0.0455**       0.0480
+                             (0.0185)      (0.0314)
+ Actual Exposure                                           0.106***   0.0853*      -0.0242        0.176
+                                                           (0.0336)   (0.0458)    (0.0660)       (2.120)
+
+ Observations                 26,041        26,041          26,041    25,503       1,646          1,646
+ AC FE                          Y             Y               Y          Y           Y              Y
+ Month-Year FE                  Y             Y               Y          Y           -              -
+ Province x Election FE          -             -               -         -           Y              Y
+ Mean DV                       .457          .315           1.348      1.286       .314          11.185
+
+Notes: The table reports politicians’ actions (columns 1-4) and electoral outcomes (columns 5-6) by level of
+constituency exposure. Potential Exposure is the sum across rural grids of the number of fires recorded in
+the same calendar month of the previous year, each weighted by the constituency population lying down-
+wind of that grid, normalized by the constituency’s total population, and standardized (z-scored) within the
+estimation sample. Actual Exposure is defined analogously using actual fires recorded in the constituency-
+month-year. In columns 6 and 7, both variables are averaged at the constituency-by-electoral-term level
+before standardization. Columns (1) and (2) use DISHA documents to report the probability that a doc-
+ument is recorded per 100 in a given month-year, for the following categories: agriculture (column 1) and
+environmental pollution (column 2). Columns (3) and (4) report the change in probability of filing court
+cases about pollution in the same month and in the following month, respectively. Column (5) reports the
+probability that the incumbent politician runs for re-election. Column (6) reports the incumbent’s vote share
+in the following election. The table reports the mean of the dependent variable in the sample. All regressions
+in columns (1)-(4) control for wind direction and average wind speed. Standard errors are clustered at the
+constituency level.
+
+
+
+
+                                                      22
+Table 4: Pollution Exposure, Politicians’ Actions, and Electoral Consequences, rural grid ×
+Any Fire × Downwind Population
+                               (1)        (2)               (3)      (4)           (5)             (6)
+                             DISHA documents on:             Court Data             Electoral Outcomes
+                                                                               Re-Election     Incumbent
+                           Agriculture   Environment       Casest   Casest+1   Probability Vote Share (%)
+
+ Potential Exposure         -0.0748**       0.0601
+                             (0.0313)      (0.0415)
+ Actual Exposure                                        0.163*** 0.185***        0.0248           1.828
+                                                        (0.0475) (0.0696)       (0.0595)         (2.163)
+
+ Observations                 26,041        26,041         26,041   25,503        1,646           1,646
+ AC FE                          Y             Y              Y         Y            Y               Y
+ Month-Year FE                  Y             Y              Y         Y            -               -
+ Province x Election FE          -             -              -        -            Y               Y
+ Mean DV                       .457          .315          1.348     1.286        .314           11.185
+
+Notes: The table reports politicians’ actions (columns 1-4) and electoral outcomes (columns 5-6) by level
+of constituency exposure. Potential Exposure is the sum across rural grids of the constituency’s popula-
+tion living downwind of a grid that experienced a fire in the same calendar month of the previous year,
+normalized by the constituency’s total population, averaged at the constituency-by-electoral-term level, and
+standardized (z-scored) within the estimation sample. Actual Exposure is defined analogously using actual
+fires recorded in the constituency-month-year. In columns 6 and 7, both variables are averaged at the
+constituency-by-electoral-term level before standardization. Columns (1) and (2) use DISHA documents to
+report the probability that a document is recorded per 100 in a given month-year, for the following categories:
+agriculture (column 1) and environmental pollution (column 2). Columns (3) and (4) report the change in
+probability of filing court cases about pollution in the same month and in the following month, respectively.
+Column (5) reports the probability that the incumbent politician runs for re-election. Column (6) reports
+the incumbent’s vote share in the following election. The table reports the mean of the dependent variable in
+the sample. All regressions in columns (1)-(4) control for wind direction and average wind speed. Standard
+errors are clustered at the constituency level.
+
+
+
+
+                                                      23
+Empirical Strategy To answer this question, we create a modified measure of exposure,
+which we call Actual Exposurej . While for the first mechanism subsection we tracked month-
+by-month intensity in politicians’ incentives to act using potential exposure, this new variable
+is constituency-by-electoral-term measure of the cumulative exposure of voters to actual fires.
+    For each constituency-term in office o, let Mo denote the number of months in the term.
+We define:
+                                                                              !
+                                        1 X         1 X
+               Actual Exposurejo =                          Downit × #Firesit ,              (5)
+                                       Mo t∈o Popj i∈j
+
+where Mo is the number of months in term o, Downit equals the number of people living
+downwind of grid i in month-year t, and #Firesit is the number of fires in grid i in that
+month, such that when there are no fires, the quantity inside the parenthesis equals zero.
+   Actual Exposurejo therefore represents the average monthly fires a citizen is actually
+exposed to in the constituency. As before, we regress incumbent electoral outcomes on
+the standarized version of this actual exposure (mean = 1040.09, sd = 2973.72), using
+constituency and state times election year fixed effects, and clustering standard errors at
+the constituency level.
+
+Results We find that constituents exposed to more fires during an electoral term pun-
+ish their incumbent in Table 4, Columns 6 and 7. A one-standard-deviation increase in
+accountability-relevant fire exposure reduces the probability that the incumbent chooses to
+run again by 0.054 percentage points, a 57% decrease relative to the baseline rerunning rate
+of 0.094 (p < 0.1). The same increase in exposure reduces incumbents’ unconditional vote
+share by 2.1 percentage points, a 61% decrease relative to the mean at baseline (p < 0.1),
+though this decrease is mostly driven by the reduced re-contestation.
+    These effects indicate that when voters are exposed to more pollution from fires during
+when their politician had clear accountability incentives, they respond by withdrawing elec-
+toral support validating the mechanism underlying the main analysis: politicians suppress
+fires because failure to do so is electorally costly.
+
+
+5     Countervailing Incentives
+The first part of the paper provided evidence that there are prospects for environmental
+accountability. In this second part, we consider how accountability can weaken or break down
+with two fundamental levers that can act as countervailing incentives: organized lobbying,
+and adverse political selection.
+
+5.1    Lobbying
+From June 2020 to December 2021, India experienced the largest protest movement in the
+world history: 25 million farmers mobilized in large-scale protests against agricultural laws
+that aimed to deregulate the sale of farm produce, allow contract farming, and remove
+stockholding limits. One key reason for mobilization was the request to decriminalize crop
+
+                                              24
+burning, removing strict penalties such as high fines and jail terms ((?)). Farmers staged
+demonstrations, road blockades, and sit-ins, particularly in Punjab, Haryana, and at the
+borders of New Delhi. The demonstrations were successful: they led to the repeal of the
+laws and to the depenalization of stubble burning. This section analyzes the impact of all 390
+farmers’ protests events on crop burning, and asks whether those counteract accountability
+incentives. While those are large scale protests, we use the term ‘lobbying’ to refer to the
+organized pursuit of policy concessions by groups with a concentrated economic interest in
+a policy, even when this interest conflicts with the diffuse welfare of broader populations,
+consistent with canonical examples from the literature (?), from taxi driver strikes to energy
+sector mobilization, in which sector-based collective action secures concessions at public
+expense.
+
+5.1.1    Data
+We gather information on the date and location of each protest event related to the Farmers’
+Movement from June 2020 to December 2021 from ?. We identify farmers’ protests by
+searching for any conjugation of the word “farm” in the event description, considering both
+type and participants to the event. We validate this process by reading the full description
+for a random sample of events. Table C.1 present the descriptive statistics for the sample.
+Figure C.1 shows the temporal distribution of protest occurrence, highlighting a peak in late
+2020 after the passage of the farm laws (September 2020). Protests were highly prevalent in
+Punjab but widesperead across all ares in our sample (Figure 5a).
+
+5.1.2    Empirical Strategy
+Treatment Definition: We code proximity to a farmer protest by drawing a 5km-radius
+buffer areas around the location of the 390 protests occurring between June 2020 and De-
+cember 2021. We code a grid-cell as treated if it falls within at least one buffer area, from
+the month-year when a protest first occurs until the end of our sample period.23 Figure C.2
+provides a visual illustration of the grid-cells coded as treated in a constituency.
+
+Estimation Strategy: We estimate the impact of proximity to a protest event using a
+stacked-design following ?. For each event-time cohort in our data, defined as the month-
+year a location first experience a protest, we build one cohort specific dataset. Each dataset
+includes only never treated units –grids that never experienced a protest– and units first
+treated in that event-time –grids experiencing their first protest, eliminating the problematic
+comparison in case of heterogeneous treatment effects. We then stack these cohort-specific
+datasets into a pooled database. For grid-cell i in constituency j in province p, relative time
+from treatment r and electoral cycle s in cohort dataset c, we estimate:
+
+                   Firesicr = βPost×Protesticr + αic + γrc + θp×s + Xipr + ϵicr                           (6)
+  23
+    We consider as treated grid-cells that fall within a buffer area regardless of whether they fall inside or
+outside the constituency boundaries. Grids located in overlapping buffer areas are assigned to the buffer
+associated with the earliest protest.
+
+
+
+
+                                                     25
+where the dependent variable is the number of fires per 1,000 units. We include a compre-
+hensive set of fixed effects which account for cohort-specific and constituency specific factors.
+First, αic are grid × cohort fixed effects that absorb time-invariant factors for each grid in
+our sample within each sub-experiment. Second, γtc are relative time from treatment de-
+fined for every cohort that account for time-varying shocks at the national level, including
+changes in the legislative environment following protest events. Third, θps are province ×
+cohort -specific electoral cycles fixed effects that account for differences across cycles within
+a province. X is a vector of controls that includes province × cohort linear time trends, av-
+erage wind speed and direction. While the stacked dataset is constructed at the month-year
+level, we aggregate relative-time into years (12 months from treatment) when plotting the
+event-study estimates to reduce noise. Standard errors are clustered at the buffer area level.
+
+5.1.3   Results
+After the first protest occurs in a given area, we observe 0.055 more fires per grid-month,
+a 13% increase with respect to an average of 0.439 fires in treated areas before any protest
+occurs (Table C.2, columns 1-3). This result is in line with politicians relaxing environmental
+control in response to concentrated farmer pressure. Figure 5c plots the de-trended event-
+study results showing an increase in the number of fires after the first protest. This effect
+corresponds to 21% more fires with respect to baseline. This indicates that politicians relax
+environmental enforcement in response to farmers organized protests.
+    Figure C.3 presents the test of the importance of differential pre-trends, following ?. Panel
+(a) presents the standard event-study estimates, while Panel (b) presents the de-trended
+estimates. Panel (c) presents the sensitivity analysis for violations of the parallel-trends
+assumption using the smoothness restriction of ?, showing that our findings are robust to
+violations of parallel trends of more than 1 times the size of the largest observed pre-trend
+deviation.                                                                                           Do we
+                                                                                                     have
+Erosion of Accountability Incentives: Organized pressure from farmer lobbies might                   what’s
+contribute to influence the accountability incentives we document in the previous section:           the
+do politicians continue reducing fires when smoke would impact their constituents, even              max
+after farmers’ protests pressure them to stop sanctioning them for crop burning? Figure              of M?
+5d explores this question by interacting the two treatments, the effect of a grid becoming a         Do we
+source of exposure for its constituency, and protests. Before protests, areas whose pollution        need
+burden falls on their own constituents experience fewer fires relative to areas that would           it if
+pollute neighboring jurisdictions, in line with the accountability mechanism.                        larger
+    In protest-affected areas, the accountability effect disappears entirely after protests begin:   than
+fires increase significantly, offsetting the reductions in crop burning otherwise associated with    1?
+political accountability. In places without protests, the accountability effect weakens, but
+this does not translate into higher crop-related fires relative to baseline. This pattern is
+consistent with organized lobbying increasing fires directly where protests occur, while also
+weakening politicians’ incentives for environmental enforcement beyond the protest locations.
+
+
+
+
+                                               26
+         Figure 5: Effect of farmers’ protests occurrence on number of fires
+      (a) Protest occurrence by location                            (b) Farmers’ Protest
+
+
+
+
+          (c) By relative time period                     (d) By constituency exposure to smoke
+
+
+
+
+Notes: (a) The map shows treated (blue) and control (white) grid-cells. A grid-cell is coded as
+treated if it falls within 5km-radius buffer areas around protest locations. Treatment begins in
+the month-year of the first protest within each buffer area. Control grid-cells are located outside
+all buffer areas. (b) This photograph is called “Art, pen and people”. It was taken in the 2020
+Indian farmers’ protest by opposing Modi’s government farm laws (?). (c) Event-Study results
+from Equation 6 . The reference category is t=-1, a year before the protest occurrence. The
+regression includes grid-cohort, and province electoral cycle fixed effects, and controls for province
+linear time trends, average wind speed and direction. Standard errors are clustered at the buffer
+area × assembly constituency level. The control group includes never treated grids only. (d) Results
+from Equation 6 with the additional interaction of a dummy equal to one in months and grids from
+which most of the assembly constituency area is exposed to smoke (Down > U p, see Section 3.2 for
+details). Plotted coefficients report the effect of being in a constituency exposed to smoke in the pre-
+vs. post-protest period, separately for constituencies that did and did not experience protests. The
+reference category is non-protest areas, before protests when they are upwind (Down > U p=0).
+Table C.2 (columns 4-6) reports the corresponding regression coefficients. The regression includes
+grid-cohort, year-cohort and province electoral cycle fixed effects, and controls for province linear
+time trends, average wind speed and direction. Standard errors are clustered at the buffer area ×
+assembly constituency level.
+
+
+
+                                                  27
+5.2     Adverse Selection
+In India, candidates with direct ties to agriculture are often elected to state legislatures,
+especially in rural constituencies where farming remains economically and politically central.
+Once in office, these politicians may use their authority to pursue policies that are more
+aligned with the interests of their sector than with those of other constituents. We therefore
+examine whether the selection of politicians with agricultural ties shapes the incidence of
+fires after elections, and whether it alters the accountability incentives documented in the
+first part of the paper.
+
+5.2.1    Data
+We build new data on the sectoral identity of elected politicians in each Assembly Con-
+stituency in our sample by scraping information about politicians’ profession and properties
+from Myneta.info (?). The website provides background information on candidates con-
+testing elections from 2008, including profession, and details on movable and immovable
+assets. To capture politicians’ self-interest in agriculture, we classify whether each politi-
+cian’s self-reported occupation is agriculture-related, using a large language model (GPT)24
+(See Section A.2 for additional details.). Our sample comprises 2,565 politicians, of whom
+1,102 (43%) have agricultural professions. Table D.1 presents descriptive statistics for the
+resulting sample.
+
+5.2.2    Empirical Strategy
+Treatment Definition: A comparison of constituencies that ever elect agriculturalist
+politicians versus not would conflate politician characteristics with place characteristics.
+Rural localities with strong agricultural ties may be more likely both to elect agriculturalists
+and to experience more agricultural fires. To isolate the effect of electing an agriculturalist
+from underlying place characteristics, we exploit within-location variation of winning politi-
+cians. We compare crop related fires before and after the same constituency switches from
+electing a non-agriculturalist to electing an agriculturalist.
+
+Estimation Strategy: We estimate the impact of a constituency switching to electing
+an agriculturalist politician using a stacked design (?). For each switch — defined as a
+constituency electing an agriculturalist politician after not having one in the prior election—
+we build a cohort-specific dataset spanning 10 years (2 elections) around the event. Never-
+treated units, i.e. constituencies that elect a non-agriculturalist politician throughout the
+10 year window, are the control group. To avoid compositional changes that might bias our
+estimates, each dataset is a balanced panel, including only units that we observe for the
+entire 10 year period. We then stack these cohort-specific datasets into a pooled database.
+For a 5km2 grid-cell i in constituency j in province p, relative time from treatment r, election
+s in cohort-dataset c, we estimate:
+
+        Number of Fires icr = β Post×Agriculturalisticr + αic + γtc + θps + Xipr + ϵicr                   (7)
+  24
+    Most politicians in our sample report holding agricultural assets, leaving little variation to exploit. We
+therefore rely on self-reported profession as our primary measure of self-interest in crop burning.
+
+
+                                                     28
+    where the dependent variable is the number of fires per 1,000 units; P ost is a dummy
+that takes value one from the cohort-specific year onward; Agriculturalist is a dummy
+equal to one after the election of a politician with agricultural ties. We include the same
+set of fixed effects as in the protest specification, which account for cohort-specific and
+electoral factors. In particular, the grid x cohort fixed effects guarantees that the estimate
+is identified from within-location changes over time, rather than from comparing potentially
+different constituencies that never elect agriculturalist politicians. The province Ö cohort Ö
+electoral cycle FEs (θps ) absorb the state-level political environment in each legislature term.
+For example, if BJP swept Uttar Pradesh in 2017, nominated more agricultural candidates
+across the state, and also changed state-level burning policy, that is absorbed.           While
+the stacked dataset is constructed at the month-year level, we aggregate relative-time into
+years (12 months from treatment) when plotting the event-study estimates to reduce noise.
+Standard errors are clustered at the assembly constituency × election year level.
+
+5.2.3   Results
+When a constituency switches to electing an agriculturalist politician, fires increase by 6%
+with respect to baseline, corresponding to about 7 additional fires per grid-year as shown
+in Table D.2, Column 3. The effect is driven by rice-producing areas, where we observe
+50% increase following the election of a politician with agricultural ties (Figure D.2). The
+de-trended event study in Figure 6c confirm this pattern: fires are 23% higher after a con-
+stituency switches into the electoral term of a agriculturalist politician, relative to the control
+group. Politicians with agricultural ties behave in line with the interest of their professional
+group, avoiding enforcement pressure on environmental damage. Figure C.3a the stan-
+dard event-study to test for the importance of differential pre-trends, following ?. Figure
+C.3c shows the sensitivity analysis for violations of the parallel-trends assumption using the
+smoothness restriction of ?, showing that our findings are robust to violations of parallel
+trends of 0.75 times the size of the largest observed pre-trend deviation.
+
+Erosion of accountability: Figure 6d examines whether the election of an agriculturalist
+politician erodes the accountability incentives documented above by estimating the joint
+interaction of the two treatments. Before elections, fires fall in areas where politicians’ own
+constituents bear the pollution burden, consistent with the baseline accountability pattern.
+After elections, however, the effect depends on who is elected. In constituencies that continue
+electing non-agriculturalists, fires remain lower when pollution affects the politician’s own
+constituents. In constituencies that switch to an agriculturalist, instead, fires increase relative
+to the control group. These results suggest that politicians with personal ties to agriculture
+undermine the responsiveness to constituent exposure documented in the first part of the
+paper, consistent with the selection of politicians whose private incentives are misaligned
+with those of the majority of their constituents.
+
+
+
+
+                                                29
+ Figure 6: Effect of switching to an agriculturalist politician on number of fires
+     (a) Treatment status by grid over time                    (b) My Neta: Profession
+
+
+
+
+          (c) By relative time period                    (d) By constituency exposure to smoke
+
+
+
+
+Notes: (a) The plot reports treatment status over time at the grid level. Each row represents
+a grid, sorted by first treatment time, while each column represents a month-year. Dark blue
+cells highlight the periods in which agrid had a self-reported agriculturalist politician in power. (B)
+Figure B shows an example of a Self-Declared Agriculturalist Politician report in My Neta Website.
+(c) Event-Study Results from Equation 7. The reference category is t = −1, one year before the
+election of an agriculturalist politician. The regression includes grid-cohort, and legislature fixed
+effects, and controls for province linear time trends, average wind speed and direction. Standard
+errors are clustered at the buffer area × assembly constituency level. The control group consists
+of never-treated grids over the period of analysis —that is, assembly constituencies, whether inside
+or outside the province holding the election, whose politicians’ self-reported occupation is not
+agriculture-related in the electoral terms just before and after the election. (d) Results from
+Equation 7 with the additional interaction for constituency exposure to smoke. Down > U p is
+a dummy equal to one in months and grids from which most of the assembly constituency area
+is exposed to smoke (see Section 3.2 for details). Plotted coefficients report the effect of being in
+a constituency exposed to smoke in the pre- vs. post-protest period, separately for constituencies
+that did and did not elect an agriculturalist. The reference category is constituencies with a non-
+agriculturalist in power, before elections when they are upwind (Down > U p=0). Table D.2 reports
+the corresponding regression coefficients. The regression includes grid-cohort, relative time-cohort
+and electoral cycle fixed effects, and controls for province linear time trends, average wind speed
+and direction. Standard errors are clustered at the buffer area × assembly constituency level.
+
+
+
+                                                  30
+6    Conclusions
+Environmental governance is a hard case for democratic accountability: pollution gener-
+ates concentrated benefits and diffuse harms, and voters rarely prioritize the environment.
+Against this backdrop, we find that politicians do curb fires, when wind patterns shift smoke
+toward their own constituents. This is, to our knowledge, among the first large-scale evi-
+dence that accountability incentives can generate environmental protection even in a setting
+with millions of dispersed polluters and limited monitoring.
+    Accountability, however, does not hold to the competing pressure of concentrated in-
+terests and adverse selection. We show that organized lobbying by the farmers’ movement
+increased burning, overriding politicians’ responsiveness to their own constituents’ welfare.
+In addition, we document that the election of politicians with private agricultural interests
+increases burning, even where accountability incentives would otherwise reduce it. Taken
+together, these results show that democratic accountability can produce environmental reg-
+ulation, but concentrated interests that benefit from pollution can undermine it.
+    These findings speak to institutional design. Whether anti-burning policy works in In-
+dia depends not only on national mandates and enforcement capacity but also on political
+incentives. Interventions that sharpen the link between pollution exposure and political re-
+sponsibility, such as real-time air quality monitoring and transparent attribution of pollution
+to specific jurisdictions, could strengthen the accountability channel we document (?). But
+the erosion we find from organized interests and adverse selection suggests that electoral
+mechanisms alone might not be enough to confront the large challenge of air pollution.
+    Finally, our results inform a broader question about whether democracies can manage
+environmental externalities. The evidence from South Asia’s air pollution crisis is that the
+capacity for accountability exists: politicians respond when their constituents pay the costs of
+pollution. The challenge is that this response is easily overwhelmed by the political economy
+forces arrayed against it. Sustaining environmental protection in democracies requires not
+just accountability but institutions that can withstand the pressures that erode it.
+
+
+
+
+                                              31
+Appendix
+
+A     Data Construction
+A.1     Combining all the data at a 5 square km grid-cell level
+We combine all the data into a single dataset at the 5x5km grid-cell level. Wind and fire
+grids do not overlap precisely: to reduce errors in the assignment of fires to wind grids, we
+split the 25kmx25km wind grid-cells into squares of 5x5k each. This guarantees that fires are
+assigned to the wind grid-cell which contains most of the fire grid-cell. Splitting wind grids
+in smaller parts also allows us to address another concern: some grids might overlap across
+jurisdiction boundaries. By reducing their size, we minimize the amount of misattribution
+and we are able to assign each grid to the appropriate jurisdiction. Any remaining error
+should bias our findings toward zero, as errors are uncorrelated with the dependent and
+independent variables. In case of overlap, we assign a grid to the jurisdiction that contains
+a larger area of the grid. For crop data, we assign the pre-period crop production to each
+5km2 grid-cell to classify what crops are produced in each location.
+
+
+A.2     Coding Farmer Politicians
+We scraped Myneta.info, an online data repository of election-related information, to collect
+data on politicians. The website contains information on politicians’ profession and their
+asset declarations.
+    To identify agricultural ties, we employed a large language model (GPT ) and fix the
+temperature to 0 for inference, as this reduces variance in the generation and helps reduce
+hallucinations. We supplied each profession description to the model and recorded whether
+it described any kind of agriculture-related job; if so, the politician is classified as having
+an agricultural profession. Formally, a politician is coded as being an agriculturalist if the
+profession description refers to a profession related to agricultural. We are able to construct
+the indicator for every winning candidate in our sample. Only for 50 out of 22,652 politicians    check
+the website does not provide any information.
+    For validation we carried out two exercises: First, we ran the classification procedure
+ten times for each observation and assigned the final category using the modal classification
+across the ten runs. Second, we manually reviewed a stratified random sample of 10 percent
+of observations (stratifying on LLM positives and negatives of farmer politicians), and found
+zero errors.
+    The following fixed prompt was supplied to GPT for the coding of politicians’ agricultural
+
+
+                                              1
+assets and professions:
+You are a research assistant interested in political capture in
+    India . You are researching whether politicians with agricultural
+    assets are more prone to taking actions that favor agricultural
+    businesses . Your current task is to assess whether an individual
+    owns agricultural assets .\ You will be provided a table with two
+    columns . The table summarizes the immovable assets owned by the
+    individual . The first column describes the type of immovable
+    assets listed in the corresponding row . The Second column lists
+    the immovable assets of the corresponding type . The individual is
+      considered to own agricultural assets ONLY IF any are listed in
+    the row corresponding to agricultural assets . If the value says
+    \" Nil \" , we can infer that the individual does not own any such
+    assets .\ Provide a JSON blob with your assessment , structured as
+    follows . First , the \" explanation \" field should include your
+    reasoning for your assessment on whether the individual owns
+    agricultural assets . Second , the " o w n s _ a g r i c u l t u r a l _ a s s e t s " must
+    include a boolean , true if the individual is assessed to own any
+    agricultural assets , and false otherwise .\ You must only use the
+    information included in the row of agricultural assets ; any other
+      kind of asset should be ignored .
+
+   We provide additional information on the use of AI in section A.4.
+
+
+A.3     Politicians’ Actions
+A.3.1   Court Cases
+
+We gathered data from the SHRUG (?) database, which contains all judicial case records
+from the Indian eCourts platform. From this database, we extracted all judicial cases in
+which there was a violation of the Air Pollution and Control Act of 1981 which include crop
+burning offenses from 2012 to 2018. Because these cases only report the district and the
+month in which they were filed, we match them to our sample at the district and month-
+year level from September 2012 to December 2018, corresponding to the start of our main
+sample period and the end of the available court data, respectively.
+
+
+
+
+                                               2
+A.3.2   DISHA Document Collection
+
+Our objective is to retrieve, for each district in our sample, any document or webpage that
+records DISHA meetings, and to match them to our data based on the location and time
+information inside the documents. Because DISHA proceedings are posted on hundreds of
+separate district and state government websites, with no common catalogue and no standard
+address, collecting them at scale requires a purpose-built web-crawl rather than a manual
+search. The crawl proceeds in two stages: a fast discovery stage that locates the pages where
+DISHA documents are likely to live, and a content-aware stage that follows those pages to
+the documents themselves.
+
+Candidate websites. We exploit the fact that Indian district portals, though not stan-
+dardized, follow a small number of recurring conventions. For each of the four states in
+our sample, Punjab, Haryana, Uttar Pradesh, and Bihar, and each district within them,
+we generate a list of candidate addresses by combining the district name with sixteen URL
+templates observed across the .nic.in and .gov.in domains; examples include a dedicated
+/disha/ path, a /document-category/proceeding/ path, and a notices page queried for
+the term “disha”. We add a spelling variant that removes hyphens from multi-word district
+names, so that a district such as Charkhi-Dadri is reached whether or not the website en-
+codes the hyphen. This yields on the order of twenty candidate entry points for each district.
+We then verify and retain only pages that are real.
+
+Content-aware, multilingual spidering. We then read these pages and follow their in-
+ternal structure to the documents. We parse each page’s markup and extract two kinds of
+links: direct links to files, identified by their PDF, DOC, or DOCX extension and includ-
+ing documents embedded through inline frames; and navigation links whose visible text or
+address contains a DISHA keyword. The keyword set is deliberately multilingual and in-
+cludes the Hindi spelling of DISHA alongside English cues such as “Proceeding”, “Minutes”,
+“Agenda”, and “District Development Coordination”. Because many websites do not list
+the documents on the landing page but behind a “DISHA” or “Proceedings” tab, the crawler
+follows these keyword links one level deeper, restricting itself to the same website, and re-
+peats the extraction there. This one-step spidering is what allows it to reach documents that
+a fixed-address scrape would miss, while the depth and same-domain limits keep the crawler
+bounded and prevents it from wandering across the wider web. Each discovered document
+is downloaded.
+
+
+
+
+                                              3
+Coverage. We attempted 152 districts across the four states, and retrieved public DISHA
+pages for 142 of them; the remaining ten districts had no publicly accessible page as of the
+collection date. The crawl captured 3,072 documents and successfully downloaded 3,059 of
+them, with 13 restricted or unavailable, for a total of roughly 6.3 gigabytes. , distributed as
+1,251 documents in Uttar Pradesh, 1,094 in Bihar, 393 in Haryana, and 321 in Punjab.
+
+Matching and coding. We match each downloaded document to a constituency and a
+month-year based on the district and time information inside the document and the webpage
+that hosts it, and for each document we also code its topic. Because the crawl is deliberately
+inclusive, capturing every candidate document rather than risking a missed proceeding, this
+matching and coding step is where documents that are not genuine DISHA proceedings are
+filtered out.                                                                                      @mamoor
+     Each district is included in the analysis sample starting from the month-year of its own      we
+first available document.                                                                          need
+                                                                                                   to
+A.4     AI disclosure                                                                              know
+                                                                                                   how
+We use large language models in two components of the data-construction process. No
+                                                                                                   they
+generative AI tools were used to formulate the research question, select the empirical strategy,
+                                                                                                   are fil-
+estimate the statistical models, or interpret the results.
+                                                                                                   tered
+    First, we used GPT API to classify politicians’ self-reported profession descriptions
+                                                                                                   out.
+obtained from Myneta.info. Each description was evaluated using a fixed prompt asking
+whether it referred to an agriculture-related profession that we then manually validate for a
+small sample. More informaiton about this process is present in Appendix Section A.2.
+    Second, we used Anthropic’s Claude Code agents to construct a dataset from publicly
+available District Development Coordination and Monitoring Committee (DISHA) docu-
+ments that were processed separately using OCR, including general-text and Punjabi/Gur-
+mukhi OCR when necessary. Claude reviewed the OCR-extracted text in batches and applied
+predefined and fixed coding rubrics to: (1) identify each document’s primary topic; (2) assign
+relevance scores for agriculture, the 2020–2021 farmers’ protests and agricultural reforms,
+and air pollution or crop-residue burning; (3) infer the document or meeting date, priori-
+tizing the meeting date over drafting or publication dates; and (4) classify the document
+genre, including meeting summaries, reports, orders, policy plans, instructions, and budget
+or planning tables. More information about data generation and identification of principal
+variables is present in Appendix Section A.3.2
+
+
+
+
+                                               4
+B     Politicians’ Incentives to Control Fires
+This section presents additional results for the main analysis. First, we present descriptives
+to the main variables (Table B.1), including the seasonality of fires and wind direction
+(Figure B.1). Second, we present the distribution of observations by relative time period
+from treatment (Figure B.3), and an illustration of the empirical strategy underlying the
+pro-sociality test (Figure B.4). We then turn to results, showing that our main estimates,
+presented in Figure 3, are robust to alternative definitions of treatment and outcome, to
+alternative samples, and to alternative explanations. We first vary the definition of treatment
+(Table B.4) and the dependent variable (Table B.5), then we subset by year (Table B.6) and
+province (Table B.7). We next report whether the effect is driven by farmers’ prosociality,
+rather than politicians (Table B.8). We then replicate our main result using downwind and
+upwind area, rather than population, to define treatment (Figure B.6). Next, we examine
+heterogeneity by interacting treatment with constituency-level agricultural characteristics
+(Figure B.7). Finally, we report the event-study specification as in equation 2 (Figure B.5a),
+after de-trending for the pre- treatment period linear trend (Figure B.5b), along with the
+Honest DiD sensitivity analysis by ? (Figure B.5c).
+
+
+B.1     Empirical Strategy: Event-Study
+We follow recent applied work in difference-in-differences estimation (?) adopting a neutral
+transformation to de-trend the event studies (??). This approach accounts for the possibility
+that treated and control units’ outcomes may have evolved along different paths in the pre-
+treatment period. In particular, we follow ? and fit a linear time trend using our estimated
+coefficients from the pre-treatment period, anchored at zero in the omitted category, and then
+extrapolate this trend into the post-treatment period. This approach accounts for potential
+violations of the parallel trends assumption in settings, such as ours, where the differential
+trend is linear.
+
+
+
+
+                                              5
+B.2     Descriptives
+
+
+                               Table B.1: Descriptive Statistics
+
+                                  Mean     SD   Min   Max   Observations   Unique Obs.
+
+           Grid ID                                                              76,800
+
+           Year                                                                    11
+
+           Month                                                                   12
+
+           Assembly                                                               808
+
+           Province                                                                 4
+
+           Number of Fires         0.155                       9,216,000
+
+           Down × Up AC Pop        0.508                       9,216,000
+
+           Average Wind Speed      1.317                       9,216,000
+
+           Wind Direction        -11.247                       9,216,000
+
+           Rice Production         0.457                       9,216,000
+
+
+
+Notes: This table shows descriptive statistics of the main variable for the politician’s incentive
+analysis
+
+
+                      Figure B.1: Patterns of Seasonality in Fires Data
+
+
+
+
+Notes: (Left) Total number of fires per month. (Right) District-average actual and 10 year rolling
+average wind direction. All data refer the states in our sample only —Bihar, Haryana, Punjab, and
+Uttar Pradesh— in the period September 2012 - August 2022.
+
+
+
+
+                                                6
+               Figure B.2: Rice Production in Northern Indian Subcontinent
+
+                                                            Quintiles
+                                                             0, 1551
+                                                             1551, 3838
+                                                             3838, 7537
+                                                             7537, 14587
+                                                             14587, 41296
+
+
+
+
+Notes: Distribution of rice production (in tons) in 2010 across grids, classified by quintile of
+production.
+
+       Figure B.3: Number of observations per relative time period from treatment
+
+
+
+
+   Figure B.4: Placebo border (circle) against the true constituency border for one grid
+
+
+
+
+                                               7
+B.3     Translating Fire Reductions into Air Quality and Mortality
+        Estimates
+To translate our estimated fire reductions into air quality and mortality impacts, we draw on
+?, who use the GEOS-Chem adjoint atmospheric chemistry and transport model to quantify
+the sensitivity of India-wide population-weighted PM2.5 exposure to crop residue burning
+emissions from 2003 to 2019. Their approach computes how PM2.5 exposure responds to
+marginal changes in fire emissions at each location and time, making it well-suited to deriving
+the air quality consequences of the fire reductions we estimate. The model is validated against
+Central Control Pollution Board ground observations and NASA MODIS satellite-derived
+aerosol optical depth.
+    This translation rests on assuming proportionality between fire counts and emissions: a
+given percentage reduction in fire counts is treated as equivalent to the same percentage
+reduction in burning-attributable PM2.5 emissions and, in turn, in PM2.5 concentrations.
+We also assume that politicians the greater effort exerted by politicians in treated areas is
+a net effect. However, this could be compensated through reduced effort elsewhere in the
+constituency. As we note in the main text, this should thus be understood as a benchmark
+for what would be achievable under full increased political accountability, rather than as
+estimates of net gains. We give estimates for Punjab, Haryana, and Uttar Pradesh, the
+three states which Lan et al. identify as collectively responsible for over two-thirds of India-
+wide air quality impacts from crop burning. Numbers would be slightly larger adding the
+fourth state in our analysis sample, Bihar.
+    For the PM2.5 estimate, Lan et al. report that crop burning across India contributes an
+annual mean population-weighted PM2.5 of 6.7 µg m−3 , of which 64 percent arises from post-
+monsoon rice burning in October and November. This seasonal contribution of 4.3 µg m−3
+to the annual mean, concentrated in approximately 60 days of burning activity, corresponds
+to an average burning-season PM2.5 from crop residue of approximately 26 µg m−3 across
+the India-wide population (4.3 Ö 365/60). Applying our estimated 13 percent fire reduction
+yields a burning-season PM2.5 reduction of approximately 3.4 µg m−3 at the India national
+level. Residents of Punjab, Haryana, and Uttar Pradesh experience substantially higher
+burning-season concentrations due to their proximity to the source. Lan et al. document
+that burning-attributable PM2.5 in northern India during the burning season reaches 15
+to 45 times the WHO annual mean guideline of 5 µg m−3 , implying local burning-season
+concentrations in the range of 75–225 µg m−3 , and that Delhi alone consistently exceeded
+120 µg m−3 of PM2.5 averaged over the post-monsoon period across their full sample. A 13
+percent reduction applied to these local levels implies reductions of roughly 10–29 µg m−3 .
+
+
+                                               8
+    For the mortality estimate, Lan et al. report 69,000 premature deaths per year
+attributable to ambient PM2.5 exposure from crop burning across India (95% CI:
+57,000–80,000), with Punjab, Haryana, and Uttar Pradesh accounting for approximately
+70 percent of this burden, or roughly 48,000 deaths annually. Applying a 13 percent propor-
+tional reduction to 48,000 yields approximately 6,200 fewer premature deaths per year. This
+figure is best understood as a full-accountability benchmark: it represents the hypothetical
+mortality reduction if political accountability suppressed fires by 13 percent uniformly across
+all grids and months throughout these states. In practice, our treatment variable (smoke
+directed toward politicians’ own constituents) applies to approximately half of all grid-month
+observations, given a mean treatment rate of 50 percent in our sample (Table B.1). Weight-
+ing by the realized treatment share yields an estimate of approximately 3,100 averted deaths
+per year from the accountability mechanism as currently operating. The full-accountability
+figure is a benchmark for the potential public health impact of political accountability when
+fully operative, and when the increase in effort by politicians is not compensated by a de-
+crease in effort elsewhere. Another caveat is that Lan et al.’s mortality estimates are averaged
+over 2003–2019; more recent years, which see higher burning intensity, would imply a larger
+baseline and correspondingly larger potential reductions.
+
+
+
+
+                                               9
+B.4     Robustness
+
+
+Table B.2: Effect of constituency exposure to smoke on number of fires, robustness by
+treatment indicator
+                                                  (1)          (2)         (3)           (4)           (5)
+                                                              Number of Fires (in 1,000 units)
+           Down>Up (Pop)                        2.8899∗∗
+                                                (1.3339)
+           Down>Up (Area)                                    4.8028∗∗∗
+                                                             (1.8026)
+           Down>Up by 1std                                                  2.5898
+                                                                           (1.6187)
+           Downwind over total Population                                               -0.0701∗
+                                                                                        (0.0361)
+           Down-Up Percent                                                                           -0.0350∗
+                                                                                                     (0.0181)
+           Observations                        63,530,478    63,530,478   63,530,478   63,530,478   63,530,478
+           N Assembly Constituencies               808          808          808          808           808
+           Grid × Cohort FE                         Y            Y            Y            Y             Y
+           Assembly × Month-Year × Cohort FE        Y            Y            Y            Y             Y
+           Mean DV                              153.264       153.264      153.264      153.264      153.264
+
+
+Notes: Results from Equation 1 considering different treatment indicators: a dummy for whether
+the downwind population is larger than the upwind population (as in the main specification) in
+Column 1; a dummy for whether the downwind area, rather than the population, is larger than the
+upwind area in Column 2; the a dummy for whether the downwind area is larger than the upwind
+area by one standard deviation or more in column 3; the share of downwind population over total
+population in Column 4; the percentage difference between down and upwind area in Column 5. The
+dependent variable is the number of fires in a 5 squared km grid-cell and month. The table reports
+the mean of the dependent variable when grids are upwind. All regressions control for average
+wind speed and direction. Standard errors are clustered at the grid and assembly constituency ×
+month-year level.
+
+
+
+
+                                                        10
+Table B.3: Effect of constituency exposure to smoke on number of fires, robustness by
+treatment indicator
+                                                    (1)                   (2)          (3)           (4)          (5)                      (6)
+                                                                                 Number of Fires (in 1,000 units)
+                                                          ∗∗
+          Down>Up (Pop)                           2.8899
+                                                  (1.3339)
+          Down>Up (Area)                                             4.8028∗∗∗
+                                                                     (1.8026)
+          Down>Up by 1std                                                                 2.5898
+                                                                                         (1.6187)
+          Downwind over total Population                                                                  -0.0701∗
+                                                                                                          (0.0361)
+          Downwind over total Population V2                                                                              -0.0316∗∗∗
+                                                                                                                          (0.0066)
+          Down-Up Percent                                                                                                                -0.0350∗
+                                                                                                                                         (0.0181)
+          Observations                           63,530,478      63,530,478             63,530,478    63,530,478         62,442,572     63,530,478
+          N Assembly Constituencies                 808             808                    808           808                808             808
+          Grid × Cohort FE                           Y               Y                      Y             Y                  Y               Y
+          Assembly × Month-Year × Cohort FE          Y               Y                      Y             Y                  Y               Y
+          Mean DV                                 153.264         153.264                153.264       153.264            153.264        153.264
+
+
+Table B.4: Effect of constituency exposure to smoke on number of fires, robustness by
+treatment indicator
+                                                               (1)                (2)          (3)           (4)          (5)               (6)
+                                                                                         Number of Fires (in 1,000 units)
+                                                                     ∗∗
+          Down>Up (Pop)                                    2.8899                                                                          -2.3339
+                                                           (1.3339)                                                                       (2.4054)
+                                                                                        ∗∗∗
+          Down>Up (Area)                                                        4.8028
+                                                                                (1.8026)
+          Down>Up by 1std                                                                       2.5898
+                                                                                               (1.6187)
+          Downwind over total Population                                                                    -0.0316∗∗∗
+                                                                                                             (0.0066)
+          Down-Up Percent                                                                                                   -0.0350∗
+                                                                                                                            (0.0181)
+          Down>Up (Pop) × Above Median Rice Production                                                                                     2.7683
+                                                                                                                                          (5.4158)
+          Observations                                    63,530,478        63,530,478        63,530,478    62,442,572     63,530,478    62,442,572
+          N Assembly Constituencies                          808               808               808           808            808            808
+          Grid × Cohort FE                                    Y                 Y                 Y             Y              Y              Y
+          Assembly × Month-Year × Cohort FE                   Y                 Y                 Y             Y              Y              Y
+          Mean DV                                          153.264           153.264           153.264       153.264        153.264       153.264
+
+
+
+                 Figure B.5: Effect of constituency exposure on number of fires
+
+          (a) Event-Study                     (b) De-Trended Event-study                                             (c) Honest DiD
+
+
+
+
+    Notes: (a) Results from Equation 2. (b) Results from Equation 2 after de-trending for the pre-
+    treatment period linear trend following ?. (c) Sensitivity analysis for the average post-treatment
+    effect allowing for violations of parallel trends (?). The reference category is t = −1,i.e. the
+    month before the switch. All regressions include grid × cohort and assembly constituency ×
+    month-year × cohort fixed effects and control for average wind speed and direction. Standard
+    errors are clustered at the grid × cohort and assembly constituency × month-year × cohort level.
+
+
+                                                                      11
+Table B.5: Effect of constituency exposure to smoke on number of fires, robustness by
+dependent variable
+
+                                                                            (1)               (2)                    (3)
+                                                                        Any Fire         Log (N) Fires         Mean Brightness
+                Down > Up                                               -0.0008∗∗           -0.0007               -0.2530∗∗
+                                                                        (0.0003)           (0.0004)               (0.1063)
+                Observations                                           62,462,012         62,462,012             62,462,012
+                N Assembly Constituencies                                  808                808                    808
+                Grid FE × Cohort                                             Y                 Y                      Y
+                Assembly × Month-Year × Cohort FE                            Y                 Y                      Y
+                Mean DV                                                    0.05              0.059                 16.548
+
+Notes: Results from Equation 1 using alternative dependent variables: a dummy for whether any
+fire took place (Column 1), the natural logarithm of the number of fires plus 1 (Column 2) and
+the average brightness of fires in a grid-month – brightness is equal to zero when there are no fires
+(Column 3). The table reports the mean of the dependent variable when ever treated grids are
+upwind. All regressions control for average wind speed and direction. Standard errors are clustered
+at the grid and assembly constituency × month-year level.
+
+
+
+
+Table B.6: Effect of constituency exposure to smoke on number of fires, robustness by year
+                                        (1)       (2)         (3)         (4)        (5)           (6)          (7)        (8)         (9)        (10)
+                                                                              Number of Fires (per 1,000 units)
+                                     2012/2013 2013/2014   2014/2015   2015/2016 2016/2017 2017/2018 2018/2019          2019/2020   2020/2021   2021/2022
+ Down>Up                               5.381     0.673       9.912∗      -2.800     1.007        -3.136      -12.267∗     -1.449      -4.900      1.682
+                                      (5.205)   (5.654)     (5.147)     (5.466)    (5.742)      (5.773)       (6.264)    (4.138)     (6.452)     (6.304)
+ Observations                        5,552,535 5,876,789   6,007,388   6,194,026 6,280,088 6,250,728 6,479,638          6,352,381   6,417,605   6,201,762
+ N Assembly Constituencies              808       808         808         808        808          808           808        808         808         808
+ Grid FE × Cohort                        Y         Y           Y           Y          Y             Y            Y          Y           Y           Y
+ Assembly × Month-Year × Cohort FE       Y         Y           Y           Y          Y             Y            Y          Y           Y           Y
+ Mean DV                              151.139   141.492     145.732     151.219    180.108      151.672      162.715     104.452     168.627     175.076
+
+
+Notes: Results from Equation 1 subsetting by year, from each September to the following August.
+The table reports the mean of the dependent variable in each year when ever treated grids are
+upwind. All regressions control for average wind speed and direction. Standard errors are clustered
+at the grid and assembly constituency × month-year level.
+
+
+
+
+                                                                        12
+Table B.7: Effect of constituency exposure to smoke on number of fires, robustness by
+province
+                                                 (1)         (2)          (3)           (4)
+                                                        Number of Fires (in 1,000 units)
+                                                 Bihar    Haryana      Punjab Uttar Pradesh
+           Down>Up (Pop)                         -0.385    10.526∗      -0.340      -6.051∗∗∗
+                                                (2.457)    (6.034)     (7.163)       (1.336)
+           Observations                        6,722,326 5,956,374 9,234,568       40,548,744
+           N Assembly Constituencies              237         84         107           380
+           Grid FE × Cohort                        Y          Y            Y             Y
+           Assembly × Month-Year × Cohort FE       Y          Y            Y             Y
+           Mean DV                              50.911     155.027    764.769         47.208
+
+Notes:    Results from Equation 1 subsetting by province. The table report the mean of the
+dependent variable in each province when ever treated grids are upwind. All regressions control
+for average wind speed and direction. Standard errors are clustered at the grid and assembly
+constituency × month-year level.
+
+     Figure B.6: Effect of constituency exposure to smoke on number of fires, by area
+
+
+
+
+Notes: Results from Equation 2. The treatment indicator Down>Up is a dummy equal to one in
+months and grids from which the majority of the assembly constituency’s area is exposed to smoke
+with respect to the grid. The reference category is t=-1, i.e. the month before of the switch. We
+use a stacked diff-in-diff to generate cohorts based on switching date. We restrict the analyses to a
+6-months window around the switch to maximize support. The control grids are never treated and
+upwind grids around the switching date. The regression includes grid and assembly constituency
+× month-year × cohort fixed effects and controls for average wind speed and direction. Standard
+errors are clustered at the grid and district × month-year level.
+
+
+                                                 13
+Figure B.7: Effect of constituency exposure to smoke on number of Fires, by constituency
+with rice production
+
+
+
+
+Notes: Results as in Figure 3b with additional interactions by constituency agricultural character-
+istics. The figure plots the interaction term between treatment and an indicator for constituencies
+with above-median rice production. The reference category is t=-1, i.e. the month before of the
+switch. All regressions control for average wind speed and direction. Standard errors are clustered
+at the grid and assembly constituency × month-year × corhot level.
+
+Table B.8: Effect of exposing the population in a farmer placebo area to smoke on N fires
+
+
+                                                          Number of Fires (in 1,000 units)
+                                           Full Sample    Treated for Politicians Control for Politicians
+                                                (1)                (2)                      (3)
+             Down>Up (Placebo)               4.899∗∗∗            -3.909                   5.863∗∗
+                                             (1.546)            (2.547)                   (2.592)
+             Observations                  133,548,526         64,854,771               67,925,304
+             N Assembly Constituencies         808                808                       808
+             Grid × Cohort FE                   Y                  Y                         Y
+             AC × Month-Year × Cohort FE        Y                  Y                         Y
+             Mean DV                         182.464            182.464                  182.464
+
+
+Notes: Results from Equation 1 considering a different treatment indicator: a dummy equal to one
+in months and grids from which the population downwind is larger than the population upwind
+in a 13km radius circle around each grid (median size of an assembly constituency). Column 1
+considers the entire sample; Column 2 restricts to areas that are treated both for the farmer and
+the politician, i.e. downwind both with respect to the placebo area and the constituency; Column
+3 restricts to areas that are treated for the farmer only, i.e. downwind with respect to the placebo
+area but upwind to the constituency. The table reports the mean of the dependent variable when
+treated grids are upwind. All regressions control for average wind speed and direction. Standard
+errors are clustered at the grid and assembly constituency × month-year level.
+
+
+C      Lobbying
+This section presents additional results for the lobbying analysis. First, we present descriptive
+statistics for the main variables (Table C.1) and illustrate the construction of the empirical
+strategy (Figures C.1 and C.2). Second, we present the de-trended event-study along with
+the Honest DiD sensitivity analysis following ? (Figure C.3). Lastly, we report heterogeneity
+
+                                                         14
+by constituency exposure to smoke (Table C.2).
+
+
+C.1     Descriptives
+
+
+                                    Table C.1: Descriptive Statistics
+
+                                               Mean SD       Min Max Observations Unique Obs.
+
+           Grid ID                                                      163,523,814     76,800
+
+           Year                                                         163,523,814        11
+
+           Month                                                        163,523,814        12
+
+           Assembly Constituency (AC)                                   163,523,814       808
+
+           Province                                                     163,523,814         4
+
+           Within 5 km of Protest                                       163,523,814         2
+
+           Cohort                                                       163,523,814        19
+
+           Legislature                                                  163,523,814        12
+
+           Relative year                       -4.013                   163,523,814        13
+
+           Protest                              0.001                   163,523,814         2
+
+           Number of Fires (in 1,000 units)   134.395                   163,523,814        45
+
+           High Rice Production (AC level)      0.437                   163,523,814         2
+
+
+
+Notes: This table shows descriptive statistics of the main variable for the protest analysis
+
+
+
+C.2     Empirical Strategy
+
+
+
+
+                                                        15
+                            Figure C.1: Number of protests over time
+
+
+
+
+                Figure C.2: Buffer area against Assembly Constituency border
+
+
+
+
+Notes: The map plots the borders of Jind Assembly constituency (black line). Three protests
+occurred in this constituency during the sample period. Around each protest location, we construct
+5km-radius buffer areas (blue shaded) around the protest location (black dot). We classify grid-
+cells falling within these buffer areas as treated, regardless of whether they fall inside or outside the
+assembly constituency boundaries. Grid-cells located in overlapping buffer areas (darker shaded)
+are assigned to the buffer associated with the earliest protest.
+
+
+
+
+                                                   16
+C.3   Robustness
+
+
+
+
+                   17
+C.4       Additional Results
+
+
+Table C.2: Effect of Protest occurrence on number of fires, by constituency exposure to
+smoke
+                                                (1)              (2)           (3)           (4)             (5)           (6)
+                                                                Number of Fires (per 1,000 units)
+  Panel A: Estimated Coefficients
+  (1) Post × Protest                           15.614           82.424∗∗∗     74.022∗∗∗       22.620      89.245∗∗∗     80.728∗∗∗
+                                              (11.924)          (10.920)      (10.813)      (15.853)      (14.963)      (14.897)
+  (2) Down > Up                                                                             4.261∗∗∗       4.103∗∗∗     4.107∗∗∗
+                                                                                             (0.643)       (0.642)       (0.642)
+  (3) Post × Down > Up                                                                        -0.390        -0.391        -0.390
+                                                                                             (0.975)       (0.975)       (0.975)
+  (4) Protest × Down > Up                                                                     -7.711        -7.412        -7.441
+                                                                                            (18.939)      (18.852)      (18.841)
+  (5) Post × Protest × Down > Up                                                             -14.165       -13.823       -13.582
+                                                                                            (22.802)      (22.235)      (22.319)
+  Panel B: Linear Combinations
+  (2) Down>Up Effect, pre-period in no protest areas                                         4.261∗∗∗      4.103∗∗∗     4.107∗∗∗
+                                                                               (0.643)        (0.642)      (0.642)
+  (2+3) Down>Up Effect, post-period in no protest areas                                      3.871∗∗∗      3.713∗∗∗     3.717∗∗∗
+                                                                               (0.959)        (0.960)      (0.960)
+  (1+2+3+4+5) Down>Up Effect, post-period in protest areas                                     4.615      71.722∗∗∗     63.421∗∗∗
+                                                                              (24.031)       (23.413)     (23.423)
+  (1+2+3+4+5)-(2+3) Differential Down>Up effect, post period                                   0.744      68.009∗∗∗     59.705∗∗
+                                                                              (24.110)       (23.493)     (23.506)
+  Observations                              163,523,814        163,523,814   163,523,814   163,523,814   163,523,814   163,523,814
+  N Assembly Constituencies                     808                808           808            808          808           808
+  Grid FE                                        Y                  Y             Y              Y            Y             Y
+  Relative Time FE                               Y                  Y             Y              Y            Y             Y
+  Legislature FE                                 N                  Y             Y              N            Y             Y
+  Province Trend FE                              N                  N             Y              N            N             Y
+  Mean DV                                     446.213            446.213       446.213       446.213       446.213       446.213
+  Mean DV2 (Down>Up=1)                                                                       440.214       440.214       440.214
+
+
+Notes: (Columns 1-3) Results from Equation 6 of the effect of protest occurence on fires. (Columns
+4-6) Results from Equation 6 with the additional interaction for pollution visibility. Down > U p is
+a dummy equal to one in months and grids from which most of the assembly constituency area is
+exposed to smoke (see Section 3.2 for details). The table reports the mean of the dependent variable
+in control grids before the cohort event-time. All regressions control for average wind speed and
+direction. Standard errors are clustered at the buffer area × assembly constituency level. Write
+why we look at linear combination as triple interaction is not significant
+
+
+
+
+                                                               18
+                    Figure C.3: Effect by relative time period from protest
+           (a) Event-Study           (b) De-Trended Event-Study              (c) Honest DiD
+
+
+
+
+    Notes: (a) Results from Equation 6. (b) Results from Equation 2 after de-trending for the pre-
+    treatment period linear trend following ?. (c) Sensitivity analysis for the average post-treatment
+    effect allowing for violations of parallel trends (?). The reference category is t = −1,i.e. the
+    month before the protest. The regressions includes grid-cohort, and province electoral cycle fixed
+    effects, and controls for province linear time trends, average wind speed and direction. Standard
+    errors are clustered at the buffer area × assembly constituency level. The control group includes
+    never treated grids only.
+
+
+D     Adverse Selection
+This section presents additional results for the adverse selection analysis. First, we present
+descriptive statistics for the main variables (Table D.1). Second, we present robustness checks
+using a de-trended event-study along with the Honest DiD sensitivity analysis following ?
+(Figure D.1). Lastly, we report heterogeneity by interacting treatment with constituency-
+level agricultural characteristics (Figure D.2) and with constituency exposure to smoke (Ta-
+ble D.2).
+
+
+D.1     Descriptives
+
+
+
+
+                                                   19
+                                     Table D.1: Descriptive Statistics
+
+                                               Mean SD       Min Max Observations Unique Obs.
+
+           Grid ID                                                       25,625,039     61,577
+
+           Year                                                          25,625,039        11
+
+           Month                                                         25,625,039        12
+
+           Assembly Constituency (AC)                                    25,625,039       689
+
+           Province                                                      25,625,039         4
+
+           Election Year                                                 25,625,039         9
+
+           Cohort                                                        25,625,039         7
+
+           Legislature                                                   25,625,039        12
+
+           Relative year                       -1.595                    25,625,039        21
+
+           Agricultural Politician                                       25,625,039         2
+
+           Number of Fires (in 1,000 units)   172.666                    25,625,039        45
+
+           High Rice Production (AC level)      0.466                    25,625,039         2
+
+
+
+Notes: This table shows descriptive statistics of the main variable for the adverse selection results
+
+
+
+
+                                                        20
+D.2     Robustness
+
+  Figure D.1: Effect by relative time period from switches to an agriculturalist politician
+           (a) Event-Study           (b) De-Trended Event-Study              (c) Honest DiD
+
+
+
+
+    Notes: (a) Results from Equation 7. (b) Results from Equation 7 after de-trending for the pre-
+    treatment period linear trend following ?. (c) Sensitivity analysis for the average post-treatment
+    effect allowing for violations of parallel trends (?). The reference category is t = −1,i.e. the
+    month before the switch to an agriculturalist. The regressions includes grid-cohort, and province
+    electoral cycle fixed effects, and controls for province linear time trends, average wind speed and
+    direction. Standard errors are clustered at the buffer area × assembly constituency level. The
+    control group includes never treated grids only.
+
+
+
+
+D.3     Additional Results
+
+Figure D.2: Effect of switching to an agriculturalist politician, by constituency agricultural
+characteristics
+
+
+
+
+Notes: Results from Equation 7 with an additional interaction for the constituency agricultural
+characteristics. The dummy Above Median Rice Production takes value 1 for constituencies with
+above median rice production. The regression includes grid-cohort, and legislature fixed effects,
+and controls for province linear time trends, average wind speed and direction. Standard errors are
+clustered at the grid and assembly constituency × month-year level.
+
+
+
+
+                                                    21
+Table D.2: Effect of switching to an agriculturalist politician on number of fires, by con-
+stituency exposure to smoke
+                                                     (1)               (2)         (3)          (4)           (5)        (6)
+                                                                     Number of Fires (in 1,000 units)
+  Panel A: Estimated Coefficients
+  (1) Post × Switch Agric                         26.660∗∗∗          11.300∗∗     11.212∗∗    25.908∗∗∗      9.939∗      9.918
+                                                   (4.519)           (4.843)      (4.851)      (5.725)      (6.021)    (6.033)
+  (2) Down > Up                                                                                4.783∗∗      5.161∗∗∗   5.073∗∗∗
+                                                                                               (1.956)      (1.945)    (1.948)
+  (3) Post × Down > Up                                                                          -1.487       -2.760     -2.766
+                                                                                               (2.374)      (2.368)    (2.373)
+  (4) Switch Agric × Down > Up                                                                  -1.532       -1.960     -1.315
+                                                                                               (4.506)      (4.484)    (4.487)
+  (5) Post × Switch Agric × Down > Up                                                           1.461         2.648      2.514
+                                                                                               (6.434)      (6.417)    (6.427)
+  Panel B: Linear Combinations
+  (2) Down>Up Effect, pre-period of no-switch politicians                                       4.783∗∗     5.161∗∗∗   5.073∗∗∗
+                                                                                  (1.956)       (1.945)      (1.948)
+  (2+3) Down>Up Effect, post-period of no-switch politicians                                     3.296∗       2.400     2.307
+                                                                                  (1.937)       (1.944)      (1.949)
+  (1+2+3+4+5) Down>Up Effect, post-period of switch politicians                                29.132∗∗∗    13.028∗∗   13.425∗∗
+                                                                                  (5.666)       (5.852)      (5.866)
+  (1+2+3+4+5)-(2+3) Differential Down>Up effect, post period                                   25.837∗∗∗    10.627∗    11.117∗
+                                                                                  (5.772)       (5.952)      (5.966)
+  Observations                                   25,625,039         25,625,039   25,625,039   25,625,039   25,625,039 25,625,039
+  N Assembly Constituencies                         689                689          689           689          689       689
+  Grid FE                                            Y                  Y            Y             Y            Y         Y
+  Relative Time FE                                   Y                  Y            Y             Y            Y         Y
+  Legislature FE                                     N                  Y            Y             N            Y         Y
+  Province Trend FE                                  N                  N            Y             N            N         Y
+  Mean DV                                         120.687            120.687      120.687       120.687     120.687    120.687
+  Mean DV2 (Down>Up=1)                                                                          121.718     121.718    121.718
+
+
+Notes: (Columns 1-3) Results from Equation 7 of the effect of switching to electing a politician with
+agricultural ties on fires. (Columns 4-6) Results from Equation 7 with the additional interaction
+for constituency exposure to smoke. Down > U p is a dummy equal to one in months and grids
+from which most of the assembly constituency area is exposed to smoke (see Section 3.2 for details).
+The table reports the mean of the dependent variable in control grids before the cohort event-time.
+All regressions control for average wind speed and direction. Standard errors are clustered at the
+assembly constituency × election year level.
+
+
+
+
+                                                               22
+E     Political Incentives Mobilize Government Machin-
+      ery
+
+
+           Table E.1: Pollution Exposure and Politicians’ Actions, all categories
+
+                                              (1)        (2)        (3)                  (4)
+                                                Any DISHA document on
+                                          Development Elections Governance             Welfare
+
+  Exposed Population Share (z-score)         -0.611*         -0.197       1.068       -0.930***
+                                             (0.362)        (0.317)      (1.004)       (0.340)
+
+  Observations                                26,041        26,041        26,041       26,041
+  AC FE                                          Y            Y             Y             Y
+  Month-Year FE                                  Y            Y             Y             Y
+  Mean DV                                      1.017         .422         6.821          .76
+
+Notes: The table reports politicians’ actions by level of constituency exposure. Exposed Population
+Share is the total population that upwind grids in a constituency-month would expose, normalized
+by the constituency’s total population, and standardized (z-scored) within the estimation sample.
+We use DISHA documents to report the probability that a document is recorded per 100 in a given
+month-year, for the following categories: development (column 1), elections (column 2), governance
+(column 3), and welfare (column 4). The table reports the mean of the dependent variable in the
+sample. All regressions control for wind direction and average wind speed. Standard errors are
+clustered at the constituency level.
+
+
+
+
+                                                23
+

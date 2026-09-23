@@ -14,6 +14,9 @@ if "$root" == "" {
 
     global location "shell"
     global sample ""
+    global is_rural_var "is_rural"
+    global fe_list "1/10"
+    global ster_suffix ""
 
     global shell "/groups/sgulzar/sa_fires/proj_bureaucrats_farms"
     global dbox "/Users/anzony.quisperojas/Library/CloudStorage/Dropbox/sa_fires/proj_bureaucrats_farms"
@@ -28,29 +31,19 @@ if "$root" == "" {
 
 cd "${root}"
 global int_farms "${root}/data_output/intermediate"
-global table_farms "${root}/tex/paper/tables"
-global figure_farms "${root}/tex/paper/figures"
+global table_farms "${code}/../../tables"
+global figure_farms "${code}/../../figures"
 ********************************************************************************
 * Import Data
 ********************************************************************************
 
-use  "${int_farms}/combined_dt_pop.dta", clear
-
-* Merge with rural classification
-merge m:1 unique_small_grid_id using "${root}/data_output/intermediate/ghs_grid_classification_2000.dta", keepusing(is_rural)
-keep if _merge == 3
-drop _merge
-
-* Keep only rural grids
-keep if is_rural == 1
-keep if relative_monthyear >= -5 & relative_monthyear <= 6
-display "Observations after rural filter: " _N
+import delimited using ///
+    "${int_farms}/main_downup_ac_pop_esample${sample}.csv", clear varnames(1)
+display as text "Loaded canonical main specification-4 sample: " _N " rows"
 
 * Create count in thousands
+capture drop countk
 gen countk = count * 1000
-
-* Filter data: year < 2022 or (year == 2022 & month <= 8)
-keep if year < 2022 | (year == 2022 & month <= 8)
 
 * Sort data
 sort unique_small_grid_id monthyear
@@ -59,6 +52,7 @@ sort unique_small_grid_id monthyear
 * Encode IDs
 ********************************************************************************
 
+capture drop grid_id ac_id
 capture confirm numeric variable unique_small_grid_id
 if _rc {
     encode unique_small_grid_id, gen(grid_id)
@@ -79,10 +73,6 @@ else {
 global cluster unique_small_grid_id#cohort ac_uq_id#cohort#monthyear
 
 
-* Count unique ACs
-unique ac_id
-local numacs = r(unique)
-
 ********************************************************************************
 * Run Regressions by Agricultural Year (Sep-Aug)
 ********************************************************************************
@@ -100,22 +90,31 @@ forvalues yr = 2012/2021 {
     * Define agricultural year: Sep of yr to Aug of yr+1
     * (year == yr & month >= 9) | (year == yr+1 & month <= 8)
 
-    preserve
+	preserve
 		keep if (year == `yr' & month >= 9) | (year == `yr_next' & month <= 8)
-
-		* Calculate mean DV for this year
-		summarize countk if treat == 1 & downup_ac_pop == 0
-		local meandv`i' = string(r(mean), "%9.2f")
 
 		* Run regression
 		reghdfejl countk downup_ac_pop $controls , ///
 			absorb(grid_id#cohort ac_id#monthyear#cohort) cluster($cluster )
+		gen byte year_sample = e(sample)
+
+		* All table statistics describe the exact regression sample within the
+		* canonical specification-4 population sample.
+		egen byte tag_ac = tag(ac_id) if year_sample == 1
+		quietly count if tag_ac == 1
+		local numacs`i' = r(N)
+		gen byte moderator = 0
+		quietly summarize countk if treat == 1 & relative_monthyear <= -1 & year_sample == 1
+		local meandv`i' = r(mean)
+		quietly summarize countk if treat == 1 & relative_monthyear <= -1 & moderator == 1 & year_sample == 1
+		local meandv2`i' = r(mean)
 
 		* Store statistics
 		estadd local gridfe "Y"
 		estadd local acmonthfe "Y"
-		estadd local ymean "`meandv`i''"
-		estadd local acq "`numacs'"
+		estadd scalar ymean = `meandv`i''
+		estadd scalar ymean2 = `meandv2`i''
+		estadd scalar acq = `numacs`i''
 		est store eq`i'
 		
     restore
@@ -130,8 +129,9 @@ forvalues yr = 2012/2021 {
 * Save ster file
 ********************************************************************************
 
-estwrite eq* using "${root}/tex/paper/tables/_app_8_main_did_by_year_rural_stacked.ster", replace
+estwrite eq* using ///
+    "${code}/../../tables/_app_8_main_did_by_year${sample}_rural_stacked${ster_suffix}.ster", replace
 
-display "Ster: ${root}/tex/paper/tables/_app_8_main_did_by_year_rural_stacked.ster"
+display "Ster: ${code}/../../tables/_app_8_main_did_by_year${sample}_rural_stacked${ster_suffix}.ster"
 
 ********************************************************************************

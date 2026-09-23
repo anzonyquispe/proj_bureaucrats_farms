@@ -1,0 +1,251 @@
+\documentclass[10pt]{article}
+\usepackage{graphicx}
+\setlength{\textwidth}{6.85in}
+\setlength{\oddsidemargin}{-0.18in}
+\setlength{\evensidemargin}{-0.18in}
+\setlength{\textheight}{9.45in}
+\setlength{\topmargin}{-0.65in}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0.4em}
+\setlength{\emergencystretch}{3em}
+\title{\textbf{Wind Direction Convention Error in the Downwind/Upwind Construction}}
+\author{Reproducible diagnostic for the bureaucrats and farms project}
+\date{August 2026}
+
+\begin{document}
+\maketitle
+
+\section*{Executive finding}
+The legacy pipeline combines two angular coordinate systems without converting
+between them. The wind variable is constructed with
+$\mathrm{atan2}(v,u)$, which is a mathematical angle measured
+counterclockwise from \textbf{East}. The geographic functions
+\texttt{geosphere::bearing()} and \texttt{geosphere::destPoint()} interpret
+their angles as compass bearings measured clockwise from \textbf{North}. Both values are
+expressed in degrees, but they are not directly comparable.
+
+This is not a cosmetic labeling issue. In the second scenario below, the true
+wind points northwest and the AC representative point lies south-southeast of
+the grid, so the representative point is unambiguously upwind. The legacy code
+instead interprets the same numeric value as a southeast-pointing wind and
+classifies the representative point as downwind.
+
+\section*{A real project example}
+The script searches the project shapefiles rather than inventing coordinates.
+It selects grid \textbf{116142} in the
+\textbf{SUNAM} assembly constituency
+(AC ID \textbf{449}), SANGRUR, Punjab. The grid centroid
+is 9.96 km from the AC representative point. The compass
+bearing from the grid centroid to that point is
+\textbf{164.986$^\circ$}, effectively the requested
+165$^\circ$ example.
+
+For a mathematical angle $\alpha$ measured from East, the corresponding
+clockwise-from-North direction toward which the wind travels is
+\[
+  B_{\mathrm{toward}} = (90^\circ - \alpha) \bmod 360^\circ.
+\]
+The legacy code instead uses the numeric value $\alpha$ directly as if it were
+a compass bearing.
+
+\begin{table}[ht]
+\centering
+\small
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{rrrrrrll}
+\hline
+$\alpha$ from East & Correct compass & Legacy compass & AC bearing &
+$\Delta$ correct & $\Delta$ legacy & Correct & Legacy \\
+\hline
+55 & 35 & 55 & 165.0 & 130 & 110 & Upwind & Upwind \\
+135 & 315 & 135 & 165.0 & 150 & 30 & Upwind & \textbf{Downwind (WRONG)} \\
+\hline
+\end{tabular}
+}
+\caption{Angles and classifications. A point is downwind only when its circular
+angular separation from the wind-toward direction is less than 90$^\circ$.}
+\end{table}
+
+\clearpage
+\begin{figure}[p]
+\centering
+\includegraphics[width=\textwidth]{wind\_direction\_convention\_error\_figure.pdf}
+\caption{Four views of the same real AC/grid pair. Blue panels use the correct
+conversion from an East-referenced mathematical angle to a compass bearing.
+Red panels reproduce the legacy interpretation. The shaded portion is the AC
+half-plane labeled downwind; the black arrow points from the grid to the AC
+representative point. With a 55$^\circ$ input, both procedures call the point
+upwind, but only by chance. With a 135$^\circ$ input, the correct wind points
+northwest while the legacy interpretation points southeast, producing the
+incorrect downwind classification.}
+\end{figure}
+\clearpage
+
+\section*{What is actually stored in \texttt{downup\_ac\_area}}
+The area indicator is defined as 1 when the area stored as downwind is larger
+than the area stored as upwind, and 0 otherwise. The diagnostic script reads
+the actual area parquet, selects the same real grid, and recomputes both
+half-plane intersections from the shapefile. Treating the raw wind number as a
+North-referenced compass bearing reproduces the stored areas to within
+$10^{-6}$ km$^2$. This proves that the convention error is present in the
+saved data, not only in a hypothetical reconstruction.
+
+\begin{table}[ht]
+\centering
+\scriptsize
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{rrrrrrrrr}
+\hline
+Period & Wind from East & Stored down & Stored up & Stored flag &
+Correct compass & Correct down & Correct up & Correct flag \\
+\hline
+2017-07 & 119.4 & 459.7 & 104.7 & \textbf{1 (WRONG)} & 330.6 & 24.0 & 540.4 & \textbf{0} \\
+2017-03 & -75.0 & 159.7 & 404.7 & \textbf{0 (WRONG)} & 165.0 & 557.2 & 7.2 & \textbf{1} \\
+\hline
+\end{tabular}
+}
+\caption{Actual saved areas and classifications versus exact corrected
+intersections. Areas are in km$^2$; \texttt{downup\_ac\_area} equals 1
+when downwind area is larger than upwind area.}
+\end{table}
+
+For this selected grid, 136 of
+148 nonmissing monthly observations change classification.
+The complete stored-by-corrected count is:
+\begin{center}
+\begin{tabular}{lrr}
+\hline
+ & Corrected 0 & Corrected 1 \\
+\hline
+Stored 0 & 12 &
+112 \\
+Stored 1 & 24 &
+0 \\
+\hline
+\end{tabular}
+\end{center}
+These counts describe this one diagnostic grid only; they are not an estimate
+of the error rate in the full sample.
+
+\section*{Why the negative angle is also misclassified}
+In March 2017, the stored raw direction is
+-74.971$^\circ$ from East. A negative
+Cartesian angle is valid: it points clockwise below the East axis. The correct
+compass-toward direction is
+$(90-(-74.971))\bmod 360=
+164.971^\circ$. The legacy code
+instead normalizes the unconverted number to
+285.029$^\circ$ and reads it from
+North. It therefore stores \texttt{downup\_ac\_area} =
+0, whereas the corrected majority-area
+classification is 1.
+
+\clearpage
+\begin{figure}[p]
+\centering
+\includegraphics[width=\textwidth]{wind\_direction\_convention\_error\_actual\_area\_figure.pdf}
+\caption{The values actually stored in the parquet (left column) versus
+the corrected calculations (right column). The first row is a positive wind
+angle; the second row is a negative wind angle. In every panel the black arrow
+to the AC representative point is a compass bearing measured clockwise from
+North. The wind input printed at the top is a mathematical angle measured from
+East. Red shading is the area stored as downwind; blue shading is the corrected
+downwind area. Both examples reverse \texttt{downup\_ac\_area}.}
+\end{figure}
+\clearpage
+
+\section*{Corrected two-square area method}
+The corrected method first converts the wind angle to the compass-toward
+direction $B$. At the focal grid centroid $p$, define the unit wind vector
+$w=(\sin B,\cos B)$ and its perpendicular tangent
+$t=(\cos B,-\sin B)$. A large downwind square has corners
+
+\[
+p-Rt,\quad p+Rt,\quad p+Rt+2Rw,\quad p-Rt+2Rw,
+\]
+
+and the upwind square is constructed in the opposite direction, using $-w$.
+The radius $R$ is chosen larger than the maximum distance from the grid
+centroid to the AC bounds. Therefore, the two squares cover the two complete
+halves of the AC and share only the perpendicular dividing line.
+
+The exact areas are then
+\[
+A_{down}=\mathrm{area}(AC\cap S_{down}),\qquad
+A_{up}=\mathrm{area}(AC\cap S_{up}),\qquad
+\texttt{downup\_ac\_area}=\mathbf{1}[A_{down}>A_{up}].
+\]
+This construction is equivalent to clipping the AC by complementary
+half-planes, but showing the two finite squares makes the implementation and
+area accounting explicit.
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=\textwidth]{wind\_direction\_convention\_error\_square\_method\_figure.pdf}
+\caption{The corrected two-square construction for the July 2017 example.
+Panel (a) shows the complementary squares and their shared line, which is
+perpendicular to the corrected wind vector. Panels (b) and (c) show the exact
+AC intersections whose areas determine the binary classification.}
+\end{figure}
+\clearpage
+
+\section*{Where the error enters}
+The wind-cleaning code calculates
+\begin{verbatim}
+wind_direction = atan2(v10, u10) * 180 / pi
+\end{verbatim}
+This returns a Cartesian angle: 0$^\circ$ is East, 90$^\circ$ is North,
+180$^\circ$ is West, and -90$^\circ$ is South. The downstream R code then uses
+\begin{verbatim}
+angle1 = wind_direction + 90
+angle2 = wind_direction - 90
+destPoint(grid_centroid, angle1, ...)
+bearing_relative = bearing(grid_centroid, ac_point)
+\end{verbatim}
+Here, 0$^\circ$ is North and 90$^\circ$ is East. The subsequent numeric
+comparison therefore mixes an East-referenced angle with a North-referenced
+bearing. In addition, ordinary inequalities do not correctly handle intervals
+that cross 0$^\circ$/360$^\circ$.
+
+\section*{Required correction}
+The wind should first be represented as a compass direction toward which the
+air moves:
+\begin{verbatim}
+wind_direction_to = (atan2(u10, v10) * 180 / pi + 360) %% 360
+\end{verbatim}
+The downwind test should use circular angular distance:
+\begin{verbatim}
+angle_difference = ((bearing_relative - wind_direction_to + 180) %% 360) - 180
+downwind = as.integer(abs(angle_difference) < 90)
+\end{verbatim}
+Monthly and rolling directions should also use circular means, preferably by
+aggregating vector components, rather than arithmetic means of degree values.
+For example, the arithmetic mean of 359$^\circ$ and 1$^\circ$ is 180$^\circ$,
+while their circular mean is 0$^\circ$.
+
+\section*{Implications for existing outputs}
+\begin{itemize}
+  \item The population and area routines can agree with each other while both
+        label the wrong geographical half-plane.
+  \item Existing \texttt{downup\_ac\_pop} and \texttt{downup\_ac\_area}
+        values should not be treated as directionally validated.
+  \item Corrected wind directions require regenerating the wind panel,
+        population measures, area measures, master dataset, and stacked data.
+  \item Cardinal and diagonal unit tests should be retained so that East,
+        North, West, South, 55$^\circ$, and 135$^\circ$ cannot silently change
+        convention again.
+\end{itemize}
+
+\section*{Source documentation}
+ECMWF defines positive $u$ as west-to-east flow and positive $v$ as
+south-to-north flow. See
+\begin{flushleft}\small\ttfamily
+\detokenize{https://confluence.ecmwf.int/spaces/FCST/pages/111155337/}
+\end{flushleft}
+ECMWF's discussion of meteorological wind angles and the special care required
+with \texttt{atan2} is available at
+\begin{flushleft}\small\ttfamily
+\detokenize{https://confluence.ecmwf.int/pages/viewpage.action?pageId=226500971}
+\end{flushleft}
+
+\end{document}

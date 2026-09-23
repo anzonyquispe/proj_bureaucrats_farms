@@ -30,14 +30,16 @@ if "$root" == "" {
 }
 
 global int_farms "${root}/data_output/intermediate"
-global table_farms "${root}/tex/paper/tables"
-global figure_farms "${root}/tex/paper/figures"
+global table_farms "${code}/../../tables"
+global figure_farms "${code}/../../figures"
 
 ********************************************************************************
 * Import Data
 ********************************************************************************
 
-import delimited "${root}/data_output/intermediate/combined_dt_pop.csv", clear
+use  "${int_farms}/combined_dt_pop.dta", clear
+keep if inrange(relative_monthyear, -5, 6)
+display as text "Final event-study sample: relative_monthyear in [-5, 6]"
 
 * Merge with rural classification
 merge m:1 unique_small_grid_id using "${root}/data_output/intermediate/ghs_grid_classification_2000.dta", keepusing(is_rural)
@@ -46,10 +48,16 @@ drop _merge
 
 * Keep only rural grids
 keep if is_rural == 1
-keep if relative_monthyear >= -5 & relative_monthyear <= 6
+
 display "Observations after rural filter: " _N
 
+* Do not drop grids that intersect more than one assembly constituency.
+* merge m:1 unique_small_grid_id using "${root}/data_output/intermediate/grids_with_more_1_ac.dta"
+* drop if dpl_ac == 1
+* drop _merge
+
 * Create count in thousands
+capture drop countk
 gen countk = count * 1000
 
 * Filter data: year < 2022 or (year == 2022 & month <= 8)

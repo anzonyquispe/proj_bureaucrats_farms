@@ -1,0 +1,3114 @@
+
+  ___  ____  ____  ____  ____ ®
+ /__    /   ____/   /   ____/      StataNow 19.5
+___/   /   /___/   /   /___/       MP—Parallel Edition
+
+ Statistics and Data Science       Copyright 1985-2025 StataCorp LLC
+                                   StataCorp
+                                   4905 Lakeway Drive
+                                   College Station, Texas 77845 USA
+                                   800-782-8272        https://www.stata.com
+                                   979-696-4600        service@stata.com
+
+Stata license: 4-user 16-core network, expiring 14 Sep 2026
+Serial number: 501909301589
+  Licensed to: University of Notre Dame
+               Notre Dame, IN 46556
+
+Notes:
+      1. Stata is running in batch mode.
+      2. Unicode is supported; see help unicode_advice.
+      3. More than 2 billion observations are allowed; see help obs_advice.
+      4. Maximum number of variables is set to 5,000 but can be increased;
+          see help set_maxvar.
+
+. do /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication/ex
+> ploratory_analysis/protest_original_controls_fe_sweep/_protest_original_contr
+> ols_fe_sweep.do 
+
+. *****************************************************************************
+> ***
+. * Stacked protest sample: 32 FE x 3 control definitions.
+. *
+. * One invocation receives an FE numlist (normally 1/15 or 16/32) and one
+. * control definition. For every FE it estimates:
+. *   1. Event study, relative years -8,...,1, omitting -1.
+. *   2. DiD interaction post x treat x downup_ac_pop.
+. *****************************************************************************
+> ***
+. 
+. version 17
+
+. set processors 5
+    The maximum number of processors or cores being used is changed from 16
+    to 5.  It can be set to any number between 1 and 16
+
+. args fe_arg control_arg
+
+. 
+. local fe_env : environment PROTEST_FE_LIST
+
+. local control_env : environment PROTEST_CONTROL_SAMPLE
+
+. local sample_env : environment ANALYSIS_SAMPLE_SUFFIX
+
+. 
+. if "$root" == "" {
+.     clear all
+.     set more off
+.     global location     "shell"
+.     global sample       "`sample_env'"
+.     global is_rural_var "is_rural"
+.     global fe_list      "1/15"
+.     global ster_suffix  "_acpop"
+.     global shell "/groups/sgulzar/sa_fires/proj_bureaucrats_farms"
+.     global dbox  "C:/Users/eunic/Dropbox/sa_fires/proj_bureaucrats_farms"
+.     global code_shell "/users/aquisper/proj_bureaucrats_farms/code/_stacked_d
+> ownup_replication"
+.     global code_dbox "C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucra
+> ts_farms/code/_stacked_downup_replication"
+.     if "$location" == "dbox" {
+.         global root "$dbox"
+.         global code "$code_dbox"
+.     }
+.     else {
+.         global root "$shell"
+.         global code "$code_shell"
+.     }
+. }
+
+. 
+. if "`fe_arg'" != "" global fe_list "`fe_arg'"
+
+. else if "`fe_env'" != "" global fe_list "`fe_env'"
+
+. 
+. local control_sample "`control_arg'"
+
+. if "`control_sample'" == "" local control_sample "`control_env'"
+
+. if "`control_sample'" == "" local control_sample "never"
+
+. if !inlist("`control_sample'", "never", "both", "notyet") {
+.     display as error "Control sample must be never, both, or notyet."
+.     exit 198
+. }
+
+. foreach selected_fe of numlist $fe_list {
+  2.     if !inrange(`selected_fe', 1, 32) {
+  3.         display as error "Every FE id must be from 1 through 32."
+  4.         exit 198
+  5.     }
+  6. }
+
+. 
+. global int_data "${root}/data_output/intermediate"
+
+. global tables_root "${code}/../../tables"
+
+. global tables "${tables_root}/exploratory_analysis/protest_original_controls_
+> fe_sweep"
+
+. global figures_root "${code}/../../figures"
+
+. global figures "${figures_root}/exploratory_analysis/protest_original_control
+> s_fe_sweep"
+
+. if "${sample}" == "_sample" {
+.     global tables "${tables}/sample"
+.     global figures "${figures}/sample"
+. }
+
+. capture mkdir "${tables_root}/exploratory_analysis"
+
+. capture mkdir "${tables}"
+
+. capture mkdir "${figures_root}/exploratory_analysis"
+
+. capture mkdir "${figures}"
+
+. 
+. local input_file "${int_data}/stacked_data_protest5km${sample}.csv"
+
+. confirm file "`input_file'"
+
+. import delimited using "`input_file'", clear varnames(1)
+(encoding automatically selected: ISO-8859-9)
+(22 vars, 2,571,754 obs)
+
+. 
+. capture confirm variable relative_year_bin
+
+. if _rc {
+.     confirm variable relative_year
+.     rename relative_year relative_year_bin
+. }
+
+. local required unique_small_grid_id province ac_uq_id count month year ///
+>     monthyear downup_ac_pop av_wind_speed wind_direction election_year ///
+>     yeargov treat cohort relative_year_bin control_type
+
+. foreach variable of local required {
+  2.     confirm variable `variable'
+  3. }
+
+. assert control_type == 0 if treat == 1
+
+. assert inlist(control_type, 1, 2) if treat == 0
+
+. 
+. gen double countk = count * 1000
+
+. merge m:1 unique_small_grid_id using ///
+>     "${int_data}/ghs_grid_classification_2000.dta", ///
+>     keep(master match) keepusing(is_rural)
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                             0
+    Matched                         2,571,754  (_merge==3)
+    -----------------------------------------
+
+. count if _merge == 1
+  0
+
+. display as text "Rows without rural classification: " r(N)
+Rows without rural classification: 0
+
+. drop _merge
+
+. keep if ${is_rural_var} == 1
+(572,003 observations deleted)
+
+. keep if year < 2022 | (year == 2022 & month <= 8)
+(365,232 observations deleted)
+
+. 
+. if "`control_sample'" == "never" {
+.     keep if treat == 1 | control_type == 1
+(69,239 observations deleted)
+. }
+
+. else if "`control_sample'" == "notyet" {
+.     keep if treat == 1 | control_type == 2
+.     display as error "CAUTION: control_type 2 is the legacy partial-zero-spel
+> l group."
+. }
+
+. 
+. gen byte fe_complete = 1
+
+. local complete_vars unique_small_grid_id province ac_uq_id month year ///
+>     monthyear election_year yeargov cohort countk downup_ac_pop ///
+>     av_wind_speed wind_direction treat relative_year_bin control_type
+
+. foreach variable of local complete_vars {
+  2.     replace fe_complete = 0 if missing(`variable')
+  3. }
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+
+. count if fe_complete == 0
+  0
+
+. display as text "Rows removed by common complete-case restriction: " r(N)
+Rows removed by common complete-case restriction: 0
+
+. drop if fe_complete == 0
+(0 observations deleted)
+
+. drop fe_complete
+
+. 
+. egen long unique_small_grid_id_cohort = group(unique_small_grid_id cohort)
+
+. egen long province_cohort = group(province cohort)
+
+. egen long monthyearco = group(month year cohort)
+
+. egen long ac_elec_yr = group(ac_uq_id election_year cohort)
+
+. 
+. local fe1  "unique_small_grid_id_cohort"
+
+. local fe2  "unique_small_grid_id_cohort monthyearco"
+
+. local fe3  "unique_small_grid_id_cohort province_cohort#c.monthyear"
+
+. local fe4  "unique_small_grid_id_cohort yeargov"
+
+. local fe5  "unique_small_grid_id_cohort province_cohort#election_year"
+
+. local fe6  "unique_small_grid_id_cohort province_cohort#election_year#yeargov
+> "
+
+. local fe7  "unique_small_grid_id_cohort monthyearco province_cohort#c.monthye
+> ar"
+
+. local fe8  "unique_small_grid_id_cohort monthyearco yeargov"
+
+. local fe9  "unique_small_grid_id_cohort monthyearco province_cohort#election_
+> year"
+
+. local fe10 "unique_small_grid_id_cohort monthyearco province_cohort#election_
+> year#yeargov"
+
+. local fe11 "unique_small_grid_id_cohort province_cohort#c.monthyear yeargov"
+
+. local fe12 "unique_small_grid_id_cohort province_cohort#c.monthyear province_
+> cohort#election_year"
+
+. local fe13 "unique_small_grid_id_cohort province_cohort#c.monthyear province_
+> cohort#election_year#yeargov"
+
+. local fe14 "unique_small_grid_id_cohort yeargov province_cohort#election_year
+> "
+
+. local fe15 "unique_small_grid_id_cohort yeargov province_cohort#election_year
+> #yeargov"
+
+. local fe16 "unique_small_grid_id_cohort province_cohort#election_year provinc
+> e_cohort#election_year#yeargov"
+
+. local fe17 "unique_small_grid_id_cohort monthyearco province_cohort#c.monthye
+> ar yeargov"
+
+. local fe18 "unique_small_grid_id_cohort monthyearco province_cohort#c.monthye
+> ar province_cohort#election_year"
+
+. local fe19 "unique_small_grid_id_cohort monthyearco province_cohort#c.monthye
+> ar province_cohort#election_year#yeargov"
+
+. local fe20 "unique_small_grid_id_cohort monthyearco yeargov province_cohort#e
+> lection_year"
+
+. local fe21 "unique_small_grid_id_cohort monthyearco yeargov province_cohort#e
+> lection_year#yeargov"
+
+. local fe22 "unique_small_grid_id_cohort monthyearco province_cohort#election_
+> year province_cohort#election_year#yeargov"
+
+. local fe23 "unique_small_grid_id_cohort province_cohort#c.monthyear yeargov p
+> rovince_cohort#election_year"
+
+. local fe24 "unique_small_grid_id_cohort province_cohort#c.monthyear yeargov p
+> rovince_cohort#election_year#yeargov"
+
+. local fe25 "unique_small_grid_id_cohort province_cohort#c.monthyear province_
+> cohort#election_year province_cohort#election_year#yeargov"
+
+. local fe26 "unique_small_grid_id_cohort yeargov province_cohort#election_year
+>  province_cohort#election_year#yeargov"
+
+. local fe27 "unique_small_grid_id_cohort monthyearco province_cohort#c.monthye
+> ar yeargov province_cohort#election_year"
+
+. local fe28 "unique_small_grid_id_cohort monthyearco province_cohort#c.monthye
+> ar yeargov province_cohort#election_year#yeargov"
+
+. local fe29 "unique_small_grid_id_cohort monthyearco province_cohort#c.monthye
+> ar province_cohort#election_year province_cohort#election_year#yeargov"
+
+. local fe30 "unique_small_grid_id_cohort monthyearco yeargov province_cohort#e
+> lection_year province_cohort#election_year#yeargov"
+
+. local fe31 "unique_small_grid_id_cohort province_cohort#c.monthyear yeargov p
+> rovince_cohort#election_year province_cohort#election_year#yeargov"
+
+. local fe32 "unique_small_grid_id_cohort monthyearco province_cohort#c.monthye
+> ar yeargov province_cohort#election_year province_cohort#election_year#yeargo
+> v"
+
+. 
+. tempfile full_analysis_sample
+
+. save `full_analysis_sample'
+file /tmp/1350513.1.largemem/St2812648.000001 saved as .dta format
+
+. 
+. * Prepare the event-study sample once and loop over the requested FEs.
+. use `full_analysis_sample', clear
+
+. keep if inrange(relative_year_bin, -8, 1)
+(86,448 observations deleted)
+
+. quietly summarize relative_year_bin
+
+. assert r(min) == -8
+
+. assert r(max) == 1
+
+. gen int relative_year_bin_aux = relative_year_bin + 9
+
+. local base = 8
+
+. gen byte moderator = 0
+
+. * local moderators_list moderator downup_ac rice_area_aclvl_ahigh rice_harvar
+> ea_aclvl_ahigh rice_prod_aclvl_ahigh
+. local moderators_list moderator
+
+. count if treat == 1
+  9,831
+
+. local event_n_treated = r(N)
+
+. count if treat == 0
+  1,469,001
+
+. local event_n_control = r(N)
+
+. egen byte event_tag_ac = tag(ac_uq_id)
+
+. count if event_tag_ac
+  782
+
+. local event_numacs = r(N)
+
+. drop event_tag_ac
+
+. quietly summarize countk if treat == 1 & relative_year_bin <= -1
+
+. local event_ymean = r(mean)
+
+. quietly summarize countk if treat == 1 & relative_year_bin <= -1 & moderator 
+> == 1
+
+. local event_ymean2 = r(mean)
+
+. 
+. foreach mod of local moderators_list {
+  2.     replace moderator = `mod'
+  3.     local rhs "ib`base'.relative_year_bin_aux##ib0.treat##ib0.`mod' wind_d
+> irection av_wind_speed"
+  4.     foreach selected_fe of numlist $fe_list {
+  5.         local fespec "`fe`selected_fe''"
+  6.         local fe_tag : display %02.0f `selected_fe'
+  7.         local fe_tag = strtrim("`fe_tag'")
+  8.         local prefix "protest_original_fe`fe_tag'_controls_`control_sample
+> '"
+  9.         display as result "EVENT controls=`control_sample' FE=`selected_fe
+> ': `fespec'"
+ 10.         est clear
+ 11.         reghdfejl countk `rhs', absorb(`fespec') vce(cluster ac_elec_yr)
+ 12.         estadd scalar ymean = `event_ymean'
+ 13.         estadd scalar ymean2 = `event_ymean2'
+ 14.         estadd scalar acq = `event_numacs'
+ 15.         estadd scalar fe_id = `selected_fe'
+ 16.         estadd scalar n_treated = `event_n_treated'
+ 17.         estadd scalar n_control = `event_n_control'
+ 18.         estadd local smpl "Rural"
+ 19.         estadd local fespec "`fespec'"
+ 20.         estadd local mod "`mod'"
+ 21.         estadd local controls "`control_sample'"
+ 22.         est store evreg1
+ 23.         local event_out "${tables}/`prefix'_event_rural_acpop_all"
+ 24.         estwrite evreg1 using "`event_out'.ster", replace
+ 25.         confirm file "`event_out'.ster"
+ 26.     }
+ 27. }
+(0 real changes made)
+EVENT controls=never FE=16: unique_small_grid_id_cohort province_cohort#electio
+> n_year province_cohort#election_year#yeargov
+(MWFE estimator converged in 3 iterations)
+
+HDFE linear regression with Julia                 Number of obs   =  1,478,832
+Absorbing 3 HDFE groups                           F(  20,  22643) =     135.10
+Statistics cluster-robust                         Prob > F        =     0.0000
+                                                  R-squared       =     0.1032
+                                                  Adj R-squared   =     0.0946
+Number of clusters (ac_elec_yr) =      22644      Within R-sq.    =     0.0062
+                                                  Root MSE        =   832.8449
+
+                        (Std. err. adjusted for 22,644 clusters in ac_elec_yr)
+------------------------------------------------------------------------------
+             |               Robust
+      countk | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+relative_y~x |
+          1  |   104.5383   25.32798     4.13   0.000     54.89377    154.1829
+          2  |   87.16521   22.77595     3.83   0.000     42.52277    131.8076
+          3  |   90.48641   20.01572     4.52   0.000     51.25423    129.7186
+          4  |   95.66269   17.53408     5.46   0.000     61.29469    130.0307
+          5  |   87.65527   14.16822     6.19   0.000     59.88458     115.426
+          6  |   76.70752   9.632829     7.96   0.000     57.82652    95.58853
+          7  |   21.79131   5.255772     4.15   0.000     11.48963    32.09298
+          9  |   13.32653    6.81371     1.96   0.050    -.0288096    26.68187
+         10  |  -29.84514   12.40215    -2.41   0.016     -54.1542   -5.536083
+             |
+     1.treat |          0  (omitted)
+wind_direc~n |  -.6485188   .0139462   -46.50   0.000    -.6758544   -.6211833
+av_wind_sp~d |   58.29278   2.267765    25.70   0.000     53.84781    62.73776
+             |
+relative_y~x#|
+       treat |
+        1 1  |   3.159851   44.10624     0.07   0.943    -83.29142    89.61112
+        2 1  |   76.67927   45.70911     1.68   0.093    -12.91372    166.2723
+        3 1  |   93.47249   47.56393     1.97   0.049     .2439152    186.7011
+        4 1  |    61.9367   53.92863     1.15   0.251    -43.76713    167.6405
+        5 1  |   48.47652   40.82845     1.19   0.235    -31.55005    128.5031
+        6 1  |   56.11379   44.40797     1.26   0.206    -30.92889    143.1565
+        7 1  |   24.52711   50.85072     0.48   0.630    -75.14379     124.198
+        9 1  |   66.70914   41.83101     1.59   0.111    -15.28253    148.7008
+       10 1  |   42.41144   67.63723     0.63   0.531    -90.16219    174.9851
+------------------------------------------------------------------------------
+
+added scalar:
+              e(ymean) =  445.28027
+
+added scalar:
+             e(ymean2) =  .
+
+added scalar:
+                e(acq) =  782
+
+added scalar:
+              e(fe_id) =  16
+
+added scalar:
+          e(n_treated) =  9831
+
+added scalar:
+          e(n_control) =  1469001
+
+added macro:
+               e(smpl) : "Rural"
+
+added macro:
+             e(fespec) : "unique_small_grid_id_cohort province_cohort#election_
+> year province_cohort#election_year#yeargov"
+
+added macro:
+                e(mod) : "moderator"
+
+added macro:
+           e(controls) : "never"
+(saving evreg1)
+(file /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication/.
+> ./../tables/exploratory_analysis/protest_original_controls_fe_sweep/sample/pr
+> otest_original_fe16_controls_never_event_rural_acpop_all.ster saved)
+EVENT controls=never FE=17: unique_small_grid_id_cohort monthyearco province_co
+> hort#c.monthyear yeargov
+(MWFE estimator converged in 24 iterations)
+
+HDFE linear regression with Julia                 Number of obs   =  1,478,832
+Absorbing 4 HDFE groups                           F(  11,  22643) =      87.77
+Statistics cluster-robust                         Prob > F        =     0.0000
+                                                  R-squared       =     0.1342
+                                                  Adj R-squared   =     0.1251
+Number of clusters (ac_elec_yr) =      22644      Within R-sq.    =     0.0027
+                                                  Root MSE        =   818.6777
+
+                        (Std. err. adjusted for 22,644 clusters in ac_elec_yr)
+------------------------------------------------------------------------------
+             |               Robust
+      countk | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+relative_y~x |
+          1  |          0  (omitted)
+          2  |          0  (omitted)
+          3  |          0  (omitted)
+          4  |          0  (omitted)
+          5  |          0  (omitted)
+          6  |          0  (omitted)
+          7  |          0  (omitted)
+          9  |          0  (omitted)
+         10  |          0  (omitted)
+             |
+     1.treat |          0  (omitted)
+wind_direc~n |  -.2642462   .0103861   -25.44   0.000    -.2846037   -.2438888
+av_wind_sp~d |   151.9881   5.611959    27.08   0.000     140.9882    162.9879
+             |
+relative_y~x#|
+       treat |
+        1 1  |  -15.67523   42.12841    -0.37   0.710    -98.24981    66.89936
+        2 1  |   55.24794   46.92038     1.18   0.239    -36.71923    147.2151
+        3 1  |   68.24308   48.10817     1.42   0.156    -26.05225    162.5384
+        4 1  |   75.24197   57.10643     1.32   0.188    -36.69057    187.1745
+        5 1  |   23.90313   43.82423     0.55   0.585    -61.99537    109.8016
+        6 1  |   16.37091   42.02239     0.39   0.697    -65.99587    98.73769
+        7 1  |  -32.24855   51.67381    -0.62   0.533    -133.5328    69.03567
+        9 1  |   83.00104   41.00181     2.02   0.043     2.634669    163.3674
+       10 1  |  -13.30407   70.49432    -0.19   0.850    -151.4778    124.8696
+------------------------------------------------------------------------------
+
+added scalar:
+              e(ymean) =  445.28027
+
+added scalar:
+             e(ymean2) =  .
+
+added scalar:
+                e(acq) =  782
+
+added scalar:
+              e(fe_id) =  17
+
+added scalar:
+          e(n_treated) =  9831
+
+added scalar:
+          e(n_control) =  1469001
+
+added macro:
+               e(smpl) : "Rural"
+
+added macro:
+             e(fespec) : "unique_small_grid_id_cohort monthyearco province_coho
+> rt#c.monthyear yeargov"
+
+added macro:
+                e(mod) : "moderator"
+
+added macro:
+           e(controls) : "never"
+(saving evreg1)
+(file /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication/.
+> ./../tables/exploratory_analysis/protest_original_controls_fe_sweep/sample/pr
+> otest_original_fe17_controls_never_event_rural_acpop_all.ster saved)
+EVENT controls=never FE=18: unique_small_grid_id_cohort monthyearco province_co
+> hort#c.monthyear province_cohort#election_year
+(MWFE estimator converged in 64 iterations)
+
+HDFE linear regression with Julia                 Number of obs   =  1,478,832
+Absorbing 4 HDFE groups                           F(  11,  22643) =      84.65
+Statistics cluster-robust                         Prob > F        =     0.0000
+                                                  R-squared       =     0.1352
+                                                  Adj R-squared   =     0.1260
+Number of clusters (ac_elec_yr) =      22644      Within R-sq.    =     0.0026
+                                                  Root MSE        =   818.2616
+
+                        (Std. err. adjusted for 22,644 clusters in ac_elec_yr)
+------------------------------------------------------------------------------
+             |               Robust
+      countk | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+relative_y~x |
+          1  |          0  (omitted)
+          2  |          0  (omitted)
+          3  |          0  (omitted)
+          4  |          0  (omitted)
+          5  |          0  (omitted)
+          6  |          0  (omitted)
+          7  |          0  (omitted)
+          9  |          0  (omitted)
+         10  |          0  (omitted)
+             |
+     1.treat |          0  (omitted)
+wind_direc~n |  -.2517265   .0102398   -24.58   0.000    -.2717973   -.2316558
+av_wind_sp~d |   151.0567   5.610687    26.92   0.000     140.0593     162.054
+             |
+relative_y~x#|
+       treat |
+        1 1  |   31.52236   41.96347     0.75   0.453    -50.72892    113.7736
+        2 1  |     73.654    46.5781     1.58   0.114    -17.64227    164.9503
+        3 1  |   60.92424   48.08128     1.27   0.205    -33.31838    155.1669
+        4 1  |   60.76245   55.19071     1.10   0.271    -47.41513      168.94
+        5 1  |   63.38577   41.70028     1.52   0.129    -18.34965    145.1212
+        6 1  |   58.29137   42.51898     1.37   0.170    -25.04876    141.6315
+        7 1  |  -15.91491   51.18631    -0.31   0.756    -116.2436    84.41377
+        9 1  |   83.60886   39.85918     2.10   0.036     5.482126    161.7356
+       10 1  |   58.44915   66.32793     0.88   0.378    -71.55816    188.4565
+------------------------------------------------------------------------------
+
+added scalar:
+              e(ymean) =  445.28027
+
+added scalar:
+             e(ymean2) =  .
+
+added scalar:
+                e(acq) =  782
+
+added scalar:
+              e(fe_id) =  18
+
+added scalar:
+          e(n_treated) =  9831
+
+added scalar:
+          e(n_control) =  1469001
+
+added macro:
+               e(smpl) : "Rural"
+
+added macro:
+             e(fespec) : "unique_small_grid_id_cohort monthyearco province_coho
+> rt#c.monthyear province_cohort#election_year"
+
+added macro:
+                e(mod) : "moderator"
+
+added macro:
+           e(controls) : "never"
+(saving evreg1)
+(file /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication/.
+> ./../tables/exploratory_analysis/protest_original_controls_fe_sweep/sample/pr
+> otest_original_fe18_controls_never_event_rural_acpop_all.ster saved)
+EVENT controls=never FE=19: unique_small_grid_id_cohort monthyearco province_co
+> hort#c.monthyear province_cohort#election_year#yeargov
+(MWFE estimator converged in 127 iterations)
+
+HDFE linear regression with Julia                 Number of obs   =  1,478,832
+Absorbing 4 HDFE groups                           F(  11,  22643) =      85.73
+Statistics cluster-robust                         Prob > F        =     0.0000
+                                                  R-squared       =     0.1375
+                                                  Adj R-squared   =     0.1281
+Number of clusters (ac_elec_yr) =      22644      Within R-sq.    =     0.0027
+                                                  Root MSE        =   817.2896
+
+                        (Std. err. adjusted for 22,644 clusters in ac_elec_yr)
+------------------------------------------------------------------------------
+             |               Robust
+      countk | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+relative_y~x |
+          1  |          0  (omitted)
+          2  |          0  (omitted)
+          3  |          0  (omitted)
+          4  |          0  (omitted)
+          5  |          0  (omitted)
+          6  |          0  (omitted)
+          7  |          0  (omitted)
+          9  |          0  (omitted)
+         10  |          0  (omitted)
+             |
+     1.treat |          0  (omitted)
+wind_direc~n |  -.2451584   .0100954   -24.28   0.000    -.2649461   -.2253707
+av_wind_sp~d |   158.1031   5.827005    27.13   0.000     146.6818    169.5244
+             |
+relative_y~x#|
+       treat |
+        1 1  |  -1.331301    43.3481    -0.03   0.975    -86.29655    83.63395
+        2 1  |   79.48818   45.33508     1.75   0.080    -9.371682    168.3481
+        3 1  |   96.79498   47.53492     2.04   0.042     3.623272    189.9667
+        4 1  |   60.87382    53.3746     1.14   0.254    -43.74407    165.4917
+        5 1  |     53.911   40.27804     1.34   0.181    -25.03673    132.8587
+        6 1  |   61.51222   44.02032     1.40   0.162    -24.77062    147.7951
+        7 1  |   26.86357   49.65838     0.54   0.589    -70.47027    124.1974
+        9 1  |   70.08164   41.66139     1.68   0.093    -11.57754    151.7408
+       10 1  |    56.4295   65.67788     0.86   0.390    -72.30365    185.1627
+------------------------------------------------------------------------------
+
+added scalar:
+              e(ymean) =  445.28027
+
+added scalar:
+             e(ymean2) =  .
+
+added scalar:
+                e(acq) =  782
+
+added scalar:
+              e(fe_id) =  19
+
+added scalar:
+          e(n_treated) =  9831
+
+added scalar:
+          e(n_control) =  1469001
+
+added macro:
+               e(smpl) : "Rural"
+
+added macro:
+             e(fespec) : "unique_small_grid_id_cohort monthyearco province_coho
+> rt#c.monthyear province_cohort#election_year#yeargov"
+
+added macro:
+                e(mod) : "moderator"
+
+added macro:
+           e(controls) : "never"
+(saving evreg1)
+(file /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication/.
+> ./../tables/exploratory_analysis/protest_original_controls_fe_sweep/sample/pr
+> otest_original_fe19_controls_never_event_rural_acpop_all.ster saved)
+EVENT controls=never FE=20: unique_small_grid_id_cohort monthyearco yeargov pro
+> vince_cohort#election_year
+(MWFE estimator converged in 48 iterations)
+
+HDFE linear regression with Julia                 Number of obs   =  1,478,832
+Absorbing 4 HDFE groups                           F(  11,  22643) =      85.69
+Statistics cluster-robust                         Prob > F        =     0.0000
+                                                  R-squared       =     0.1356
+                                                  Adj R-squared   =     0.1264
+Number of clusters (ac_elec_yr) =      22644      Within R-sq.    =     0.0028
+                                                  Root MSE        =   818.0565
+
+                        (Std. err. adjusted for 22,644 clusters in ac_elec_yr)
+------------------------------------------------------------------------------
+             |               Robust
+      countk | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+relative_y~x |
+          1  |          0  (omitted)
+          2  |          0  (omitted)
+          3  |          0  (omitted)
+          4  |          0  (omitted)
+          5  |          0  (omitted)
+          6  |          0  (omitted)
+          7  |          0  (omitted)
+          9  |          0  (omitted)
+         10  |          0  (omitted)
+             |
+     1.treat |          0  (omitted)
+wind_direc~n |  -.2428697   .0100582   -24.15   0.000    -.2625845    -.223155
+av_wind_sp~d |   161.2694   5.890042    27.38   0.000     149.7245    172.8142
+             |
+relative_y~x#|
+       treat |
+        1 1  |  -21.39012   41.84075    -0.51   0.609    -103.4009    60.62062
+        2 1  |   43.93365    46.5983     0.94   0.346    -47.40222    135.2695
+        3 1  |   51.06505   48.19659     1.06   0.289    -43.40359    145.5337
+        4 1  |   55.72729    56.4277     0.99   0.323    -54.87489    166.3295
+        5 1  |   20.73579   42.75698     0.48   0.628    -63.07083    104.5424
+        6 1  |   16.49256   42.42122     0.39   0.697    -66.65594    99.64106
+        7 1  |  -35.30736   51.45227    -0.69   0.493    -136.1573    65.54262
+        9 1  |   92.79254   40.24916     2.31   0.021     13.90143    171.6837
+       10 1  |   54.30798   67.37824     0.81   0.420      -77.758     186.374
+------------------------------------------------------------------------------
+
+added scalar:
+              e(ymean) =  445.28027
+
+added scalar:
+             e(ymean2) =  .
+
+added scalar:
+                e(acq) =  782
+
+added scalar:
+              e(fe_id) =  20
+
+added scalar:
+          e(n_treated) =  9831
+
+added scalar:
+          e(n_control) =  1469001
+
+added macro:
+               e(smpl) : "Rural"
+
+added macro:
+             e(fespec) : "unique_small_grid_id_cohort monthyearco yeargov provi
+> nce_cohort#election_year"
+
+added macro:
+                e(mod) : "moderator"
+
+added macro:
+           e(controls) : "never"
+(saving evreg1)
+(file /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication/.
+> ./../tables/exploratory_analysis/protest_original_controls_fe_sweep/sample/pr
+> otest_original_fe20_controls_never_event_rural_acpop_all.ster saved)
+EVENT controls=never FE=21: unique_small_grid_id_cohort monthyearco yeargov pro
+> vince_cohort#election_year#yeargov
+(MWFE estimator converged in 131 iterations)
+
+HDFE linear regression with Julia                 Number of obs   =  1,478,832
+Absorbing 4 HDFE groups                           F(  11,  22643) =      85.74
+Statistics cluster-robust                         Prob > F        =     0.0000
+                                                  R-squared       =     0.1375
+                                                  Adj R-squared   =     0.1281
+Number of clusters (ac_elec_yr) =      22644      Within R-sq.    =     0.0027
+                                                  Root MSE        =   817.2699
+
+                        (Std. err. adjusted for 22,644 clusters in ac_elec_yr)
+------------------------------------------------------------------------------
+             |               Robust
+      countk | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+relative_y~x |
+          1  |          0  (omitted)
+          2  |          0  (omitted)
+          3  |          0  (omitted)
+          4  |          0  (omitted)
+          5  |          0  (omitted)
+          6  |          0  (omitted)
+          7  |          0  (omitted)
+          9  |          0  (omitted)
+         10  |          0  (omitted)
+             |
+     1.treat |          0  (omitted)
+wind_direc~n |  -.2451696   .0100954   -24.29   0.000    -.2649572   -.2253819
+av_wind_sp~d |    158.101   5.826813    27.13   0.000     146.6801     169.522
+             |
+relative_y~x#|
+       treat |
+        1 1  |  -1.325155   43.34735    -0.03   0.976    -86.28894    83.63863
+        2 1  |   79.49968   45.33416     1.75   0.080    -9.358394    168.3578
+        3 1  |   96.80656   47.53381     2.04   0.042     3.637022    189.9761
+        4 1  |   60.88551     53.374     1.14   0.254    -43.73121    165.5022
+        5 1  |   53.92254   40.27752     1.34   0.181    -25.02417    132.8693
+        6 1  |   61.52378   44.01936     1.40   0.162    -24.75718    147.8047
+        7 1  |   26.87507   49.65739     0.54   0.588    -70.45684     124.207
+        9 1  |   70.09472   41.66079     1.68   0.092    -11.56329    151.7527
+       10 1  |   56.44823   65.67654     0.86   0.390    -72.28231    185.1788
+------------------------------------------------------------------------------
+
+added scalar:
+              e(ymean) =  445.28027
+
+added scalar:
+             e(ymean2) =  .
+
+added scalar:
+                e(acq) =  782
+
+added scalar:
+              e(fe_id) =  21
+
+added scalar:
+          e(n_treated) =  9831
+
+added scalar:
+          e(n_control) =  1469001
+
+added macro:
+               e(smpl) : "Rural"
+
+added macro:
+             e(fespec) : "unique_small_grid_id_cohort monthyearco yeargov provi
+> nce_cohort#election_year#yeargov"
+
+added macro:
+                e(mod) : "moderator"
+
+added macro:
+           e(controls) : "never"
+(saving evreg1)
+(file /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication/.
+> ./../tables/exploratory_analysis/protest_original_controls_fe_sweep/sample/pr
+> otest_original_fe21_controls_never_event_rural_acpop_all.ster saved)
+EVENT controls=never FE=22: unique_small_grid_id_cohort monthyearco province_co
+> hort#election_year province_cohort#election_year#yeargov
+(MWFE estimator converged in 131 iterations)
+
+HDFE linear regression with Julia                 Number of obs   =  1,478,832
+Absorbing 4 HDFE groups                           F(  11,  22643) =      85.72
+Statistics cluster-robust                         Prob > F        =     0.0000
+                                                  R-squared       =     0.1375
+                                                  Adj R-squared   =     0.1280
+Number of clusters (ac_elec_yr) =      22644      Within R-sq.    =     0.0027
+                                                  Root MSE        =   817.3322
+
+                        (Std. err. adjusted for 22,644 clusters in ac_elec_yr)
+------------------------------------------------------------------------------
+             |               Robust
+      countk | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+relative_y~x |
+          1  |          0  (omitted)
+          2  |          0  (omitted)
+          3  |          0  (omitted)
+          4  |          0  (omitted)
+          5  |          0  (omitted)
+          6  |          0  (omitted)
+          7  |          0  (omitted)
+          9  |          0  (omitted)
+         10  |          0  (omitted)
+             |
+     1.treat |          0  (omitted)
+wind_direc~n |  -.2451696   .0100962   -24.28   0.000    -.2649588   -.2253803
+av_wind_sp~d |    158.101   5.827267    27.13   0.000     146.6792    169.5229
+             |
+relative_y~x#|
+       treat |
+        1 1  |  -1.325105   43.35051    -0.03   0.976    -86.29509    83.64488
+        2 1  |   79.49974   45.33765     1.75   0.080    -9.365165    168.3646
+        3 1  |   96.80665   47.53732     2.04   0.042      3.63024    189.9831
+        4 1  |    60.8856   53.37845     1.14   0.254    -43.73983     165.511
+        5 1  |   53.92261   40.28034     1.34   0.181    -25.02963    132.8749
+        6 1  |    61.5238   44.02259     1.40   0.162     -24.7635    147.8111
+        7 1  |    26.8751   49.66101     0.54   0.588     -70.4639    124.2141
+        9 1  |   70.09469   41.66401     1.68   0.093    -11.56964     151.759
+       10 1  |   56.44824   65.68179     0.86   0.390    -72.29258    185.1891
+------------------------------------------------------------------------------
+
+added scalar:
+              e(ymean) =  445.28027
+
+added scalar:
+             e(ymean2) =  .
+
+added scalar:
+                e(acq) =  782
+
+added scalar:
+              e(fe_id) =  22
+
+added scalar:
+          e(n_treated) =  9831
+
+added scalar:
+          e(n_control) =  1469001
+
+added macro:
+               e(smpl) : "Rural"
+
+added macro:
+             e(fespec) : "unique_small_grid_id_cohort monthyearco province_coho
+> rt#election_year province_cohort#election_year#yeargov"
+
+added macro:
+                e(mod) : "moderator"
+
+added macro:
+           e(controls) : "never"
+(saving evreg1)
+(file /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication/.
+> ./../tables/exploratory_analysis/protest_original_controls_fe_sweep/sample/pr
+> otest_original_fe22_controls_never_event_rural_acpop_all.ster saved)
+EVENT controls=never FE=23: unique_small_grid_id_cohort province_cohort#c.month
+> year yeargov province_cohort#election_year
+(MWFE estimator converged in 37 iterations)
+
+HDFE linear regression with Julia                 Number of obs   =  1,478,832
+Absorbing 4 HDFE groups                           F(  20,  22643) =     130.80
+Statistics cluster-robust                         Prob > F        =     0.0000
+                                                  R-squared       =     0.1014
+                                                  Adj R-squared   =     0.0932
+Number of clusters (ac_elec_yr) =      22644      Within R-sq.    =     0.0059
+                                                  Root MSE        =   833.4560
+
+                        (Std. err. adjusted for 22,644 clusters in ac_elec_yr)
+------------------------------------------------------------------------------
+             |               Robust
+      countk | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+relative_y~x |
+          1  |   130.1115   28.00871     4.65   0.000     75.21254    185.0105
+          2  |   92.11464   24.10409     3.82   0.000     44.86896    139.3603
+          3  |   77.08832   20.22524     3.81   0.000     37.44547    116.7312
+          4  |   84.83787   16.36018     5.19   0.000     52.77079     116.905
+          5  |    68.6753     12.109     5.67   0.000     44.94082    92.40977
+          6  |   52.82988   8.218202     6.43   0.000     36.72164    68.93812
+          7  |   15.87547   4.360891     3.64   0.000     7.327821    24.42311
+          9  |   10.72779   5.308209     2.02   0.043     .3233361    21.13225
+         10  |  -14.36153    9.87405    -1.45   0.146    -33.71534    4.992289
+             |
+     1.treat |          0  (omitted)
+wind_direc~n |  -.6384549   .0137244   -46.52   0.000    -.6653558   -.6115541
+av_wind_sp~d |   53.12744   2.228388    23.84   0.000     48.75964    57.49523
+             |
+relative_y~x#|
+       treat |
+        1 1  |   31.81297   42.47553     0.75   0.454    -51.44198    115.0679
+        2 1  |    71.0966    47.1393     1.51   0.132    -21.29968    163.4929
+        3 1  |   56.14659   48.22871     1.16   0.244    -38.38499    150.6782
+        4 1  |   62.93078   55.36697     1.14   0.256    -45.59229    171.4538
+        5 1  |   56.36041   41.96659     1.34   0.179    -25.89699    138.6178
+        6 1  |   54.19628   42.88153     1.26   0.206    -29.85448     138.247
+        7 1  |  -13.31515   52.45967    -0.25   0.800    -116.1397    89.50941
+        9 1  |    82.9701   40.24735     2.06   0.039     4.082522    161.8577
+       10 1  |   49.02057   68.32718     0.72   0.473     -84.9054    182.9466
+------------------------------------------------------------------------------
+
+added scalar:
+              e(ymean) =  445.28027
+
+added scalar:
+             e(ymean2) =  .
+
+added scalar:
+                e(acq) =  782
+
+added scalar:
+              e(fe_id) =  23
+
+added scalar:
+          e(n_treated) =  9831
+
+added scalar:
+          e(n_control) =  1469001
+
+added macro:
+               e(smpl) : "Rural"
+
+added macro:
+             e(fespec) : "unique_small_grid_id_cohort province_cohort#c.monthye
+> ar yeargov province_cohort#election_year"
+
+added macro:
+                e(mod) : "moderator"
+
+added macro:
+           e(controls) : "never"
+(saving evreg1)
+(file /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication/.
+> ./../tables/exploratory_analysis/protest_original_controls_fe_sweep/sample/pr
+> otest_original_fe23_controls_never_event_rural_acpop_all.ster saved)
+EVENT controls=never FE=24: unique_small_grid_id_cohort province_cohort#c.month
+> year yeargov province_cohort#election_year#yeargov
+(MWFE estimator converged in 14 iterations)
+
+HDFE linear regression with Julia                 Number of obs   =  1,478,832
+Absorbing 4 HDFE groups                           F(  20,  22643) =     124.19
+Statistics cluster-robust                         Prob > F        =     0.0000
+                                                  R-squared       =     0.1030
+                                                  Adj R-squared   =     0.0945
+Number of clusters (ac_elec_yr) =      22644      Within R-sq.    =     0.0061
+                                                  Root MSE        =   832.8791
+
+                        (Std. err. adjusted for 22,644 clusters in ac_elec_yr)
+------------------------------------------------------------------------------
+             |               Robust
+      countk | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+relative_y~x |
+          1  |  -207.6371   53.02092    -3.92   0.000    -311.5617   -103.7124
+          2  |  -180.3495   45.90601    -3.93   0.000    -270.3284   -90.37055
+          3  |  -132.4532   38.79985    -3.41   0.001    -208.5035   -56.40278
+          4  |  -82.71903   31.68811    -2.61   0.009    -144.8299   -20.60816
+          5  |  -46.18408   24.12753    -1.91   0.056    -93.47571    1.107541
+          6  |   -12.5041   16.12878    -0.78   0.438    -44.11761    19.10941
+          7  |  -22.82086   8.421788    -2.71   0.007    -39.32814   -6.313571
+          9  |    58.6623   10.15399     5.78   0.000     38.75977    78.56482
+         10  |   55.32821   18.69508     2.96   0.003     18.68456    91.97186
+             |
+     1.treat |          0  (omitted)
+wind_direc~n |  -.6534162   .0142164   -45.96   0.000    -.6812814   -.6255511
+av_wind_sp~d |   55.45315   2.247981    24.67   0.000     51.04695    59.85934
+             |
+relative_y~x#|
+       treat |
+        1 1  |   8.278616   44.11553     0.19   0.851    -78.19086     94.7481
+        2 1  |   76.58306   45.66104     1.68   0.094    -12.91572    166.0818
+        3 1  |   93.35174   47.52949     1.96   0.050     .1906774    186.5128
+        4 1  |   61.86203   53.91559     1.15   0.251    -43.81623    167.5403
+        5 1  |   48.34583   40.81713     1.18   0.236    -31.65855    128.3502
+        6 1  |   55.98009   44.43782     1.26   0.208     -31.1211    143.0813
+        7 1  |   24.41219   50.73456     0.48   0.630    -75.03103    123.8554
+        9 1  |   64.59907   41.89711     1.54   0.123    -17.52214    146.7203
+       10 1  |   36.06913   67.80831     0.53   0.595    -96.83983    168.9781
+------------------------------------------------------------------------------
+
+added scalar:
+              e(ymean) =  445.28027
+
+added scalar:
+             e(ymean2) =  .
+
+added scalar:
+                e(acq) =  782
+
+added scalar:
+              e(fe_id) =  24
+
+added scalar:
+          e(n_treated) =  9831
+
+added scalar:
+          e(n_control) =  1469001
+
+added macro:
+               e(smpl) : "Rural"
+
+added macro:
+             e(fespec) : "unique_small_grid_id_cohort province_cohort#c.monthye
+> ar yeargov province_cohort#election_year#yeargov"
+
+added macro:
+                e(mod) : "moderator"
+
+added macro:
+           e(controls) : "never"
+(saving evreg1)
+(file /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication/.
+> ./../tables/exploratory_analysis/protest_original_controls_fe_sweep/sample/pr
+> otest_original_fe24_controls_never_event_rural_acpop_all.ster saved)
+EVENT controls=never FE=25: unique_small_grid_id_cohort province_cohort#c.month
+> year province_cohort#election_year province_cohort#election_year#yeargov
+(MWFE estimator converged in 8 iterations)
+
+HDFE linear regression with Julia                 Number of obs   =  1,478,832
+Absorbing 4 HDFE groups                           F(  20,  22643) =     124.25
+Statistics cluster-robust                         Prob > F        =     0.0000
+                                                  R-squared       =     0.1030
+                                                  Adj R-squared   =     0.0944
+Number of clusters (ac_elec_yr) =      22644      Within R-sq.    =     0.0061
+                                                  Root MSE        =   832.9429
+
+                        (Std. err. adjusted for 22,644 clusters in ac_elec_yr)
+------------------------------------------------------------------------------
+             |               Robust
+      countk | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+relative_y~x |
+          1  |  -201.3175   53.23076    -3.78   0.000    -305.6534   -96.98153
+          2  |  -174.9386   46.08268    -3.80   0.000    -265.2638    -84.6134
+          3  |  -127.9486   38.95085    -3.28   0.001     -204.295   -51.60225
+          4  |   -79.1204   31.80446    -2.49   0.013    -141.4593   -16.78148
+          5  |  -43.49156   24.21041    -1.80   0.072    -90.94562    3.962504
+          6  |  -10.71449   16.18534    -0.66   0.508    -42.43887     21.0099
+          7  |  -21.93488   8.448935    -2.60   0.009    -38.49538   -5.374389
+          9  |   57.09325   10.17642     5.61   0.000     37.14676    77.03974
+         10  |   52.00375   18.73487     2.78   0.006     15.28212    88.72539
+             |
+     1.treat |          0  (omitted)
+wind_direc~n |  -.6536232   .0142175   -45.97   0.000    -.6814904    -.625756
+av_wind_sp~d |   55.47151   2.246958    24.69   0.000     51.06732     59.8757
+             |
+relative_y~x#|
+       treat |
+        1 1  |   10.90578   44.04819     0.25   0.804     -75.4317    97.24326
+        2 1  |   79.32024    45.5982     1.74   0.082    -10.05536    168.6958
+        3 1  |    96.0902   47.47972     2.02   0.043     3.026678    189.1537
+        4 1  |   64.60267   53.91713     1.20   0.231    -41.07861     170.284
+        5 1  |   51.08377   40.75679     1.25   0.210    -28.80234    130.9699
+        6 1  |   58.71814   44.35617     1.32   0.186      -28.223    145.6593
+        7 1  |   27.13128   50.67609     0.54   0.592    -72.19734    126.4599
+        9 1  |   67.39406   41.83479     1.61   0.107      -14.605    149.3931
+       10 1  |   44.09526   67.61625     0.65   0.514    -88.43725    176.6278
+------------------------------------------------------------------------------
+
+added scalar:
+              e(ymean) =  445.28027
+
+added scalar:
+             e(ymean2) =  .
+
+added scalar:
+                e(acq) =  782
+
+added scalar:
+              e(fe_id) =  25
+
+added scalar:
+          e(n_treated) =  9831
+
+added scalar:
+          e(n_control) =  1469001
+
+added macro:
+               e(smpl) : "Rural"
+
+added macro:
+             e(fespec) : "unique_small_grid_id_cohort province_cohort#c.monthye
+> ar province_cohort#election_year province_cohort#election_year#yeargov"
+
+added macro:
+                e(mod) : "moderator"
+
+added macro:
+           e(controls) : "never"
+(saving evreg1)
+(file /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication/.
+> ./../tables/exploratory_analysis/protest_original_controls_fe_sweep/sample/pr
+> otest_original_fe25_controls_never_event_rural_acpop_all.ster saved)
+EVENT controls=never FE=26: unique_small_grid_id_cohort yeargov province_cohort
+> #election_year province_cohort#election_year#yeargov
+(MWFE estimator converged in 9 iterations)
+
+HDFE linear regression with Julia                 Number of obs   =  1,478,832
+Absorbing 4 HDFE groups                           F(  20,  22643) =     135.10
+Statistics cluster-robust                         Prob > F        =     0.0000
+                                                  R-squared       =     0.1032
+                                                  Adj R-squared   =     0.0946
+Number of clusters (ac_elec_yr) =      22644      Within R-sq.    =     0.0062
+                                                  Root MSE        =   832.8464
+
+                        (Std. err. adjusted for 22,644 clusters in ac_elec_yr)
+------------------------------------------------------------------------------
+             |               Robust
+      countk | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+relative_y~x |
+          1  |   104.5383   25.32803     4.13   0.000     54.89366     154.183
+          2  |   87.16521     22.776     3.83   0.000     42.52268    131.8077
+          3  |   90.48641   20.01576     4.52   0.000     51.25415    129.7187
+          4  |   95.66269   17.53412     5.46   0.000     61.29462    130.0308
+          5  |   87.65527   14.16825     6.19   0.000     59.88453     115.426
+          6  |   76.70752   9.632846     7.96   0.000     57.82648    95.58857
+          7  |   21.79131   5.255781     4.15   0.000     11.48962      32.093
+          9  |   13.32653   6.813721     1.96   0.050    -.0288316    26.68189
+         10  |  -29.84514   12.40217    -2.41   0.016    -54.15425   -5.536042
+             |
+     1.treat |          0  (omitted)
+wind_direc~n |  -.6485188   .0139462   -46.50   0.000    -.6758544   -.6211832
+av_wind_sp~d |   58.29278   2.267769    25.70   0.000      53.8478    62.73777
+             |
+relative_y~x#|
+       treat |
+        1 1  |   3.159851   44.10632     0.07   0.943    -83.29157    89.61127
+        2 1  |   76.67927   45.70919     1.68   0.093    -12.91388    166.2724
+        3 1  |   93.47249     47.564     1.97   0.049     .2437722    186.7012
+        4 1  |    61.9367   53.92873     1.15   0.251    -43.76732    167.6407
+        5 1  |   48.47652   40.82852     1.19   0.235    -31.55018    128.5032
+        6 1  |   56.11379   44.40804     1.26   0.206    -30.92902    143.1566
+        7 1  |   24.52711   50.85081     0.48   0.630    -75.14397    124.1982
+        9 1  |   66.70914   41.83109     1.59   0.111    -15.28267    148.7009
+       10 1  |   42.41144   67.63735     0.63   0.531    -90.16242    174.9853
+------------------------------------------------------------------------------
+
+added scalar:
+              e(ymean) =  445.28027
+
+added scalar:
+             e(ymean2) =  .
+
+added scalar:
+                e(acq) =  782
+
+added scalar:
+              e(fe_id) =  26
+
+added scalar:
+          e(n_treated) =  9831
+
+added scalar:
+          e(n_control) =  1469001
+
+added macro:
+               e(smpl) : "Rural"
+
+added macro:
+             e(fespec) : "unique_small_grid_id_cohort yeargov province_cohort#e
+> lection_year province_cohort#election_year#yeargov"
+
+added macro:
+                e(mod) : "moderator"
+
+added macro:
+           e(controls) : "never"
+(saving evreg1)
+(file /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication/.
+> ./../tables/exploratory_analysis/protest_original_controls_fe_sweep/sample/pr
+> otest_original_fe26_controls_never_event_rural_acpop_all.ster saved)
+EVENT controls=never FE=27: unique_small_grid_id_cohort monthyearco province_co
+> hort#c.monthyear yeargov province_cohort#election_year
+(MWFE estimator converged in 85 iterations)
+
+HDFE linear regression with Julia                 Number of obs   =  1,478,832
+Absorbing 5 HDFE groups                           F(  11,  22643) =      85.50
+Statistics cluster-robust                         Prob > F        =     0.0000
+                                                  R-squared       =     0.1357
+                                                  Adj R-squared   =     0.1265
+Number of clusters (ac_elec_yr) =      22644      Within R-sq.    =     0.0028
+                                                  Root MSE        =   818.0091
+
+                        (Std. err. adjusted for 22,644 clusters in ac_elec_yr)
+------------------------------------------------------------------------------
+             |               Robust
+      countk | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+relative_y~x |
+          1  |          0  (omitted)
+          2  |          0  (omitted)
+          3  |          0  (omitted)
+          4  |          0  (omitted)
+          5  |          0  (omitted)
+          6  |          0  (omitted)
+          7  |          0  (omitted)
+          9  |          0  (omitted)
+         10  |          0  (omitted)
+             |
+     1.treat |          0  (omitted)
+wind_direc~n |  -.2422643   .0100467   -24.11   0.000    -.2619564   -.2225721
+av_wind_sp~d |   160.8481   5.881576    27.35   0.000     149.3198    172.3764
+             |
+relative_y~x#|
+       treat |
+        1 1  |   22.46559   42.38193     0.53   0.596     -60.6059    105.5371
+        2 1  |   66.57042   46.79033     1.42   0.155    -25.14185    158.2827
+        3 1  |   58.80613   48.18881     1.22   0.222    -35.64725    153.2595
+        4 1  |   55.00648   56.32828     0.98   0.329    -55.40082    165.4138
+        5 1  |   54.69519   42.85389     1.28   0.202    -29.30137    138.6918
+        6 1  |   50.53842   42.64002     1.19   0.236    -33.03895    134.1158
+        7 1  |  -20.28031   51.64315    -0.39   0.695    -121.5044    80.94381
+        9 1  |   78.48491   40.07371     1.96   0.050    -.0623206    157.0321
+       10 1  |   53.35977   66.99227     0.80   0.426    -77.94969    184.6692
+------------------------------------------------------------------------------
+
+added scalar:
+              e(ymean) =  445.28027
+
+added scalar:
+             e(ymean2) =  .
+
+added scalar:
+                e(acq) =  782
+
+added scalar:
+              e(fe_id) =  27
+
+added scalar:
+          e(n_treated) =  9831
+
+added scalar:
+          e(n_control) =  1469001
+
+added macro:
+               e(smpl) : "Rural"
+
+added macro:
+             e(fespec) : "unique_small_grid_id_cohort monthyearco province_coho
+> rt#c.monthyear yeargov province_cohort#election_year"
+
+added macro:
+                e(mod) : "moderator"
+
+added macro:
+           e(controls) : "never"
+(saving evreg1)
+(file /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication/.
+> ./../tables/exploratory_analysis/protest_original_controls_fe_sweep/sample/pr
+> otest_original_fe27_controls_never_event_rural_acpop_all.ster saved)
+EVENT controls=never FE=28: unique_small_grid_id_cohort monthyearco province_co
+> hort#c.monthyear yeargov province_cohort#election_year#yeargov
+(MWFE estimator converged in 138 iterations)
+
+HDFE linear regression with Julia                 Number of obs   =  1,478,832
+Absorbing 5 HDFE groups                           F(  11,  22643) =      85.73
+Statistics cluster-robust                         Prob > F        =     0.0000
+                                                  R-squared       =     0.1375
+                                                  Adj R-squared   =     0.1281
+Number of clusters (ac_elec_yr) =      22644      Within R-sq.    =     0.0027
+                                                  Root MSE        =   817.2910
+
+                        (Std. err. adjusted for 22,644 clusters in ac_elec_yr)
+------------------------------------------------------------------------------
+             |               Robust
+      countk | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+relative_y~x |
+          1  |          0  (omitted)
+          2  |          0  (omitted)
+          3  |          0  (omitted)
+          4  |          0  (omitted)
+          5  |          0  (omitted)
+          6  |          0  (omitted)
+          7  |          0  (omitted)
+          9  |          0  (omitted)
+         10  |          0  (omitted)
+             |
+     1.treat |          0  (omitted)
+wind_direc~n |  -.2451584   .0100954   -24.28   0.000    -.2649461   -.2253707
+av_wind_sp~d |   158.1031   5.827011    27.13   0.000     146.6817    169.5244
+             |
+relative_y~x#|
+       treat |
+        1 1  |  -1.331356    43.3483    -0.03   0.975    -86.29701     83.6343
+        2 1  |   79.48814    45.3353     1.75   0.080    -9.372163    168.3484
+        3 1  |   96.79496   47.53483     2.04   0.042      3.62342    189.9665
+        4 1  |   60.87383   53.37506     1.14   0.254    -43.74496    165.4926
+        5 1  |   53.91097    40.2778     1.34   0.181    -25.03628    132.8582
+        6 1  |   61.51219   44.02056     1.40   0.162    -24.77113    147.7955
+        7 1  |   26.86352   49.65851     0.54   0.589    -70.47057    124.1976
+        9 1  |   70.08153   41.66163     1.68   0.093    -11.57812    151.7412
+       10 1  |   56.42934   65.67819     0.86   0.390    -72.30443    185.1631
+------------------------------------------------------------------------------
+
+added scalar:
+              e(ymean) =  445.28027
+
+added scalar:
+             e(ymean2) =  .
+
+added scalar:
+                e(acq) =  782
+
+added scalar:
+              e(fe_id) =  28
+
+added scalar:
+          e(n_treated) =  9831
+
+added scalar:
+          e(n_control) =  1469001
+
+added macro:
+               e(smpl) : "Rural"
+
+added macro:
+             e(fespec) : "unique_small_grid_id_cohort monthyearco province_coho
+> rt#c.monthyear yeargov province_cohort#election_year#yeargov"
+
+added macro:
+                e(mod) : "moderator"
+
+added macro:
+           e(controls) : "never"
+(saving evreg1)
+(file /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication/.
+> ./../tables/exploratory_analysis/protest_original_controls_fe_sweep/sample/pr
+> otest_original_fe28_controls_never_event_rural_acpop_all.ster saved)
+EVENT controls=never FE=29: unique_small_grid_id_cohort monthyearco province_co
+> hort#c.monthyear province_cohort#election_year province_cohort#election_year#
+> yeargov
+(MWFE estimator converged in 138 iterations)
+
+HDFE linear regression with Julia                 Number of obs   =  1,478,832
+Absorbing 5 HDFE groups                           F(  11,  22643) =      85.72
+Statistics cluster-robust                         Prob > F        =     0.0000
+                                                  R-squared       =     0.1375
+                                                  Adj R-squared   =     0.1279
+Number of clusters (ac_elec_yr) =      22644      Within R-sq.    =     0.0027
+                                                  Root MSE        =   817.3533
+
+                        (Std. err. adjusted for 22,644 clusters in ac_elec_yr)
+------------------------------------------------------------------------------
+             |               Robust
+      countk | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+relative_y~x |
+          1  |          0  (omitted)
+          2  |          0  (omitted)
+          3  |          0  (omitted)
+          4  |          0  (omitted)
+          5  |          0  (omitted)
+          6  |          0  (omitted)
+          7  |          0  (omitted)
+          9  |          0  (omitted)
+         10  |          0  (omitted)
+             |
+     1.treat |          0  (omitted)
+wind_direc~n |  -.2451613   .0100963   -24.28   0.000    -.2649507   -.2253719
+av_wind_sp~d |   158.1026   5.827455    27.13   0.000     146.6803    169.5248
+             |
+relative_y~x#|
+       treat |
+        1 1  |  -1.329745   43.35146    -0.03   0.976    -86.30159     83.6421
+        2 1  |   79.49105   45.33871     1.75   0.080    -9.375942     168.358
+        3 1  |    96.7979   47.53842     2.04   0.042     3.619328    189.9765
+        4 1  |   60.87678   53.37933     1.14   0.254    -43.75037    165.5039
+        5 1  |   53.91388   40.28097     1.34   0.181     -25.0396    132.8674
+        6 1  |   61.51507   44.02369     1.40   0.162     -24.7744    147.8045
+        7 1  |   26.86643    49.6621     0.54   0.589    -70.47469    124.2076
+        9 1  |    70.0848    41.6648     1.68   0.093    -11.58106    151.7507
+       10 1  |   56.43406   65.68334     0.86   0.390    -72.30981    185.1779
+------------------------------------------------------------------------------
+
+added scalar:
+              e(ymean) =  445.28027
+
+added scalar:
+             e(ymean2) =  .
+
+added scalar:
+                e(acq) =  782
+
+added scalar:
+              e(fe_id) =  29
+
+added scalar:
+          e(n_treated) =  9831
+
+added scalar:
+          e(n_control) =  1469001
+
+added macro:
+               e(smpl) : "Rural"
+
+added macro:
+             e(fespec) : "unique_small_grid_id_cohort monthyearco province_coho
+> rt#c.monthyear province_cohort#election_year province_cohort#election_year#ye
+> argov"
+
+added macro:
+                e(mod) : "moderator"
+
+added macro:
+           e(controls) : "never"
+(saving evreg1)
+(file /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication/.
+> ./../tables/exploratory_analysis/protest_original_controls_fe_sweep/sample/pr
+> otest_original_fe29_controls_never_event_rural_acpop_all.ster saved)
+EVENT controls=never FE=30: unique_small_grid_id_cohort monthyearco yeargov pro
+> vince_cohort#election_year province_cohort#election_year#yeargov
+(MWFE estimator converged in 139 iterations)
+
+HDFE linear regression with Julia                 Number of obs   =  1,478,832
+Absorbing 5 HDFE groups                           F(  11,  22643) =      85.72
+Statistics cluster-robust                         Prob > F        =     0.0000
+                                                  R-squared       =     0.1375
+                                                  Adj R-squared   =     0.1280
+Number of clusters (ac_elec_yr) =      22644      Within R-sq.    =     0.0027
+                                                  Root MSE        =   817.3336
+
+                        (Std. err. adjusted for 22,644 clusters in ac_elec_yr)
+------------------------------------------------------------------------------
+             |               Robust
+      countk | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+relative_y~x |
+          1  |          0  (omitted)
+          2  |          0  (omitted)
+          3  |          0  (omitted)
+          4  |          0  (omitted)
+          5  |          0  (omitted)
+          6  |          0  (omitted)
+          7  |          0  (omitted)
+          9  |          0  (omitted)
+         10  |          0  (omitted)
+             |
+     1.treat |          0  (omitted)
+wind_direc~n |  -.2451696   .0100962   -24.28   0.000    -.2649588   -.2253803
+av_wind_sp~d |    158.101   5.827277    27.13   0.000     146.6792    169.5229
+             |
+relative_y~x#|
+       treat |
+        1 1  |  -1.325126   43.35062    -0.03   0.976    -86.29532    83.64507
+        2 1  |   79.49974   45.33771     1.75   0.080    -9.365289    168.3648
+        3 1  |   96.80666   47.53742     2.04   0.042     3.630041    189.9833
+        4 1  |   60.88561   53.37883     1.14   0.254    -43.74058    165.5118
+        5 1  |   53.92258   40.28017     1.34   0.181    -25.02931    132.8745
+        6 1  |   61.52381   44.02264     1.40   0.162     -24.7636    147.8112
+        7 1  |   26.87509   49.66116     0.54   0.588     -70.4642    124.2144
+        9 1  |   70.09464   41.66407     1.68   0.093     -11.5698    151.7591
+       10 1  |   56.44814    65.6819     0.86   0.390    -72.29291    185.1892
+------------------------------------------------------------------------------
+
+added scalar:
+              e(ymean) =  445.28027
+
+added scalar:
+             e(ymean2) =  .
+
+added scalar:
+                e(acq) =  782
+
+added scalar:
+              e(fe_id) =  30
+
+added scalar:
+          e(n_treated) =  9831
+
+added scalar:
+          e(n_control) =  1469001
+
+added macro:
+               e(smpl) : "Rural"
+
+added macro:
+             e(fespec) : "unique_small_grid_id_cohort monthyearco yeargov provi
+> nce_cohort#election_year province_cohort#election_year#yeargov"
+
+added macro:
+                e(mod) : "moderator"
+
+added macro:
+           e(controls) : "never"
+(saving evreg1)
+(file /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication/.
+> ./../tables/exploratory_analysis/protest_original_controls_fe_sweep/sample/pr
+> otest_original_fe30_controls_never_event_rural_acpop_all.ster saved)
+EVENT controls=never FE=31: unique_small_grid_id_cohort province_cohort#c.month
+> year yeargov province_cohort#election_year province_cohort#election_year#year
+> gov
+(MWFE estimator converged in 18 iterations)
+
+HDFE linear regression with Julia                 Number of obs   =  1,478,832
+Absorbing 5 HDFE groups                           F(  20,  22643) =     124.31
+Statistics cluster-robust                         Prob > F        =     0.0000
+                                                  R-squared       =     0.1030
+                                                  Adj R-squared   =     0.0944
+Number of clusters (ac_elec_yr) =      22644      Within R-sq.    =     0.0061
+                                                  Root MSE        =   832.9426
+
+                        (Std. err. adjusted for 22,644 clusters in ac_elec_yr)
+------------------------------------------------------------------------------
+             |               Robust
+      countk | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+relative_y~x |
+          1  |  -207.5233   53.15739    -3.90   0.000    -311.7154   -103.3312
+          2  |  -180.2571   46.01805    -3.92   0.000    -270.4556   -90.05856
+          3  |  -132.3787   38.89256    -3.40   0.001    -208.6108   -56.14664
+          4  |  -82.66125   31.75842    -2.60   0.009    -144.9099   -20.41255
+          5  |  -46.14215   24.17768    -1.91   0.056    -93.53206    1.247766
+          6  |  -12.47629   16.16344    -0.77   0.440    -44.15774    19.20515
+          7  |  -22.80674   8.440123    -2.70   0.007    -39.34996   -6.263514
+          9  |   58.70868   10.17003     5.77   0.000     38.77472    78.64263
+         10  |   54.87512   18.72393     2.93   0.003     18.17494    91.57531
+             |
+     1.treat |          0  (omitted)
+wind_direc~n |  -.6534992   .0142177   -45.96   0.000    -.6813668   -.6256315
+av_wind_sp~d |   55.52801   2.247143    24.71   0.000     51.12346    59.93257
+             |
+relative_y~x#|
+       treat |
+        1 1  |   8.222374      44.12     0.19   0.852    -78.25585     94.7006
+        2 1  |   76.57076   45.66481     1.68   0.094     -12.9354    166.0769
+        3 1  |   93.33994   47.53324     1.96   0.050     .1715207    186.5084
+        4 1  |   61.85121   53.92346     1.15   0.251    -43.84248    167.5449
+        5 1  |   48.33377   40.82123     1.18   0.236    -31.67865    128.3462
+        6 1  |   55.96831   44.44125     1.26   0.208     -31.1396    143.0762
+        7 1  |   24.40051   50.73897     0.48   0.631    -75.05135    123.8524
+        9 1  |   64.53378   41.90348     1.54   0.124    -17.59992    146.6675
+       10 1  |   36.21793   67.81747     0.53   0.593    -96.70898    169.1448
+------------------------------------------------------------------------------
+
+added scalar:
+              e(ymean) =  445.28027
+
+added scalar:
+             e(ymean2) =  .
+
+added scalar:
+                e(acq) =  782
+
+added scalar:
+              e(fe_id) =  31
+
+added scalar:
+          e(n_treated) =  9831
+
+added scalar:
+          e(n_control) =  1469001
+
+added macro:
+               e(smpl) : "Rural"
+
+added macro:
+             e(fespec) : "unique_small_grid_id_cohort province_cohort#c.monthye
+> ar yeargov province_cohort#election_year province_cohort#election_year#yeargo
+> v"
+
+added macro:
+                e(mod) : "moderator"
+
+added macro:
+           e(controls) : "never"
+(saving evreg1)
+(file /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication/.
+> ./../tables/exploratory_analysis/protest_original_controls_fe_sweep/sample/pr
+> otest_original_fe31_controls_never_event_rural_acpop_all.ster saved)
+EVENT controls=never FE=32: unique_small_grid_id_cohort monthyearco province_co
+> hort#c.monthyear yeargov province_cohort#election_year province_cohort#electi
+> on_year#yeargov
+(MWFE estimator converged in 144 iterations)
+
+HDFE linear regression with Julia                 Number of obs   =  1,478,832
+Absorbing 6 HDFE groups                           F(  11,  22643) =      85.72
+Statistics cluster-robust                         Prob > F        =     0.0000
+                                                  R-squared       =     0.1375
+                                                  Adj R-squared   =     0.1279
+Number of clusters (ac_elec_yr) =      22644      Within R-sq.    =     0.0027
+                                                  Root MSE        =   817.3547
+
+                        (Std. err. adjusted for 22,644 clusters in ac_elec_yr)
+------------------------------------------------------------------------------
+             |               Robust
+      countk | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+relative_y~x |
+          1  |          0  (omitted)
+          2  |          0  (omitted)
+          3  |          0  (omitted)
+          4  |          0  (omitted)
+          5  |          0  (omitted)
+          6  |          0  (omitted)
+          7  |          0  (omitted)
+          9  |          0  (omitted)
+         10  |          0  (omitted)
+             |
+     1.treat |          0  (omitted)
+wind_direc~n |  -.2451613   .0100963   -24.28   0.000    -.2649507   -.2253718
+av_wind_sp~d |   158.1026   5.827464    27.13   0.000     146.6803    169.5248
+             |
+relative_y~x#|
+       treat |
+        1 1  |  -1.329785    43.3515    -0.03   0.976    -86.30171    83.64214
+        2 1  |   79.49103   45.33877     1.75   0.080    -9.376079    168.3581
+        3 1  |    96.7979   47.53848     2.04   0.042     3.619214    189.9766
+        4 1  |   60.87678    53.3797     1.14   0.254     -43.7511    165.5047
+        5 1  |   53.91384   40.28081     1.34   0.181    -25.03931     132.867
+        6 1  |   61.51506   44.02377     1.40   0.162    -24.77456    147.8047
+        7 1  |   26.86641   49.66226     0.54   0.589    -70.47503    124.2079
+        9 1  |   70.08475   41.66488     1.68   0.093    -11.58128    151.7508
+       10 1  |   56.43397   65.68352     0.86   0.390    -72.31024    185.1782
+------------------------------------------------------------------------------
+
+added scalar:
+              e(ymean) =  445.28027
+
+added scalar:
+             e(ymean2) =  .
+
+added scalar:
+                e(acq) =  782
+
+added scalar:
+              e(fe_id) =  32
+
+added scalar:
+          e(n_treated) =  9831
+
+added scalar:
+          e(n_control) =  1469001
+
+added macro:
+               e(smpl) : "Rural"
+
+added macro:
+             e(fespec) : "unique_small_grid_id_cohort monthyearco province_coho
+> rt#c.monthyear yeargov province_cohort#election_year province_cohort#election
+> _year#yeargov"
+
+added macro:
+                e(mod) : "moderator"
+
+added macro:
+           e(controls) : "never"
+(saving evreg1)
+(file /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication/.
+> ./../tables/exploratory_analysis/protest_original_controls_fe_sweep/sample/pr
+> otest_original_fe32_controls_never_event_rural_acpop_all.ster saved)
+
+. 
+. * Reload the prepared full sample once and loop over the DiD specifications.
+. use `full_analysis_sample', clear
+
+. gen byte post_ = relative_year_bin >= 0
+
+. gen byte moderator = downup_ac_pop
+
+. local moderators_list downup_ac_pop
+
+. count if treat == 1
+  10,320
+
+. local did_n_treated = r(N)
+
+. count if treat == 0
+  1,554,960
+
+. local did_n_control = r(N)
+
+. egen byte did_tag_ac = tag(ac_uq_id)
+
+. count if did_tag_ac
+  782
+
+. local did_numacs = r(N)
+
+. drop did_tag_ac
+
+. quietly summarize countk if treat == 1 & relative_year_bin <= -1
+
+. local did_ymean = r(mean)
+
+. quietly summarize countk if treat == 1 & relative_year_bin <= -1 & moderator 
+> == 1
+
+. local did_ymean2 = r(mean)
+
+. 
+. foreach mod of local moderators_list {
+  2.     local rhs "ib0.post_##ib0.treat##ib0.`mod' wind_direction av_wind_spee
+> d"
+  3.     foreach selected_fe of numlist $fe_list {
+  4.         local fespec "`fe`selected_fe''"
+  5.         local fe_tag : display %02.0f `selected_fe'
+  6.         local fe_tag = strtrim("`fe_tag'")
+  7.         local prefix "protest_original_fe`fe_tag'_controls_`control_sample
+> '"
+  8.         display as result "DID controls=`control_sample' FE=`selected_fe':
+>  `fespec'"
+  9.         est clear
+ 10.         reghdfejl countk `rhs', absorb(`fespec') vce(cluster ac_elec_yr)
+ 11.         estadd scalar ymean = `did_ymean'
+ 12.         estadd scalar ymean2 = `did_ymean2'
+ 13.         estadd scalar acq = `did_numacs'
+ 14.         estadd scalar fe_id = `selected_fe'
+ 15.         estadd scalar n_treated = `did_n_treated'
+ 16.         estadd scalar n_control = `did_n_control'
+ 17.         estadd local smpl "Rural"
+ 18.         estadd local fespec "`fespec'"
+ 19.         estadd local mod "`mod'"
+ 20.         estadd local controls "`control_sample'"
+ 21.         est store evreg1
+ 22.         local did_out "${tables}/`prefix'_did_interaction_rural_acpop_all"
+ 23.         estwrite evreg1 using "`did_out'.ster", replace
+ 24.         confirm file "`did_out'.ster"
+ 25.     }
+ 26. }
+DID controls=never FE=16: unique_small_grid_id_cohort province_cohort#election_
+> year province_cohort#election_year#yeargov
+(MWFE estimator converged in 3 iterations)
+
+HDFE linear regression with Julia                 Number of obs   =  1,565,280
+Absorbing 3 HDFE groups                           F(   8,  22643) =     335.63
+Statistics cluster-robust                         Prob > F        =     0.0000
+                                                  R-squared       =     0.1049
+                                                  Adj R-squared   =     0.0968
+Number of clusters (ac_elec_yr) =      22644      Within R-sq.    =     0.0060
+                                                  Root MSE        =   835.9688
+
+                        (Std. err. adjusted for 22,644 clusters in ac_elec_yr)
+------------------------------------------------------------------------------
+             |               Robust
+      countk | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+     1.post_ |   16.94101   7.168848     2.36   0.018     2.889573    30.99244
+     1.treat |          0  (omitted)
+1.downup_a~p |    4.86863   2.458365     1.98   0.048     .0500658    9.687193
+wind_direc~n |  -.6518794   .0137807   -47.30   0.000    -.6788904   -.6248684
+av_wind_sp~d |   60.44261   2.080575    29.05   0.000     56.36454    64.52068
+             |
+ post_#treat |
+        1 1  |   26.62709   50.31026     0.53   0.597    -71.98447    125.2387
+             |
+       post_#|
+downup_ac_~p |
+        1 1  |  -5.751559   4.014282    -1.43   0.152    -13.61983     2.11671
+             |
+       treat#|
+downup_ac_~p |
+        1 1  |   5.537156   79.84653     0.07   0.945    -150.9675    162.0419
+             |
+ post_#treat#|
+downup_ac_~p |
+      1 1 1  |   -25.9319   76.72915    -0.34   0.735    -176.3263    124.4625
+------------------------------------------------------------------------------
+
+added scalar:
+              e(ymean) =  453.13755
+
+added scalar:
+             e(ymean2) =  442.40437
+
+added scalar:
+                e(acq) =  782
+
+added scalar:
+              e(fe_id) =  16
+
+added scalar:
+          e(n_treated) =  10320
+
+added scalar:
+          e(n_control) =  1554960
+
+added macro:
+               e(smpl) : "Rural"
+
+added macro:
+             e(fespec) : "unique_small_grid_id_cohort province_cohort#election_
+> year province_cohort#election_year#yeargov"
+
+added macro:
+                e(mod) : "downup_ac_pop"
+
+added macro:
+           e(controls) : "never"
+(saving evreg1)
+(file /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication/.
+> ./../tables/exploratory_analysis/protest_original_controls_fe_sweep/sample/pr
+> otest_original_fe16_controls_never_did_interaction_rural_acpop_all.ster saved
+> )
+DID controls=never FE=17: unique_small_grid_id_cohort monthyearco province_coho
+> rt#c.monthyear yeargov
+(MWFE estimator converged in 14 iterations)
+
+HDFE linear regression with Julia                 Number of obs   =  1,565,280
+Absorbing 4 HDFE groups                           F(   7,  22643) =     142.51
+Statistics cluster-robust                         Prob > F        =     0.0000
+                                                  R-squared       =     0.1362
+                                                  Adj R-squared   =     0.1276
+Number of clusters (ac_elec_yr) =      22644      Within R-sq.    =     0.0028
+                                                  Root MSE        =   821.5709
+
+                        (Std. err. adjusted for 22,644 clusters in ac_elec_yr)
+------------------------------------------------------------------------------
+             |               Robust
+      countk | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+     1.post_ |          0  (omitted)
+     1.treat |          0  (omitted)
+1.downup_a~p |   4.351843   2.439678     1.78   0.074    -.4300931    9.133778
+wind_direc~n |  -.2813538    .010509   -26.77   0.000     -.301952   -.2607555
+av_wind_sp~d |    158.053   5.703255    27.71   0.000     146.8742    169.2318
+             |
+ post_#treat |
+        1 1  |   57.09255   53.91835     1.06   0.290    -48.59113    162.7762
+             |
+       post_#|
+downup_ac_~p |
+        1 1  |  -3.736562   4.027553    -0.93   0.354    -11.63084    4.157718
+             |
+       treat#|
+downup_ac_~p |
+        1 1  |   .1305285   76.56833     0.00   0.999    -149.9487    150.2097
+             |
+ post_#treat#|
+downup_ac_~p |
+      1 1 1  |  -43.20556   79.64448    -0.54   0.587    -199.3142    112.9031
+------------------------------------------------------------------------------
+
+added scalar:
+              e(ymean) =  453.13755
+
+added scalar:
+             e(ymean2) =  442.40437
+
+added scalar:
+                e(acq) =  782
+
+added scalar:
+              e(fe_id) =  17
+
+added scalar:
+          e(n_treated) =  10320
+
+added scalar:
+          e(n_control) =  1554960
+
+added macro:
+               e(smpl) : "Rural"
+
+added macro:
+             e(fespec) : "unique_small_grid_id_cohort monthyearco province_coho
+> rt#c.monthyear yeargov"
+
+added macro:
+                e(mod) : "downup_ac_pop"
+
+added macro:
+           e(controls) : "never"
+(saving evreg1)
+(file /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication/.
+> ./../tables/exploratory_analysis/protest_original_controls_fe_sweep/sample/pr
+> otest_original_fe17_controls_never_did_interaction_rural_acpop_all.ster saved
+> )
+DID controls=never FE=18: unique_small_grid_id_cohort monthyearco province_coho
+> rt#c.monthyear province_cohort#election_year
+(MWFE estimator converged in 60 iterations)
+
+HDFE linear regression with Julia                 Number of obs   =  1,565,280
+Absorbing 4 HDFE groups                           F(   7,  22643) =     137.99
+Statistics cluster-robust                         Prob > F        =     0.0000
+                                                  R-squared       =     0.1368
+                                                  Adj R-squared   =     0.1280
+Number of clusters (ac_elec_yr) =      22644      Within R-sq.    =     0.0028
+                                                  Root MSE        =   821.3692
+
+                        (Std. err. adjusted for 22,644 clusters in ac_elec_yr)
+------------------------------------------------------------------------------
+             |               Robust
+      countk | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+     1.post_ |          0  (omitted)
+     1.treat |          0  (omitted)
+1.downup_a~p |   4.346331   2.439246     1.78   0.075    -.4347591    9.127422
+wind_direc~n |  -.2697742   .0104012   -25.94   0.000    -.2901612   -.2493871
+av_wind_sp~d |   157.4294   5.711913    27.56   0.000     146.2337    168.6251
+             |
+ post_#treat |
+        1 1  |   67.11244   51.49599     1.30   0.193    -33.82325    168.0481
+             |
+       post_#|
+downup_ac_~p |
+        1 1  |  -4.428402   4.006024    -1.11   0.269    -12.28049     3.42368
+             |
+       treat#|
+downup_ac_~p |
+        1 1  |  -.3612462   76.58937    -0.00   0.996    -150.4817    149.7592
+             |
+ post_#treat#|
+downup_ac_~p |
+      1 1 1  |   -38.0535   77.88359    -0.49   0.625    -190.7107    114.6037
+------------------------------------------------------------------------------
+
+added scalar:
+              e(ymean) =  453.13755
+
+added scalar:
+             e(ymean2) =  442.40437
+
+added scalar:
+                e(acq) =  782
+
+added scalar:
+              e(fe_id) =  18
+
+added scalar:
+          e(n_treated) =  10320
+
+added scalar:
+          e(n_control) =  1554960
+
+added macro:
+               e(smpl) : "Rural"
+
+added macro:
+             e(fespec) : "unique_small_grid_id_cohort monthyearco province_coho
+> rt#c.monthyear province_cohort#election_year"
+
+added macro:
+                e(mod) : "downup_ac_pop"
+
+added macro:
+           e(controls) : "never"
+(saving evreg1)
+(file /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication/.
+> ./../tables/exploratory_analysis/protest_original_controls_fe_sweep/sample/pr
+> otest_original_fe18_controls_never_did_interaction_rural_acpop_all.ster saved
+> )
+DID controls=never FE=19: unique_small_grid_id_cohort monthyearco province_coho
+> rt#c.monthyear province_cohort#election_year#yeargov
+(MWFE estimator converged in 100 iterations)
+
+HDFE linear regression with Julia                 Number of obs   =  1,565,280
+Absorbing 4 HDFE groups                           F(   7,  22643) =     137.95
+Statistics cluster-robust                         Prob > F        =     0.0000
+                                                  R-squared       =     0.1395
+                                                  Adj R-squared   =     0.1305
+Number of clusters (ac_elec_yr) =      22644      Within R-sq.    =     0.0029
+                                                  Root MSE        =   820.2166
+
+                        (Std. err. adjusted for 22,644 clusters in ac_elec_yr)
+------------------------------------------------------------------------------
+             |               Robust
+      countk | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+     1.post_ |          0  (omitted)
+     1.treat |          0  (omitted)
+1.downup_a~p |   3.920158   2.441707     1.61   0.108    -.8657561    8.706073
+wind_direc~n |  -.2518664   .0100933   -24.95   0.000      -.27165   -.2320828
+av_wind_sp~d |   164.3005   5.928147    27.72   0.000      152.681    175.9201
+             |
+ post_#treat |
+        1 1  |   34.12677   49.08718     0.70   0.487    -62.08748     130.341
+             |
+       post_#|
+downup_ac_~p |
+        1 1  |  -4.236794   3.956347    -1.07   0.284    -11.99151    3.517918
+             |
+       treat#|
+downup_ac_~p |
+        1 1  |  -2.137562   77.47696    -0.03   0.978    -153.9977    149.7226
+             |
+ post_#treat#|
+downup_ac_~p |
+      1 1 1  |  -30.66651   74.83927    -0.41   0.682    -177.3566    116.0236
+------------------------------------------------------------------------------
+
+added scalar:
+              e(ymean) =  453.13755
+
+added scalar:
+             e(ymean2) =  442.40437
+
+added scalar:
+                e(acq) =  782
+
+added scalar:
+              e(fe_id) =  19
+
+added scalar:
+          e(n_treated) =  10320
+
+added scalar:
+          e(n_control) =  1554960
+
+added macro:
+               e(smpl) : "Rural"
+
+added macro:
+             e(fespec) : "unique_small_grid_id_cohort monthyearco province_coho
+> rt#c.monthyear province_cohort#election_year#yeargov"
+
+added macro:
+                e(mod) : "downup_ac_pop"
+
+added macro:
+           e(controls) : "never"
+(saving evreg1)
+(file /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication/.
+> ./../tables/exploratory_analysis/protest_original_controls_fe_sweep/sample/pr
+> otest_original_fe19_controls_never_did_interaction_rural_acpop_all.ster saved
+> )
+DID controls=never FE=20: unique_small_grid_id_cohort monthyearco yeargov provi
+> nce_cohort#election_year
+(MWFE estimator converged in 45 iterations)
+
+HDFE linear regression with Julia                 Number of obs   =  1,565,280
+Absorbing 4 HDFE groups                           F(   7,  22643) =     139.33
+Statistics cluster-robust                         Prob > F        =     0.0000
+                                                  R-squared       =     0.1376
+                                                  Adj R-squared   =     0.1290
+Number of clusters (ac_elec_yr) =      22644      Within R-sq.    =     0.0030
+                                                  Root MSE        =   820.9374
+
+                        (Std. err. adjusted for 22,644 clusters in ac_elec_yr)
+------------------------------------------------------------------------------
+             |               Robust
+      countk | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+     1.post_ |          0  (omitted)
+     1.treat |          0  (omitted)
+1.downup_a~p |   4.007277   2.444421     1.64   0.101    -.7839572    8.798511
+wind_direc~n |  -.2586112   .0101547   -25.47   0.000    -.2785151   -.2387074
+av_wind_sp~d |   167.1012   5.975192    27.97   0.000     155.3894     178.813
+             |
+ post_#treat |
+        1 1  |    84.8009   51.64083     1.64   0.101    -16.41867    186.0205
+             |
+       post_#|
+downup_ac_~p |
+        1 1  |   -4.35503   3.997642    -1.09   0.276    -12.19068    3.480623
+             |
+       treat#|
+downup_ac_~p |
+        1 1  |   .9839112   77.58443     0.01   0.990    -151.0869    153.0547
+             |
+ post_#treat#|
+downup_ac_~p |
+      1 1 1  |  -42.99997   78.27818    -0.55   0.583    -196.4306    110.4306
+------------------------------------------------------------------------------
+
+added scalar:
+              e(ymean) =  453.13755
+
+added scalar:
+             e(ymean2) =  442.40437
+
+added scalar:
+                e(acq) =  782
+
+added scalar:
+              e(fe_id) =  20
+
+added scalar:
+          e(n_treated) =  10320
+
+added scalar:
+          e(n_control) =  1554960
+
+added macro:
+               e(smpl) : "Rural"
+
+added macro:
+             e(fespec) : "unique_small_grid_id_cohort monthyearco yeargov provi
+> nce_cohort#election_year"
+
+added macro:
+                e(mod) : "downup_ac_pop"
+
+added macro:
+           e(controls) : "never"
+(saving evreg1)
+(file /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication/.
+> ./../tables/exploratory_analysis/protest_original_controls_fe_sweep/sample/pr
+> otest_original_fe20_controls_never_did_interaction_rural_acpop_all.ster saved
+> )
+DID controls=never FE=21: unique_small_grid_id_cohort monthyearco yeargov provi
+> nce_cohort#election_year#yeargov
+(MWFE estimator converged in 102 iterations)
+
+HDFE linear regression with Julia                 Number of obs   =  1,565,280
+Absorbing 4 HDFE groups                           F(   7,  22643) =     137.96
+Statistics cluster-robust                         Prob > F        =     0.0000
+                                                  R-squared       =     0.1395
+                                                  Adj R-squared   =     0.1305
+Number of clusters (ac_elec_yr) =      22644      Within R-sq.    =     0.0029
+                                                  Root MSE        =   820.1979
+
+                        (Std. err. adjusted for 22,644 clusters in ac_elec_yr)
+------------------------------------------------------------------------------
+             |               Robust
+      countk | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+     1.post_ |          0  (omitted)
+     1.treat |          0  (omitted)
+1.downup_a~p |   3.920251   2.441668     1.61   0.108    -.8655861    8.706088
+wind_direc~n |  -.2518777   .0100934   -24.95   0.000    -.2716613    -.232094
+av_wind_sp~d |   164.2985   5.927966    27.72   0.000     152.6792    175.9177
+             |
+ post_#treat |
+        1 1  |   34.13406   49.08665     0.70   0.487    -62.07915    130.3473
+             |
+       post_#|
+downup_ac_~p |
+        1 1  |  -4.236811   3.956266    -1.07   0.284    -11.99137    3.517743
+             |
+       treat#|
+downup_ac_~p |
+        1 1  |  -2.133092   77.47638    -0.03   0.978    -153.9921    149.7259
+             |
+ post_#treat#|
+downup_ac_~p |
+      1 1 1  |  -30.67017   74.83855    -0.41   0.682    -177.3589    116.0185
+------------------------------------------------------------------------------
+
+added scalar:
+              e(ymean) =  453.13755
+
+added scalar:
+             e(ymean2) =  442.40437
+
+added scalar:
+                e(acq) =  782
+
+added scalar:
+              e(fe_id) =  21
+
+added scalar:
+          e(n_treated) =  10320
+
+added scalar:
+          e(n_control) =  1554960
+
+added macro:
+               e(smpl) : "Rural"
+
+added macro:
+             e(fespec) : "unique_small_grid_id_cohort monthyearco yeargov provi
+> nce_cohort#election_year#yeargov"
+
+added macro:
+                e(mod) : "downup_ac_pop"
+
+added macro:
+           e(controls) : "never"
+(saving evreg1)
+(file /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication/.
+> ./../tables/exploratory_analysis/protest_original_controls_fe_sweep/sample/pr
+> otest_original_fe21_controls_never_did_interaction_rural_acpop_all.ster saved
+> )
+DID controls=never FE=22: unique_small_grid_id_cohort monthyearco province_coho
+> rt#election_year province_cohort#election_year#yeargov
+(MWFE estimator converged in 107 iterations)
+
+HDFE linear regression with Julia                 Number of obs   =  1,565,280
+Absorbing 4 HDFE groups                           F(   7,  22643) =     137.94
+Statistics cluster-robust                         Prob > F        =     0.0000
+                                                  R-squared       =     0.1395
+                                                  Adj R-squared   =     0.1304
+Number of clusters (ac_elec_yr) =      22644      Within R-sq.    =     0.0029
+                                                  Root MSE        =   820.2569
+
+                        (Std. err. adjusted for 22,644 clusters in ac_elec_yr)
+------------------------------------------------------------------------------
+             |               Robust
+      countk | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+     1.post_ |          0  (omitted)
+     1.treat |          0  (omitted)
+1.downup_a~p |   3.920251   2.441851     1.61   0.108    -.8659443    8.706446
+wind_direc~n |  -.2518777   .0100941   -24.95   0.000    -.2716628   -.2320925
+av_wind_sp~d |   164.2985   5.928371    27.71   0.000     152.6784    175.9185
+             |
+ post_#treat |
+        1 1  |   34.13403   49.08994     0.70   0.487    -62.08563    130.3537
+             |
+       post_#|
+downup_ac_~p |
+        1 1  |  -4.236819   3.956562    -1.07   0.284    -11.99195    3.518315
+             |
+       treat#|
+downup_ac_~p |
+        1 1  |  -2.133094   77.48228    -0.03   0.978    -154.0037    149.7375
+             |
+ post_#treat#|
+downup_ac_~p |
+      1 1 1  |  -30.67015   74.84339    -0.41   0.682    -177.3683     116.028
+------------------------------------------------------------------------------
+
+added scalar:
+              e(ymean) =  453.13755
+
+added scalar:
+             e(ymean2) =  442.40437
+
+added scalar:
+                e(acq) =  782
+
+added scalar:
+              e(fe_id) =  22
+
+added scalar:
+          e(n_treated) =  10320
+
+added scalar:
+          e(n_control) =  1554960
+
+added macro:
+               e(smpl) : "Rural"
+
+added macro:
+             e(fespec) : "unique_small_grid_id_cohort monthyearco province_coho
+> rt#election_year province_cohort#election_year#yeargov"
+
+added macro:
+                e(mod) : "downup_ac_pop"
+
+added macro:
+           e(controls) : "never"
+(saving evreg1)
+(file /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication/.
+> ./../tables/exploratory_analysis/protest_original_controls_fe_sweep/sample/pr
+> otest_original_fe22_controls_never_did_interaction_rural_acpop_all.ster saved
+> )
+DID controls=never FE=23: unique_small_grid_id_cohort province_cohort#c.monthye
+> ar yeargov province_cohort#election_year
+(MWFE estimator converged in 29 iterations)
+
+HDFE linear regression with Julia                 Number of obs   =  1,565,280
+Absorbing 4 HDFE groups                           F(   8,  22643) =     322.77
+Statistics cluster-robust                         Prob > F        =     0.0000
+                                                  R-squared       =     0.1031
+                                                  Adj R-squared   =     0.0954
+Number of clusters (ac_elec_yr) =      22644      Within R-sq.    =     0.0058
+                                                  Root MSE        =   836.6198
+
+                        (Std. err. adjusted for 22,644 clusters in ac_elec_yr)
+------------------------------------------------------------------------------
+             |               Robust
+      countk | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+     1.post_ |   29.33537   3.754304     7.81   0.000     21.97667    36.69406
+     1.treat |          0  (omitted)
+1.downup_a~p |   4.976449   2.460274     2.02   0.043      .154142    9.798756
+wind_direc~n |  -.6441385   .0136248   -47.28   0.000    -.6708441    -.617433
+av_wind_sp~d |   52.34457   2.141114    24.45   0.000     48.14784     56.5413
+             |
+ post_#treat |
+        1 1  |   62.71192   51.37879     1.22   0.222    -37.99404    163.4179
+             |
+       post_#|
+downup_ac_~p |
+        1 1  |  -6.132751   4.041697    -1.52   0.129    -14.05476    1.789253
+             |
+       treat#|
+downup_ac_~p |
+        1 1  |   7.861832   80.12962     0.10   0.922    -149.1977    164.9214
+             |
+ post_#treat#|
+downup_ac_~p |
+      1 1 1  |   -35.1551   78.72644    -0.45   0.655    -189.4643    119.1541
+------------------------------------------------------------------------------
+
+added scalar:
+              e(ymean) =  453.13755
+
+added scalar:
+             e(ymean2) =  442.40437
+
+added scalar:
+                e(acq) =  782
+
+added scalar:
+              e(fe_id) =  23
+
+added scalar:
+          e(n_treated) =  10320
+
+added scalar:
+          e(n_control) =  1554960
+
+added macro:
+               e(smpl) : "Rural"
+
+added macro:
+             e(fespec) : "unique_small_grid_id_cohort province_cohort#c.monthye
+> ar yeargov province_cohort#election_year"
+
+added macro:
+                e(mod) : "downup_ac_pop"
+
+added macro:
+           e(controls) : "never"
+(saving evreg1)
+(file /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication/.
+> ./../tables/exploratory_analysis/protest_original_controls_fe_sweep/sample/pr
+> otest_original_fe23_controls_never_did_interaction_rural_acpop_all.ster saved
+> )
+DID controls=never FE=24: unique_small_grid_id_cohort province_cohort#c.monthye
+> ar yeargov province_cohort#election_year#yeargov
+(MWFE estimator converged in 9 iterations)
+
+HDFE linear regression with Julia                 Number of obs   =  1,565,280
+Absorbing 4 HDFE groups                           F(   8,  22643) =     312.15
+Statistics cluster-robust                         Prob > F        =     0.0000
+                                                  R-squared       =     0.1048
+                                                  Adj R-squared   =     0.0967
+Number of clusters (ac_elec_yr) =      22644      Within R-sq.    =     0.0059
+                                                  Root MSE        =   835.9827
+
+                        (Std. err. adjusted for 22,644 clusters in ac_elec_yr)
+------------------------------------------------------------------------------
+             |               Robust
+      countk | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+     1.post_ |   47.89495   7.458328     6.42   0.000     33.27612    62.51379
+     1.treat |          0  (omitted)
+1.downup_a~p |   4.846772   2.471834     1.96   0.050     .0018072    9.691737
+wind_direc~n |  -.6618195   .0141864   -46.65   0.000    -.6896259   -.6340132
+av_wind_sp~d |   52.82088   2.138008    24.71   0.000     48.63024    57.01152
+             |
+ post_#treat |
+        1 1  |   22.87768   50.48266     0.45   0.650     -76.0718    121.8272
+             |
+       post_#|
+downup_ac_~p |
+        1 1  |   -5.96131   4.028325    -1.48   0.139     -13.8571    1.934485
+             |
+       treat#|
+downup_ac_~p |
+        1 1  |   8.215395   80.52096     0.10   0.919    -149.6112     166.042
+             |
+ post_#treat#|
+downup_ac_~p |
+      1 1 1  |  -27.03034   77.16914    -0.35   0.726    -178.2872    124.2265
+------------------------------------------------------------------------------
+
+added scalar:
+              e(ymean) =  453.13755
+
+added scalar:
+             e(ymean2) =  442.40437
+
+added scalar:
+                e(acq) =  782
+
+added scalar:
+              e(fe_id) =  24
+
+added scalar:
+          e(n_treated) =  10320
+
+added scalar:
+          e(n_control) =  1554960
+
+added macro:
+               e(smpl) : "Rural"
+
+added macro:
+             e(fespec) : "unique_small_grid_id_cohort province_cohort#c.monthye
+> ar yeargov province_cohort#election_year#yeargov"
+
+added macro:
+                e(mod) : "downup_ac_pop"
+
+added macro:
+           e(controls) : "never"
+(saving evreg1)
+(file /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication/.
+> ./../tables/exploratory_analysis/protest_original_controls_fe_sweep/sample/pr
+> otest_original_fe24_controls_never_did_interaction_rural_acpop_all.ster saved
+> )
+DID controls=never FE=25: unique_small_grid_id_cohort province_cohort#c.monthye
+> ar province_cohort#election_year province_cohort#election_year#yeargov
+(MWFE estimator converged in 7 iterations)
+
+HDFE linear regression with Julia                 Number of obs   =  1,565,280
+Absorbing 4 HDFE groups                           F(   8,  22643) =     312.41
+Statistics cluster-robust                         Prob > F        =     0.0000
+                                                  R-squared       =     0.1048
+                                                  Adj R-squared   =     0.0966
+Number of clusters (ac_elec_yr) =      22644      Within R-sq.    =     0.0059
+                                                  Root MSE        =   836.0414
+
+                        (Std. err. adjusted for 22,644 clusters in ac_elec_yr)
+------------------------------------------------------------------------------
+             |               Robust
+      countk | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+     1.post_ |     47.351   7.459643     6.35   0.000     32.72959    61.97241
+     1.treat |          0  (omitted)
+1.downup_a~p |   4.611677   2.476128     1.86   0.063     -.241705    9.465059
+wind_direc~n |   -.662067   .0141891   -46.66   0.000    -.6898787   -.6342553
+av_wind_sp~d |   52.85838   2.136832    24.74   0.000     48.67004    57.04672
+             |
+ post_#treat |
+        1 1  |   23.00325   50.48964     0.46   0.649    -75.95991    121.9664
+             |
+       post_#|
+downup_ac_~p |
+        1 1  |  -5.760574   4.028818    -1.43   0.153    -13.65733    2.136186
+             |
+       treat#|
+downup_ac_~p |
+        1 1  |   8.303454   80.53395     0.10   0.918    -149.5486    166.1555
+             |
+ post_#treat#|
+downup_ac_~p |
+      1 1 1  |   -27.1088    77.1765    -0.35   0.725      -178.38    124.1624
+------------------------------------------------------------------------------
+
+added scalar:
+              e(ymean) =  453.13755
+
+added scalar:
+             e(ymean2) =  442.40437
+
+added scalar:
+                e(acq) =  782
+
+added scalar:
+              e(fe_id) =  25
+
+added scalar:
+          e(n_treated) =  10320
+
+added scalar:
+          e(n_control) =  1554960
+
+added macro:
+               e(smpl) : "Rural"
+
+added macro:
+             e(fespec) : "unique_small_grid_id_cohort province_cohort#c.monthye
+> ar province_cohort#election_year province_cohort#election_year#yeargov"
+
+added macro:
+                e(mod) : "downup_ac_pop"
+
+added macro:
+           e(controls) : "never"
+(saving evreg1)
+(file /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication/.
+> ./../tables/exploratory_analysis/protest_original_controls_fe_sweep/sample/pr
+> otest_original_fe25_controls_never_did_interaction_rural_acpop_all.ster saved
+> )
+DID controls=never FE=26: unique_small_grid_id_cohort yeargov province_cohort#e
+> lection_year province_cohort#election_year#yeargov
+(MWFE estimator converged in 8 iterations)
+
+HDFE linear regression with Julia                 Number of obs   =  1,565,280
+Absorbing 4 HDFE groups                           F(   8,  22643) =     335.63
+Statistics cluster-robust                         Prob > F        =     0.0000
+                                                  R-squared       =     0.1049
+                                                  Adj R-squared   =     0.0968
+Number of clusters (ac_elec_yr) =      22644      Within R-sq.    =     0.0060
+                                                  Root MSE        =   835.9701
+
+                        (Std. err. adjusted for 22,644 clusters in ac_elec_yr)
+------------------------------------------------------------------------------
+             |               Robust
+      countk | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+     1.post_ |   16.94101   7.168859     2.36   0.018     2.889551    30.99246
+     1.treat |          0  (omitted)
+1.downup_a~p |    4.86863   2.458369     1.98   0.048     .0500575    9.687202
+wind_direc~n |  -.6518794   .0137807   -47.30   0.000    -.6788905   -.6248683
+av_wind_sp~d |   60.44261   2.080579    29.05   0.000     56.36454    64.52069
+             |
+ post_#treat |
+        1 1  |   26.62709   50.31034     0.53   0.597    -71.98463    125.2388
+             |
+       post_#|
+downup_ac_~p |
+        1 1  |  -5.751559   4.014289    -1.43   0.152    -13.61984    2.116722
+             |
+       treat#|
+downup_ac_~p |
+        1 1  |   5.537156   79.84668     0.07   0.945    -150.9678    162.0421
+             |
+ post_#treat#|
+downup_ac_~p |
+      1 1 1  |   -25.9319   76.72926    -0.34   0.735    -176.3265    124.4627
+------------------------------------------------------------------------------
+
+added scalar:
+              e(ymean) =  453.13755
+
+added scalar:
+             e(ymean2) =  442.40437
+
+added scalar:
+                e(acq) =  782
+
+added scalar:
+              e(fe_id) =  26
+
+added scalar:
+          e(n_treated) =  10320
+
+added scalar:
+          e(n_control) =  1554960
+
+added macro:
+               e(smpl) : "Rural"
+
+added macro:
+             e(fespec) : "unique_small_grid_id_cohort yeargov province_cohort#e
+> lection_year province_cohort#election_year#yeargov"
+
+added macro:
+                e(mod) : "downup_ac_pop"
+
+added macro:
+           e(controls) : "never"
+(saving evreg1)
+(file /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication/.
+> ./../tables/exploratory_analysis/protest_original_controls_fe_sweep/sample/pr
+> otest_original_fe26_controls_never_did_interaction_rural_acpop_all.ster saved
+> )
+DID controls=never FE=27: unique_small_grid_id_cohort monthyearco province_coho
+> rt#c.monthyear yeargov province_cohort#election_year
+(MWFE estimator converged in 78 iterations)
+
+HDFE linear regression with Julia                 Number of obs   =  1,565,280
+Absorbing 5 HDFE groups                           F(   7,  22643) =     139.32
+Statistics cluster-robust                         Prob > F        =     0.0000
+                                                  R-squared       =     0.1376
+                                                  Adj R-squared   =     0.1289
+Number of clusters (ac_elec_yr) =      22644      Within R-sq.    =     0.0030
+                                                  Root MSE        =   820.9596
+
+                        (Std. err. adjusted for 22,644 clusters in ac_elec_yr)
+------------------------------------------------------------------------------
+             |               Robust
+      countk | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+     1.post_ |          0  (omitted)
+     1.treat |          0  (omitted)
+1.downup_a~p |   4.019586   2.444379     1.64   0.100     -.771565    8.810738
+wind_direc~n |  -.2585819   .0101553   -25.46   0.000     -.278487   -.2386768
+av_wind_sp~d |   167.0394   5.976188    27.95   0.000     155.3256    178.7531
+             |
+ post_#treat |
+        1 1  |   64.77373   51.79628     1.25   0.211    -36.75054     166.298
+             |
+       post_#|
+downup_ac_~p |
+        1 1  |  -4.415146   3.998013    -1.10   0.269    -12.25153    3.421234
+             |
+       treat#|
+downup_ac_~p |
+        1 1  |  -.3551432   77.57438    -0.00   0.996    -152.4063     151.696
+             |
+ post_#treat#|
+downup_ac_~p |
+      1 1 1  |   -35.6491   78.54026    -0.45   0.650    -189.5934    118.2952
+------------------------------------------------------------------------------
+
+added scalar:
+              e(ymean) =  453.13755
+
+added scalar:
+             e(ymean2) =  442.40437
+
+added scalar:
+                e(acq) =  782
+
+added scalar:
+              e(fe_id) =  27
+
+added scalar:
+          e(n_treated) =  10320
+
+added scalar:
+          e(n_control) =  1554960
+
+added macro:
+               e(smpl) : "Rural"
+
+added macro:
+             e(fespec) : "unique_small_grid_id_cohort monthyearco province_coho
+> rt#c.monthyear yeargov province_cohort#election_year"
+
+added macro:
+                e(mod) : "downup_ac_pop"
+
+added macro:
+           e(controls) : "never"
+(saving evreg1)
+(file /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication/.
+> ./../tables/exploratory_analysis/protest_original_controls_fe_sweep/sample/pr
+> otest_original_fe27_controls_never_did_interaction_rural_acpop_all.ster saved
+> )
+DID controls=never FE=28: unique_small_grid_id_cohort monthyearco province_coho
+> rt#c.monthyear yeargov province_cohort#election_year#yeargov
+(MWFE estimator converged in 107 iterations)
+
+HDFE linear regression with Julia                 Number of obs   =  1,565,280
+Absorbing 5 HDFE groups                           F(   7,  22643) =     137.95
+Statistics cluster-robust                         Prob > F        =     0.0000
+                                                  R-squared       =     0.1395
+                                                  Adj R-squared   =     0.1305
+Number of clusters (ac_elec_yr) =      22644      Within R-sq.    =     0.0029
+                                                  Root MSE        =   820.2179
+
+                        (Std. err. adjusted for 22,644 clusters in ac_elec_yr)
+------------------------------------------------------------------------------
+             |               Robust
+      countk | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+     1.post_ |          0  (omitted)
+     1.treat |          0  (omitted)
+1.downup_a~p |    3.92016   2.441708     1.61   0.108    -.8657552    8.706075
+wind_direc~n |  -.2518664   .0100934   -24.95   0.000    -.2716501   -.2320827
+av_wind_sp~d |   164.3005   5.928165    27.72   0.000     152.6809    175.9202
+             |
+ post_#treat |
+        1 1  |   34.12675   49.08739     0.70   0.487    -62.08791    130.3414
+             |
+       post_#|
+downup_ac_~p |
+        1 1  |  -4.236818   3.956349    -1.07   0.284    -11.99153    3.517899
+             |
+       treat#|
+downup_ac_~p |
+        1 1  |  -2.137567   77.47716    -0.03   0.978    -153.9981     149.723
+             |
+ post_#treat#|
+downup_ac_~p |
+      1 1 1  |  -30.66649   74.83956    -0.41   0.682    -177.3572    116.0242
+------------------------------------------------------------------------------
+
+added scalar:
+              e(ymean) =  453.13755
+
+added scalar:
+             e(ymean2) =  442.40437
+
+added scalar:
+                e(acq) =  782
+
+added scalar:
+              e(fe_id) =  28
+
+added scalar:
+          e(n_treated) =  10320
+
+added scalar:
+          e(n_control) =  1554960
+
+added macro:
+               e(smpl) : "Rural"
+
+added macro:
+             e(fespec) : "unique_small_grid_id_cohort monthyearco province_coho
+> rt#c.monthyear yeargov province_cohort#election_year#yeargov"
+
+added macro:
+                e(mod) : "downup_ac_pop"
+
+added macro:
+           e(controls) : "never"
+(saving evreg1)
+(file /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication/.
+> ./../tables/exploratory_analysis/protest_original_controls_fe_sweep/sample/pr
+> otest_original_fe28_controls_never_did_interaction_rural_acpop_all.ster saved
+> )
+DID controls=never FE=29: unique_small_grid_id_cohort monthyearco province_coho
+> rt#c.monthyear province_cohort#election_year province_cohort#election_year#ye
+> argov
+(MWFE estimator converged in 111 iterations)
+
+HDFE linear regression with Julia                 Number of obs   =  1,565,280
+Absorbing 5 HDFE groups                           F(   7,  22643) =     137.93
+Statistics cluster-robust                         Prob > F        =     0.0000
+                                                  R-squared       =     0.1395
+                                                  Adj R-squared   =     0.1304
+Number of clusters (ac_elec_yr) =      22644      Within R-sq.    =     0.0029
+                                                  Root MSE        =   820.2770
+
+                        (Std. err. adjusted for 22,644 clusters in ac_elec_yr)
+------------------------------------------------------------------------------
+             |               Robust
+      countk | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+     1.post_ |          0  (omitted)
+     1.treat |          0  (omitted)
+1.downup_a~p |   3.920186   2.441896     1.61   0.108    -.8660978    8.706469
+wind_direc~n |  -.2518693   .0100942   -24.95   0.000    -.2716546   -.2320841
+av_wind_sp~d |      164.3   5.928556    27.71   0.000     152.6796    175.9204
+             |
+ post_#treat |
+        1 1  |   34.12852   49.09083     0.70   0.487    -62.09288    130.3499
+             |
+       post_#|
+downup_ac_~p |
+        1 1  |  -4.236834   3.956648    -1.07   0.284    -11.99214    3.518468
+             |
+       treat#|
+downup_ac_~p |
+        1 1  |  -2.136452   77.48338    -0.03   0.978    -154.0092    149.7363
+             |
+ post_#treat#|
+downup_ac_~p |
+      1 1 1  |  -30.66738   74.84456    -0.41   0.682    -177.3679    116.0331
+------------------------------------------------------------------------------
+
+added scalar:
+              e(ymean) =  453.13755
+
+added scalar:
+             e(ymean2) =  442.40437
+
+added scalar:
+                e(acq) =  782
+
+added scalar:
+              e(fe_id) =  29
+
+added scalar:
+          e(n_treated) =  10320
+
+added scalar:
+          e(n_control) =  1554960
+
+added macro:
+               e(smpl) : "Rural"
+
+added macro:
+             e(fespec) : "unique_small_grid_id_cohort monthyearco province_coho
+> rt#c.monthyear province_cohort#election_year province_cohort#election_year#ye
+> argov"
+
+added macro:
+                e(mod) : "downup_ac_pop"
+
+added macro:
+           e(controls) : "never"
+(saving evreg1)
+(file /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication/.
+> ./../tables/exploratory_analysis/protest_original_controls_fe_sweep/sample/pr
+> otest_original_fe29_controls_never_did_interaction_rural_acpop_all.ster saved
+> )
+DID controls=never FE=30: unique_small_grid_id_cohort monthyearco yeargov provi
+> nce_cohort#election_year province_cohort#election_year#yeargov
+(MWFE estimator converged in 111 iterations)
+
+HDFE linear regression with Julia                 Number of obs   =  1,565,280
+Absorbing 5 HDFE groups                           F(   7,  22643) =     137.94
+Statistics cluster-robust                         Prob > F        =     0.0000
+                                                  R-squared       =     0.1395
+                                                  Adj R-squared   =     0.1304
+Number of clusters (ac_elec_yr) =      22644      Within R-sq.    =     0.0029
+                                                  Root MSE        =   820.2582
+
+                        (Std. err. adjusted for 22,644 clusters in ac_elec_yr)
+------------------------------------------------------------------------------
+             |               Robust
+      countk | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+     1.post_ |          0  (omitted)
+     1.treat |          0  (omitted)
+1.downup_a~p |   3.920254   2.441849     1.61   0.108    -.8659378    8.706445
+wind_direc~n |  -.2518777   .0100941   -24.95   0.000    -.2716629   -.2320926
+av_wind_sp~d |   164.2984   5.928385    27.71   0.000     152.6784    175.9185
+             |
+ post_#treat |
+        1 1  |   34.13396   49.08998     0.70   0.487    -62.08577    130.3537
+             |
+       post_#|
+downup_ac_~p |
+        1 1  |   -4.23686   3.956562    -1.07   0.284    -11.99199    3.518274
+             |
+       treat#|
+downup_ac_~p |
+        1 1  |  -2.133126   77.48272    -0.03   0.978    -154.0046    149.7383
+             |
+ post_#treat#|
+downup_ac_~p |
+      1 1 1  |  -30.67009   74.84318    -0.41   0.682    -177.3679    116.0277
+------------------------------------------------------------------------------
+
+added scalar:
+              e(ymean) =  453.13755
+
+added scalar:
+             e(ymean2) =  442.40437
+
+added scalar:
+                e(acq) =  782
+
+added scalar:
+              e(fe_id) =  30
+
+added scalar:
+          e(n_treated) =  10320
+
+added scalar:
+          e(n_control) =  1554960
+
+added macro:
+               e(smpl) : "Rural"
+
+added macro:
+             e(fespec) : "unique_small_grid_id_cohort monthyearco yeargov provi
+> nce_cohort#election_year province_cohort#election_year#yeargov"
+
+added macro:
+                e(mod) : "downup_ac_pop"
+
+added macro:
+           e(controls) : "never"
+(saving evreg1)
+(file /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication/.
+> ./../tables/exploratory_analysis/protest_original_controls_fe_sweep/sample/pr
+> otest_original_fe30_controls_never_did_interaction_rural_acpop_all.ster saved
+> )
+DID controls=never FE=31: unique_small_grid_id_cohort province_cohort#c.monthye
+> ar yeargov province_cohort#election_year province_cohort#election_year#yeargo
+> v
+(MWFE estimator converged in 14 iterations)
+
+HDFE linear regression with Julia                 Number of obs   =  1,565,280
+Absorbing 5 HDFE groups                           F(   8,  22643) =     312.17
+Statistics cluster-robust                         Prob > F        =     0.0000
+                                                  R-squared       =     0.1048
+                                                  Adj R-squared   =     0.0966
+Number of clusters (ac_elec_yr) =      22644      Within R-sq.    =     0.0059
+                                                  Root MSE        =   836.0439
+
+                        (Std. err. adjusted for 22,644 clusters in ac_elec_yr)
+------------------------------------------------------------------------------
+             |               Robust
+      countk | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+     1.post_ |   47.23904   7.458642     6.33   0.000     32.61959     61.8585
+     1.treat |          0  (omitted)
+1.downup_a~p |   4.884419   2.471274     1.98   0.048     .0405516    9.728286
+wind_direc~n |  -.6619228   .0141884   -46.65   0.000    -.6897331   -.6341125
+av_wind_sp~d |   52.83415   2.137605    24.72   0.000      48.6443    57.02401
+             |
+ post_#treat |
+        1 1  |   22.93346    50.4899     0.45   0.650    -76.03022    121.8971
+             |
+       post_#|
+downup_ac_~p |
+        1 1  |  -5.993624   4.028642    -1.49   0.137    -13.89004     1.90279
+             |
+       treat#|
+downup_ac_~p |
+        1 1  |    8.10793   80.52745     0.10   0.920    -149.7314    165.9473
+             |
+ post_#treat#|
+downup_ac_~p |
+      1 1 1  |  -26.94208   77.17823    -0.35   0.727    -178.2167    124.3325
+------------------------------------------------------------------------------
+
+added scalar:
+              e(ymean) =  453.13755
+
+added scalar:
+             e(ymean2) =  442.40437
+
+added scalar:
+                e(acq) =  782
+
+added scalar:
+              e(fe_id) =  31
+
+added scalar:
+          e(n_treated) =  10320
+
+added scalar:
+          e(n_control) =  1554960
+
+added macro:
+               e(smpl) : "Rural"
+
+added macro:
+             e(fespec) : "unique_small_grid_id_cohort province_cohort#c.monthye
+> ar yeargov province_cohort#election_year province_cohort#election_year#yeargo
+> v"
+
+added macro:
+                e(mod) : "downup_ac_pop"
+
+added macro:
+           e(controls) : "never"
+(saving evreg1)
+(file /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication/.
+> ./../tables/exploratory_analysis/protest_original_controls_fe_sweep/sample/pr
+> otest_original_fe31_controls_never_did_interaction_rural_acpop_all.ster saved
+> )
+DID controls=never FE=32: unique_small_grid_id_cohort monthyearco province_coho
+> rt#c.monthyear yeargov province_cohort#election_year province_cohort#election
+> _year#yeargov
+(MWFE estimator converged in 115 iterations)
+
+HDFE linear regression with Julia                 Number of obs   =  1,565,280
+Absorbing 6 HDFE groups                           F(   7,  22643) =     137.93
+Statistics cluster-robust                         Prob > F        =     0.0000
+                                                  R-squared       =     0.1395
+                                                  Adj R-squared   =     0.1304
+Number of clusters (ac_elec_yr) =      22644      Within R-sq.    =     0.0029
+                                                  Root MSE        =   820.2783
+
+                        (Std. err. adjusted for 22,644 clusters in ac_elec_yr)
+------------------------------------------------------------------------------
+             |               Robust
+      countk | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+     1.post_ |          0  (omitted)
+     1.treat |          0  (omitted)
+1.downup_a~p |   3.920185   2.441892     1.61   0.108    -.8660907     8.70646
+wind_direc~n |  -.2518693   .0100942   -24.95   0.000    -.2716546    -.232084
+av_wind_sp~d |      164.3   5.928572    27.71   0.000     152.6796    175.9204
+             |
+ post_#treat |
+        1 1  |   34.12848   49.09082     0.70   0.487    -62.09291    130.3499
+             |
+       post_#|
+downup_ac_~p |
+        1 1  |   -4.23685   3.956648    -1.07   0.284    -11.99215    3.518451
+             |
+       treat#|
+downup_ac_~p |
+        1 1  |  -2.136475   77.48365    -0.03   0.978    -154.0098    149.7368
+             |
+ post_#treat#|
+downup_ac_~p |
+      1 1 1  |  -30.66735   74.84447    -0.41   0.682    -177.3677     116.033
+------------------------------------------------------------------------------
+
+added scalar:
+              e(ymean) =  453.13755
+
+added scalar:
+             e(ymean2) =  442.40437
+
+added scalar:
+                e(acq) =  782
+
+added scalar:
+              e(fe_id) =  32
+
+added scalar:
+          e(n_treated) =  10320
+
+added scalar:
+          e(n_control) =  1554960
+
+added macro:
+               e(smpl) : "Rural"
+
+added macro:
+             e(fespec) : "unique_small_grid_id_cohort monthyearco province_coho
+> rt#c.monthyear yeargov province_cohort#election_year province_cohort#election
+> _year#yeargov"
+
+added macro:
+                e(mod) : "downup_ac_pop"
+
+added macro:
+           e(controls) : "never"
+(saving evreg1)
+(file /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication/.
+> ./../tables/exploratory_analysis/protest_original_controls_fe_sweep/sample/pr
+> otest_original_fe32_controls_never_did_interaction_rural_acpop_all.ster saved
+> )
+
+. 
+. display as result "COMPLETED protest STER files: controls=`control_sample', F
+> E=$fe_list"
+COMPLETED protest STER files: controls=never, FE=16/32
+
+. 
+end of do-file

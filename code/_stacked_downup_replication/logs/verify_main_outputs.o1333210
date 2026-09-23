@@ -1,0 +1,6 @@
+Python environment: /groups/sgulzar/india_forest_land/downup_geo
+Python executable: /groups/sgulzar/india_forest_land/downup_geo/bin/python
+Python version: 3.11.15
+Strict audit failed: 5 code gaps, 32 missing generated outputs, and 4 missing static assets.
+Wrote /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication/output_manifest.csv
+Wrote /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication/OUTPUT_GAPS.md

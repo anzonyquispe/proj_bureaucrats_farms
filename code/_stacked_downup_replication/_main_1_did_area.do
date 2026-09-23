@@ -28,17 +28,19 @@ if "$root" == "" {
 }
 
 global int_farms "${root}/data_output/intermediate"
-global table_farms "${root}/tex/paper/tables"
-global figure_farms "${root}/tex/paper/figures"
+global table_farms "${code}/../../tables"
+global figure_farms "${code}/../../figures"
 
 ********************************************************************************
 * Import Data
 ********************************************************************************
 
-import delimited "${root}/data_output/intermediate/combined_dt_pop.csv", clear
+import delimited "${root}/data_output/intermediate/combined_dt_pop${sample}.csv", clear
+keep if inrange(relative_monthyear, -5, 6)
+display as text "Final event-study sample: relative_monthyear in [-5, 6]"
 
 preserve
-		import delimited using "${root}/data_output/intermediate/0_master_dataset.csv", ///
+		import delimited using "${root}/data_output/intermediate/0_master_dataset${sample}.csv", ///
     clear varnames(1)
 		keep unique_small_grid_id month year downup_ac downup_dummy
 		tempfile dta
@@ -55,8 +57,14 @@ drop _merge
 
 * Keep only rural grids
 keep if is_rural == 1
-keep if relative_monthyear >= -5 & relative_monthyear <= 6
+
 display "Observations after rural filter: " _N
+
+* Do not drop grids that intersect more than one assembly constituency.
+* merge m:1 unique_small_grid_id using "${root}/data_output/intermediate/grids_with_more_1_ac.dta"
+* drop if dpl_ac == 1
+* drop _merge
+
 
 * Getting downup_dummy & mean_brigthness
 merge m:1 unique_small_grid_id month year ac_uq_id using "${root}/data_output/intermediate/merged_data.dta"
@@ -64,6 +72,7 @@ keep if _merge == 3
 drop _merge
 
 * Create count in thousands
+capture drop countk
 gen countk = count * 1000
 
 * Filter data: year < 2022 or (year == 2022 & month <= 8)
@@ -98,18 +107,7 @@ else {
     gen ac_id = ac_uq_id
 }
 
-********************************************************************************
-* Calculate statistics for table footer
-********************************************************************************
 
-* Calculate mean DV for control group (downup_ac==0 & TREAT_abs==1)
-summarize countk if downup_ac == 0 & TREAT_abs == 1
-local meandv = r(mean)
-local meandv_fmt = string(`meandv', "%9.3f")
-
-* Count unique ACs
-unique ac_id
-local numacs = r(unique)
 
 ********************************************************************************
 * DiD Regressions
@@ -134,6 +132,21 @@ qui reghdfejl countk downup_dummy $controls , ///
     cluster($cluster )
 	gen esample3 = e(sample)
 	
+keep if esample4 == 1 & esample3 == 1
+	
+********************************************************************************
+* Calculate statistics for table footer
+********************************************************************************
+
+* Calculate mean DV for control group (downup_ac==0 & TREAT_abs==1)
+summarize countk if downup_ac == 0 & TREAT_abs == 1
+local meandv = r(mean)
+local meandv_fmt = string(`meandv', "%9.3f")
+
+* Count unique ACs
+unique ac_id
+local numacs = r(unique)
+
 	
 * Specification 1: No FE (baseline with controls only)
 reghdfejl countk downup_dummy $controls if esample4 == 1 & esample3 == 1 , ///
@@ -148,10 +161,24 @@ estadd local acmonthfe "N"
 estadd local gridfe "N"
 estimates store eq1
 
-* Specification 2: AC FE + MonthYear FE
+* Specification 2: Grid FE + MonthYear FE
 reghdfejl countk downup_dummy $controls if esample4 == 1 & esample3 == 1 , ///
 	cluster($cluster ) ///
-    absorb(ac_id#cohort monthyear#cohort) ///
+    absorb(grid_id#cohort  monthyear#cohort) ///
+    cluster($cluster)
+estadd local ymean `meandv_fmt'
+estadd local acq `numacs'
+estadd local cohortt "N"
+estadd local monthyearfe "Y"
+estadd local acfe "N"
+estadd local acmonthfe "N"
+estadd local gridfe "Y"
+estimates store eq2
+
+* Specification 3: Grid FE + AC FE + MonthYear FE
+reghdfejl countk downup_dummy $controls if esample4 == 1 & esample3 == 1 , ///
+	cluster($cluster ) ///
+    absorb(grid_id#cohort ac_id#cohort monthyear#cohort) ///
     cluster($cluster)
 estadd local ymean `meandv_fmt'
 estadd local acq `numacs'
@@ -159,21 +186,7 @@ estadd local cohortt "N"
 estadd local monthyearfe "Y"
 estadd local acfe "Y"
 estadd local acmonthfe "N"
-estadd local gridfe "N"
-estimates store eq2
-
-* Specification 3: AC x MonthYear FE
-reghdfejl countk downup_dummy $controls if esample4 == 1 & esample3 == 1 , ///
-	cluster($cluster ) ///
-    absorb(ac_id#monthyear#cohort) ///
-    cluster($cluster)
-estadd local ymean `meandv_fmt'
-estadd local acq `numacs'
-estadd local cohortt "N"
-estadd local monthyearfe "N"
-estadd local acfe "N"
-estadd local acmonthfe "Y"
-estadd local gridfe "N"
+estadd local gridfe "Y"
 estimates store eq3
 
 * Specification 4: Grid FE + AC x MonthYear FE

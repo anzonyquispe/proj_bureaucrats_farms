@@ -1,0 +1,16 @@
+Loading CRC_default/1.1
+Loading CRC_default/1.1
+[2026-08-11 10:01:11] host=d32cepyc257.crc.nd.edu job=1348929 pwd=/users/aquisper/proj_bureaucrats_farms
+[2026-08-11 10:01:11] conda environment=/groups/sgulzar/india_forest_land/downup_geo
+[2026-08-11 10:01:11] python=/groups/sgulzar/india_forest_land/downup_geo/bin/python
+[2026-08-11 10:01:11] intermediate=/groups/sgulzar/sa_fires/proj_bureaucrats_farms/data_output/intermediate
+From github.com:anzonyquispe/proj_bureaucrats_farms
+ * branch            replication_data -> FETCH_HEAD
+Already on 'replication_data'
+Your branch is up to date with 'origin/replication_data'.
+From github.com:anzonyquispe/proj_bureaucrats_farms
+ * branch            replication_data -> FETCH_HEAD
+Already up to date.
+[2026-08-11 10:01:14] git HEAD: 09a4b4f
+[2026-08-11 10:02:11] completed politicians_characteristics_byprov.csv
+Loading CRC_default/1.1

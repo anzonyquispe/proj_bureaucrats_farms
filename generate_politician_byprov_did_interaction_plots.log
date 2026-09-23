@@ -1,0 +1,1038 @@
+
+  ___  ____  ____  ____  ____ ®
+ /__    /   ____/   /   ____/      18.0
+___/   /   /___/   /   /___/       MP—Parallel Edition
+
+ Statistics and Data Science       Copyright 1985-2023 StataCorp LLC
+                                   StataCorp
+                                   4905 Lakeway Drive
+                                   College Station, Texas 77845 USA
+                                   800-STATA-PC        https://www.stata.com
+                                   979-696-4600        stata@stata.com
+
+Stata license: Single-user 4-core  perpetual
+Serial number: 501806366048
+  Licensed to: Any Name
+               Any Name
+
+Notes:
+      1. Stata is running in batch mode.
+      2. Unicode is supported; see help unicode_advice.
+      3. More than 2 billion observations are allowed; see help obs_advice.
+      4. Maximum number of variables is set to 5,000 but can be increased;
+          see help set_maxvar.
+
+. do C:\Users\eunic\OneDrive\Documents\GitHub\proj_bureaucrats_farms\code\_stac
+> ked_downup_replication\exploratory_analysis\politician_byprov_fe_sweep\genera
+> te_politician_byprov_did_interaction_plots.do 
+
+. *****************************************************************************
+> ***
+. * Local/cluster post-processing for the 32 politician-by-province DiD models.
+. * Uses interaction_graph.ado unchanged so the established interaction-figure
+. * format is preserved exactly.
+. *****************************************************************************
+> ***
+. 
+. version 17
+
+. set more off
+
+. 
+. if "$root" == "" {
+.     clear all
+.     global location     "dbox"
+.     global sample       ""
+.     global is_rural_var "is_rural"
+.     global fe_list      "1/32"
+.     global ster_suffix  "_acpop"
+. 
+.     global shell "/groups/sgulzar/sa_fires/proj_bureaucrats_farms"
+.     global dbox  "C:/Users/eunic/Dropbox/sa_fires/proj_bureaucrats_farms"
+.     global code_shell "/users/aquisper/proj_bureaucrats_farms/code/_stacked_d
+> ownup_replication"
+.     global code_dbox  "C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucr
+> ats_farms/code/_stacked_downup_replication"
+. 
+.     if "$location" == "dbox" {
+.         global root "$dbox"
+.         global code "$code_dbox"
+.     }
+.     else {
+.         global root "$shell"
+.         global code "$code_shell"
+.     }
+. }
+
+. 
+. global tables_root "${code}/../../tables"
+
+. global tables "${tables_root}/exploratory_analysis/politician_byprov_fe_sweep
+> "
+
+. global figures_root "${code}/../../figures"
+
+. global figures "${figures_root}/exploratory_analysis/politician_byprov_fe_swe
+> ep"
+
+. capture mkdir "${figures_root}/exploratory_analysis"
+
+. capture mkdir "${figures}"
+
+. 
+. quietly do "${code}/interaction_graph.ado"
+
+. 
+. foreach fe of numlist $fe_list {
+  2.     local fe_tag : display %02.0f `fe'
+  3.     local fe_tag = strtrim("`fe_tag'")
+  4.     local input_ster "${tables}/politician_byprov_fe`fe_tag'_did_interacti
+> on${sample}_rural${ster_suffix}_all.ster"
+  5.     local output_stem "${figures}/politician_byprov_fe`fe_tag'_did_interac
+> tion_rural_acpop_all"
+  6. 
+.     confirm file "`input_ster'"
+  7.     est clear
+  8.     interaction_graph using "`input_ster'", ///
+>         estimates(1) ///
+>         output("`output_stem'") ///
+>         type(politician) modvar(downup_ac_pop)
+  9.     confirm file "`output_stem'_1.png"
+ 10. }
+
+-------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+-----------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with
+             |                                 Julia
+-------------------------------------------------------------------------------
+(results evreg1 are active now)
+number of observations will be reset to 4
+Press any key to continue, or Break to abort
+Number of observations (_N) was 0, now 4.
+(4 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+Number of observations (_N) was 4, now 5.
+(1 real change made)
+(1 real change made)
+(1 real change made)
+file
+    C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/code/_sta
+    > cked_downup_replication/../../figures/exploratory_analysis/politician_b
+    > yprov_fe_sweep/politician_byprov_fe01_did_interaction_rural_acpop_all_1
+    > .png saved as PNG format
+Exported: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/code/
+> _stacked_downup_replication/../../figures/exploratory_analysis/politician_byp
+> rov_fe_sweep/politician_byprov_fe01_did_interaction_rural_acpop_all_1.png
+
+-------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+-----------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with
+             |                                 Julia
+-------------------------------------------------------------------------------
+(results evreg1 are active now)
+number of observations will be reset to 4
+Press any key to continue, or Break to abort
+Number of observations (_N) was 0, now 4.
+(4 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+Number of observations (_N) was 4, now 5.
+(1 real change made)
+(1 real change made)
+(1 real change made)
+file
+    C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/code/_sta
+    > cked_downup_replication/../../figures/exploratory_analysis/politician_b
+    > yprov_fe_sweep/politician_byprov_fe02_did_interaction_rural_acpop_all_1
+    > .png saved as PNG format
+Exported: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/code/
+> _stacked_downup_replication/../../figures/exploratory_analysis/politician_byp
+> rov_fe_sweep/politician_byprov_fe02_did_interaction_rural_acpop_all_1.png
+
+-------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+-----------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with
+             |                                 Julia
+-------------------------------------------------------------------------------
+(results evreg1 are active now)
+number of observations will be reset to 4
+Press any key to continue, or Break to abort
+Number of observations (_N) was 0, now 4.
+(4 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+Number of observations (_N) was 4, now 5.
+(1 real change made)
+(1 real change made)
+(1 real change made)
+file
+    C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/code/_sta
+    > cked_downup_replication/../../figures/exploratory_analysis/politician_b
+    > yprov_fe_sweep/politician_byprov_fe03_did_interaction_rural_acpop_all_1
+    > .png saved as PNG format
+Exported: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/code/
+> _stacked_downup_replication/../../figures/exploratory_analysis/politician_byp
+> rov_fe_sweep/politician_byprov_fe03_did_interaction_rural_acpop_all_1.png
+
+-------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+-----------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with
+             |                                 Julia
+-------------------------------------------------------------------------------
+(results evreg1 are active now)
+number of observations will be reset to 4
+Press any key to continue, or Break to abort
+Number of observations (_N) was 0, now 4.
+(4 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+Number of observations (_N) was 4, now 5.
+(1 real change made)
+(1 real change made)
+(1 real change made)
+file
+    C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/code/_sta
+    > cked_downup_replication/../../figures/exploratory_analysis/politician_b
+    > yprov_fe_sweep/politician_byprov_fe04_did_interaction_rural_acpop_all_1
+    > .png saved as PNG format
+Exported: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/code/
+> _stacked_downup_replication/../../figures/exploratory_analysis/politician_byp
+> rov_fe_sweep/politician_byprov_fe04_did_interaction_rural_acpop_all_1.png
+
+-------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+-----------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with
+             |                                 Julia
+-------------------------------------------------------------------------------
+(results evreg1 are active now)
+number of observations will be reset to 4
+Press any key to continue, or Break to abort
+Number of observations (_N) was 0, now 4.
+(4 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+Number of observations (_N) was 4, now 5.
+(1 real change made)
+(1 real change made)
+(1 real change made)
+file
+    C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/code/_sta
+    > cked_downup_replication/../../figures/exploratory_analysis/politician_b
+    > yprov_fe_sweep/politician_byprov_fe05_did_interaction_rural_acpop_all_1
+    > .png saved as PNG format
+Exported: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/code/
+> _stacked_downup_replication/../../figures/exploratory_analysis/politician_byp
+> rov_fe_sweep/politician_byprov_fe05_did_interaction_rural_acpop_all_1.png
+
+-------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+-----------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with
+             |                                 Julia
+-------------------------------------------------------------------------------
+(results evreg1 are active now)
+number of observations will be reset to 4
+Press any key to continue, or Break to abort
+Number of observations (_N) was 0, now 4.
+(4 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+Number of observations (_N) was 4, now 5.
+(1 real change made)
+(1 real change made)
+(1 real change made)
+file
+    C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/code/_sta
+    > cked_downup_replication/../../figures/exploratory_analysis/politician_b
+    > yprov_fe_sweep/politician_byprov_fe06_did_interaction_rural_acpop_all_1
+    > .png saved as PNG format
+Exported: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/code/
+> _stacked_downup_replication/../../figures/exploratory_analysis/politician_byp
+> rov_fe_sweep/politician_byprov_fe06_did_interaction_rural_acpop_all_1.png
+
+-------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+-----------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with
+             |                                 Julia
+-------------------------------------------------------------------------------
+(results evreg1 are active now)
+number of observations will be reset to 4
+Press any key to continue, or Break to abort
+Number of observations (_N) was 0, now 4.
+(4 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+Number of observations (_N) was 4, now 5.
+(1 real change made)
+(1 real change made)
+(1 real change made)
+file
+    C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/code/_sta
+    > cked_downup_replication/../../figures/exploratory_analysis/politician_b
+    > yprov_fe_sweep/politician_byprov_fe07_did_interaction_rural_acpop_all_1
+    > .png saved as PNG format
+Exported: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/code/
+> _stacked_downup_replication/../../figures/exploratory_analysis/politician_byp
+> rov_fe_sweep/politician_byprov_fe07_did_interaction_rural_acpop_all_1.png
+
+-------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+-----------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with
+             |                                 Julia
+-------------------------------------------------------------------------------
+(results evreg1 are active now)
+number of observations will be reset to 4
+Press any key to continue, or Break to abort
+Number of observations (_N) was 0, now 4.
+(4 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+Number of observations (_N) was 4, now 5.
+(1 real change made)
+(1 real change made)
+(1 real change made)
+file
+    C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/code/_sta
+    > cked_downup_replication/../../figures/exploratory_analysis/politician_b
+    > yprov_fe_sweep/politician_byprov_fe08_did_interaction_rural_acpop_all_1
+    > .png saved as PNG format
+Exported: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/code/
+> _stacked_downup_replication/../../figures/exploratory_analysis/politician_byp
+> rov_fe_sweep/politician_byprov_fe08_did_interaction_rural_acpop_all_1.png
+
+-------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+-----------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with
+             |                                 Julia
+-------------------------------------------------------------------------------
+(results evreg1 are active now)
+number of observations will be reset to 4
+Press any key to continue, or Break to abort
+Number of observations (_N) was 0, now 4.
+(4 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+Number of observations (_N) was 4, now 5.
+(1 real change made)
+(1 real change made)
+(1 real change made)
+file
+    C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/code/_sta
+    > cked_downup_replication/../../figures/exploratory_analysis/politician_b
+    > yprov_fe_sweep/politician_byprov_fe09_did_interaction_rural_acpop_all_1
+    > .png saved as PNG format
+Exported: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/code/
+> _stacked_downup_replication/../../figures/exploratory_analysis/politician_byp
+> rov_fe_sweep/politician_byprov_fe09_did_interaction_rural_acpop_all_1.png
+
+-------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+-----------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with
+             |                                 Julia
+-------------------------------------------------------------------------------
+(results evreg1 are active now)
+number of observations will be reset to 4
+Press any key to continue, or Break to abort
+Number of observations (_N) was 0, now 4.
+(4 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+Number of observations (_N) was 4, now 5.
+(1 real change made)
+(1 real change made)
+(1 real change made)
+file
+    C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/code/_sta
+    > cked_downup_replication/../../figures/exploratory_analysis/politician_b
+    > yprov_fe_sweep/politician_byprov_fe10_did_interaction_rural_acpop_all_1
+    > .png saved as PNG format
+Exported: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/code/
+> _stacked_downup_replication/../../figures/exploratory_analysis/politician_byp
+> rov_fe_sweep/politician_byprov_fe10_did_interaction_rural_acpop_all_1.png
+
+-------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+-----------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with
+             |                                 Julia
+-------------------------------------------------------------------------------
+(results evreg1 are active now)
+number of observations will be reset to 4
+Press any key to continue, or Break to abort
+Number of observations (_N) was 0, now 4.
+(4 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+Number of observations (_N) was 4, now 5.
+(1 real change made)
+(1 real change made)
+(1 real change made)
+file
+    C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/code/_sta
+    > cked_downup_replication/../../figures/exploratory_analysis/politician_b
+    > yprov_fe_sweep/politician_byprov_fe11_did_interaction_rural_acpop_all_1
+    > .png saved as PNG format
+Exported: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/code/
+> _stacked_downup_replication/../../figures/exploratory_analysis/politician_byp
+> rov_fe_sweep/politician_byprov_fe11_did_interaction_rural_acpop_all_1.png
+
+-------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+-----------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with
+             |                                 Julia
+-------------------------------------------------------------------------------
+(results evreg1 are active now)
+number of observations will be reset to 4
+Press any key to continue, or Break to abort
+Number of observations (_N) was 0, now 4.
+(4 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+Number of observations (_N) was 4, now 5.
+(1 real change made)
+(1 real change made)
+(1 real change made)
+file
+    C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/code/_sta
+    > cked_downup_replication/../../figures/exploratory_analysis/politician_b
+    > yprov_fe_sweep/politician_byprov_fe12_did_interaction_rural_acpop_all_1
+    > .png saved as PNG format
+Exported: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/code/
+> _stacked_downup_replication/../../figures/exploratory_analysis/politician_byp
+> rov_fe_sweep/politician_byprov_fe12_did_interaction_rural_acpop_all_1.png
+
+-------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+-----------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with
+             |                                 Julia
+-------------------------------------------------------------------------------
+(results evreg1 are active now)
+number of observations will be reset to 4
+Press any key to continue, or Break to abort
+Number of observations (_N) was 0, now 4.
+(4 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+Number of observations (_N) was 4, now 5.
+(1 real change made)
+(1 real change made)
+(1 real change made)
+file
+    C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/code/_sta
+    > cked_downup_replication/../../figures/exploratory_analysis/politician_b
+    > yprov_fe_sweep/politician_byprov_fe13_did_interaction_rural_acpop_all_1
+    > .png saved as PNG format
+Exported: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/code/
+> _stacked_downup_replication/../../figures/exploratory_analysis/politician_byp
+> rov_fe_sweep/politician_byprov_fe13_did_interaction_rural_acpop_all_1.png
+
+-------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+-----------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with
+             |                                 Julia
+-------------------------------------------------------------------------------
+(results evreg1 are active now)
+number of observations will be reset to 4
+Press any key to continue, or Break to abort
+Number of observations (_N) was 0, now 4.
+(4 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+Number of observations (_N) was 4, now 5.
+(1 real change made)
+(1 real change made)
+(1 real change made)
+file
+    C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/code/_sta
+    > cked_downup_replication/../../figures/exploratory_analysis/politician_b
+    > yprov_fe_sweep/politician_byprov_fe14_did_interaction_rural_acpop_all_1
+    > .png saved as PNG format
+Exported: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/code/
+> _stacked_downup_replication/../../figures/exploratory_analysis/politician_byp
+> rov_fe_sweep/politician_byprov_fe14_did_interaction_rural_acpop_all_1.png
+
+-------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+-----------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with
+             |                                 Julia
+-------------------------------------------------------------------------------
+(results evreg1 are active now)
+number of observations will be reset to 4
+Press any key to continue, or Break to abort
+Number of observations (_N) was 0, now 4.
+(4 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+Number of observations (_N) was 4, now 5.
+(1 real change made)
+(1 real change made)
+(1 real change made)
+file
+    C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/code/_sta
+    > cked_downup_replication/../../figures/exploratory_analysis/politician_b
+    > yprov_fe_sweep/politician_byprov_fe15_did_interaction_rural_acpop_all_1
+    > .png saved as PNG format
+Exported: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/code/
+> _stacked_downup_replication/../../figures/exploratory_analysis/politician_byp
+> rov_fe_sweep/politician_byprov_fe15_did_interaction_rural_acpop_all_1.png
+
+-------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+-----------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with
+             |                                 Julia
+-------------------------------------------------------------------------------
+(results evreg1 are active now)
+number of observations will be reset to 4
+Press any key to continue, or Break to abort
+Number of observations (_N) was 0, now 4.
+(4 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+Number of observations (_N) was 4, now 5.
+(1 real change made)
+(1 real change made)
+(1 real change made)
+file
+    C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/code/_sta
+    > cked_downup_replication/../../figures/exploratory_analysis/politician_b
+    > yprov_fe_sweep/politician_byprov_fe16_did_interaction_rural_acpop_all_1
+    > .png saved as PNG format
+Exported: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/code/
+> _stacked_downup_replication/../../figures/exploratory_analysis/politician_byp
+> rov_fe_sweep/politician_byprov_fe16_did_interaction_rural_acpop_all_1.png
+
+-------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+-----------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with
+             |                                 Julia
+-------------------------------------------------------------------------------
+(results evreg1 are active now)
+number of observations will be reset to 4
+Press any key to continue, or Break to abort
+Number of observations (_N) was 0, now 4.
+(4 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+Number of observations (_N) was 4, now 5.
+(1 real change made)
+(1 real change made)
+(1 real change made)
+file
+    C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/code/_sta
+    > cked_downup_replication/../../figures/exploratory_analysis/politician_b
+    > yprov_fe_sweep/politician_byprov_fe17_did_interaction_rural_acpop_all_1
+    > .png saved as PNG format
+Exported: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/code/
+> _stacked_downup_replication/../../figures/exploratory_analysis/politician_byp
+> rov_fe_sweep/politician_byprov_fe17_did_interaction_rural_acpop_all_1.png
+
+-------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+-----------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with
+             |                                 Julia
+-------------------------------------------------------------------------------
+(results evreg1 are active now)
+number of observations will be reset to 4
+Press any key to continue, or Break to abort
+Number of observations (_N) was 0, now 4.
+(4 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+Number of observations (_N) was 4, now 5.
+(1 real change made)
+(1 real change made)
+(1 real change made)
+file
+    C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/code/_sta
+    > cked_downup_replication/../../figures/exploratory_analysis/politician_b
+    > yprov_fe_sweep/politician_byprov_fe18_did_interaction_rural_acpop_all_1
+    > .png saved as PNG format
+Exported: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/code/
+> _stacked_downup_replication/../../figures/exploratory_analysis/politician_byp
+> rov_fe_sweep/politician_byprov_fe18_did_interaction_rural_acpop_all_1.png
+
+-------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+-----------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with
+             |                                 Julia
+-------------------------------------------------------------------------------
+(results evreg1 are active now)
+number of observations will be reset to 4
+Press any key to continue, or Break to abort
+Number of observations (_N) was 0, now 4.
+(4 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+Number of observations (_N) was 4, now 5.
+(1 real change made)
+(1 real change made)
+(1 real change made)
+file
+    C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/code/_sta
+    > cked_downup_replication/../../figures/exploratory_analysis/politician_b
+    > yprov_fe_sweep/politician_byprov_fe19_did_interaction_rural_acpop_all_1
+    > .png saved as PNG format
+Exported: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/code/
+> _stacked_downup_replication/../../figures/exploratory_analysis/politician_byp
+> rov_fe_sweep/politician_byprov_fe19_did_interaction_rural_acpop_all_1.png
+
+-------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+-----------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with
+             |                                 Julia
+-------------------------------------------------------------------------------
+(results evreg1 are active now)
+number of observations will be reset to 4
+Press any key to continue, or Break to abort
+Number of observations (_N) was 0, now 4.
+(4 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+Number of observations (_N) was 4, now 5.
+(1 real change made)
+(1 real change made)
+(1 real change made)
+file
+    C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/code/_sta
+    > cked_downup_replication/../../figures/exploratory_analysis/politician_b
+    > yprov_fe_sweep/politician_byprov_fe20_did_interaction_rural_acpop_all_1
+    > .png saved as PNG format
+Exported: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/code/
+> _stacked_downup_replication/../../figures/exploratory_analysis/politician_byp
+> rov_fe_sweep/politician_byprov_fe20_did_interaction_rural_acpop_all_1.png
+
+-------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+-----------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with
+             |                                 Julia
+-------------------------------------------------------------------------------
+(results evreg1 are active now)
+number of observations will be reset to 4
+Press any key to continue, or Break to abort
+Number of observations (_N) was 0, now 4.
+(4 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+Number of observations (_N) was 4, now 5.
+(1 real change made)
+(1 real change made)
+(1 real change made)
+file
+    C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/code/_sta
+    > cked_downup_replication/../../figures/exploratory_analysis/politician_b
+    > yprov_fe_sweep/politician_byprov_fe21_did_interaction_rural_acpop_all_1
+    > .png saved as PNG format
+Exported: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/code/
+> _stacked_downup_replication/../../figures/exploratory_analysis/politician_byp
+> rov_fe_sweep/politician_byprov_fe21_did_interaction_rural_acpop_all_1.png
+
+-------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+-----------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with
+             |                                 Julia
+-------------------------------------------------------------------------------
+(results evreg1 are active now)
+number of observations will be reset to 4
+Press any key to continue, or Break to abort
+Number of observations (_N) was 0, now 4.
+(4 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+Number of observations (_N) was 4, now 5.
+(1 real change made)
+(1 real change made)
+(1 real change made)
+file
+    C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/code/_sta
+    > cked_downup_replication/../../figures/exploratory_analysis/politician_b
+    > yprov_fe_sweep/politician_byprov_fe22_did_interaction_rural_acpop_all_1
+    > .png saved as PNG format
+Exported: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/code/
+> _stacked_downup_replication/../../figures/exploratory_analysis/politician_byp
+> rov_fe_sweep/politician_byprov_fe22_did_interaction_rural_acpop_all_1.png
+
+-------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+-----------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with
+             |                                 Julia
+-------------------------------------------------------------------------------
+(results evreg1 are active now)
+number of observations will be reset to 4
+Press any key to continue, or Break to abort
+Number of observations (_N) was 0, now 4.
+(4 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+Number of observations (_N) was 4, now 5.
+(1 real change made)
+(1 real change made)
+(1 real change made)
+file
+    C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/code/_sta
+    > cked_downup_replication/../../figures/exploratory_analysis/politician_b
+    > yprov_fe_sweep/politician_byprov_fe23_did_interaction_rural_acpop_all_1
+    > .png saved as PNG format
+Exported: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/code/
+> _stacked_downup_replication/../../figures/exploratory_analysis/politician_byp
+> rov_fe_sweep/politician_byprov_fe23_did_interaction_rural_acpop_all_1.png
+
+-------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+-----------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with
+             |                                 Julia
+-------------------------------------------------------------------------------
+(results evreg1 are active now)
+number of observations will be reset to 4
+Press any key to continue, or Break to abort
+Number of observations (_N) was 0, now 4.
+(4 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+Number of observations (_N) was 4, now 5.
+(1 real change made)
+(1 real change made)
+(1 real change made)
+file
+    C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/code/_sta
+    > cked_downup_replication/../../figures/exploratory_analysis/politician_b
+    > yprov_fe_sweep/politician_byprov_fe24_did_interaction_rural_acpop_all_1
+    > .png saved as PNG format
+Exported: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/code/
+> _stacked_downup_replication/../../figures/exploratory_analysis/politician_byp
+> rov_fe_sweep/politician_byprov_fe24_did_interaction_rural_acpop_all_1.png
+
+-------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+-----------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with
+             |                                 Julia
+-------------------------------------------------------------------------------
+(results evreg1 are active now)
+number of observations will be reset to 4
+Press any key to continue, or Break to abort
+Number of observations (_N) was 0, now 4.
+(4 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+Number of observations (_N) was 4, now 5.
+(1 real change made)
+(1 real change made)
+(1 real change made)
+file
+    C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/code/_sta
+    > cked_downup_replication/../../figures/exploratory_analysis/politician_b
+    > yprov_fe_sweep/politician_byprov_fe25_did_interaction_rural_acpop_all_1
+    > .png saved as PNG format
+Exported: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/code/
+> _stacked_downup_replication/../../figures/exploratory_analysis/politician_byp
+> rov_fe_sweep/politician_byprov_fe25_did_interaction_rural_acpop_all_1.png
+
+-------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+-----------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with
+             |                                 Julia
+-------------------------------------------------------------------------------
+(results evreg1 are active now)
+number of observations will be reset to 4
+Press any key to continue, or Break to abort
+Number of observations (_N) was 0, now 4.
+(4 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+Number of observations (_N) was 4, now 5.
+(1 real change made)
+(1 real change made)
+(1 real change made)
+file
+    C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/code/_sta
+    > cked_downup_replication/../../figures/exploratory_analysis/politician_b
+    > yprov_fe_sweep/politician_byprov_fe26_did_interaction_rural_acpop_all_1
+    > .png saved as PNG format
+Exported: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/code/
+> _stacked_downup_replication/../../figures/exploratory_analysis/politician_byp
+> rov_fe_sweep/politician_byprov_fe26_did_interaction_rural_acpop_all_1.png
+
+-------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+-----------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with
+             |                                 Julia
+-------------------------------------------------------------------------------
+(results evreg1 are active now)
+number of observations will be reset to 4
+Press any key to continue, or Break to abort
+Number of observations (_N) was 0, now 4.
+(4 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+Number of observations (_N) was 4, now 5.
+(1 real change made)
+(1 real change made)
+(1 real change made)
+file
+    C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/code/_sta
+    > cked_downup_replication/../../figures/exploratory_analysis/politician_b
+    > yprov_fe_sweep/politician_byprov_fe27_did_interaction_rural_acpop_all_1
+    > .png saved as PNG format
+Exported: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/code/
+> _stacked_downup_replication/../../figures/exploratory_analysis/politician_byp
+> rov_fe_sweep/politician_byprov_fe27_did_interaction_rural_acpop_all_1.png
+
+-------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+-----------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with
+             |                                 Julia
+-------------------------------------------------------------------------------
+(results evreg1 are active now)
+number of observations will be reset to 4
+Press any key to continue, or Break to abort
+Number of observations (_N) was 0, now 4.
+(4 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+Number of observations (_N) was 4, now 5.
+(1 real change made)
+(1 real change made)
+(1 real change made)
+file
+    C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/code/_sta
+    > cked_downup_replication/../../figures/exploratory_analysis/politician_b
+    > yprov_fe_sweep/politician_byprov_fe28_did_interaction_rural_acpop_all_1
+    > .png saved as PNG format
+Exported: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/code/
+> _stacked_downup_replication/../../figures/exploratory_analysis/politician_byp
+> rov_fe_sweep/politician_byprov_fe28_did_interaction_rural_acpop_all_1.png
+
+-------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+-----------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with
+             |                                 Julia
+-------------------------------------------------------------------------------
+(results evreg1 are active now)
+number of observations will be reset to 4
+Press any key to continue, or Break to abort
+Number of observations (_N) was 0, now 4.
+(4 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+Number of observations (_N) was 4, now 5.
+(1 real change made)
+(1 real change made)
+(1 real change made)
+file
+    C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/code/_sta
+    > cked_downup_replication/../../figures/exploratory_analysis/politician_b
+    > yprov_fe_sweep/politician_byprov_fe29_did_interaction_rural_acpop_all_1
+    > .png saved as PNG format
+Exported: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/code/
+> _stacked_downup_replication/../../figures/exploratory_analysis/politician_byp
+> rov_fe_sweep/politician_byprov_fe29_did_interaction_rural_acpop_all_1.png
+
+-------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+-----------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with
+             |                                 Julia
+-------------------------------------------------------------------------------
+(results evreg1 are active now)
+number of observations will be reset to 4
+Press any key to continue, or Break to abort
+Number of observations (_N) was 0, now 4.
+(4 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+Number of observations (_N) was 4, now 5.
+(1 real change made)
+(1 real change made)
+(1 real change made)
+file
+    C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/code/_sta
+    > cked_downup_replication/../../figures/exploratory_analysis/politician_b
+    > yprov_fe_sweep/politician_byprov_fe30_did_interaction_rural_acpop_all_1
+    > .png saved as PNG format
+Exported: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/code/
+> _stacked_downup_replication/../../figures/exploratory_analysis/politician_byp
+> rov_fe_sweep/politician_byprov_fe30_did_interaction_rural_acpop_all_1.png
+
+-------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+-----------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with
+             |                                 Julia
+-------------------------------------------------------------------------------
+(results evreg1 are active now)
+number of observations will be reset to 4
+Press any key to continue, or Break to abort
+Number of observations (_N) was 0, now 4.
+(4 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+Number of observations (_N) was 4, now 5.
+(1 real change made)
+(1 real change made)
+(1 real change made)
+file
+    C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/code/_sta
+    > cked_downup_replication/../../figures/exploratory_analysis/politician_b
+    > yprov_fe_sweep/politician_byprov_fe31_did_interaction_rural_acpop_all_1
+    > .png saved as PNG format
+Exported: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/code/
+> _stacked_downup_replication/../../figures/exploratory_analysis/politician_byp
+> rov_fe_sweep/politician_byprov_fe31_did_interaction_rural_acpop_all_1.png
+
+-------------------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+-----------------------------------------------------------------
+      evreg1 | reghdfejl    countk          9  HDFE linear regression with
+             |                                 Julia
+-------------------------------------------------------------------------------
+(results evreg1 are active now)
+number of observations will be reset to 4
+Press any key to continue, or Break to abort
+Number of observations (_N) was 0, now 4.
+(4 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+Number of observations (_N) was 4, now 5.
+(1 real change made)
+(1 real change made)
+(1 real change made)
+file
+    C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/code/_sta
+    > cked_downup_replication/../../figures/exploratory_analysis/politician_b
+    > yprov_fe_sweep/politician_byprov_fe32_did_interaction_rural_acpop_all_1
+    > .png saved as PNG format
+Exported: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/code/
+> _stacked_downup_replication/../../figures/exploratory_analysis/politician_byp
+> rov_fe_sweep/politician_byprov_fe32_did_interaction_rural_acpop_all_1.png
+
+. 
+. display as result "COMPLETED all available politician by-province DiD interac
+> tion plots"
+COMPLETED all available politician by-province DiD interaction plots
+
+. 
+. 
+end of do-file

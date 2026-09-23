@@ -18,7 +18,7 @@ if "$root" == "" {
 
     * DATA roots
     global shell "/groups/sgulzar/sa_fires/proj_bureaucrats_farms"
-    global dbox  "/Users/anzony.quisperojas/Library/CloudStorage/Dropbox/sa_fires/proj_bureaucrats_farms"
+    global dbox  "C:/Users/eunic/Dropbox/sa_fires/proj_bureaucrats_farms"
 
     * CODE roots (code is NOT a subpath of data root on either machine)
     global code_shell "/users/aquisper/proj_bureaucrats_farms/code/_replication_rural_acpop"
@@ -44,7 +44,7 @@ if "$root" == "" {
 *-------------------------------------------------------------------------------
 
 * Import politician characteristics data
-import delimited using "${root}/data_output/intermediate/politicians_characteristics${sample}.csv", clear varnames(1)
+import delimited using "C:\Users\eunic\OneDrive\Documents\stacked_prof.csv", clear varnames(1)
 
 * Merge with rice moderators
 merge m:1 unique_small_grid_id ac_uq_id using "${root}/data_output/intermediate/rice_moderators.dta"
@@ -174,4 +174,4 @@ foreach mod of local moderators_list {
 * Export Results
 *-------------------------------------------------------------------------------
 
-estsave_csv evreg1 evreg2 evreg3 evreg4 evreg5 using "${root}/tex/paper/tables/_app_16_polischar_fe12_evst_all${sample}_rural_acpop.csv", replace
+estsave_csv evreg1 evreg2 evreg3 evreg4 evreg5 using "${root}/tex/paper/tables/_app_16_polischar_fe12_evst_test0_all${sample}_rural_acpop.csv", replace

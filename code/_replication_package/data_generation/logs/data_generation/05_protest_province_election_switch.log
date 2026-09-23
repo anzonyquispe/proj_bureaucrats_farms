@@ -1,0 +1,26 @@
+[2026-08-22 15:39:27] host=d32cepyc256.crc.nd.edu job=1377808
+[2026-08-22 15:39:27] environment=/groups/sgulzar/india_forest_land/downup_geo
+[2026-08-22 15:39:27] intermediate=/groups/sgulzar/sa_fires/proj_bureaucrats_farms/data_output/intermediate
+[2026-08-22 15:39:27] threads=10 memory=110GB
+From github.com:anzonyquispe/proj_bureaucrats_farms
+ * branch            replication_data -> FETCH_HEAD
+Already on 'replication_data'
+Your branch is up to date with 'origin/replication_data'.
+From github.com:anzonyquispe/proj_bureaucrats_farms
+ * branch            replication_data -> FETCH_HEAD
+Already up to date.
+[2026-08-22 15:39:29] git HEAD=d7b84ad
+2026-08-22 15:39:30,129 | INFO | Input: /groups/sgulzar/sa_fires/proj_bureaucrats_farms/data_output/intermediate/0_master_dataset.parquet
+2026-08-22 15:39:30,129 | INFO | Cohort key: province x election_year x switching month
+2026-08-22 15:39:30,129 | INFO | Control rule: never treated or censored not-yet treated
+2026-08-22 15:39:32,883 | INFO | Panel rows: 14,837,592
+2026-08-22 15:39:32,884 | INFO | Panel grids: 100,254
+2026-08-22 15:39:37,411 | INFO | Candidate cohorts: 59
+2026-08-22 15:39:37,411 | INFO | Candidate treated grids: 12,111
+2026-08-22 15:40:05,927 | INFO | Final rows: 71,063,267
+2026-08-22 15:40:05,927 | INFO | Final cohorts: 59
+2026-08-22 15:40:05,927 | INFO | Distinct grids used: 100,254
+2026-08-22 15:40:05,927 | INFO | Exporting Parquet: /groups/sgulzar/sa_fires/proj_bureaucrats_farms/data_output/intermediate/stacked_data_protest5km_province_election_switch.parquet
+2026-08-22 15:40:10,086 | INFO | Exporting CSV: /groups/sgulzar/sa_fires/proj_bureaucrats_farms/data_output/intermediate/stacked_data_protest5km_province_election_switch.csv
+2026-08-22 15:40:34,113 | INFO | Completed province-election-switch protest stack
+[2026-08-22 15:40:34] completed province-election-switch protest stack

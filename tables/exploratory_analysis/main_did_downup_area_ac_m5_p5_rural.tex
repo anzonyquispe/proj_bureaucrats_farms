@@ -1,0 +1,21 @@
+{
+\def\sym#1{\ifmmode^{#1}\else\(^{#1}\)\fi}
+\begin{tabular}{l*{4}{c}}
+\hline
+&\multicolumn{4}{c}{Relative-month window: -5 to +5} \\ \hline
+            &\multicolumn{1}{c}{(1)}&\multicolumn{1}{c}{(2)}&\multicolumn{1}{c}{(3)}&\multicolumn{1}{c}{(4)}\\
+            &\multicolumn{1}{c}{No FE}&\multicolumn{1}{c}{AC + Month-Year}&\multicolumn{1}{c}{AC $\times$ Month-Year}&\multicolumn{1}{c}{Grid + AC $\times$ Month-Year}\\
+\hline
+Down $>$ Up Area&       9.676\sym{***}&      -0.731         &       5.949\sym{***}&      -3.222\sym{*}  \\
+            &     (2.129)         &     (1.263)         &     (1.221)         &     (1.672)         \\
+\hline
+Observations&  35,717,491         &  35,717,364         &  35,676,729         &  35,588,053         \\
+N Assembly Constituencies&         807         &         807         &         807         &         807         \\
+Month-Year FE&           N         &           Y         &           N         &           N         \\
+AC FE       &           N         &           Y         &           N         &           N         \\
+AC $\times$ Month-Year FE&           N         &           N         &           Y         &           Y         \\
+Grid FE     &           N         &           N         &           N         &           Y         \\
+Mean DV, treated pre-treatment&      91.110         &      91.110         &      91.110         &      91.110         \\
+\hline
+\end{tabular}
+}

@@ -1,0 +1,622 @@
+-------------------------------------------------------------------------------
+      name:  <unnamed>
+       log:  C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/co
+> de/_stacked_downup_replication/logs/local_sample_remaining.log
+  log type:  text
+ opened on:  24 Aug 2026, 06:56:59
+
+. 
+. confirm file "${int_data}/stacked_downup_neigh${sample}.csv"
+
+. do "${code}/_main_6_neighbour.do"
+
+. *****************************************************************************
+> ***
+. * Neighbour-border analysis for figures/neighbor_output.pdf
+. *****************************************************************************
+> ***
+. 
+. if "$root" == "" {
+.     clear all
+.     set more off
+.     * Standalone defaults for the five sbatch-array parameters.
+.     global location     "shell"
+.     global sample       ""
+.     global is_rural_var "is_rural"
+.     global fe_list      "1"
+.     global ster_suffix  ""
+.     global shell "/groups/sgulzar/sa_fires/proj_bureaucrats_farms"
+.     global dbox  "/Users/anzony.quisperojas/Library/CloudStorage/Dropbox/sa_f
+> ires/proj_bureaucrats_farms"
+.     global code_shell "/users/aquisper/proj_bureaucrats_farms/code/_stacked_d
+> ownup_replication"
+.     global code_dbox  "/Users/anzony.quisperojas/Documents/GitHub/proj_bureau
+> crats_farms/code/_stacked_downup_replication"
+.     if "$location" == "dbox" {
+.         global root "$dbox"
+.         global code "$code_dbox"
+.     }
+.     else {
+.         global root "$shell"
+.         global code "$code_shell"
+.     }
+. }
+
+. 
+. global int_data "${root}/data_output/intermediate"
+
+. global tables   "${code}/../../tables"
+
+. 
+. import delimited "${int_data}/stacked_downup_neigh${sample}.csv", clear varna
+> mes(1)
+(encoding automatically selected: ISO-8859-1)
+(15 vars, 1,230,100 obs)
+
+. capture confirm variable relative_monthyear
+
+. if _rc {
+.     gen relative_monthyear = monthyear - cohort
+. }
+
+. keep if inrange(relative_monthyear, -5, 6)
+(0 observations deleted)
+
+. display as text "Final event-study sample: relative_monthyear in [-5, 6]"
+Final event-study sample: relative_monthyear in [-5, 6]
+
+. merge m:1 unique_small_grid_id using "${int_data}/ghs_grid_classification_200
+> 0.dta", ///
+>     keep(master match) keepusing(is_rural)
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                             0
+    Matched                         1,230,100  (_merge==3)
+    -----------------------------------------
+
+. drop _merge
+
+. keep if ${is_rural_var} == 1
+(291,304 observations deleted)
+
+. keep if year < 2022 | (year == 2022 & month <= 8)
+(0 observations deleted)
+
+. 
+. capture drop countk
+
+. gen countk = count * 1000
+
+. capture confirm variable treat
+
+. if _rc {
+.     gen byte treat = downwind_neighbours
+. }
+
+. capture confirm variable relative_year_bin
+
+. if _rc {
+.     capture confirm variable relative_monthyear
+.     if !_rc {
+.         gen relative_year_bin = floor(relative_monthyear / 12)
+.     }
+.     else {
+.         gen relative_year_bin = floor((monthyear - cohort) / 12)
+.     }
+. }
+
+. gen moderator = 0
+
+. 
+. quietly summarize countk if treat == 1 & relative_year_bin <= -1
+
+. local ymean = r(mean)
+
+. quietly summarize countk if treat == 1 & relative_year_bin <= -1 & moderator 
+> == 1
+
+. local ymean2 = r(mean)
+
+. egen tag_ac = tag(ac_uq_id)
+
+. count if tag_ac == 1
+  801
+
+. local numacs = r(N)
+
+. 
+. local fe1 "ac_uq_id#ac_uq_id_neighbor#month#year#cohort unique_small_grid_id#
+> cohort"
+
+. foreach fe of numlist $fe_list {
+  2.     if `fe' != 1 {
+  3.         display as error "The neighbour figure defines FE specification 1 
+> only."
+  4.         exit 198
+  5.     }
+  6.     reghdfejl countk b5.dist_q##b0.downwind_neighbours, ///
+>         absorb(`fe`fe'') ///
+>         cluster(ac_uq_id#month#year unique_small_grid_id)
+  7.     estadd scalar ymean = `ymean'
+  8.     estadd scalar ymean2 = `ymean2'
+  9.     estadd scalar acq = `numacs'
+ 10.     estadd local smpl "Rural"
+ 11.     estadd local fespec "fe`fe'"
+ 12.     est store reg`fe'
+ 13. }
+(dropped 579225 singleton observations)
+(MWFE estimator converged in 18 iterations)
+note: 2bn.dist_q is probably collinear with the fixed effects (all partialled-o
+> ut values are close to zero; tol = 1.0e-09)
+note: 2.dist_q omitted because of collinearity
+note: 4.dist_q omitted because of collinearity
+Warning: VCV matrix was non-positive semi-definite; adjustment from Cameron, Ge
+> lbach & Miller applied.
+warning: missing F statistic; dropped variables due to collinearity or too few 
+> clusters
+warning: variance matrix is nonsymmetric or highly singular.
+
+HDFE Linear regression                            Number of obs   =    359,571
+Absorbing 2 HDFE groups                           F(   6,  29711) =          .
+Statistics robust to heteroskedasticity           Prob > F        =          .
+                                                  R-squared       =     0.7939
+                                                  Adj R-squared   =     0.5385
+Number of clusters (ac_uq_id#month#year) =     53,939Within R-sq. =     0.0000
+Number of clusters (unique_small_grid_id) =     29,712Root MSE    =   715.8445
+
+(Std. err. adjusted for 29,712 clusters in ac_uq_id#month#year unique_small_gri
+> d_id)
+------------------------------------------------------------------------------
+             |               Robust
+      countk | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+      dist_q |
+          1  |  -6.07e-12          .        .       .            .           .
+          2  |          0  (omitted)
+          3  |          0  (omitted)
+          4  |          0  (omitted)
+             |
+1.downwind~s |  -.6945562          .        .       .            .           .
+             |
+      dist_q#|
+downwind_n~s |
+        1 1  |  -29.14447          .        .       .            .           .
+        2 1  |   9.871817          .        .       .            .           .
+        3 1  |   12.30272          .        .       .            .           .
+        4 1  |   10.65825          .        .       .            .           .
+             |
+       _cons |   165.7821          .        .       .            .           .
+------------------------------------------------------------------------------
+
+Absorbed degrees of freedom:
+-------------------------------------------------------------------------------
+> ---------------+
+                                          Absorbed FE | Categories  - Redundant
+>   = Num. Coefs                                                               
+>                |
+------------------------------------------------------+------------------------
+> ---------------|
+         ac_uq_id#ac_uq_id_neighbor#month#year#cohort |    157727      157727  
+>          0                                                                   
+>               *                                                              
+>                |
+                          unique_small_grid_id#cohort |     41276       41276  
+>          0                                                                   
+>               *                                                              
+>                |
+-------------------------------------------------------------------------------
+> ---------------+
+* = FE nested within cluster; treated as redundant for DoF computation
+
+added scalar:
+              e(ymean) =  110.39148
+
+added scalar:
+             e(ymean2) =  .
+
+added scalar:
+                e(acq) =  801
+
+added macro:
+               e(smpl) : "Rural"
+
+added macro:
+             e(fespec) : "fe1"
+
+. 
+. estwrite reg1 using ///
+>     "${tables}/main_figure4_neighbour${sample}_rural${ster_suffix}.ster", rep
+> lace
+(saving reg1)
+(file C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/code/_sta
+> cked_downup_replication/../../tables/main_figure4_neighbour_sample_rural.ster
+>  saved)
+
+. 
+. *****************************************************************************
+> ***
+. 
+end of do-file
+
+. do "${code}/_main_6_neighbour_plot.do"
+
+. *****************************************************************************
+> ***
+. * Plot neighbour-border estimates used by main.tex
+. *****************************************************************************
+> ***
+. 
+. if "$root" == "" {
+.     clear all
+.     set more off
+.     global location     "dbox"
+.     global sample       ""
+.     global is_rural_var "is_rural"
+.     global fe_list      "1"
+.     global ster_suffix  ""
+.     global shell "/groups/sgulzar/sa_fires/proj_bureaucrats_farms"
+.     global dbox  "/Users/anzony.quisperojas/Library/CloudStorage/Dropbox/sa_f
+> ires/proj_bureaucrats_farms"
+.     if "$location" == "dbox" {
+.         global root "$dbox"
+.     }
+.     else {
+.         global root "$shell"
+.     }
+. }
+
+. 
+. global tables  "${code}/../../tables"
+
+. global figures "${code}/../../figures"
+
+. 
+. est clear
+
+. estread using "${tables}/main_figure4_neighbour${sample}_rural${ster_suffix}.
+> ster"
+
+---------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+-------------------------------------------------------
+        reg1 | reghdfe      countk         18  HDFE Linear regression
+---------------------------------------------------------------------
+
+. est restore reg1
+(results reg1 are active now)
+
+. 
+. tempfile plotdata controls
+
+. clear
+
+. set obs 1
+Number of observations (_N) was 0, now 1.
+
+. forvalues q = 1/4 {
+  2.     gen point`q' = _b[`q'.dist_q#1.downwind_neighbours]
+  3.     gen lo`q' = point`q' - 1.96 * _se[`q'.dist_q#1.downwind_neighbours]
+  4.     gen hi`q' = point`q' + 1.96 * _se[`q'.dist_q#1.downwind_neighbours]
+  5.     gen cpoint`q' = _b[`q'.dist_q]
+  6.     gen clo`q' = cpoint`q' - 1.96 * _se[`q'.dist_q]
+  7.     gen chi`q' = cpoint`q' + 1.96 * _se[`q'.dist_q]
+  8. }
+
+. save `plotdata'
+file C:\Users\eunic\AppData\Local\Temp\ST_5b74_000001.tmp saved as .dta
+    format
+
+. 
+. keep cpoint* clo* chi*
+
+. rename (cpoint1 clo1 chi1 cpoint2 clo2 chi2 cpoint3 clo3 chi3 cpoint4 clo4 ch
+> i4) ///
+>        (point1  lo1  hi1  point2  lo2  hi2  point3  lo3  hi3  point4  lo4  hi
+> 4)
+
+. gen series = 2
+
+. save `controls'
+file C:\Users\eunic\AppData\Local\Temp\ST_5b74_000002.tmp saved as .dta
+    format
+
+. 
+. use `plotdata', clear
+
+. keep point* lo* hi*
+
+. gen series = 1
+
+. append using `controls'
+
+. gen point5 = 0
+
+. gen lo5 = 0
+
+. gen hi5 = 0
+
+. reshape long point lo hi, i(series) j(order)
+(j = 1 2 3 4 5)
+
+Data                               Wide   ->   Long
+-----------------------------------------------------------------------------
+Number of observations                2   ->   10          
+Number of variables                  16   ->   5           
+j variable (5 values)                     ->   order
+xij variables:
+               point1 point2 ... point5   ->   point
+                        lo1 lo2 ... lo5   ->   lo
+                        hi1 hi2 ... hi5   ->   hi
+-----------------------------------------------------------------------------
+
+. 
+. set scheme plotplainblind
+
+. twoway ///
+>     (rarea lo hi order if series == 1, color(red%10)) ///
+>     (connect point order if series == 1, msymbol(S) color(red)) ///
+>     (rarea lo hi order if series == 2, color(blue%10)) ///
+>     (connect point order if series == 2, msymbol(T) color(blue)), ///
+>     xtitle("Distance from Assembly border segment g (quintiles)") ///
+>     ytitle("Effect on number of fires (x 1,000 units)") ///
+>     yline(0, lpattern(dash)) xlabel(1 "Closest" 5 "Farthest") legend(off)
+
+. 
+. graph export "${figures}/neighbor_output${sample}.pdf", replace as(pdf)
+file
+    C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/code/_sta
+    > cked_downup_replication/../../figures/neighbor_output_sample.pdf saved
+    as PDF format
+
+. 
+. *****************************************************************************
+> ***
+. 
+end of do-file
+
+. do "${code}/_generate_interaction_plots.do"
+
+. *****************************************************************************
+> ***
+. * Generate every interaction figure from independently produced .ster files
+. *****************************************************************************
+> ***
+. 
+. version 17
+
+. set more off
+
+. 
+. if "$root" == "" {
+.     clear all
+.     global location     "shell"
+.     global sample       ""
+.     global is_rural_var "is_rural"
+.     global fe_list      "1"
+.     global ster_suffix  ""
+.     global shell "/groups/sgulzar/sa_fires/proj_bureaucrats_farms"
+.     global dbox  "/Users/anzony.quisperojas/Library/CloudStorage/Dropbox/sa_f
+> ires/proj_bureaucrats_farms"
+.     global code_shell "/users/aquisper/proj_bureaucrats_farms/code/_stacked_d
+> ownup_replication"
+.     global code_dbox "/Users/anzony.quisperojas/Documents/GitHub/proj_bureauc
+> rats_farms/code/_stacked_downup_replication"
+.     if "$location" == "dbox" {
+.         global root "$dbox"
+.         global code "$code_dbox"
+.     }
+.     else {
+.         global root "$shell"
+.         global code "$code_shell"
+.     }
+. }
+
+. 
+. global tables  "${code}/../../tables"
+
+. global figures "${code}/../../figures"
+
+. capture mkdir "${figures}/Interaction_downwind"
+
+. quietly do "${code}/interaction_graph.ado"
+
+. 
+. * Population-weighted figures actively referenced by main.tex.
+. est clear
+
+. interaction_graph using ///
+>     "${tables}/_app_18_protest_5km_fe12_did_downup_plot${sample}_rural_acpop.
+> ster", ///
+>     estimates(1) ///
+>     output("${figures}/_app_18_protest_5km_fe12_did_downup_plot_rural_acpop${
+> sample}") ///
+>     type(protest) modvar(downup_ac_pop)
+
+---------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+-------------------------------------------------------
+      evreg1 | reghdfe      countk         29  HDFE Linear regression
+---------------------------------------------------------------------
+(results evreg1 are active now)
+
+INTERACTION AUDIT (CONTROL-PRE STANDARDIZED): protest, estimate evreg1, moderat
+> or downup_ac_pop
+Control pre  : b =     0.000000   95% CI [    0.000000,     0.000000]   90% CI 
+> [    0.000000,     0.000000]
+Control post : b =    10.700492   95% CI [   -1.296869,    22.697852]   90% CI 
+> [    0.632611,    20.768372]
+Treated post : b =    39.056032   95% CI [  -26.084536,   104.196600]   90% CI 
+> [  -15.608280,    93.720344]
+Difference   : b =    28.355540   SE =    33.019973   95% CI [  -36.379455,    
+> 93.090535]   90% CI [  -25.968425,    82.679505]   p =  0.390529
+(file
+    C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/code/_sta
+    > cked_downup_replication/../../figures/_app_18_protest_5km_fe12_did_down
+    > up_plot_rural_acpop_sample_1.png not found)
+file
+    C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/code/_sta
+    > cked_downup_replication/../../figures/_app_18_protest_5km_fe12_did_down
+    > up_plot_rural_acpop_sample_1.png saved as PNG format
+Exported: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/code/
+> _stacked_downup_replication/../../figures/_app_18_protest_5km_fe12_did_downup
+> _plot_rural_acpop_sample_1.png
+
+. 
+. est clear
+
+. interaction_graph using ///
+>     "${tables}/_app_19_polischar_fe12_did_downup_inter_plot${sample}_rural_ac
+> pop.ster", ///
+>     estimates(1) ///
+>     output("${figures}/_app_19_polischar_fe12_did_downup_inter_plot_rural_acp
+> op${sample}") ///
+>     type(politician) modvar(downup_ac_pop)
+
+---------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+-------------------------------------------------------
+      evreg1 | reghdfe      countk         29  HDFE Linear regression
+---------------------------------------------------------------------
+(results evreg1 are active now)
+
+INTERACTION AUDIT (CONTROL-PRE STANDARDIZED): politician, estimate evreg1, mode
+> rator downup_ac_pop
+Control pre  : b =     0.000000   95% CI [    0.000000,     0.000000]   90% CI 
+> [    0.000000,     0.000000]
+Control post : b =    23.252940   95% CI [  -94.140627,   140.646507]   90% CI 
+> [  -75.229302,   121.735183]
+Treated post : b =    35.873340   95% CI [ -186.684629,   258.431310]   90% CI 
+> [ -150.832017,   222.578698]
+Difference   : b =    12.620400   SE =    81.358493   95% CI [ -147.098449,   1
+> 72.339249]   90% CI [ -121.368802,   146.609602]   p =  0.876768
+(file
+    C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/code/_sta
+    > cked_downup_replication/../../figures/_app_19_polischar_fe12_did_downup
+    > _inter_plot_rural_acpop_sample_1.png not found)
+file
+    C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/code/_sta
+    > cked_downup_replication/../../figures/_app_19_polischar_fe12_did_downup
+    > _inter_plot_rural_acpop_sample_1.png saved as PNG format
+Exported: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/code/
+> _stacked_downup_replication/../../figures/_app_19_polischar_fe12_did_downup_i
+> nter_plot_rural_acpop_sample_1.png
+
+. 
+. * Area-weighted counterparts retained under their historical names.
+. est clear
+
+. interaction_graph using ///
+>     "${tables}/_app_18_protest_5km_fe12_did_downup_plot${sample}_rural.ster",
+>  ///
+>     estimates(1) ///
+>     output("${figures}/Interaction_downwind/_app_downup_rel_protest${sample}"
+> ) ///
+>     type(protest) modvar(downup_ac)
+
+---------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+-------------------------------------------------------
+      evreg1 | reghdfe      countk         29  HDFE Linear regression
+---------------------------------------------------------------------
+(results evreg1 are active now)
+
+INTERACTION AUDIT (CONTROL-PRE STANDARDIZED): protest, estimate evreg1, moderat
+> or downup_ac
+Control pre  : b =     0.000000   95% CI [    0.000000,     0.000000]   90% CI 
+> [    0.000000,     0.000000]
+Control post : b =    11.340245   95% CI [   -0.537971,    23.218461]   90% CI 
+> [    1.372347,    21.308142]
+Treated post : b =    31.281304   95% CI [  -33.329337,    95.891946]   90% CI 
+> [  -22.938306,    85.500915]
+Difference   : b =    19.941059   SE =    32.740657   95% CI [  -44.246343,    
+> 84.128462]   90% CI [  -33.923380,    73.805499]   p =  0.542514
+(file
+    C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/code/_sta
+    > cked_downup_replication/../../figures/Interaction_downwind/_app_downup_
+    > rel_protest_sample_1.png not found)
+file
+    C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/code/_sta
+    > cked_downup_replication/../../figures/Interaction_downwind/_app_downup_
+    > rel_protest_sample_1.png saved as PNG format
+Exported: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/code/
+> _stacked_downup_replication/../../figures/Interaction_downwind/_app_downup_re
+> l_protest_sample_1.png
+
+. copy "${figures}/Interaction_downwind/_app_downup_rel_protest${sample}_1.png"
+>  ///
+>      "${figures}/Interaction_downwind/_app_downup_rel_protest${sample}.png", 
+> replace
+(file
+    C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/code/_sta
+    > cked_downup_replication/../../figures/Interaction_downwind/_app_downup_
+    > rel_protest_sample.png not found)
+
+. 
+. est clear
+
+. interaction_graph using ///
+>     "${tables}/_app_19_polischar_fe12_did_downup_inter_plot${sample}_rural.st
+> er", ///
+>     estimates(1) ///
+>     output("${figures}/Interaction_downwind/_app_downup_rel_polischar${sample
+> }") ///
+>     type(politician) modvar(downup_ac)
+
+---------------------------------------------------------------------
+             |           Dependent  Number of        
+        Name | Command    variable     param.  Title 
+-------------+-------------------------------------------------------
+      evreg1 | reghdfe      countk         29  HDFE Linear regression
+---------------------------------------------------------------------
+(results evreg1 are active now)
+
+INTERACTION AUDIT (CONTROL-PRE STANDARDIZED): politician, estimate evreg1, mode
+> rator downup_ac
+Control pre  : b =     0.000000   95% CI [    0.000000,     0.000000]   90% CI 
+> [    0.000000,     0.000000]
+Control post : b =    10.039166   95% CI [  -99.489867,   119.568199]   90% CI 
+> [  -81.845467,   101.923799]
+Treated post : b =    27.093051   95% CI [ -185.362201,   239.548304]   90% CI 
+> [ -151.137070,   205.323173]
+Difference   : b =    17.053885   SE =    79.268930   95% CI [ -138.562839,   1
+> 72.670610]   90% CI [ -113.494018,   147.601788]   p =  0.829717
+(file
+    C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/code/_sta
+    > cked_downup_replication/../../figures/Interaction_downwind/_app_downup_
+    > rel_polischar_sample_1.png not found)
+file
+    C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/code/_sta
+    > cked_downup_replication/../../figures/Interaction_downwind/_app_downup_
+    > rel_polischar_sample_1.png saved as PNG format
+Exported: C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/code/
+> _stacked_downup_replication/../../figures/Interaction_downwind/_app_downup_re
+> l_polischar_sample_1.png
+
+. copy "${figures}/Interaction_downwind/_app_downup_rel_polischar${sample}_1.pn
+> g" ///
+>      "${figures}/Interaction_downwind/_app_downup_rel_polischar${sample}.png"
+> , replace
+(file
+    C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/code/_sta
+    > cked_downup_replication/../../figures/Interaction_downwind/_app_downup_
+    > rel_polischar_sample.png not found)
+
+. 
+end of do-file
+
+. 
+. display as result "LOCAL SAMPLE REMAINING STAGES COMPLETED"
+LOCAL SAMPLE REMAINING STAGES COMPLETED
+
+. log close
+      name:  <unnamed>
+       log:  C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/co
+> de/_stacked_downup_replication/logs/local_sample_remaining.log
+  log type:  text
+ closed on:  24 Aug 2026, 06:57:22
+-------------------------------------------------------------------------------

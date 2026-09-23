@@ -1,0 +1,28 @@
+{
+\def\sym#1{\ifmmode^{#1}\else\(^{#1}\)\fi}
+\begin{tabular}{l*{4}{c}}
+\hline
+            &\multicolumn{1}{c}{(1)}         &\multicolumn{1}{c}{(2)}         &\multicolumn{1}{c}{(3)} &\multicolumn{1}{c}{(4)}         \\
+            & \multicolumn{4}{c}{Number of Fires (in 1,000 units)} \\ \hline
+
+Post $\times$ Agriculturalist&       7.316\sym{***}&      -1.750         &      -3.215         &      -1.090         \\
+            &     (2.827)         &     (3.181)         &     (2.608)         &     (2.669)         \\
+Post $\times$ Agriculturalist $\times$ Rice Areas&                     &      23.057\sym{***}&                     &                     \\
+            &                     &     (6.383)         &                     &                     \\
+Post $\times$ Agriculturalist $\times$ Harvested Rice Area&                     &                     &      27.063\sym{***}&                     \\
+            &                     &                     &     (6.481)         &                     \\
+Post $\times$ Agriculturalist $\times$ Rice Production&                     &                     &                     &      19.608\sym{***}\\
+            &                     &                     &                     &     (6.012)         \\
+\hline
+Observations&  21,882,509         &  21,882,509         &  21,882,509         &  21,882,509         \\
+N Assembly Constituencies&         658         &         658         &         658         &         658         \\
+Grid  $\times$ Cohort FE&           Y         &           Y         &           Y         &           Y         \\
+Relative Time FE&           Y         &           Y         &           Y         &           Y         \\
+Legislature  $\times$ Cohort FE&           Y         &           Y         &           Y         &           Y         \\
+Province  $\times$ Cohort Trend FE&           Y         &           Y         &           Y         &           Y         \\
+Mean DV     &     200.662         &     200.662         &     200.662         &     200.662         \\
+Mean DV2    &     200.662         &     107.351         &      44.741         &      39.083         \\
+Mean DV3    &                     &                     &                     &                     \\
+\hline
+\end{tabular}
+}

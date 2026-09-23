@@ -1,0 +1,1064 @@
+
+  ___  ____  ____  ____  ____ ®
+ /__    /   ____/   /   ____/      StataNow 19.5
+___/   /   /___/   /   /___/       MP—Parallel Edition
+
+ Statistics and Data Science       Copyright 1985-2025 StataCorp LLC
+                                   StataCorp
+                                   4905 Lakeway Drive
+                                   College Station, Texas 77845 USA
+                                   800-782-8272        https://www.stata.com
+                                   979-696-4600        service@stata.com
+
+Stata license: 4-user 16-core network, expiring 14 Sep 2026
+Serial number: 501909301589
+  Licensed to: University of Notre Dame
+               Notre Dame, IN 46556
+
+Notes:
+      1. Stata is running in batch mode.
+      2. Unicode is supported; see help unicode_advice.
+      3. More than 2 billion observations are allowed; see help obs_advice.
+      4. Maximum number of variables is set to 5,000 but can be increased;
+          see help set_maxvar.
+
+. do /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication/sb
+> atch/_run_dofile.do 
+
+. *****************************************************************************
+> ***
+. * Environment bridge: one invocation runs exactly one result-generating dofil
+> e.
+. *****************************************************************************
+> ***
+. 
+. version 17
+
+. set more off
+
+. 
+. local dofile        : environment FARMS_DOFILE
+
+. local root          : environment FARMS_ROOT
+
+. local code          : environment FARMS_CODE
+
+. local location      : environment FARMS_LOCATION
+
+. local sample        : environment FARMS_SAMPLE
+
+. local is_rural_var  : environment FARMS_RURAL_VAR
+
+. local fe_list       : environment FARMS_FE_LIST
+
+. local ster_suffix   : environment FARMS_STER_SUFFIX
+
+. local downup_var    : environment FARMS_DOWNUP_VAR
+
+. local stacked_file  : environment FARMS_STACKED_FILE
+
+. local did_output    : environment FARMS_DID_OUTPUT
+
+. local control_samples : environment FARMS_CONTROL_SAMPLES
+
+. local analysis_subsample : environment FARMS_ANALYSIS_SUBSAMPLE
+
+. local processors    : environment FARMS_CPUS
+
+. 
+. if "`processors'" == "" local processors "1"
+
+. set processors `processors'
+    The maximum number of processors or cores being used is changed from 16
+    to 1.  It can be set to any number between 1 and 16
+
+. 
+. if "`dofile'" == "" {
+.     display as error "FARMS_DOFILE is empty; use sbatch/run_dofile.sbatch."
+.     exit 198
+. }
+
+. if "`root'" == "" {
+.     display as error "FARMS_ROOT is empty; use sbatch/run_dofile.sbatch."
+.     exit 198
+. }
+
+. if "`code'" == "" {
+.     display as error "FARMS_CODE is empty; use sbatch/run_dofile.sbatch."
+.     exit 198
+. }
+
+. 
+. if "`sample'" == "none" local sample ""
+
+. if "`ster_suffix'" == "none" local ster_suffix ""
+
+. if "`downup_var'" == "none" local downup_var ""
+
+. if "`stacked_file'" == "none" local stacked_file ""
+
+. if "`did_output'" == "none" local did_output ""
+
+. if "`control_samples'" == "all" local control_samples ""
+
+. if "`analysis_subsample'" == "all" local analysis_subsample ""
+
+. 
+. global root          "`root'"
+
+. global code          "`code'"
+
+. global location      "`location'"
+
+. global sample        "`sample'"
+
+. global is_rural_var  "`is_rural_var'"
+
+. global fe_list       "`fe_list'"
+
+. global ster_suffix   "`ster_suffix'"
+
+. global downup_var    "`downup_var'"
+
+. global stacked_file  "`stacked_file'"
+
+. global did_output    "`did_output'"
+
+. global control_samples "`control_samples'"
+
+. global analysis_subsample "`analysis_subsample'"
+
+. 
+. global int_data    "${root}/data_output/intermediate"
+
+. global int_farms   "${int_data}"
+
+. global tables      "${code}/../../tables"
+
+. global table_farms "${tables}"
+
+. global figures     "${code}/../../figures"
+
+. global figure_farms "${figures}"
+
+. 
+. capture mkdir "${tables}"
+
+. capture mkdir "${figures}"
+
+. capture mkdir "${code}/logs"
+
+. 
+. adopath ++ "${code}"
+  [1]              "/users/aquisper/proj_bureaucrats_farms/code/_stacked_downup
+> _replication"
+  [2]  (BASE)      "/software/s/stata/19.5/ado/base/"
+  [3]  (SITE)      "/software/s/stata/ado/"
+  [4]              "."
+  [5]  (PERSONAL)  "~/ado/personal/"
+  [6]  (PLUS)      "~/ado/plus/"
+  [7]  (OLDPLACE)  "~/ado/"
+
+. capture noisily do "${code}/estsave_csv.ado"
+
+. *! estsave_csv v1.2 - Export stored estimates and covariance matrices to CSV
+. program define estsave_csv
+  1.     version 14.0
+  2.     syntax namelist using/, [replace append]
+  3. 
+.     local outfile `"`using'"'
+  4.     tempfile coef_all coef_cur scalar_all scalar_cur
+  5.     local first = 1
+  6. 
+.     foreach est of local namelist {
+  7.         quietly estimates restore `est'
+  8.         matrix b = e(b)
+  9.         matrix V = e(V)
+ 10.         local k = colsof(b)
+ 11.         local cnames : colfullnames b
+ 12. 
+.         preserve
+ 13.         clear
+ 14.         quietly set obs `k'
+ 15.         gen strL reg = "`est'"
+ 16.         gen strL var = ""
+ 17.         gen double beta = .
+ 18.         capture local ymean_val `"`e(ymean)'"'
+ 19.         if !_rc & `"`ymean_val'"' != "" gen strL ymean = `"`ymean_val'"'
+ 20.         else gen strL ymean = ""
+ 21. 
+.         forvalues j = 1/`k' {
+ 22.             local nm : word `j' of `cnames'
+ 23.             quietly replace var = "`nm'" in `j'
+ 24.             quietly replace beta = b[1, `j'] in `j'
+ 25.             gen double cov`j' = .
+ 26.         }
+ 27.         forvalues i = 1/`k' {
+ 28.             forvalues j = 1/`k' {
+ 29.                 quietly replace cov`j' = V[`i', `j'] in `i'
+ 30.             }
+ 31.         }
+ 32.         quietly save `coef_cur', replace
+ 33.         if `first' quietly save `coef_all', replace
+ 34.         else {
+ 35.             quietly use `coef_all', clear
+ 36.             quietly append using `coef_cur'
+ 37.             quietly save `coef_all', replace
+ 38.         }
+ 39.         restore
+ 40. 
+.         preserve
+ 41.         clear
+ 42.         quietly set obs 1
+ 43.         gen strL reg = "`est'"
+ 44.         local escalars : e(scalars)
+ 45.         foreach sc of local escalars {
+ 46.             local scval = e(`sc')
+ 47.             local safe = subinstr("`sc'", "-", "_", .)
+ 48.             capture gen double `safe' = `scval'
+ 49.             if _rc capture gen double sc_`safe' = `scval'
+ 50.         }
+ 51.         local emacros : e(macros)
+ 52.         foreach mc of local emacros {
+ 53.             capture local mcval `"`e(`mc')'"'
+ 54.             if !_rc & `"`mcval'"' != "" {
+ 55.                 if strlen(`"`mcval'"') > 244 local mcval = substr(`"`mcval
+> '"', 1, 244)
+ 56.                 local safe = subinstr("`mc'", "-", "_", .)
+ 57.                 capture gen strL `safe' = `"`mcval'"'
+ 58.                 if _rc capture gen strL mc_`safe' = `"`mcval'"'
+ 59.             }
+ 60.         }
+ 61.         quietly save `scalar_cur', replace
+ 62.         if `first' {
+ 63.             quietly save `scalar_all', replace
+ 64.             local first = 0
+ 65.         }
+ 66.         else {
+ 67.             quietly use `scalar_all', clear
+ 68.             quietly append using `scalar_cur'
+ 69.             quietly save `scalar_all', replace
+ 70.         }
+ 71.         restore
+ 72.     }
+ 73. 
+.     local basefile = subinstr(`"`outfile'"', ".csv", "", .)
+ 74.     quietly use `coef_all', clear
+ 75.     order reg var beta ymean
+ 76.     quietly export delimited using "`basefile'.csv", `replace' `append'
+ 77.     quietly use `scalar_all', clear
+ 78.     quietly export delimited using "`basefile'_scalars.csv", `replace' `ap
+> pend'
+ 79.     display as result "Estimates exported to `basefile'.csv"
+ 80. end
+
+. 
+. 
+end of do-file
+
+. capture noisily do "${code}/estload_csv.ado"
+
+. *! estload_csv v1.0 - Reconstruct estimate objects exported by estsave_csv
+. program define estload_csv
+  1.     version 14.0
+  2.     syntax using/
+  3. 
+.     local infile `"`using'"'
+  4.     local basefile = subinstr(`"`infile'"', ".csv", "", .)
+  5.     preserve
+  6.     quietly import delimited using "`basefile'.csv", clear varnames(1)
+  7.     quietly levelsof reg, local(regs)
+  8. 
+.     foreach r of local regs {
+  9.         preserve
+ 10.         quietly keep if reg == "`r'"
+ 11.         local k = _N
+ 12.         matrix b = J(1, `k', .)
+ 13.         matrix V = J(`k', `k', .)
+ 14.         local varnames ""
+ 15.         forvalues i = 1/`k' {
+ 16.             local vname = var[`i']
+ 17.             local varnames `"`varnames' `vname'"'
+ 18.             matrix b[1, `i'] = beta[`i']
+ 19.             forvalues j = 1/`k' {
+ 20.                 matrix V[`i', `j'] = cov`j'[`i']
+ 21.             }
+ 22.         }
+ 23.         matrix colnames b = `varnames'
+ 24.         matrix rownames V = `varnames'
+ 25.         matrix colnames V = `varnames'
+ 26.         restore, preserve
+ 27.         quietly ereturn post b V
+ 28.         estimates store `r'
+ 29.         display as text "Loaded estimate: `r'"
+ 30.     }
+ 31.     restore
+ 32. end
+
+. 
+. 
+end of do-file
+
+. 
+. display "============================================================"
+============================================================
+
+. display "Independent dofile job: `dofile'"
+Independent dofile job: _app_6_main_did_treat_definition.do
+
+. display "Data root: ${root}"
+Data root: /groups/sgulzar/sa_fires/proj_bureaucrats_farms
+
+. display "Tables output: ${tables}"
+Tables output: /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_repl
+> ication/../../tables
+
+. display "Figures output: ${figures}"
+Figures output: /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_rep
+> lication/../../figures
+
+. display "Code root: ${code}"
+Code root: /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replicat
+> ion
+
+. display "Sample: ${sample}; rural: ${is_rural_var}; FE: ${fe_list}"
+Sample: ; rural: is_rural; FE: 1/7
+
+. display "Suffix: ${ster_suffix}; moderator: ${downup_var}"
+Suffix: ; moderator: 
+
+. display "Control samples: ${control_samples}"
+Control samples: 
+
+. display "Analysis subsample: ${analysis_subsample}"
+Analysis subsample: 
+
+. display "Stata processors: " c(processors)
+Stata processors: 1
+
+. display "============================================================"
+============================================================
+
+. 
+. do "${code}/`dofile'"
+
+. *****************************************************************************
+> ***
+. * _app_main_did_treat_definition_rural.do
+. * Replicates _app_main_did_treat_definition.R - RURAL GRIDS ONLY
+. * Different treatment definitions for downup
+. *****************************************************************************
+> ***
+. 
+. *****************************************************************************
+> ***
+. * Setup - Only set globals if running standalone (not from master)
+. *****************************************************************************
+> ***
+. 
+. if "$root" == "" {
+.     clear all
+.     set more off
+. 
+.     * Set toggles for standalone run
+.     global location "shell"
+.     global sample ""
+.     global is_rural_var "is_rural"
+.     global fe_list "1/7"
+.     global ster_suffix ""
+. 
+.     global shell "/groups/sgulzar/sa_fires/proj_bureaucrats_farms"
+.     global dbox "/Users/anzony.quisperojas/Library/CloudStorage/Dropbox/sa_fi
+> res/proj_bureaucrats_farms"
+. 
+.     if "$location" == "dbox" {
+.         global root "$dbox"
+.     }
+.     else {
+.         global root "$shell"
+.     }
+. }
+
+. 
+. global int_farms "${root}/data_output/intermediate"
+
+. global table_farms "${code}/../../tables"
+
+. global figure_farms "${code}/../../figures"
+
+. 
+. *****************************************************************************
+> ***
+. * Import Data
+. *****************************************************************************
+> ***
+. 
+. * Getting downup_dummy & mean_brigthness
+. import delimited "${root}/data_output/intermediate/combined_dt_pop${sample}.c
+> sv", clear
+(encoding automatically selected: ISO-8859-1)
+(20 vars, 95,976,111 obs)
+
+. keep if inrange(relative_monthyear, -5, 6)
+(37,385,876 observations deleted)
+
+. display as text "Final event-study sample: relative_monthyear in [-5, 6]"
+Final event-study sample: relative_monthyear in [-5, 6]
+
+. 
+. preserve
+
+.                 import delimited using "${root}/data_output/intermediate/0_ma
+> ster_dataset${sample}.csv", ///
+>     clear varnames(1)
+(encoding automatically selected: ISO-8859-1)
+(81 vars, 14,837,592 obs)
+
+.                 keep ac_uq_id unique_small_grid_id downup_ac down_percent_pop
+>  downup_diff_percent_pop downwind_pop_ac_nosmall upwind_pop_ac_nosmall downup
+> _1sd_pop year month
+
+.                 tempfile dta
+
+.                 save `dta'
+file /tmp/1381613.1.largemem/St3891216.000002 saved as .dta format
+
+.         restore
+
+.         
+.         merge m:1 unique_small_grid_id month year using `dta', keep(3) nogen
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                             0
+    Matched                        58,590,235  
+    -----------------------------------------
+
+. 
+. 
+. * Merge with rural classification
+. merge m:1 unique_small_grid_id using "${root}/data_output/intermediate/ghs_gr
+> id_classification_2000.dta", keepusing(is_rural)
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                        59,933
+        from master                         0  (_merge==1)
+        from using                     59,933  (_merge==2)
+
+    Matched                        58,590,235  (_merge==3)
+    -----------------------------------------
+
+. keep if _merge == 3
+(59,933 observations deleted)
+
+. drop _merge
+
+. 
+. 
+. * Total POP
+. merge m:1 ac_uq_id using "${root}/data_output/intermediate/AC_total_pop.dta" 
+> , keep(3) nogen
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                             0
+    Matched                        58,590,235  
+    -----------------------------------------
+
+. 
+. 
+. * Keep only rural grids
+. keep if ${is_rural_var} == 1
+(13,625,380 observations deleted)
+
+. 
+. display "Observations after rural filter: " _N
+Observations after rural filter: 44964855
+
+. 
+. * Do not drop grids that intersect more than one assembly constituency.
+. * merge m:1 unique_small_grid_id using "${root}/data_output/intermediate/grid
+> s_with_more_1_ac.dta"
+. * drop if dpl_ac == 1
+. * drop _merge
+. 
+. 
+. * Merge rice moderators if not already present
+. capture confirm variable rice_area_aclvl_ahigh
+
+. if _rc {
+.     display "Merging rice moderators..."
+Merging rice moderators...
+.     merge m:1 unique_small_grid_id ac_uq_id using "${root}/data_output/interm
+> ediate/rice_moderators.dta", nogen keep(3)
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                             0
+    Matched                        44,943,072  
+    -----------------------------------------
+. }
+
+. 
+. 
+. 
+. * Create count in thousands
+. capture drop countk
+
+. gen countk = count * 1000
+
+. 
+. * Filter data: year < 2022 or (year == 2022 & month <= 8)
+. keep if year < 2022 | (year == 2022 & month <= 8)
+(8,062,900 observations deleted)
+
+. 
+. *****************************************************************************
+> ***
+. * Create treatment variables
+. *****************************************************************************
+> ***
+. 
+. * Total area
+. // gen total_area = downwind_pop_ac_nosmall + upwind_pop_ac_nosmall
+. 
+. * Difference: downwind - upwind and its one-standard-deviation threshold.
+. gen downup_diff = downwind_pop_ac_nosmall - upwind_pop_ac_nosmall
+
+. summarize downup_diff
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+ downup_diff | 36,880,172   -198024.7    229347.1   -1692580    1692557
+
+. local sd_val = r(sd)
+
+. 
+. 
+. // gen downup_1sd = .
+. // replace downup_1sd = 1 if downup_diff > `sd_val' & !missing(downup_diff)
+. // replace downup_1sd = 0 if downup_diff <= `sd_val' & !missing(downup_diff)
+. 
+. * Downwind percentage over total
+. gen down_percent = (downwind_pop_ac_nosmall  * 100) / total_pop_ac_nosmall
+
+. 
+. *****************************************************************************
+> ***
+. * Encode IDs
+. *****************************************************************************
+> ***
+. 
+. capture confirm numeric variable unique_small_grid_id
+
+. if _rc {
+.     encode unique_small_grid_id, gen(grid_id)
+. }
+
+. else {
+.     gen grid_id = unique_small_grid_id
+. }
+
+. 
+. capture confirm numeric variable ac_uq_id
+
+. if _rc {
+.     encode ac_uq_id, gen(ac_id)
+. }
+
+. else {
+.     gen ac_id = ac_uq_id
+. }
+
+. 
+. * Create cluster variable
+. egen cluster_acmonth = group(ac_id monthyear)
+
+. 
+. 
+. *****************************************************************************
+> ***
+. * Run Regressions
+. *****************************************************************************
+> ***
+. 
+. global controls av_wind_speed wind_direction
+
+. 
+. * Eq1: downup_ac_pop (exclude grid 116147 as in R code)
+. do "${code}/exploratory_analysis/rice_high_subsample/_apply_rice_high_subsamp
+> le.do"
+
+. *****************************************************************************
+> ***
+. * Optional exploratory restriction: ACs with above-median rice production.
+. *
+. * Called after an analysis dataset and its required merge fields are loaded,
+. * but before the first regression/common-sample regression.  It is inert unle
+> ss
+. * $analysis_subsample is "rice_high".
+. *****************************************************************************
+> ***
+. 
+. if "$analysis_subsample" == "rice_high" {
+.     capture confirm variable rice_prod_aclvl_ahigh
+.     if _rc {
+.         display as error ///
+>             "rice_prod_aclvl_ahigh is missing from the stacked dataset. " ///
+>             "Regenerate it from 0_master_dataset with the data-generation pip
+> eline."
+.         exit 111
+.     }
+. 
+.     assert inlist(rice_prod_aclvl_ahigh, 0, 1)
+.     quietly count
+.     local rice_before = r(N)
+.     keep if rice_prod_aclvl_ahigh == 1
+.     quietly count
+.     local rice_after = r(N)
+.     if `rice_after' == 0 {
+.         display as error "The rice-high exploratory restriction removed every
+>  row."
+.         exit 2000
+.     }
+.     display as result "EXPLORATORY SAMPLE: rice_prod_aclvl_ahigh == 1"
+.     display as result "Rows retained: `rice_after' of `rice_before'"
+. }
+
+. 
+end of do-file
+
+. 
+. reghdfejl countk downup_ac_pop $controls if grid_id != 116147, ///
+>     absorb(grid_id ac_id#monthyear) cluster(grid_id cluster_acmonth)
+(dropped 556 singleton observations)
+(MWFE estimator converged in 17 iterations)
+
+HDFE linear regression with Julia                 Number of obs   = 36,878,861
+Absorbing 2 HDFE groups                           F(   3,  75305) =       0.58
+Statistics cluster-robust                         Prob > F        =     0.6293
+                                                  R-squared       =     0.6194
+                                                  Adj R-squared   =     0.6176
+Number of clusters (grid_id) =      75306         Within R-sq.    =     0.0000
+Number of clusters (cluster_acmonth) =      96273 Root MSE        =   620.8477
+
+           (Std. err. adjusted for 75,306 clusters in grid_id cluster_acmonth)
+------------------------------------------------------------------------------
+             |               Robust
+      countk | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+downup_ac_~p |   1.611858   1.341093     1.20   0.229    -1.016678    4.240394
+av_wind_sp~d |  -2.826697   19.63773    -0.14   0.886    -41.31657    35.66317
+wind_direc~n |  -.0069256   .0121535    -0.57   0.569    -.0307463    .0168952
+------------------------------------------------------------------------------
+
+. 
+. gen esample = e(sample)
+
+. 
+. {
+. *****************************************************************************
+> ***
+. * Calculate Mean DV for each treatment definition
+. *****************************************************************************
+> ***
+. 
+. * Project-standard treated-group pre-treatment means and AC count.
+. egen tag_ac = tag(ac_id) if esample == 1
+. count if tag_ac == 1
+  808
+. local numacs = r(N)
+. gen relative_year_bin = floor(relative_monthyear / 12)
+. gen moderator = rice_prod_aclvl_ahigh
+. quietly summarize countk if treat == 1 & relative_year_bin <= -1 & esample ==
+>  1
+. local meandv = r(mean)
+. quietly summarize countk if treat == 1 & relative_year_bin <= -1 & moderator 
+> == 1 & esample == 1
+. local meandv2 = r(mean)
+. }
+
+. 
+. estadd local gridfe "Y"
+
+added macro:
+             e(gridfe) : "Y"
+
+. estadd local acmonthfe "Y"
+
+added macro:
+          e(acmonthfe) : "Y"
+
+. estadd scalar ymean = `meandv'
+
+added scalar:
+              e(ymean) =  91.996305
+
+. estadd scalar ymean2 = `meandv2'
+
+added scalar:
+             e(ymean2) =  149.3439
+
+. estadd scalar acq = `numacs'
+
+added scalar:
+                e(acq) =  808
+
+. est store eq1
+
+. 
+. * Eq2: downup_ac
+. reghdfejl countk downup_ac $controls if  esample == 1, ///
+>     absorb(grid_id ac_id#monthyear) cluster(grid_id cluster_acmonth)
+(MWFE estimator converged in 17 iterations)
+
+HDFE linear regression with Julia                 Number of obs   = 36,878,861
+Absorbing 2 HDFE groups                           F(   3,  75305) =       1.62
+Statistics cluster-robust                         Prob > F        =     0.1830
+                                                  R-squared       =     0.6194
+                                                  Adj R-squared   =     0.6176
+Number of clusters (grid_id) =      75306         Within R-sq.    =     0.0000
+Number of clusters (cluster_acmonth) =      96273 Root MSE        =   620.8473
+
+           (Std. err. adjusted for 75,306 clusters in grid_id cluster_acmonth)
+------------------------------------------------------------------------------
+             |               Robust
+      countk | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+   downup_ac |   2.852025   1.328887     2.15   0.032     .2474117    5.456639
+av_wind_sp~d |  -3.835474   19.65292    -0.20   0.845    -42.35511    34.68416
+wind_direc~n |  -.0068383   .0121514    -0.56   0.574     -.030655    .0169784
+------------------------------------------------------------------------------
+
+. estadd local gridfe "Y"
+
+added macro:
+             e(gridfe) : "Y"
+
+. estadd local acmonthfe "Y"
+
+added macro:
+          e(acmonthfe) : "Y"
+
+. estadd scalar ymean = `meandv'
+
+added scalar:
+              e(ymean) =  91.996305
+
+. estadd scalar ymean2 = `meandv2'
+
+added scalar:
+             e(ymean2) =  149.3439
+
+. estadd scalar acq = `numacs'
+
+added scalar:
+                e(acq) =  808
+
+. est store eq2
+
+. 
+. * Eq3: downup_1sd
+. reghdfejl countk downup_1sd_pop $controls if  esample == 1, ///
+>     absorb(grid_id ac_id#monthyear) cluster(grid_id cluster_acmonth)
+(MWFE estimator converged in 17 iterations)
+
+HDFE linear regression with Julia                 Number of obs   = 36,878,861
+Absorbing 2 HDFE groups                           F(   3,  75305) =       0.18
+Statistics cluster-robust                         Prob > F        =     0.9102
+                                                  R-squared       =     0.6194
+                                                  Adj R-squared   =     0.6176
+Number of clusters (grid_id) =      75306         Within R-sq.    =     0.0000
+Number of clusters (cluster_acmonth) =      96273 Root MSE        =   620.8478
+
+           (Std. err. adjusted for 75,306 clusters in grid_id cluster_acmonth)
+------------------------------------------------------------------------------
+             |               Robust
+      countk | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+downup_1sd~p |   .7268884   1.576907     0.46   0.645    -2.363842    3.817619
+av_wind_sp~d |  -2.042418   19.76855    -0.10   0.918     -40.7887    36.70386
+wind_direc~n |   -.006989   .0121559    -0.57   0.565    -.0308145    .0168364
+------------------------------------------------------------------------------
+
+. estadd local gridfe "Y"
+
+added macro:
+             e(gridfe) : "Y"
+
+. estadd local acmonthfe "Y"
+
+added macro:
+          e(acmonthfe) : "Y"
+
+. estadd scalar ymean = `meandv'
+
+added scalar:
+              e(ymean) =  91.996305
+
+. estadd scalar ymean2 = `meandv2'
+
+added scalar:
+             e(ymean2) =  149.3439
+
+. estadd scalar acq = `numacs'
+
+added scalar:
+                e(acq) =  808
+
+. est store eq3
+
+. 
+. * Eq4: down_percent
+. reghdfejl countk down_percent_pop $controls if  esample == 1, ///
+>     absorb(grid_id ac_id#monthyear) cluster(grid_id cluster_acmonth)
+(MWFE estimator converged in 17 iterations)
+
+HDFE linear regression with Julia                 Number of obs   = 36,878,861
+Absorbing 2 HDFE groups                           F(   3,  75305) =       0.30
+Statistics cluster-robust                         Prob > F        =     0.8250
+                                                  R-squared       =     0.6194
+                                                  Adj R-squared   =     0.6176
+Number of clusters (grid_id) =      75306         Within R-sq.    =     0.0000
+Number of clusters (cluster_acmonth) =      96273 Root MSE        =   620.8477
+
+           (Std. err. adjusted for 75,306 clusters in grid_id cluster_acmonth)
+------------------------------------------------------------------------------
+             |               Robust
+      countk | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+down_perce~p |  -.0192703   .0267274    -0.72   0.471    -.0716558    .0331153
+av_wind_sp~d |  -.6323976   19.72831    -0.03   0.974     -39.2998    38.03501
+wind_direc~n |  -.0070442   .0121533    -0.58   0.562    -.0308645    .0167761
+------------------------------------------------------------------------------
+
+. estadd local gridfe "Y"
+
+added macro:
+             e(gridfe) : "Y"
+
+. estadd local acmonthfe "Y"
+
+added macro:
+          e(acmonthfe) : "Y"
+
+. estadd scalar ymean = `meandv'
+
+added scalar:
+              e(ymean) =  91.996305
+
+. estadd scalar ymean2 = `meandv2'
+
+added scalar:
+             e(ymean2) =  149.3439
+
+. estadd scalar acq = `numacs'
+
+added scalar:
+                e(acq) =  808
+
+. est store eq4
+
+. 
+. * Eq5: downup_diff_percent
+. reghdfejl countk downup_diff_percent_pop $controls if  esample == 1, ///
+>     absorb(grid_id ac_id#monthyear) cluster(grid_id cluster_acmonth)
+(MWFE estimator converged in 17 iterations)
+
+HDFE linear regression with Julia                 Number of obs   = 36,878,861
+Absorbing 2 HDFE groups                           F(   3,  75305) =       0.30
+Statistics cluster-robust                         Prob > F        =     0.8250
+                                                  R-squared       =     0.6194
+                                                  Adj R-squared   =     0.6176
+Number of clusters (grid_id) =      75306         Within R-sq.    =     0.0000
+Number of clusters (cluster_acmonth) =      96273 Root MSE        =   620.8477
+
+           (Std. err. adjusted for 75,306 clusters in grid_id cluster_acmonth)
+------------------------------------------------------------------------------
+             |               Robust
+      countk | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+downup_dif~p |  -.0096351   .0133637    -0.72   0.471    -.0358279    .0165577
+av_wind_sp~d |  -.6323976   19.72831    -0.03   0.974     -39.2998    38.03501
+wind_direc~n |  -.0070442   .0121533    -0.58   0.562    -.0308645    .0167761
+------------------------------------------------------------------------------
+
+. estadd local gridfe "Y"
+
+added macro:
+             e(gridfe) : "Y"
+
+. estadd local acmonthfe "Y"
+
+added macro:
+          e(acmonthfe) : "Y"
+
+. estadd scalar ymean = `meandv'
+
+added scalar:
+              e(ymean) =  91.996305
+
+. estadd scalar ymean2 = `meandv2'
+
+added scalar:
+             e(ymean2) =  149.3439
+
+. estadd scalar acq = `numacs'
+
+added scalar:
+                e(acq) =  808
+
+. est store eq5
+
+. 
+. 
+. * Eq6: down_percent
+. reghdfejl countk down_percent $controls if  esample == 1, ///
+>     absorb(grid_id#i.cohort ac_id#monthyear#i.cohort) cluster(grid_id cluster
+> _acmonth)
+(dropped 138614 singleton observations)
+(MWFE estimator converged in 28 iterations)
+
+HDFE linear regression with Julia                 Number of obs   = 36,740,247
+Absorbing 2 HDFE groups                           F(   3,  75287) =       5.74
+Statistics cluster-robust                         Prob > F        =     0.0006
+                                                  R-squared       =     0.6669
+                                                  Adj R-squared   =     0.5992
+Number of clusters (grid_id) =      75288         Within R-sq.    =     0.0000
+Number of clusters (cluster_acmonth) =      95550 Root MSE        =   636.5315
+
+           (Std. err. adjusted for 75,288 clusters in grid_id cluster_acmonth)
+------------------------------------------------------------------------------
+             |               Robust
+      countk | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+down_percent |  -.0188471   .0050098    -3.76   0.000    -.0286663    -.009028
+av_wind_sp~d |   -12.5014     23.944    -0.52   0.602    -59.43153    34.42874
+wind_direc~n |  -.0126999   .0128231    -0.99   0.322     -.037833    .0124333
+------------------------------------------------------------------------------
+
+. estadd local gridfe "Y"
+
+added macro:
+             e(gridfe) : "Y"
+
+. estadd local acmonthfe "Y"
+
+added macro:
+          e(acmonthfe) : "Y"
+
+. estadd scalar ymean = `meandv'
+
+added scalar:
+              e(ymean) =  91.996305
+
+. estadd scalar ymean2 = `meandv2'
+
+added scalar:
+             e(ymean2) =  149.3439
+
+. estadd scalar acq = `numacs'
+
+added scalar:
+                e(acq) =  808
+
+. est store eq6
+
+. 
+. * Eq7: X Rice
+. reghdfejl countk downup_ac_pop##ib0.rice_prod_aclvl_ahigh $controls if  esamp
+> le == 1, ///
+>     absorb(grid_id#i.cohort ac_id#monthyear#i.cohort) cluster(grid_id cluster
+> _acmonth)
+(dropped 138614 singleton observations)
+(MWFE estimator converged in 28 iterations)
+
+HDFE linear regression with Julia                 Number of obs   = 36,740,247
+Absorbing 2 HDFE groups                           F(   4,  75287) =       1.66
+Statistics cluster-robust                         Prob > F        =     0.1571
+                                                  R-squared       =     0.6669
+                                                  Adj R-squared   =     0.5992
+Number of clusters (grid_id) =      75288         Within R-sq.    =     0.0000
+Number of clusters (cluster_acmonth) =      95550 Root MSE        =   636.5334
+
+           (Std. err. adjusted for 75,288 clusters in grid_id cluster_acmonth)
+------------------------------------------------------------------------------
+             |               Robust
+      countk | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+1.downup_a~p |  -4.424453   2.506354    -1.77   0.078    -9.336895    .4879886
+1.rice_pro~h |          0  (omitted)
+av_wind_sp~d |  -16.57437    23.7394    -0.70   0.485    -63.10349    29.95476
+wind_direc~n |  -.0124961   .0128269    -0.97   0.330    -.0376368    .0126445
+             |
+downup_ac_~p#|
+rice_prod_~h |
+        1 1  |  -2.070509   5.642432    -0.37   0.714    -13.12965    8.988632
+------------------------------------------------------------------------------
+
+. estadd local gridfe "Y"
+
+added macro:
+             e(gridfe) : "Y"
+
+. estadd local acmonthfe "Y"
+
+added macro:
+          e(acmonthfe) : "Y"
+
+. estadd scalar ymean = `meandv'
+
+added scalar:
+              e(ymean) =  91.996305
+
+. estadd scalar ymean2 = `meandv2'
+
+added scalar:
+             e(ymean2) =  149.3439
+
+. estadd scalar acq = `numacs'
+
+added scalar:
+                e(acq) =  808
+
+. est store eq7
+
+. 
+. *****************************************************************************
+> ***
+. * Save ster file
+. *****************************************************************************
+> ***
+. 
+. estwrite eq* using ///
+>     "${code}/../../tables/_app_6_main_did_treat_definition${sample}_rural_acp
+> op${ster_suffix}.ster", replace
+(saving eq1)
+(saving eq2)
+(saving eq3)
+(saving eq4)
+(saving eq5)
+(saving eq6)
+(saving eq7)
+(file /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication/.
+> ./../tables/_app_6_main_did_treat_definition_rural_acpop.ster saved)
+
+. 
+. display "Ster: ${code}/../../tables/_app_6_main_did_treat_definition${sample}
+> _rural_acpop${ster_suffix}.ster"
+Ster: /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication/.
+> ./../tables/_app_6_main_did_treat_definition_rural_acpop.ster
+
+. 
+. *****************************************************************************
+> ***
+. 
+end of do-file
+
+. 
+. display as result "COMPLETED: `dofile' at $S_DATE $S_TIME"
+COMPLETED: _app_6_main_did_treat_definition.do at 24 Aug 2026 16:10:26
+
+. 
+end of do-file

@@ -1,115 +1,112 @@
 ********************************************************************************
-* _app_13_protest_5km_fe12_did_ricemods_rural.do
-* Protest DiD analysis with rice moderators - RURAL GRIDS ONLY
-* 3 columns: Rice Area, Harvested Rice Area, Rice Production
+* Presentation table A13: Protest x high rice production.
+* Eight models: four without rice heterogeneity, followed by the same four
+* FE specifications interacted with high rice production.
 ********************************************************************************
-
-********************************************************************************
-* Setup - Only set globals if running standalone (not from master)
-********************************************************************************
-
 if "$root" == "" {
     clear all
     set more off
-
-    * Set toggles for standalone run
+    * Standalone defaults for the five sbatch-array parameters.
     global location "shell"
     global sample ""
-
+    global is_rural_var "is_rural"
+    global fe_list "0/3"
+    global ster_suffix ""
     global shell "/groups/sgulzar/sa_fires/proj_bureaucrats_farms"
-    global dbox "/Users/anzony.quisperojas/Library/CloudStorage/Dropbox/sa_fires/proj_bureaucrats_farms"
-
+    global dbox "C:/Users/eunic/Dropbox/sa_fires/proj_bureaucrats_farms"
+    global code "/users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication"
     if "$location" == "dbox" {
         global root "$dbox"
+        global code "C:/Users/eunic/OneDrive/Documents/GitHub/proj_bureaucrats_farms/code/_stacked_downup_replication"
     }
-    else {
-        global root "$shell"
-    }
+    else global root "$shell"
 }
+global int_data "${root}/data_output/intermediate"
+global tables "${code}/../../tables"
 
-cd "${root}"
+local input "${int_data}/stacked_data_protest5km_election_sameterm${sample}.csv"
+capture confirm file "`input'"
+if _rc local input "${int_data}/cohortes_protest_term/stacked_data_protest5km_election_sameterm${sample}.csv"
+capture confirm file "`input'"
+if _rc local input "${int_data}/cohorts_protest_term/stacked_data_protest5km_election_sameterm${sample}.csv"
+confirm file "`input'"
+import delimited using "`input'", clear varnames(1)
+capture confirm variable relative_year_bin
+if _rc rename relative_year relative_year_bin
+keep if year < 2022 | (year == 2022 & month <= 8)
+keep if inrange(relative_year_bin, -4, 1)
+confirm variable rice_prod_aclvl_ahigh
+drop if missing(rice_prod_aclvl_ahigh)
 
-********************************************************************************
-* Import Data
-********************************************************************************
-
-import delimited using "${root}/data_output/intermediate/stacked_data_protest${sample}.csv", clear varnames(1)
-
-* Merge with rice moderators
-merge m:1 unique_small_grid_id ac_uq_id using "data_output/intermediate/rice_moderators.dta"
-keep if _merge == 3
+merge m:1 unique_small_grid_id month year using ///
+    "${int_data}/grid_month_ac_area_tr.dta", keep(master match) keepusing(ac_area_tr)
+assert _merge == 3
 drop _merge
-
-* Merge with rural classification
-merge m:1 unique_small_grid_id using "${root}/data_output/intermediate/ghs_grid_classification_2000.dta", keepusing(is_rural)
-keep if _merge == 3
+merge m:1 unique_small_grid_id using ///
+    "${int_data}/ghs_grid_classification_2000.dta", ///
+    keep(master match) keepusing(is_rural)
 drop _merge
+keep if ${is_rural_var} == 1
 
-* Keep only rural grids
-keep if is_rural == 1
+capture drop countk
+gen countk = count * 1000
+gen byte post_ = relative_year_bin >= 0
+gen byte nofe = 1
+gen byte moderator = 0
+egen unique_small_grid_id_cohort = group(unique_small_grid_id cohort_id)
+egen relativeyear_cohort = group(relative_year_bin cohort_id)
+egen province_cohort = group(province cohort_id)
+bysort unique_small_grid_id_cohort: egen byte has_pre = max(relative_year_bin < 0)
+bysort unique_small_grid_id_cohort: egen byte has_post = max(relative_year_bin >= 0)
+keep if has_pre & has_post
+drop has_pre has_post
 
-display "Observations after rural filter: " _N
+local fe0 "nofe"
+local fe1 "unique_small_grid_id_cohort"
+local fe2 "unique_small_grid_id_cohort relativeyear_cohort"
+local fe3 "unique_small_grid_id_cohort relativeyear_cohort province_cohort#c.monthyear"
+local common_rhs "ib0.post_##ib0.treat##ib0.rice_prod_aclvl_ahigh wind_direction av_wind_speed"
+do "${code}/_apply_analysis_subsample.do"
+quietly reghdfejl countk `common_rhs', absorb(`fe3') vce(cluster ac_area_tr)
+gen byte common_sample = e(sample)
+quietly count if common_sample
+local common_n = r(N)
+keep if common_sample
+drop common_sample
 
-********************************************************************************
-* Generate Variables
-********************************************************************************
-
-* Create count in thousands if not exists
-capture confirm variable countk
-if _rc {
-    gen countk = count * 1000
-}
-
-* Post indicator
-gen post_ = relative_year_bin >= 0
-
-* Controls
-local dep_var countk
-local rhs "wind_direction av_wind_speed"
-
-* FE specifications (Grid, Relative Year, Government Term-Year)
-local fe12 "unique_small_grid_id_cohort relative_year_bin province_cohort#election_year province_cohort#c.monthyear "
-
-* Statistics
-unique ac_uq_id
-local numacs = r(unique)
-
-* Mean DV for control group
-quietly summarize `dep_var' if treat == 0 & post_ == 0
+egen byte tag_ac = tag(ac_uq_id)
+quietly count if tag_ac
+local numacs = r(N)
+quietly summarize countk if treat == 1 & relative_year_bin <= -1
 local ymean = r(mean)
-local modlist rice_area_aclvl_ahigh rice_harvarea_aclvl_ahigh rice_prod_aclvl_ahigh
 
-********************************************************************************
-* Run Regressions - 3 Rice Moderators
-********************************************************************************
+est clear
+local moderators_list moderator rice_prod_aclvl_ahigh
 local i = 1
-foreach mod of local modlist{
-
-	quietly summarize `dep_var' if treat == 0 & post_ == 0 & `mod' == 0
-	local ymean2 = r(mean)
-
-
-	* Equation 1: Rice Area
-	reghdfejl `dep_var' ib0.post_##ib0.treat##ib0.`mod' `rhs', ///
-		absorb(`fe12') cluster(ac_area_tr)
-	estadd local gridfe "Y"
-	estadd local time "Y"
-	estadd local electionfe "Y"
-	estadd local provtrendfe "Y"
-	estadd scalar ymean `ymean'
-	estadd scalar ymean2 `ymean2'
-	estadd scalar acq `numacs'
-	est store eq`i'
-	local i = `i' + 1
+foreach mod of local moderators_list {
+    replace moderator = `mod'
+    local rhs "ib0.post_##ib0.treat##ib0.`mod' wind_direction av_wind_speed"
+    quietly summarize countk if treat == 1 & relative_year_bin <= -1 & moderator == 1
+    local ymean2 = r(mean)
+    foreach fe of numlist $fe_list {
+        reghdfejl countk `rhs', absorb(`fe`fe'') vce(cluster ac_area_tr)
+        assert e(N) == `common_n'
+        estadd scalar ymean = `ymean'
+        estadd scalar ymean2 = `ymean2'
+        estadd scalar acq = `numacs'
+        estadd local smpl "Rural"
+        local grid_label = cond(`fe' == 0, "N", "Y")
+        estadd local gridfe "`grid_label'"
+        local time_label = cond(`fe' >= 2, "Y", "N")
+        local trend_label = cond(`fe' == 3, "Y", "N")
+        estadd local time "`time_label'"
+        estadd local provtrendfe "`trend_label'"
+        estadd local mod "`mod'"
+        est store eq`i'
+        local i = `i' + 1
+    }
 }
-
-
-********************************************************************************
-* Save ster file
-********************************************************************************
-
-estwrite eq1 eq2 eq3 using "${root}/tex/paper/tables/_app_13_protest_5km_fe12_did_ricemods${sample}_rural.ster", replace
-
-display "Ster: ${root}/tex/paper/tables/_app_13_protest_5km_fe12_did_ricemods${sample}_rural.ster"
-
+estwrite eq1 eq2 eq3 eq4 eq5 eq6 eq7 eq8 using ///
+    "${tables}/_app_13_protest_5km_fe12_did_ricemods${sample}_rural_acpop${ster_suffix}.ster", replace
+display as result "Saved updated presentation ster: _app_13_protest_5km_fe12_did_ricemods${sample}_rural_acpop${ster_suffix}.ster"
 ********************************************************************************

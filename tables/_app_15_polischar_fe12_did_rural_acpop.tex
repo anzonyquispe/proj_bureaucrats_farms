@@ -1,0 +1,20 @@
+{
+\def\sym#1{\ifmmode^{#1}\else\(^{#1}\)\fi}
+\begin{tabular}{l*{3}{c}}
+\hline
+            &\multicolumn{1}{c}{(1)}         &\multicolumn{1}{c}{(2)}         &\multicolumn{1}{c}{(3)}         \\
+            & \multicolumn{3}{c}{Number of Fires (in 1,000 units) } \\ \hline
+
+Post $\times$ Agriculturalist&      29.244\sym{***}&       6.288\sym{**} &       7.316\sym{***}\\
+            &     (3.659)         &     (2.854)         &     (2.827)         \\
+\hline
+Observations&  21,882,509         &  21,882,509         &  21,882,509         \\
+N Assembly Constituencies&         658         &         658         &         658         \\
+Grid $\times$ Cohort FE&           Y         &           Y         &           Y         \\
+Relative Time FE&           Y         &           Y         &           Y         \\
+Legislature  $\times$ Cohort FE&           N         &           Y         &           Y         \\
+Province  $\times$ Cohort Trend FE&           N         &           N         &           Y         \\
+Mean DV     &     200.662         &     200.662         &     200.662         \\
+\hline
+\end{tabular}
+}

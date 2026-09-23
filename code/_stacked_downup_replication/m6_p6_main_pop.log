@@ -1,0 +1,621 @@
+
+  ___  ____  ____  ____  ____ ®
+ /__    /   ____/   /   ____/      StataNow 19.5
+___/   /   /___/   /   /___/       MP—Parallel Edition
+
+ Statistics and Data Science       Copyright 1985-2025 StataCorp LLC
+                                   StataCorp
+                                   4905 Lakeway Drive
+                                   College Station, Texas 77845 USA
+                                   800-782-8272        https://www.stata.com
+                                   979-696-4600        service@stata.com
+
+Stata license: 4-user 16-core network, expiring 14 Sep 2026
+Serial number: 501909301589
+  Licensed to: University of Notre Dame
+               Notre Dame, IN 46556
+
+Notes:
+      1. Stata is running in batch mode.
+      2. Unicode is supported; see help unicode_advice.
+      3. More than 2 billion observations are allowed; see help obs_advice.
+      4. Maximum number of variables is set to 5,000 but can be increased;
+          see help set_maxvar.
+
+. do /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication/ex
+> ploratory_analysis/event_study/omit_period_0/alternative_windows/m6_p6_main_p
+> op.do 
+
+. * Main population event study: relative months -6 through +6; omit 0.
+. version 17
+
+. do "exploratory_analysis/event_study/omit_period_0/_event_study_pop_omit0_cor
+> e.do" ///
+>     main controls cohort ///
+>     stacked_event_study_pop_m6_p6_omit0 -6 6
+
+. *****************************************************************************
+> ***
+. * Population-weighted stacked event study with a configurable event window.
+. * Exploratory normalization: relative month 0 is the omitted reference period
+> .
+. *
+. * Arguments:
+. *   fe_mode:       main | grid_monthyear
+. *   controls_mode: controls | nocontrols
+. *   cluster_mode:  cohort | grid_monthyear
+. *   output_stem:   filename stem written under tables/
+. *   window_min:    first retained relative month; default -6
+. *   window_max:    last retained relative month; default +5
+. *****************************************************************************
+> ***
+. 
+. version 17
+
+. args fe_mode controls_mode cluster_mode output_stem window_min window_max
+
+. 
+. if "$root" == "" {
+.     clear all
+.     set more off
+. 
+.     * Five sbatch-array parameters; defaults apply only to standalone runs.
+.     global location     "shell"
+.     global sample       ""
+.     global is_rural_var "is_rural"
+.     global fe_list      "1"
+.     global ster_suffix  ""
+. 
+.     global shell "/groups/sgulzar/sa_fires/proj_bureaucrats_farms"
+.     global dbox  "/Users/anzony.quisperojas/Library/CloudStorage/Dropbox/sa_f
+> ires/proj_bureaucrats_farms"
+.     global code_shell "/users/aquisper/proj_bureaucrats_farms/code/_stacked_d
+> ownup_replication"
+.     global code_dbox  "/Users/anzony.quisperojas/Documents/GitHub/proj_bureau
+> crats_farms/code/_stacked_downup_replication"
+.     if "$location" == "dbox" {
+.         global root "$dbox"
+.         global code "$code_dbox"
+.     }
+.     else {
+.         global root "$shell"
+.         global code "$code_shell"
+.     }
+.     quietly do "${code}/estsave_csv.ado"
+. }
+
+. 
+. global int_data "${root}/data_output/intermediate"
+
+. global tables   "${code}/../../tables"
+
+. 
+. if !inlist("`fe_mode'", "main", "grid_monthyear") {
+.     display as error "fe_mode must be main or grid_monthyear."
+.     exit 198
+. }
+
+. if !inlist("`controls_mode'", "controls", "nocontrols") {
+.     display as error "controls_mode must be controls or nocontrols."
+.     exit 198
+. }
+
+. if !inlist("`cluster_mode'", "cohort", "grid_monthyear") {
+.     display as error "cluster_mode must be cohort or grid_monthyear."
+.     exit 198
+. }
+
+. if "`output_stem'" == "" {
+.     display as error "output_stem is required."
+.     exit 198
+. }
+
+. if "`window_min'" == "" local window_min = -6
+
+. if "`window_max'" == "" local window_max = 5
+
+. if `window_min' >= 0 | `window_max' <= 0 {
+.     display as error "The event window must contain negative periods, 0, and 
+> positive periods."
+.     exit 198
+. }
+
+. if `window_min' != floor(`window_min') | `window_max' != floor(`window_max') 
+> {
+.     display as error "window_min and window_max must be integers."
+.     exit 198
+. }
+
+. 
+. if "`fe_mode'" == "main" {
+.     local fe1 "unique_small_grid_id#cohort ac_uq_id#monthyear#cohort"
+.     local fespec_tag "Grid x cohort; AC x month-year x cohort"
+.     local monthyearfe "N"
+.     local acfe "N"
+.     local acmonthfe "Y"
+.     local gridfe "Y"
+. }
+
+. else {
+.     local fe1 "unique_small_grid_id#cohort monthyear#cohort"
+.     local fespec_tag "Grid x cohort; month-year x cohort"
+.     local monthyearfe "Y"
+.     local acfe "N"
+.     local acmonthfe "N"
+.     local gridfe "Y"
+. }
+
+. 
+. if "`controls_mode'" == "controls" {
+.     local weather_controls "wind_direction av_wind_speed"
+.     local controls_tag "Y"
+. }
+
+. else {
+.     local weather_controls ""
+.     local controls_tag "N"
+. }
+
+. 
+. if "`cluster_mode'" == "cohort" {
+.     local cluster_variables ///
+>         "ac_uq_id#cohort#monthyear unique_small_grid_id#cohort"
+.     local cluster_tag "AC x cohort x month-year; grid x cohort"
+. }
+
+. else {
+.     local cluster_variables "unique_small_grid_id monthyear"
+.     local cluster_tag "Grid; month-year"
+. }
+
+. 
+. import delimited using "${int_data}/combined_dt_pop${sample}.csv", clear varn
+> ames(1)
+(encoding automatically selected: ISO-8859-9)
+(20 vars, 95,976,111 obs)
+
+. keep if inrange(relative_monthyear, `window_min', `window_max')
+(35,318,147 observations deleted)
+
+. gen relative_year_bin = relative_monthyear
+
+. local shift = 1 - `window_min'
+
+. gen relative_year_bin_aux = relative_year_bin + `shift'
+
+. * Relative month 0 maps to `shift' and is the omitted category.
+. local base = `shift'
+
+. capture drop countk
+
+. gen countk = count * 1000
+
+. 
+. merge m:1 unique_small_grid_id using "${int_data}/ghs_grid_classification_200
+> 0.dta", ///
+>     keep(master match) keepusing(is_rural)
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                             0
+    Matched                        60,657,964  (_merge==3)
+    -----------------------------------------
+
+. drop _merge
+
+. keep if ${is_rural_var} == 1
+(14,062,601 observations deleted)
+
+. keep if year < 2022 | (year == 2022 & month <= 8)
+(8,314,040 observations deleted)
+
+. 
+. capture confirm variable rice_prod_aclvl_ahigh
+
+. if _rc {
+.     merge m:1 unique_small_grid_id ac_uq_id using ///
+>         "${int_data}/rice_moderators.dta", keep(master match) nogen ///
+>         keepusing(rice_area_aclvl_ahigh rice_harvarea_aclvl_ahigh rice_prod_a
+> clvl_ahigh)
+. }
+
+. 
+. local dep_var countk
+
+. local moderators_list moderator rice_prod_aclvl_ahigh
+
+. * local moderators_list moderator downup_ac rice_area_aclvl_ahigh rice_harvar
+> ea_aclvl_ahigh rice_prod_aclvl_ahigh
+. gen moderator = 0
+
+. egen tag_ac = tag(ac_uq_id)
+
+. count if tag_ac == 1
+  808
+
+. local numacs = r(N)
+
+. 
+. est clear
+
+. local i = 1
+
+. local estimate_names ""
+
+. foreach mod of local moderators_list {
+  2.     replace moderator = `mod'
+  3.     local rhs ///
+>         "ib`base'.relative_year_bin_aux##ib0.treat##ib0.`mod' `weather_contro
+> ls'"
+  4. 
+.     quietly summarize `dep_var' if treat == 1 & relative_year_bin <= -1
+  5.     local ymean = r(mean)
+  6.     quietly summarize `dep_var' if treat == 1 & relative_year_bin <= -1 & 
+> moderator == 1
+  7.     local ymean2 = r(mean)
+  8. 
+.     foreach fe of numlist $fe_list {
+  9.         if `fe' != 1 {
+ 10.             display as error "This exploratory file supports only FE speci
+> fication 1."
+ 11.             exit 198
+ 12.         }
+ 13. 
+.         reghdfejl `dep_var' `rhs', absorb(`fe`fe'') ///
+>             cluster(`cluster_variables')
+ 14.         estadd scalar ymean = `ymean'
+ 15.         estadd scalar ymean2 = `ymean2'
+ 16.         estadd scalar acq = `numacs'
+ 17.         estadd local smpl "Rural"
+ 18.         estadd local fespec "`fespec_tag'"
+ 19.         estadd local mod "`mod'"
+ 20.         estadd local monthyearfe "`monthyearfe'"
+ 21.         estadd local acfe "`acfe'"
+ 22.         estadd local acmonthfe "`acmonthfe'"
+ 23.         estadd local gridfe "`gridfe'"
+ 24.         estadd local weathercontrols "`controls_tag'"
+ 25.         estadd local clusterspec "`cluster_tag'"
+ 26.         estadd local omittedperiod "0"
+ 27.         estadd local eventwindow "`window_min' to `window_max'"
+ 28.         local estname evreg`i'
+ 29.         local i = `i' + 1
+ 30.         est store `estname'
+ 31.         local estimate_names "`estimate_names' `estname'"
+ 32.     }
+ 33. }
+(0 real changes made)
+(dropped 146438 singleton observations)
+(MWFE estimator converged in 28 iterations)
+
+HDFE linear regression with Julia                 Number of obs   = 38,134,885
+Absorbing 2 HDFE groups                           F(  14, 976159) =       8.06
+Statistics cluster-robust                         Prob > F        =     0.0000
+                                                  R-squared       =     0.6707
+                                                  Adj R-squared   =     0.6060
+Number of clusters (ac_uq_id#cohort#monthyear) =     976159Within R-sq.=     0.
+> 0000
+Number of clusters (unique_small_grid_id#cohort) =    5293426Root MSE=   644.74
+> 25
+
+(Std. err. adjusted for 976,159 clusters in ac_uq_id#cohort#monthyear unique_sm
+> all_grid_id#cohort)
+------------------------------------------------------------------------------
+             |               Robust
+      countk | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+relative_y~x |
+          1  |          0  (omitted)
+          2  |          0  (omitted)
+          3  |          0  (omitted)
+          4  |          0  (omitted)
+          5  |          0  (omitted)
+          6  |          0  (omitted)
+          8  |          0  (omitted)
+          9  |          0  (omitted)
+         10  |          0  (omitted)
+         11  |          0  (omitted)
+         12  |          0  (omitted)
+         13  |          0  (omitted)
+             |
+     1.treat |          0  (omitted)
+wind_direc~n |  -.0122012   .0053032    -2.30   0.021    -.0225952   -.0018072
+av_wind_sp~d |  -17.87597   8.307298    -2.15   0.031    -34.15799   -1.593943
+             |
+relative_y~x#|
+       treat |
+        1 1  |  -9.054829   4.124122    -2.20   0.028    -17.13797   -.9716895
+        2 1  |   6.096127   3.043249     2.00   0.045     .1314624    12.06079
+        3 1  |   1.094778   2.575583     0.43   0.671    -3.953278    6.142834
+        4 1  |  -.8976216   2.985737    -0.30   0.764    -6.749566    4.954322
+        5 1  |   3.701253   2.821071     1.31   0.190    -1.827951    9.230456
+        6 1  |  -.4314018   2.803001    -0.15   0.878    -5.925189    5.062385
+        8 1  |   4.245442   4.192235     1.01   0.311    -3.971198    12.46208
+        9 1  |   -2.74116    3.33407    -0.82   0.411    -9.275825    3.793506
+       10 1  |  -15.56039   2.908156    -5.35   0.000    -21.26027   -9.860497
+       11 1  |  -18.60568   3.208183    -5.80   0.000    -24.89361   -12.31774
+       12 1  |  -22.09685   3.873585    -5.70   0.000    -29.68895   -14.50475
+       13 1  |  -5.986568   4.934111    -1.21   0.225    -15.65726    3.684123
+------------------------------------------------------------------------------
+
+added scalar:
+              e(ymean) =  93.646576
+
+added scalar:
+             e(ymean2) =  .
+
+added scalar:
+                e(acq) =  808
+
+added macro:
+               e(smpl) : "Rural"
+
+added macro:
+             e(fespec) : "Grid x cohort; AC x month-year x cohort"
+
+added macro:
+                e(mod) : "moderator"
+
+added macro:
+        e(monthyearfe) : "N"
+
+added macro:
+               e(acfe) : "N"
+
+added macro:
+          e(acmonthfe) : "Y"
+
+added macro:
+             e(gridfe) : "Y"
+
+added macro:
+    e(weathercontrols) : "Y"
+
+added macro:
+        e(clusterspec) : "AC x cohort x month-year; grid x cohort"
+
+added macro:
+      e(omittedperiod) : "0"
+
+added macro:
+        e(eventwindow) : "-6 to 6"
+(17,243,633 real changes made)
+(dropped 146438 singleton observations)
+(MWFE estimator converged in 28 iterations)
+
+HDFE linear regression with Julia                 Number of obs   = 38,134,885
+Absorbing 2 HDFE groups                           F(  26, 976159) =       5.48
+Statistics cluster-robust                         Prob > F        =     0.0000
+                                                  R-squared       =     0.6707
+                                                  Adj R-squared   =     0.6060
+Number of clusters (ac_uq_id#cohort#monthyear) =     976159Within R-sq.=     0.
+> 0000
+Number of clusters (unique_small_grid_id#cohort) =    5293426Root MSE=   644.74
+> 08
+
+(Std. err. adjusted for 976,159 clusters in ac_uq_id#cohort#monthyear unique_sm
+> all_grid_id#cohort)
+------------------------------------------------------------------------------
+             |               Robust
+      countk | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+relative_y~x |
+          1  |          0  (omitted)
+          2  |          0  (omitted)
+          3  |          0  (omitted)
+          4  |          0  (omitted)
+          5  |          0  (omitted)
+          6  |          0  (omitted)
+          8  |          0  (omitted)
+          9  |          0  (omitted)
+         10  |          0  (omitted)
+         11  |          0  (omitted)
+         12  |          0  (omitted)
+         13  |          0  (omitted)
+             |
+     1.treat |          0  (omitted)
+1.rice_pro~h |          0  (omitted)
+wind_direc~n |   -.012105   .0053018    -2.28   0.022    -.0224963   -.0017138
+av_wind_sp~d |  -18.42832   8.305701    -2.22   0.027    -34.70721   -2.149422
+             |
+relative_y~x#|
+       treat |
+        1 1  |   4.192156   4.365238     0.96   0.337    -4.363563    12.74788
+        2 1  |   6.826998   3.543804     1.93   0.054    -.1187384    13.77274
+        3 1  |  -1.143694   2.834703    -0.40   0.687    -6.699617    4.412228
+        4 1  |  -.1148907   3.584434    -0.03   0.974    -7.140261     6.91048
+        5 1  |   5.281115   3.438713     1.54   0.125    -1.458647    12.02088
+        6 1  |    .935102   2.518969     0.37   0.710    -4.001992    5.872196
+        8 1  |   2.089688   4.825749     0.43   0.665    -7.368617    11.54799
+        9 1  |  -3.743283   3.186772    -1.17   0.240    -9.989249    2.502682
+       10 1  |  -8.757359   2.409408    -3.63   0.000    -13.47972      -4.035
+       11 1  |   -15.0898   3.166164    -4.77   0.000    -21.29537   -8.884221
+       12 1  |  -8.203313   4.174598    -1.97   0.049    -16.38539   -.0212409
+       13 1  |   6.558556   6.005421     1.09   0.275    -5.211867    18.32898
+             |
+relative_y~x#|
+rice_prod_~h |
+        1 1  |          0  (omitted)
+        2 1  |          0  (omitted)
+        3 1  |          0  (omitted)
+        4 1  |          0  (omitted)
+        5 1  |          0  (omitted)
+        6 1  |          0  (omitted)
+        8 1  |          0  (omitted)
+        9 1  |          0  (omitted)
+       10 1  |          0  (omitted)
+       11 1  |          0  (omitted)
+       12 1  |          0  (omitted)
+       13 1  |          0  (omitted)
+             |
+       treat#|
+rice_prod_~h |
+        1 1  |          0  (omitted)
+             |
+relative_y~x#|
+       treat#|
+rice_prod_~h |
+      1 1 1  |  -29.82954   8.604002    -3.47   0.001     -46.6931   -12.96599
+      2 1 1  |  -1.632727   6.177037    -0.26   0.792    -13.73951    10.47406
+      3 1 1  |    4.32032   5.245786     0.82   0.410    -5.961245    14.60189
+      4 1 1  |  -1.820905   6.057284    -0.30   0.764    -13.69298    10.05117
+      5 1 1  |  -3.330891   5.744178    -0.58   0.562    -14.58929    7.927506
+      6 1 1  |  -2.880433    5.81892    -0.50   0.621    -14.28532    8.524453
+      8 1 1  |   4.409131   8.531418     0.52   0.605    -12.31216    21.13042
+      9 1 1  |   1.969118   6.768644     0.29   0.771     -11.2972    15.23543
+     10 1 1  |  -13.72976   5.913719    -2.32   0.020    -25.32046   -2.139074
+     11 1 1  |  -7.255886   6.550281    -1.11   0.268    -20.09422    5.582444
+     12 1 1  |  -29.04986   7.885988    -3.68   0.000    -44.50613   -13.59359
+     13 1 1  |  -26.59616   9.982023    -2.66   0.008    -46.16059   -7.031729
+------------------------------------------------------------------------------
+
+added scalar:
+              e(ymean) =  93.646576
+
+added scalar:
+             e(ymean2) =  152.51514
+
+added scalar:
+                e(acq) =  808
+
+added macro:
+               e(smpl) : "Rural"
+
+added macro:
+             e(fespec) : "Grid x cohort; AC x month-year x cohort"
+
+added macro:
+                e(mod) : "rice_prod_aclvl_ahigh"
+
+added macro:
+        e(monthyearfe) : "N"
+
+added macro:
+               e(acfe) : "N"
+
+added macro:
+          e(acmonthfe) : "Y"
+
+added macro:
+             e(gridfe) : "Y"
+
+added macro:
+    e(weathercontrols) : "Y"
+
+added macro:
+        e(clusterspec) : "AC x cohort x month-year; grid x cohort"
+
+added macro:
+      e(omittedperiod) : "0"
+
+added macro:
+        e(eventwindow) : "-6 to 6"
+
+. 
+. local outbase "${tables}/`output_stem'${sample}_rural${ster_suffix}"
+
+. estwrite `estimate_names' using "`outbase'.ster", replace
+(saving evreg1)
+(saving evreg2)
+(file /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication/.
+> ./../tables/stacked_event_study_pop_m6_p6_omit0_rural.ster saved)
+
+. estsave_csv `estimate_names' using "`outbase'.csv", replace
+(27 missing values generated)
+(27 missing values generated)
+(27 missing values generated)
+(27 missing values generated)
+(27 missing values generated)
+(27 missing values generated)
+(27 missing values generated)
+(27 missing values generated)
+(27 missing values generated)
+(27 missing values generated)
+(27 missing values generated)
+(27 missing values generated)
+(27 missing values generated)
+(27 missing values generated)
+(27 missing values generated)
+(27 missing values generated)
+(27 missing values generated)
+(27 missing values generated)
+(27 missing values generated)
+(27 missing values generated)
+(27 missing values generated)
+(27 missing values generated)
+(27 missing values generated)
+(27 missing values generated)
+(27 missing values generated)
+(27 missing values generated)
+(27 missing values generated)
+(27 missing values generated)
+(27 missing values generated)
+(53 missing values generated)
+(53 missing values generated)
+(53 missing values generated)
+(53 missing values generated)
+(53 missing values generated)
+(53 missing values generated)
+(53 missing values generated)
+(53 missing values generated)
+(53 missing values generated)
+(53 missing values generated)
+(53 missing values generated)
+(53 missing values generated)
+(53 missing values generated)
+(53 missing values generated)
+(53 missing values generated)
+(53 missing values generated)
+(53 missing values generated)
+(53 missing values generated)
+(53 missing values generated)
+(53 missing values generated)
+(53 missing values generated)
+(53 missing values generated)
+(53 missing values generated)
+(53 missing values generated)
+(53 missing values generated)
+(53 missing values generated)
+(53 missing values generated)
+(53 missing values generated)
+(53 missing values generated)
+(53 missing values generated)
+(53 missing values generated)
+(53 missing values generated)
+(53 missing values generated)
+(53 missing values generated)
+(53 missing values generated)
+(53 missing values generated)
+(53 missing values generated)
+(53 missing values generated)
+(53 missing values generated)
+(53 missing values generated)
+(53 missing values generated)
+(53 missing values generated)
+(53 missing values generated)
+(53 missing values generated)
+(53 missing values generated)
+(53 missing values generated)
+(53 missing values generated)
+(53 missing values generated)
+(53 missing values generated)
+(53 missing values generated)
+(53 missing values generated)
+(53 missing values generated)
+(53 missing values generated)
+(53 missing values generated)
+(53 missing values generated)
+Estimates exported to /users/aquisper/proj_bureaucrats_farms/code/_stacked_down
+> up_replication/../../tables/stacked_event_study_pop_m6_p6_omit0_rural.csv
+
+. 
+. display as result "Saved `outbase'.ster and `outbase'.csv"
+Saved /users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication/.
+> ./../tables/stacked_event_study_pop_m6_p6_omit0_rural.ster and /users/aquispe
+> r/proj_bureaucrats_farms/code/_stacked_downup_replication/../../tables/stacke
+> d_event_study_pop_m6_p6_omit0_rural.csv
+
+. 
+end of do-file
+
+. 
+end of do-file

@@ -1,0 +1,21 @@
+{
+\def\sym#1{\ifmmode^{#1}\else\(^{#1}\)\fi}
+\begin{tabular}{l*{4}{c}}
+\hline
+&\multicolumn{4}{c}{Relative-month window: -5 to +5} \\ \hline
+            &\multicolumn{1}{c}{(1)}&\multicolumn{1}{c}{(2)}&\multicolumn{1}{c}{(3)}&\multicolumn{1}{c}{(4)}\\
+            &\multicolumn{1}{c}{No FE}&\multicolumn{1}{c}{AC + Month-Year}&\multicolumn{1}{c}{AC $\times$ Month-Year}&\multicolumn{1}{c}{Grid + AC $\times$ Month-Year}\\
+\hline
+Down $>$ Up Population&       6.700\sym{***}&      -2.817\sym{**} &       4.879\sym{***}&      -5.770\sym{***}\\
+            &     (2.130)         &     (1.272)         &     (1.222)         &     (1.678)         \\
+\hline
+Observations&  35,617,546         &  35,617,395         &  35,575,494         &  35,485,769         \\
+N Assembly Constituencies&         808         &         808         &         808         &         808         \\
+Month-Year FE&           N         &           Y         &           N         &           N         \\
+AC FE       &           N         &           Y         &           N         &           N         \\
+AC $\times$ Month-Year FE&           N         &           N         &           Y         &           Y         \\
+Grid FE     &           N         &           N         &           N         &           Y         \\
+Mean DV, treated pre-treatment&      91.948         &      91.948         &      91.948         &      91.948         \\
+\hline
+\end{tabular}
+}
