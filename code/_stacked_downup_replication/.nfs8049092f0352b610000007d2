@@ -1,0 +1,321 @@
+
+  ___  ____  ____  ____  ____ ®
+ /__    /   ____/   /   ____/      StataNow 19.5
+___/   /   /___/   /   /___/       MP—Parallel Edition
+
+ Statistics and Data Science       Copyright 1985-2025 StataCorp LLC
+                                   StataCorp
+                                   4905 Lakeway Drive
+                                   College Station, Texas 77845 USA
+                                   800-782-8272        https://www.stata.com
+                                   979-696-4600        service@stata.com
+
+Stata license: 4-user 16-core network, expiring 14 Sep 2026
+Serial number: 501909301589
+  Licensed to: University of Notre Dame
+               Notre Dame, IN 46556
+
+Notes:
+      1. Stata is running in batch mode.
+      2. Unicode is supported; see help unicode_advice.
+      3. More than 2 billion observations are allowed; see help obs_advice.
+      4. Maximum number of variables is set to 5,000 but can be increased;
+          see help set_maxvar.
+
+. do _main_2_event_study.do 
+
+. *----------------------------------------------------------------------------
+> ---
+. * Main Event Study - RURAL GRIDS ONLY
+. * Output: main_event_study_rural.ster
+. *----------------------------------------------------------------------------
+> ---
+. 
+. *****************************************************************************
+> ***
+. * Setup - Only set globals if running standalone (not from master)
+. *****************************************************************************
+> ***
+. 
+. if "$root" == "" {
+.     clear all
+.     set more off
+. 
+.     * Set toggles for standalone run
+.     global location "shell"
+.     global sample ""
+. 
+.     global shell "/groups/sgulzar/sa_fires/proj_bureaucrats_farms"
+.     global dbox "/Users/anzony.quisperojas/Library/CloudStorage/Dropbox/sa_fi
+> res/proj_bureaucrats_farms"
+. 
+.     if "$location" == "dbox" {
+.         global root "$dbox"
+.     }
+.     else {
+.         global root "$shell"
+.     }
+. }
+
+. 
+. global int_farms "${root}/data_output/intermediate"
+
+. global table_farms "${root}/tex/paper/tables"
+
+. global figure_farms "${root}/tex/paper/figures"
+
+. 
+. 
+. *----------------------------------------------------------------------------
+> ---
+. * Import and Merge Data
+. *----------------------------------------------------------------------------
+> ---
+. 
+. import delimited "${root}/data_output/intermediate/combined_dt_pop.csv", clea
+> r
+(encoding automatically selected: ISO-8859-9)
+(14 vars, 162,906,001 obs)
+
+. 
+. * Merge with rural classification
+. merge m:1 unique_small_grid_id using "${root}/data_output/intermediate/ghs_gr
+> id_classification_2000.dta", keepusing(is_rural)
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                        66,775
+        from master                         0  (_merge==1)
+        from using                     66,775  (_merge==2)
+
+    Matched                       162,906,001  (_merge==3)
+    -----------------------------------------
+
+. keep if _merge == 3
+(66,775 observations deleted)
+
+. drop _merge
+
+. 
+. * Keep only rural grids
+. keep if is_rural == 1
+(32,089,417 observations deleted)
+
+. 
+. display "Observations after rural filter: " _N
+Observations after rural filter: 1.308e+08
+
+. 
+. * Drop grids with more than 1 ac
+. merge m:1 unique_small_grid_id using "${root}/data_output/intermediate/grids_
+> with_more_1_ac.dta"
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                   130,763,444
+        from master               130,763,411  (_merge==1)
+        from using                         33  (_merge==2)
+
+    Matched                            53,173  (_merge==3)
+    -----------------------------------------
+
+. drop if dpl_ac ==1
+(53,206 observations deleted)
+
+. drop _merge
+
+. 
+. * Merge rice moderators if not already present
+. capture confirm variable rice_area_aclvl_ahigh
+
+. if _rc {
+.     display "Merging rice moderators..."
+Merging rice moderators...
+.     merge m:1 unique_small_grid_id ac_uq_id using "${root}/data_output/interm
+> ediate/rice_moderators.dta", nogen
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                        63,157
+        from master                    32,529  
+        from using                     30,628  
+
+    Matched                       130,730,882  
+    -----------------------------------------
+. }
+
+. 
+. * Create count in thousands
+. gen countk = count * 1000
+(30,628 missing values generated)
+
+. 
+. * Filter data: year < 2022 or (year == 2022 & month <= 8)
+. keep if year < 2022 | (year == 2022 & month <= 8)
+(30,628 observations deleted)
+
+. 
+. * Sort data
+. sort unique_small_grid_id monthyear
+
+. 
+. keep unique_small_grid_id monthyear downup_ac_pop av_wind_speed wind_directio
+> n countk ac_uq_id is_rural rice_area_aclvl_ahigh rice_harvarea_aclvl_ahigh ri
+> ce_prod_aclvl_ahigh cohort
+
+. 
+. *----------------------------------------------------------------------------
+> ---
+. * Generate Event Study Variables
+. *----------------------------------------------------------------------------
+> ---
+. 
+. * Temporarily rename variables
+. rename downup_ac_pop abs
+
+. 
+. * First, set switchtoexp = 1 everytime there is a switch
+. gsort unique_small_grid_id monthyear
+
+. bys unique_small_grid_id: gen switchtoexp=1 if abs==1 & abs[_n-1]==0
+(130,099,863 missing values generated)
+
+. 
+. * Set switch to unexp = 1 if switch to unexposed
+. gsort unique_small_grid_id monthyear
+
+. bys unique_small_grid_id: gen switchtounexp=1 if abs==0 & abs[_n-1]==1
+(130,132,188 missing values generated)
+
+. 
+. * Second, set rtime = +n after the switch and -n after
+. gen rtime_abs=switchtoexp
+(130,099,863 missing values generated)
+
+. replace rtime_abs=-1 if switchtounexp==1
+(631,223 real changes made)
+
+.     bys unique_small_grid_id: replace rtime_abs=rtime_abs[_n-1]+1 if abs==1 &
+>  rtime_abs==.
+(2945831 real changes made)
+
+. gsort unique_small_grid_id -monthyear
+
+. replace rtime_abs=. if rtime_abs==-1
+(631,223 real changes made, 631,223 to missing)
+
+. replace rtime_abs=-1 if rtime_abs==. & rtime_abs[_n-1]==1
+(663,548 real changes made)
+
+.     bys unique_small_grid_id: replace rtime_abs=rtime_abs[_n-1]-1 if abs==0 &
+>  rtime_abs==.
+(37484945 real changes made)
+
+. 
+. drop switchtoexp switchtounexp
+
+. gsort unique_small_grid_id monthyear
+
+. 
+. * Time invariant treatment
+. bys unique_small_grid_id: egen TREAT_abs=max(abs)
+
+. 
+. * First treated time is zero
+. replace rtime_abs=rtime_abs-1 if rtime_abs>0
+(3,609,379 real changes made)
+
+. 
+. rename abs downup_ac_pop
+
+. 
+. * Generate event study dummies
+. su rtime_abs
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+   rtime_abs | 41,757,872   -607.4041    1674.121     -14161        118
+
+. forvalues l = 0/6 {
+  2.     gen byte La`l'_abs = rtime_abs ==`l'
+  3.     label var La`l'_abs "`l'"
+  4. }
+
+. forvalues l = 1/6 {
+  2.     gen byte Le`l'_abs = rtime_abs ==-`l'
+  3.     label var Le`l'_abs "-`l'"
+  4. }
+
+. 
+. drop La0_abs // normalize rtime = 0
+
+. 
+. 
+. global tr abs
+
+. 
+. drop if TREAT_$tr==1 & rtime_$tr>=7
+(13,679,183 observations deleted)
+
+. drop if TREAT_$tr==1 & rtime_$tr<=-7
+(34,626,899 observations deleted)
+
+. bys unique_small_grid_id: egen TREAT = max(downup_ac_pop)
+
+. 
+. *----------------------------------------------------------------------------
+> ---
+. * Regressions
+. *----------------------------------------------------------------------------
+> ---
+. 
+. global controls av_wind_speed wind_direction
+
+. global cluster unique_small_grid_id monthyear#ac_uq_id
+
+. local dep_var countk
+
+. 
+. local fe1 "unique_small_grid_id#cohort ac_uq_id#monthyear#cohort"
+
+. 
+. * Compute mean of dep var where untreated
+. 
+. gen moderator = 0
+
+. * Count number of unique ACs in subsample
+. 
+. local modlist moderator rice_area_aclvl_ahigh rice_harvarea_aclvl_ahigh rice_
+> prod_aclvl_ahigh
+
+. local i = 1
+
+. foreach mod of local modlist{
+  2.         
+.         local rhs Le*_${tr} La*_${tr} 1.Le*_${tr}#1.`mod' 1.La*_${tr}#1.`mod'
+>  $controls
+  3.         
+.         * Run regression with clustering
+.         reghdfejl `dep_var' `rhs', absorb(`fe1') cluster($cluster) nocons
+  4.         gen esample = e(sample)
+  5.         
+.                 unique ac_uq_id if esample == 1
+  6.         local numacs = r(unique)
+  7.                 quietly summarize `dep_var' if downup_ac_pop ==0 & TREAT =
+> = 1 & esample == 1
+  8.         local ymean = r(mean)
+  9.                 quietly summarize `dep_var' if downup_ac_pop ==0 & TREAT =
+> = 1 & `mod' == 1 & esample == 1
+ 10.         local ymean2 = cond(r(N) == 0, `ymean', r(mean))
+ 11.                 quietly summarize `dep_var' if downup_ac_pop ==0 & TREAT =
+> = 1 & `mod' == 0 & esample == 1
+ 12.         local ymean3 = cond(r(N) == 0, `ymean', r(mean))
+ 13.         drop esample
+ 14.         * Store coefficient + SE of main var
+.         estadd local ymean `ymean'
+ 15.         estadd local ymean2 `ymean2'
+ 16.         estadd local ymean3 `ymean3'
+ 17.         estadd local acq `numacs'
+ 18.         est store evreg`i'
+ 19.         local i = `i' + 1
+ 20. }
