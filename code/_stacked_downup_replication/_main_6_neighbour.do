@@ -93,7 +93,7 @@ foreach fe of numlist $fe_list {
     }
     reghdfejl countk b5.dist_q##b0.downwind_neighbours, ///
         absorb(`fe`fe'') ///
-        cluster(ac_uq_id#month#year unique_small_grid_id)
+        cluster(ac_uq_id#month#year#cohort unique_small_grid_id#cohort)
     estadd scalar ymean = `ymean'
     estadd scalar ymean2 = `ymean2'
     estadd scalar acq = `numacs'
