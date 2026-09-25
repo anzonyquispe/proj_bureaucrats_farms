@@ -210,7 +210,11 @@ foreach mod of local moderators_list {
     local fcond `filter1'
 
     * Project-standard treated-group pre-treatment means.
-    quietly summarize `dep_var' if `fcond' & treat == 1 & relative_year_bin <= -1
+    * The plotted coefficients describe the omitted moderator group, so the
+    * reported Mean DV is the treated pre-period mean with moderator == 0.
+    * For the unmoderated estimate the condition binds nothing.
+    quietly summarize `dep_var' if `fcond' & treat == 1 & ///
+        relative_year_bin <= -1 & moderator == 0
     local ymean = r(mean)
     quietly summarize `dep_var' if `fcond' & treat == 1 & ///
         relative_year_bin <= -1 & moderator == 1

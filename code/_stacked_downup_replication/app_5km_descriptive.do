@@ -34,6 +34,13 @@ import delimited using ///
     "${int_data}/protest_downup_ac_pop_esample${sample}.csv", ///
     clear varnames(1) case(preserve)
 display as text "Protest richest-DiD descriptive sample: " _N
+* Politician identity, used for the politician-count row below.
+merge m:1 ac_uq_id month year using ///
+    "${int_data}/winners_name_info.dta", keepusing(pol_name)
+drop if _merge == 2
+drop _merge
+quietly count if missing(pol_name)
+display as text "Rows without a politician name: " r(N)
 
 capture drop prov legis_govyear protest
 egen prov = group(province)
@@ -82,7 +89,7 @@ program define _unique_count, rclass
     restore
 end
 
-local colsel unique_small_grid_id year month ac_uq_id prov ///
+local colsel unique_small_grid_id year month ac_uq_id pol_name prov ///
     ac_area_tr cohort legis_govyear relative_year_bin protest countk ///
     rice_prod_aclvl_ahigh
 local contvars countk rice_prod_aclvl_ahigh protest relative_year_bin
@@ -91,6 +98,7 @@ local lab_unique_small_grid_id  "Grid ID"
 local lab_year                  "Year"
 local lab_month                 "Month"
 local lab_ac_uq_id              "Assembly Constituency (AC)"
+local lab_pol_name              "Number of Politicians"
 local lab_prov                  "Province"
 local lab_ac_area_tr            "Protest Area"
 local lab_cohort                "Cohort"
@@ -123,13 +131,19 @@ foreach v of local colsel {
     local maxfmt ""
     if strpos(" `contvars' ", " `v' ") {
         quietly summarize `v'
-        _fmt_num `r(mean)'
+        * _fmt_num is rclass, so the first call clears summarize's r().
+        * Store all four statistics before formatting any of them.
+        local sum_mean = r(mean)
+        local sum_sd   = r(sd)
+        local sum_min  = r(min)
+        local sum_max  = r(max)
+        _fmt_num `sum_mean'
         local meanfmt "`r(out)'"
-        _fmt_num `r(sd)'
+        _fmt_num `sum_sd'
         local sdfmt "`r(out)'"
-        _fmt_num `r(min)'
+        _fmt_num `sum_min'
         local minfmt "`r(out)'"
-        _fmt_num `r(max)'
+        _fmt_num `sum_max'
         local maxfmt "`r(out)'"
     }
     local vlabel "`lab_`v''"
