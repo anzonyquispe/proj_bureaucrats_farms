@@ -252,6 +252,12 @@ foreach control_sample in $control_samples {
         local dvnorm "none"
         if "`depvar'" == "countk_t2" local dvnorm "T-2 calendar-month mean"
 
+        * The moderator loop below opens with `replace moderator = moderator',
+        * which is a no-op, so without this reset the second dependent variable
+        * would inherit the rice values left behind by the first one and its
+        * unmoderated estimate would silently become a second moderated one.
+        quietly replace moderator = 0
+
         est clear
         local i = 1
         foreach mod of local moderators_list {
