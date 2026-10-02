@@ -161,7 +161,10 @@ foreach control_sample in $control_samples {
         local rhs "ib`base'.relative_year_bin_aux##ib0.treat##ib0.`mod' wind_direction av_wind_speed"
         local fcond `filter1'
 
-        quietly summarize countk if treat == 1 & relative_year_bin <= -1 & `fcond'
+        * The plotted coefficients describe the omitted moderator group, so the
+        * reported Mean DV is the treated pre-period mean with moderator == 0.
+        * For the unmoderated estimate the condition binds nothing.
+        quietly summarize countk if treat == 1 & relative_year_bin <= -1 & moderator == 0 & `fcond'
         local ymean = r(mean)
         quietly summarize countk if treat == 1 & relative_year_bin <= -1 & moderator == 1 & `fcond'
         local ymean2 = r(mean)

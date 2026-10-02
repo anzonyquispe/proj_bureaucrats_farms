@@ -33,6 +33,13 @@ import delimited using ///
     "${int_data}/politician_downup_ac_pop_esample${sample}.csv", ///
     clear varnames(1) case(preserve)
 display as text "Politician richest-DiD descriptive sample: " _N
+* Politician identity, used for the politician-count row below.
+merge m:1 ac_uq_id month year using ///
+    "${int_data}/winners_name_info.dta", keepusing(pol_name)
+drop if _merge == 2
+drop _merge
+quietly count if missing(pol_name)
+display as text "Rows without a politician name: " r(N)
 
 capture drop prov legis_govyear agri_politician
 egen prov = group(province)
@@ -81,7 +88,7 @@ program define _unique_count, rclass
     restore
 end
 
-local colsel unique_small_grid_id year month ac_uq_id prov election_year ///
+local colsel unique_small_grid_id year month ac_uq_id pol_name prov election_year ///
     cohort legis_govyear self_profession_nomiss relative_year_bin ///
     agri_politician countk ///
     rice_prod_aclvl_ahigh
@@ -91,6 +98,7 @@ local lab_unique_small_grid_id  "Grid ID"
 local lab_year                  "Year"
 local lab_month                 "Month"
 local lab_ac_uq_id              "Assembly Constituency (AC)"
+local lab_pol_name              "Number of Politicians"
 local lab_prov                  "Province"
 local lab_election_year         "Election Year"
 local lab_cohort                "Cohort"
@@ -113,6 +121,16 @@ foreach v of local colsel {
     local Nval = r(N)
     quietly _unique_count `v'
     local uval = r(n)
+
+    * The agricultural-politician row counts treated politicians, not the two
+    * values of the dummy.
+    if "`v'" == "self_profession_nomiss" {
+        tempvar tag_agri_pol
+        quietly egen `tag_agri_pol' = tag(pol_name) if treat == 1 & !missing(pol_name)
+        quietly count if `tag_agri_pol' == 1
+        local uval = r(N)
+        drop `tag_agri_pol'
+    }
     _fmt_int `Nval'
     local Nfmt "`r(out)'"
     _fmt_int `uval'
@@ -124,13 +142,19 @@ foreach v of local colsel {
     local maxfmt ""
     if strpos(" `contvars' ", " `v' ") {
         quietly summarize `v'
-        _fmt_num `r(mean)'
+        * _fmt_num is rclass, so the first call clears summarize's r().
+        * Store all four statistics before formatting any of them.
+        local sum_mean = r(mean)
+        local sum_sd   = r(sd)
+        local sum_min  = r(min)
+        local sum_max  = r(max)
+        _fmt_num `sum_mean'
         local meanfmt "`r(out)'"
-        _fmt_num `r(sd)'
+        _fmt_num `sum_sd'
         local sdfmt "`r(out)'"
-        _fmt_num `r(min)'
+        _fmt_num `sum_min'
         local minfmt "`r(out)'"
-        _fmt_num `r(max)'
+        _fmt_num `sum_max'
         local maxfmt "`r(out)'"
     }
     local vlabel "`lab_`v''"
