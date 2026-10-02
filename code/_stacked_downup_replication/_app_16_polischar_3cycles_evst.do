@@ -36,6 +36,10 @@
 *              from the change of outcome
 *   countk_t2  the normalized outcome
 *
+* Each is run across the four-specification fixed-effect sweep defined below,
+* so one .ster per dependent variable holds 2 moderators x 4 specifications =
+* 8 stored estimates, each tagged with e(fespec) and e(mod).
+*
 * The caller selects downup_ac or downup_ac_pop through $downup_var and uses
 * $ster_suffix (normally "" or "_acpop") to keep the two result families apart.
 ********************************************************************************
@@ -49,7 +53,7 @@ if "$root" == "" {
     global location     "shell"
     global sample       ""
     global is_rural_var "is_rural"
-    global fe_list      "1"
+    global fe_list      "1/4"
     global ster_suffix  ""
     global control_samples "both"
 
@@ -178,8 +182,32 @@ local rmin = r(min)
 gen relative_year_bin_aux = relative_year_bin - `rmin' + 1
 local base = -1 - `rmin' + 1
 
-* Final FE03 selected by the province-cohort exploratory sweep.
-local fe1 "unique_small_grid_id_cohort province_cohort#c.monthyear relative_year_bin_aux#cohort_id"
+********************************************************************************
+* Fixed-effect sweep
+*
+* Four nested specifications, from the event-time structure alone up to the
+* FE03 the canonical dofile settled on. fe4 is the production specification;
+* the other three say how much of the result rests on the grid and calendar
+* controls rather than on the event-time x cohort structure.
+*
+*   fe1  event year x cohort only
+*   fe2  plus grid x cohort
+*   fe3  plus calendar month-year dummies
+*   fe4  calendar time as a province-cohort linear trend instead of dummies
+*
+* fe3 and fe4 are not nested in each other: both add calendar time to fe2, one
+* as a full set of dummies and the other as a per-province-cohort slope.
+********************************************************************************
+
+local fe1 "relative_year_bin_aux#cohort_id"
+local fe2 "unique_small_grid_id_cohort relative_year_bin_aux#cohort_id"
+local fe3 "unique_small_grid_id_cohort monthyear relative_year_bin_aux#cohort_id"
+local fe4 "unique_small_grid_id_cohort province_cohort#c.monthyear relative_year_bin_aux#cohort_id"
+
+* The richest specification anchors the common sample, so every cell of the
+* sweep is estimated on identical rows and the comparison is about the
+* specification alone.
+local anchor_fe "`fe4'"
 
 local filter1 "1"
 gen moderator = 0
@@ -222,13 +250,16 @@ foreach control_sample in $control_samples {
         "Three-term politician event study: controls=`control_sample', " ///
         "downup=${downup_var}, N=" _N
 
-    * One common sample for both dependent variables, taken from the richest
-    * rice-moderated FE03 model on the normalized outcome. Neither outcome has
-    * missing values, so the raw arm estimates on exactly the same rows and the
-    * two arms differ only in the dependent variable.
+    * One common sample for both dependent variables and all four FE
+    * specifications, taken from the richest rice-moderated model on the
+    * normalized outcome. It is the richest one because it drops the most
+    * singletons: anchoring on anything coarser would let the finer
+    * specifications shrink the sample further and turn the sweep into a
+    * comparison of samples. Neither outcome has missing values, so the raw arm
+    * estimates on exactly the same rows too.
     quietly reghdfejl countk_t2 ///
         ib`base'.relative_year_bin_aux##ib0.treat##ib0.rice_prod_aclvl_ahigh ///
-        wind_direction av_wind_speed, absorb(`fe1') vce(cluster ac_elec_yr)
+        wind_direction av_wind_speed, absorb(`anchor_fe') vce(cluster ac_elec_yr)
     gen byte common_sample = e(sample)
     keep if common_sample
     drop common_sample
