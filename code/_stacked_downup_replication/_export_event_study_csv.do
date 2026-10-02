@@ -64,6 +64,7 @@ foreach ster_file of local ster_files {
         strpos("`ster_file'", "main_event_study") == 1 | ///
         strpos("`ster_file'", "stacked_event_study") == 1 | ///
         strpos("`ster_file'", "_app_16_polischar_fe12_evst_all") == 1 | ///
+        strpos("`ster_file'", "_app_16_polischar_3cycles_evst") == 1 | ///
         strpos("`ster_file'", "_app_17_5km_fe12_evst_all") == 1
 
     * The production Windows bridge exports only the three selected main
