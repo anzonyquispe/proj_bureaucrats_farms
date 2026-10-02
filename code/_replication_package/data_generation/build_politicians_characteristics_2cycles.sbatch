@@ -1,5 +1,8 @@
 #!/bin/bash
-#$ -m abe
+# No mail directive here: SGE rejects -m without a matching -M, and hard-coding
+# one address would send this job's mail to whoever committed it. Ask for mail
+# at submit time instead:
+#   qsub -m abe -M you@example.edu build_politicians_characteristics_2cycles.sbatch
 #$ -q largemem
 #$ -N polischar_2cycles
 #$ -pe smp 10
