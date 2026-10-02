@@ -101,9 +101,13 @@ keep if common_sample
 drop common_sample
 
 isid unique_small_grid_id monthyear cohort_id treat
-export delimited using ///
-    "${int_data}/politician_downup_ac_pop_esample${sample}.csv", replace
-display as result "Exported politician richest-DiD sample: `common_n' rows"
+* Only the population run owns the exported sample; the area run would
+* otherwise overwrite the same file with its own (different) sample.
+if "${downup_var}" == "downup_ac_pop" {
+    export delimited using ///
+        "${int_data}/politician_downup_ac_pop_esample${sample}.csv", replace
+    display as result "Exported politician richest-DiD sample: `common_n' rows"
+}
 
 egen tag_ac = tag(ac_uq_id)
 count if tag_ac == 1

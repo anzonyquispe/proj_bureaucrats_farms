@@ -77,6 +77,7 @@ submit_job() {
 submit_stata() {
   local name="$1" dofile="$2" fe_list="$3" suffix="$4"
   local downup="${5:-none}" stacked="${6:-none}" output="${7:-none}"
+  local dependency="${8:-}"
   local cpus=1
   if [[ -n "${OUTPUT_TAG}" ]]; then
     [[ "${suffix}" == "none" ]] && suffix=""
@@ -86,7 +87,7 @@ submit_stata() {
   if [[ "${stacked}" == "stacked_data_protest5km" ]]; then
     cpus="${PROTEST_CPUS}"
   fi
-  submit_job "${name}" "sbatch/run_dofile.sbatch" "" "${cpus}" \
+  submit_job "${name}" "sbatch/run_dofile.sbatch" "${dependency}" "${cpus}" \
     "${dofile}" "${REPLICATION_ROOT}" "${REPLICATION_CODE}" "${LOCATION}" \
     "${SAMPLE}" "${RURAL_VAR}" "${fe_list}" "${suffix}" \
     "${downup}" "${stacked}" "${output}" all "${ANALYSIS_SUBSAMPLE}"
@@ -97,24 +98,29 @@ declare -a table_ids event_ids interaction_ids neighbour_ids
 echo "Submission mode: sample=${SAMPLE}; subsample=${ANALYSIS_SUBSAMPLE}; output_tag=${OUTPUT_TAG:-<none>}"
 echo "Permanent logs: ${REPLICATION_CODE}/logs/<job-name>_<job-id>.stata.log"
 
+# These three jobs export the canonical *_downup_ac_pop_esample* files to
+# data_output/intermediate. Every job that re-reads one of those samples waits
+# for its producer; otherwise it reads a missing, stale, or half-written file.
+main_pop_id=$(submit_stata main_did_pop _main_1_did.do 1/4 _stacked downup_ac_pop combined_dt_pop main_did_downup_pop_ac)
+protest_pop_id=$(submit_stata protest_did_pop _main_4_protest_5km_fe12_did_downup.do 1/3 _acpop downup_ac_pop stacked_data_protest5km)
+politician_pop_id=$(submit_stata politician_did_pop _main_5_polischar_fe12_did_downup_inter.do 1/3 _acpop downup_ac_pop)
+table_ids+=("${main_pop_id}" "${protest_pop_id}" "${politician_pop_id}")
+
 # Main and appendix table estimates. Each call is a distinct scheduler job.
 table_ids+=("$(submit_stata main_did_area _main_1_did.do 1/4 _stacked downup_ac combined_dt main_did_downup_area_ac)")
-table_ids+=("$(submit_stata main_did_pop _main_1_did.do 1/4 _stacked downup_ac_pop combined_dt_pop main_did_downup_pop_ac)")
 table_ids+=("$(submit_stata bureau_polisc _main_3_bureau_polisc_did.do 1/4 none)")
-table_ids+=("$(submit_stata treatment_defs _app_6_main_did_treat_definition.do 1/7 none)")
-table_ids+=("$(submit_stata alternative_dv _app_7_main_did_downup_area_ac_dv.do 1/3 none)")
-table_ids+=("$(submit_stata did_by_year _app_8_main_did_by_year.do 1/10 none)")
-table_ids+=("$(submit_stata did_by_state _app_9_main_did_by_state.do 1/4 none)")
-table_ids+=("$(submit_stata placebo_13km _app_11_placebo_pop_13km.do 1 none)")
+table_ids+=("$(submit_stata treatment_defs _app_6_main_did_treat_definition.do 1/7 none none none none "${main_pop_id}")")
+table_ids+=("$(submit_stata alternative_dv _app_7_main_did_downup_area_ac_dv.do 1/3 none none none none "${main_pop_id}")")
+table_ids+=("$(submit_stata did_by_year _app_8_main_did_by_year.do 1/10 none none none none "${main_pop_id}")")
+table_ids+=("$(submit_stata did_by_state _app_9_main_did_by_state.do 1/4 none none none none "${main_pop_id}")")
+table_ids+=("$(submit_stata placebo_13km _app_11_placebo_pop_13km.do 1 none none none none "${main_pop_id}")")
 table_ids+=("$(submit_stata protest_did_area _main_4_protest_5km_fe12_did_downup.do 1/3 none downup_ac stacked_data_protest5km)")
-table_ids+=("$(submit_stata protest_did_pop _main_4_protest_5km_fe12_did_downup.do 1/3 _acpop downup_ac_pop stacked_data_protest5km)")
 table_ids+=("$(submit_stata politician_did_area _main_5_polischar_fe12_did_downup_inter.do 1/3 none downup_ac)")
-table_ids+=("$(submit_stata politician_did_pop _main_5_polischar_fe12_did_downup_inter.do 1/3 _acpop downup_ac_pop)")
 
-# Descriptive tables are also separate Stata jobs.
-table_ids+=("$(submit_stata descriptives_main app_main_descriptive.do 1 none)")
-table_ids+=("$(submit_stata descriptives_protest app_5km_descriptive.do 1 none none stacked_data_protest5km)")
-table_ids+=("$(submit_stata descriptives_politician app_polischar_descriptive.do 1 none)")
+# Descriptive tables are also separate Stata jobs, each on its sample's producer.
+table_ids+=("$(submit_stata descriptives_main app_main_descriptive.do 1 none none none none "${main_pop_id}")")
+table_ids+=("$(submit_stata descriptives_protest app_5km_descriptive.do 1 none none stacked_data_protest5km none "${protest_pop_id}")")
+table_ids+=("$(submit_stata descriptives_politician app_polischar_descriptive.do 1 none none none none "${politician_pop_id}")")
 
 # Event-study estimates. Politician uses the unchanged by-province composition.
 # Protest uses the RA's pooled control sample and selected FE3 only.

@@ -27,7 +27,9 @@ bash sbatch/submit_all.sh
 Stata array: every dofile/variant receives its own job ID and log. The table,
 event-plot, interaction-plot, neighbour-plot, and final-audit jobs wait for the
 estimates they consume. The final audit uses `afterany`, so it still inventories
-missing outputs if an upstream job fails.
+missing outputs if an upstream job fails. Jobs that re-read a canonical
+`*_downup_ac_pop_esample*` sample (`_app_6`–`_app_9`, `_app_11`, and the three
+descriptive tables) wait for the population DiD job that exports it.
 
 Jobs that read `stacked_data_protest5km.csv` request 10 CPUs. This includes its
 descriptive table, DiD, event-study, and interaction-estimate jobs. Every other
