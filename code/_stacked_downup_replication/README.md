@@ -73,6 +73,16 @@ SAMPLE=_sample EVENT_FE_LIST=1 \
   bash sbatch/submit_all.sh
 ```
 
+`SGE_QUEUE=long` overrides the `largemem` queue embedded in the job scripts
+(for accounts without `largemem` access). `ONLY="job1 job2"` resubmits just
+the named jobs (names as in `submit_all.sh`); skipped jobs keep their earlier
+outputs and release their dependents. Unknown names abort before submission:
+
+```bash
+SGE_QUEUE=long ONLY="protest_did_pop descriptives_protest" \
+  REPLICATION_CODE=$PWD bash sbatch/submit_all.sh
+```
+
 The exact root overrides are `REPLICATION_ROOT`, `REPLICATION_CODE`, and
 `REPOSITORY_ROOT`. The first is the shared data root; the last is the Git
 checkout that receives all generated tables and figures.

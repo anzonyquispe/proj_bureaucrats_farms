@@ -120,9 +120,9 @@ do "${code}/_main_2_stacked_event_study_5pre.do"
 
 global downup_var "downup_ac"
 global ster_suffix ""
-global fe_list "1/3"
+global fe_list "0/3"
 do "${code}/_main_4_protest_5km_fe12_did_downup.do"
-global fe_list "1/3"
+global fe_list "0/3"
 do "${code}/_main_5_polischar_fe12_did_downup_inter.do"
 
 global fe_list "3"
@@ -131,9 +131,9 @@ do "${code}/_app_19_polischar_fe12_did_downup_inter_plot.do"
 
 global downup_var "downup_ac_pop"
 global ster_suffix "_acpop"
-global fe_list "1/3"
+global fe_list "0/3"
 do "${code}/_main_4_protest_5km_fe12_did_downup.do"
-global fe_list "1/3"
+global fe_list "0/3"
 do "${code}/_main_5_polischar_fe12_did_downup_inter.do"
 
 global fe_list "3"

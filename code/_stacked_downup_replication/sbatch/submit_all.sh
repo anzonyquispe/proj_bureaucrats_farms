@@ -14,6 +14,12 @@ JOB_PREFIX="${JOB_PREFIX:-}"
 RURAL_VAR="is_rural"
 EVENT_FE_LIST="${EVENT_FE_LIST:-1}"
 PROTEST_CPUS=3
+# ONLY: space-separated job names to (re)submit; every other job is skipped and
+# its dependents are released immediately (its earlier outputs are reused).
+ONLY="${ONLY:-}"
+# SGE_QUEUE: overrides the queue embedded in the job scripts (#$ -q largemem),
+# e.g. SGE_QUEUE=long for users without largemem access.
+SGE_QUEUE="${SGE_QUEUE:-}"
 
 case "${SAMPLE}" in
   none|""|_sample) ;;
@@ -26,6 +32,15 @@ esac
 if [[ "${ANALYSIS_SUBSAMPLE}" == "rice_high" && -z "${OUTPUT_TAG}" ]]; then
   OUTPUT_TAG="_rice_high"
 fi
+# Reject unknown ONLY names before anything is submitted, so a typo cannot
+# silently skip the job it was meant to rerun.
+SELF="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/$(basename "${BASH_SOURCE[0]}")"
+for wanted in ${ONLY}; do
+  if ! grep -Eq "submit_(stata|job) ${wanted} " "${SELF}"; then
+    echo "ERROR: ONLY lists unknown job name '${wanted}'." >&2
+    exit 64
+  fi
+done
 
 mkdir -p "${REPLICATION_CODE}/logs"
 cd "${REPLICATION_CODE}"
@@ -58,6 +73,10 @@ submit_job() {
   local cpus="$4"
   shift 4
   local id
+  if [[ -n "${ONLY}" && " ${ONLY} " != *" ${name} "* ]]; then
+    echo "Skipped ${name} (not in ONLY)" >&2
+    return 0
+  fi
   if [[ "${scheduler}" == "slurm" ]]; then
     local -a options=(--parsable --job-name="${JOB_PREFIX}${name}" \
       --cpus-per-task="${cpus}" --output=/dev/null --error=/dev/null)
@@ -66,6 +85,7 @@ submit_job() {
     id="${id%%;*}"
   else
     local -a options=(-terse -V -N "${JOB_PREFIX}${name}" -j y -o /dev/null)
+    if [[ -n "${SGE_QUEUE}" ]]; then options+=(-q "${SGE_QUEUE}"); fi
     if (( cpus > 1 )); then options+=(-pe smp "${cpus}"); fi
     [[ -n "${dependency}" ]] && options+=(-hold_jid "${dependency}")
     id=$(qsub "${options[@]}" "${script}" "$@")
@@ -96,14 +116,15 @@ submit_stata() {
 declare -a table_ids event_ids interaction_ids neighbour_ids
 
 echo "Submission mode: sample=${SAMPLE}; subsample=${ANALYSIS_SUBSAMPLE}; output_tag=${OUTPUT_TAG:-<none>}"
+echo "Queue override: ${SGE_QUEUE:-<none>}; only: ${ONLY:-<all jobs>}"
 echo "Permanent logs: ${REPLICATION_CODE}/logs/<job-name>_<job-id>.stata.log"
 
 # These three jobs export the canonical *_downup_ac_pop_esample* files to
 # data_output/intermediate. Every job that re-reads one of those samples waits
 # for its producer; otherwise it reads a missing, stale, or half-written file.
 main_pop_id=$(submit_stata main_did_pop _main_1_did.do 1/4 _stacked downup_ac_pop combined_dt_pop main_did_downup_pop_ac)
-protest_pop_id=$(submit_stata protest_did_pop _main_4_protest_5km_fe12_did_downup.do 1/3 _acpop downup_ac_pop stacked_data_protest5km)
-politician_pop_id=$(submit_stata politician_did_pop _main_5_polischar_fe12_did_downup_inter.do 1/3 _acpop downup_ac_pop)
+protest_pop_id=$(submit_stata protest_did_pop _main_4_protest_5km_fe12_did_downup.do 0/3 _acpop downup_ac_pop stacked_data_protest5km)
+politician_pop_id=$(submit_stata politician_did_pop _main_5_polischar_fe12_did_downup_inter.do 0/3 _acpop downup_ac_pop)
 table_ids+=("${main_pop_id}" "${protest_pop_id}" "${politician_pop_id}")
 
 # Main and appendix table estimates. Each call is a distinct scheduler job.
@@ -114,8 +135,9 @@ table_ids+=("$(submit_stata alternative_dv _app_7_main_did_downup_area_ac_dv.do 
 table_ids+=("$(submit_stata did_by_year _app_8_main_did_by_year.do 1/10 none none none none "${main_pop_id}")")
 table_ids+=("$(submit_stata did_by_state _app_9_main_did_by_state.do 1/4 none none none none "${main_pop_id}")")
 table_ids+=("$(submit_stata placebo_13km _app_11_placebo_pop_13km.do 1 none none none none "${main_pop_id}")")
-table_ids+=("$(submit_stata protest_did_area _main_4_protest_5km_fe12_did_downup.do 1/3 none downup_ac stacked_data_protest5km)")
-table_ids+=("$(submit_stata politician_did_area _main_5_polischar_fe12_did_downup_inter.do 1/3 none downup_ac)")
+# FE0-FE3 x {plain, interacted} = the eight evreg models each table reads.
+table_ids+=("$(submit_stata protest_did_area _main_4_protest_5km_fe12_did_downup.do 0/3 none downup_ac stacked_data_protest5km)")
+table_ids+=("$(submit_stata politician_did_area _main_5_polischar_fe12_did_downup_inter.do 0/3 none downup_ac)")
 
 # Descriptive tables are also separate Stata jobs, each on its sample's producer.
 table_ids+=("$(submit_stata descriptives_main app_main_descriptive.do 1 none none none none "${main_pop_id}")")
