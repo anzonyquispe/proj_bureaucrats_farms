@@ -27,6 +27,10 @@ raw/curated sources
     -> build_all_stacked_datasets_duckdb.py -> five standard stacked datasets
     -> build_politicians_characteristics_byprov.py
        -> politicians_characteristics_byprov.csv / DuckDB / cohort manifest
+    -> build_politicians_characteristics_2cycles.py
+       -> politicians_characteristics_byprov_2cycles.csv / DuckDB / manifest
+    -> build_politicians_characteristics_3cycles.py
+       -> politicians_characteristics_byprov_3cycles.csv / DuckDB / manifest
     -> build_stacked_duckdb_unique_pair.py
        -> stacked_downup_neigh.csv / DuckDB / cohort manifest
 ```
@@ -60,17 +64,38 @@ checks a 179/-179 degree wraparound.
 | `data_2012_2024_grid_ac_downup_pop.parquet` | `build_downup_ac_pop_cluster.py` | Present |
 | `data_2012_2024_grid_ac_downup.parquet` | `build_downup_ac_area_cluster.py` | Present; canonical seven-column area panel |
 | `data_2012_2024_grid_ac_13kmpl.parquet` | `build_downup_13kmpl_cluster.py` | Present |
+| `data_2012_2024_ac_downup_pop_rice.parquet` | `build_downup_ac_pop_rice.py` | Present; AC-month |
 | `8_grids_ac_pr_5km.csv` | `8_grids_ac_pr_5km.ipynb` | Present; local-path notebook |
 | `panel_data_election_year.parquet` | `panel_data_election_year.ipynb` | Present; local-path notebook |
 | `_3_fire_grid.csv` | `build_fire_grid_duckdb.py` | Present; DuckDB Spatial |
 | `9_rice_info_ac_lvl.parquet` | `9_rice_info_ac_lvl.ipynb` | Present; local-path notebook |
 
-`build_0_master_dataset.py` left-joins all seven files above to the retained
+`build_0_master_dataset.py` left-joins all eight files above to the retained
 wind-complete population base. The population Parquet is the sole source of
 population, wind, and base-panel columns. The AC-area Parquet contains only
 the four merge keys and `downup_ac_area`, `downwind_area`, and `upwind_area`.
 `normalize_downup_ac_area_panel.py` migrates a legacy wide area Parquet to
 this schema without recalculating geometry.
+
+### Rice-source population (`downwind_pop_rice_ac`)
+
+`build_downup_ac_pop_rice.py` writes one row per AC x month, as
+`data_2012_2024_ac_downup_pop_rice.parquet` and as a Stata copy
+`data_2012_2024_ac_downup_pop_rice.dta` (merge on `ac_uq_id year month`). A grid
+is a rice zone when its MapSPAM 2010 production is positive and at least a
+median cutoff. Two cutoffs are produced side by side: the within-AC median
+(`--rice-percentile 0.5`; unsuffixed columns such as `downup_ac_pop_rice`) and
+the median across all sample grids, each counted once
+(`--rice-sample-percentile 0.5`; `_sample` columns such as
+`downup_ac_pop_rice_sample`). The AC wind is the unit-vector mean of the
+grids' observed monthly `wind_direction_av_cellid_month`. Population is
+downwind when it sits in a rice zone or beyond the line perpendicular to that
+wind through the most-upwind rice zone, so it is downwind of at least one rice
+zone. `downup_ac_pop_rice` is 1 when that population exceeds half of the AC
+population, and ACs without rice zones are 0. The stage applies the master's
+wind-complete grid exclusion, so the master merge requires an exact AC-month
+match. `tests/test_downup_pop_rice.py` covers the cardinal cases, the
+percentile cutoff, the 50% boundary, and the vector mean.
 
 ## Derived stacked datasets
 
@@ -79,6 +104,17 @@ folder. `build_all_stacked_datasets_duckdb.py` creates the five standard
 treatment stacks. `build_politicians_characteristics_byprov.py` creates the
 alternative politician-characteristics stack within province-election
 cohorts from the same `0_master_dataset.parquet`.
+`build_politicians_characteristics_2cycles.py` then filters a politician stack
+down to the units whose AC shows two consecutive non-agricultural terms before
+the switch, trimming their pre-period to the start of the second one. It reads
+the published stack and the master's electoral calendar, so it never
+re-estimates; see `STACKED_DATASETS.md` for the retention rule.
+`build_politicians_characteristics_3cycles.py` spans the same three terms but
+drops the profession requirement on the oldest one, so it keeps the units the
+two-cycle rule discards. Because the engine had already cut an agricultural
+prior term out of the stack, that builder recovers those months from the master
+rather than filtering; `STACKED_DATASETS.md` documents what it recomputes and
+what it deliberately leaves alone.
 
 The province-election stack is part of both shared rebuild entry points:
 
@@ -111,6 +147,9 @@ builds the neighbour-border stack from the uploaded
 | `build_downup_ac_area_cluster.py` | `_0_2_3_ACs_right_shapefile.shp` | Raw/curated source | No producer required |
 | `build_downup_13kmpl_cluster.py` | `data_2012_2024_grid_ac_downup_pop.parquet` | Intermediate | `build_downup_ac_pop_cluster.py` present |
 | `build_downup_13kmpl_cluster.py` | `small_grid_population_2010.parquet` | Intermediate | `grid_population.ipynb` present; output path needs correction |
+| `build_downup_ac_pop_rice.py` | `data_2012_2024_grid_ac_downup_pop.parquet` | Intermediate | `build_downup_ac_pop_cluster.py` present |
+| `build_downup_ac_pop_rice.py` | `small_grid_population_2010.parquet` | Intermediate | `grid_population.ipynb` present; output path needs correction |
+| `build_downup_ac_pop_rice.py` | `small_grid_rice_2010.parquet` | Intermediate | `grid_rice.py` present; local Dropbox paths, output uploaded to the cluster |
 | `8_grids_ac_pr_5km.ipynb` | ACLED protest CSV | Raw/curated source | No producer required |
 | `8_grids_ac_pr_5km.ipynb` | `1-grid-generation.shp` | Raw/curated source | No producer required |
 | `8_grids_ac_pr_5km.ipynb` | `_0_2_3_ACs_right_shapefile.shp` | Raw/curated source | No producer required |
@@ -150,6 +189,21 @@ The notebook currently writes the Parquet to the `proj_downwind` intermediate
 directory, while the Python consumers expect it under the
 `proj_bureaucrats_farms` intermediate directory. The producer exists, but the
 path must be aligned before the pipeline is self-contained.
+
+### `small_grid_rice_2010.parquet`
+
+Produced by `grid_rice.py` from:
+
+| Input | Classification | Producer coverage |
+| --- | --- | --- |
+| MapSPAM 2010 v2r0 `spam2010V2r0_global_P_RICE_A.tif` (from `spam2010v2r0_global_prod.geotiff.zip`) | Raw/curated source | No producer required |
+| `1-grid-generation.shp` | Raw/curated source | No producer required |
+
+Each grid receives the coverage-weighted sum of rice production in tonnes
+(`rice_prod_2010`) via `exactextract`, plus EPSG:7755 centroids. The script
+uses local Dropbox paths and requires `rasterio` and `exactextract`, which the
+cluster environment does not include, so its output is uploaded to the cluster
+intermediate directory.
 
 ## Raw/curated source inventory
 

@@ -197,6 +197,105 @@ politicians_characteristics_byprov_manifest  one audit row per cohort
 final_stack                                  view of the combined observations
 ```
 
+## Politician stack restricted to two clean electoral cycles
+
+`build_politicians_characteristics_2cycles.py` filters a published politician
+stack down to the units whose AC had **two** consecutive non-agricultural terms
+before the switch. The standard stacks keep only one clean cycle, because the
+engine truncates the pre-period at the last agricultural month.
+
+For every unit and cohort the builder reads the AC's electoral terms from the
+master and identifies `T-1`, the term in force just before the cohort month,
+and `T-2`, the one before it. A unit is retained only when `T-2` is observed in
+the panel and both terms were non-agricultural; its rows then start at the
+beginning of `T-2`. Everything else is dropped in full, post-treatment rows
+included, and the post period of the retained units is left untouched. Control
+grids are judged on their own AC's history, so they must also show two clean
+terms.
+
+The new stack is always a row subset of its source, so the builder filters
+rather than re-estimates and `cohort_id` and `control_type` stay identical to
+the published dataset. Six diagnostic columns are appended after the source
+schema: `control_term_start`, `control_term_election_year`, `prev_term_start`,
+`prev_term_election_year`, `pre_window_start_monthyear` and `relative_term`
+(0 = the term starting at the cohort, -1 = control term, -2 = prior term).
+
+```bash
+python build_politicians_characteristics_2cycles.py --source byprov --overwrite
+python build_politicians_characteristics_2cycles.py --source pooled --overwrite
+qsub build_politicians_characteristics_2cycles.sbatch
+```
+
+Outputs, per source stack:
+
+```text
+politicians_characteristics_byprov_2cycles.csv / .db / _manifest.csv
+politicians_characteristics_2cycles.csv        / .db / _manifest.csv
+```
+
+Each DuckDB also carries a `*_attrition` table with the unit counts per cohort,
+retention status and treatment arm, plus the usual `final_stack` view.
+
+Because the master panel starts in 2012-09, only the four second-round cohorts
+(Haryana 2019-11, Bihar 2020-12, Punjab 2022-04, Uttar Pradesh 2022-04) can have
+an observable `T-2`; the earlier cohorts disappear. `--expected-cohorts`
+defaults to 4 and fails the run when a different number survives; pass `0` to
+disable that check.
+
+## Politician stack extended to three electoral terms
+
+`build_politicians_characteristics_3cycles.py` spans the same three terms as the
+two-cycle stack, but **places no restriction on the profession of the oldest
+one**. Mind the naming: "3cycles" counts electoral terms, "2cycles" counts clean
+cycles without an agricultural politician.
+
+The retention rule keeps a unit when its `T-2` is observed in the panel, whatever
+the politician's profession was; `T-1` must still be non-agricultural, which the
+switch definition already guarantees for treated units. So the surviving cohorts
+are the same four second-round ones, but every unit the two-cycle rule dropped as
+`prior_term_agricultural` comes back.
+
+**This builder adds rows, it does not only filter.** The engine truncates a
+treated unit's pre-period at the last agricultural month, so when `T-2` was
+agricultural its months are absent from the source stack. They are recovered from
+the master and their engine-derived columns (`post`, `relative_monthyear`,
+`relative_year`) are recomputed, while `treat`, `cohort`, `cohort_id` and
+`control_type` are carried over from the unit's existing stack rows. Every output
+row is verified to be a real master grid-month, no source row inside the retained
+window may be lost, and each unit's window must stay contiguous.
+
+Two consequences worth remembering when analysing the result:
+
+* `control_type` still describes the engine's **original** window, not the
+  extended one. It is deliberately not recomputed, so that
+  `keep if treat == 1 | control_type == 1` keeps meaning what it means elsewhere.
+* The third term is only **partially observed**, because the master starts in
+  2012-09: roughly 26 of its months for Haryana 2019-11, 39 for Bihar 2020-12 and
+  55 for Punjab and Uttar Pradesh 2022-04. `prev_term_obs_months` records this per
+  unit so it can be filtered rather than discovered by accident.
+
+Nine diagnostic columns are appended after the source schema: the six of the
+two-cycle stack plus `prev_term_agricultural` (1 when the recovered term had an
+agricultural politician — the flag that makes this stack analysable),
+`prev_term_obs_months`, and `row_source` (`stack` or `master_backfill`).
+
+```bash
+python build_politicians_characteristics_3cycles.py --source byprov --overwrite
+python build_politicians_characteristics_3cycles.py --source pooled --overwrite
+qsub build_politicians_characteristics_3cycles.sbatch
+```
+
+Outputs, per source stack:
+
+```text
+politicians_characteristics_byprov_3cycles.csv / .db / _manifest.csv
+politicians_characteristics_3cycles.csv        / .db / _manifest.csv
+```
+
+The manifest adds `rows_added` (rows recovered from the master),
+`grids_with_prior_agricultural` and the `prior_term_obs_months_min/max` range;
+`rows_dropped` counts source rows trimmed away, net of what was recovered.
+
 ## Adding another treatment
 
 Add one `StackSpecification` entry to `STACK_SPECIFICATIONS` in the public

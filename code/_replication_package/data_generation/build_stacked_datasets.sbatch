@@ -88,4 +88,44 @@ case "${BUILD_BYPROV:-1}" in
         ;;
 esac
 
+case "${BUILD_TWO_CYCLES:-1}" in
+    1)
+        echo "[$(date '+%F %T')] restricting the politician stack to two cycles"
+        "${PYTHON}" build_politicians_characteristics_2cycles.py \
+            --source "${TWO_CYCLES_SOURCE:-byprov}" \
+            --threads "${NSLOTS:-10}" \
+            --memory-limit "${STACK_MEMORY_LIMIT:-90GB}" \
+            --expected-cohorts "${TWO_CYCLES_EXPECTED_COHORTS:-4}" \
+            "${OVERWRITE_ARGS[@]}" \
+            > build_politicians_characteristics_2cycles.out 2>&1
+        ;;
+    0)
+        echo "[$(date '+%F %T')] two-cycle politician stack skipped"
+        ;;
+    *)
+        echo "ERROR: BUILD_TWO_CYCLES must be 0 or 1." >&2
+        exit 1
+        ;;
+esac
+
+case "${BUILD_THREE_CYCLES:-1}" in
+    1)
+        echo "[$(date '+%F %T')] extending the politician stack to three terms"
+        "${PYTHON}" build_politicians_characteristics_3cycles.py \
+            --source "${THREE_CYCLES_SOURCE:-byprov}" \
+            --threads "${NSLOTS:-10}" \
+            --memory-limit "${STACK_MEMORY_LIMIT:-90GB}" \
+            --expected-cohorts "${THREE_CYCLES_EXPECTED_COHORTS:-4}" \
+            "${OVERWRITE_ARGS[@]}" \
+            > build_politicians_characteristics_3cycles.out 2>&1
+        ;;
+    0)
+        echo "[$(date '+%F %T')] three-term politician stack skipped"
+        ;;
+    *)
+        echo "ERROR: BUILD_THREE_CYCLES must be 0 or 1." >&2
+        exit 1
+        ;;
+esac
+
 echo "[$(date '+%F %T')] completed configured stacked datasets"

@@ -88,6 +88,17 @@ run_stage "canonical AC-area panel" "${LOG_DIR}/01_normalize_ac_area.log" \
     --memory-limit "${MEMORY_LIMIT}" \
     --overwrite
 
+run_stage "AC-month rice-source population" "${LOG_DIR}/01b_downup_ac_pop_rice.log" \
+    "${PYTHON}" build_downup_ac_pop_rice.py \
+    --panel "${INTERMEDIATE}/data_2012_2024_grid_ac_downup_pop.parquet" \
+    --grid-population "${INTERMEDIATE}/small_grid_population_2010.parquet" \
+    --grid-rice "${INTERMEDIATE}/small_grid_rice_2010.parquet" \
+    --rice-percentile "${RICE_PERCENTILE:-0.5}" \
+    --output "${INTERMEDIATE}/data_2012_2024_ac_downup_pop_rice.parquet" \
+    --threads "${NSLOTS:-10}" \
+    --memory-limit "${MEMORY_LIMIT}" \
+    --overwrite
+
 run_stage "master dataset" "${LOG_DIR}/02_master_dataset.log" \
     "${PYTHON}" build_0_master_dataset.py \
     --intermediate "${INTERMEDIATE}" \
@@ -127,6 +138,24 @@ run_stage "province-election politician stack" "${LOG_DIR}/05_politicians_byprov
     --last-cohort-year 2022 \
     --last-cohort-month 12 \
     --expected-cohorts 8 \
+    --overwrite
+
+run_stage "two-cycle politician stack" "${LOG_DIR}/05b_politicians_2cycles.log" \
+    "${PYTHON}" build_politicians_characteristics_2cycles.py \
+    --intermediate "${INTERMEDIATE}" \
+    --source byprov \
+    --threads "${NSLOTS:-10}" \
+    --memory-limit "${MEMORY_LIMIT}" \
+    --expected-cohorts "${TWO_CYCLES_EXPECTED_COHORTS:-4}" \
+    --overwrite
+
+run_stage "three-term politician stack" "${LOG_DIR}/05c_politicians_3cycles.log" \
+    "${PYTHON}" build_politicians_characteristics_3cycles.py \
+    --intermediate "${INTERMEDIATE}" \
+    --source byprov \
+    --threads "${NSLOTS:-10}" \
+    --memory-limit "${MEMORY_LIMIT}" \
+    --expected-cohorts "${THREE_CYCLES_EXPECTED_COHORTS:-4}" \
     --overwrite
 
 if [[ ! -f "${NEIGH_INPUT}" ]]; then
