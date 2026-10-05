@@ -1,0 +1,7 @@
+Python environment: /users/aquispe/envs/downup_geo
+Permanent Python log: /users/aquispe/proj_bureaucrats_farms_git/code/_stacked_downup_replication/logs/protest_figures_1498894.python.log
+Python executable: /users/aquispe/envs/downup_geo/bin/python
+Python version: 3.11.16
+/users/aquispe/proj_bureaucrats_farms_git/code/_stacked_downup_replication/python/generate_protest_figures.py:80: DtypeWarning: Columns (11: civilian_targeting, 26: tags) have mixed types. Specify dtype option on import or set low_memory=False.
+  protests = pd.read_csv(
+Generated 5km_plot.png, protests_monthly_bars.png, and ac_protest_plot.png

@@ -1,0 +1,13 @@
+Python environment: /users/aquispe/envs/downup_geo
+Permanent Python log: /users/aquispe/proj_bureaucrats_farms_git/code/_stacked_downup_replication/logs/design_maps_1498860.python.log
+Python executable: /users/aquispe/envs/downup_geo/bin/python
+Python version: 3.11.16
+Traceback (most recent call last):
+  File "/users/aquispe/proj_bureaucrats_farms_git/code/_stacked_downup_replication/python/generate_design_maps.py", line 271, in <module>
+    main()
+  File "/users/aquispe/proj_bureaucrats_farms_git/code/_stacked_downup_replication/python/generate_design_maps.py", line 259, in main
+    intermediate, data, grid, acs, boundaries = read_inputs(
+                                                ^^^^^^^^^^^^
+  File "/users/aquispe/proj_bureaucrats_farms_git/code/_stacked_downup_replication/python/generate_design_maps.py", line 62, in read_inputs
+    raise FileNotFoundError("Constituencies_Boundaries_Post_2008.shp was not found")
+FileNotFoundError: Constituencies_Boundaries_Post_2008.shp was not found
