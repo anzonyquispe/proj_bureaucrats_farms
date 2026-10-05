@@ -296,6 +296,58 @@ The manifest adds `rows_added` (rows recovered from the master),
 `grids_with_prior_agricultural` and the `prior_term_obs_months_min/max` range;
 `rows_dropped` counts source rows trimmed away, net of what was recovered.
 
+## MODIS T-2 fire baseline
+
+`build_polischar_t2_baseline.py` writes a lookup table that lets the politician
+event study be expressed against `T-2`, the electoral term before the control
+term, **without restricting the sample at all**.
+
+The three-term stack above has to drop four of the eight cohorts, because it
+needs `T-2` present as rows and the master starts in 2012-09. But `T-2` never
+enters the estimation window; it only supplies the baseline. Moving the baseline
+into a lookup table removes the restriction, and the analysis returns to the
+canonical eight-cohort sample.
+
+The baseline is **MODIS-only**. `count` is a raw detection count, so it scales
+with how many instruments observe: MODIS runs from 2000, VIIRS only from 2012. A
+combined-series baseline would be on one scale for the old cohorts and another
+for the recent ones. The input is `_3_fire_grid_MODIS_only.csv`, from
+`build_fire_grid_duckdb_modis_only.py`, which must be built first.
+
+The window is the **60 months before the control term opens**. The real `T-2`
+boundaries are not recoverable for the early cohorts — their terms ended before
+the master begins, so they never enter the electoral calendar — and the
+arithmetic window is preferable regardless:
+
+* 60 months is exactly 5 years, so every baseline month falls on the same
+  calendar month. Real electoral spacing is irregular, 61 months between the
+  first two elections and 60 between the next two, and using it would compare
+  October against September in a series dominated by October-November burning.
+* It is identical for every cohort: 5 observations per calendar month, against
+  the 26, 39 or 55 months the three-term stack provides.
+
+Months with no detection are absent from the fire grid, so the window is
+expanded per unit and `LEFT JOIN`ed: a month without fire enters as zero.
+Averaging only the matched rows would overstate the baseline, in proportion to
+how fire-prone the grid is.
+
+```bash
+qsub build_fire_grid_duckdb_modis_only.sbatch   # first
+qsub build_polischar_t2_baseline.sbatch
+```
+
+Outputs:
+
+```text
+politicians_characteristics_byprov_t2_baseline.csv / .dta / .db
+politicians_characteristics_byprov_modis_panel.csv / .dta
+```
+
+The baseline is keyed `unique_small_grid_id x cohort_id x month`; the panel is
+keyed `unique_small_grid_id x year x month` and carries the MODIS level over the
+stack's own window, so an outcome and a baseline drawn from the same instrument
+can also be estimated. `_app_16_polischar_t2norm_evst.do` merges both.
+
 ## Adding another treatment
 
 Add one `StackSpecification` entry to `STACK_SPECIFICATIONS` in the public
