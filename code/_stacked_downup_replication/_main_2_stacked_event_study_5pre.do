@@ -39,6 +39,8 @@ local base = 6
 assert relative_year_bin == 0 if relative_year_bin_aux == `base'
 capture drop countk
 gen countk = count * 1000
+* October and November, the rice stubble-burning season.
+gen byte burning_season = inlist(month, 10, 11)
 
 merge m:1 unique_small_grid_id using "${int_data}/ghs_grid_classification_2000.dta", ///
     keep(master match) keepusing(is_rural)
@@ -51,7 +53,7 @@ assert inlist(rice_prod_aclvl_ahigh, 0, 1)
 
 local dep_var countk
 local fe1 "unique_small_grid_id#cohort ac_uq_id#monthyear#cohort"
-local moderators_list moderator rice_prod_aclvl_ahigh
+local moderators_list moderator rice_prod_aclvl_ahigh burning_season
 gen moderator = 0
 do "${code}/_apply_analysis_subsample.do"
 
