@@ -96,6 +96,32 @@ program define _set_main_fe_tags
 end
 
 
+* Event-study ster files hold evreg1/evreg2, not eq1-eq4, so _set_main_fe_tags
+* does not apply to them, and their absorbed terms differ across the three
+* families: the main study uses AC x month-year x cohort, while the politician
+* and protest studies use a province-cohort trend plus event year x cohort.
+* Reading e(absvars) keeps the Y/N rows honest instead of hard-coding a
+* progression that only describes the DiD tables.
+capture program drop _set_event_fe_tags
+program define _set_event_fe_tags
+    syntax , Models(string)
+    foreach m of local models {
+        capture estimates restore `m'
+        if _rc continue
+        local absorbed "`e(absvars)'"
+        local gridfe    = cond(strpos("`absorbed'", "unique_small_grid_id") > 0, "Y", "N")
+        local acmonthfe = cond(strpos("`absorbed'", "ac_uq_id") > 0, "Y", "N")
+        local provtrend = cond(strpos("`absorbed'", "province_cohort#c.monthyear") > 0, "Y", "N")
+        local eventfe   = cond(strpos("`absorbed'", "relative") > 0, "Y", "N")
+        estadd local gridfe "`gridfe'", replace
+        estadd local acmonthfe "`acmonthfe'", replace
+        estadd local provtrend "`provtrend'", replace
+        estadd local eventfe "`eventfe'", replace
+        estimates store `m'
+    }
+end
+
+
 * Program to add a lincom result with stars + SE in parentheses
 capture program drop _add_lincom
 program define _add_lincom
@@ -218,6 +244,128 @@ esttab evreg1 evreg2 using ///
     posthead("") prefoot("\hline") ///
     postfoot("\hline" "\end{tabular}" "}")
 
+
+********************************************************************************
+* 1. Main Event Study Table 
+********************************************************************************
+est clear
+estread using "${tables}/stacked_event_study_pop_5pre_rural.ster"
+_set_event_fe_tags, models(evreg1)
+_strip_zeros_stats, models(evreg1) stats(ymean)
+
+* One column: the production event study. Its absorbed terms are grid x
+* cohort and AC x month-year x cohort, so there is no month-year row.
+esttab evreg1 using "${tables}/main_event_study.tex", ///
+    replace ///
+    cells(b(fmt(3) star) se(par fmt(3))) ///
+    star(* 0.10 ** 0.05 *** 0.01) ///
+    order(*relative*) ///
+	keep( *aux#1.treat wind_direction av_wind_speed) ///
+    varlabels(1.relative_year_bin_aux#1.treat "Relative Period = -5 \$\times\$ Down\$>\$Up" 2.relative_year_bin_aux#1.treat "Relative Period = -4 \$\times\$ Down\$>\$Up" 3.relative_year_bin_aux#1.treat "Relative Period = -3 \$\times\$ Down\$>\$Up" 4.relative_year_bin_aux#1.treat "Relative Period = -2 \$\times\$ Down\$>\$Up" 5.relative_year_bin_aux#1.treat "Relative Period = -1 \$\times\$ Down\$>\$Up" 7.relative_year_bin_aux#1.treat "Relative Period = 1 \$\times\$ Down\$>\$Up" 8.relative_year_bin_aux#1.treat "Relative Period = 2 \$\times\$ Down\$>\$Up" 9.relative_year_bin_aux#1.treat "Relative Period = 3 \$\times\$ Down\$>\$Up"  10.relative_year_bin_aux#1.treat "Relative Period = 4 \$\times\$ Down\$>\$Up" 11.relative_year_bin_aux#1.treat "Relative Period = 5 \$\times\$ Down\$>\$Up" 12.relative_year_bin_aux#1.treat "Relative Period = 6 \$\times\$ Down\$>\$Up" wind_direction "Wind Direction" av_wind_speed "Av. Wind Speed" ) ///
+    stats(N acq gridfe acmonthfe ymean_clean, ///
+          fmt(%12.0fc %12.0fc %s %s %s) ///
+          labels("Observations" "N Assembly Constituencies" ///
+                 "Grid \$\times\$ Cohort FE" ///
+                 "AC \$\times\$ Month-Year \$\times\$ Cohort FE" ///
+                 "Mean DV")) ///
+    nomtitles nonumbers ///
+    collabels(none) ///
+    nobaselevels ///
+    prehead("{" ///
+            "\def\sym#1{\ifmmode^{#1}\else\(^{#1}\)\fi}" ///
+            "\begin{tabular}{l*{1}{c}}" ///
+            "\hline" ///
+            "            & \multicolumn{1}{c}{(1)}             \\" ///
+            "            & \multicolumn{1}{c}{Number of Fires (in 1,000 units)} \\ \hline") ///
+    posthead("") ///
+    postfoot("\hline" "\end{tabular}" "}")
+
+display "Generated: main_event_study.tex"
+
+********************************************************************************
+* 1b. Politician Event Study Table (_app_16_polischar_fe12_evst_all)
+*
+* Window [-5, 4] with the year before the switch omitted, so the estimated
+* levels are 1-4 and 6-10 and level 5 is the base. evreg1 is the unmoderated
+* estimate; evreg2 carries the rice-production moderator.
+********************************************************************************
+est clear
+estread using "${tables}/_app_16_polischar_fe12_evst_all${sample}_rural_acpop${ster_suffix}_controls_both.ster"
+_set_event_fe_tags, models(evreg1)
+_strip_zeros_stats, models(evreg1) stats(ymean)
+
+esttab evreg1 using "${tables}/polischar_event_study.tex", ///
+    replace ///
+    cells(b(fmt(3) star) se(par fmt(3))) ///
+    star(* 0.10 ** 0.05 *** 0.01) ///
+    order(*relative*) ///
+    keep( *aux#1.treat wind_direction av_wind_speed) ///
+    varlabels(1.relative_year_bin_aux#1.treat "Relative Period = -5 \$\times\$ Agricultural Politician" 2.relative_year_bin_aux#1.treat "Relative Period = -4 \$\times\$ Agricultural Politician" 3.relative_year_bin_aux#1.treat "Relative Period = -3 \$\times\$ Agricultural Politician" 4.relative_year_bin_aux#1.treat "Relative Period = -2 \$\times\$ Agricultural Politician" 6.relative_year_bin_aux#1.treat "Relative Period = 0 \$\times\$ Agricultural Politician" 7.relative_year_bin_aux#1.treat "Relative Period = 1 \$\times\$ Agricultural Politician" 8.relative_year_bin_aux#1.treat "Relative Period = 2 \$\times\$ Agricultural Politician" 9.relative_year_bin_aux#1.treat "Relative Period = 3 \$\times\$ Agricultural Politician" 10.relative_year_bin_aux#1.treat "Relative Period = 4 \$\times\$ Agricultural Politician" wind_direction "Wind Direction" av_wind_speed "Av. Wind Speed" ) ///
+    stats(N acq gridfe provtrend eventfe ymean_clean, ///
+          fmt(%12.0fc %12.0fc %s %s %s %s) ///
+          labels("Observations" "N Assembly Constituencies" ///
+                 "Grid \$\times\$ Cohort FE" ///
+                 "Province-Cohort Time Trend" ///
+                 "Event Year \$\times\$ Cohort FE" ///
+                 "Mean DV")) ///
+    nomtitles nonumbers ///
+    collabels(none) ///
+    nobaselevels ///
+    prehead("{" ///
+            "\def\sym#1{\ifmmode^{#1}\else\(^{#1}\)\fi}" ///
+            "\begin{tabular}{l*{1}{c}}" ///
+            "\hline" ///
+            "            & \multicolumn{1}{c}{(1)}             \\" ///
+            "            & \multicolumn{1}{c}{Number of Fires (in 1,000 units)} \ \hline") ///
+    posthead("") ///
+    postfoot("\hline" "\end{tabular}" "}")
+
+display "Generated: polischar_event_study.tex"
+
+
+********************************************************************************
+* 1c. Protest Event Study Table (_app_17_5km_fe12_evst_all)
+*
+* Window [-4, 1], so the estimated levels are 1-3 and 5-6 and level 4 is the
+* base. The window is narrower than the politician one because the protest
+* stack supports fewer event years.
+********************************************************************************
+est clear
+estread using "${tables}/_app_17_5km_fe12_evst_all${sample}_rural${ster_suffix}.ster"
+_set_event_fe_tags, models(evreg1)
+_strip_zeros_stats, models(evreg1) stats(ymean)
+
+esttab evreg1 using "${tables}/protest_event_study.tex", ///
+    replace ///
+    cells(b(fmt(3) star) se(par fmt(3))) ///
+    star(* 0.10 ** 0.05 *** 0.01) ///
+    order(*relative*) ///
+    keep( *aux#1.treat wind_direction av_wind_speed) ///
+    varlabels(1.relative_year_bin_aux#1.treat "Relative Period = -4 \$\times\$ Protest within 5 km" 2.relative_year_bin_aux#1.treat "Relative Period = -3 \$\times\$ Protest within 5 km" 3.relative_year_bin_aux#1.treat "Relative Period = -2 \$\times\$ Protest within 5 km" 5.relative_year_bin_aux#1.treat "Relative Period = 0 \$\times\$ Protest within 5 km" 6.relative_year_bin_aux#1.treat "Relative Period = 1 \$\times\$ Protest within 5 km" wind_direction "Wind Direction" av_wind_speed "Av. Wind Speed" ) ///
+    stats(N acq gridfe provtrend eventfe ymean_clean, ///
+          fmt(%12.0fc %12.0fc %s %s %s %s) ///
+          labels("Observations" "N Assembly Constituencies" ///
+                 "Grid \$\times\$ Cohort FE" ///
+                 "Province-Cohort Time Trend" ///
+                 "Event Year \$\times\$ Cohort FE" ///
+                 "Mean DV")) ///
+    nomtitles nonumbers ///
+    collabels(none) ///
+    nobaselevels ///
+    prehead("{" ///
+            "\def\sym#1{\ifmmode^{#1}\else\(^{#1}\)\fi}" ///
+            "\begin{tabular}{l*{1}{c}}" ///
+            "\hline" ///
+            "            & \multicolumn{1}{c}{(1)}             \\" ///
+            "            & \multicolumn{1}{c}{Number of Fires (in 1,000 units)} \ \hline") ///
+    posthead("") ///
+    postfoot("\hline" "\end{tabular}" "}")
+
+display "Generated: protest_event_study.tex"
+
+	
+	
+	
 ********************************************************************************
 * 1. Main DiD Table (_main_1_did)
 ********************************************************************************
