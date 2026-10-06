@@ -128,6 +128,22 @@ assert !missing(t2_count_modis)
 merge m:1 unique_small_grid_id year month using ///
     "${int_data}/politicians_characteristics_byprov_modis_panel.dta", ///
     keep(master match) keepusing(count_modis)
+
+* Most grid-months legitimately have no fire at all, so a low match rate is
+* expected and cannot be asserted on. But none matching would mean the key or
+* the file is wrong, and the silent failure mode is nasty: count_modis would be
+* zero everywhere and countk_modis_t2 would collapse to minus the baseline
+* without anything looking out of place.
+quietly count if _merge == 3
+local modis_matched = r(N)
+if `modis_matched' == 0 {
+    display as error ///
+        "No grid-month matched the MODIS panel; check the merge key and the file."
+    exit 459
+}
+display as text "MODIS panel matched " %12.0fc `modis_matched' ///
+    " of " %12.0fc _N " rows"
+
 replace count_modis = 0 if missing(count_modis)
 drop _merge
 
