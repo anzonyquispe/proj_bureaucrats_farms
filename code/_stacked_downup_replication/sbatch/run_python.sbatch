@@ -76,6 +76,11 @@ case "${SCRIPT}" in
       --root "${REPLICATION_ROOT}" --output-root "${REPOSITORY_ROOT}" \
       --sample "${SAMPLE}"
     ;;
+  generate_treatment_variation_gif.py)
+    "${PYTHON_BIN}" "${REPLICATION_CODE}/python/${SCRIPT}" \
+      --root "${REPLICATION_ROOT}" --output-root "${REPOSITORY_ROOT}" \
+      --sample "${SAMPLE}"
+    ;;
   generate_protest_figures.py)
     "${PYTHON_BIN}" "${REPLICATION_CODE}/python/${SCRIPT}" \
       --root "${REPLICATION_ROOT}" --output-root "${REPOSITORY_ROOT}"

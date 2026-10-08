@@ -14,6 +14,7 @@ march2013_plot.png, october2013_plot.png, map_grids.png
 from __future__ import annotations
 
 import argparse
+import os
 from pathlib import Path
 
 import geopandas as gpd
@@ -25,13 +26,23 @@ from matplotlib.patches import FancyArrowPatch, Rectangle
 from shapely.geometry import LineString, Polygon
 
 
+# The project root was hard-coded to one collaborator's Dropbox, which left the
+# script unrunnable anywhere else, the cluster included. It now comes from
+# PROJECT_DATA_ROOT, falling back to the cluster share; every path below is
+# still overridable one by one on the command line.
 DEFAULT_PROJECT = Path(
-    r"C:\Users\eunic\Dropbox\sa_fires\proj_bureaucrats_farms"
+    os.environ.get(
+        "PROJECT_DATA_ROOT",
+        "/groups/sgulzar/sa_fires/proj_bureaucrats_farms",
+    )
 )
 DEFAULT_MASTER = DEFAULT_PROJECT / "data_output/intermediate/0_master_dataset.parquet"
 DEFAULT_ACS = DEFAULT_PROJECT / "data_output/intermediate/_0_2_3_ACs_right_shapefile.shp"
 DEFAULT_GRID = DEFAULT_PROJECT / "data_output/intermediate/1-grid-generation.shp"
-DEFAULT_OUTPUT = Path(r"C:\Users\eunic\OneDrive\Documents\GitHub\proj_bureaucrats_farms\figures")
+# Repository figures directory, three levels up from this file.
+DEFAULT_OUTPUT = Path(
+    os.environ.get("PROJECT_FIGURES", Path(__file__).resolve().parents[2] / "figures")
+)
 DEFAULT_FIRE = (
     DEFAULT_PROJECT.parent / "proj_downwind/tex/paper/figures/fire.png"
 )
@@ -273,12 +284,12 @@ def plot_map_grids(
     study_acs = acs.loc[acs["STATE_UT"].isin(states)].copy()
 
     fig, ax = plt.subplots(figsize=(10, 10))
-    study_acs.plot(ax=ax, color="#AFE1AF", edgecolor="#336ece", linewidth=0.35)
+    study_acs.plot(ax=ax, color="#F08080", edgecolor="#336ece", linewidth=0.35)
     ax.set_axis_off()
 
     inset = fig.add_axes([0.59, 0.48, 0.32, 0.32])
     study_acs.boundary.plot(ax=inset, color="#336ece", linewidth=0.25)
-    selected_ac.plot(ax=inset, color="#AFE1AF", edgecolor="black", linewidth=1.2)
+    selected_ac.plot(ax=inset, color="#F08080", edgecolor="black", linewidth=1.2)
     selected_grids.boundary.plot(ax=inset, color="black", linewidth=0.15)
     minx, miny, maxx, maxy = selected_ac.total_bounds
     inset.set_xlim(minx - 0.10, maxx + 0.10)
@@ -316,7 +327,7 @@ def plot_month(
     ).drop_duplicates("unique_small_grid_id")
     mapped = grid.merge(values, on="unique_small_grid_id", how="inner", validate="one_to_one")
     mapped = gpd.GeoDataFrame(mapped, geometry="geometry", crs=grid.crs)
-    colors = mapped["downup_ac_pop"].map({0: "#8FC6FA", 1: "#032544"})
+    colors = mapped["downup_ac_pop"].map({0: "#CCCCCC", 1: "#8B0000"})
 
     fig, ax = plt.subplots(figsize=(8, 8))
     mapped.plot(ax=ax, color=colors, edgecolor="none", linewidth=0, antialiased=False)
