@@ -96,19 +96,29 @@ def require(path: Path) -> Path:
     return path
 
 
-def resolve_stacked(intermediate: Path, sample: str, override: Path | None) -> Path:
+def resolve_stacked(
+    intermediate: Path, sample: str, override: Path | None
+) -> tuple[Path, Path | None]:
+    """The panel to read, and a same-content file to fall back to.
+
+    The .dta is preferred because it is the smaller of the two, but the copy on
+    the cluster raises "buffer is smaller than requested size" partway through
+    a chunked read while the Dropbox copy of the same panel reads cleanly end
+    to end. The two differ in size, so one of them is written differently or is
+    truncated. Rather than guess which, the reader retries on the .csv.
+    """
+
     if override:
-        return require(override)
-    candidates = [
-        intermediate / f"combined_dt_pop{sample}.dta",
-        intermediate / f"combined_dt_pop{sample}.csv",
-    ]
-    path = next((candidate for candidate in candidates if candidate.exists()), None)
-    if path is None:
-        raise FileNotFoundError(
-            "combined_dt_pop was not found as .dta or .csv in " + str(intermediate)
-        )
-    return path
+        return require(override), None
+    stata = intermediate / f"combined_dt_pop{sample}.dta"
+    comma = intermediate / f"combined_dt_pop{sample}.csv"
+    if stata.exists():
+        return stata, (comma if comma.exists() else None)
+    if comma.exists():
+        return comma, None
+    raise FileNotFoundError(
+        "combined_dt_pop was not found as .dta or .csv in " + str(intermediate)
+    )
 
 
 def panel_columns(path: Path) -> list[str]:
@@ -309,14 +319,32 @@ def main() -> None:
     figures = options.figures_dir or (options.output_root / "figures")
     figures.mkdir(parents=True, exist_ok=True)
 
-    stacked = resolve_stacked(intermediate, options.sample, options.stacked)
+    stacked, fallback = resolve_stacked(
+        intermediate, options.sample, options.stacked
+    )
     print("Inputs:")
     preflight(intermediate, stacked)
 
     rural, straddling = grid_filters(intermediate)
-    everyone, treated = collapse(
-        stacked, rural, straddling, options.chunk_rows
-    )
+    try:
+        everyone, treated = collapse(
+            stacked, rural, straddling, options.chunk_rows
+        )
+    except ValueError as error:
+        if fallback is None:
+            raise
+        # A partial chunked read would quietly drop observations and shrink the
+        # tails, which is exactly what this figure is about, so the run starts
+        # over on the other copy rather than keeping what it got.
+        print(
+            f"\n{stacked.name} failed mid-read ({error}); retrying on "
+            f"{fallback.name}.",
+            flush=True,
+        )
+        preflight(intermediate, fallback)
+        everyone, treated = collapse(
+            fallback, rural, straddling, options.chunk_rows
+        )
 
     describe(everyone, "All units")
     describe(treated, "Treated units")
