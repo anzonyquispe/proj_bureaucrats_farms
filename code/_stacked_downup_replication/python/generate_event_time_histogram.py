@@ -111,6 +111,46 @@ def resolve_stacked(intermediate: Path, sample: str, override: Path | None) -> P
     return path
 
 
+def panel_columns(path: Path) -> list[str]:
+    if path.suffix.lower() == ".dta":
+        with pd.io.stata.StataReader(path) as reader:
+            return list(reader.varlist)
+    return list(pd.read_csv(path, nrows=0).columns)
+
+
+def preflight(intermediate: Path, stacked: Path) -> None:
+    """Name every missing input before reading five gigabytes of panel.
+
+    Without this the job dies in under a minute with a bare FileNotFoundError
+    or a KeyError from deep inside the Stata reader, which says nothing about
+    which file or column was at fault.
+    """
+
+    needed = {
+        "stacked panel": stacked,
+        "rural classification": intermediate / "ghs_grid_classification_2000.dta",
+        "multi-AC grids": intermediate / "grids_with_more_1_ac.dta",
+    }
+    missing = {label: path for label, path in needed.items() if not path.exists()}
+    for label, path in needed.items():
+        mark = "MISSING" if label in missing else f"{path.stat().st_size / 1e9:.2f} GB"
+        print(f"  {label:24s} {mark:>10}  {path}")
+    if missing:
+        raise FileNotFoundError(
+            "Inputs not found: "
+            + "; ".join(f"{label} at {path}" for label, path in missing.items())
+        )
+
+    available = panel_columns(stacked)
+    absent = [column for column in COLUMNS if column not in available]
+    if absent:
+        raise ValueError(
+            f"{stacked.name} is missing {', '.join(absent)}. "
+            f"It has {len(available)} columns: {', '.join(sorted(available))}"
+        )
+    print(f"  panel columns: {len(available)}, all {len(COLUMNS)} needed ones present")
+
+
 def grid_filters(intermediate: Path) -> tuple[set[int], set[int]]:
     """The two filters are grid properties, so they reduce to two id sets."""
 
@@ -264,7 +304,8 @@ def main() -> None:
     figures.mkdir(parents=True, exist_ok=True)
 
     stacked = resolve_stacked(intermediate, options.sample, options.stacked)
-    print(f"Panel: {stacked}")
+    print("Inputs:")
+    preflight(intermediate, stacked)
 
     rural, straddling = grid_filters(intermediate)
     everyone, treated = collapse(
