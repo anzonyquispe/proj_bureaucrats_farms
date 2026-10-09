@@ -112,9 +112,15 @@ def resolve_stacked(intermediate: Path, sample: str, override: Path | None) -> P
 
 
 def panel_columns(path: Path) -> list[str]:
+    """Column names only, without reading the file.
+
+    StataReader.varlist is not public API and is absent in some pandas
+    versions, so the header comes from a one-row chunk instead.
+    """
+
     if path.suffix.lower() == ".dta":
-        with pd.io.stata.StataReader(path) as reader:
-            return list(reader.varlist)
+        with pd.read_stata(path, chunksize=1) as reader:
+            return list(next(iter(reader)).columns)
     return list(pd.read_csv(path, nrows=0).columns)
 
 
