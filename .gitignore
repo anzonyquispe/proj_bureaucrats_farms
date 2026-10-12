@@ -1,2 +1,16 @@
 __pycache__/
 *.py[cod]
+
+# Archived code and outputs not used by the paper or talks (kept locally only)
+_archived/*
+!_archived/.gitignore
+
+# Logs, scheduler output and editor/OS scratch
+*.log
+*.o[0-9]*
+*.po[0-9]*
+*.stswp
+.Rhistory
+.nfs*
+.DS_Store
+.claude/worktrees/

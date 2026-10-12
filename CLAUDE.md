@@ -33,14 +33,19 @@ Key design features:
 proj_bureaucrats_farms/
 ├── README.md
 ├── CLAUDE.md                     ← this file
-└── code/
-    ├── _auxiliar_code/
-    │   └── convertdata/          # data-prep / format-conversion helpers
-    └── _rural_analysis_loop/     # main Stata analysis scripts (.do)
-        ├── 8_polischar_allagain.do            # politician-characteristics analysis
-        ├── 10_pr_cluster_2022_5km_fe13_allspecs_evst.do  # 5km event-study sweep
-        └── _app_*.do                           # appendix / robustness figures
+├── code/
+│   ├── _replication_package/data_generation/  # Python/DuckDB build of master + stacked datasets
+│   ├── _stacked_downup_replication/           # main analysis: _main_*/_app_* .do, tables, plots
+│   │   └── exploratory_analysis/event_study/omit_period_0/  # only the m5_p6 omit0 chain used in main.tex
+│   └── _replication_rural/                    # legacy area tables used only in the EGAP deck
+├── figures/, tables/             # outputs used in main.tex / talks + saved estimates they read
+├── docs/                         # archive_manifest.csv, external_outputs.md
+└── _archived/                    # git-ignored: everything not used by main.tex or the talks
 ```
+
+Only code that contributes to an output in Overleaf `main.tex` or the talks
+APSA_short, 20260902_PECE_APSA and 20260515_EGAP stays outside `_archived/`;
+`docs/archive_manifest.csv` records the decision for every file.
 
 Data lives **outside** the repo on a shared cluster path
 (`/groups/sgulzar/sa_fires/proj_bureaucrats_farms/data_output/...`) or a local
