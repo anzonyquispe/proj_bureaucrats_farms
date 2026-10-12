@@ -59,6 +59,11 @@ def parse_args() -> argparse.Namespace:
         help="sa_fires root containing data/input and proj_downwind (defaults to root parent)",
     )
     parser.add_argument(
+        "--figures-dir",
+        type=Path,
+        help="Override the figure directory; defaults to OUTPUT_ROOT/figures.",
+    )
+    parser.add_argument(
         "--master",
         type=Path,
         help="Override the panel; defaults to INTERMEDIATE/0_master_merge_data_gen<sample>.csv.",
@@ -151,7 +156,7 @@ def read_panel(master: Path, start: int, end: int, chunk_rows: int) -> pd.DataFr
 def main() -> None:
     options = parse_args()
     shared = options.shared_root or options.root.parent
-    figures = options.output_root / "figures"
+    figures = options.figures_dir or (options.output_root / "figures")
     frames_dir = figures / "gif_frames"
     figures.mkdir(parents=True, exist_ok=True)
     frames_dir.mkdir(parents=True, exist_ok=True)

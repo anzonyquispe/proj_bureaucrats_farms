@@ -20,6 +20,16 @@ SAMPLE="${4:-none}"
 RURAL_VAR="${5:-is_rural}"
 REPOSITORY_ROOT="${6:-$(cd "${REPLICATION_CODE}/../.." && pwd)}"
 PYTHON_ENV="${PYTHON_ENV:-/groups/sgulzar/india_forest_land/downup_geo}"
+# Figures land in REPOSITORY_ROOT/figures, which is what audit_main_outputs.py
+# checks. Set FIGURES_DIR to send them elsewhere instead -- the paper's own
+# figure folder, for one, so a regenerated figure does not have to be copied
+# across by hand afterwards:
+#   FIGURES_DIR=/groups/sgulzar/sa_fires/proj_bureaucrats_farms/tex/paper/figures
+FIGURES_DIR="${FIGURES_DIR:-}"
+FIGURES_OPT=()
+if [[ -n "${FIGURES_DIR}" ]]; then
+  FIGURES_OPT=(--figures-dir "${FIGURES_DIR}")
+fi
 PYTHON_BIN="${PYTHON_BIN:-${PYTHON_ENV}/bin/python}"
 if [[ "${SAMPLE}" == "none" ]]; then SAMPLE=""; fi
 
@@ -74,17 +84,17 @@ case "${SCRIPT}" in
   generate_design_maps.py)
     "${PYTHON_BIN}" "${REPLICATION_CODE}/python/${SCRIPT}" \
       --root "${REPLICATION_ROOT}" --output-root "${REPOSITORY_ROOT}" \
-      --sample "${SAMPLE}"
+      --sample "${SAMPLE}" "${FIGURES_OPT[@]}"
     ;;
   generate_event_time_histogram.py)
     "${PYTHON_BIN}" "${REPLICATION_CODE}/python/${SCRIPT}" \
       --root "${REPLICATION_ROOT}" --output-root "${REPOSITORY_ROOT}" \
-      --sample "${SAMPLE}"
+      --sample "${SAMPLE}" "${FIGURES_OPT[@]}"
     ;;
   generate_treatment_variation_gif.py)
     "${PYTHON_BIN}" "${REPLICATION_CODE}/python/${SCRIPT}" \
       --root "${REPLICATION_ROOT}" --output-root "${REPOSITORY_ROOT}" \
-      --sample "${SAMPLE}"
+      --sample "${SAMPLE}" "${FIGURES_OPT[@]}"
     ;;
   generate_protest_figures.py)
     "${PYTHON_BIN}" "${REPLICATION_CODE}/python/${SCRIPT}" \

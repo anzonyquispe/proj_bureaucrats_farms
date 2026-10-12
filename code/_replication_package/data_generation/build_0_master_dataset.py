@@ -3,9 +3,9 @@
 
 The population-stage Parquet is the source for the row-preserving base. Grids
 with a missing raw or calculation wind direction in any month are excluded in
-their entirety. Area treatment, the 13 km placebo measures, protests,
-elections, fires, and AC-level rice information are left-joined without
-changing the retained key. Every merge reports left_only, right_only, and both
+their entirety. Area treatment, the 13 km placebo measures, the AC-month
+rice-source population measures, protests, elections, fires, and AC-level rice
+information are left-joined without changing the retained key. Every merge reports left_only, right_only, and both
 counts. Both Parquet and CSV outputs are written.
 """
 
@@ -51,6 +51,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--area", type=Path, default=None)
     parser.add_argument("--population", type=Path, default=None)
     parser.add_argument("--placebo-13km", type=Path, default=None)
+    parser.add_argument("--pop-rice", type=Path, default=None)
     parser.add_argument("--protests", type=Path, default=None)
     parser.add_argument("--elections", type=Path, default=None)
     parser.add_argument("--fire", type=Path, default=None)
@@ -97,6 +98,11 @@ def resolve_paths(args: argparse.Namespace) -> dict[str, Path]:
             args.placebo_13km.resolve()
             if args.placebo_13km
             else intermediate / "data_2012_2024_grid_ac_13kmpl.parquet"
+        ),
+        "pop_rice": (
+            args.pop_rice.resolve()
+            if args.pop_rice
+            else intermediate / "data_2012_2024_ac_downup_pop_rice.parquet"
         ),
         "protests": (
             args.protests.resolve()
@@ -161,6 +167,7 @@ def require_files(paths: dict[str, Path]) -> None:
         "area",
         "population",
         "placebo_13km",
+        "pop_rice",
         "protests",
         "elections",
         "fire",
@@ -604,6 +611,7 @@ def main() -> int:
         area = sql_string(paths["area"])
         population = sql_string(paths["population"])
         placebo_13km = sql_string(paths["placebo_13km"])
+        pop_rice = sql_string(paths["pop_rice"])
         population_relation = f"read_parquet({population})"
         population_base = create_population_base(connection, population_relation)
 
@@ -719,6 +727,32 @@ def main() -> int:
             raise ValueError(
                 "The 13 km merge does not preserve the population base."
             )
+
+        # The rice-source stage applies the same wind-complete exclusion, so it
+        # must cover exactly the base's AC-months.
+        pop_rice_rows, pop_rice_keys = connection.execute(
+            f"""
+            SELECT count(*), count(DISTINCT (ac_uq_id, year, month))
+            FROM read_parquet({pop_rice})
+            """
+        ).fetchone()
+        if pop_rice_rows != pop_rice_keys:
+            raise ValueError("The AC-month rice-source panel key is not unique.")
+        check_merge(
+            connection,
+            name="population base x rice-source population [AC-month]",
+            left_query="""
+                SELECT DISTINCT ac_uq_id, year, month
+                FROM population_base
+            """,
+            right_query=f"""
+                SELECT ac_uq_id, year, month
+                FROM read_parquet({pop_rice})
+            """,
+            using_columns=("ac_uq_id", "year", "month"),
+            require_all_left=True,
+            require_all_right=True,
+        )
         fire_rows, fire_keys = connection.execute(
             """
             SELECT
@@ -910,6 +944,17 @@ def main() -> int:
             "downwind_pop_13kmpl",
             "upwind_pop_13kmpl",
             "downup_13kmpl",
+            "total_pop_ac",
+            "downwind_pop_rice_ac",
+            "upwind_pop_rice_ac",
+            "down_percent_pop_rice_ac",
+            "downup_ac_pop_rice",
+            "n_rice_grids_ac",
+            "downwind_pop_rice_ac_sample",
+            "upwind_pop_rice_ac_sample",
+            "down_percent_pop_rice_ac_sample",
+            "downup_ac_pop_rice_sample",
+            "n_rice_grids_ac_sample",
         }
         election_fields = election_select_list(
             list(elections.columns), base_columns | additional_columns
@@ -929,6 +974,17 @@ def main() -> int:
                 q.downwind_pop_13kmpl,
                 q.upwind_pop_13kmpl,
                 q.downup_13kmpl,
+                pr.total_pop_ac,
+                pr.downwind_pop_rice_ac,
+                pr.upwind_pop_rice_ac,
+                pr.down_percent_pop_rice_ac,
+                pr.downup_ac_pop_rice,
+                pr.n_rice_grids_ac,
+                pr.downwind_pop_rice_ac_sample,
+                pr.upwind_pop_rice_ac_sample,
+                pr.down_percent_pop_rice_ac_sample,
+                pr.downup_ac_pop_rice_sample,
+                pr.n_rice_grids_ac_sample,
                 p.downwind_pop AS downwind_pop_ac_nosmall,
                 p.upwind_pop AS upwind_pop_ac_nosmall,
                 p.downwind_pop + p.upwind_pop AS total_pop,
@@ -971,6 +1027,10 @@ def main() -> int:
              AND p.year = q.year
              AND p.month = q.month
              AND p.ac_uq_id = q.ac_uq_id
+            LEFT JOIN read_parquet({pop_rice}) AS pr
+              ON p.ac_uq_id = pr.ac_uq_id
+             AND p.year = pr.year
+             AND p.month = pr.month
             LEFT JOIN grid_lookup AS g
               ON p.unique_small_grid_id = g.unique_small_grid_id
              AND p.ac_uq_id = g.ac_uq_id
@@ -1026,6 +1086,7 @@ def main() -> int:
             missing_calculation_wind,
             missing_raw_wind,
             incomplete_placebo,
+            missing_pop_rice,
         ) = connection.execute(
                 f"""
                 SELECT
@@ -1059,6 +1120,13 @@ def main() -> int:
                             OR upwind_pop_13kmpl IS NULL
                             OR downup_13kmpl IS NULL
                         )
+                    ),
+                    count_if(
+                        downup_ac_pop_rice IS NULL
+                        OR total_pop_ac IS NULL
+                        OR n_rice_grids_ac IS NULL
+                        OR downup_ac_pop_rice_sample IS NULL
+                        OR n_rice_grids_ac_sample IS NULL
                     )
                 FROM read_parquet({sql_string(paths['output_parquet'])})
                 """
@@ -1093,6 +1161,11 @@ def main() -> int:
             raise ValueError(
                 "The retained sample contains incomplete 13 km measures."
             )
+        if missing_pop_rice:
+            raise ValueError(
+                "The output contains "
+                f"{missing_pop_rice:,} rows with missing rice-source population."
+            )
         logging.info(
             "Rows without election_year (field may legitimately be missing): %s",
             f"{missing_election:,}",
@@ -1124,7 +1197,9 @@ def main() -> int:
                 count(DISTINCT ac_uq_id) AS acs,
                 count_if(protest5km = 1) AS treated_rows,
                 count_if(downup_1sd_pop = 1) AS one_sd_rows,
-                count_if(total_pop = 0) AS zero_population_rows
+                count_if(total_pop = 0) AS zero_population_rows,
+                count_if(downup_ac_pop_rice = 1) AS rice_downup_rows,
+                count_if(downup_ac_pop_rice_sample = 1) AS rice_sample_downup_rows
             FROM read_parquet({sql_string(paths['output_parquet'])})
             """
         ).fetchone()
@@ -1135,6 +1210,8 @@ def main() -> int:
         logging.info("protest5km=1 rows: %s", f"{summary[3]:,}")
         logging.info("downup_1sd_pop=1 rows: %s", f"{summary[4]:,}")
         logging.info("zero-population rows: %s", f"{summary[5]:,}")
+        logging.info("downup_ac_pop_rice=1 rows: %s", f"{summary[6]:,}")
+        logging.info("downup_ac_pop_rice_sample=1 rows: %s", f"{summary[7]:,}")
         logging.info("Parquet: %s", paths["output_parquet"])
         if not args.skip_csv:
             logging.info("CSV: %s", paths["output_csv"])

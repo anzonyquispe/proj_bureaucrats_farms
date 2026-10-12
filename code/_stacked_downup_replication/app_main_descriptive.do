@@ -38,6 +38,8 @@ display as text "Main specification-4 descriptive sample: " _N
 capture drop prov
 egen prov = group(province)
 
+keep if disha_sample == 1 & is_rural != 0
+
 capture program drop _fmt_num
 program define _fmt_num, rclass
     args x
@@ -116,13 +118,19 @@ foreach v of local colsel {
     }
     else {
         quietly summarize `v'
-        _fmt_num `r(mean)'
+        * _fmt_num is rclass, so the first call clears summarize's r().
+        * Store all four statistics before formatting any of them.
+        local sum_mean = r(mean)
+        local sum_sd   = r(sd)
+        local sum_min  = r(min)
+        local sum_max  = r(max)
+        _fmt_num `sum_mean'
         local meanfmt "`r(out)'"
-        _fmt_num `r(sd)'
+        _fmt_num `sum_sd'
         local sdfmt "`r(out)'"
-        _fmt_num `r(min)'
+        _fmt_num `sum_min'
         local minfmt "`r(out)'"
-        _fmt_num `r(max)'
+        _fmt_num `sum_max'
         local maxfmt "`r(out)'"
         quietly count if !missing(`v')
         _fmt_int `r(N)'

@@ -152,14 +152,12 @@ global cluster unique_small_grid_id#cohort district_id#cohort#monthyear
 * used by the final table specification.
 ********************************************************************************
 
-quietly reghdfejl countk downup_dummy downup_ac_pop downup_interaction $controls, ///
+quietly reghdfejl countk downup_ac_pop $controls, ///
     absorb(grid_id#cohort district_id#monthyear#cohort) ///
     cluster($cluster)
 gen byte common_sample = e(sample)
-quietly count if common_sample
-local common_n = r(N)
-assert `common_n' > 0
-keep if common_sample
+
+keep if common_sample == 1
 drop common_sample
 
 isid unique_small_grid_id monthyear cohort

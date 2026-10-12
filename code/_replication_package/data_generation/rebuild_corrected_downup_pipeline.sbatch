@@ -60,7 +60,7 @@ cd "${CODE_DIR}"
 "${PYTHON}" tests/test_downup_direction_convention.py -v
 
 if [[ "${REBUILD_WIND:-1}" == "1" ]]; then
-    echo "[$(date '+%F %T')] stage 1/6: East-referenced vector wind panel"
+    echo "[$(date '+%F %T')] stage 1/7: East-referenced vector wind panel"
     "${PYTHON}" build_wind_direction_grid_duckdb.py \
         --historical-netcdf "${HISTORICAL_WIND_NETCDF:-${SA_ROOT}/data/input/wind/ecmwf/era5-land-19902021-wind.nc}" \
         --year-2022-netcdf "${WIND_2022_NETCDF:-${SA_ROOT}/data/input/wind/ecmwf/era5-land-2022-wind.nc}" \
@@ -72,10 +72,10 @@ if [[ "${REBUILD_WIND:-1}" == "1" ]]; then
         --overwrite \
         > build_wind_direction_grid_duckdb.out 2>&1
 else
-    echo "[$(date '+%F %T')] stage 1/6 skipped because REBUILD_WIND=0"
+    echo "[$(date '+%F %T')] stage 1/7 skipped because REBUILD_WIND=0"
 fi
 
-echo "[$(date '+%F %T')] stage 2/6: corrected AC population measures"
+echo "[$(date '+%F %T')] stage 2/7: corrected AC population measures"
 "${PYTHON}" build_downup_ac_pop_cluster.py \
     --panel "${INTERMEDIATE}/data_2012_2024_grid_ac.parquet" \
     --wind-input "${INTERMEDIATE}/_2_wind_direction_grid.parquet" \
@@ -86,7 +86,7 @@ echo "[$(date '+%F %T')] stage 2/6: corrected AC population measures"
     --overwrite \
     > build_downup_ac_pop_cluster.out 2>&1
 
-echo "[$(date '+%F %T')] stage 3/6: corrected exact AC area measures"
+echo "[$(date '+%F %T')] stage 3/7: corrected exact AC area measures"
 "${PYTHON}" build_downup_ac_area_cluster.py \
     --population-input "${INTERMEDIATE}/data_2012_2024_grid_ac_downup_pop.parquet" \
     --grid-population "${INTERMEDIATE}/small_grid_population_2010.parquet" \
@@ -99,7 +99,7 @@ echo "[$(date '+%F %T')] stage 3/6: corrected exact AC area measures"
     --overwrite \
     > build_downup_ac_area_cluster.out 2>&1
 
-echo "[$(date '+%F %T')] stage 4/6: corrected 13 km directional placebo"
+echo "[$(date '+%F %T')] stage 4/7: corrected 13 km directional placebo"
 "${PYTHON}" build_downup_13kmpl_cluster.py \
     --panel "${INTERMEDIATE}/data_2012_2024_grid_ac_downup_pop.parquet" \
     --grid-population "${INTERMEDIATE}/small_grid_population_2010.parquet" \
@@ -109,7 +109,19 @@ echo "[$(date '+%F %T')] stage 4/6: corrected 13 km directional placebo"
     --overwrite \
     > build_downup_13kmpl_cluster.out 2>&1
 
-echo "[$(date '+%F %T')] stage 5/6: rebuild master dataset"
+echo "[$(date '+%F %T')] stage 5/7: AC-month population downwind of rice zones"
+"${PYTHON}" build_downup_ac_pop_rice.py \
+    --panel "${INTERMEDIATE}/data_2012_2024_grid_ac_downup_pop.parquet" \
+    --grid-population "${INTERMEDIATE}/small_grid_population_2010.parquet" \
+    --grid-rice "${INTERMEDIATE}/small_grid_rice_2010.parquet" \
+    --rice-percentile "${RICE_PERCENTILE:-0.5}" \
+    --output "${INTERMEDIATE}/data_2012_2024_ac_downup_pop_rice.parquet" \
+    --threads "${THREADS}" \
+    --memory-limit "${MEMORY_LIMIT}" \
+    --overwrite \
+    > build_downup_ac_pop_rice.out 2>&1
+
+echo "[$(date '+%F %T')] stage 6/7: rebuild master dataset"
 "${PYTHON}" build_0_master_dataset.py \
     --intermediate "${INTERMEDIATE}" \
     --threads "${THREADS}" \
@@ -128,7 +140,7 @@ for spec in "${REQUESTED_SPECS[@]}"; do
     SPEC_ARGS+=(--spec "${spec}")
 done
 
-echo "[$(date '+%F %T')] stage 6/6: rebuild stacked datasets"
+echo "[$(date '+%F %T')] stage 7/7: rebuild stacked datasets"
 "${PYTHON}" build_all_stacked_datasets_duckdb.py \
     --intermediate "${INTERMEDIATE}" \
     --threads "${THREADS}" \

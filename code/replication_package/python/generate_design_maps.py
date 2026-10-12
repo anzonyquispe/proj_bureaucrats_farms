@@ -73,12 +73,12 @@ def map_grids(figures: Path, grid: gpd.GeoDataFrame, acs: gpd.GeoDataFrame,
     ]
     xmin, ymin, xmax, ymax = states.total_bounds
     fig, ax = plt.subplots(figsize=(30, 30))
-    states.plot(ax=ax, color="#AFE1AF", edgecolor=None)
+    states.plot(ax=ax, color="#F08080", edgecolor=None)
     boundaries.boundary.plot(ax=ax, color="#336ece")
     ax.set(xlim=(xmin - 1, xmax + 1), ylim=(ymin - 1, ymax + 1))
     ax.axis("off")
     inset = fig.add_axes([0.6, 0.45, 0.3, 0.3])
-    boundaries.plot(ax=inset, color="#AFE1AF", edgecolor="black")
+    boundaries.plot(ax=inset, color="#F08080", edgecolor="black")
     boundaries.boundary.plot(ax=inset, color="#336ece", linewidth=0.5)
     grid.plot(ax=inset, facecolor="none", edgecolor="black", linewidth=0.1)
     ixmin, iymin, ixmax, iymax = selected_ac.total_bounds
@@ -127,7 +127,7 @@ def time_map(data: pd.DataFrame, grid: gpd.GeoDataFrame, figures: Path,
         ["unique_small_grid_id", "downup_ac_pop"],
     ].drop_duplicates("unique_small_grid_id")
     mapped = gpd.GeoDataFrame(values.merge(grid), geometry="geometry", crs=grid.crs)
-    mapped["plot_color"] = mapped.downup_ac_pop.map({0: "#8FC6FA", 1: "#032544"})
+    mapped["plot_color"] = mapped.downup_ac_pop.map({0: "#CCCCCC", 1: "#8B0000"})
     fig, ax = plt.subplots(figsize=(8, 8))
     mapped.plot(ax=ax, color=mapped.plot_color, edgecolor="none", linewidth=0, antialiased=False)
     ax.set_title(title)
