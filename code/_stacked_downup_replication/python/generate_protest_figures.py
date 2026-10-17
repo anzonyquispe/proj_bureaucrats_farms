@@ -42,9 +42,13 @@ def main() -> None:
         shared / "data" / "input" / "admin-data" / "india" / "IND_adm" / "IND_adm1.shp"
     ))
     states = states.loc[states.NAME_1.isin(["Bihar", "Uttar Pradesh", "Punjab", "Haryana"])]
+    # The protest grid keeps the shapefile-truncated id name; match
+    # grid_5km_plot.ipynb and join explicitly on the grid id.
     protest_grid = pd.read_csv(require(intermediate / "8_grids_ac_pr_5km.csv"))
+    if "unq_s__" in protest_grid:
+        protest_grid = protest_grid.rename(columns={"unq_s__": "unique_small_grid_id"})
     intersection = pd.read_csv(require(intermediate / "_1_AC_grid_intersection.csv"))
-    joined = intersection.merge(protest_grid, how="left")
+    joined = intersection.merge(protest_grid, on="unique_small_grid_id", how="left")
     joined["protest_place"] = joined.protest_place.fillna(0)
     grid = gpd.read_file(require(intermediate / "1-grid-generation.shp"))
     if "unq_s__" in grid:

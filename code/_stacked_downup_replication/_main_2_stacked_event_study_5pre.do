@@ -76,7 +76,10 @@ local estimate_names ""
 foreach mod of local moderators_list {
     replace moderator = `mod'
     local rhs "ib`base'.relative_year_bin_aux##ib0.treat##ib0.`mod' wind_direction av_wind_speed"
-    quietly summarize `dep_var' if treat == 1 & relative_year_bin <= -1
+    * The plotted coefficients describe the omitted moderator group, so the
+    * reported Mean DV is the treated pre-period mean with moderator == 0.
+    * For the unmoderated estimate the condition binds nothing.
+    quietly summarize `dep_var' if treat == 1 & relative_year_bin <= -1 & moderator == 0
     local ymean = r(mean)
     quietly summarize `dep_var' if treat == 1 & relative_year_bin <= -1 & moderator == 1
     local ymean2 = r(mean)

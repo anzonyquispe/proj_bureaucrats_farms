@@ -91,6 +91,8 @@ local numacs = r(N)
 ********************************************************************************
 * Project-standard treated-group pre-treatment means for each dependent variable.
 ********************************************************************************
+* The canonical sample exported by _main_1_did.do already carries moderator.
+capture drop moderator
 gen moderator = 0
 quietly summarize anyfire if treat == 1 & relative_monthyear <= -1
 local meandv1 = r(mean)

@@ -120,8 +120,7 @@ else {
 }
 
 * Create cluster variable
-egen cluster_acmonth = group(ac_id monthyear)
-
+egen cluster_acmonth = group(ac_id monthyear cohort)
 
 ********************************************************************************
 * Run Regressions
@@ -131,7 +130,7 @@ global controls av_wind_speed wind_direction
 
 * Eq1: population Down > Up on the canonical main sample.
 reghdfejl countk downup_ac_pop $controls, ///
-    absorb(grid_id#cohort ac_id#monthyear#cohort) cluster(grid_id cluster_acmonth)
+    absorb(grid_id#cohort ac_id#monthyear#cohort) cluster(grid_id#cohort  cluster_acmonth)
 assert e(N) == `common_n'
 gen byte esample = e(sample)
 assert esample == 1
@@ -218,7 +217,7 @@ est store eq1
 
 * Eq2: downup_ac
 reghdfejl countk downup_ac $controls if  esample == 1, ///
-    absorb(grid_id#cohort ac_id#monthyear#cohort) cluster(grid_id cluster_acmonth)
+    absorb(grid_id#cohort ac_id#monthyear#cohort) cluster(grid_id#cohort  cluster_acmonth)
 assert e(N) == `common_n'
 estadd local gridfe "Y"
 estadd local acmonthfe "Y"
@@ -229,7 +228,7 @@ est store eq2
 
 * Eq3: downup_1sd
 reghdfejl countk downup_1sd_pop $controls if  esample == 1, ///
-    absorb(grid_id#cohort ac_id#monthyear#cohort) cluster(grid_id cluster_acmonth)
+    absorb(grid_id#cohort ac_id#monthyear#cohort) cluster(grid_id#cohort cluster_acmonth)
 assert e(N) == `common_n'
 estadd local gridfe "Y"
 estadd local acmonthfe "Y"
@@ -240,7 +239,7 @@ est store eq3
 
 * Eq4: down_percent
 reghdfejl countk down_percent_pop $controls if  esample == 1, ///
-    absorb(grid_id#cohort ac_id#monthyear#cohort) cluster(grid_id cluster_acmonth)
+    absorb(grid_id#cohort ac_id#monthyear#cohort) cluster(grid_id#cohort cluster_acmonth)
 assert e(N) == `common_n'
 estadd local gridfe "Y"
 estadd local acmonthfe "Y"
@@ -251,7 +250,7 @@ est store eq4
 
 * Eq5: downup_diff_percent
 reghdfejl countk downup_diff_percent_pop $controls if  esample == 1, ///
-    absorb(grid_id#cohort ac_id#monthyear#cohort) cluster(grid_id cluster_acmonth)
+    absorb(grid_id#cohort ac_id#monthyear#cohort) cluster(grid_id#cohort cluster_acmonth)
 assert e(N) == `common_n'
 estadd local gridfe "Y"
 estadd local acmonthfe "Y"
@@ -263,7 +262,7 @@ est store eq5
 
 * Eq6: down_percent
 reghdfejl countk down_percent $controls if  esample == 1, ///
-    absorb(grid_id#cohort ac_id#monthyear#cohort) cluster(grid_id cluster_acmonth)
+    absorb(grid_id#cohort ac_id#monthyear#cohort) cluster(grid_id#cohort cluster_acmonth)
 assert e(N) == `common_n'
 estadd local gridfe "Y"
 estadd local acmonthfe "Y"
@@ -274,7 +273,7 @@ est store eq6
 
 * Eq7: X Rice
 reghdfejl countk downup_ac_pop##ib0.rice_prod_aclvl_ahigh $controls if  esample == 1, ///
-    absorb(grid_id#cohort ac_id#monthyear#cohort) cluster(grid_id cluster_acmonth)
+    absorb(grid_id#cohort ac_id#monthyear#cohort) cluster(grid_id#cohort cluster_acmonth)
 assert e(N) == `common_n'
 estadd local gridfe "Y"
 estadd local acmonthfe "Y"

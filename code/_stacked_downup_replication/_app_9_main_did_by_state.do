@@ -120,6 +120,8 @@ forvalues prov_num = 1/`nstates' {
     egen byte tag_ac = tag(ac_id) if state_sample == 1
     quietly count if tag_ac == 1
     local numacs`i' = r(N)
+    * The canonical sample exported by _main_1_did.do already carries moderator.
+    capture drop moderator
     gen byte moderator = 0
     quietly summarize countk if treat == 1 & relative_monthyear <= -1 & state_sample == 1
     local meandv`i' = r(mean)

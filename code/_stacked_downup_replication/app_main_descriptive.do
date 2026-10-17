@@ -35,7 +35,9 @@ import delimited using ///
     clear varnames(1) case(preserve)
 display as text "Main specification-4 descriptive sample: " _N
 
-capture drop prov
+* Match prov exactly: a bare "drop prov" abbreviates to province and drops it.
+capture confirm variable prov, exact
+if !_rc drop prov
 egen prov = group(province)
 
 capture program drop _fmt_num

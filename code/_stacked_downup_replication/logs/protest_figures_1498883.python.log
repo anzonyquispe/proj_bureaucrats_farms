@@ -1,0 +1,22 @@
+Python environment: /users/aquispe/envs/downup_geo
+Permanent Python log: /users/aquispe/proj_bureaucrats_farms_git/code/_stacked_downup_replication/logs/protest_figures_1498883.python.log
+Python executable: /users/aquispe/envs/downup_geo/bin/python
+Python version: 3.11.16
+Traceback (most recent call last):
+  File "/users/aquispe/proj_bureaucrats_farms_git/code/_stacked_downup_replication/python/generate_protest_figures.py", line 138, in <module>
+    main()
+  File "/users/aquispe/proj_bureaucrats_farms_git/code/_stacked_downup_replication/python/generate_protest_figures.py", line 47, in main
+    joined = intersection.merge(protest_grid, how="left")
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/users/aquispe/envs/downup_geo/lib/python3.11/site-packages/pandas/core/frame.py", line 12902, in merge
+    return merge(
+           ^^^^^^
+  File "/users/aquispe/envs/downup_geo/lib/python3.11/site-packages/pandas/core/reshape/merge.py", line 385, in merge
+    op = _MergeOperation(
+         ^^^^^^^^^^^^^^^^
+  File "/users/aquispe/envs/downup_geo/lib/python3.11/site-packages/pandas/core/reshape/merge.py", line 1010, in __init__
+    self.left_on, self.right_on = self._validate_left_right_on(left_on, right_on)
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/users/aquispe/envs/downup_geo/lib/python3.11/site-packages/pandas/core/reshape/merge.py", line 1899, in _validate_left_right_on
+    raise MergeError(
+pandas.errors.MergeError: No common columns to perform merge on. Merge options: left_on=None, right_on=None, left_index=False, right_index=False

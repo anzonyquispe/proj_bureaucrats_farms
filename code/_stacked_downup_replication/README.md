@@ -27,7 +27,9 @@ bash sbatch/submit_all.sh
 Stata array: every dofile/variant receives its own job ID and log. The table,
 event-plot, interaction-plot, neighbour-plot, and final-audit jobs wait for the
 estimates they consume. The final audit uses `afterany`, so it still inventories
-missing outputs if an upstream job fails.
+missing outputs if an upstream job fails. Jobs that re-read a canonical
+`*_downup_ac_pop_esample*` sample (`_app_6`–`_app_9`, `_app_11`, and the three
+descriptive tables) wait for the population DiD job that exports it.
 
 Jobs that read `stacked_data_protest5km.csv` request 10 CPUs. This includes its
 descriptive table, DiD, event-study, and interaction-estimate jobs. Every other
@@ -69,6 +71,16 @@ The launcher accepts environment overrides:
 ```bash
 SAMPLE=_sample EVENT_FE_LIST=1 \
   bash sbatch/submit_all.sh
+```
+
+`SGE_QUEUE=long` overrides the `largemem` queue embedded in the job scripts
+(for accounts without `largemem` access). `ONLY="job1 job2"` resubmits just
+the named jobs (names as in `submit_all.sh`); skipped jobs keep their earlier
+outputs and release their dependents. Unknown names abort before submission:
+
+```bash
+SGE_QUEUE=long ONLY="protest_did_pop descriptives_protest" \
+  REPLICATION_CODE=$PWD bash sbatch/submit_all.sh
 ```
 
 The exact root overrides are `REPLICATION_ROOT`, `REPLICATION_CODE`, and

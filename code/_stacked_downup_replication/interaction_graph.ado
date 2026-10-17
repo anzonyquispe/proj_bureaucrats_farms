@@ -154,18 +154,18 @@ program define interaction_graph
                 (pcarrowi `pos1' 1.45 `pos3' 3.75, color(black)) ///
                 (scatter lincoms_treat1 sec in 1, msymbol(O) color(black) msize(3)) ///
                 (scatter lincoms_treat1 sec in 2/3, msymbol(O) color(black) msize(3)) ///
-                (pci `pos2' 5.55 `pos2' 5.68, color(black)) ///
-                (pci `pos2' 5.68 `pos3' 5.68, color(black)) ///
-                (pci `pos3' 5.55 `pos3' 5.68, color(black)) ///
-                (pci `pos4' 5.68 `pos4' 5.72, color(black)), ///
+                (pci `pos2' 6.95 `pos2' 7.08, color(black)) ///
+                (pci `pos2' 7.08 `pos3' 7.08, color(black)) ///
+                (pci `pos3' 6.95 `pos3' 7.08, color(black)) ///
+                (pci `pos4' 7.08 `pos4' 7.12, color(black)), ///
                 text(1 1.22 "Non-Agricultural" "Politician", place(w) size(3.5) justification(right)) ///
-                text(1 3.98 "Non-Agricultural" "Politician", place(e) size(3.5) justification(left)) ///
-                text(`pos3' 3.98 "Agricultural" "Politician", place(e) size(3.5) justification(left)) ///
+                text(`pos2' 3.98 "Remain Non-Agricultural" "Politician", place(e) size(3.5) justification(left)) ///
+                text(`pos3' 3.98 "Switch to" "Agricultural Politician", place(e) size(3.5) justification(left)) ///
                 legend(off) ///
-                text(`pos4' 5.92 "p-value = `pval'", place(e) size(3)) ///
+                text(`pos4' 7.32 "p-value = `pval'", place(e) size(3)) ///
                 xlabel(, nogrid nolabels) xtitle(" ") ///
                 ytitle("Effect of Down>Up on Number of Fires (x 1,000)") ///
-                xscale(range(-.35 7.35) off) yscale(range(`ymin' `ymax')) ///
+                xscale(range(-.35 9.20) off) yscale(range(`ymin' `ymax')) ///
                 ylabel(-3(3)18) ///
                 graphregion(margin(small)) plotregion(margin(small)) ///
                 yline(0, lcolor(black%75))
