@@ -316,7 +316,7 @@ esttab evreg1 using "${tables}/polischar_event_study.tex", ///
             "\begin{tabular}{l*{1}{c}}" ///
             "\hline" ///
             "            & \multicolumn{1}{c}{(1)}             \\" ///
-            "            & \multicolumn{1}{c}{Number of Fires (in 1,000 units)} \ \hline") ///
+            "            & \multicolumn{1}{c}{Number of Fires (in 1,000 units)} \\ \hline") ///
     posthead("") ///
     postfoot("\hline" "\end{tabular}" "}")
 
@@ -357,7 +357,7 @@ esttab evreg1 using "${tables}/protest_event_study.tex", ///
             "\begin{tabular}{l*{1}{c}}" ///
             "\hline" ///
             "            & \multicolumn{1}{c}{(1)}             \\" ///
-            "            & \multicolumn{1}{c}{Number of Fires (in 1,000 units)} \ \hline") ///
+            "            & \multicolumn{1}{c}{Number of Fires (in 1,000 units)} \\ \hline") ///
     posthead("") ///
     postfoot("\hline" "\end{tabular}" "}")
 
@@ -416,9 +416,11 @@ if _rc {
 else {
     est clear
     estread using "${tables}/_main_3_bureau_polisc_did${sample}_rural_stacked${ster_suffix}.ster"
-    _strip_zeros_stats, models(eq1 eq2 eq3 eq4) stats(ymean ymean2)
+    * As in the paper: eq1 (pooled OLS) is not reported and Mean DV is ymean2
+    * (treated pre-period mean where Down>Up Bureaucrat == 1).
+    _strip_zeros_stats, models(eq2 eq3 eq4 eq5) stats(ymean ymean2)
 
-    esttab eq1 eq2 eq3 eq4 using "${tables}/_main_3_bureau_polisc_did${sample}_rural_acpop${ster_suffix}.tex", ///
+    esttab eq2 eq3 eq4 eq5 using "${tables}/_main_3_bureau_polisc_did${sample}_rural_acpop${ster_suffix}.tex", ///
         replace ///
         cells(b(fmt(3) star) se(par fmt(3))) ///
         star(* 0.10 ** 0.05 *** 0.01) ///
@@ -427,7 +429,7 @@ else {
         varlabels(downup_ac_pop "Down\$>\$ Up Politician" ///
                   downup_dummy "Down\$>\$ Up Bureaucrat" ///
                   downup_interaction "Down\$>\$ Up Pol. \$\times\$ Down\$>\$ Up Bur.") ///
-        stats(N nacs ndists monthyearfe gridfe acmonthfe distmonthfe ymean_clean, ///
+        stats(N nacs ndists monthyearfe gridfe acmonthfe distmonthfe ymean2_clean, ///
               fmt(%12.0fc %12.0fc %12.0fc %s %s %s %s %s) ///
               labels("Observations" "N Assembly Constituencies" "N Districts" ///
                      "Month-Year \$\times\$ Cohort FE" "Grid \$\times\$ Cohort FE" ///
