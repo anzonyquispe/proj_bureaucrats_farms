@@ -1,0 +1,21 @@
+[2026-10-02 19:10:23] Generating descriptives from exact Stata e(sample) CSVs
+Python: /users/aquispe/envs/downup_geo/bin/python
+Threads: 10; memory limit: 100GB
+Sample suffix: <full sample>
+2026-10-02 19:10:36,473 | INFO | Main province column: province
+2026-10-02 19:10:36,474 | INFO | Protest relative-year column: relative_year_bin
+2026-10-02 19:10:36,474 | INFO | Politician relative-year column: relative_year_bin
+2026-10-02 19:10:36,474 | INFO | Building main descriptives from exact specification-4 e(sample)
+2026-10-02 19:10:40,868 | INFO | Building protest descriptives from exact richest-DiD e(sample)
+2026-10-02 19:10:44,483 | INFO | Building politician descriptives from exact richest-DiD e(sample)
+2026-10-02 19:11:32,869 | INFO | Validated desc_main: 36,758,771 rows exactly match /users/aquispe/proj_bureaucrats_farms/data_output/intermediate/main_downup_ac_pop_esample.csv
+2026-10-02 19:11:46,389 | INFO | Validated desc_politician: 8,268,839 rows exactly match /users/aquispe/proj_bureaucrats_farms/data_output/intermediate/politician_downup_ac_pop_esample.csv
+2026-10-02 19:12:54,579 | INFO | Validated desc_protest: 63,240,134 rows exactly match /users/aquispe/proj_bureaucrats_farms/data_output/intermediate/protest_downup_ac_pop_esample.csv
+2026-10-02 19:12:59,397 | INFO | desc_main: 36,758,771 observations
+2026-10-02 19:12:59,403 | INFO | Generated /users/aquispe/proj_bureaucrats_farms_git/tables/descriptives_main.tex
+2026-10-02 19:13:08,350 | INFO | desc_protest: 63,240,134 observations
+2026-10-02 19:13:08,352 | INFO | Generated /users/aquispe/proj_bureaucrats_farms_git/tables/_protest_stacked_descriptive.tex
+2026-10-02 19:13:12,521 | INFO | desc_politician: 8,268,839 observations
+2026-10-02 19:13:12,524 | INFO | Generated /users/aquispe/proj_bureaucrats_farms_git/tables/_politicians_stacked_descriptive.tex
+[2026-10-02 19:13:13] Completed descriptive tables
+Outputs: /users/aquispe/proj_bureaucrats_farms_git/tables
