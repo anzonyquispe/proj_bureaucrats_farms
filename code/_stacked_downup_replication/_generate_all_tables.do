@@ -424,10 +424,10 @@ else {
         replace ///
         cells(b(fmt(3) star) se(par fmt(3))) ///
         star(* 0.10 ** 0.05 *** 0.01) ///
-        keep(downup_ac_pop downup_dummy downup_interaction) ///
-        order( downup_dummy downup_ac_pop downup_interaction) ///
+        keep(downup_ac_pop downup_pop downup_interaction) ///
+        order( downup_pop downup_ac_pop downup_interaction) ///
         varlabels(downup_ac_pop "Down\$>\$ Up Politician" ///
-                  downup_dummy "Down\$>\$ Up Bureaucrat" ///
+                  downup_pop "Down\$>\$ Up Bureaucrat" ///
                   downup_interaction "Down\$>\$ Up Pol. \$\times\$ Down\$>\$ Up Bur.") ///
         stats(N nacs ndists monthyearfe gridfe acmonthfe distmonthfe ymean2_clean, ///
               fmt(%12.0fc %12.0fc %12.0fc %s %s %s %s %s) ///

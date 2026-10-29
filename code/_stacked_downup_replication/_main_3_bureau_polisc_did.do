@@ -37,7 +37,7 @@ global figure_farms "${code}/../../figures"
 * Import Data
 ********************************************************************************
 
-* Getting downup_dummy & mean_brigthness
+* Getting downup_dummy (used only to check the downup_pop merge) & mean_brigthness
 import delimited "${root}/data_output/intermediate/combined_dt_pop${sample}.csv", clear
 keep if inrange(relative_monthyear, -5, 6)
 display as text "Final event-study sample: relative_monthyear in [-5, 6]"
@@ -80,6 +80,14 @@ gen countk = count * 1000
 * Filter data: year < 2022 or (year == 2022 & month <= 8)
 keep if year < 2022 | (year == 2022 & month <= 8)
 
+* Bureaucrat treatment: district population-based Down>Up dummy (Nature paper)
+merge m:1 unique_small_grid_id month year using ///
+    "${root}/data_output/intermediate/grid_month_downup_pop.dta", ///
+    keep(master match) keepusing(downup_pop)
+* Both dummies come from the same source, so every row with one has the other
+assert _merge == 3 if !missing(downup_dummy)
+drop _merge
+
 * Sort data
 sort unique_small_grid_id monthyear
 
@@ -87,7 +95,7 @@ sort unique_small_grid_id monthyear
 * Create interaction variable
 ********************************************************************************
 
-gen downup_interaction = downup_ac_pop * downup_dummy
+gen downup_interaction = downup_ac_pop * downup_pop
 
 ********************************************************************************
 * Encode string IDs if necessary
@@ -142,7 +150,7 @@ local n_districts = r(N)
 
 * Project-standard treated-group pre-treatment means.
 gen relative_year_bin = floor(relative_monthyear / 12)
-gen moderator = downup_dummy
+gen moderator = downup_pop
 do "${code}/_apply_analysis_subsample.do"
 
 quietly summarize countk if treat == 1 & relative_year_bin <= -1
@@ -168,13 +176,13 @@ global cluster unique_small_grid_id#cohort district_id#cohort#monthyear
 
 
 ** Equalizing sample
-qui reghdfejl countk downup_dummy downup_ac_pop downup_interaction $controls , ///
+qui reghdfejl countk downup_pop downup_ac_pop downup_interaction $controls , ///
     absorb(grid_id#cohort assembly_id#monthyear#cohort) ///
     cluster($cluster )
 	gen esample3 = e(sample)
 
 * Specification 1: No FE (baseline) 
-reg countk downup_dummy downup_ac_pop downup_interaction $controls if esample3 == 1 , ///
+reg countk downup_pop downup_ac_pop downup_interaction $controls if esample3 == 1 , ///
     vce(cluster grid_id)
 estadd scalar ymean = `meandv'
 estadd scalar ymean2 = `meandv2'
@@ -188,7 +196,7 @@ estadd local gridfe "N"
 estimates store eq1
 
 * Specification 2:  MonthYear FE + AC FE
-reghdfejl countk downup_dummy downup_ac_pop downup_interaction $controls if esample3 == 1 , ///
+reghdfejl countk downup_pop downup_ac_pop downup_interaction $controls if esample3 == 1 , ///
     absorb(monthyear#cohort assembly_id#cohort) ///
     cluster($cluster )
 estadd scalar ymean = `meandv'
@@ -203,7 +211,7 @@ estadd local gridfe "N"
 estimates store eq2
 
 * Specification 3:	AC x MonthYear FE
-reghdfejl countk downup_dummy downup_ac_pop downup_interaction $controls if esample3 == 1 , ///
+reghdfejl countk downup_pop downup_ac_pop downup_interaction $controls if esample3 == 1 , ///
     absorb(assembly_id#monthyear#cohort) ///
     cluster($cluster )
 estadd scalar ymean = `meandv'
@@ -218,7 +226,7 @@ estadd local gridfe "N"
 estimates store eq3
 
 * Specification 4: 	AC x MonthYear FE + Grid FE
-reghdfejl countk downup_dummy downup_ac_pop downup_interaction $controls if esample3 == 1  , ///
+reghdfejl countk downup_pop downup_ac_pop downup_interaction $controls if esample3 == 1  , ///
     absorb(grid_id#cohort assembly_id#monthyear#cohort) ///
     cluster($cluster )
 estadd scalar ymean = `meandv'
@@ -233,7 +241,7 @@ estadd local gridfe "Y"
 estimates store eq4
 
 * Specification 5: 	Grid FE + District x MonthYear FE (alternative)
-reghdfejl countk downup_dummy downup_ac_pop downup_interaction $controls if esample3 == 1 , ///
+reghdfejl countk downup_pop downup_ac_pop downup_interaction $controls if esample3 == 1 , ///
     absorb(grid_id#cohort district_id#monthyear#cohort) ///
     cluster($cluster )
 estadd scalar ymean = `meandv'

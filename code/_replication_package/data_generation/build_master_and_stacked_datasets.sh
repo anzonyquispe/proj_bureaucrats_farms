@@ -114,6 +114,15 @@ run_stage "grid-month AC-area treatment crosswalk" "${LOG_DIR}/03_ac_area_tr_cro
     --memory-limit "${MEMORY_LIMIT}" \
     --overwrite
 
+run_stage "grid-month district population downup crosswalk" "${LOG_DIR}/03b_downup_pop_crosswalk.log" \
+    "${PYTHON}" build_grid_month_downup_pop.py \
+    --source-csv "${INTERMEDIATE}/data_2012_2022_downup.csv" \
+    --master-parquet "${MASTER_PARQUET}" \
+    --output "${INTERMEDIATE}/grid_month_downup_pop.dta" \
+    --threads "${NSLOTS:-10}" \
+    --memory-limit "${MEMORY_LIMIT}" \
+    --overwrite
+
 SPEC_ARGS=()
 if [[ -n "${STACK_SPECS:-}" && "${STACK_SPECS}" != "all" ]]; then
     IFS=',' read -r -a REQUESTED_SPECS <<< "${STACK_SPECS}"
