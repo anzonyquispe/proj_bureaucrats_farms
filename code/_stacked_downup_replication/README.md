@@ -156,6 +156,12 @@ Stata needs the project commands already used by the original package,
 including `reghdfejl`, `estout`/`esttab`, and their dependencies. R needs
 `data.table`, `ggplot2`, and `HonestDiD`.
 
+The protest estimations (`_main_4`, `_app_13`, `_app_17`, `_app_18`) pass
+`tolerance(1e-6)` to `reghdfejl` explicitly. That was the command's default
+before version 1.1.6, which produced the paper's estimates; newer versions
+default to `1e-8`, which slightly moves the point estimates of the
+specifications with province x cohort trends (e.g. 104.440 vs 105.087).
+
 The Python map/description jobs use the existing geospatial conda environment
 at `/groups/sgulzar/india_forest_land/downup_geo`. The launcher calls its Python
 executable directly and adds its `bin`, PROJ, and GDAL locations to the job

@@ -145,10 +145,12 @@ do "${code}/_apply_analysis_subsample.do"
 
 * Use the richest rice-moderated FE3 event study to define the common sample
 * used by both production event-study estimates.
+* The paper used reghdfejl's pre-1.1.6 default tolerance (1e-6); keep it fixed
+* so the estimates do not depend on the installed version.
 quietly reghdfejl `dep_var' ///
     ib`base'.relative_year_bin_aux##ib0.treat##ib0.rice_prod_aclvl_ahigh ///
     wind_direction av_wind_speed, ///
-    absorb(`fe3' relativeyear_cohort) vce(cluster ac_area_tr_cohort)
+    absorb(`fe3' relativeyear_cohort) vce(cluster ac_area_tr_cohort) tolerance(1e-6)
 gen byte common_sample = e(sample)
 keep if common_sample
 drop common_sample
@@ -187,7 +189,7 @@ foreach fe of numlist $fe_list {
 
         reghdfejl `dep_var' `rhs' if `filter1', ///
             absorb(`fespec' relativeyear_cohort) ///
-            vce(cluster ac_area_tr_cohort)
+            vce(cluster ac_area_tr_cohort) tolerance(1e-6)
         assert e(N) == `common_n'
 
         * Preserve structural sanity checks for the naturally retained support.

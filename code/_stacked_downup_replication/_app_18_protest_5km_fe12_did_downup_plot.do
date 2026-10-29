@@ -129,7 +129,9 @@ foreach mod of local moderators_list {
     quietly summarize `dep_var' if treat == 1 & relative_year_bin <= -1 & moderator == 1
     local ymean2 = r(mean)
     foreach fe of numlist $fe_list {
-        reghdfejl `dep_var' `rhs', absorb(`fe`fe'') vce(cluster ac_area_tr_cohort)
+        * The paper used reghdfejl's pre-1.1.6 default tolerance (1e-6); keep it fixed
+        * so the estimates do not depend on the installed version.
+        reghdfejl `dep_var' `rhs', absorb(`fe`fe'') vce(cluster ac_area_tr_cohort) tolerance(1e-6)
         estadd scalar ymean = `ymean'
         estadd scalar ymean2 = `ymean2'
         estadd scalar acq = `numacs'

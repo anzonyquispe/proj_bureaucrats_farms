@@ -124,8 +124,10 @@ local moderators_list moderator ${downup_var}
 local common_rhs "ib0.post_##ib0.treat##ib0.${downup_var} wind_direction av_wind_speed"
 do "${code}/_apply_analysis_subsample.do"
 
+* The paper used reghdfejl's pre-1.1.6 default tolerance (1e-6); keep it fixed
+* so the estimates do not depend on the installed version.
 quietly reghdfejl countk `common_rhs', ///
-    absorb(`fe3') vce(cluster ac_area_tr_cohort)
+    absorb(`fe3') vce(cluster ac_area_tr_cohort) tolerance(1e-6)
 gen byte common_sample = e(sample)
 quietly count
 local candidate_n = r(N)
@@ -160,7 +162,7 @@ foreach mod of local moderators_list {
     local ymean2 = r(mean)
     foreach fe of numlist $fe_list {
         reghdfejl countk `rhs', ///
-            absorb(`fe`fe'') vce(cluster ac_area_tr_cohort)
+            absorb(`fe`fe'') vce(cluster ac_area_tr_cohort) tolerance(1e-6)
         if e(N) != `common_n' {
             display as error "FE specification `fe' with moderator `mod' changed the anchored sample."
             exit 459
