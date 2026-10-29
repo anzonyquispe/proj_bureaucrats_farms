@@ -107,6 +107,7 @@ egen unique_small_grid_id_cohort = group(unique_small_grid_id cohort_id)
 egen monthyearco                 = group(month year cohort_id)
 egen province_cohort             = group(cohort_id province)
 egen relativeyear_cohort         = group(relative_year_bin cohort_id)
+egen ac_area_tr_cohort           = group(ac_area_tr cohort_id)
 
 * Retain grid-cohort units observed on both sides of the protest switch.
 bysort unique_small_grid_id_cohort: egen byte has_pre  = max(relative_year_bin < 0)
@@ -147,7 +148,7 @@ do "${code}/_apply_analysis_subsample.do"
 quietly reghdfejl `dep_var' ///
     ib`base'.relative_year_bin_aux##ib0.treat##ib0.rice_prod_aclvl_ahigh ///
     wind_direction av_wind_speed, ///
-    absorb(`fe3' relativeyear_cohort) vce(cluster ac_area_tr)
+    absorb(`fe3' relativeyear_cohort) vce(cluster ac_area_tr_cohort)
 gen byte common_sample = e(sample)
 keep if common_sample
 drop common_sample
@@ -186,7 +187,7 @@ foreach fe of numlist $fe_list {
 
         reghdfejl `dep_var' `rhs' if `filter1', ///
             absorb(`fespec' relativeyear_cohort) ///
-            vce(cluster ac_area_tr)
+            vce(cluster ac_area_tr_cohort)
         assert e(N) == `common_n'
 
         * Preserve structural sanity checks for the naturally retained support.

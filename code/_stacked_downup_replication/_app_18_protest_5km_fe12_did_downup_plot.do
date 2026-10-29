@@ -90,6 +90,7 @@ gen countk = count * 1000
 egen unique_small_grid_id_cohort = group(unique_small_grid_id cohort_id)
 egen province_cohort = group(province cohort_id)
 egen relativeyear_cohort = group(relative_year_bin cohort_id)
+egen ac_area_tr_cohort = group(ac_area_tr cohort_id)
 
 bysort unique_small_grid_id_cohort: egen byte has_pre = max(relative_year_bin < 0)
 bysort unique_small_grid_id_cohort: egen byte has_post = max(relative_year_bin >= 0)
@@ -128,7 +129,7 @@ foreach mod of local moderators_list {
     quietly summarize `dep_var' if treat == 1 & relative_year_bin <= -1 & moderator == 1
     local ymean2 = r(mean)
     foreach fe of numlist $fe_list {
-        reghdfejl `dep_var' `rhs', absorb(`fe`fe'') vce(cluster ac_area_tr)
+        reghdfejl `dep_var' `rhs', absorb(`fe`fe'') vce(cluster ac_area_tr_cohort)
         estadd scalar ymean = `ymean'
         estadd scalar ymean2 = `ymean2'
         estadd scalar acq = `numacs'

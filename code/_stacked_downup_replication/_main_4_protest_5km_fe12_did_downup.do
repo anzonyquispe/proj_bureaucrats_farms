@@ -88,6 +88,7 @@ capture drop province_cohort
 egen province_cohort = group(province cohort_id)
 egen monthyearco = group(monthyear cohort_id)
 egen relativeyear_cohort = group(relative_year_bin cohort_id)
+egen ac_area_tr_cohort = group(ac_area_tr cohort_id)
 
 * The production stack must already contain both sides of the switch for every
 * retained grid-cohort. Fail loudly instead of silently changing the sample.
@@ -124,7 +125,7 @@ local common_rhs "ib0.post_##ib0.treat##ib0.${downup_var} wind_direction av_wind
 do "${code}/_apply_analysis_subsample.do"
 
 quietly reghdfejl countk `common_rhs', ///
-    absorb(`fe3') vce(cluster ac_area_tr)
+    absorb(`fe3') vce(cluster ac_area_tr_cohort)
 gen byte common_sample = e(sample)
 quietly count
 local candidate_n = r(N)
@@ -159,7 +160,7 @@ foreach mod of local moderators_list {
     local ymean2 = r(mean)
     foreach fe of numlist $fe_list {
         reghdfejl countk `rhs', ///
-            absorb(`fe`fe'') vce(cluster ac_area_tr)
+            absorb(`fe`fe'') vce(cluster ac_area_tr_cohort)
         if e(N) != `common_n' {
             display as error "FE specification `fe' with moderator `mod' changed the anchored sample."
             exit 459
