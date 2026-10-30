@@ -176,9 +176,11 @@ global cluster unique_small_grid_id#cohort district_id#cohort#monthyear
 
 
 ** Equalizing sample
+* The paper used reghdfejl's pre-1.1.6 default tolerance (1e-6); keep it fixed
+* so the estimates do not depend on the installed version.
 qui reghdfejl countk downup_pop downup_ac_pop downup_interaction $controls , ///
     absorb(grid_id#cohort assembly_id#monthyear#cohort) ///
-    cluster($cluster )
+    cluster($cluster ) tolerance(1e-6)
 	gen esample3 = e(sample)
 
 * Specification 1: No FE (baseline) 
@@ -198,7 +200,7 @@ estimates store eq1
 * Specification 2:  MonthYear FE + AC FE
 reghdfejl countk downup_pop downup_ac_pop downup_interaction $controls if esample3 == 1 , ///
     absorb(monthyear#cohort assembly_id#cohort) ///
-    cluster($cluster )
+    cluster($cluster ) tolerance(1e-6)
 estadd scalar ymean = `meandv'
 estadd scalar ymean2 = `meandv2'
 estadd scalar nacs = `numacs'
@@ -213,7 +215,7 @@ estimates store eq2
 * Specification 3:	AC x MonthYear FE
 reghdfejl countk downup_pop downup_ac_pop downup_interaction $controls if esample3 == 1 , ///
     absorb(assembly_id#monthyear#cohort) ///
-    cluster($cluster )
+    cluster($cluster ) tolerance(1e-6)
 estadd scalar ymean = `meandv'
 estadd scalar ymean2 = `meandv2'
 estadd scalar nacs = `numacs'
@@ -228,7 +230,7 @@ estimates store eq3
 * Specification 4: 	AC x MonthYear FE + Grid FE
 reghdfejl countk downup_pop downup_ac_pop downup_interaction $controls if esample3 == 1  , ///
     absorb(grid_id#cohort assembly_id#monthyear#cohort) ///
-    cluster($cluster )
+    cluster($cluster ) tolerance(1e-6)
 estadd scalar ymean = `meandv'
 estadd scalar ymean2 = `meandv2'
 estadd scalar nacs = `numacs'
@@ -243,7 +245,7 @@ estimates store eq4
 * Specification 5: 	Grid FE + District x MonthYear FE (alternative)
 reghdfejl countk downup_pop downup_ac_pop downup_interaction $controls if esample3 == 1 , ///
     absorb(grid_id#cohort district_id#monthyear#cohort) ///
-    cluster($cluster )
+    cluster($cluster ) tolerance(1e-6)
 estadd scalar ymean = `meandv'
 estadd scalar ymean2 = `meandv2'
 estadd scalar nacs = `numacs'
