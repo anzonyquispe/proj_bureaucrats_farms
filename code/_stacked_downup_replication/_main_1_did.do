@@ -188,9 +188,14 @@ local ymean2 = r(mean)
 quietly levelsof ac_id, local(ac_levels)
 local numacs : word count `ac_levels'
 
+* Constant-only absorbed category: specification 1 has no fixed effects but
+* uses the same two-way clustering as the other columns.
+gen byte nofe = 1
+
 foreach fe of numlist $fe_list {
     if `fe' == 1 {
-        reg countk ${downup_var} `controls', vce(cluster grid_id)
+        reghdfejl countk ${downup_var} `controls', ///
+            absorb(nofe) cluster(`cluster')
         local monthyearfe "N"
         local acfe "N"
         local acmonthfe "N"
