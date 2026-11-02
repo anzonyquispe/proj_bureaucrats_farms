@@ -196,7 +196,8 @@ program define interaction_graph
                 yline(0, lcolor(black%75))
         }
 
-        graph export "`output'_`numero'.png", as(png) replace
+        * Fixed width: batch Stata on the cluster otherwise exports at 720 px
+        graph export "`output'_`numero'.png", as(png) width(1440) replace
         display as result "Exported: `output'_`numero'.png"
         quietly graph drop _all
         quietly clear
