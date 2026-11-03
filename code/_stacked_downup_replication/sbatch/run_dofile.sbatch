@@ -61,7 +61,8 @@ STATA_AUTOMATIC_LOG="${STATA_WORK_DIR}/_run_dofile.log"
 
 # Refuse to run while any reghdfejl call lacks tolerance(1e-6). The reason is
 # written to the permanent log because scheduler output may go to /dev/null.
-if ! tolerance_report=$(bash "${REPLICATION_CODE}/sbatch/check_tolerance.sh" "${REPLICATION_CODE}" 2>&1); then
+if ! tolerance_report=$(bash "${REPLICATION_CODE}/sbatch/check_tolerance.sh" \
+    "${REPLICATION_CODE}" "${REPLICATION_CODE}/${DOFILE}" 2>&1); then
   printf '%s\n' "${tolerance_report}" | tee "${STATA_SAVED_LOG}" >&2
   exit 65
 fi

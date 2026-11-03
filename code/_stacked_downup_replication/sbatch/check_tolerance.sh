@@ -7,15 +7,23 @@
 # keeps the results independent of the installed version.
 #
 # Usage: check_tolerance.sh PATH [PATH ...]
-#   PATH is a dofile or a directory searched recursively for *.do files.
+#   PATH is a dofile, always checked, or a directory searched recursively for
+#   *.do files. Inside a git checkout only tracked dofiles are searched, so
+#   loose scratch dofiles on the cluster do not block the package.
 
 set -euo pipefail
 
 files=()
 for target in "$@"; do
   if [[ -d "${target}" ]]; then
-    while IFS= read -r file; do files+=("${file}"); done \
-      < <(find "${target}" -name '*.do' | sort)
+    if git -C "${target}" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+      while IFS= read -r file; do
+        [[ -f "${target}/${file}" ]] && files+=("${target}/${file}")
+      done < <(git -C "${target}" ls-files -- '*.do')
+    else
+      while IFS= read -r file; do files+=("${file}"); done \
+        < <(find "${target}" -name '*.do' | sort)
+    fi
   else
     files+=("${target}")
   fi
@@ -59,6 +67,6 @@ violations=$(awk '
 
 if [[ -n "${violations}" ]]; then
   echo "ERROR: reghdfejl calls without tolerance(1e-6):" >&2
-  printf '%s\n' "${violations}" | sed 's/^/  /' >&2
+  printf '%s\n' "${violations}" | sort -u | sed 's/^/  /' >&2
   exit 65
 fi

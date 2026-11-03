@@ -40,8 +40,6 @@ capture confirm variable prov, exact
 if !_rc drop prov
 egen prov = group(province)
 
-keep if disha_sample == 1 & is_rural != 0
-
 capture program drop _fmt_num
 program define _fmt_num, rclass
     args x
