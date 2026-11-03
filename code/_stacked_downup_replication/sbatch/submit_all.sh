@@ -42,6 +42,10 @@ for wanted in ${ONLY}; do
   fi
 done
 
+# Every reghdfejl call must fix the paper's tolerance(1e-6); refuse to submit
+# anything otherwise (see check_tolerance.sh).
+bash "${REPLICATION_CODE}/sbatch/check_tolerance.sh" "${REPLICATION_CODE}"
+
 mkdir -p "${REPLICATION_CODE}/logs"
 cd "${REPLICATION_CODE}"
 
@@ -149,6 +153,8 @@ table_ids+=("$(submit_stata descriptives_politician app_polischar_descriptive.do
 event_ids+=("$(submit_stata event_5pre_area _main_2_stacked_event_study_5pre_area.do "${EVENT_FE_LIST}" none)")
 event_ids+=("$(submit_stata event_5pre_pop _main_2_stacked_event_study_5pre.do "${EVENT_FE_LIST}" none)")
 event_ids+=("$(submit_stata politician_event_pop _app_16_polischar_fe12_evst_all.do "${EVENT_FE_LIST}" _acpop downup_ac_pop)")
+# T-2 differenced politician event study (fig:agri_modi), full FE sweep.
+event_ids+=("$(submit_stata politician_event_t2norm _app_16_polischar_t2norm_evst.do 1/4 _acpop downup_ac_pop)")
 event_ids+=("$(submit_stata protest_event _app_17_5km_fe12_evst_all.do 3 none none stacked_data_protest5km)")
 
 # Interaction estimates used by the two active interaction figures.

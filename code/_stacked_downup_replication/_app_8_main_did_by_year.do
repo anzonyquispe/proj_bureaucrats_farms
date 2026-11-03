@@ -95,7 +95,7 @@ forvalues yr = 2012/2021 {
 
 		* Run regression
 		reghdfejl countk downup_ac_pop $controls , ///
-			absorb(grid_id#cohort ac_id#monthyear#cohort) cluster($cluster )
+			absorb(grid_id#cohort ac_id#monthyear#cohort) cluster($cluster ) tolerance(1e-6)
 		gen byte year_sample = e(sample)
 
 		* All table statistics describe the exact regression sample within the

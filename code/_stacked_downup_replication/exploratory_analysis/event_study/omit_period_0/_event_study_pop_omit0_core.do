@@ -152,7 +152,7 @@ foreach mod of local moderators_list {
         }
 
         reghdfejl `dep_var' `rhs', absorb(`fe`fe'') ///
-            cluster(`cluster_variables')
+            cluster(`cluster_variables') tolerance(1e-6)
         estadd scalar ymean = `ymean'
         estadd scalar ymean2 = `ymean2'
         estadd scalar acq = `numacs'

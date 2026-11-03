@@ -85,7 +85,7 @@ local i = 1
 
 foreach fe of numlist 1/3 {
 
-    reghdfejl `dep_var' `rhs', absorb(`fe`fe'') cluster(ac_area_tr)
+    reghdfejl `dep_var' `rhs', absorb(`fe`fe'') cluster(ac_area_tr) tolerance(1e-6)
 
     * Store FE indicators
     estadd local gridfe "Y"

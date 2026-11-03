@@ -124,7 +124,7 @@ global cluster ac_uq_id#cohort#monthyear unique_small_grid_id#cohort
 
 * Eq1: Any Fire
 reghdfejl anyfire downup_ac_pop $controls , ///
-    absorb($setfe ) cluster($cluster )
+    absorb($setfe ) cluster($cluster ) tolerance(1e-6)
 assert e(N) == `common_n'
 estadd local gridfe "Y"
 estadd local acmonthfe "Y"
@@ -135,7 +135,7 @@ est store eq1
 
 * Eq2: Log Fires
 reghdfejl logfire downup_ac_pop $controls , ///
-    absorb($setfe ) cluster($cluster )
+    absorb($setfe ) cluster($cluster ) tolerance(1e-6)
 assert e(N) == `common_n'
 estadd local gridfe "Y"
 estadd local acmonthfe "Y"
@@ -146,7 +146,7 @@ est store eq2
 
 * Eq3: Mean Brightness
 reghdfejl mean_brightness downup_ac_pop $controls , ///
-    absorb($setfe ) cluster($cluster )
+    absorb($setfe ) cluster($cluster ) tolerance(1e-6)
 assert e(N) == `common_n'
 estadd local gridfe "Y"
 estadd local acmonthfe "Y"

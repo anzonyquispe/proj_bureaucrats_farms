@@ -62,7 +62,7 @@ do "${code}/_apply_analysis_subsample.do"
 quietly reghdfejl `dep_var' ///
     ib`base'.relative_year_bin_aux##ib0.treat##ib0.rice_prod_aclvl_ahigh ///
     wind_direction av_wind_speed, absorb(`fe1') ///
-    cluster(ac_uq_id#cohort#monthyear unique_small_grid_id#cohort)
+    cluster(ac_uq_id#cohort#monthyear unique_small_grid_id#cohort) tolerance(1e-6)
 gen byte common_sample = e(sample)
 keep if common_sample
 drop common_sample
@@ -87,7 +87,7 @@ foreach mod of local moderators_list {
     local ymean2 = r(mean)
     foreach fe of numlist $fe_list {
         reghdfejl `dep_var' `rhs', absorb(`fe`fe'') ///
-            cluster(ac_uq_id#cohort#monthyear unique_small_grid_id#cohort)
+            cluster(ac_uq_id#cohort#monthyear unique_small_grid_id#cohort) tolerance(1e-6)
         assert e(N) == `common_n'
         estadd scalar ymean = `ymean'
         estadd scalar ymean2 = `ymean2'

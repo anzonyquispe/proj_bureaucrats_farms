@@ -127,7 +127,7 @@ forvalues feval = 1/3 {
     local fespec `fe`feval''
 
     * Run regression with clustering
-    reghdfejl `dep_var' `rhs', absorb(`fespec') vce(cluster ac_elec_yr)
+    reghdfejl `dep_var' `rhs', absorb(`fespec') vce(cluster ac_elec_yr) tolerance(1e-6)
 
     * Store statistics
     estadd local ymean "`ymean_fmt'"

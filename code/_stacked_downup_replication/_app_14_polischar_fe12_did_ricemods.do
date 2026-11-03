@@ -54,7 +54,7 @@ local fe2 "unique_small_grid_id_cohort relativeyear_cohort"
 local fe3 "unique_small_grid_id_cohort relativeyear_cohort province_cohort#c.monthyear"
 local common_rhs "ib0.post_##ib0.treat##ib0.rice_prod_aclvl_ahigh wind_direction av_wind_speed"
 do "${code}/_apply_analysis_subsample.do"
-quietly reghdfejl countk `common_rhs', absorb(`fe3') vce(cluster ac_elec_yr)
+quietly reghdfejl countk `common_rhs', absorb(`fe3') vce(cluster ac_elec_yr) tolerance(1e-6)
 gen byte common_sample = e(sample)
 quietly count if common_sample
 local common_n = r(N)
@@ -76,7 +76,7 @@ foreach mod of local moderators_list {
     quietly summarize countk if treat == 1 & relative_year_bin <= -1 & moderator == 1
     local ymean2 = r(mean)
     foreach fe of numlist $fe_list {
-        reghdfejl countk `rhs', absorb(`fe`fe'') vce(cluster ac_elec_yr)
+        reghdfejl countk `rhs', absorb(`fe`fe'') vce(cluster ac_elec_yr) tolerance(1e-6)
         assert e(N) == `common_n'
         estadd scalar ymean = `ymean'
         estadd scalar ymean2 = `ymean2'

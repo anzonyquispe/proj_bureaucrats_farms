@@ -112,7 +112,7 @@ forvalues prov_num = 1/`nstates' {
 
     * Run regression
     reghdfejl countk downup_ac_pop $controls, ///
-        absorb(grid_id#cohort ac_id#monthyear#cohort) cluster($cluster)
+        absorb(grid_id#cohort ac_id#monthyear#cohort) cluster($cluster) tolerance(1e-6)
     gen byte state_sample = e(sample)
 
     * Statistics use the exact state-regression sample, itself restricted to

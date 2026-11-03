@@ -143,7 +143,7 @@ foreach control_sample in $control_samples {
     * for the baseline and moderated estimates.
     quietly reghdfejl countk ///
         ib`base'.relative_year_bin_aux##ib0.treat##ib0.rice_prod_aclvl_ahigh ///
-        wind_direction av_wind_speed, absorb(`fe1') vce(cluster ac_elec_yr)
+        wind_direction av_wind_speed, absorb(`fe1') vce(cluster ac_elec_yr) tolerance(1e-6)
     gen byte common_sample = e(sample)
     keep if common_sample
     drop common_sample
@@ -172,7 +172,7 @@ foreach control_sample in $control_samples {
         foreach fe of numlist $fe_list {
             local fespec `fe`fe''
             reghdfejl countk `rhs' if `fcond', ///
-                absorb(`fespec') vce(cluster ac_elec_yr)
+                absorb(`fespec') vce(cluster ac_elec_yr) tolerance(1e-6)
             assert e(N) == `common_n'
 
             estadd scalar ymean  = `ymean'

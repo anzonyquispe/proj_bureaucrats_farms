@@ -76,7 +76,7 @@ forvalues i = 1/3 {
             exit 198
         }
         reghdfejl countk downup_pop_13km av_wind_speed wind_direction `if`i'', ///
-            absorb(`fe`fe'') cluster(grid_id#cohort cluster_acmonth)
+            absorb(`fe`fe'') cluster(grid_id#cohort cluster_acmonth) tolerance(1e-6)
         capture drop placebo_sample tag_ac
         gen byte placebo_sample = e(sample)
         egen byte tag_ac = tag(ac_id) if placebo_sample == 1

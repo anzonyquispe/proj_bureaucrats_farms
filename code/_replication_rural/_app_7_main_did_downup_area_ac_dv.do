@@ -116,7 +116,7 @@ global controls av_wind_speed wind_direction
 
 * Eq1: Any Fire
 reghdfejl anyfire downup_ac $controls, ///
-    absorb(grid_id ac_id#monthyear) cluster(grid_id cluster_acmonth)
+    absorb(grid_id ac_id#monthyear) cluster(grid_id cluster_acmonth) tolerance(1e-6)
 estadd local gridfe "Y"
 estadd local acmonthfe "Y"
 estadd local ymean "`meandv1'"
@@ -125,7 +125,7 @@ est store eq1
 
 * Eq2: Log Fires
 reghdfejl logfire downup_ac $controls, ///
-    absorb(grid_id ac_id#monthyear) cluster(grid_id cluster_acmonth)
+    absorb(grid_id ac_id#monthyear) cluster(grid_id cluster_acmonth) tolerance(1e-6)
 estadd local gridfe "Y"
 estadd local acmonthfe "Y"
 estadd local ymean "`meandv2'"
@@ -134,7 +134,7 @@ est store eq2
 
 * Eq3: Mean Brightness
 reghdfejl mean_brightness downup_ac $controls, ///
-    absorb(grid_id ac_id#monthyear) cluster(grid_id cluster_acmonth)
+    absorb(grid_id ac_id#monthyear) cluster(grid_id cluster_acmonth) tolerance(1e-6)
 estadd local gridfe "Y"
 estadd local acmonthfe "Y"
 estadd local ymean "`meandv3'"

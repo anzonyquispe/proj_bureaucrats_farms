@@ -153,7 +153,7 @@ local estimates ""
 do "${code}/_apply_analysis_subsample.do"
 
 quietly reghdfejl countk ${downup_var} `controls', ///
-    absorb(grid_id#cohort ac_id#monthyear#cohort) cluster(`cluster')
+    absorb(grid_id#cohort ac_id#monthyear#cohort) cluster(`cluster') tolerance(1e-6)
 gen byte common_sample = e(sample)
 quietly count
 local candidate_n = r(N)
@@ -195,7 +195,7 @@ gen byte nofe = 1
 foreach fe of numlist $fe_list {
     if `fe' == 1 {
         reghdfejl countk ${downup_var} `controls', ///
-            absorb(nofe) cluster(`cluster')
+            absorb(nofe) cluster(`cluster') tolerance(1e-6)
         local monthyearfe "N"
         local acfe "N"
         local acmonthfe "N"
@@ -203,7 +203,7 @@ foreach fe of numlist $fe_list {
     }
     else if `fe' == 2 {
         reghdfejl countk ${downup_var} `controls', ///
-            absorb(monthyear#cohort) cluster(`cluster')
+            absorb(monthyear#cohort) cluster(`cluster') tolerance(1e-6)
         local monthyearfe "Y"
         local acfe "N"
         local acmonthfe "N"
@@ -211,7 +211,7 @@ foreach fe of numlist $fe_list {
     }
     else if `fe' == 3 {
         reghdfejl countk ${downup_var} `controls', ///
-            absorb(grid_id#cohort monthyear#cohort) cluster(`cluster')
+            absorb(grid_id#cohort monthyear#cohort) cluster(`cluster') tolerance(1e-6)
         local monthyearfe "Y"
         local acfe "N"
         local acmonthfe "N"
@@ -219,7 +219,7 @@ foreach fe of numlist $fe_list {
     }
     else if `fe' == 4 {
         reghdfejl countk ${downup_var} `controls', ///
-            absorb(grid_id#cohort ac_id#monthyear#cohort) cluster(`cluster')
+            absorb(grid_id#cohort ac_id#monthyear#cohort) cluster(`cluster') tolerance(1e-6)
         local monthyearfe "N"
         local acfe "N"
         local acmonthfe "Y"

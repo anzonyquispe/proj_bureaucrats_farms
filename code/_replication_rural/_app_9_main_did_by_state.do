@@ -123,7 +123,7 @@ forvalues prov_num = 1/`nstates' {
 
     * Run regression
     reghdfejl countk downup_ac $controls, ///
-        absorb(grid_id ac_id#monthyear) cluster(grid_id cluster_acmonth)
+        absorb(grid_id ac_id#monthyear) cluster(grid_id cluster_acmonth) tolerance(1e-6)
 
     * Store statistics
     estadd local gridfe "Y"

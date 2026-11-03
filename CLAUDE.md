@@ -131,3 +131,9 @@ should be preserved when writing new scripts or editing existing ones.
      `${root}/tex/paper/tables/<name>${sample}_rural${ster_suffix}.ster`.
    - Keep the `if "$root" == ""` standalone block as the single place where
      defaults for all five globals live, documented in one comment header.
+
+7. **Every `reghdfejl` call passes `tolerance(1e-6)`.** It reproduces the
+   paper's estimates whatever `reghdfejl` version is installed (≥1.1.6 defaults
+   to `1e-8`, which moves specifications with province × cohort trends).
+   `sbatch/check_tolerance.sh` blocks `submit_all.sh` and `run_dofile.sbatch`
+   when a call lacks it.

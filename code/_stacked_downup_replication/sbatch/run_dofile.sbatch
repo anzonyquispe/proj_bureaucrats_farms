@@ -58,6 +58,14 @@ SCHEDULER_JOB_ID="${SLURM_JOB_ID:-${JOB_ID:-$$}}"
 STATA_WORK_DIR="${REPLICATION_CODE}/logs/stata_work/${SCHEDULER_JOB_NAME}_${SCHEDULER_JOB_ID}"
 STATA_SAVED_LOG="${REPLICATION_CODE}/logs/${SCHEDULER_JOB_NAME}_${SCHEDULER_JOB_ID}.stata.log"
 STATA_AUTOMATIC_LOG="${STATA_WORK_DIR}/_run_dofile.log"
+
+# Refuse to run while any reghdfejl call lacks tolerance(1e-6). The reason is
+# written to the permanent log because scheduler output may go to /dev/null.
+if ! tolerance_report=$(bash "${REPLICATION_CODE}/sbatch/check_tolerance.sh" "${REPLICATION_CODE}" 2>&1); then
+  printf '%s\n' "${tolerance_report}" | tee "${STATA_SAVED_LOG}" >&2
+  exit 65
+fi
+
 mkdir -p "${STATA_WORK_DIR}"
 cd "${STATA_WORK_DIR}"
 

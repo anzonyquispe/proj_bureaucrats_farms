@@ -89,7 +89,7 @@ local moderators_list moderator ${downup_var}
 local common_rhs "ib0.post_##ib0.treat##ib0.${downup_var} wind_direction av_wind_speed"
 do "${code}/_apply_analysis_subsample.do"
 
-quietly reghdfejl countk `common_rhs', absorb(`fe3') vce(cluster ac_elec_yr)
+quietly reghdfejl countk `common_rhs', absorb(`fe3') vce(cluster ac_elec_yr) tolerance(1e-6)
 gen byte common_sample = e(sample)
 quietly count
 local candidate_n = r(N)
@@ -123,7 +123,7 @@ foreach mod of local moderators_list {
     quietly summarize countk if treat == 1 & relative_year_bin <= -1 & moderator == 1
     local ymean2 = r(mean)
     foreach fe of numlist $fe_list {
-        reghdfejl countk `rhs', absorb(`fe`fe'') vce(cluster ac_elec_yr)
+        reghdfejl countk `rhs', absorb(`fe`fe'') vce(cluster ac_elec_yr) tolerance(1e-6)
         if e(N) != `common_n' {
             display as error "FE specification `fe' with moderator `mod' changed the anchored sample."
             exit 459

@@ -139,7 +139,7 @@ estimates store eq1
 * Specification 2: AC FE + MonthYear FE
 reghdfejl countk i.downup_ac_pop##i.rice_prod_aclvl_ahigh $controls , ///
     absorb(ac_id#cohort monthyear#cohort) ///
-    cluster($cluster )
+    cluster($cluster ) tolerance(1e-6)
 estadd local ymean `meandv_fmt'
 estadd local ymean2 `meandv_fmt2'
 estadd local acq `numacs'
@@ -152,7 +152,7 @@ estimates store eq2
 * Specification 3: AC x MonthYear FE
 reghdfejl countk i.downup_ac_pop##i.rice_prod_aclvl_ahigh $controls , ///
     absorb(ac_id#monthyear#cohort) ///
-    cluster($cluster )
+    cluster($cluster ) tolerance(1e-6)
 estadd local ymean `meandv_fmt'
 estadd local ymean2 `meandv_fmt2'
 estadd local acq `numacs'
@@ -165,7 +165,7 @@ estimates store eq3
 * Specification 4: Grid FE + AC x MonthYear FE
 reghdfejl countk i.downup_ac_pop##i.rice_prod_aclvl_ahigh $controls , ///
     absorb(grid_id#cohort ac_id#monthyear#cohort) ///
-    cluster($cluster )
+    cluster($cluster ) tolerance(1e-6)
 estadd local ymean `meandv_fmt'
 estadd local ymean2 `meandv_fmt2'
 estadd local acq `numacs'

@@ -66,6 +66,7 @@ by cohort_id unique_small_grid_id: assert control_type == control_type[1]
 isid unique_small_grid_id monthyear cohort_id treat
 
 egen unique_small_grid_id_cohort = group(unique_small_grid_id cohort_id)
+egen province_cohort = group(province cohort_id)
 egen ac_elec_yr = group(ac_uq_id election_year cohort_id)
 quietly summarize relative_year_bin
 local rmin = r(min)
@@ -75,7 +76,9 @@ gen moderator = ${downup_var}
 
 local dep_var countk
 local moderators_list ${downup_var}
-local fe1 "unique_small_grid_id_cohort relative_year_bin_aux#cohort_id"
+* Same specification as column 8 of tab:agri_profession_downwind (_main_5 fe3),
+* including the cohort-specific province trend stated in the figure note.
+local fe1 "unique_small_grid_id_cohort relative_year_bin_aux#cohort_id province_cohort#c.monthyear"
 do "${code}/_apply_analysis_subsample.do"
 
 egen tag_ac = tag(ac_uq_id)
@@ -91,7 +94,7 @@ foreach mod of local moderators_list {
     quietly summarize `dep_var' if treat == 1 & relative_year_bin <= -1 & moderator == 1
     local ymean2 = r(mean)
     foreach fe of numlist $fe_list {
-        reghdfejl `dep_var' `rhs', absorb(`fe`fe'') vce(cluster ac_elec_yr)
+        reghdfejl `dep_var' `rhs', absorb(`fe`fe'') vce(cluster ac_elec_yr) tolerance(1e-6)
         estadd scalar ymean = `ymean'
         estadd scalar ymean2 = `ymean2'
         estadd scalar acq = `numacs'
