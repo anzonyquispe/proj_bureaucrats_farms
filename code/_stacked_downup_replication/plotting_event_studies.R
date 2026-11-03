@@ -249,7 +249,8 @@ save_honest <- function(beta, vcov, file_base, prefix, result_suffix,
 plot_event <- function(event_data, file_base, num_pre, num_post,
                        omitted = -1, xlab = "Time from Treatment",
                        ylim_original = NULL, ylim_rotated = NULL,
-                       result_suffix = "") {
+                       result_suffix = "",
+                       ylab = "Effect on Number of Fires (in 1,000 units)") {
   event_data <- as.data.table(copy(event_data))
   setnames(event_data, names(event_data)[1:2], c("ymean", "beta"))
   event_data[, beta := as.numeric(beta)]
@@ -325,7 +326,7 @@ plot_event <- function(event_data, file_base, num_pre, num_post,
     geom_vline(xintercept = omitted, linetype = "dashed", colour = "blue") +
     geom_hline(yintercept = 0, linetype = "dashed", colour = "purple") +
     scale_x_continuous(breaks = seq(min(full$time), max(full$time))) +
-    labs(x = xlab, y = "Effect on Number of Fires (in 1,000 units)") +
+    labs(x = xlab, y = ylab) +
     geom_text(
       data = annotation_data,
       aes(x = time, y = value, label = label),
@@ -444,7 +445,8 @@ extract_event <- function(csv_name, model, rows, columns) {
 
 run_case <- function(csv, model, rows, columns, base, pre, post, omitted,
                      xlab, ylim_original = NULL, ylim_rotated = NULL,
-                     required = TRUE, result_suffix = "") {
+                     required = TRUE, result_suffix = "",
+                     ylab = "Effect on Number of Fires (in 1,000 units)") {
   event <- extract_event(csv, model, rows, columns)
   if (is.null(event)) {
     message <- paste0("Missing estimate file: ", file.path(table_dir, csv))
@@ -453,7 +455,7 @@ run_case <- function(csv, model, rows, columns, base, pre, post, omitted,
     return(invisible(FALSE))
   }
   plot_event(event, base, pre, post, omitted, xlab,
-             ylim_original, ylim_rotated, result_suffix)
+             ylim_original, ylim_rotated, result_suffix, ylab)
   invisible(TRUE)
 }
 
@@ -1178,6 +1180,23 @@ for (analysis_suffix in "_acpop") {
       }
     }
   }
+}
+
+# T-2 differenced politician event study with MODIS fires only (fig:agri_modi).
+# With the fe_list 1/4 submitted by submit_all.sh, evreg4 is the baseline
+# model with FE4: grid x cohort, cohort-specific province trends, and event
+# year x cohort, as stated in the figure note.
+if ("politician" %in% args$families) {
+  run_case(
+    paste0(
+      "_app_16_polischar_t2norm_evst", s,
+      "_rural_acpop_controls_both_countk_modis_t2.csv"
+    ),
+    "evreg4", 13:21, c(3, 4, 17:25),
+    paste0("_app_16_polischar_t2norm_evst", s, "_rural_acpop_countk_modis_t2_1"),
+    5, 5, -1, "Years from Election",
+    ylab = "Effect on Fires net of T-2 (in 1,000 units)"
+  )
 }
 
 # Canonical protest event studies: baseline and rice-production moderation on

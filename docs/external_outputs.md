@@ -23,10 +23,6 @@ in Overleaf.
 `tables/_app_desc_polisch_char.tex`, `tables/_main_5_polischar_fe12_did_inter_rural.tex`
 
 ## Partially covered
-- `_app_16_polischar_t2norm_evst_rural_acpop_countk_modis_t2_1_ori.png`: the
-  estimation (`_app_16_polischar_t2norm_evst.do`) and the CSV export
-  (`_export_event_study_csv.do`) are kept, but no script in the repo plots
-  this figure.
 - `stacked_event_study_pop_m5_p6_omit0_rural_1_ori.png`: estimated by
   `exploratory_analysis/event_study/omit_period_0/alternative_windows/m5_p6_main_pop.do`
   and plotted by `plotting_event_studies.R` (alternative-window cases). The PNG

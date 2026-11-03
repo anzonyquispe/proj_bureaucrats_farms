@@ -4538,6 +4538,7 @@ figures/_app_16_polischar_fe12_evst_all_rural_acpop_riceP_5_ori.png,keep,figure 
 figures/_app_16_polischar_fe12_evst_all_rural_acpop_riceP_5_rot_honest1.png,archive,figure not used in main.tex / talks
 figures/_app_16_polischar_fe12_evst_all_rural_acpop_riceP_5_rot_honest2.png,archive,figure not used in main.tex / talks
 figures/_app_16_polischar_fe12_evst_all_rural_acpop_riceP_5_rotated.png,keep,figure used in main.tex / talks
+figures/_app_16_polischar_t2norm_evst_rural_acpop_countk_modis_t2_1_ori.png,keep,figure used in main.tex / talks
 figures/_app_17_5km_fe12_evst_all_rural_fe03_1_honest1.png,archive,figure not used in main.tex / talks
 figures/_app_17_5km_fe12_evst_all_rural_fe03_1_honest2.png,archive,figure not used in main.tex / talks
 figures/_app_17_5km_fe12_evst_all_rural_fe03_1_ori.png,keep,figure used in main.tex / talks
@@ -8516,6 +8517,9 @@ tables/_app_16_polischar_fe12_evst_all_sample_rural_controls_both.csv,archive,ta
 tables/_app_16_polischar_fe12_evst_all_sample_rural_controls_both.ster,archive,table/estimate not used in main.tex / talks
 tables/_app_16_polischar_fe12_evst_all_sample_rural_controls_both_scalars.csv,archive,table/estimate not used in main.tex / talks
 tables/_app_16_polischar_fe12_evst_all_scalars.csv,archive,table/estimate not used in main.tex / talks
+tables/_app_16_polischar_t2norm_evst_rural_acpop_controls_both_countk_modis_t2.csv,keep,saved estimates read by kept post-processing
+tables/_app_16_polischar_t2norm_evst_rural_acpop_controls_both_countk_modis_t2.ster,keep,saved estimates read by kept post-processing
+tables/_app_16_polischar_t2norm_evst_rural_acpop_controls_both_countk_modis_t2_scalars.csv,keep,saved estimates read by kept post-processing
 tables/_app_17_5km_evst_all_rural_area.ster,archive,table/estimate not used in main.tex / talks
 tables/_app_17_5km_evst_all_rural_area_set1.ster,archive,table/estimate not used in main.tex / talks
 tables/_app_17_5km_evst_all_rural_area_set2.ster,archive,table/estimate not used in main.tex / talks
