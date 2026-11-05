@@ -194,6 +194,10 @@ if [[ "${SAMPLE}" != "_sample" && "${ANALYSIS_SUBSAMPLE}" == "all" ]]; then
     generate_descriptive_figures.py "${REPLICATION_ROOT}" "${REPLICATION_CODE}" "${SAMPLE}" "${RURAL_VAR}")
   protest_fig_job=$(submit_job protest_figures sbatch/run_python.sbatch "" 1 \
     generate_protest_figures.py "${REPLICATION_ROOT}" "${REPLICATION_CODE}" "${SAMPLE}" "${RURAL_VAR}")
+  # AC-level politician panel view (10% state-stratified sample); needs the R
+  # packages haven and panelView.
+  panelview_job=$(submit_job panelview sbatch/generate_panelview_self_profession.sbatch "" 1 \
+    "${REPLICATION_ROOT}" "${REPLICATION_CODE}")
 else
   echo "Skipping mode-invariant source figures outside the full/all run."
 fi

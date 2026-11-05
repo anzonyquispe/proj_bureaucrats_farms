@@ -16,9 +16,11 @@
 
 set -euo pipefail
 
-DATA_ROOT="${REPLICATION_ROOT:-/groups/sgulzar/sa_fires/proj_bureaucrats_farms}"
-REPO="${REPLICATION_REPO:-/users/aquisper/proj_bureaucrats_farms}"
-CODE="${REPLICATION_CODE:-${REPO}/code/_stacked_downup_replication}"
+# submit_all.sh passes the data root and the code directory as arguments; the
+# environment variables are the fallback for a standalone qsub/sbatch run.
+DATA_ROOT="${1:-${REPLICATION_ROOT:-/groups/sgulzar/sa_fires/proj_bureaucrats_farms}}"
+CODE="${2:-${REPLICATION_CODE:-${REPLICATION_REPO:-/users/aquisper/proj_bureaucrats_farms}/code/_stacked_downup_replication}}"
+REPO="$(cd "${CODE}/../.." && pwd)"
 RSCRIPT_BIN="${RSCRIPT_BIN:-Rscript}"
 LOG_DIR="${CODE}/logs"
 LOG_FILE="${LOG_DIR}/panelview_self_profession.log"

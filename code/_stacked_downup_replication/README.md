@@ -154,7 +154,8 @@ single pooled sample. Politician control-sample robustness naming is unchanged.
 
 Stata needs the project commands already used by the original package,
 including `reghdfejl`, `estout`/`esttab`, and their dependencies. R needs
-`data.table`, `ggplot2`, and `HonestDiD`.
+`data.table`, `ggplot2`, and `HonestDiD`, plus `haven` and `panelView` for the
+politician panel view (`generate_panelview_self_profession.R`).
 
 Every `reghdfejl` call passes `tolerance(1e-6)` explicitly. That was the
 command's default before version 1.1.6, which produced the paper's estimates;

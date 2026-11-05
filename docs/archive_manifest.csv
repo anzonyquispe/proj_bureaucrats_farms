@@ -11494,7 +11494,7 @@ tables/main_figure4_neighbour_sample_rural.ster,archive,table/estimate not used 
 tables/main_figure4_neighbour_sample_rural_ricehigh.ster,archive,table/estimate not used in main.tex / talks
 tables/panelview_downup_ac_pop_excluded_grids.csv,archive,table/estimate not used in main.tex / talks
 tables/panelview_downup_ac_pop_selected_grids.csv,archive,table/estimate not used in main.tex / talks
-tables/panelview_self_profession_selected_acs.csv,archive,table/estimate not used in main.tex / talks
+tables/panelview_self_profession_selected_acs.csv,keep,sampled-AC audit list for figures/panelview_self_profession.png
 tables/polischar_event_study.tex,keep,table used in main.tex / talks
 tables/presentations/_app_10_did_rice_moderators_rural.tex,keep,table used in main.tex / talks
 tables/presentations/_app_13_protest_5km_fe12_did_ricemods_rural.tex,keep,table used in main.tex / talks
