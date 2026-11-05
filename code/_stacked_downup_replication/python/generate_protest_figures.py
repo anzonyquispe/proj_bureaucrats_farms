@@ -120,20 +120,28 @@ def main() -> None:
     buffers = events.to_crs(7755).copy()
     buffers.geometry = buffers.geometry.buffer(5000)
     buffers = buffers.to_crs(4326)
+    # Protest dots and three-entry legend as described in the fig:protest_construction note.
     fig, ax = plt.subplots(figsize=(8, 8))
-    buffers.plot(ax=ax, color="blue", alpha=0.2)
-    constituencies.loc[constituencies.ac_uq_id.eq(ac_id)].boundary.plot(ax=ax, color="black")
+    buffers.plot(ax=ax, color="blue", linewidth=0.7, alpha=0.2)
+    ax.scatter(events.longitude, events.latitude, color="black", marker="o", s=40, zorder=5)
+    constituencies.loc[constituencies.ac_uq_id.eq(ac_id)].boundary.plot(
+        ax=ax, color="black", linewidth=1.0
+    )
     ax.legend(
         handles=[
-            mpatches.Patch(color="blue", alpha=0.2, label="Protests"),
-            mpatches.Patch(edgecolor="black", facecolor="none", label="Assembly Constituency"),
+            plt.Line2D([], [], color="black", marker="o", linestyle="None",
+                       markersize=8, label="Protest Location"),
+            mpatches.Patch(color="blue", alpha=0.2, label="Protest Buffer Area"),
+            mpatches.Patch(edgecolor="black", facecolor="none",
+                           label="Assembly Constituency Border"),
         ],
         loc="lower right",
+        fontsize=12,
         frameon=False,
     )
     ax.axis("off")
     fig.tight_layout()
-    fig.savefig(figures / "ac_protest_plot.png", dpi=300)
+    fig.savefig(figures / "ac_protest_plot.png", dpi=300, bbox_inches="tight")
     plt.close(fig)
     print("Generated 5km_plot.png, protests_monthly_bars.png, and ac_protest_plot.png")
 
