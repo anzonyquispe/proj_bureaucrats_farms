@@ -3191,6 +3191,7 @@ code/_stacked_downup_replication/_app_8_main_did_by_year.do,keep,estimation feed
 code/_stacked_downup_replication/_app_9_main_did_by_state.do,keep,estimation feeding a used table/figure (or read by _generate_all_tables.do)
 code/_stacked_downup_replication/_app_maps_acs.ipynb,keep,figure/table generator used in paper or talks
 code/_stacked_downup_replication/_apply_analysis_subsample.do,keep,estimation feeding a used table/figure (or read by _generate_all_tables.do)
+code/_stacked_downup_replication/_compare_protest2.do,keep,estimation feeding a used table/figure (or read by _generate_all_tables.do)
 code/_stacked_downup_replication/_export_event_study_csv.do,keep,post-processing: tables/figures used in paper or talks
 code/_stacked_downup_replication/_generate_all_tables.do,keep,post-processing: tables/figures used in paper or talks
 code/_stacked_downup_replication/_generate_all_tables.log,archive,log / scratch / OS file

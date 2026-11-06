@@ -37,4 +37,12 @@ submit_appendix() {
 submit_appendix protest2_app12 _app_12_protest_5km_fe_did.do 3
 submit_appendix protest2_app13_rice _app_13_protest_5km_fe12_did_ricemods.do 0/3
 
+# Side-by-side table, released when every job above has left the queue.
+held="protest_did_pop,protest_did_area,descriptives_protest,protest_event"
+held+=",protest_inter_area,protest_inter_pop,protest2_app12,protest2_app13_rice"
+id=$(qsub -terse -V -N protest2_compare -j y -o /dev/null -q "${SGE_QUEUE}" \
+  -hold_jid "${held}" "${REPLICATION_CODE}/sbatch/run_dofile.sbatch" _compare_protest2.do \
+  "${REPLICATION_ROOT}" "${REPLICATION_CODE}" shell none is_rural 1 none none none none all all)
+echo "Submitted protest2_compare (after all protest2 jobs): ${id}"
+echo "Comparison: ${REPLICATION_CODE}/../../tables/protest2_comparison.csv"
 echo "Logs: ${REPLICATION_CODE}/logs/<job-name>_<job-id>.stata.log"
