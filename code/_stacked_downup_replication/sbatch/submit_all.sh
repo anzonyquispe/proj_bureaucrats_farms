@@ -20,6 +20,10 @@ ONLY="${ONLY:-}"
 # SGE_QUEUE: overrides the queue embedded in the job scripts (#$ -q largemem),
 # e.g. SGE_QUEUE=long for users without largemem access.
 SGE_QUEUE="${SGE_QUEUE:-}"
+# PROTEST_STACK: protest definition for the protest jobs. stacked_data_protest2_5km
+# runs them on the Gemini-based protest2 data and tags every output _protest2
+# (see _protest_definition.do); sbatch/submit_protest2.sh sets it.
+PROTEST_STACK="${PROTEST_STACK:-stacked_data_protest5km}"
 
 case "${SAMPLE}" in
   none|""|_sample) ;;
@@ -108,7 +112,7 @@ submit_stata() {
     suffix="${suffix}${OUTPUT_TAG}"
   fi
   [[ -z "${suffix}" ]] && suffix="none"
-  if [[ "${stacked}" == "stacked_data_protest5km" ]]; then
+  if [[ "${stacked}" == stacked_data_protest* ]]; then
     cpus="${PROTEST_CPUS}"
   fi
   submit_job "${name}" "sbatch/run_dofile.sbatch" "${dependency}" "${cpus}" \
@@ -127,7 +131,7 @@ echo "Permanent logs: ${REPLICATION_CODE}/logs/<job-name>_<job-id>.stata.log"
 # data_output/intermediate. Every job that re-reads one of those samples waits
 # for its producer; otherwise it reads a missing, stale, or half-written file.
 main_pop_id=$(submit_stata main_did_pop _main_1_did.do 1/4 _stacked downup_ac_pop combined_dt_pop main_did_downup_pop_ac)
-protest_pop_id=$(submit_stata protest_did_pop _main_4_protest_5km_fe12_did_downup.do 0/3 _acpop downup_ac_pop stacked_data_protest5km)
+protest_pop_id=$(submit_stata protest_did_pop _main_4_protest_5km_fe12_did_downup.do 0/3 _acpop downup_ac_pop "${PROTEST_STACK}")
 politician_pop_id=$(submit_stata politician_did_pop _main_5_polischar_fe12_did_downup_inter.do 0/3 _acpop downup_ac_pop)
 table_ids+=("${main_pop_id}" "${protest_pop_id}" "${politician_pop_id}")
 
@@ -140,12 +144,12 @@ table_ids+=("$(submit_stata did_by_year _app_8_main_did_by_year.do 1/10 none non
 table_ids+=("$(submit_stata did_by_state _app_9_main_did_by_state.do 1/4 none none none none "${main_pop_id}")")
 table_ids+=("$(submit_stata placebo_13km _app_11_placebo_pop_13km.do 1 none none none none "${main_pop_id}")")
 # FE0-FE3 x {plain, interacted} = the eight evreg models each table reads.
-table_ids+=("$(submit_stata protest_did_area _main_4_protest_5km_fe12_did_downup.do 0/3 none downup_ac stacked_data_protest5km)")
+table_ids+=("$(submit_stata protest_did_area _main_4_protest_5km_fe12_did_downup.do 0/3 none downup_ac "${PROTEST_STACK}")")
 table_ids+=("$(submit_stata politician_did_area _main_5_polischar_fe12_did_downup_inter.do 0/3 none downup_ac)")
 
 # Descriptive tables are also separate Stata jobs, each on its sample's producer.
 table_ids+=("$(submit_stata descriptives_main app_main_descriptive.do 1 none none none none "${main_pop_id}")")
-table_ids+=("$(submit_stata descriptives_protest app_5km_descriptive.do 1 none none stacked_data_protest5km none "${protest_pop_id}")")
+table_ids+=("$(submit_stata descriptives_protest app_5km_descriptive.do 1 none none "${PROTEST_STACK}" none "${protest_pop_id}")")
 table_ids+=("$(submit_stata descriptives_politician app_polischar_descriptive.do 1 none none none none "${politician_pop_id}")")
 
 # Event-study estimates. Politician uses the unchanged by-province composition.
@@ -155,11 +159,11 @@ event_ids+=("$(submit_stata event_5pre_pop _main_2_stacked_event_study_5pre.do "
 event_ids+=("$(submit_stata politician_event_pop _app_16_polischar_fe12_evst_all.do "${EVENT_FE_LIST}" _acpop downup_ac_pop)")
 # T-2 differenced politician event study (fig:agri_modi), full FE sweep.
 event_ids+=("$(submit_stata politician_event_t2norm _app_16_polischar_t2norm_evst.do 1/4 _acpop downup_ac_pop)")
-event_ids+=("$(submit_stata protest_event _app_17_5km_fe12_evst_all.do 3 none none stacked_data_protest5km)")
+event_ids+=("$(submit_stata protest_event _app_17_5km_fe12_evst_all.do 3 none none "${PROTEST_STACK}")")
 
 # Interaction estimates used by the two active interaction figures.
-interaction_ids+=("$(submit_stata protest_inter_area _app_18_protest_5km_fe12_did_downup_plot.do 3 none downup_ac stacked_data_protest5km)")
-interaction_ids+=("$(submit_stata protest_inter_pop _app_18_protest_5km_fe12_did_downup_plot.do 3 _acpop downup_ac_pop stacked_data_protest5km)")
+interaction_ids+=("$(submit_stata protest_inter_area _app_18_protest_5km_fe12_did_downup_plot.do 3 none downup_ac "${PROTEST_STACK}")")
+interaction_ids+=("$(submit_stata protest_inter_pop _app_18_protest_5km_fe12_did_downup_plot.do 3 _acpop downup_ac_pop "${PROTEST_STACK}")")
 interaction_ids+=("$(submit_stata politician_inter_area _app_19_polischar_fe12_did_downup_inter_plot.do 1 none downup_ac)")
 interaction_ids+=("$(submit_stata politician_inter_pop _app_19_polischar_fe12_did_downup_inter_plot.do 1 _acpop downup_ac_pop)")
 

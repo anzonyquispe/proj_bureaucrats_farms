@@ -30,8 +30,9 @@ global tables   "${code}/../../tables"
 
 * Exact sample exported by the richest interacted protest DiD, already
 * restricted to relative years [-4, 1].
+do "${code}/_protest_definition.do"
 import delimited using ///
-    "${int_data}/protest_downup_ac_pop_esample${sample}.csv", ///
+    "${int_data}/protest_downup_ac_pop_esample${sample}${protest_tag}.csv", ///
     clear varnames(1) case(preserve)
 display as text "Protest richest-DiD descriptive sample: " _N
 * Politician identity, used for the politician-count row below.

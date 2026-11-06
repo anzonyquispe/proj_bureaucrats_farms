@@ -3213,6 +3213,7 @@ code/_stacked_downup_replication/_main_6_neighbour.do,keep,estimation feeding a 
 code/_stacked_downup_replication/_main_6_neighbour_plot.do,keep,estimation feeding a used table/figure (or read by _generate_all_tables.do)
 code/_stacked_downup_replication/_master_replication.do,keep,driver for kept scripts
 code/_stacked_downup_replication/_master_replication_log_sample.txt,archive,code not contributing to a used output
+code/_stacked_downup_replication/_protest_definition.do,keep,estimation feeding a used table/figure (or read by _generate_all_tables.do)
 code/_stacked_downup_replication/_run_local_main_postprocessing.do,keep,driver for kept scripts
 code/_stacked_downup_replication/_run_local_ster_postprocessing.do,keep,driver for kept scripts
 code/_stacked_downup_replication/_stacked_downup_replication shell none is_rural_area 1 _acpop downup_ac_pop none none.log,archive,log / scratch / OS file
@@ -4248,6 +4249,7 @@ code/_stacked_downup_replication/sbatch/submit_corrected_protest_estimations.sh,
 code/_stacked_downup_replication/sbatch/submit_descriptive_statistics_only.sh,keep,cluster launcher for kept scripts
 code/_stacked_downup_replication/sbatch/submit_did_descriptives_only.sh,archive,code not contributing to a used output
 code/_stacked_downup_replication/sbatch/submit_estimations_only.sh,keep,cluster launcher for kept scripts
+code/_stacked_downup_replication/sbatch/submit_protest2.sh,keep,cluster launcher for kept scripts
 code/_stacked_downup_replication/sbatch/submit_recovery_jobs.sh,archive,code not contributing to a used output
 code/_stacked_downup_replication/sbatch/submit_updated_main_estimations.sh,archive,code not contributing to a used output
 code/_stacked_downup_replication/sbatch/submit_updated_presentation_tables.sh,keep,cluster launcher for kept scripts

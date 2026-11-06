@@ -22,6 +22,15 @@ loading and standardizing the event-time variable, before estimation.
 The `0_master_dataset.csv` descriptive table is not a stacked regression and
 therefore does not receive an event-time restriction.
 
+Every protest dofile (`_main_4`, `_app_12`, `_app_13`, `_app_17`, `_app_18`,
+`app_5km_descriptive.do`) selects its data through `_protest_definition.do`.
+With `$stacked_file` equal to `stacked_data_protest2_5km` it reads the
+Gemini-based protest2 stack and `grid_month_ac_area_tr_protest2.dta`, and it
+appends `_protest2` to `$ster_suffix` and to the exported estimation sample.
+Any other value keeps the keyword-rule inputs and output names used by the
+paper. `sbatch/submit_protest2.sh` submits all protest regressions for
+protest2.
+
 ## Main analysis dofiles
 
 | Dofile | What it estimates or generates | Main output |

@@ -29,24 +29,11 @@ if "$downup_var" == "" {
 global int_data "${root}/data_output/intermediate"
 global tables   "${code}/../../tables"
 
-local protest_input ///
-    "${int_data}/stacked_data_protest5km_election_sameterm${sample}.csv"
-capture confirm file "`protest_input'"
-if _rc {
-    local protest_input ///
-        "${int_data}/cohortes_protest_term/stacked_data_protest5km_election_sameterm${sample}.csv"
-}
-capture confirm file "`protest_input'"
-if _rc {
-    local protest_input ///
-        "${int_data}/cohorts_protest_term/stacked_data_protest5km_election_sameterm${sample}.csv"
-}
-confirm file "`protest_input'"
-display as text "Final same-term protest input: `protest_input'"
-import delimited using "`protest_input'", clear varnames(1)
+do "${code}/_protest_definition.do"
+import delimited using "${protest_input}", clear varnames(1)
 
 merge m:1 unique_small_grid_id month year using ///
-    "${int_data}/grid_month_ac_area_tr.dta", ///
+    "${protest_clusters}", ///
     keep(master match) keepusing(ac_area_tr)
 assert _merge == 3
 drop _merge

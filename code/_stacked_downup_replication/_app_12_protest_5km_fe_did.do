@@ -26,6 +26,8 @@ if "$root" == "" {
         global root "$shell"
     }
 }
+* Standalone sbatch runs start in the code directory.
+if "$code" == "" global code "`c(pwd)'"
 
 cd "${root}"
 
@@ -33,16 +35,8 @@ cd "${root}"
 * Import Data
 ********************************************************************************
 
-local protest_input ///
-    "${root}/data_output/intermediate/stacked_data_protest5km_election_sameterm${sample}.csv"
-capture confirm file "`protest_input'"
-if _rc local protest_input ///
-    "${root}/data_output/intermediate/cohortes_protest_term/stacked_data_protest5km_election_sameterm${sample}.csv"
-capture confirm file "`protest_input'"
-if _rc local protest_input ///
-    "${root}/data_output/intermediate/cohorts_protest_term/stacked_data_protest5km_election_sameterm${sample}.csv"
-confirm file "`protest_input'"
-import delimited using "`protest_input'", clear varnames(1)
+do "${code}/_protest_definition.do"
+import delimited using "${protest_input}", clear varnames(1)
 
 capture confirm variable relative_year_bin
 if _rc rename relative_year relative_year_bin
@@ -143,8 +137,8 @@ foreach fe of numlist 3 {
 * Save ster file
 ********************************************************************************
 
-estwrite evreg* using "${code}/../../tables/_app_12_protest_5km_fe_did${sample}_rural.ster", replace
+estwrite evreg* using "${code}/../../tables/_app_12_protest_5km_fe_did${sample}_rural${ster_suffix}.ster", replace
 
-display "Ster: ${code}/../../tables/_app_12_protest_5km_fe_did${sample}_rural.ster"
+display "Ster: ${code}/../../tables/_app_12_protest_5km_fe_did${sample}_rural${ster_suffix}.ster"
 
 ********************************************************************************

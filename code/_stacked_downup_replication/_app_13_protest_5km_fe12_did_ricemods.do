@@ -24,13 +24,8 @@ if "$root" == "" {
 global int_data "${root}/data_output/intermediate"
 global tables "${code}/../../tables"
 
-local input "${int_data}/stacked_data_protest5km_election_sameterm${sample}.csv"
-capture confirm file "`input'"
-if _rc local input "${int_data}/cohortes_protest_term/stacked_data_protest5km_election_sameterm${sample}.csv"
-capture confirm file "`input'"
-if _rc local input "${int_data}/cohorts_protest_term/stacked_data_protest5km_election_sameterm${sample}.csv"
-confirm file "`input'"
-import delimited using "`input'", clear varnames(1)
+do "${code}/_protest_definition.do"
+import delimited using "${protest_input}", clear varnames(1)
 capture confirm variable relative_year_bin
 if _rc rename relative_year relative_year_bin
 keep if year < 2022 | (year == 2022 & month <= 8)
@@ -39,7 +34,7 @@ confirm variable rice_prod_aclvl_ahigh
 drop if missing(rice_prod_aclvl_ahigh)
 
 merge m:1 unique_small_grid_id month year using ///
-    "${int_data}/grid_month_ac_area_tr.dta", keep(master match) keepusing(ac_area_tr)
+    "${protest_clusters}", keep(master match) keepusing(ac_area_tr)
 assert _merge == 3
 drop _merge
 merge m:1 unique_small_grid_id using ///

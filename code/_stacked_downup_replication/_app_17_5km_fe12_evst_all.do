@@ -2,7 +2,8 @@
 * Canonical protest event study: FE3 implementation based on the RA's
 * _app_21_5km_allfe_same_term.do, estimated over event years -4 through +4.
 *
-* Authoritative input: stacked_data_protest5km_election_sameterm.csv.
+* Authoritative input: stacked_data_protest5km_election_sameterm.csv, or the
+* protest2 stack selected by _protest_definition.do.
 * Controls are pooled exactly as supplied by that stack. There is no
 * control_type filter. The zero moderator produces the production baseline;
 * the native rice-production moderator is retained for the table output.
@@ -39,16 +40,13 @@ if "$root" == "" {
 global int_data "${root}/data_output/intermediate"
 global tables   "${code}/../../tables"
 
-local protest_input ///
-    "${int_data}/stacked_data_protest5km_election_sameterm${sample}.csv"
-confirm file "`protest_input'"
-display as text "RA same-term protest input: `protest_input'"
-import delimited using "`protest_input'", clear varnames(1)
+do "${code}/_protest_definition.do"
+import delimited using "${protest_input}", clear varnames(1)
 
 * Attach the reference dofile's AC-area clustering variable without importing
 * the full master CSV into Stata.
 merge m:1 unique_small_grid_id month year using ///
-    "${int_data}/grid_month_ac_area_tr.dta", ///
+    "${protest_clusters}", ///
     keep(master match) keepusing(ac_area_tr)
 assert _merge == 3
 drop _merge
