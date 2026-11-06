@@ -90,9 +90,12 @@ program define _unique_count, rclass
 end
 
 local colsel unique_small_grid_id year month ac_uq_id pol_name prov ///
-    ac_area_tr cohort legis_govyear relative_year_bin protest countk ///
-    rice_prod_aclvl_ahigh
-local contvars countk rice_prod_aclvl_ahigh protest relative_year_bin
+    cohort legis_govyear relative_year_bin protest countk ///
+    av_wind_speed wind_direction rice_prod_aclvl_ahigh
+local contvars countk rice_prod_aclvl_ahigh protest relative_year_bin ///
+    av_wind_speed wind_direction
+* Keep only the table variables; _unique_count preserves the whole dataset.
+keep `colsel'
 
 local lab_unique_small_grid_id  "Grid ID"
 local lab_year                  "Year"
@@ -100,24 +103,28 @@ local lab_month                 "Month"
 local lab_ac_uq_id              "Assembly Constituency (AC)"
 local lab_pol_name              "Number of Politicians"
 local lab_prov                  "Province"
-local lab_ac_area_tr            "Protest Area"
 local lab_cohort                "Cohort"
 local lab_legis_govyear         "Legislature"
 local lab_relative_year_bin     "Relative year"
 local lab_protest               "Protest"
 local lab_countk                "Number of Fires (in 1,000 units)"
+local lab_av_wind_speed         "Average Wind Speed"
+local lab_wind_direction        "Wind Direction"
 local lab_rice_prod_aclvl_ahigh "High Rice Production (AC level)"
 
 capture file close texout
 file open texout using "${tables}/_protest_stacked_descriptive${sample}${ster_suffix}.tex", write replace
 file write texout "\begin{tabular}{lrrrrrr}" _n
 file write texout "\toprule" _n
-file write texout " & Mean & SD & Min & Max & Observations & Unique Obs.\\\\" _n
+file write texout " & Mean & SD & Min & Max & Observations & Unique Obs.\\" _n
 file write texout "\midrule" _n
 
 foreach v of local colsel {
     quietly count if !missing(`v')
     local Nval = r(N)
+    * Rows without a politician name stay in the regression sample, so they
+    * count as observations of the politician row.
+    if "`v'" == "pol_name" local Nval = _N
     quietly _unique_count `v'
     local uval = r(n)
     _fmt_int `Nval'
@@ -147,7 +154,7 @@ foreach v of local colsel {
         local maxfmt "`r(out)'"
     }
     local vlabel "`lab_`v''"
-    file write texout "`vlabel' & `meanfmt' & `sdfmt' & `minfmt' & `maxfmt' & `Nfmt' & `ufmt'\\\\" _n
+    file write texout "`vlabel' & `meanfmt' & `sdfmt' & `minfmt' & `maxfmt' & `Nfmt' & `ufmt'\\" _n
 }
 
 file write texout "\bottomrule" _n

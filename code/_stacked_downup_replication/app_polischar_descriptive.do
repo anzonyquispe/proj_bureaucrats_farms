@@ -40,6 +40,9 @@ drop if _merge == 2
 drop _merge
 quietly count if missing(pol_name)
 display as text "Rows without a politician name: " r(N)
+* How the regression treats the rows without a politician name.
+tabulate treat post_ if missing(pol_name), missing
+tabulate self_profession_nomiss if missing(pol_name), missing
 
 capture drop prov legis_govyear agri_politician
 egen prov = group(province)
@@ -88,11 +91,14 @@ program define _unique_count, rclass
     restore
 end
 
-local colsel unique_small_grid_id year month ac_uq_id pol_name prov election_year ///
-    cohort legis_govyear self_profession_nomiss relative_year_bin ///
-    agri_politician countk ///
+local colsel unique_small_grid_id year month ac_uq_id pol_name ///
+    self_profession_nomiss prov election_year cohort legis_govyear ///
+    relative_year_bin agri_politician countk av_wind_speed wind_direction ///
     rice_prod_aclvl_ahigh
-local contvars countk rice_prod_aclvl_ahigh relative_year_bin agri_politician
+local contvars countk rice_prod_aclvl_ahigh relative_year_bin agri_politician ///
+    av_wind_speed wind_direction
+* Keep only the table variables; _unique_count preserves the whole dataset.
+keep `colsel'
 
 local lab_unique_small_grid_id  "Grid ID"
 local lab_year                  "Year"
@@ -107,26 +113,34 @@ local lab_self_profession_nomiss "Agricultural Politician"
 local lab_relative_year_bin     "Relative year"
 local lab_agri_politician       "Switching to Agri Pol"
 local lab_countk                "Number of Fires (in 1,000 units)"
+local lab_av_wind_speed         "Average Wind Speed"
+local lab_wind_direction        "Wind Direction"
 local lab_rice_prod_aclvl_ahigh "High Rice Production (AC level)"
 
 capture file close texout
 file open texout using "${tables}/_politicians_stacked_descriptive${sample}${ster_suffix}.tex", write replace
 file write texout "\begin{tabular}{lrrrrrr}" _n
 file write texout "\toprule" _n
-file write texout " & Mean & SD & Min & Max & Observations & Unique Obs.\\\\" _n
+file write texout " & Mean & SD & Min & Max & Observations & Unique Obs.\\" _n
 file write texout "\midrule" _n
 
 foreach v of local colsel {
     quietly count if !missing(`v')
     local Nval = r(N)
+    * Rows without a politician name stay in the regression sample (a missing
+    * profession is coded as non-agricultural), so they count as observations
+    * of the politician row.
+    if "`v'" == "pol_name" local Nval = _N
     quietly _unique_count `v'
     local uval = r(n)
 
-    * The agricultural-politician row counts treated politicians, not the two
-    * values of the dummy.
+    * The agricultural-politician row counts distinct politicians whose
+    * profession is agricultural, not the two values of the dummy. treat
+    * cannot be used here: it equals 1 in every month of a switching AC, so it
+    * would also count the non-agricultural politicians before the switch.
     if "`v'" == "self_profession_nomiss" {
         tempvar tag_agri_pol
-        quietly egen `tag_agri_pol' = tag(pol_name) if treat == 1 & !missing(pol_name)
+        quietly egen `tag_agri_pol' = tag(pol_name) if self_profession_nomiss == 1 & !missing(pol_name)
         quietly count if `tag_agri_pol' == 1
         local uval = r(N)
         drop `tag_agri_pol'
@@ -158,7 +172,7 @@ foreach v of local colsel {
         local maxfmt "`r(out)'"
     }
     local vlabel "`lab_`v''"
-    file write texout "`vlabel' & `meanfmt' & `sdfmt' & `minfmt' & `maxfmt' & `Nfmt' & `ufmt'\\\\" _n
+    file write texout "`vlabel' & `meanfmt' & `sdfmt' & `minfmt' & `maxfmt' & `Nfmt' & `ufmt'\\" _n
 }
 
 file write texout "\bottomrule" _n
