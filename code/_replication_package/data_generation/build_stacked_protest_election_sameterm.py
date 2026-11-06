@@ -82,9 +82,14 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--input", type=Path, default=None)
     parser.add_argument("--treatment-col", default="protest5km")
     parser.add_argument(
+        "--treatment-name",
+        default=None,
+        help="Name of the treatment column in the output; defaults to --treatment-col.",
+    )
+    parser.add_argument(
         "--output-stem",
         default=None,
-        help="Defaults to stacked_data_<treatment-col>_election_sameterm.",
+        help="Defaults to stacked_data_<treatment-name>_election_sameterm.",
     )
     parser.add_argument("--no-csv", action="store_true", help="Write Parquet only.")
     parser.add_argument(
@@ -103,7 +108,8 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
 def resolve_paths(args: argparse.Namespace) -> None:
     args.intermediate = args.intermediate.resolve()
     args.input = (args.input or args.intermediate / "0_master_dataset.parquet").resolve()
-    stem = args.output_stem or f"stacked_data_{args.treatment_col}_election_sameterm"
+    args.treatment_name = args.treatment_name or args.treatment_col
+    stem = args.output_stem or f"stacked_data_{args.treatment_name}_election_sameterm"
     if stem == REFERENCE_STEM:
         raise ValueError(
             f"{REFERENCE_STEM} is the RA's reference file; pass another --output-stem."
@@ -151,7 +157,10 @@ def source_columns(treatment_col: str) -> list[str]:
 
 
 def build_panel(
-    con: duckdb.DuckDBPyConnection, source: str, treatment_col: str
+    con: duckdb.DuckDBPyConnection,
+    source: str,
+    treatment_col: str,
+    treatment_name: str,
 ) -> None:
     available = {
         row[0] for row in con.execute(f"DESCRIBE SELECT * FROM {source}").fetchall()
@@ -160,7 +169,10 @@ def build_panel(
     if missing:
         raise ValueError("Master input is missing: " + ", ".join(missing))
 
-    select_columns = ",\n            ".join(qid(c) for c in source_columns(treatment_col))
+    select_columns = ",\n            ".join(
+        f"{qid(treatment_col)} AS {qid(treatment_name)}" if c == treatment_col else qid(c)
+        for c in source_columns(treatment_col)
+    )
     con.execute(
         f"""
         CREATE TABLE panel AS
@@ -436,21 +448,23 @@ def main(argv: Sequence[str] | None = None) -> int:
     if not args.input.is_file():
         raise FileNotFoundError(args.input)
     logging.info("Input: %s", args.input)
-    logging.info("Treatment: %s", args.treatment_col)
+    logging.info("Treatment: %s (output column %s)", args.treatment_col, args.treatment_name)
     logging.info("Cohort key: switching month x election year")
 
     remove_existing_outputs(args)
     con = duckdb.connect(str(args.database))
     try:
         configure(con, args)
-        build_panel(con, source_sql(args.input), args.treatment_col)
+        build_panel(
+            con, source_sql(args.input), args.treatment_col, args.treatment_name
+        )
         build_switches_and_cohorts(con)
         cohorts, treated = con.execute(
             "SELECT count(*), sum(treated_grids) FROM cohorts"
         ).fetchone()
         logging.info("Cohorts: %s | treated grids: %s", cohorts, f"{int(treated or 0):,}")
-        build_stack(con, args.treatment_col)
-        validate_final(con, args.treatment_col)
+        build_stack(con, args.treatment_name)
+        validate_final(con, args.treatment_name)
         create_manifest(con)
         rows, grids, treated_rows = con.execute(
             """

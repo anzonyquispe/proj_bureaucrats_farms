@@ -287,6 +287,36 @@ class ProtestElectionSametermTests(unittest.TestCase):
             term = ym(2022, 3) - START + 1
             self.assertIn(f"Rows only in candidate: {term:,}", report)
 
+    def test_treatment_name_only_renames_the_column(self) -> None:
+        with temporary_workspace() as work:
+            source = work / "panel.csv"
+            write_csv(source, panel_rows())
+            build(work, source).close()
+            builder.main(
+                [
+                    "--intermediate", str(work),
+                    "--input", str(source),
+                    "--treatment-name", "protest2_5km",
+                    "--output-stem", "renamed",
+                    "--no-csv",
+                    "--threads", "1",
+                    "--memory-limit", "1GB",
+                    "--log-level", "WARNING",
+                ]
+            )
+            con = duckdb.connect()
+            original = con.execute(
+                f"SELECT * FROM read_parquet('{work / 'stack.parquet'}')"
+            ).fetchdf()
+            renamed = con.execute(
+                f"SELECT * FROM read_parquet('{work / 'renamed.parquet'}')"
+            ).fetchdf()
+            con.close()
+            self.assertNotIn("protest5km", renamed.columns)
+            self.assertTrue(
+                renamed.rename(columns={"protest2_5km": "protest5km"}).equals(original)
+            )
+
     def test_reference_file_is_protected(self) -> None:
         with self.assertRaisesRegex(ValueError, "reference file"):
             builder.main(["--output-stem", builder.REFERENCE_STEM])

@@ -2272,6 +2272,7 @@ code/_replication_package/data_generation/build_fire_grid_duckdb_modis_only.sbat
 code/_replication_package/data_generation/build_grid_ac_panel_2012_2024.py,keep,data build feeding the analysis datasets
 code/_replication_package/data_generation/build_grid_month_ac_area_tr.py,keep,data build feeding the analysis datasets
 code/_replication_package/data_generation/build_grid_month_ac_area_tr.sbatch,keep,data build feeding the analysis datasets
+code/_replication_package/data_generation/build_grids_ac_protest_5km.py,keep,data build feeding the analysis datasets
 code/_replication_package/data_generation/build_master_and_stacked_datasets.sh,keep,data build feeding the analysis datasets
 code/_replication_package/data_generation/build_polischar_t2_baseline.py,keep,data build feeding the analysis datasets
 code/_replication_package/data_generation/build_polischar_t2_baseline.sbatch,keep,data build feeding the analysis datasets
@@ -2282,6 +2283,8 @@ code/_replication_package/data_generation/build_politicians_characteristics_3cyc
 code/_replication_package/data_generation/build_politicians_characteristics_byprov.out,archive,log / scratch / OS file
 code/_replication_package/data_generation/build_politicians_characteristics_byprov.py,keep,data build feeding the analysis datasets
 code/_replication_package/data_generation/build_politicians_characteristics_byprov.sbatch,keep,data build feeding the analysis datasets
+code/_replication_package/data_generation/build_protest2_datasets.sbatch,keep,data build feeding the analysis datasets
+code/_replication_package/data_generation/build_protest2_events.py,keep,data build feeding the analysis datasets
 code/_replication_package/data_generation/build_self_profession_gemini_final.py,keep,data build feeding the analysis datasets
 code/_replication_package/data_generation/build_stacked_datasets.sbatch,keep,data build feeding the analysis datasets
 code/_replication_package/data_generation/build_stacked_downup_duckdb.py,archive,data step not feeding any used output
@@ -2293,6 +2296,7 @@ code/_replication_package/data_generation/build_stacked_protest_province_electio
 code/_replication_package/data_generation/build_wind_direction_error_report.py,archive,data step not feeding any used output
 code/_replication_package/data_generation/build_wind_direction_grid_duckdb.py,keep,data build feeding the analysis datasets
 code/_replication_package/data_generation/build_wind_direction_grid_duckdb.sbatch,keep,data build feeding the analysis datasets
+code/_replication_package/data_generation/compare_master_datasets.py,keep,data build feeding the analysis datasets
 code/_replication_package/data_generation/compare_protest_sameterm_stacks.py,keep,data build feeding the analysis datasets
 code/_replication_package/data_generation/create_downup_cluster_environment.sh,keep,data build feeding the analysis datasets
 code/_replication_package/data_generation/downup_cluster_environment.yml,keep,data build feeding the analysis datasets
@@ -2319,6 +2323,7 @@ code/_replication_package/data_generation/rebuild_distr_stacks.o1333166,archive,
 code/_replication_package/data_generation/requirements.txt,keep,data build feeding the analysis datasets
 code/_replication_package/data_generation/run_downup_ac_pop_rice_workdir.sh,keep,data build feeding the analysis datasets
 code/_replication_package/data_generation/tests/test_ac_month_panel.py,archive,data step not feeding any used output
+code/_replication_package/data_generation/tests/test_compare_master_datasets.py,keep,data build feeding the analysis datasets
 code/_replication_package/data_generation/tests/test_downup_direction_convention.py,keep,data build feeding the analysis datasets
 code/_replication_package/data_generation/tests/test_downup_pop_rice.py,keep,data build feeding the analysis datasets
 code/_replication_package/data_generation/tests/test_fire_wind_duckdb.py,keep,data build feeding the analysis datasets
@@ -2328,6 +2333,7 @@ code/_replication_package/data_generation/tests/test_polischar_t2_baseline.py,ke
 code/_replication_package/data_generation/tests/test_politicians_characteristics_2cycles.py,keep,data build feeding the analysis datasets
 code/_replication_package/data_generation/tests/test_politicians_characteristics_3cycles.py,keep,data build feeding the analysis datasets
 code/_replication_package/data_generation/tests/test_politicians_characteristics_byprov.py,keep,data build feeding the analysis datasets
+code/_replication_package/data_generation/tests/test_protest2_events.py,keep,data build feeding the analysis datasets
 code/_replication_package/data_generation/tests/test_stacked_pipeline.py,keep,data build feeding the analysis datasets
 code/_replication_package/data_generation/tests/test_stacked_protest_election_sameterm.py,keep,data build feeding the analysis datasets
 code/_replication_package/data_generation/tests/test_stacked_protest_province_election_switch.py,archive,data step not feeding any used output
