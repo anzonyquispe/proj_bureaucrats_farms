@@ -84,7 +84,9 @@ def main(argv: Sequence[str] | None = None) -> int:
     con.close()
 
     unexpected = {col: n for col, n in mismatches.items() if n and col not in args.allowed}
-    missing = sorted(set(ref_cols) ^ set(cand_cols))
+    # Columns added by a newer master builder are reported but do not fail.
+    missing = sorted(set(ref_cols) - set(cand_cols))
+    added = sorted(set(cand_cols) - set(ref_cols))
     ok = ref_rows == cand_rows == matched and not unexpected and not missing
 
     lines = [
@@ -94,7 +96,8 @@ def main(argv: Sequence[str] | None = None) -> int:
         "VERDICT: " + ("ONLY PROTEST COLUMNS DIFFER" if ok else "UNEXPECTED DIFFERENCES"),
         "",
         f"Rows: reference {ref_rows:,} | candidate {cand_rows:,} | matched {matched:,}",
-        "Columns in only one file: " + (", ".join(missing) or "none"),
+        "Columns missing from the candidate: " + (", ".join(missing) or "none"),
+        "Columns only in the candidate (not compared): " + (", ".join(added) or "none"),
         "Unexpected column differences: "
         + (", ".join(f"{col} ({n:,} rows)" for col, n in unexpected.items()) or "none"),
         "",

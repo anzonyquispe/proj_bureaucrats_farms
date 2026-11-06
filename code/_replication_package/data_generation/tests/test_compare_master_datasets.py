@@ -55,6 +55,18 @@ class CompareMasterTests(unittest.TestCase):
         self.assertIn("ONLY PROTEST COLUMNS DIFFER", report)
         self.assertIn("Grids whose protest5km history changes: 2", report)
 
+    def test_added_columns_pass_but_missing_columns_fail(self) -> None:
+        status, report = self.run_compare(
+            master([0, 1, 0, 0], [3, 4, 5, 6]).assign(total_pop_ac=1.0)
+        )
+        self.assertEqual(status, 0)
+        self.assertIn("Columns only in the candidate (not compared): total_pop_ac", report)
+        status, report = self.run_compare(
+            master([0, 1, 0, 0], [3, 4, 5, 6]).drop(columns="count")
+        )
+        self.assertEqual(status, 1)
+        self.assertIn("Columns missing from the candidate: count", report)
+
     def test_other_differences_fail(self) -> None:
         status, report = self.run_compare(master([0, 1, 0, 0], [3, 4, 5, 9]))
         self.assertEqual(status, 1)

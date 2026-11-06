@@ -12,7 +12,8 @@
 #   4. stacked_data_protest2_5km_election_sameterm.csv (the RA's same-term rules)
 # Submit from this directory:
 #   qsub build_protest2_datasets.sbatch
-# Overrides: PYTHON_ENV, INTERMEDIATE, MEMORY_LIMIT.
+# Overrides: PYTHON_ENV, INTERMEDIATE, MEMORY_LIMIT. To reuse an existing protest2
+# master and start at the check: qsub -v SKIP_MASTER=1 build_protest2_datasets.sbatch
 
 set -euo pipefail
 
@@ -34,17 +35,21 @@ for input in "${INTERMEDIATE}/8_grids_ac_pr2_5km.csv" "${INTERMEDIATE}/0_master_
     [[ -f "${input}" ]] || { echo "ERROR: missing ${input}" >&2; exit 1; }
 done
 
-echo "[$(date '+%F %T')] 1/4 master dataset with protest2"
-"${PYTHON}" build_0_master_dataset.py \
-    --intermediate "${INTERMEDIATE}" \
-    --protests "${INTERMEDIATE}/8_grids_ac_pr2_5km.csv" \
-    --output-parquet "${MASTER}" \
-    --skip-csv \
-    --database "${INTERMEDIATE}/0_master_dataset_protest2.duckdb" \
-    --temp-directory "${INTERMEDIATE}/0_master_dataset_protest2_duckdb_tmp" \
-    --threads "${THREADS}" \
-    --memory-limit "${MEMORY_LIMIT}" \
-    --overwrite
+if [[ "${SKIP_MASTER:-0}" == "1" && -f "${MASTER}" ]]; then
+    echo "[$(date '+%F %T')] 1/4 reusing ${MASTER} (SKIP_MASTER=1)"
+else
+    echo "[$(date '+%F %T')] 1/4 master dataset with protest2"
+    "${PYTHON}" build_0_master_dataset.py \
+        --intermediate "${INTERMEDIATE}" \
+        --protests "${INTERMEDIATE}/8_grids_ac_pr2_5km.csv" \
+        --output-parquet "${MASTER}" \
+        --skip-csv \
+        --database "${INTERMEDIATE}/0_master_dataset_protest2.duckdb" \
+        --temp-directory "${INTERMEDIATE}/0_master_dataset_protest2_duckdb_tmp" \
+        --threads "${THREADS}" \
+        --memory-limit "${MEMORY_LIMIT}" \
+        --overwrite
+fi
 
 echo "[$(date '+%F %T')] 2/4 check against the production master"
 "${PYTHON}" compare_master_datasets.py \
