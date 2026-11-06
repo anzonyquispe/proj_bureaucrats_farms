@@ -368,6 +368,30 @@ The new treatment must be binary (`0`, `1`, or missing) and present in the
 master dataset. Its source column is retained automatically. Any
 `extra_columns` are also required and retained for that specification.
 
+## Same-election-term protest stack
+
+The protest dofiles read `stacked_data_protest5km_election_sameterm.csv`,
+supplied by the RA without a builder in the repository.
+`build_stacked_protest_election_sameterm.py` rebuilds it from
+`0_master_dataset.parquet` with the rules documented by the August cohort audit:
+
+- a cohort is a switching month x election year; provinces sharing an election
+  year share a cohort;
+- controls are all grids with the same election year in force and still
+  untreated at the cohort month, kept until the month before their own switch;
+- every row lies in the cohort's election term, and `cohort_term_start` and
+  `cohort_analysis_max` are the first and last panel months of that term.
+
+On synthetic data the builder matches the standard engine's protest stack split
+by the election term in force at the cohort month. `--treatment-col` builds the
+same stack for another absorbing treatment. The builder refuses to overwrite
+the RA's file.
+
+`build_compare_protest_sameterm.sbatch` rebuilds the `protest5km` stack and runs
+`compare_protest_sameterm_stacks.py` against the RA's file. The verdict and the
+per-cohort comparison are written to
+`logs/data_generation/protest_sameterm_comparison/`.
+
 ## Tests
 
 From the repository root:
