@@ -399,12 +399,16 @@ was identical to the RA's file (87,667,769 rows, 44 cohorts).
 ACLED events: an event counts when its `farmer_led` and `solidarity` votes add
 up to at least 7 of 10 rounds.
 
-1. `build_protest2_events.py` turns `gemini_rounds.csv` into
+1. `gemini_protests.ipynb` classified the 5,516 events in ten Batch Mode rounds
+   on 2026-10-16 (prompt, pilot and majority vote). Its outputs, including
+   `gemini_rounds.csv`, are in `data_output/intermediate/gemini_protests/`;
+   ACLED event texts are kept out of the repository.
+2. `build_protest2_events.py` turns `gemini_rounds.csv` into
    `acled_protest2_events.csv` (2,852 of 5,516 events).
-2. `build_grids_ac_protest_5km.py`, the script version of
+3. `build_grids_ac_protest_5km.py`, the script version of
    `8_grids_ac_pr_5km.ipynb`, writes `8_grids_ac_pr2_5km.csv` with `--events`.
    Without `--events` it reproduces `8_grids_ac_pr_5km.csv` (12,902 grids).
-3. `build_protest2_datasets.sbatch` builds `0_master_dataset_protest2.parquet`
+4. `build_protest2_datasets.sbatch` builds `0_master_dataset_protest2.parquet`
    (the `protest5km` and `ac_area_tr` columns there hold protest2), checks with
    `compare_master_datasets.py` that only protest columns differ from the
    production master, and writes `grid_month_ac_area_tr_protest2.dta` and

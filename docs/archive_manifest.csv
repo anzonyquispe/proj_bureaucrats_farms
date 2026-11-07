@@ -2300,6 +2300,7 @@ code/_replication_package/data_generation/compare_master_datasets.py,keep,data b
 code/_replication_package/data_generation/compare_protest_sameterm_stacks.py,keep,data build feeding the analysis datasets
 code/_replication_package/data_generation/create_downup_cluster_environment.sh,keep,data build feeding the analysis datasets
 code/_replication_package/data_generation/downup_cluster_environment.yml,keep,data build feeding the analysis datasets
+code/_replication_package/data_generation/gemini_protests.ipynb,keep,data build feeding the analysis datasets
 code/_replication_package/data_generation/grid_population.ipynb,keep,data build feeding the analysis datasets
 code/_replication_package/data_generation/grid_rice.py,keep,data build feeding the analysis datasets
 code/_replication_package/data_generation/logs/data_generation/00_master_and_stacked_pipeline.log,archive,log / scratch / OS file
