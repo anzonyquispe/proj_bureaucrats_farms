@@ -106,8 +106,9 @@ quietly summarize `dep_var' if treat == 1 & relative_year_bin <= -1
 local ymean_fmt = r(mean)
 quietly summarize `dep_var' if treat == 1 & relative_year_bin <= -1 & moderator == 1
 local ymean2_fmt = r(mean)
-unique ac_uq_id
-local numacs = r(unique)
+egen tag_ac = tag(ac_uq_id)
+count if tag_ac == 1
+local numacs = r(N)
 
 ********************************************************************************
 * Run the single selected FE3 regression
