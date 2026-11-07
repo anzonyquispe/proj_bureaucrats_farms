@@ -1,9 +1,10 @@
 ********************************************************************************
 * Side-by-side protest estimates: keyword-rule protests (paper) vs protest2.
 *
-* For every protest .ster stem, reads tables/<stem>.ster and
-* tables/<stem>_protest2.ster and keeps each identified coefficient whose name
-* involves treat, with its standard error, N and number of clusters.
+* For every protest .ster stem, reads tables/<stem>.ster (or
+* tables/<stem>_keyword.ster when it exists) and tables/<stem>_protest2.ster and
+* keeps each identified coefficient whose name involves treat, with its
+* standard error, N, number of clusters and source file.
 * Output: tables/protest2_comparison.csv (one row per stem x model x term).
 ********************************************************************************
 
@@ -32,14 +33,18 @@ local stems ///
 tempname results
 tempfile long
 postfile `results' str60 stem str10 version str20 model str100 term ///
-    double(b se N N_clust) using `long'
+    double(b se N N_clust) str80 source using `long'
 foreach stem of local stems {
     foreach version in protest protest2 {
-        local file "${tables}/`stem'.ster"
-        if "`version'" == "protest2" local file "${tables}/`stem'_protest2.ster"
-        confirm file "`file'"
+        local file "`stem'.ster"
+        * The paper files of _app_12 and _app_13 predate the current code, so
+        * their keyword-rule reruns (suffix _keyword) are the baseline instead.
+        capture confirm file "${tables}/`stem'_keyword.ster"
+        if !_rc local file "`stem'_keyword.ster"
+        if "`version'" == "protest2" local file "`stem'_protest2.ster"
+        confirm file "${tables}/`file'"
         estimates clear
-        estread using "`file'"
+        estread using "${tables}/`file'"
         quietly estimates dir
         foreach model in `r(names)' {
             quietly estimates restore `model'
@@ -52,7 +57,7 @@ foreach stem of local stems {
                 * Base and omitted levels carry zero variance.
                 if strpos("`term'", "treat") == 0 | V[`j', `j'] == 0 continue
                 post `results' ("`stem'") ("`version'") ("`model'") ("`term'") ///
-                    (b[1, `j']) (sqrt(V[`j', `j'])) (e(N)) (e(N_clust))
+                    (b[1, `j']) (sqrt(V[`j', `j'])) (e(N)) (e(N_clust)) ("`file'")
             }
         }
     }
@@ -60,8 +65,8 @@ foreach stem of local stems {
 postclose `results'
 
 use `long', clear
-reshape wide b se N N_clust, i(stem model term) j(version) string
+reshape wide b se N N_clust source, i(stem model term) j(version) string
 order stem model term bprotest bprotest2 seprotest seprotest2 ///
-    Nprotest Nprotest2 N_clustprotest N_clustprotest2
+    Nprotest Nprotest2 N_clustprotest N_clustprotest2 sourceprotest sourceprotest2
 export delimited using "${tables}/protest2_comparison.csv", replace
 display as result "Generated: ${tables}/protest2_comparison.csv (" _N " rows)"

@@ -29,7 +29,11 @@ Gemini-based protest2 stack and `grid_month_ac_area_tr_protest2.dta`, and it
 appends `_protest2` to `$ster_suffix` and to the exported estimation sample.
 Any other value keeps the keyword-rule inputs and output names used by the
 paper. `sbatch/submit_protest2.sh` submits all protest regressions for
-protest2.
+protest2, plus keyword-rule reruns of `_app_12` and `_app_13` saved with the
+suffix `_keyword`, because their paper `.ster` files predate the current code
+(the August stack and AC-level clusters). `_compare_protest2.do` then writes
+`tables/protest2_comparison.csv`, using the `_keyword` files as the baseline
+where they exist.
 
 ## Main analysis dofiles
 
