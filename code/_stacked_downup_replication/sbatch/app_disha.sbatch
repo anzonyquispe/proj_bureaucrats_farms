@@ -17,10 +17,11 @@ DATA_ROOT="${REPLICATION_ROOT:-/groups/sgulzar/sa_fires/proj_bureaucrats_farms}"
 CODE="${REPLICATION_CODE:-/users/aquisper/proj_bureaucrats_farms/code/_stacked_downup_replication}"
 RUNNER="${CODE}/sbatch/run_dofile.sbatch"
 
-# The three run in order: _app_disha_generation.do writes action_final.dta,
-# which the other two read. Running them as one job keeps that dependency
-# explicit instead of relying on submit order.
-for DOFILE in _app_disha_generation.do _app_disha.do app_disha_desc.do; do
+# They run in order: _app_disha_generation.do writes action_final.dta, which
+# the others read. Running them as one job keeps that dependency explicit
+# instead of relying on submit order.
+for DOFILE in _app_disha_generation.do _app_disha.do app_disha_desc.do \
+        _app_disha_party.do; do
     echo "[$(date '+%F %T')] starting ${DOFILE}"
     bash "${RUNNER}" "${DOFILE}" "${DATA_ROOT}" "${CODE}" \
         shell none is_rural 1 none none none none
