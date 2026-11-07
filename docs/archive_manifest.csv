@@ -8473,10 +8473,14 @@ tables/_app_11_placebo_pop_13km_sample_rural.ster,archive,table/estimate not use
 tables/_app_11_placebo_pop_13km_stacked.ster,archive,table/estimate not used in main.tex / talks
 tables/_app_12_protest_5km_fe_did.ster,archive,table/estimate not used in main.tex / talks
 tables/_app_12_protest_5km_fe_did_rural.ster,keep,saved estimates read by kept post-processing
+tables/_app_12_protest_5km_fe_did_rural_keyword.ster,keep,protest2 robustness estimates read by _compare_protest2.do
+tables/_app_12_protest_5km_fe_did_rural_protest2.ster,keep,protest2 robustness estimates read by _compare_protest2.do
 tables/_app_12_protest_5km_fe_did_stacked.ster,archive,table/estimate not used in main.tex / talks
 tables/_app_13_protest_5km_fe12_did_ricemods.ster,archive,table/estimate not used in main.tex / talks
 tables/_app_13_protest_5km_fe12_did_ricemods_rural.ster,archive,table/estimate not used in main.tex / talks
 tables/_app_13_protest_5km_fe12_did_ricemods_rural_acpop.ster,keep,saved estimates read by kept post-processing
+tables/_app_13_protest_5km_fe12_did_ricemods_rural_acpop_keyword.ster,keep,protest2 robustness estimates read by _compare_protest2.do
+tables/_app_13_protest_5km_fe12_did_ricemods_rural_acpop_protest2.ster,keep,protest2 robustness estimates read by _compare_protest2.do
 tables/_app_13_protest_5km_fe12_did_ricemods_stacked.ster,archive,table/estimate not used in main.tex / talks
 tables/_app_14_polischar_fe12_did_ricemods.ster,archive,table/estimate not used in main.tex / talks
 tables/_app_14_polischar_fe12_did_ricemods_rural.ster,archive,table/estimate not used in main.tex / talks
@@ -8568,6 +8572,7 @@ tables/_app_17_5km_fe12_evst_all_rural_controls_never_scalars.csv,archive,table/
 tables/_app_17_5km_fe12_evst_all_rural_controls_notyet.csv,archive,table/estimate not used in main.tex / talks
 tables/_app_17_5km_fe12_evst_all_rural_controls_notyet.ster,archive,table/estimate not used in main.tex / talks
 tables/_app_17_5km_fe12_evst_all_rural_controls_notyet_scalars.csv,archive,table/estimate not used in main.tex / talks
+tables/_app_17_5km_fe12_evst_all_rural_protest2.ster,keep,protest2 robustness estimates read by _compare_protest2.do
 tables/_app_17_5km_fe12_evst_all_rural_scalars.csv,keep,saved estimates read by kept post-processing
 tables/_app_17_5km_fe12_evst_all_sample_rural.csv,archive,table/estimate not used in main.tex / talks
 tables/_app_17_5km_fe12_evst_all_sample_rural.ster,archive,table/estimate not used in main.tex / talks
@@ -8580,6 +8585,8 @@ tables/_app_18_protest_5km_did_downup_plot_rural_farzad.ster,archive,table/estim
 tables/_app_18_protest_5km_fe12_did_downup_plot_rural.csv,archive,table/estimate not used in main.tex / talks
 tables/_app_18_protest_5km_fe12_did_downup_plot_rural.ster,keep,saved estimates read by kept post-processing
 tables/_app_18_protest_5km_fe12_did_downup_plot_rural_acpop.ster,keep,saved estimates read by kept post-processing
+tables/_app_18_protest_5km_fe12_did_downup_plot_rural_acpop_protest2.ster,keep,protest2 robustness estimates read by _compare_protest2.do
+tables/_app_18_protest_5km_fe12_did_downup_plot_rural_protest2.ster,keep,protest2 robustness estimates read by _compare_protest2.do
 tables/_app_18_protest_5km_fe12_did_downup_plot_sample_rural.ster,archive,table/estimate not used in main.tex / talks
 tables/_app_18_protest_5km_fe12_did_downup_plot_sample_rural_acpop.ster,archive,table/estimate not used in main.tex / talks
 tables/_app_18_protest_5km_fe12_did_downup_plot_stacked.ster,archive,table/estimate not used in main.tex / talks
@@ -8671,6 +8678,8 @@ tables/_main_4_protest_5km_fe12_did_downup_rural.ster,keep,saved estimates read 
 tables/_main_4_protest_5km_fe12_did_downup_rural.tex,archive,table/estimate not used in main.tex / talks
 tables/_main_4_protest_5km_fe12_did_downup_rural_acpop.ster,keep,saved estimates read by kept post-processing
 tables/_main_4_protest_5km_fe12_did_downup_rural_acpop_new.tex,keep,table used in main.tex / talks
+tables/_main_4_protest_5km_fe12_did_downup_rural_acpop_protest2.ster,keep,protest2 robustness estimates read by _compare_protest2.do
+tables/_main_4_protest_5km_fe12_did_downup_rural_protest2.ster,keep,protest2 robustness estimates read by _compare_protest2.do
 tables/_main_4_protest_5km_fe12_did_downup_sample_rural.ster,archive,table/estimate not used in main.tex / talks
 tables/_main_4_protest_5km_fe12_did_downup_sample_rural_acpop.ster,archive,table/estimate not used in main.tex / talks
 tables/_main_4_protest_5km_fe12_did_downup_sample_rural_acpop_ricehigh.ster,archive,table/estimate not used in main.tex / talks
@@ -8703,6 +8712,7 @@ tables/_politicians_stacked_descriptive.tex,keep,table used in main.tex / talks
 tables/_politicians_stacked_descriptive_sample.tex,archive,table/estimate not used in main.tex / talks
 tables/_politicians_stacked_descriptive_stata.tex,archive,table/estimate not used in main.tex / talks
 tables/_protest_stacked_descriptive.tex,keep,table used in main.tex / talks
+tables/_protest_stacked_descriptive_protest2.tex,keep,protest2 descriptive table (Gemini-classified protests)
 tables/_protest_stacked_descriptive_sample.tex,archive,table/estimate not used in main.tex / talks
 tables/_protest_stacked_descriptive_stata.tex,archive,table/estimate not used in main.tex / talks
 tables/ac_dist.txt,archive,table/estimate not used in main.tex / talks
@@ -11513,6 +11523,7 @@ tables/polischar_event_study.tex,keep,table used in main.tex / talks
 tables/presentations/_app_10_did_rice_moderators_rural.tex,keep,table used in main.tex / talks
 tables/presentations/_app_13_protest_5km_fe12_did_ricemods_rural.tex,keep,table used in main.tex / talks
 tables/presentations/_app_14_polischar_fe12_did_ricemods_rural.tex,keep,table used in main.tex / talks
+tables/protest2_comparison.csv,keep,protest vs protest2 comparison written by _compare_protest2.do
 tables/protest_event_study.tex,keep,table used in main.tex / talks
 tables/stacked_event_study_5pre_grid_monthyear_fe_rural.csv,archive,table/estimate not used in main.tex / talks
 tables/stacked_event_study_5pre_grid_monthyear_fe_rural.ster,archive,table/estimate not used in main.tex / talks
