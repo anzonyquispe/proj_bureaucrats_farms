@@ -1,0 +1,26 @@
+{
+\def\sym#1{\ifmmode^{#1}\else\(^{#1}\)\fi}
+\begin{tabular}{l*{8}{c}}
+\toprule
+            &\multicolumn{8}{c}{DISHA documents on:}                                                                                                                                        \\\cmidrule(lr){2-9}
+            &\multicolumn{1}{c}{(1)}&\multicolumn{1}{c}{(2)}&\multicolumn{1}{c}{(3)}&\multicolumn{1}{c}{(4)}&\multicolumn{1}{c}{(5)}&\multicolumn{1}{c}{(6)}&\multicolumn{1}{c}{(7)}&\multicolumn{1}{c}{(8)}\\
+            &\multicolumn{1}{c}{\shortstack{Substitution toward\\environment}}&\multicolumn{1}{c}{Environment}&\multicolumn{1}{c}{Agriculture}&\multicolumn{1}{c}{Development}&\multicolumn{1}{c}{Election}&\multicolumn{1}{c}{Governance}&\multicolumn{1}{c}{Welfare}&\multicolumn{1}{c}{Other Topics}\\
+\midrule
+Exposure    &       0.080         &       0.133\sym{*}  &       0.002         &      -0.068         &      -0.027         &       0.254         &      -0.012         &       0.168\sym{*}  \\
+            &     (0.112)         &     (0.078)         &     (0.044)         &     (0.122)         &     (0.078)         &     (0.460)         &     (0.095)         &     (0.087)         \\
+Exposure $\times$ Share&      -0.008         &      -0.081         &       0.067         &      -0.024         &       0.085         &      -0.441         &      -0.015         &      -0.110         \\
+            &     (0.115)         &     (0.078)         &     (0.064)         &     (0.146)         &     (0.080)         &     (0.480)         &     (0.100)         &     (0.125)         \\
+Share       &       0.642         &      -0.278         &      -1.973\sym{***}&      -1.370\sym{*}  &       0.432         &      -3.390\sym{*}  &       0.371         &       0.411         \\
+            &     (0.806)         &     (0.632)         &     (0.541)         &     (0.822)         &     (0.945)         &     (1.772)         &     (0.616)         &     (0.296)         \\
+\midrule
+Exposure + Exposure $\times$ Share&     0.072**         &     0.052**         &       0.069         &      -0.092         &       0.058         &      -0.187         &      -0.027         &       0.059         \\
+            &     (0.035)         &     (0.026)         &     (0.047)         &     (0.082)         &     (0.038)         &     (0.118)         &     (0.048)         &     (0.081)         \\
+Observations&      23,745         &      23,745         &      23,745         &      23,745         &      23,745         &      23,745         &      23,745         &      23,745         \\
+N Assembly Constituencies&         470         &         470         &         470         &         470         &         470         &         470         &         470         &         470         \\
+AC FE       &           Y         &           Y         &           Y         &           Y         &           Y         &           Y         &           Y         &           Y         \\
+Month-Year FE&           Y         &           Y         &           Y         &           Y         &           Y         &           Y         &           Y         &           Y         \\
+Mean DV     &      -2.464         &       0.884         &       1.188         &       2.287         &       1.213         &      12.382         &       1.832         &       1.188         \\
+Mean Share  &       0.635         &       0.635         &       0.635         &       0.635         &       0.635         &       0.635         &       0.635         &       0.635         \\
+\bottomrule
+\end{tabular}
+}
