@@ -156,6 +156,8 @@ table_ids+=("$(submit_stata descriptives_politician app_polischar_descriptive.do
 # Protest uses the RA's pooled control sample and selected FE3 only.
 event_ids+=("$(submit_stata event_5pre_area _main_2_stacked_event_study_5pre_area.do "${EVENT_FE_LIST}" none)")
 event_ids+=("$(submit_stata event_5pre_pop _main_2_stacked_event_study_5pre.do "${EVENT_FE_LIST}" none)")
+# Figure 3 under AC x month-year and district x month-year clustering.
+event_ids+=("$(submit_stata event_5pre_pop_cluster _app_22_event_study_cluster.do "${EVENT_FE_LIST}" none)")
 event_ids+=("$(submit_stata politician_event_pop _app_16_polischar_fe12_evst_all.do "${EVENT_FE_LIST}" _acpop downup_ac_pop)")
 # T-2 differenced politician event study (fig:agri_modi), full FE sweep.
 event_ids+=("$(submit_stata politician_event_t2norm _app_16_polischar_t2norm_evst.do 1/4 _acpop downup_ac_pop)")

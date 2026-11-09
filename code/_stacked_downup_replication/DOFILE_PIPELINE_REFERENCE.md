@@ -71,6 +71,7 @@ production master or cluster submission script.
 | `_app_18_protest_5km_fe12_did_downup_plot.do` | Stores the protest post-treatment interaction estimates consumed by the interaction graph routine. | `tables/_app_18_protest_5km_fe12_did_downup_plot*_rural*.ster` |
 | `_app_19_polischar_fe12_did_downup_inter_plot.do` | Stores the politician post-treatment interaction estimates consumed by the interaction graph routine. | `tables/_app_19_polischar_fe12_did_downup_inter_plot*_rural*.ster` |
 | `_app_20_did_downwind_hm.do` | Population-downwind DiD restricted to harvest-month/rice heterogeneity variants. | `tables/_app_20_did_downwind_hm_rural_stacked.ster` |
+| `_app_22_event_study_cluster.do` | Figure 3 (`_main_2_stacked_event_study_5pre.do`) re-estimated with the AC clustering dimension replaced by AC × month-year and by district × month-year; grid × cohort kept. Same sample and coefficients, new standard errors. | `tables/stacked_event_study_pop_5pre_cl_{acmy,distmy}*_rural*.ster` and `.csv`; `tables/main_event_study_cluster*_rural*.tex` |
 | `_app_21_5km_allfe_same_term.do` | Legacy 32-FE protest event-study sweep on the cleaned same-term sample. | `tex/paper/tables/_app_21_5km_allfe_same_term*.csv` |
 
 Appendix files 10, 12–15, 20, and 21 are available but are not currently
