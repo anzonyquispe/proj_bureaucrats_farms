@@ -1,6 +1,7 @@
 ********************************************************************************
-* DISHA appendix tables: downwind rural exposure against fires, meeting-document
-* topics and court cases, at assembly constituency x month-year.
+* DISHA tables at assembly constituency x month-year: the paper's main table
+* (tab:mechanism, tables/action_final_prev_year_count.tex), meeting-document
+* topics against downwind rural exposure, and a table of fires on exposure.
 *
 * Input: action_final.dta, written by _app_disha_generation.do.
 *
@@ -60,15 +61,9 @@ forvalues i = 1/2 {
     egen std_pop_share`i' = std(pop_share`i') if disha_sample & is_rural != 0
 }
 
-do "${code}/_app_disha_election_calendar.do"
-do "${code}/_app_disha_incumbents.do"
-
 ********************************************************************************
 * Outcomes
 ********************************************************************************
-
-gen y_fir = (fir > 0 & fir != .) * 100
-bysort ac_uq_id (monthyear): gen y_fir_tp1 = y_fir[_n + 1]
 
 gen y_agri = (topic_primary_agriculture > 0 & topic_primary_agriculture != .) * 100
 gen y_environment = (environment_pollution > 0 & environment_pollution != .) * 100
@@ -88,7 +83,7 @@ foreach y of varlist environment_pollution n_others {
     bysort ac_uq_id qtr: egen `y'_qtr = max(`y')
 }
 foreach y of varlist y_environment y_agri y_development y_election ///
-        y_governance y_welfare y_others y_fir {
+        y_governance y_welfare y_others {
     bysort ac_uq_id qtr: egen `y'_qtr = max(`y')
 }
 
@@ -100,7 +95,6 @@ gen substitution_qtr = y_environment_qtr - ///
      y_welfare_qtr + y_others_qtr) / 6
 replace substitution_qtr = 0 if substitution_qtr == .
 
-encode election, gen(election_id)
 gen countk = count * 1000
 replace count_prev_year = count_prev_year * 1000
 
@@ -112,7 +106,8 @@ quietly count if tag_ac == 1
 local numacs = r(N)
 
 ********************************************************************************
-* Table 1: fires
+* Fires on exposure (disha_final_fires.tex; not the paper's
+* action_final_prev_year_count_fire.tex)
 ********************************************************************************
 
 est clear
@@ -153,13 +148,15 @@ esttab fires1 fires2 ///
     collabels(none) booktabs
 
 ********************************************************************************
-* Table 2: meeting-document topics and court cases
+* Main table (tab:mechanism): meeting-document topics
 ********************************************************************************
 
 est clear
 
-local outcomes substitution_qtr y_environment y_agri y_development y_election ///
-    y_governance y_welfare y_others y_fir
+* Exposure is the fire-count measure std_pop_share1 and every outcome is
+* quarterly, in the paper's column order. The court-case column was dropped.
+local outcomes substitution_qtr y_environment_qtr y_agri_qtr y_development_qtr ///
+    y_election_qtr y_governance_qtr y_welfare_qtr y_others_qtr
 local names ""
 
 local i = 1
@@ -168,7 +165,7 @@ foreach var of local outcomes {
     quietly summarize `var' if `fcond'
     local ymean = r(mean)
 
-    reghdfe `var' std_pop_share2 if `fcond', ///
+    reghdfe `var' std_pop_share1 if `fcond', ///
         absorb(ac_uq_id monthyear) cluster(ac_uq_id)
     estadd scalar ymean = `ymean'
     estadd scalar acq = `numacs'
@@ -181,29 +178,27 @@ foreach var of local outcomes {
     local i = `i' + 1
 }
 
-* Nine outcomes, nine column titles: the first is the substitution index, the
-* next seven are document topics, the last is the court-case indicator.
+* Rows and headers follow the paper's table; a3 keeps the three significant
+* digits it reports.
 esttab `names' ///
-    using "${tables}/disha_final${sample}.tex", replace ///
-    cells(b(fmt(3) star) se(par fmt(3))) ///
+    using "${tables}/action_final_prev_year_count${sample}.tex", replace ///
+    cells(b(fmt(a3) star) se(par fmt(a3))) ///
     star(* 0.10 ** 0.05 *** 0.01) ///
-    nocons nobaselevels ///
-    varlabels(std_pop_share2 "Std. Share Downup \$\times\$ Fires Prev Year") ///
-    stats(N acq acfe acmonthfe ymean, ///
-          fmt(%12.0fc %12.0fc %s %s %9.3f) ///
-          labels("Observations" "N Assembly Constituencies" ///
-                 "AC FE" "Month-Year FE" "Mean DV")) ///
-    mtitles("\shortstack{Substitution toward\\environment}" ///
-            "Environment" "Agriculture" "Development" ///
-            "Election" "Governance" "Welfare" "Other Topics" ///
-            "Cases") ///
-    mgroups("DISHA Documents" "Court Data", ///
-            pattern(1 0 0 0 0 0 0 0 1) ///
+    keep(std_pop_share1) nocons nobaselevels ///
+    varlabels(std_pop_share1 "Exposure") ///
+    stats(N acfe acmonthfe ymean, ///
+          fmt(%12.0fc %s %s %9.3f) ///
+          labels("Observations" "AC FE" "Month-Year FE" "Mean DV")) ///
+    mtitles("\makecell{\textbf{Substitution} \\ \textbf{toward environment}}" ///
+            "\textbf{Environment}" "\textbf{Agriculture}" "\textbf{Development}" ///
+            "\textbf{Election}" "\textbf{Governance}" "\textbf{Welfare}" ///
+            "\textbf{Other Topics}") ///
+    mgroups("\textbf{DISHA documents on:}", pattern(1 0 0 0 0 0 0 0) ///
             prefix(\multicolumn{@span}{c}{) suffix(}) ///
             span erepeat(\cmidrule(lr){@span})) ///
-    collabels(none) booktabs
+    collabels(none) booktabs nonotes
 
 display as result "Generated: ${tables}/disha_final_fires${sample}.tex"
-display as result "Generated: ${tables}/disha_final${sample}.tex"
+display as result "Generated: ${tables}/action_final_prev_year_count${sample}.tex"
 
 ********************************************************************************
