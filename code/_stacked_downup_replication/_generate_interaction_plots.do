@@ -47,15 +47,18 @@ copy "${figures}/_app_18_protest_5km_fe12_did_downup_plot_rural_acpop${sample}${
      "${figures}/_app_18_protest_5km_fe12_did_downup_plot_rural_acpop${sample}${ster_suffix}.png", replace
 erase "${figures}/_app_18_protest_5km_fe12_did_downup_plot_rural_acpop${sample}${ster_suffix}_1.png"
 
-est clear
-interaction_graph using ///
-    "${tables}/_app_19_polischar_fe12_did_downup_inter_plot${sample}_rural_acpop${ster_suffix}.ster", ///
-    estimates(1) ///
-    output("${figures}/_app_19_polischar_fe12_did_downup_inter_plot_rural_acpop${sample}${ster_suffix}") ///
-    type(politician) modvar(downup_ac_pop)
-copy "${figures}/_app_19_polischar_fe12_did_downup_inter_plot_rural_acpop${sample}${ster_suffix}_1.png" ///
-     "${figures}/_app_19_polischar_fe12_did_downup_inter_plot_rural_acpop${sample}${ster_suffix}.png", replace
-erase "${figures}/_app_19_polischar_fe12_did_downup_inter_plot_rural_acpop${sample}${ster_suffix}_1.png"
+* A protest2 run (ster_suffix _protest2) has no politician estimates.
+if strpos("${ster_suffix}", "_protest2") == 0 {
+    est clear
+    interaction_graph using ///
+        "${tables}/_app_19_polischar_fe12_did_downup_inter_plot${sample}_rural_acpop${ster_suffix}.ster", ///
+        estimates(1) ///
+        output("${figures}/_app_19_polischar_fe12_did_downup_inter_plot_rural_acpop${sample}${ster_suffix}") ///
+        type(politician) modvar(downup_ac_pop)
+    copy "${figures}/_app_19_polischar_fe12_did_downup_inter_plot_rural_acpop${sample}${ster_suffix}_1.png" ///
+         "${figures}/_app_19_polischar_fe12_did_downup_inter_plot_rural_acpop${sample}${ster_suffix}.png", replace
+    erase "${figures}/_app_19_polischar_fe12_did_downup_inter_plot_rural_acpop${sample}${ster_suffix}_1.png"
+}
 
 * Area-weighted historical figures are excluded from the production pass.
 if "$production_only" != "1" {

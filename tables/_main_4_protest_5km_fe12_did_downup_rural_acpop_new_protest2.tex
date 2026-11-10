@@ -1,0 +1,46 @@
+{
+\def\sym#1{\ifmmode^{#1}\else\(^{#1}\)\fi}
+\begin{tabular}{l*{8}{c}}
+\hline
+& (1) & (2) & (3) & (4) & (5) & (6) & (7) & (8) \\
+            & \multicolumn{8}{c}{Number of Fires (per 1,000 units)} \\
+             \hline
+\multicolumn{9}{l}{\textbf{Panel A: Estimated Coefficients}} \\ \hline
+(1) Post $\times$ Protest&      50.046\sym{***}&     166.738\sym{***}&     156.240\sym{***}&     105.477\sym{***}&      52.198\sym{**} &     163.653\sym{***}&     152.754\sym{***}&     101.360\sym{***}\\
+            &    (18.615)         &    (15.839)         &    (15.442)         &    (14.791)         &    (22.124)         &    (18.087)         &    (17.657)         &    (17.029)         \\
+(2) Down $>$ Up&                     &                     &                     &                     &       4.218\sym{***}&       4.803\sym{***}&       4.829\sym{***}&       4.348\sym{***}\\
+            &                     &                     &                     &                     &     (1.412)         &     (1.075)         &     (1.073)         &     (1.090)         \\
+(3) Post $\times$ Down $>$ Up&                     &                     &                     &                     &       1.374         &      -0.989         &      -1.231         &      -1.935\sym{*}  \\
+            &                     &                     &                     &                     &     (1.246)         &     (1.019)         &     (1.019)         &     (1.022)         \\
+(4) Protest $\times$ Down $>$ Up&                     &                     &                     &                     &     -28.707         &     -19.400         &     -19.675         &     -18.369         \\
+            &                     &                     &                     &                     &    (33.743)         &    (30.682)         &    (30.583)         &    (31.059)         \\
+(5) Post $\times$ Protest $\times$ Down $>$ Up&                     &                     &                     &                     &      -4.247         &       6.172         &       6.978         &       8.253         \\
+            &                     &                     &                     &                     &    (25.028)         &    (20.550)         &    (20.145)         &    (19.793)         \\
+
+
+
+
+\hline
+\multicolumn{9}{l}{\textbf{Panel B: Linear Combinations}} \\ \hline
+\multicolumn{2}{l}{Down$>$Up Effect, pre-period in no protest areas (2)}&            &            &            &4.218\sym{***}&4.803\sym{***}&4.829\sym{***}&4.348\sym{***}\\
+\multicolumn{2}{l}{}&            &            &            &     (1.412)&     (1.075)&     (1.073)&     (1.090)\\
+\multicolumn{2}{l}{Down$>$Up Effect, post-period in no protest areas (3)}&            &            &            &       1.374&      -0.989&      -1.231&-1.935\sym{*}\\
+\multicolumn{2}{l}{}&            &            &            &     (1.246)&     (1.019)&     (1.019)&     (1.022)\\
+\multicolumn{2}{l}{Down$>$Up Effect, post-period in protest areas (1+3+4+5)}&            &            &            &      20.618&149.436\sym{***}&138.827\sym{***}&89.309\sym{**}\\
+\multicolumn{2}{l}{}&            &            &            &    (42.068)&    (38.537)&    (38.211)&    (38.069)\\
+\multicolumn{2}{l}{Differential downwind effect, post period (1+3+4+5)-(3)}&            &            &            &      19.244&150.425\sym{***}&140.057\sym{***}&91.244\sym{**}\\
+\multicolumn{2}{l}{}&            &            &            &    (42.067)&    (38.536)&    (38.210)&    (38.071)\\
+
+
+
+\hline
+Observations&  63,302,546&  63,302,546&  63,302,546&  63,302,546&  63,302,546&  63,302,546&  63,302,546&  63,302,546\\
+N Assembly Constituencies&         808&         808&         808&         808&         808&         808&         808&         808\\
+Grid $\times$ Cohort FE&           N&           Y&           Y&           Y&           N&           Y&           Y&           Y\\
+Relative Time $\times$ Cohort FE&           N&           N&           Y&           Y&           N&           N&           Y&           Y\\
+Province Trend $\times$ Cohort FE&           N&           N&           N&           Y&           N&           N&           N&           Y\\
+Mean DV     &      477.15&      477.15&      477.15&      477.15&      477.15&      477.15&      477.15&      477.15\\
+Mean DV2 (Down$>$Up=1)&            &            &            &            &     464.938&     464.938&     464.938&     464.938\\
+\hline
+\end{tabular}
+}

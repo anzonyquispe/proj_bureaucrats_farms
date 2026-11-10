@@ -4566,15 +4566,19 @@ figures/_app_16_polischar_t2norm_evst_rural_acpop_countk_modis_t2_1_ori.png,keep
 figures/_app_17_5km_fe12_evst_all_rural_fe03_1_honest1.png,archive,figure not used in main.tex / talks
 figures/_app_17_5km_fe12_evst_all_rural_fe03_1_honest2.png,archive,figure not used in main.tex / talks
 figures/_app_17_5km_fe12_evst_all_rural_fe03_1_ori.png,keep,figure used in main.tex / talks
+figures/_app_17_5km_fe12_evst_all_rural_fe03_1_ori_protest2.png,keep,protest2 version of Figure C.2 / Figure 4 panel C
 figures/_app_17_5km_fe12_evst_all_rural_fe03_1_rot_honest1.png,archive,figure not used in main.tex / talks
 figures/_app_17_5km_fe12_evst_all_rural_fe03_1_rot_honest2.png,archive,figure not used in main.tex / talks
 figures/_app_17_5km_fe12_evst_all_rural_fe03_1_rotated.png,keep,figure used in main.tex / talks
+figures/_app_17_5km_fe12_evst_all_rural_fe03_1_rotated_protest2.png,keep,protest2 version of Figure C.2 / Figure 4 panel C
 figures/_app_17_5km_fe12_evst_all_rural_fe03_riceP_honest1.png,archive,figure not used in main.tex / talks
 figures/_app_17_5km_fe12_evst_all_rural_fe03_riceP_honest2.png,archive,figure not used in main.tex / talks
 figures/_app_17_5km_fe12_evst_all_rural_fe03_riceP_ori.png,keep,figure used in main.tex / talks
+figures/_app_17_5km_fe12_evst_all_rural_fe03_riceP_ori_protest2.png,keep,protest2 version of Figure C.2 / Figure 4 panel C
 figures/_app_17_5km_fe12_evst_all_rural_fe03_riceP_rot_honest1.png,archive,figure not used in main.tex / talks
 figures/_app_17_5km_fe12_evst_all_rural_fe03_riceP_rot_honest2.png,archive,figure not used in main.tex / talks
 figures/_app_17_5km_fe12_evst_all_rural_fe03_riceP_rotated.png,keep,figure used in main.tex / talks
+figures/_app_17_5km_fe12_evst_all_rural_fe03_riceP_rotated_protest2.png,keep,protest2 version of Figure C.2 / Figure 4 panel C
 figures/_app_18_protest_5km_fe12_did_downup_plot_rural_acpop.png,keep,figure used in main.tex / talks
 figures/_app_19_polischar_fe12_did_downup_inter_plot_rural_acpop.png,keep,figure used in main.tex / talks
 figures/_archive/10_pr_5km_202208_10_honest.RDS,archive,output / report not used in main.tex / talks
@@ -8586,7 +8590,9 @@ tables/_app_17_5km_fe12_evst_all_rural_controls_never_scalars.csv,archive,table/
 tables/_app_17_5km_fe12_evst_all_rural_controls_notyet.csv,archive,table/estimate not used in main.tex / talks
 tables/_app_17_5km_fe12_evst_all_rural_controls_notyet.ster,archive,table/estimate not used in main.tex / talks
 tables/_app_17_5km_fe12_evst_all_rural_controls_notyet_scalars.csv,archive,table/estimate not used in main.tex / talks
+tables/_app_17_5km_fe12_evst_all_rural_protest2.csv,keep,protest2 event-study estimates read by plotting_event_studies.R
 tables/_app_17_5km_fe12_evst_all_rural_protest2.ster,keep,protest2 robustness estimates read by _compare_protest2.do
+tables/_app_17_5km_fe12_evst_all_rural_protest2_scalars.csv,keep,protest2 event-study scalars exported with the estimates
 tables/_app_17_5km_fe12_evst_all_rural_scalars.csv,keep,saved estimates read by kept post-processing
 tables/_app_17_5km_fe12_evst_all_sample_rural.csv,archive,table/estimate not used in main.tex / talks
 tables/_app_17_5km_fe12_evst_all_sample_rural.ster,archive,table/estimate not used in main.tex / talks
@@ -8692,6 +8698,7 @@ tables/_main_4_protest_5km_fe12_did_downup_rural.ster,keep,saved estimates read 
 tables/_main_4_protest_5km_fe12_did_downup_rural.tex,archive,table/estimate not used in main.tex / talks
 tables/_main_4_protest_5km_fe12_did_downup_rural_acpop.ster,keep,saved estimates read by kept post-processing
 tables/_main_4_protest_5km_fe12_did_downup_rural_acpop_new.tex,keep,table used in main.tex / talks
+tables/_main_4_protest_5km_fe12_did_downup_rural_acpop_new_protest2.tex,keep,protest2 version of Table C.3 written by _generate_all_tables.do
 tables/_main_4_protest_5km_fe12_did_downup_rural_acpop_protest2.ster,keep,protest2 robustness estimates read by _compare_protest2.do
 tables/_main_4_protest_5km_fe12_did_downup_rural_protest2.ster,keep,protest2 robustness estimates read by _compare_protest2.do
 tables/_main_4_protest_5km_fe12_did_downup_sample_rural.ster,archive,table/estimate not used in main.tex / talks
@@ -11542,6 +11549,7 @@ tables/presentations/_app_13_protest_5km_fe12_did_ricemods_rural.tex,keep,table 
 tables/presentations/_app_14_polischar_fe12_did_ricemods_rural.tex,keep,table used in main.tex / talks
 tables/protest2_comparison.csv,keep,protest vs protest2 comparison written by _compare_protest2.do
 tables/protest_event_study.tex,keep,table used in main.tex / talks
+tables/protest_event_study_protest2.tex,keep,protest2 version of Table C.2 written by _generate_all_tables.do
 tables/stacked_event_study_5pre_grid_monthyear_fe_rural.csv,archive,table/estimate not used in main.tex / talks
 tables/stacked_event_study_5pre_grid_monthyear_fe_rural.ster,archive,table/estimate not used in main.tex / talks
 tables/stacked_event_study_5pre_grid_monthyear_fe_rural_scalars.csv,archive,table/estimate not used in main.tex / talks
