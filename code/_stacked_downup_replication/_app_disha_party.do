@@ -90,6 +90,21 @@ gen substitution_qtr = y_environment_qtr - ///
      y_welfare_qtr + y_others_qtr) / 6
 replace substitution_qtr = 0 if substitution_qtr == .
 
+* Alternative quarter that never looks ahead: a month counts as having a
+* document if one was filed that month or earlier in the same quarter.
+* Quarters have three months, so two lags cover them.
+foreach y of varlist y_environment y_agri y_development y_election ///
+        y_governance y_welfare y_others {
+    gen `y'_qtr2 = `y'
+    forvalues i = 1/2 {
+        bysort ac_uq_id qtr (monthyear): ///
+            replace `y'_qtr2 = 100 if `y'[_n-`i'] == 100
+    }
+}
+gen substitution_qtr2 = y_environment_qtr2 - ///
+    (y_agri_qtr2 + y_development_qtr2 + y_election_qtr2 + y_governance_qtr2 + ///
+     y_welfare_qtr2 + y_others_qtr2) / 6
+
 ********************************************************************************
 * Sitting MLA's party and the co-partisan shares
 ********************************************************************************
@@ -156,70 +171,79 @@ program define disha_full_effect
     estadd local se_full_str "(`se_full_str')"
 end
 
-foreach s of local shares {
+* Columns 1-8 on the paper's quarter (tables disha_<share>) and on the quarter
+* that does not look ahead (disha_qtr2_<share>).
+foreach q in qtr qtr2 {
 
-    est clear
+    local outcomes substitution_`q' y_environment_`q' y_agri_`q' y_development_`q' ///
+        y_election_`q' y_governance_`q' y_welfare_`q' y_others_`q'
+    local stem = cond("`q'" == "qtr", "disha", "disha_qtr2")
 
-    local mcond "`fcond' & !missing(`s')"
+    foreach s of local shares {
 
-    capture drop tag_ac
-    egen byte tag_ac = tag(ac_uq_id) if `mcond'
-    quietly count if tag_ac == 1
-    local numacs = r(N)
+        est clear
 
-    quietly summarize `s' if `mcond'
-    local smean = r(mean)
+        local mcond "`fcond' & !missing(`s')"
 
-    local names ""
-    local i = 1
-    foreach var of local outcomes {
+        capture drop tag_ac
+        egen byte tag_ac = tag(ac_uq_id) if `mcond'
+        quietly count if tag_ac == 1
+        local numacs = r(N)
 
-        quietly summarize `var' if `mcond'
-        local ymean = r(mean)
+        quietly summarize `s' if `mcond'
+        local smean = r(mean)
 
-        reghdfe `var' c.std_pop_share1##c.`s' if `mcond', ///
-            absorb(ac_uq_id monthyear) cluster(ac_uq_id)
-        disha_full_effect `s'
+        local names ""
+        local i = 1
+        foreach var of local outcomes {
 
-        estadd scalar ymean = `ymean'
-        estadd scalar smean = `smean'
-        estadd scalar acq = `numacs'
-        estadd local acfe "Y"
-        estadd local acmonthfe "Y"
-        estadd local smpl "Rural, DISHA"
-        estadd local mod "`s'"
-        est store copart`i'
-        local names "`names' copart`i'"
+            quietly summarize `var' if `mcond'
+            local ymean = r(mean)
 
-        local i = `i' + 1
+            reghdfe `var' c.std_pop_share1##c.`s' if `mcond', ///
+                absorb(ac_uq_id monthyear) cluster(ac_uq_id)
+            disha_full_effect `s'
+
+            estadd scalar ymean = `ymean'
+            estadd scalar smean = `smean'
+            estadd scalar acq = `numacs'
+            estadd local acfe "Y"
+            estadd local acmonthfe "Y"
+            estadd local smpl "Rural, DISHA"
+            estadd local mod "`s'"
+            est store copart`i'
+            local names "`names' copart`i'"
+
+            local i = `i' + 1
+        }
+
+        esttab `names' ///
+            using "${tables}/`stem'_`s'${sample}.tex", replace ///
+            cells(b(fmt(3) star) se(par fmt(3))) ///
+            star(* 0.10 ** 0.05 *** 0.01) ///
+            keep(std_pop_share1 c.std_pop_share1#c.`s' `s') ///
+            order(std_pop_share1 c.std_pop_share1#c.`s' `s') ///
+            varlabels(std_pop_share1 "Exposure" ///
+                      c.std_pop_share1#c.`s' "Exposure \$\times\$ Share" ///
+                      `s' "Share") ///
+            stats(b_full_str se_full_str N acq acfe acmonthfe ymean smean, ///
+                  fmt(%s %s %12.0fc %12.0fc %s %s %9.3f %9.3f) ///
+                  labels("Exposure + Exposure \$\times\$ Share" " " ///
+                         "Observations" "N Assembly Constituencies" ///
+                         "AC FE" "Month-Year FE" "Mean DV" "Mean Share")) ///
+            mtitles(`titles') ///
+            mgroups("DISHA documents on:", pattern(1 0 0 0 0 0 0 0) ///
+                    prefix(\multicolumn{@span}{c}{) suffix(}) ///
+                    span erepeat(\cmidrule(lr){@span})) ///
+            nocons nobaselevels collabels(none) booktabs
+
+        display as text _n "Outcomes: `q'; share: `s'"
+        esttab `names', keep(std_pop_share1 c.std_pop_share1#c.`s' `s') ///
+            b(4) se(4) star(* 0.10 ** 0.05 *** 0.01) ///
+            stats(b_full_str se_full_str N acq smean) mtitles(`titles') nonotes
+
+        display as result "Generated: ${tables}/`stem'_`s'${sample}.tex"
     }
-
-    esttab `names' ///
-        using "${tables}/disha_`s'${sample}.tex", replace ///
-        cells(b(fmt(3) star) se(par fmt(3))) ///
-        star(* 0.10 ** 0.05 *** 0.01) ///
-        keep(std_pop_share1 c.std_pop_share1#c.`s' `s') ///
-        order(std_pop_share1 c.std_pop_share1#c.`s' `s') ///
-        varlabels(std_pop_share1 "Exposure" ///
-                  c.std_pop_share1#c.`s' "Exposure \$\times\$ Share" ///
-                  `s' "Share") ///
-        stats(b_full_str se_full_str N acq acfe acmonthfe ymean smean, ///
-              fmt(%s %s %12.0fc %12.0fc %s %s %9.3f %9.3f) ///
-              labels("Exposure + Exposure \$\times\$ Share" " " ///
-                     "Observations" "N Assembly Constituencies" ///
-                     "AC FE" "Month-Year FE" "Mean DV" "Mean Share")) ///
-        mtitles(`titles') ///
-        mgroups("DISHA documents on:", pattern(1 0 0 0 0 0 0 0) ///
-                prefix(\multicolumn{@span}{c}{) suffix(}) ///
-                span erepeat(\cmidrule(lr){@span})) ///
-        nocons nobaselevels collabels(none) booktabs
-
-    display as text _n "Share: `s'"
-    esttab `names', keep(std_pop_share1 c.std_pop_share1#c.`s' `s') ///
-        b(4) se(4) star(* 0.10 ** 0.05 *** 0.01) ///
-        stats(b_full_str se_full_str N acq smean) mtitles(`titles') nonotes
-
-    display as result "Generated: ${tables}/disha_`s'${sample}.tex"
 }
 
 ********************************************************************************

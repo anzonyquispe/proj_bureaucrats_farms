@@ -96,6 +96,21 @@ gen substitution_qtr = y_environment_qtr - ///
      y_welfare_qtr + y_others_qtr) / 6
 replace substitution_qtr = 0 if substitution_qtr == .
 
+* Alternative quarter that never looks ahead: a month counts as having a
+* document if one was filed that month or earlier in the same quarter.
+* Quarters have three months, so two lags cover them.
+foreach y of varlist y_environment y_agri y_development y_election ///
+        y_governance y_welfare y_others {
+    gen `y'_qtr2 = `y'
+    forvalues i = 1/2 {
+        bysort ac_uq_id qtr (monthyear): ///
+            replace `y'_qtr2 = 100 if `y'[_n-`i'] == 100
+    }
+}
+gen substitution_qtr2 = y_environment_qtr2 - ///
+    (y_agri_qtr2 + y_development_qtr2 + y_election_qtr2 + y_governance_qtr2 + ///
+     y_welfare_qtr2 + y_others_qtr2) / 6
+
 local fcond "disha_sample == 1 & is_rural != 0"
 
 capture drop tag_ac
@@ -154,57 +169,66 @@ esttab fires1 fires2 ///
     collabels(none) booktabs nonotes
 
 ********************************************************************************
-* Main table (tab:mechanism): meeting-document topics
+* Main table (tab:mechanism): meeting-document topics, and the same table on
+* the quarter that does not look ahead (action_final_prev_year_count_new_qtr,
+* in the team's code but not in the paper)
 ********************************************************************************
-
-est clear
 
 * Exposure is the fire-count measure std_pop_share1 and every outcome is
 * quarterly, in the paper's column order. The court-case column was dropped.
-local outcomes substitution_qtr y_environment_qtr y_agri_qtr y_development_qtr ///
-    y_election_qtr y_governance_qtr y_welfare_qtr y_others_qtr
-local names ""
+foreach q in qtr qtr2 {
 
-local i = 1
-foreach var of local outcomes {
+    local file = cond("`q'" == "qtr", "action_final_prev_year_count", ///
+        "action_final_prev_year_count_new_qtr")
 
-    quietly summarize `var' if `fcond'
-    local ymean = r(mean)
+    est clear
 
-    reghdfe `var' std_pop_share1 if `fcond', ///
-        absorb(ac_uq_id monthyear) cluster(ac_uq_id)
-    estadd scalar ymean = `ymean'
-    estadd scalar acq = `numacs'
-    estadd local acfe "Y"
-    estadd local acmonthfe "Y"
-    estadd local smpl "Rural, DISHA"
-    est store topic`i'
-    local names "`names' topic`i'"
+    local outcomes substitution_`q' y_environment_`q' y_agri_`q' y_development_`q' ///
+        y_election_`q' y_governance_`q' y_welfare_`q' y_others_`q'
+    local names ""
 
-    local i = `i' + 1
+    local i = 1
+    foreach var of local outcomes {
+
+        quietly summarize `var' if `fcond'
+        local ymean = r(mean)
+
+        reghdfe `var' std_pop_share1 if `fcond', ///
+            absorb(ac_uq_id monthyear) cluster(ac_uq_id)
+        estadd scalar ymean = `ymean'
+        estadd scalar acq = `numacs'
+        estadd local acfe "Y"
+        estadd local acmonthfe "Y"
+        estadd local smpl "Rural, DISHA"
+        est store topic`i'
+        local names "`names' topic`i'"
+
+        local i = `i' + 1
+    }
+
+    * Rows and headers follow the paper's table; a3 keeps the three significant
+    * digits it reports.
+    esttab `names' ///
+        using "${tables}/`file'${sample}.tex", replace ///
+        cells(b(fmt(a3) star) se(par fmt(a3))) ///
+        star(* 0.10 ** 0.05 *** 0.01) ///
+        keep(std_pop_share1) nocons nobaselevels ///
+        varlabels(std_pop_share1 "Exposure") ///
+        stats(N acfe acmonthfe ymean, ///
+              fmt(%12.0fc %s %s %9.3f) ///
+              labels("Observations" "AC FE" "Month-Year FE" "Mean DV")) ///
+        mtitles("\makecell{\textbf{Substitution} \\ \textbf{toward environment}}" ///
+                "\textbf{Environment}" "\textbf{Agriculture}" "\textbf{Development}" ///
+                "\textbf{Election}" "\textbf{Governance}" "\textbf{Welfare}" ///
+                "\textbf{Other Topics}") ///
+        mgroups("\textbf{DISHA documents on:}", pattern(1 0 0 0 0 0 0 0) ///
+                prefix(\multicolumn{@span}{c}{) suffix(}) ///
+                span erepeat(\cmidrule(lr){@span})) ///
+        collabels(none) booktabs nonotes
+
+    display as result "Generated: ${tables}/`file'${sample}.tex"
 }
 
-* Rows and headers follow the paper's table; a3 keeps the three significant
-* digits it reports.
-esttab `names' ///
-    using "${tables}/action_final_prev_year_count${sample}.tex", replace ///
-    cells(b(fmt(a3) star) se(par fmt(a3))) ///
-    star(* 0.10 ** 0.05 *** 0.01) ///
-    keep(std_pop_share1) nocons nobaselevels ///
-    varlabels(std_pop_share1 "Exposure") ///
-    stats(N acfe acmonthfe ymean, ///
-          fmt(%12.0fc %s %s %9.3f) ///
-          labels("Observations" "AC FE" "Month-Year FE" "Mean DV")) ///
-    mtitles("\makecell{\textbf{Substitution} \\ \textbf{toward environment}}" ///
-            "\textbf{Environment}" "\textbf{Agriculture}" "\textbf{Development}" ///
-            "\textbf{Election}" "\textbf{Governance}" "\textbf{Welfare}" ///
-            "\textbf{Other Topics}") ///
-    mgroups("\textbf{DISHA documents on:}", pattern(1 0 0 0 0 0 0 0) ///
-            prefix(\multicolumn{@span}{c}{) suffix(}) ///
-            span erepeat(\cmidrule(lr){@span})) ///
-    collabels(none) booktabs nonotes
-
 display as result "Generated: ${tables}/action_final_prev_year_count_fire${sample}.tex"
-display as result "Generated: ${tables}/action_final_prev_year_count${sample}.tex"
 
 ********************************************************************************
