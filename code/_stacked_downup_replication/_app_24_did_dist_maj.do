@@ -196,7 +196,7 @@ esttab `estimates' using ///
             "\begin{tabular}{l*{`ncols'}{c}}" ///
             "\hline" ///
             "           `header' \\" ///
-            "            & \multicolumn{`ncols'}{c}{Number of Fires (per 1,000 units)} \\ \hline") ///
+            "            & \multicolumn{`ncols'}{c}{Number of Fires (in 1,000 units)} \\ \hline") ///
     posthead("") ///
     postfoot("\hline" "\end{tabular}" "}")
 

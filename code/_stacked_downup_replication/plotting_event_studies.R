@@ -1041,6 +1041,8 @@ production_main_case_ids <- c(
   "final_stacked_area_rice",
   "final_stacked_population_baseline",
   "final_stacked_population_rice",
+  "distmaj_population_baseline",
+  "distmaj_population_majority",
   "final_politician_fe03_baseline",
   "final_politician_fe03_rice"
 )

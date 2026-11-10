@@ -8353,6 +8353,10 @@ figures/stacked_event_study_5pre_rural_riceP_ori.png,keep,figure used in main.te
 figures/stacked_event_study_5pre_rural_riceP_rot_honest1.png,archive,figure not used in main.tex / talks
 figures/stacked_event_study_5pre_rural_riceP_rot_honest2.png,archive,figure not used in main.tex / talks
 figures/stacked_event_study_5pre_rural_riceP_rotated.png,keep,figure used in main.tex / talks
+figures/stacked_event_study_pop_5pre_distmaj_rural_1_ori.png,keep,district-majority heterogeneity of Figure 3, B.3 and B.10 requested by the team (not yet in main.tex)
+figures/stacked_event_study_pop_5pre_distmaj_rural_1_rotated.png,keep,district-majority heterogeneity of Figure 3, B.3 and B.10 requested by the team (not yet in main.tex)
+figures/stacked_event_study_pop_5pre_distmaj_rural_maj_ori.png,keep,district-majority heterogeneity of Figure 3, B.3 and B.10 requested by the team (not yet in main.tex)
+figures/stacked_event_study_pop_5pre_distmaj_rural_maj_rotated.png,keep,district-majority heterogeneity of Figure 3, B.3 and B.10 requested by the team (not yet in main.tex)
 figures/stacked_event_study_pop_5pre_rural_1_honest1.png,archive,figure not used in main.tex / talks
 figures/stacked_event_study_pop_5pre_rural_1_honest2.png,archive,figure not used in main.tex / talks
 figures/stacked_event_study_pop_5pre_rural_1_ori.png,keep,figure used in main.tex / talks
@@ -11495,6 +11499,7 @@ tables/exploratory_analysis/protest_original_controls_fe_sweep/sample/protest_or
 tables/exploratory_analysis/protest_province_election_switch/protest_province_election_switch_event_rural.csv,archive,table/estimate not used in main.tex / talks
 tables/exploratory_analysis/protest_province_election_switch/protest_province_election_switch_event_rural.ster,archive,table/estimate not used in main.tex / talks
 tables/exploratory_analysis/protest_province_election_switch/protest_province_election_switch_event_rural_scalars.csv,archive,table/estimate not used in main.tex / talks
+tables/main_did_downup_ac_distmaj_rural_acpop.tex,keep,district-majority heterogeneity of Figure 3, B.3 and B.10 requested by the team (not yet in main.tex)
 tables/main_did_downup_ac_rural_acpop.tex,keep,table used in main.tex / talks
 tables/main_did_downup_area_ac.ster,archive,table/estimate not used in main.tex / talks
 tables/main_did_downup_area_ac_rural.ster,archive,table/estimate not used in main.tex / talks
@@ -11502,6 +11507,7 @@ tables/main_did_downup_area_ac_rural.tex,keep,table used in main.tex / talks
 tables/main_did_downup_area_ac_rural_acpop.ster,archive,table/estimate not used in main.tex / talks
 tables/main_did_downup_area_ac_rural_stacked.ster,keep,saved estimates read by kept post-processing
 tables/main_did_downup_area_ac_sample_rural_stacked.ster,archive,table/estimate not used in main.tex / talks
+tables/main_did_downup_pop_ac_distmaj_rural.ster,keep,district-majority heterogeneity of Figure 3, B.3 and B.10 requested by the team (not yet in main.tex)
 tables/main_did_downup_pop_ac_rural_stacked.ster,keep,saved estimates read by kept post-processing
 tables/main_did_downup_pop_ac_sample_rural_stacked.ster,archive,table/estimate not used in main.tex / talks
 tables/main_did_downup_pop_ac_sample_rural_stacked_ricehigh.ster,archive,table/estimate not used in main.tex / talks
@@ -11541,6 +11547,9 @@ tables/stacked_event_study_5pre_rural_scalars.csv,keep,saved estimates read by k
 tables/stacked_event_study_5pre_sample_rural.csv,archive,table/estimate not used in main.tex / talks
 tables/stacked_event_study_5pre_sample_rural.ster,archive,table/estimate not used in main.tex / talks
 tables/stacked_event_study_5pre_sample_rural_scalars.csv,archive,table/estimate not used in main.tex / talks
+tables/stacked_event_study_pop_5pre_distmaj_rural.csv,keep,district-majority heterogeneity of Figure 3, B.3 and B.10 requested by the team (not yet in main.tex)
+tables/stacked_event_study_pop_5pre_distmaj_rural.ster,keep,district-majority heterogeneity of Figure 3, B.3 and B.10 requested by the team (not yet in main.tex)
+tables/stacked_event_study_pop_5pre_distmaj_rural_scalars.csv,keep,district-majority heterogeneity of Figure 3, B.3 and B.10 requested by the team (not yet in main.tex)
 tables/stacked_event_study_pop_5pre_grid_monthyear_fe_gridmonth_cluster_omit0_rural.csv,archive,table/estimate not used in main.tex / talks
 tables/stacked_event_study_pop_5pre_grid_monthyear_fe_gridmonth_cluster_omit0_rural.ster,archive,table/estimate not used in main.tex / talks
 tables/stacked_event_study_pop_5pre_grid_monthyear_fe_gridmonth_cluster_omit0_rural_scalars.csv,archive,table/estimate not used in main.tex / talks
