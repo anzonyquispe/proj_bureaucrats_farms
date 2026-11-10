@@ -162,6 +162,8 @@ event_ids+=("$(submit_stata event_5pre_pop _main_2_stacked_event_study_5pre.do "
 event_ids+=("$(submit_stata event_5pre_pop_cluster _app_22_event_study_cluster.do "${EVENT_FE_LIST}" none)")
 # Figure 3 by district majority party; needs dist_maj_party.dta in intermediate.
 event_ids+=("$(submit_stata event_5pre_pop_distmaj _app_23_event_study_dist_maj.do "${EVENT_FE_LIST}" none)")
+# Figure 3 by ruling coalition of the AC's MLA; needs coalition_ac.dta in intermediate.
+event_ids+=("$(submit_stata event_5pre_pop_coalition _app_25_event_study_coalition.do "${EVENT_FE_LIST}" none)")
 event_ids+=("$(submit_stata politician_event_pop _app_16_polischar_fe12_evst_all.do "${EVENT_FE_LIST}" _acpop downup_ac_pop)")
 # T-2 differenced politician event study (fig:agri_modi), full FE sweep.
 event_ids+=("$(submit_stata politician_event_t2norm _app_16_polischar_t2norm_evst.do 1/4 _acpop downup_ac_pop)")

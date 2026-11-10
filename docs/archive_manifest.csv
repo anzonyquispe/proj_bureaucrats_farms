@@ -3188,11 +3188,13 @@ code/_stacked_downup_replication/_app_21_5km_allfe_same_term.do,archive,code not
 code/_stacked_downup_replication/_app_22_event_study_cluster.do,keep,Figure 3 clustering robustness requested by the team (not yet in main.tex)
 code/_stacked_downup_replication/_app_23_event_study_dist_maj.do,keep,district-majority heterogeneity of Figure 3, B.3 and B.10 requested by the team (not yet in main.tex)
 code/_stacked_downup_replication/_app_24_did_dist_maj.do,keep,district-majority heterogeneity of Figure 3, B.3 and B.10 requested by the team (not yet in main.tex)
+code/_stacked_downup_replication/_app_25_event_study_coalition.do,keep,ruling-coalition decomposition of Figure 3 requested by the team (not yet in main.tex)
 code/_stacked_downup_replication/_app_6_main_did_treat_definition.do,keep,estimation feeding a used table/figure (or read by _generate_all_tables.do)
 code/_stacked_downup_replication/_app_6_main_did_treat_definition.log,archive,log / scratch / OS file
 code/_stacked_downup_replication/_app_7_main_did_downup_area_ac_dv.do,keep,estimation feeding a used table/figure (or read by _generate_all_tables.do)
 code/_stacked_downup_replication/_app_8_main_did_by_year.do,keep,estimation feeding a used table/figure (or read by _generate_all_tables.do)
 code/_stacked_downup_replication/_app_9_main_did_by_state.do,keep,estimation feeding a used table/figure (or read by _generate_all_tables.do)
+code/_stacked_downup_replication/_app_coalition_generation.do,keep,ruling-coalition decomposition of Figure 3 requested by the team (not yet in main.tex)
 code/_stacked_downup_replication/_app_disha_dist_maj.do,keep,district-majority heterogeneity of Figure 3, B.3 and B.10 requested by the team (not yet in main.tex)
 code/_stacked_downup_replication/_app_dist_maj_party_generation.do,keep,district-majority heterogeneity of Figure 3, B.3 and B.10 requested by the team (not yet in main.tex)
 code/_stacked_downup_replication/_app_maps_acs.ipynb,keep,figure/table generator used in paper or talks
@@ -3221,7 +3223,9 @@ code/_stacked_downup_replication/_main_6_neighbour_plot.do,keep,estimation feedi
 code/_stacked_downup_replication/_master_replication.do,keep,driver for kept scripts
 code/_stacked_downup_replication/_master_replication_log_sample.txt,archive,code not contributing to a used output
 code/_stacked_downup_replication/_merge_dist_maj_party.do,keep,district-majority heterogeneity of Figure 3, B.3 and B.10 requested by the team (not yet in main.tex)
+code/_stacked_downup_replication/_mla_party.do,keep,ruling-coalition decomposition of Figure 3 requested by the team (not yet in main.tex)
 code/_stacked_downup_replication/_protest_definition.do,keep,estimation feeding a used table/figure (or read by _generate_all_tables.do)
+code/_stacked_downup_replication/_ruling_coalition.do,keep,ruling-coalition decomposition of Figure 3 requested by the team (not yet in main.tex)
 code/_stacked_downup_replication/_run_local_main_postprocessing.do,keep,driver for kept scripts
 code/_stacked_downup_replication/_run_local_ster_postprocessing.do,keep,driver for kept scripts
 code/_stacked_downup_replication/_stacked_downup_replication shell none is_rural_area 1 _acpop downup_ac_pop none none.log,archive,log / scratch / OS file

@@ -581,6 +581,16 @@ event_cases <- list(
     figure_base = "stacked_event_study_pop_5pre_distmaj_rural_maj",
     pre = 5, post = 6, omitted = 0, required = FALSE
   ),
+  # Ruling-coalition decomposition (_app_25): the coalition_ac == 1
+  # interaction terms, laid out like the rice moderator above. Its evreg1 is
+  # Figure 3 itself, so it is not plotted again.
+  event_case(
+    id = "coalition_population_coalition",
+    csv_stem = "stacked_event_study_pop_5pre_coalition", model = "evreg2",
+    rows = 39:49, columns = c(3, 4, 43:53),
+    figure_base = "stacked_event_study_pop_5pre_coalition_rural_coal",
+    pre = 5, post = 6, omitted = 0, required = FALSE
+  ),
   # Selected politician specification: grid x cohort, province-specific linear
   # month-year trends, and cohort-specific event-year fixed effects. This is
   # the baseline event study without a moderator interaction.
@@ -1043,6 +1053,7 @@ production_main_case_ids <- c(
   "final_stacked_population_rice",
   "distmaj_population_baseline",
   "distmaj_population_majority",
+  "coalition_population_coalition",
   "final_politician_fe03_baseline",
   "final_politician_fe03_rice"
 )
