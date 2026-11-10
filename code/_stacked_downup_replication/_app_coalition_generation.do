@@ -9,7 +9,7 @@
 *
 * Output (data_output/intermediate):
 *   coalition_ac.dta/.csv: one row per AC x calendar month, April 2012 to
-*       December 2022, with the MLA's party, the state government in office
+*       January 2023, with the MLA's party, the state government in office
 *       and coalition_ac. The month is stored as cohort (year * 12 + month,
 *       the stacked panels' coding), so a fire panel merges it on
 *       ac_uq_id cohort and gets the status at each stack's cohort month.
@@ -64,9 +64,11 @@ duplicates drop
 isid ac_uq_id
 
 * April 2012 is the first month in which all four states sit in a term of the
-* candidate file (Punjab and Uttar Pradesh voted in early 2012).
+* candidate file (Punjab and Uttar Pradesh voted in early 2012). January 2023
+* is the last cohort the fire panels reach: they keep calendar months up to
+* August 2022 and relative months -5 to 6, so its month -5 is still in.
 local first = ym(2012, 4)
-local last  = ym(2022, 12)
+local last  = ym(2023, 1)
 expand `last' - `first' + 1
 bysort ac_uq_id: gen int _ym = `first' + _n - 1
 gen int year = year(dofm(_ym))

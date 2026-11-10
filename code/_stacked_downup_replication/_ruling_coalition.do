@@ -21,8 +21,10 @@
 *   Bihar 2015: the JD(U) leaves the Mahagathbandhan for the NDA in July 2017.
 *   Bihar 2020: the JD(U) returns to the Mahagathbandhan in August 2022.
 *
-* Covers the terms that span the fire panel (September 2012 to August 2022);
-* other months are left without a government period.
+* Coded for April 2012 to January 2023, the months _app_coalition_generation.do
+* covers, which span every cohort of the fire panels. Other terms are left
+* without a government period, and changes after January 2023 are not coded
+* (HAM leaves the Bihar government in June 2023).
 *
 * Expects: province (calendar spelling, Punjab_IND), year, month, year_el and
 * mla_party in memory, with the election calendar already applied.

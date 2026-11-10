@@ -65,7 +65,14 @@ keep if year < 2022 | (year == 2022 & month <= 8)
 * the cohort gives each stack the status at its cohort month.
 assert year * 12 + month == cohort if relative_monthyear == 0
 merge m:1 ac_uq_id cohort using "${int_data}/coalition_ac.dta", ///
-    keepusing(coalition_ac) assert(match using) keep(match) nogen
+    keepusing(coalition_ac) keep(master match)
+quietly count if _merge == 1
+if r(N) > 0 {
+    display as error "Rows whose AC-cohort is not in coalition_ac.dta: " r(N)
+    tab cohort if _merge == 1
+    exit 459
+}
+drop _merge
 
 local dep_var countk
 local fe1 "unique_small_grid_id#cohort ac_uq_id#monthyear#cohort"
