@@ -335,13 +335,13 @@ estread using "${tables}/_app_17_5km_fe12_evst_all${sample}_rural${ster_suffix}.
 _set_event_fe_tags, models(evreg1)
 _strip_zeros_stats, models(evreg1) stats(ymean)
 
-esttab evreg1 using "${tables}/protest_event_study.tex", ///
+esttab evreg1 using "${tables}/protest_event_study${ster_suffix}.tex", ///
     replace ///
     cells(b(fmt(3) star) se(par fmt(3))) ///
     star(* 0.10 ** 0.05 *** 0.01) ///
     order(*relative*) ///
     keep( *aux#1.treat wind_direction av_wind_speed) ///
-    varlabels(1.relative_year_bin_aux#1.treat "Relative Period = -4 \$\times\$ Protest within 5 km" 2.relative_year_bin_aux#1.treat "Relative Period = -3 \$\times\$ Protest within 5 km" 3.relative_year_bin_aux#1.treat "Relative Period = -2 \$\times\$ Protest within 5 km" 5.relative_year_bin_aux#1.treat "Relative Period = 0 \$\times\$ Protest within 5 km" 6.relative_year_bin_aux#1.treat "Relative Period = 1 \$\times\$ Protest within 5 km" wind_direction "Wind Direction" av_wind_speed "Av. Wind Speed" ) ///
+    varlabels(1.relative_year_bin_aux#1.treat "Relative Period = -4 \$\times\$ Protest" 2.relative_year_bin_aux#1.treat "Relative Period = -3 \$\times\$ Protest" 3.relative_year_bin_aux#1.treat "Relative Period = -2 \$\times\$ Protest" 5.relative_year_bin_aux#1.treat "Relative Period = 0 \$\times\$ Protest" 6.relative_year_bin_aux#1.treat "Relative Period = 1 \$\times\$ Protest" wind_direction "Wind Direction" av_wind_speed "Av. Wind Speed" ) ///
     stats(N acq gridfe provtrend eventfe ymean_clean, ///
           fmt(%12.0fc %12.0fc %s %s %s %s) ///
           labels("Observations" "N Assembly Constituencies" ///
@@ -361,7 +361,7 @@ esttab evreg1 using "${tables}/protest_event_study.tex", ///
     posthead("") ///
     postfoot("\hline" "\end{tabular}" "}")
 
-display "Generated: protest_event_study.tex"
+display "Generated: protest_event_study${ster_suffix}.tex"
 
 	
 	
@@ -512,9 +512,9 @@ esttab evreg1 evreg2 evreg3 evreg4 evreg5 evreg6 evreg7 evreg8 ///
             "\def\sym#1{\ifmmode^{#1}\else\(^{#1}\)\fi}" ///
             "\begin{tabular}{l*{8}{c}}" ///
             "\hline" ///
+            "& (1) & (2) & (3) & (4) & (5) & (6) & (7) & (8) \\" ///
             "            & \multicolumn{8}{c}{Number of Fires (per 1,000 units)} \\" ///
-            "            & \multicolumn{4}{c}{Without Downwind Interaction} & \multicolumn{4}{c}{With Downwind Interaction} \\" ///
-            "            & (1) & (2) & (3) & (4) & (5) & (6) & (7) & (8) \\ \hline") ///
+            "             \hline") ///
     posthead("\multicolumn{9}{l}{\textbf{Panel A: Estimated Coefficients}} \\ \hline") ///
     prefoot("") postfoot("")
 

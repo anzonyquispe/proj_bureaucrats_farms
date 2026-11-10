@@ -42,19 +42,22 @@ def main() -> None:
         shared / "data" / "input" / "admin-data" / "india" / "IND_adm" / "IND_adm1.shp"
     ))
     states = states.loc[states.NAME_1.isin(["Bihar", "Uttar Pradesh", "Punjab", "Haryana"])]
-    # The protest grid keeps the shapefile-truncated id name; match
-    # grid_5km_plot.ipynb and join explicitly on the grid id.
+    # Reproduce the paper's map from grid_5km_plot.ipynb: the protest grid keeps
+    # the shapefile-truncated id name, holds one row per grid (its largest
+    # protest_place) and joins explicitly on the grid id.
     protest_grid = pd.read_csv(require(intermediate / "8_grids_ac_pr_5km.csv"))
     if "unq_s__" in protest_grid:
         protest_grid = protest_grid.rename(columns={"unq_s__": "unique_small_grid_id"})
+    protest_grid = protest_grid.groupby("unique_small_grid_id", as_index=False)["protest_place"].max()
     intersection = pd.read_csv(require(intermediate / "_1_AC_grid_intersection.csv"))
     joined = intersection.merge(protest_grid, on="unique_small_grid_id", how="left")
     joined["protest_place"] = joined.protest_place.fillna(0)
     grid = gpd.read_file(require(intermediate / "1-grid-generation.shp"))
     if "unq_s__" in grid:
         grid = grid.rename(columns={"unq_s__": "unique_small_grid_id"})
+    grid = grid[["unique_small_grid_id", "geometry"]].drop_duplicates("unique_small_grid_id")
     joined = gpd.GeoDataFrame(
-        joined.merge(grid[["unique_small_grid_id", "geometry"]]),
+        joined.merge(grid, on="unique_small_grid_id", how="inner"),
         geometry="geometry",
         crs=grid.crs,
     )
@@ -64,11 +67,13 @@ def main() -> None:
     fig, ax = plt.subplots(figsize=(8, 8))
     states.boundary.plot(ax=ax, color="black")
     constituencies.boundary.plot(ax=ax, color="#2C4460", linewidth=0.2)
-    joined.plot(ax=ax, color=joined.treat.map({0: "white", 1: "#2793F2"}), linewidth=0)
+    joined.plot(
+        ax=ax, color=joined.treat.map({0: "white", 1: "#2793F2"}), edgecolor="none", linewidth=0
+    )
     ax.legend(
         handles=[
-            mpatches.Patch(facecolor="#2793F2", edgecolor="black", label="Treated"),
-            mpatches.Patch(facecolor="white", edgecolor="black", label="Control"),
+            mpatches.Patch(facecolor="#2793F2", edgecolor="black", linewidth=0.5, label="Treated"),
+            mpatches.Patch(facecolor="white", edgecolor="black", linewidth=0.5, label="Control"),
         ],
         loc="upper right",
         frameon=False,
