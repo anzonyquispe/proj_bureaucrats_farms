@@ -1,7 +1,8 @@
 ********************************************************************************
 * DISHA tables at assembly constituency x month-year: the paper's main table
 * (tab:mechanism, tables/action_final_prev_year_count.tex), meeting-document
-* topics against downwind rural exposure, and a table of fires on exposure.
+* topics against downwind rural exposure, and its table of fires on exposure
+* (tab:mechanism_count, tables/action_final_prev_year_count_fire.tex).
 *
 * Input: action_final.dta, written by _app_disha_generation.do.
 *
@@ -95,9 +96,6 @@ gen substitution_qtr = y_environment_qtr - ///
      y_welfare_qtr + y_others_qtr) / 6
 replace substitution_qtr = 0 if substitution_qtr == .
 
-gen countk = count * 1000
-replace count_prev_year = count_prev_year * 1000
-
 local fcond "disha_sample == 1 & is_rural != 0"
 
 capture drop tag_ac
@@ -106,16 +104,17 @@ quietly count if tag_ac == 1
 local numacs = r(N)
 
 ********************************************************************************
-* Fires on exposure (disha_final_fires.tex; not the paper's
-* action_final_prev_year_count_fire.tex)
+* Fires on exposure (tab:mechanism_count)
 ********************************************************************************
 
 est clear
 
-quietly summarize countk if `fcond'
+* Fires are the raw monthly count. Wind direction and speed are controlled
+* for but, as in the paper, not reported.
+quietly summarize count if `fcond'
 local ymean = r(mean)
 
-reghdfe countk std_pop_share2 if `fcond', ///
+reghdfe count std_pop_share1 wind_direction av_wind_speed if `fcond', ///
     absorb(ac_uq_id monthyear) cluster(ac_uq_id)
 estadd scalar ymean = `ymean'
 estadd scalar acq = `numacs'
@@ -124,8 +123,9 @@ estadd local acmonthfe "Y"
 estadd local smpl "Rural, DISHA"
 est store fires1
 
-reghdfe countk std_pop_share2 count_prev_year if `fcond', ///
-    absorb(ac_uq_id monthyear) cluster(ac_uq_id)
+* Column 2 adds the fires of the same calendar month a year earlier.
+reghdfe count std_pop_share1 count_prev_year wind_direction av_wind_speed ///
+    if `fcond', absorb(ac_uq_id monthyear) cluster(ac_uq_id)
 estadd scalar ymean = `ymean'
 estadd scalar acq = `numacs'
 estadd local acfe "Y"
@@ -133,19 +133,25 @@ estadd local acmonthfe "Y"
 estadd local smpl "Rural, DISHA"
 est store fires2
 
+* a3 is outreg2's rule, which the paper's table used: three significant
+* digits below one and four above. esttab escapes every underscore in LaTeX
+* output; substitute() keeps that but restores the t-12 subscript.
 esttab fires1 fires2 ///
-    using "${tables}/disha_final_fires${sample}.tex", replace ///
-    cells(b(fmt(3) star) se(par fmt(3))) ///
+    using "${tables}/action_final_prev_year_count_fire${sample}.tex", replace ///
+    cells(b(fmt(a3) star) se(par fmt(a3))) ///
     star(* 0.10 ** 0.05 *** 0.01) ///
-    nocons nobaselevels ///
-    varlabels(std_pop_share2 "Exposure" ///
+    keep(std_pop_share1 count_prev_year) nocons nobaselevels ///
+    varlabels(std_pop_share1 "Exposure" ///
               count_prev_year "Number of Fires\$_{t-12}\$") ///
-    stats(N acq acfe acmonthfe ymean, ///
-          fmt(%12.0fc %12.0fc %s %s %9.3f) ///
-          labels("Observations" "N Assembly Constituencies" ///
-                 "AC FE" "Month-Year FE" "Mean DV")) ///
-    mtitles("No Controls" "Controlling for Fires\$_{t-12}\$") ///
-    collabels(none) booktabs
+    stats(N acfe acmonthfe ymean, ///
+          fmt(%12.0fc %s %s %9.3f) ///
+          labels("Observations" "AC FE" "Month-Year FE" "Mean DV")) ///
+    nomtitles ///
+    mgroups("Number of Fires", pattern(1 0) ///
+            prefix(\multicolumn{@span}{c}{) suffix(}) ///
+            span erepeat(\cmidrule(lr){@span})) ///
+    substitute(_ \_ \_{t-12} _{t-12}) ///
+    collabels(none) booktabs nonotes
 
 ********************************************************************************
 * Main table (tab:mechanism): meeting-document topics
@@ -198,7 +204,7 @@ esttab `names' ///
             span erepeat(\cmidrule(lr){@span})) ///
     collabels(none) booktabs nonotes
 
-display as result "Generated: ${tables}/disha_final_fires${sample}.tex"
+display as result "Generated: ${tables}/action_final_prev_year_count_fire${sample}.tex"
 display as result "Generated: ${tables}/action_final_prev_year_count${sample}.tex"
 
 ********************************************************************************

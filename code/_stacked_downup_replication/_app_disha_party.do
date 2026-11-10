@@ -1,7 +1,7 @@
 ********************************************************************************
-* DISHA main table (tab:mechanism, columns 1-8) with Exposure interacted with
-* the share of the district's other MLAs who share this AC's MLA's party or
-* alliance.
+* DISHA main table (tab:mechanism, columns 1-8) and its table of fires
+* (tab:mechanism_count) with Exposure interacted with the share of the
+* district's other MLAs who share this AC's MLA's party or alliance.
 *
 * Input: action_final.dta, written by _app_disha_generation.do, and the
 * candidate file read by _app_disha_party_share.do.
@@ -12,9 +12,13 @@
 * the paper's main table. S changes within an AC at each election, so its own
 * term survives the AC fixed effect. b1 is the effect of Exposure when no
 * other MLA of the district shares the party; b1 + b2 when all of them do.
+* The fires regressions also control for wind direction and speed, and their
+* column 2 for the fires of the same month a year earlier, as in
+* tab:mechanism_count.
 *
-* Four shares, one table each: party or alliance, counted over all ACs of the
-* district or over the rural ones only (see _app_disha_party_share.do).
+* Four shares, a topics table and a fires table each: party or alliance,
+* counted over all ACs of the district or over the rural ones only (see
+* _app_disha_party_share.do).
 *
 * Like _app_disha.do this is not an event study: there is no treat indicator
 * and no relative event time, so the ymean / moderators_list template does not
@@ -128,6 +132,30 @@ esttab `names', keep(std_pop_share1) b(4) se(4) ///
 local shares copart_party_all copart_party_rural ///
     copart_alliance_all copart_alliance_rural
 
+* Effect of Exposure when every other MLA of the district shares it (b1 + b2),
+* added to the active estimates as numbers and as the strings the tables print.
+capture program drop disha_full_effect
+program define disha_full_effect
+    args s
+
+    lincom _b[std_pop_share1] + _b[c.std_pop_share1#c.`s']
+    local b_full = r(estimate)
+    local se_full = r(se)
+    local p_full = r(p)
+    local stars = cond(`p_full' < 0.01, "***", ///
+        cond(`p_full' < 0.05, "**", cond(`p_full' < 0.10, "*", "")))
+    local b_full_str : display %9.3f `b_full'
+    local se_full_str : display %9.3f `se_full'
+    local b_full_str = strtrim("`b_full_str'")
+    local se_full_str = strtrim("`se_full_str'")
+
+    estadd scalar b_full = `b_full'
+    estadd scalar se_full = `se_full'
+    estadd scalar p_full = `p_full'
+    estadd local b_full_str "`b_full_str'`stars'"
+    estadd local se_full_str "(`se_full_str')"
+end
+
 foreach s of local shares {
 
     est clear
@@ -151,24 +179,7 @@ foreach s of local shares {
 
         reghdfe `var' c.std_pop_share1##c.`s' if `mcond', ///
             absorb(ac_uq_id monthyear) cluster(ac_uq_id)
-
-        * Effect of Exposure when every other MLA of the district shares it.
-        lincom _b[std_pop_share1] + _b[c.std_pop_share1#c.`s']
-        local b_full = r(estimate)
-        local se_full = r(se)
-        local p_full = r(p)
-        local stars = cond(`p_full' < 0.01, "***", ///
-            cond(`p_full' < 0.05, "**", cond(`p_full' < 0.10, "*", "")))
-        local b_full_str : display %9.3f `b_full'
-        local se_full_str : display %9.3f `se_full'
-        local b_full_str = strtrim("`b_full_str'")
-        local se_full_str = strtrim("`se_full_str'")
-
-        estadd scalar b_full = `b_full'
-        estadd scalar se_full = `se_full'
-        estadd scalar p_full = `p_full'
-        estadd local b_full_str "`b_full_str'`stars'"
-        estadd local se_full_str "(`se_full_str')"
+        disha_full_effect `s'
 
         estadd scalar ymean = `ymean'
         estadd scalar smean = `smean'
@@ -209,6 +220,93 @@ foreach s of local shares {
         stats(b_full_str se_full_str N acq smean) mtitles(`titles') nonotes
 
     display as result "Generated: ${tables}/disha_`s'${sample}.tex"
+}
+
+********************************************************************************
+* Check: without the interaction, tab:mechanism_count
+********************************************************************************
+
+est clear
+
+quietly reghdfe count std_pop_share1 wind_direction av_wind_speed if `fcond', ///
+    absorb(ac_uq_id monthyear) cluster(ac_uq_id)
+est store basefire1
+quietly reghdfe count std_pop_share1 count_prev_year wind_direction av_wind_speed ///
+    if `fcond', absorb(ac_uq_id monthyear) cluster(ac_uq_id)
+est store basefire2
+
+display as text _n "Without interaction; the paper's tab:mechanism_count reports " ///
+    "25.42 (4.722) and -8.639 (1.831), with 1.049 (0.0685) on fires t-12."
+esttab basefire1 basefire2, keep(std_pop_share1 count_prev_year) b(4) se(4) ///
+    star(* 0.10 ** 0.05 *** 0.01) stats(N) nonotes
+
+********************************************************************************
+* Fires on Exposure x co-partisan share
+********************************************************************************
+
+foreach s of local shares {
+
+    est clear
+
+    local mcond "`fcond' & !missing(`s')"
+
+    capture drop tag_ac
+    egen byte tag_ac = tag(ac_uq_id) if `mcond'
+    quietly count if tag_ac == 1
+    local numacs = r(N)
+
+    quietly summarize `s' if `mcond'
+    local smean = r(mean)
+
+    quietly summarize count if `mcond'
+    local ymean = r(mean)
+
+    * Column 1 without and column 2 with the fires a year earlier.
+    forvalues j = 1/2 {
+        local lag = cond(`j' == 2, "count_prev_year", "")
+
+        reghdfe count c.std_pop_share1##c.`s' `lag' wind_direction av_wind_speed ///
+            if `mcond', absorb(ac_uq_id monthyear) cluster(ac_uq_id)
+        disha_full_effect `s'
+
+        estadd scalar ymean = `ymean'
+        estadd scalar smean = `smean'
+        estadd scalar acq = `numacs'
+        estadd local acfe "Y"
+        estadd local acmonthfe "Y"
+        estadd local smpl "Rural, DISHA"
+        estadd local mod "`s'"
+        est store fire`j'
+    }
+
+    esttab fire1 fire2 ///
+        using "${tables}/disha_fire_`s'${sample}.tex", replace ///
+        cells(b(fmt(3) star) se(par fmt(3))) ///
+        star(* 0.10 ** 0.05 *** 0.01) ///
+        keep(std_pop_share1 c.std_pop_share1#c.`s' `s' count_prev_year) ///
+        order(std_pop_share1 c.std_pop_share1#c.`s' `s' count_prev_year) ///
+        varlabels(std_pop_share1 "Exposure" ///
+                  c.std_pop_share1#c.`s' "Exposure \$\times\$ Share" ///
+                  `s' "Share" ///
+                  count_prev_year "Number of Fires\$_{t-12}\$") ///
+        stats(b_full_str se_full_str N acq acfe acmonthfe ymean smean, ///
+              fmt(%s %s %12.0fc %12.0fc %s %s %9.3f %9.3f) ///
+              labels("Exposure + Exposure \$\times\$ Share" " " ///
+                     "Observations" "N Assembly Constituencies" ///
+                     "AC FE" "Month-Year FE" "Mean DV" "Mean Share")) ///
+        nomtitles ///
+        mgroups("Number of Fires", pattern(1 0) ///
+                prefix(\multicolumn{@span}{c}{) suffix(}) ///
+                span erepeat(\cmidrule(lr){@span})) ///
+        substitute(_ \_ \_{t-12} _{t-12}) ///
+        nocons nobaselevels collabels(none) booktabs
+
+    display as text _n "Share: `s'"
+    esttab fire1 fire2, keep(std_pop_share1 c.std_pop_share1#c.`s' `s' count_prev_year) ///
+        b(4) se(4) star(* 0.10 ** 0.05 *** 0.01) ///
+        stats(b_full_str se_full_str N acq smean) nonotes
+
+    display as result "Generated: ${tables}/disha_fire_`s'${sample}.tex"
 }
 
 ********************************************************************************

@@ -1,0 +1,27 @@
+{
+\def\sym#1{\ifmmode^{#1}\else\(^{#1}\)\fi}
+\begin{tabular}{l*{2}{c}}
+\toprule
+            &\multicolumn{2}{c}{Number of Fires}        \\\cmidrule(lr){2-3}
+            &\multicolumn{1}{c}{(1)}         &\multicolumn{1}{c}{(2)}         \\
+\midrule
+Exposure    &      24.494\sym{***}&     -13.050\sym{***}\\
+            &     (8.009)         &     (2.764)         \\
+Exposure $\times$ Share&       1.732         &       6.713\sym{**} \\
+            &     (7.673)         &     (2.948)         \\
+Share       &      -2.719\sym{*}  &      -1.703         \\
+            &     (1.550)         &     (1.335)         \\
+Number of Fires$_{t-12}$&                     &       1.060\sym{***}\\
+            &                     &     (0.067)         \\
+\midrule
+Exposure + Exposure $\times$ Share&   26.226***         &   -6.336***         \\
+            &     (4.384)         &     (2.025)         \\
+Observations&      23,745         &      23,745         \\
+N Assembly Constituencies&         470         &         470         \\
+AC FE       &           Y         &           Y         \\
+Month-Year FE&           Y         &           Y         \\
+Mean DV     &       7.288         &       7.288         \\
+Mean Share  &       0.474         &       0.474         \\
+\bottomrule
+\end{tabular}
+}
