@@ -1,0 +1,23 @@
+{
+\def\sym#1{\ifmmode^{#1}\else\(^{#1}\)\fi}
+\begin{tabular}{l*{8}{c}}
+\toprule
+            &\multicolumn{8}{c}{DISHA documents on:}                                                                                                                                        \\\cmidrule(lr){2-9}
+            &\multicolumn{1}{c}{(1)}&\multicolumn{1}{c}{(2)}&\multicolumn{1}{c}{(3)}&\multicolumn{1}{c}{(4)}&\multicolumn{1}{c}{(5)}&\multicolumn{1}{c}{(6)}&\multicolumn{1}{c}{(7)}&\multicolumn{1}{c}{(8)}\\
+            &\multicolumn{1}{c}{\shortstack{Substitution toward\\environment}}&\multicolumn{1}{c}{Environment}&\multicolumn{1}{c}{Agriculture}&\multicolumn{1}{c}{Development}&\multicolumn{1}{c}{Election}&\multicolumn{1}{c}{Governance}&\multicolumn{1}{c}{Welfare}&\multicolumn{1}{c}{Other Topics}\\
+\midrule
+Exposure    &       0.221         &       0.372         &       0.028         &       0.481         &      -0.239         &       1.100         &      -0.018         &      -0.447\sym{*}  \\
+            &     (0.345)         &     (0.274)         &     (0.124)         &     (0.340)         &     (0.279)         &     (1.057)         &     (0.388)         &     (0.262)         \\
+Exposure $\times$ Majority Party&      -0.103         &      -0.273         &       0.016         &      -0.529         &       0.324         &      -1.430         &      -0.058         &       0.656\sym{**} \\
+            &     (0.345)         &     (0.274)         &     (0.136)         &     (0.345)         &     (0.285)         &     (1.076)         &     (0.370)         &     (0.286)         \\
+Majority Party&       0.542         &      -0.187         &      -0.515         &      -2.211\sym{***}&       1.017         &      -1.728         &       0.300         &      -1.239\sym{***}\\
+            &     (0.718)         &     (0.598)         &     (0.317)         &     (0.601)         &     (0.802)         &     (1.979)         &     (0.414)         &     (0.450)         \\
+\midrule
+Observations&      23,799         &      23,799         &      23,799         &      23,799         &      23,799         &      23,799         &      23,799         &      23,799         \\
+N Assembly Constituencies&         472         &         472         &         472         &         472         &         472         &         472         &         472         &         472         \\
+AC FE       &           Y         &           Y         &           Y         &           Y         &           Y         &           Y         &           Y         &           Y         \\
+Month-Year FE&           Y         &           Y         &           Y         &           Y         &           Y         &           Y         &           Y         &           Y         \\
+Mean DV     &      -2.450         &       0.895         &       1.185         &       2.307         &       1.210         &      12.353         &       1.828         &       1.185         \\
+\bottomrule
+\end{tabular}
+}

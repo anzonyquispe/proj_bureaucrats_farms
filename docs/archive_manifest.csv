@@ -3186,11 +3186,15 @@ code/_stacked_downup_replication/_app_19_polischar_fe12_did_downup_inter_plot.lo
 code/_stacked_downup_replication/_app_20_did_downwind_hm.do,keep,estimation feeding a used table/figure (or read by _generate_all_tables.do)
 code/_stacked_downup_replication/_app_21_5km_allfe_same_term.do,archive,code not contributing to a used output
 code/_stacked_downup_replication/_app_22_event_study_cluster.do,keep,Figure 3 clustering robustness requested by the team (not yet in main.tex)
+code/_stacked_downup_replication/_app_23_event_study_dist_maj.do,keep,district-majority heterogeneity of Figure 3, B.3 and B.10 requested by the team (not yet in main.tex)
+code/_stacked_downup_replication/_app_24_did_dist_maj.do,keep,district-majority heterogeneity of Figure 3, B.3 and B.10 requested by the team (not yet in main.tex)
 code/_stacked_downup_replication/_app_6_main_did_treat_definition.do,keep,estimation feeding a used table/figure (or read by _generate_all_tables.do)
 code/_stacked_downup_replication/_app_6_main_did_treat_definition.log,archive,log / scratch / OS file
 code/_stacked_downup_replication/_app_7_main_did_downup_area_ac_dv.do,keep,estimation feeding a used table/figure (or read by _generate_all_tables.do)
 code/_stacked_downup_replication/_app_8_main_did_by_year.do,keep,estimation feeding a used table/figure (or read by _generate_all_tables.do)
 code/_stacked_downup_replication/_app_9_main_did_by_state.do,keep,estimation feeding a used table/figure (or read by _generate_all_tables.do)
+code/_stacked_downup_replication/_app_disha_dist_maj.do,keep,district-majority heterogeneity of Figure 3, B.3 and B.10 requested by the team (not yet in main.tex)
+code/_stacked_downup_replication/_app_dist_maj_party_generation.do,keep,district-majority heterogeneity of Figure 3, B.3 and B.10 requested by the team (not yet in main.tex)
 code/_stacked_downup_replication/_app_maps_acs.ipynb,keep,figure/table generator used in paper or talks
 code/_stacked_downup_replication/_apply_analysis_subsample.do,keep,estimation feeding a used table/figure (or read by _generate_all_tables.do)
 code/_stacked_downup_replication/_compare_protest2.do,keep,estimation feeding a used table/figure (or read by _generate_all_tables.do)
@@ -3216,6 +3220,7 @@ code/_stacked_downup_replication/_main_6_neighbour.do,keep,estimation feeding a 
 code/_stacked_downup_replication/_main_6_neighbour_plot.do,keep,estimation feeding a used table/figure (or read by _generate_all_tables.do)
 code/_stacked_downup_replication/_master_replication.do,keep,driver for kept scripts
 code/_stacked_downup_replication/_master_replication_log_sample.txt,archive,code not contributing to a used output
+code/_stacked_downup_replication/_merge_dist_maj_party.do,keep,district-majority heterogeneity of Figure 3, B.3 and B.10 requested by the team (not yet in main.tex)
 code/_stacked_downup_replication/_protest_definition.do,keep,estimation feeding a used table/figure (or read by _generate_all_tables.do)
 code/_stacked_downup_replication/_run_local_main_postprocessing.do,keep,driver for kept scripts
 code/_stacked_downup_replication/_run_local_ster_postprocessing.do,keep,driver for kept scripts
@@ -8717,6 +8722,7 @@ tables/_protest_stacked_descriptive_protest2.tex,keep,protest2 descriptive table
 tables/_protest_stacked_descriptive_sample.tex,archive,table/estimate not used in main.tex / talks
 tables/_protest_stacked_descriptive_stata.tex,archive,table/estimate not used in main.tex / talks
 tables/ac_dist.txt,archive,table/estimate not used in main.tex / talks
+tables/action_final_prev_year_dist_maj.tex,keep,district-majority heterogeneity of Figure 3, B.3 and B.10 requested by the team (not yet in main.tex)
 tables/app_18_polishcar_fe12_rubric2.ster,archive,table/estimate not used in main.tex / talks
 tables/app_19_5km_fe12_rubric1.ster,archive,table/estimate not used in main.tex / talks
 tables/app_19_5km_fe12_rubric2.ster,archive,table/estimate not used in main.tex / talks

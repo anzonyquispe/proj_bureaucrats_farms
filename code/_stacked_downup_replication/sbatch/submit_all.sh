@@ -143,6 +143,8 @@ table_ids+=("$(submit_stata alternative_dv _app_7_main_did_downup_area_ac_dv.do 
 table_ids+=("$(submit_stata did_by_year _app_8_main_did_by_year.do 1/10 none none none none "${main_pop_id}")")
 table_ids+=("$(submit_stata did_by_state _app_9_main_did_by_state.do 1/4 none none none none "${main_pop_id}")")
 table_ids+=("$(submit_stata placebo_13km _app_11_placebo_pop_13km.do 1 none none none none "${main_pop_id}")")
+# Table B.3 by district majority party; needs dist_maj_party.dta in intermediate.
+table_ids+=("$(submit_stata main_did_pop_distmaj _app_24_did_dist_maj.do 1/4 none)")
 # FE0-FE3 x {plain, interacted} = the eight evreg models each table reads.
 table_ids+=("$(submit_stata protest_did_area _main_4_protest_5km_fe12_did_downup.do 0/3 none downup_ac "${PROTEST_STACK}")")
 table_ids+=("$(submit_stata politician_did_area _main_5_polischar_fe12_did_downup_inter.do 0/3 none downup_ac)")
@@ -158,6 +160,8 @@ event_ids+=("$(submit_stata event_5pre_area _main_2_stacked_event_study_5pre_are
 event_ids+=("$(submit_stata event_5pre_pop _main_2_stacked_event_study_5pre.do "${EVENT_FE_LIST}" none)")
 # Figure 3 under AC x month-year and district x month-year clustering.
 event_ids+=("$(submit_stata event_5pre_pop_cluster _app_22_event_study_cluster.do "${EVENT_FE_LIST}" none)")
+# Figure 3 by district majority party; needs dist_maj_party.dta in intermediate.
+event_ids+=("$(submit_stata event_5pre_pop_distmaj _app_23_event_study_dist_maj.do "${EVENT_FE_LIST}" none)")
 event_ids+=("$(submit_stata politician_event_pop _app_16_polischar_fe12_evst_all.do "${EVENT_FE_LIST}" _acpop downup_ac_pop)")
 # T-2 differenced politician event study (fig:agri_modi), full FE sweep.
 event_ids+=("$(submit_stata politician_event_t2norm _app_16_polischar_t2norm_evst.do 1/4 _acpop downup_ac_pop)")
