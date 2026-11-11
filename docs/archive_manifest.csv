@@ -8361,6 +8361,8 @@ figures/stacked_event_study_5pre_rural_riceP_ori.png,keep,figure used in main.te
 figures/stacked_event_study_5pre_rural_riceP_rot_honest1.png,archive,figure not used in main.tex / talks
 figures/stacked_event_study_5pre_rural_riceP_rot_honest2.png,archive,figure not used in main.tex / talks
 figures/stacked_event_study_5pre_rural_riceP_rotated.png,keep,figure used in main.tex / talks
+figures/stacked_event_study_pop_5pre_coalition_rural_coal_ori.png,keep,ruling-coalition decomposition of Figure 3 requested by the team (not yet in main.tex)
+figures/stacked_event_study_pop_5pre_coalition_rural_coal_rotated.png,keep,ruling-coalition decomposition of Figure 3 requested by the team (not yet in main.tex)
 figures/stacked_event_study_pop_5pre_distmaj_rural_1_ori.png,keep,district-majority heterogeneity of Figure 3, B.3 and B.10 requested by the team (not yet in main.tex)
 figures/stacked_event_study_pop_5pre_distmaj_rural_1_rotated.png,keep,district-majority heterogeneity of Figure 3, B.3 and B.10 requested by the team (not yet in main.tex)
 figures/stacked_event_study_pop_5pre_distmaj_rural_maj_ori.png,keep,district-majority heterogeneity of Figure 3, B.3 and B.10 requested by the team (not yet in main.tex)
@@ -11559,6 +11561,9 @@ tables/stacked_event_study_5pre_rural_scalars.csv,keep,saved estimates read by k
 tables/stacked_event_study_5pre_sample_rural.csv,archive,table/estimate not used in main.tex / talks
 tables/stacked_event_study_5pre_sample_rural.ster,archive,table/estimate not used in main.tex / talks
 tables/stacked_event_study_5pre_sample_rural_scalars.csv,archive,table/estimate not used in main.tex / talks
+tables/stacked_event_study_pop_5pre_coalition_rural.csv,keep,ruling-coalition decomposition of Figure 3 requested by the team (not yet in main.tex)
+tables/stacked_event_study_pop_5pre_coalition_rural.ster,keep,ruling-coalition decomposition of Figure 3 requested by the team (not yet in main.tex)
+tables/stacked_event_study_pop_5pre_coalition_rural_scalars.csv,keep,ruling-coalition decomposition of Figure 3 requested by the team (not yet in main.tex)
 tables/stacked_event_study_pop_5pre_distmaj_rural.csv,keep,district-majority heterogeneity of Figure 3, B.3 and B.10 requested by the team (not yet in main.tex)
 tables/stacked_event_study_pop_5pre_distmaj_rural.ster,keep,district-majority heterogeneity of Figure 3, B.3 and B.10 requested by the team (not yet in main.tex)
 tables/stacked_event_study_pop_5pre_distmaj_rural_scalars.csv,keep,district-majority heterogeneity of Figure 3, B.3 and B.10 requested by the team (not yet in main.tex)
