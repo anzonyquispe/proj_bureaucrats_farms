@@ -1,12 +1,15 @@
 ********************************************************************************
 * DISHA main table (tab:mechanism), alone and interacted with ENP, the ruling
-* share and the co-partisan share, with SEs clustered by AC (paper), AC x
-* month-year and district x month-year. Same sample and FE as _app_disha.do.
+* share and the co-partisan share, and Table B.10 (tab:app_mechanism, any-fire
+* Exposure) interacted with the co-partisan share, with SEs clustered by AC
+* (paper), AC x month-year and district x month-year. Same sample and FE as
+* _app_disha.do.
 *
 * Output (tables/), one panel per clustering:
 *   action_final_prev_year_count_cluster.tex       tab:mechanism
 *   action_final_prev_year_count_<m>_cluster.tex   m = enp, ruling, ruling_ext,
 *                                                  copart
+*   action_final_prev_year_copart_cluster.tex      B.10 x co-partisan share
 ********************************************************************************
 
 if "$root" == "" {
@@ -46,6 +49,9 @@ rename total_pop_ac_nosmall tot_population
 gen pop_share1 = count_downwind_rural_prev_year / tot_population
 * Formerly: zscore pop_share1 if ..., stub(std_)
 egen std_pop_share1 = std(pop_share1) if disha_sample & is_rural != 0
+* Table B.10's Exposure: any fire downwind instead of the count.
+gen pop_share2 = any_downwind_rural_prev_year / tot_population
+egen std_pop_share2 = std(pop_share2) if disha_sample & is_rural != 0
 
 gen y_agri = (topic_primary_agriculture > 0 & topic_primary_agriculture != .) * 100
 gen y_environment = (environment_pollution > 0 & environment_pollution != .) * 100
@@ -127,6 +133,14 @@ display as text _n "Paper's clustering; tab:mechanism reports 0.0713* (0.0416) "
 esttab `names_ac', keep(std_pop_share1) b(4) se(4) ///
     star(* 0.10 ** 0.05 *** 0.01) stats(N N_clust) nonotes
 
+display as text _n "Table B.10 reports 0.123* (0.0660) and 0.110* (0.0596) " ///
+    "in columns 1 and 2:"
+foreach var in substitution_qtr y_environment_qtr {
+    quietly reghdfe `var' std_pop_share2 if `fcond', ///
+        absorb(ac_uq_id monthyear) cluster(ac_uq_id)
+    display as text "`var': " %7.4f _b[std_pop_share2] " (" %6.4f _se[std_pop_share2] ")"
+}
+
 ********************************************************************************
 * Table: one panel per clustering, then the paper's bottom rows
 ********************************************************************************
@@ -191,8 +205,8 @@ display as result "Generated: `out'"
 * significant digits like the a3 cells.
 capture program drop disha_full_effect
 program define disha_full_effect
-    args s
-    quietly lincom _b[std_pop_share1] + _b[c.std_pop_share1#c.`s']
+    args x s
+    quietly lincom _b[`x'] + _b[c.`x'#c.`s']
     local p = r(p)
     local stars = cond(`p' < 0.01, "***", cond(`p' < 0.05, "**", ///
         cond(`p' < 0.10, "*", "")))
@@ -223,14 +237,29 @@ local meanlab_enp1_party_all "Mean ENP"
 local meanlab_ruling_all     "Mean ruling-coalition share"
 local meanlab_copart_party_all "Mean co-partisan share"
 local meanlab_ruling_ext_all "Mean ruling share with outside support"
-local file_enp1_party_all  "enp"
-local file_ruling_all      "ruling"
-local file_copart_party_all "copart"
-local file_ruling_ext_all  "ruling_ext"
+* Each table: measure, Exposure and output file.
+local meas_enp        "enp1_party_all"
+local meas_ruling     "ruling_all"
+local meas_ruling_ext "ruling_ext_all"
+local meas_copart     "copart_party_all"
+local meas_b10_copart "copart_party_all"
+local x_enp        "std_pop_share1"
+local x_ruling     "std_pop_share1"
+local x_ruling_ext "std_pop_share1"
+local x_copart     "std_pop_share1"
+local x_b10_copart "std_pop_share2"
+local stem_enp        "action_final_prev_year_count_enp"
+local stem_ruling     "action_final_prev_year_count_ruling"
+local stem_ruling_ext "action_final_prev_year_count_ruling_ext"
+local stem_copart     "action_final_prev_year_count_copart"
+local stem_b10_copart "action_final_prev_year_copart"
 
-foreach s in enp1_party_all ruling_all ruling_ext_all copart_party_all {
+foreach k in enp ruling ruling_ext copart b10_copart {
 
     est clear
+
+    local s "`meas_`k''"
+    local x "`x_`k''"
 
     local mcond "`fcond' & !missing(`s')"
     local lab "`label_`s''"
@@ -252,9 +281,9 @@ foreach s in enp1_party_all ruling_all ruling_ext_all copart_party_all {
             quietly summarize `var' if `mcond'
             local ymean = r(mean)
 
-            reghdfe `var' c.std_pop_share1##c.`s' if `mcond', ///
+            reghdfe `var' c.`x'##c.`s' if `mcond', ///
                 absorb(ac_uq_id monthyear) cluster(`cl_`cl'')
-            disha_full_effect `s'
+            disha_full_effect `x' `s'
             estadd scalar ymean = `ymean'
             estadd scalar smean = `smean'
             estadd scalar acq = `numacs_s'
@@ -270,22 +299,22 @@ foreach s in enp1_party_all ruling_all ruling_ext_all copart_party_all {
         }
     }
 
-    display as text _n "Exposure x `s', clustered by AC:"
-    esttab `names_ac', keep(std_pop_share1 c.std_pop_share1#c.`s' `s') ///
+    display as text _n "`x' x `s', clustered by AC:"
+    esttab `names_ac', keep(`x' c.`x'#c.`s' `s') ///
         b(4) se(4) star(* 0.10 ** 0.05 *** 0.01) ///
         stats(b_full_str se_full_str N N_clust) nonotes
 
-    local out "${tables}/action_final_prev_year_count_`file_`s''_cluster${sample}.tex"
+    local out "${tables}/`stem_`k''_cluster${sample}.tex"
 
     * Header and Panel A, with the paper's column titles.
     esttab `names_ac' using "`out'", replace ///
         cells(b(fmt(a3) star) se(par fmt(a3))) ///
         star(* 0.10 ** 0.05 *** 0.01) ///
-        keep(std_pop_share1 c.std_pop_share1#c.`s' `s') ///
-        order(std_pop_share1 c.std_pop_share1#c.`s' `s') ///
+        keep(`x' c.`x'#c.`s' `s') ///
+        order(`x' c.`x'#c.`s' `s') ///
         nocons nobaselevels ///
-        varlabels(std_pop_share1 "Exposure" ///
-                  c.std_pop_share1#c.`s' "Exposure \$\times\$ `lab'" ///
+        varlabels(`x' "Exposure" ///
+                  c.`x'#c.`s' "Exposure \$\times\$ `lab'" ///
                   `s' "`mainlab'") ///
         stats(b_full_str se_full_str N_clust, fmt(%s %s %12.0fc) ///
               labels("Exposure + Exposure \$\times\$ `lab'" " " "Clusters")) ///
@@ -304,11 +333,11 @@ foreach s in enp1_party_all ruling_all ruling_ext_all copart_party_all {
         esttab `names_`cl'' using "`out'", append ///
             cells(b(fmt(a3) star) se(par fmt(a3))) ///
             star(* 0.10 ** 0.05 *** 0.01) ///
-            keep(std_pop_share1 c.std_pop_share1#c.`s' `s') ///
-            order(std_pop_share1 c.std_pop_share1#c.`s' `s') ///
+            keep(`x' c.`x'#c.`s' `s') ///
+            order(`x' c.`x'#c.`s' `s') ///
             nocons nobaselevels ///
-            varlabels(std_pop_share1 "Exposure" ///
-                      c.std_pop_share1#c.`s' "Exposure \$\times\$ `lab'" ///
+            varlabels(`x' "Exposure" ///
+                      c.`x'#c.`s' "Exposure \$\times\$ `lab'" ///
                       `s' "`mainlab'") ///
             stats(b_full_str se_full_str N_clust, fmt(%s %s %12.0fc) ///
                   labels("Exposure + Exposure \$\times\$ `lab'" " " "Clusters")) ///

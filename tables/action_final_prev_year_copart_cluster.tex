@@ -1,0 +1,57 @@
+{
+\def\sym#1{\ifmmode^{#1}\else\(^{#1}\)\fi}
+\begin{tabular}{l*{8}{c}}
+\toprule
+            &\multicolumn{8}{c}{\textbf{DISHA documents on:}}                                                                                                                               \\\cmidrule(lr){2-9}
+            &\multicolumn{1}{c}{(1)}&\multicolumn{1}{c}{(2)}&\multicolumn{1}{c}{(3)}&\multicolumn{1}{c}{(4)}&\multicolumn{1}{c}{(5)}&\multicolumn{1}{c}{(6)}&\multicolumn{1}{c}{(7)}&\multicolumn{1}{c}{(8)}\\
+            &\multicolumn{1}{c}{\makecell{\textbf{Substitution} \\ \textbf{toward environment}}}&\multicolumn{1}{c}{\textbf{Environment}}&\multicolumn{1}{c}{\textbf{Agriculture}}&\multicolumn{1}{c}{\textbf{Development}}&\multicolumn{1}{c}{\textbf{Election}}&\multicolumn{1}{c}{\textbf{Governance}}&\multicolumn{1}{c}{\textbf{Welfare}}&\multicolumn{1}{c}{\textbf{Other Topics}}\\
+\midrule
+\multicolumn{9}{l}{\textit{Panel A: clustered by constituency, as in the paper}} \\
+Exposure    &       0.168         &       0.158\sym{*}  &      0.0830         &     0.00906         &       0.190\sym{**} &      -0.468\sym{*}  &      -0.118         &       0.245\sym{**} \\
+            &     (0.108)         &    (0.0931)         &    (0.0959)         &     (0.119)         &    (0.0916)         &     (0.273)         &     (0.117)         &     (0.122)         \\
+Exposure $\times$ Co-partisan share&     -0.0683         &     -0.0633         &     -0.0572         &     -0.0157         &      -0.198\sym{*}  &       0.342         &      0.0680         &      -0.109         \\
+            &     (0.116)         &    (0.0925)         &     (0.101)         &     (0.175)         &     (0.110)         &     (0.340)         &     (0.130)         &     (0.194)         \\
+Co-partisan share&       2.021\sym{**} &       0.428         &      -1.942\sym{***}&      -2.152\sym{**} &       0.786         &      -6.892\sym{***}&       0.197         &       0.443         \\
+            &     (0.998)         &     (0.798)         &     (0.663)         &     (1.060)         &     (0.833)         &     (2.033)         &     (0.621)         &     (0.368)         \\
+
+Exposure + Exposure $\times$ Co-partisan share&      0.0999         &      0.0950         &      0.0258         &    -0.00667         &    -0.00812         &      -0.127         &     -0.0503         &       0.136         \\
+            &    (0.0717)         &    (0.0611)         &    (0.0753)         &     (0.148)         &    (0.0585)         &     (0.195)         &    (0.0756)         &     (0.197)         \\
+Clusters    &         470         &         470         &         470         &         470         &         470         &         470         &         470         &         470         \\
+\midrule
+
+\multicolumn{9}{l}{\textit{Panel B: clustered by constituency $\times$ month-year}} \\
+Exposure    &       0.168         &       0.158\sym{*}  &      0.0830         &     0.00906         &       0.190\sym{**} &      -0.468\sym{*}  &      -0.118         &       0.245\sym{**} \\
+            &     (0.107)         &    (0.0859)         &     (0.111)         &     (0.101)         &    (0.0905)         &     (0.262)         &     (0.120)         &     (0.109)         \\
+Exposure $\times$ Co-partisan share&     -0.0683         &     -0.0633         &     -0.0572         &     -0.0157         &      -0.198\sym{**} &       0.342         &      0.0680         &      -0.109         \\
+            &     (0.111)         &    (0.0824)         &     (0.112)         &     (0.151)         &    (0.0949)         &     (0.322)         &     (0.129)         &     (0.129)         \\
+Co-partisan share&       2.021\sym{***}&       0.428         &      -1.942\sym{***}&      -2.152\sym{***}&       0.786\sym{**} &      -6.892\sym{***}&       0.197         &       0.443\sym{**} \\
+            &     (0.541)         &     (0.440)         &     (0.390)         &     (0.598)         &     (0.368)         &     (1.056)         &     (0.461)         &     (0.187)         \\
+
+Exposure + Exposure $\times$ Co-partisan share&      0.0999         &0.0950\sym{*}         &      0.0258         &    -0.00667         &    -0.00812         &      -0.127         &     -0.0503         &       0.136         \\
+            &    (0.0721)         &    (0.0554)         &    (0.0514)         &     (0.116)         &    (0.0419)         &     (0.192)         &    (0.0719)         &     (0.103)         \\
+Clusters    &      23,745         &      23,745         &      23,745         &      23,745         &      23,745         &      23,745         &      23,745         &      23,745         \\
+\midrule
+
+\multicolumn{9}{l}{\textit{Panel C: clustered by district $\times$ month-year}} \\
+Exposure    &       0.168         &       0.158         &      0.0830         &     0.00906         &       0.190         &      -0.468         &      -0.118         &       0.245\sym{*}  \\
+            &     (0.169)         &     (0.139)         &     (0.160)         &     (0.127)         &     (0.122)         &     (0.378)         &     (0.161)         &     (0.138)         \\
+Exposure $\times$ Co-partisan share&     -0.0683         &     -0.0633         &     -0.0572         &     -0.0157         &      -0.198         &       0.342         &      0.0680         &      -0.109         \\
+            &     (0.155)         &     (0.123)         &     (0.147)         &     (0.193)         &     (0.126)         &     (0.402)         &     (0.147)         &     (0.166)         \\
+Co-partisan share&       2.021\sym{**} &       0.428         &      -1.942\sym{***}&      -2.152\sym{**} &       0.786         &      -6.892\sym{***}&       0.197         &       0.443         \\
+            &     (0.957)         &     (0.779)         &     (0.569)         &     (0.947)         &     (0.494)         &     (1.711)         &     (0.719)         &     (0.298)         \\
+
+Exposure + Exposure $\times$ Co-partisan share&      0.0999         &      0.0950         &      0.0258         &    -0.00667         &    -0.00812         &      -0.127         &     -0.0503         &       0.136         \\
+            &    (0.0944)         &    (0.0646)         &    (0.0815)         &     (0.160)         &    (0.0624)         &     (0.305)         &     (0.106)         &     (0.135)         \\
+Clusters    &       4,722         &       4,722         &       4,722         &       4,722         &       4,722         &       4,722         &       4,722         &       4,722         \\
+\midrule
+
+
+
+Observations&      23,745&      23,745&      23,745&      23,745&      23,745&      23,745&      23,745&      23,745\\
+AC FE       &           Y&           Y&           Y&           Y&           Y&           Y&           Y&           Y\\
+Month-Year FE&           Y&           Y&           Y&           Y&           Y&           Y&           Y&           Y\\
+Mean DV     &      -2.464&       0.884&       1.188&       2.287&       1.213&      12.382&       1.832&       1.188\\
+Mean co-partisan share&       0.474&       0.474&       0.474&       0.474&       0.474&       0.474&       0.474&       0.474\\
+\bottomrule
+\end{tabular}
+}
