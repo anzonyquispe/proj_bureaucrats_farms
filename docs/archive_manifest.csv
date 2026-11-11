@@ -3195,6 +3195,7 @@ code/_stacked_downup_replication/_app_7_main_did_downup_area_ac_dv.do,keep,estim
 code/_stacked_downup_replication/_app_8_main_did_by_year.do,keep,estimation feeding a used table/figure (or read by _generate_all_tables.do)
 code/_stacked_downup_replication/_app_9_main_did_by_state.do,keep,estimation feeding a used table/figure (or read by _generate_all_tables.do)
 code/_stacked_downup_replication/_app_coalition_generation.do,keep,ruling-coalition decomposition of Figure 3 requested by the team (not yet in main.tex)
+code/_stacked_downup_replication/_app_disha_cluster.do,keep,main table (tab:mechanism) with AC x month-year and district x month-year clustering requested by the team (not yet in main.tex)
 code/_stacked_downup_replication/_app_disha_dist_maj.do,keep,district-majority heterogeneity of Figure 3, B.3 and B.10 requested by the team (not yet in main.tex)
 code/_stacked_downup_replication/_app_dist_maj_party_generation.do,keep,district-majority heterogeneity of Figure 3, B.3 and B.10 requested by the team (not yet in main.tex)
 code/_stacked_downup_replication/_app_maps_acs.ipynb,keep,figure/table generator used in paper or talks
@@ -8739,6 +8740,7 @@ tables/_protest_stacked_descriptive_protest2.tex,keep,protest2 descriptive table
 tables/_protest_stacked_descriptive_sample.tex,archive,table/estimate not used in main.tex / talks
 tables/_protest_stacked_descriptive_stata.tex,archive,table/estimate not used in main.tex / talks
 tables/ac_dist.txt,archive,table/estimate not used in main.tex / talks
+tables/action_final_prev_year_count_cluster.tex,keep,main table (tab:mechanism) with AC x month-year and district x month-year clustering requested by the team (not yet in main.tex)
 tables/action_final_prev_year_dist_maj.tex,keep,district-majority heterogeneity of Figure 3, B.3 and B.10 requested by the team (not yet in main.tex)
 tables/app_18_polishcar_fe12_rubric2.ster,archive,table/estimate not used in main.tex / talks
 tables/app_19_5km_fe12_rubric1.ster,archive,table/estimate not used in main.tex / talks

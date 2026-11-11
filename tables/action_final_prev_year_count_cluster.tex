@@ -1,0 +1,38 @@
+{
+\def\sym#1{\ifmmode^{#1}\else\(^{#1}\)\fi}
+\begin{tabular}{l*{8}{c}}
+\toprule
+            &\multicolumn{8}{c}{\textbf{DISHA documents on:}}                                                                                                                               \\\cmidrule(lr){2-9}
+            &\multicolumn{1}{c}{(1)}&\multicolumn{1}{c}{(2)}&\multicolumn{1}{c}{(3)}&\multicolumn{1}{c}{(4)}&\multicolumn{1}{c}{(5)}&\multicolumn{1}{c}{(6)}&\multicolumn{1}{c}{(7)}&\multicolumn{1}{c}{(8)}\\
+            &\multicolumn{1}{c}{\makecell{\textbf{Substitution} \\ \textbf{toward environment}}}&\multicolumn{1}{c}{\textbf{Environment}}&\multicolumn{1}{c}{\textbf{Agriculture}}&\multicolumn{1}{c}{\textbf{Development}}&\multicolumn{1}{c}{\textbf{Election}}&\multicolumn{1}{c}{\textbf{Governance}}&\multicolumn{1}{c}{\textbf{Welfare}}&\multicolumn{1}{c}{\textbf{Other Topics}}\\
+\midrule
+\multicolumn{9}{l}{\textit{Panel A: clustered by constituency, as in the paper}} \\
+Exposure    &      0.0713\sym{*}  &      0.0718\sym{**} &      0.0514         &     -0.0934         &      0.0333         &     -0.0564         &     -0.0218         &      0.0899         \\
+            &    (0.0416)         &    (0.0314)         &    (0.0346)         &    (0.0686)         &    (0.0369)         &     (0.159)         &    (0.0465)         &    (0.0604)         \\
+
+Clusters    &         472         &         472         &         472         &         472         &         472         &         472         &         472         &         472         \\
+\midrule
+
+\multicolumn{9}{l}{\textit{Panel B: clustered by constituency $\times$ month-year}} \\
+Exposure    &      0.0713         &      0.0718\sym{**} &      0.0514         &     -0.0934\sym{*}  &      0.0333         &     -0.0564         &     -0.0218         &      0.0899\sym{**} \\
+            &    (0.0484)         &    (0.0354)         &    (0.0329)         &    (0.0564)         &    (0.0431)         &     (0.159)         &    (0.0465)         &    (0.0405)         \\
+
+Clusters    &      23,799         &      23,799         &      23,799         &      23,799         &      23,799         &      23,799         &      23,799         &      23,799         \\
+\midrule
+
+\multicolumn{9}{l}{\textit{Panel C: clustered by district $\times$ month-year}} \\
+Exposure    &      0.0713         &      0.0718         &      0.0514         &     -0.0934         &      0.0333         &     -0.0564         &     -0.0218         &      0.0899\sym{*}  \\
+            &    (0.0797)         &    (0.0605)         &    (0.0522)         &    (0.0732)         &    (0.0563)         &     (0.246)         &    (0.0683)         &    (0.0523)         \\
+
+Clusters    &       4,776         &       4,776         &       4,776         &       4,776         &       4,776         &       4,776         &       4,776         &       4,776         \\
+\midrule
+
+
+
+Observations&      23,799&      23,799&      23,799&      23,799&      23,799&      23,799&      23,799&      23,799\\
+AC FE       &           Y&           Y&           Y&           Y&           Y&           Y&           Y&           Y\\
+Month-Year FE&           Y&           Y&           Y&           Y&           Y&           Y&           Y&           Y\\
+Mean DV     &      -2.450&       0.895&       1.185&       2.307&       1.210&      12.353&       1.828&       1.185\\
+\bottomrule
+\end{tabular}
+}
