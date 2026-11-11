@@ -1,30 +1,18 @@
 ********************************************************************************
-* Whether each AC's MLA belongs to the state ruling coalition, month by month.
-* Input of the coalition decomposition of Figure 3 (_app_25).
+* Whether each AC's MLA is in the state ruling coalition, by month. Input of
+* the Figure 3 coalition decomposition (_app_25). Covers every AC of the four
+* states (MLA: _mla_party.do; coalition: _ruling_coalition.do).
 *
-* The MLA is the general-election winner of the AC (_mla_party.do) and the
-* coalition is the set of parties with ministers in the state government that
-* month (_ruling_coalition.do). Every AC of the four states is covered,
-* including those spanning several districts.
-*
-* Output (data_output/intermediate):
-*   coalition_ac.dta/.csv: one row per AC x calendar month, April 2012 to
-*       January 2023, with the MLA's party, the state government in office
-*       and coalition_ac. The month is stored as cohort (year * 12 + month,
-*       the stacked panels' coding), so a fire panel merges it on
-*       ac_uq_id cohort and gets the status at each stack's cohort month.
-*
-* The candidate file does not depend on the sample, so the output carries no
-* ${sample} suffix. Runs where the candidate file lives (the team's Dropbox);
-* the cluster jobs only need the .dta copied into data_output/intermediate.
+* Output (data_output/intermediate): coalition_ac.dta/.csv, one row per AC x
+* month, 2012m4-2023m1, with the month stored as cohort (year * 12 + month)
+* so fire panels merge on ac_uq_id cohort. No ${sample} suffix. Runs on the
+* team's Dropbox; the cluster only needs the .dta copied to intermediate.
 ********************************************************************************
 
 if "$root" == "" {
     clear all
     set more off
-    * Standalone defaults for the five sbatch-array parameters. This is a data
-    * build, so is_rural_var, fe_list and ster_suffix are inert here; they stay
-    * for consistency with the other dofiles.
+    * Standalone defaults; is_rural_var, fe_list and ster_suffix are unused here.
     global location     "dbox"
     global sample       ""
     global is_rural_var "is_rural"
@@ -63,10 +51,8 @@ keep ac_uq_id province
 duplicates drop
 isid ac_uq_id
 
-* April 2012 is the first month in which all four states sit in a term of the
-* candidate file (Punjab and Uttar Pradesh voted in early 2012). January 2023
-* is the last cohort the fire panels reach: they keep calendar months up to
-* August 2022 and relative months -5 to 6, so its month -5 is still in.
+* 2012m4: first month with all four states in a term. 2023m1: last cohort of
+* the fire panels (data end in 2022m8, cohorts keep months -5 to 6).
 local first = ym(2012, 4)
 local last  = ym(2023, 1)
 expand `last' - `first' + 1
@@ -94,6 +80,8 @@ drop _merge
 
 do "${code}/_ruling_coalition.do"
 assert gov_period != "" & !missing(coalition)
+* Government only, as in the DISHA share: no outside support.
+drop coalition_ext
 rename coalition coalition_ac
 label variable coalition_ac "AC's MLA belongs to the state ruling coalition"
 

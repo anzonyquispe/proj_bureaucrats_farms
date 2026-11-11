@@ -1,22 +1,12 @@
 ********************************************************************************
-* Winner of each AC-election in the candidate file, with their party and
-* pre-poll alliance.
+* Winner of each AC-election, with party and pre-poll alliance.
 *
-* Leaves in memory one row per AC-election: ac_uq_id, province (Punjab spelled
-* Punjab_IND, as in the election calendar), year_el, mla_party and
-* mla_alliance. It covers every AC of the four states, including the ACs
-* spanning several districts that action_final.dta leaves out.
+* Leaves one row per AC-election: ac_uq_id, province (Punjab_IND), year_el,
+* mla_party, mla_alliance. Covers every AC of the four states. Shared by
+* _app_disha_party_share.do and _app_coalition_generation.do.
 *
-* _app_disha_party_share.do and _app_coalition_generation.do both read it, so
-* the party labels are cleaned in one place.
-*
-* Alliances are the pre-poll alliances of each election, fixed for the whole
-* term. Realignments during a term are not modelled: JD(U) left the Bihar
-* Mahagathbandhan for the NDA in July 2017, SAD left the NDA in September
-* 2020, SBSP left the UP NDA in 2019, and the 2019 BJP-JJP coalition in
-* Haryana formed after the vote.
-*
-* Replaces the data in memory; callers wrap it in preserve/restore.
+* Alliances are fixed for the term; realignments are not modelled (e.g. JD(U)
+* to the NDA in 2017). Replaces the data; callers use preserve/restore.
 ********************************************************************************
 
 import delimited using "${int_data}/IV_AC_candidates_ac_identifier.csv", clear
@@ -39,18 +29,11 @@ replace province = "Uttar Pradesh" if province == "Uttar"
 replace province = "Punjab_IND" if province == "Punjab"
 destring year_el, replace
 
-* The winner is the candidate in position 1. Summing votes by name, as
-* _app_disha_incumbents.do does, merges namesake candidates (82 pairs in
-* the file, e.g. an independent with the winner's name) and makes the
-* party depend on the sort order; it also changes the winner in Fatehabad,
-* Uttar Pradesh 2012.
+* Winner = position 1. Summing votes by name would merge namesakes (82 pairs).
 keep if position == 1
 isid ac_uq_id province year_el
 
-* Party key: upper case without punctuation or spaces, then each label the
-* winners carry in the file maps to one abbreviation. The file spells BJP
-* "Bharatiya Janta Party" and SBSP both "Bharatiya" (2022) and "Bhartiya"
-* (2017).
+* Party key: upper case, no punctuation; each label maps to one abbreviation.
 gen mla_party = ustrupper(ustrregexra(party, "[^A-Za-z0-9]", ""))
 replace mla_party = "IND"    if mla_party == "INDEPENDENT"
 replace mla_party = "BJP"    if inlist(mla_party, "BHARATIYAJANTAPARTY", "BHARATIYAJANATAPARTY")
@@ -86,8 +69,7 @@ replace mla_party = "IEMC"   if mla_party == "ITTEHADEMILLAITCOUNCIL"
 replace mla_party = "NCP"    if mla_party == "NATIONALISTCONGRESSPARTY"
 replace mla_party = "JMM"    if mla_party == "JHARKHANDMUKTIMORCHA"
 
-* Pre-poll alliances by election, listing the members that won seats; a
-* party not listed runs on its own.
+* Pre-poll alliances (members that won seats); unlisted parties run alone.
 gen mla_alliance = mla_party
 replace mla_alliance = "SAD-BJP" if province == "Punjab_IND" & ///
     inlist(year_el, 2012, 2017) & inlist(mla_party, "SAD", "BJP")
@@ -99,6 +81,8 @@ replace mla_alliance = "INLD-SAD" if province == "Haryana" & ///
     inlist(year_el, 2009, 2014) & inlist(mla_party, "INLD", "SAD")
 replace mla_alliance = "INC-RLD" if province == "Uttar Pradesh" & ///
     year_el == 2012 & inlist(mla_party, "INC", "RLD")
+replace mla_alliance = "PECP-AD" if province == "Uttar Pradesh" & ///
+    year_el == 2012 & inlist(mla_party, "PECP", "AD")
 replace mla_alliance = "NDA" if province == "Uttar Pradesh" & ///
     year_el == 2017 & inlist(mla_party, "BJP", "ADS", "SBSP")
 replace mla_alliance = "SP-INC" if province == "Uttar Pradesh" & ///
@@ -120,7 +104,7 @@ replace mla_alliance = "NDA" if province == "Bihar" & ///
 replace mla_alliance = "MGB" if province == "Bihar" & ///
     year_el == 2020 & inlist(mla_party, "RJD", "INC", "CPIMLL", "CPI", "CPM")
 replace mla_alliance = "GDSF" if province == "Bihar" & ///
-    year_el == 2020 & inlist(mla_party, "RLSP", "BSP", "AIMIM")
+    year_el == 2020 & inlist(mla_party, "BSP", "AIMIM")
 
 display as text _n "Raw party labels of winners that the cleaning changed:"
 gen _pair = party + "  ->  " + mla_party
@@ -135,7 +119,7 @@ bysort province: tab mla_alliance year_el if mla_alliance != mla_party
 
 keep ac_uq_id province year_el party mla_party mla_alliance
 rename party mla_party_raw
-* For the team's review of the cleaning; a write failure only loses this file.
+* For the team's review; a failed write is not fatal.
 capture noisily export delimited using ///
     "${int_data}/disha_mla_party${sample}.csv", replace
 drop mla_party_raw
