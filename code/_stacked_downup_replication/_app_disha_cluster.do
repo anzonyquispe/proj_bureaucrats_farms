@@ -1,20 +1,18 @@
 ********************************************************************************
-* Main DISHA table (tab:mechanism) with standard errors clustered by AC (as in
-* the paper), AC x month-year and district x month-year. Sample, Exposure,
-* outcomes and FE are those of _app_disha.do, so only the standard errors
-* change.
+* DISHA main table (tab:mechanism), alone and interacted with ENP, the ruling
+* share and the co-partisan share, with SEs clustered by AC (paper), AC x
+* month-year and district x month-year. Same sample and FE as _app_disha.do.
 *
-* Input:  action_final.dta (_app_disha_generation.do).
-* Output: tables/action_final_prev_year_count_cluster${sample}.tex, one panel
-*         per clustering.
+* Output (tables/), one panel per clustering:
+*   action_final_prev_year_count_cluster.tex       tab:mechanism
+*   action_final_prev_year_count_<m>_cluster.tex   m = enp, ruling, ruling_ext,
+*                                                  copart
 ********************************************************************************
 
 if "$root" == "" {
     clear all
     set more off
-    * Standalone defaults for the five sbatch-array parameters. The DISHA
-    * tables are a single specification, so fe_list and ster_suffix are inert
-    * here; they stay for consistency with the other analysis dofiles.
+    * Standalone defaults; fe_list and ster_suffix are unused here.
     global location     "shell"
     global sample       ""
     global is_rural_var "is_rural"
@@ -75,9 +73,12 @@ replace substitution_qtr = 0 if substitution_qtr == .
 
 local fcond "disha_sample == 1 & is_rural != 0"
 
-* A row without a district would leave the district clustering with a smaller
-* sample than the paper's.
+* District clustering needs a district on every row.
 assert !missing(distr_id) if `fcond'
+
+do "${code}/_app_disha_election_calendar.do"
+do "${code}/_app_disha_party_share.do"
+do "${code}/_disha_fragmentation.do"
 
 capture drop tag_ac
 egen byte tag_ac = tag(ac_uq_id) if `fcond'
@@ -180,5 +181,156 @@ esttab `names_ac' using "`out'", append ///
     collabels(none) booktabs nonotes
 
 display as result "Generated: `out'"
+
+********************************************************************************
+* Interactions with ENP, the ruling-coalition share and the co-partisan share
+* under each clustering
+********************************************************************************
+
+* b1 + b2 (Exposure at ENP = 2 or at share = 1) as table strings, with three
+* significant digits like the a3 cells.
+capture program drop disha_full_effect
+program define disha_full_effect
+    args s
+    quietly lincom _b[std_pop_share1] + _b[c.std_pop_share1#c.`s']
+    local p = r(p)
+    local stars = cond(`p' < 0.01, "***", cond(`p' < 0.05, "**", ///
+        cond(`p' < 0.10, "*", "")))
+    foreach k in estimate se {
+        local x = r(`k')
+        local d = max(3, 2 - floor(log10(abs(`x'))))
+        local str_`k' : display %20.`d'f `x'
+        local str_`k' = strtrim("`str_`k''")
+    }
+    if "`stars'" != "" local str_estimate "`str_estimate'\sym{`stars'}"
+    estadd local b_full_str "`str_estimate'"
+    estadd local se_full_str "(`str_se')"
+end
+
+local label_enp1_party_all "(ENP \$-\$ 1)"
+local label_ruling_all     "Ruling-coalition share"
+local label_copart_party_all "Co-partisan share"
+local label_ruling_ext_all "Ruling share with outside support"
+local mainlab_enp1_party_all "ENP \$-\$ 1"
+local mainlab_ruling_all     "Ruling-coalition share"
+local mainlab_copart_party_all "Co-partisan share"
+local mainlab_ruling_ext_all "Ruling share with outside support"
+local mean_enp1_party_all  "enp_party_all"
+local mean_ruling_all      "ruling_all"
+local mean_copart_party_all "copart_party_all"
+local mean_ruling_ext_all  "ruling_ext_all"
+local meanlab_enp1_party_all "Mean ENP"
+local meanlab_ruling_all     "Mean ruling-coalition share"
+local meanlab_copart_party_all "Mean co-partisan share"
+local meanlab_ruling_ext_all "Mean ruling share with outside support"
+local file_enp1_party_all  "enp"
+local file_ruling_all      "ruling"
+local file_copart_party_all "copart"
+local file_ruling_ext_all  "ruling_ext"
+
+foreach s in enp1_party_all ruling_all ruling_ext_all copart_party_all {
+
+    est clear
+
+    local mcond "`fcond' & !missing(`s')"
+    local lab "`label_`s''"
+    local mainlab "`mainlab_`s''"
+
+    capture drop tag_ac
+    egen byte tag_ac = tag(ac_uq_id) if `mcond'
+    quietly count if tag_ac == 1
+    local numacs_s = r(N)
+
+    quietly summarize `mean_`s'' if `mcond'
+    local smean = r(mean)
+
+    foreach cl in ac acmy distmy {
+        local names_`cl' ""
+        local i = 1
+        foreach var of local outcomes {
+
+            quietly summarize `var' if `mcond'
+            local ymean = r(mean)
+
+            reghdfe `var' c.std_pop_share1##c.`s' if `mcond', ///
+                absorb(ac_uq_id monthyear) cluster(`cl_`cl'')
+            disha_full_effect `s'
+            estadd scalar ymean = `ymean'
+            estadd scalar smean = `smean'
+            estadd scalar acq = `numacs_s'
+            estadd local acfe "Y"
+            estadd local acmonthfe "Y"
+            estadd local smpl "Rural, DISHA"
+            estadd local mod "`s'"
+            estadd local clusterspec "`cl'"
+            est store `cl'`i'
+            local names_`cl' "`names_`cl'' `cl'`i'"
+
+            local i = `i' + 1
+        }
+    }
+
+    display as text _n "Exposure x `s', clustered by AC:"
+    esttab `names_ac', keep(std_pop_share1 c.std_pop_share1#c.`s' `s') ///
+        b(4) se(4) star(* 0.10 ** 0.05 *** 0.01) ///
+        stats(b_full_str se_full_str N N_clust) nonotes
+
+    local out "${tables}/action_final_prev_year_count_`file_`s''_cluster${sample}.tex"
+
+    * Header and Panel A, with the paper's column titles.
+    esttab `names_ac' using "`out'", replace ///
+        cells(b(fmt(a3) star) se(par fmt(a3))) ///
+        star(* 0.10 ** 0.05 *** 0.01) ///
+        keep(std_pop_share1 c.std_pop_share1#c.`s' `s') ///
+        order(std_pop_share1 c.std_pop_share1#c.`s' `s') ///
+        nocons nobaselevels ///
+        varlabels(std_pop_share1 "Exposure" ///
+                  c.std_pop_share1#c.`s' "Exposure \$\times\$ `lab'" ///
+                  `s' "`mainlab'") ///
+        stats(b_full_str se_full_str N_clust, fmt(%s %s %12.0fc) ///
+              labels("Exposure + Exposure \$\times\$ `lab'" " " "Clusters")) ///
+        mtitles("\makecell{\textbf{Substitution} \\ \textbf{toward environment}}" ///
+                "\textbf{Environment}" "\textbf{Agriculture}" "\textbf{Development}" ///
+                "\textbf{Election}" "\textbf{Governance}" "\textbf{Welfare}" ///
+                "\textbf{Other Topics}") ///
+        mgroups("\textbf{DISHA documents on:}", pattern(1 0 0 0 0 0 0 0) ///
+                prefix(\multicolumn{@span}{c}{) suffix(}) ///
+                span erepeat(\cmidrule(lr){@span})) ///
+        posthead("\midrule" "\multicolumn{`ncols'}{l}{\textit{`panel_ac'}} \\") ///
+        prefoot("") postfoot("\midrule") ///
+        collabels(none) booktabs nonotes
+
+    foreach cl in acmy distmy {
+        esttab `names_`cl'' using "`out'", append ///
+            cells(b(fmt(a3) star) se(par fmt(a3))) ///
+            star(* 0.10 ** 0.05 *** 0.01) ///
+            keep(std_pop_share1 c.std_pop_share1#c.`s' `s') ///
+            order(std_pop_share1 c.std_pop_share1#c.`s' `s') ///
+            nocons nobaselevels ///
+            varlabels(std_pop_share1 "Exposure" ///
+                      c.std_pop_share1#c.`s' "Exposure \$\times\$ `lab'" ///
+                      `s' "`mainlab'") ///
+            stats(b_full_str se_full_str N_clust, fmt(%s %s %12.0fc) ///
+                  labels("Exposure + Exposure \$\times\$ `lab'" " " "Clusters")) ///
+            nomtitles nonumbers ///
+            prehead("") ///
+            posthead("\multicolumn{`ncols'}{l}{\textit{`panel_`cl''}} \\") ///
+            prefoot("") postfoot("\midrule") ///
+            collabels(none) booktabs nonotes
+    }
+
+    * Bottom rows, common to the panels.
+    esttab `names_ac' using "`out'", append ///
+        cells(none) ///
+        stats(N acfe acmonthfe ymean smean, ///
+              fmt(%12.0fc %s %s %9.3f %9.3f) ///
+              labels("Observations" "AC FE" "Month-Year FE" "Mean DV" ///
+                     "`meanlab_`s''")) ///
+        nomtitles nonumbers ///
+        prehead("") posthead("") prefoot("") ///
+        collabels(none) booktabs nonotes
+
+    display as result "Generated: `out'"
+}
 
 ********************************************************************************

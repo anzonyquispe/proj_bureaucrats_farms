@@ -3195,12 +3195,14 @@ code/_stacked_downup_replication/_app_7_main_did_downup_area_ac_dv.do,keep,estim
 code/_stacked_downup_replication/_app_8_main_did_by_year.do,keep,estimation feeding a used table/figure (or read by _generate_all_tables.do)
 code/_stacked_downup_replication/_app_9_main_did_by_state.do,keep,estimation feeding a used table/figure (or read by _generate_all_tables.do)
 code/_stacked_downup_replication/_app_coalition_generation.do,keep,ruling-coalition decomposition of Figure 3 requested by the team (not yet in main.tex)
-code/_stacked_downup_replication/_app_disha_cluster.do,keep,main table (tab:mechanism) with AC x month-year and district x month-year clustering requested by the team (not yet in main.tex)
+code/_stacked_downup_replication/_app_disha_cluster.do,keep,main DISHA table (tab:mechanism) and its ENP, ruling-coalition share and co-partisan share interactions with AC x month-year and district x month-year clustering requested by the team (not yet in main.tex)
 code/_stacked_downup_replication/_app_disha_dist_maj.do,keep,district-majority heterogeneity of Figure 3, B.3 and B.10 requested by the team (not yet in main.tex)
+code/_stacked_downup_replication/_app_disha_fragmentation.do,keep,DISHA main table (tab:mechanism) interacted with the district's ENP and ruling-coalition shares (task 2 fragmentation measures) requested by the team (not yet in main.tex)
 code/_stacked_downup_replication/_app_dist_maj_party_generation.do,keep,district-majority heterogeneity of Figure 3, B.3 and B.10 requested by the team (not yet in main.tex)
 code/_stacked_downup_replication/_app_maps_acs.ipynb,keep,figure/table generator used in paper or talks
 code/_stacked_downup_replication/_apply_analysis_subsample.do,keep,estimation feeding a used table/figure (or read by _generate_all_tables.do)
 code/_stacked_downup_replication/_compare_protest2.do,keep,estimation feeding a used table/figure (or read by _generate_all_tables.do)
+code/_stacked_downup_replication/_disha_fragmentation.do,keep,main DISHA table (tab:mechanism) and its ENP and ruling-coalition share interactions with AC x month-year and district x month-year clustering requested by the team (not yet in main.tex)
 code/_stacked_downup_replication/_export_event_study_csv.do,keep,post-processing: tables/figures used in paper or talks
 code/_stacked_downup_replication/_generate_all_tables.do,keep,post-processing: tables/figures used in paper or talks
 code/_stacked_downup_replication/_generate_all_tables.log,archive,log / scratch / OS file
@@ -3226,7 +3228,7 @@ code/_stacked_downup_replication/_master_replication_log_sample.txt,archive,code
 code/_stacked_downup_replication/_merge_dist_maj_party.do,keep,district-majority heterogeneity of Figure 3, B.3 and B.10 requested by the team (not yet in main.tex)
 code/_stacked_downup_replication/_mla_party.do,keep,ruling-coalition decomposition of Figure 3 requested by the team (not yet in main.tex)
 code/_stacked_downup_replication/_protest_definition.do,keep,estimation feeding a used table/figure (or read by _generate_all_tables.do)
-code/_stacked_downup_replication/_ruling_coalition.do,keep,ruling-coalition decomposition of Figure 3 requested by the team (not yet in main.tex)
+code/_stacked_downup_replication/_ruling_coalition.do,keep,state ruling coalition for the Figure 3 decomposition and the DISHA ruling-coalition shares requested by the team (not yet in main.tex)
 code/_stacked_downup_replication/_run_local_main_postprocessing.do,keep,driver for kept scripts
 code/_stacked_downup_replication/_run_local_ster_postprocessing.do,keep,driver for kept scripts
 code/_stacked_downup_replication/_stacked_downup_replication shell none is_rural_area 1 _acpop downup_ac_pop none none.log,archive,log / scratch / OS file
@@ -8741,6 +8743,10 @@ tables/_protest_stacked_descriptive_sample.tex,archive,table/estimate not used i
 tables/_protest_stacked_descriptive_stata.tex,archive,table/estimate not used in main.tex / talks
 tables/ac_dist.txt,archive,table/estimate not used in main.tex / talks
 tables/action_final_prev_year_count_cluster.tex,keep,main table (tab:mechanism) with AC x month-year and district x month-year clustering requested by the team (not yet in main.tex)
+tables/action_final_prev_year_count_copart_cluster.tex,keep,main DISHA table (tab:mechanism) and its ENP, ruling-coalition share and co-partisan share interactions with AC x month-year and district x month-year clustering requested by the team (not yet in main.tex)
+tables/action_final_prev_year_count_enp_cluster.tex,keep,main DISHA table (tab:mechanism) and its ENP and ruling-coalition share interactions with AC x month-year and district x month-year clustering requested by the team (not yet in main.tex)
+tables/action_final_prev_year_count_ruling_cluster.tex,keep,main DISHA table (tab:mechanism) and its ENP and ruling-coalition share interactions with AC x month-year and district x month-year clustering requested by the team (not yet in main.tex)
+tables/action_final_prev_year_count_ruling_ext_cluster.tex,keep,main DISHA table (tab:mechanism) and its ENP, ruling-coalition share and co-partisan share interactions with AC x month-year and district x month-year clustering requested by the team (not yet in main.tex)
 tables/action_final_prev_year_dist_maj.tex,keep,district-majority heterogeneity of Figure 3, B.3 and B.10 requested by the team (not yet in main.tex)
 tables/app_18_polishcar_fe12_rubric2.ster,archive,table/estimate not used in main.tex / talks
 tables/app_19_5km_fe12_rubric1.ster,archive,table/estimate not used in main.tex / talks
@@ -8751,6 +8757,14 @@ tables/app_19_5km_fe12_rubric2_state.ster,archive,table/estimate not used in mai
 tables/archive_files.sh,archive,table/estimate not used in main.tex / talks
 tables/descriptives_main.tex,keep,table used in main.tex / talks
 tables/descriptives_main_sample.tex,archive,table/estimate not used in main.tex / talks
+tables/disha_enp_alliance_all.tex,keep,DISHA main table (tab:mechanism) interacted with the district's ENP and ruling-coalition shares (task 2 fragmentation measures) requested by the team (not yet in main.tex)
+tables/disha_enp_alliance_rural.tex,keep,DISHA main table (tab:mechanism) interacted with the district's ENP and ruling-coalition shares (task 2 fragmentation measures) requested by the team (not yet in main.tex)
+tables/disha_enp_party_all.tex,keep,DISHA main table (tab:mechanism) interacted with the district's ENP and ruling-coalition shares (task 2 fragmentation measures) requested by the team (not yet in main.tex)
+tables/disha_enp_party_rural.tex,keep,DISHA main table (tab:mechanism) interacted with the district's ENP and ruling-coalition shares (task 2 fragmentation measures) requested by the team (not yet in main.tex)
+tables/disha_ruling_all.tex,keep,DISHA main table (tab:mechanism) interacted with the district's ENP and ruling-coalition shares (task 2 fragmentation measures) requested by the team (not yet in main.tex)
+tables/disha_ruling_ext_all.tex,keep,DISHA main table (tab:mechanism) interacted with the district's ENP and ruling-coalition shares (task 2 fragmentation measures) requested by the team (not yet in main.tex)
+tables/disha_ruling_ext_rural.tex,keep,DISHA main table (tab:mechanism) interacted with the district's ENP and ruling-coalition shares (task 2 fragmentation measures) requested by the team (not yet in main.tex)
+tables/disha_ruling_rural.tex,keep,DISHA main table (tab:mechanism) interacted with the district's ENP and ruling-coalition shares (task 2 fragmentation measures) requested by the team (not yet in main.tex)
 tables/exploratory_analysis/cohort_eventtime_fe_sweep/_app_16_polischar_fe12_evst_all_rural_acpop_controls_both.csv,archive,table/estimate not used in main.tex / talks
 tables/exploratory_analysis/cohort_eventtime_fe_sweep/_app_16_polischar_fe12_evst_all_rural_acpop_controls_both.ster,archive,table/estimate not used in main.tex / talks
 tables/exploratory_analysis/cohort_eventtime_fe_sweep/politician_byprov_cohorttime_fe01_did_interaction_rural_acpop_all.csv,archive,table/estimate not used in main.tex / talks

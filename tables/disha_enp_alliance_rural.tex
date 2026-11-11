@@ -1,0 +1,26 @@
+{
+\def\sym#1{\ifmmode^{#1}\else\(^{#1}\)\fi}
+\begin{tabular}{l*{8}{c}}
+\toprule
+            &\multicolumn{8}{c}{DISHA documents on:}                                                                                                                                        \\\cmidrule(lr){2-9}
+            &\multicolumn{1}{c}{(1)}&\multicolumn{1}{c}{(2)}&\multicolumn{1}{c}{(3)}&\multicolumn{1}{c}{(4)}&\multicolumn{1}{c}{(5)}&\multicolumn{1}{c}{(6)}&\multicolumn{1}{c}{(7)}&\multicolumn{1}{c}{(8)}\\
+            &\multicolumn{1}{c}{\shortstack{Substitution toward\\environment}}&\multicolumn{1}{c}{Environment}&\multicolumn{1}{c}{Agriculture}&\multicolumn{1}{c}{Development}&\multicolumn{1}{c}{Election}&\multicolumn{1}{c}{Governance}&\multicolumn{1}{c}{Welfare}&\multicolumn{1}{c}{Other Topics}\\
+\midrule
+Exposure    &       0.050         &       0.054\sym{*}  &       0.072\sym{*}  &      -0.121         &       0.071\sym{*}  &      -0.064         &       0.017         &       0.049         \\
+            &     (0.034)         &     (0.029)         &     (0.043)         &     (0.080)         &     (0.040)         &     (0.114)         &     (0.040)         &     (0.074)         \\
+Exposure $\times$ (ENP $-$ 1)&       0.063         &       0.057         &      -0.051         &       0.086         &      -0.105         &       0.039         &      -0.118\sym{*}  &       0.114         \\
+            &     (0.100)         &     (0.092)         &     (0.048)         &     (0.102)         &     (0.068)         &     (0.319)         &     (0.065)         &     (0.097)         \\
+ENP $-$ 1   &       0.191         &       0.952\sym{*}  &       1.311\sym{***}&       0.852         &       0.803         &       2.822\sym{***}&      -0.724         &      -0.499\sym{***}\\
+            &     (0.644)         &     (0.556)         &     (0.292)         &     (0.519)         &     (0.567)         &     (0.781)         &     (0.445)         &     (0.162)         \\
+\midrule
+Exposure at ENP = 2&       0.113         &       0.111         &       0.021         &      -0.036         &      -0.033         &      -0.025         &      -0.100         &     0.163**         \\
+            &     (0.097)         &     (0.081)         &     (0.041)         &     (0.093)         &     (0.067)         &     (0.336)         &     (0.076)         &     (0.076)         \\
+Observations&      23,799         &      23,799         &      23,799         &      23,799         &      23,799         &      23,799         &      23,799         &      23,799         \\
+N Assembly Constituencies&         472         &         472         &         472         &         472         &         472         &         472         &         472         &         472         \\
+AC FE       &           Y         &           Y         &           Y         &           Y         &           Y         &           Y         &           Y         &           Y         \\
+Month-Year FE&           Y         &           Y         &           Y         &           Y         &           Y         &           Y         &           Y         &           Y         \\
+Mean DV     &      -2.450         &       0.895         &       1.185         &       2.307         &       1.210         &      12.353         &       1.828         &       1.185         \\
+Mean ENP    &       1.572         &       1.572         &       1.572         &       1.572         &       1.572         &       1.572         &       1.572         &       1.572         \\
+\bottomrule
+\end{tabular}
+}

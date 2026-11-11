@@ -1,0 +1,26 @@
+{
+\def\sym#1{\ifmmode^{#1}\else\(^{#1}\)\fi}
+\begin{tabular}{l*{8}{c}}
+\toprule
+            &\multicolumn{8}{c}{DISHA documents on:}                                                                                                                                        \\\cmidrule(lr){2-9}
+            &\multicolumn{1}{c}{(1)}&\multicolumn{1}{c}{(2)}&\multicolumn{1}{c}{(3)}&\multicolumn{1}{c}{(4)}&\multicolumn{1}{c}{(5)}&\multicolumn{1}{c}{(6)}&\multicolumn{1}{c}{(7)}&\multicolumn{1}{c}{(8)}\\
+            &\multicolumn{1}{c}{\shortstack{Substitution toward\\environment}}&\multicolumn{1}{c}{Environment}&\multicolumn{1}{c}{Agriculture}&\multicolumn{1}{c}{Development}&\multicolumn{1}{c}{Election}&\multicolumn{1}{c}{Governance}&\multicolumn{1}{c}{Welfare}&\multicolumn{1}{c}{Other Topics}\\
+\midrule
+Exposure    &       0.033         &       0.128         &       0.149         &      -0.025         &      -0.083         &       0.503         &      -0.255\sym{*}  &       0.280\sym{**} \\
+            &     (0.126)         &     (0.078)         &     (0.115)         &     (0.149)         &     (0.124)         &     (0.613)         &     (0.153)         &     (0.129)         \\
+Exposure $\times$ Ruling-coalition share&       0.048         &      -0.073         &      -0.124         &      -0.088         &       0.154         &      -0.725         &       0.302\sym{*}  &      -0.248\sym{*}  \\
+            &     (0.129)         &     (0.074)         &     (0.124)         &     (0.180)         &     (0.136)         &     (0.647)         &     (0.164)         &     (0.146)         \\
+Ruling-coalition share&       1.175         &      -0.365         &      -2.913\sym{***}&      -0.990         &      -1.654\sym{**} &      -5.424\sym{*}  &       1.990\sym{**} &      -0.249         \\
+            &     (0.939)         &     (0.660)         &     (0.672)         &     (0.990)         &     (0.681)         &     (2.977)         &     (0.903)         &     (0.262)         \\
+\midrule
+Exposure + Exposure $\times$ Share&     0.082**         &     0.055**         &       0.025         &      -0.113         &      0.071*         &    -0.221**         &       0.047         &       0.032         \\
+            &     (0.036)         &     (0.025)         &     (0.033)         &     (0.084)         &     (0.040)         &     (0.109)         &     (0.041)         &     (0.068)         \\
+Observations&      23,799         &      23,799         &      23,799         &      23,799         &      23,799         &      23,799         &      23,799         &      23,799         \\
+N Assembly Constituencies&         472         &         472         &         472         &         472         &         472         &         472         &         472         &         472         \\
+AC FE       &           Y         &           Y         &           Y         &           Y         &           Y         &           Y         &           Y         &           Y         \\
+Month-Year FE&           Y         &           Y         &           Y         &           Y         &           Y         &           Y         &           Y         &           Y         \\
+Mean DV     &      -2.450         &       0.895         &       1.185         &       2.307         &       1.210         &      12.353         &       1.828         &       1.185         \\
+Mean share  &       0.656         &       0.656         &       0.656         &       0.656         &       0.656         &       0.656         &       0.656         &       0.656         \\
+\bottomrule
+\end{tabular}
+}
