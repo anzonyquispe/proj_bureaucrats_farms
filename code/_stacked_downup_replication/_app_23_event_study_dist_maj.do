@@ -8,6 +8,10 @@
 * interaction relative time x treat x dist_maj_party. The indicator is fixed
 * at each stack's cohort month (_merge_dist_maj_party.do).
 *
+* FE. fe1 is Figure 3's grid x cohort and AC x month-year x cohort. fe2 drops
+* the AC interaction: grid x cohort and month-year x cohort. Both run on the
+* same rows, the estimation sample of the interacted fe1 model.
+*
 * Sample. The district crosswalk follows the DISHA analysis and leaves out the
 * ACs spanning several districts, so their rows are dropped and N is below
 * Figure 3's. evreg1 re-estimates the plain event study on this sample;
@@ -17,6 +21,7 @@
 *
 * Outputs (tables/):
 *   stacked_event_study_pop_5pre_distmaj${sample}_rural${ster_suffix}.ster/.csv
+*   (fe1 with no suffix; fe2 with ster_suffix _gridmy, see submit_all.sh)
 ********************************************************************************
 
 if "$root" == "" {
@@ -66,12 +71,14 @@ do "${code}/_merge_dist_maj_party.do"
 
 local dep_var countk
 local fe1 "unique_small_grid_id#cohort ac_uq_id#monthyear#cohort"
+local fe2 "unique_small_grid_id#cohort monthyear#cohort"
 * local moderators_list moderator rice_prod_aclvl_ahigh burning_season
 local moderators_list moderator dist_maj_party
 gen moderator = 0
 do "${code}/_apply_analysis_subsample.do"
 
-* Anchor both event studies to the interacted model's exact estimation sample.
+* Anchor both event studies, under every FE spec, to the interacted fe1
+* model's exact estimation sample.
 quietly reghdfejl `dep_var' ///
     ib`base'.relative_year_bin_aux##ib0.treat##ib0.dist_maj_party ///
     wind_direction av_wind_speed, absorb(`fe1') ///

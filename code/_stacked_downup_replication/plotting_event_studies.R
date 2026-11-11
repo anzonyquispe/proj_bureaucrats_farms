@@ -581,6 +581,16 @@ event_cases <- list(
     figure_base = "stacked_event_study_pop_5pre_distmaj_rural_maj",
     pre = 5, post = 6, omitted = 0, required = FALSE
   ),
+  # The same dist_maj_party == 1 terms with grid x cohort and month-year x
+  # cohort FE instead of AC x month-year x cohort (_app_23 fe2).
+  event_case(
+    id = "distmaj_population_majority_gridmy",
+    csv_stem = "stacked_event_study_pop_5pre_distmaj", model = "evreg2",
+    rows = 39:49, columns = c(3, 4, 43:53),
+    figure_base = "stacked_event_study_pop_5pre_distmaj_rural_gridmy_maj",
+    pre = 5, post = 6, omitted = 0, required = FALSE,
+    csv_middle = "_gridmy"
+  ),
   # Selected politician specification: grid x cohort, province-specific linear
   # month-year trends, and cohort-specific event-year fixed effects. This is
   # the baseline event study without a moderator interaction.
@@ -1043,6 +1053,7 @@ production_main_case_ids <- c(
   "final_stacked_population_rice",
   "distmaj_population_baseline",
   "distmaj_population_majority",
+  "distmaj_population_majority_gridmy",
   "final_politician_fe03_baseline",
   "final_politician_fe03_rice"
 )
