@@ -11,16 +11,22 @@
 * for every $sample.
 *
 * Expects: province (string), ac_uq_id and cohort (numeric), year, month and
-* relative_monthyear in memory, with cohort coded like monthyear
-* (year * 12 + month).
+* relative_monthyear or monthyear, with cohort coded as year * 12 + month.
 ********************************************************************************
 
 confirm string variable province
 confirm numeric variable ac_uq_id cohort
 confirm new variable year_el dist_maj_party
 
-* The cohort is the calendar month of relative month 0.
-assert year * 12 + month == cohort if relative_monthyear == 0
+* Check that cohort is coded as year * 12 + month.
+capture confirm variable relative_monthyear
+if !_rc {
+    assert year * 12 + month == cohort if relative_monthyear == 0
+}
+else {
+    confirm numeric variable monthyear
+    assert year * 12 + month == monthyear
+}
 
 preserve
     keep province cohort

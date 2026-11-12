@@ -145,6 +145,9 @@ table_ids+=("$(submit_stata did_by_state _app_9_main_did_by_state.do 1/4 none no
 table_ids+=("$(submit_stata placebo_13km _app_11_placebo_pop_13km.do 1 none none none none "${main_pop_id}")")
 # Table B.3 by district majority party; needs dist_maj_party.dta in intermediate.
 table_ids+=("$(submit_stata main_did_pop_distmaj _app_24_did_dist_maj.do 1/4 none)")
+# C.3 and D.3 by district majority.
+table_ids+=("$(submit_stata protest_did_pop_distmaj _app_26_protest_did_dist_maj.do 0/3 _acpop downup_ac_pop "${PROTEST_STACK}")")
+table_ids+=("$(submit_stata politician_did_pop_distmaj _app_27_polischar_did_dist_maj.do 0/3 _acpop downup_ac_pop)")
 # FE0-FE3 x {plain, interacted} = the eight evreg models each table reads.
 table_ids+=("$(submit_stata protest_did_area _main_4_protest_5km_fe12_did_downup.do 0/3 none downup_ac "${PROTEST_STACK}")")
 table_ids+=("$(submit_stata politician_did_area _main_5_polischar_fe12_did_downup_inter.do 0/3 none downup_ac)")
