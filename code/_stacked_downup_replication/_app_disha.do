@@ -1,8 +1,10 @@
 ********************************************************************************
 * DISHA tables at assembly constituency x month-year: the paper's main table
 * (tab:mechanism, tables/action_final_prev_year_count.tex), meeting-document
-* topics against downwind rural exposure, and its table of fires on exposure
-* (tab:mechanism_count, tables/action_final_prev_year_count_fire.tex).
+* topics against downwind rural exposure, its any-fire version (tab:app_mechanism,
+* tables/action_final_prev_year.tex), its no-look-ahead quarter version
+* (tables/action_final_prev_year_count_new_qtr.tex) and its table of fires on
+* exposure (tab:mechanism_count, tables/action_final_prev_year_count_fire.tex).
 *
 * Input: action_final.dta, written by _app_disha_generation.do.
 *
@@ -169,17 +171,27 @@ esttab fires1 fires2 ///
     collabels(none) booktabs nonotes
 
 ********************************************************************************
-* Main table (tab:mechanism): meeting-document topics, and the same table on
-* the quarter that does not look ahead (action_final_prev_year_count_new_qtr,
-* in the team's code but not in the paper)
+* Main table (tab:mechanism) and its two robustness versions: any-fire
+* Exposure (tab:app_mechanism) and the quarter that does not look ahead
 ********************************************************************************
 
-* Exposure is the fire-count measure std_pop_share1 and every outcome is
-* quarterly, in the paper's column order. The court-case column was dropped.
-foreach q in qtr qtr2 {
+* Each table: outcome quarter, Exposure and output file. Outcomes follow the
+* paper's column order; the court-case column was dropped.
+local q_count   "qtr"
+local x_count   "std_pop_share1"
+local f_count   "action_final_prev_year_count"
+local q_any     "qtr"
+local x_any     "std_pop_share2"
+local f_any     "action_final_prev_year"
+local q_new_qtr "qtr2"
+local x_new_qtr "std_pop_share1"
+local f_new_qtr "action_final_prev_year_count_new_qtr"
 
-    local file = cond("`q'" == "qtr", "action_final_prev_year_count", ///
-        "action_final_prev_year_count_new_qtr")
+foreach k in count any new_qtr {
+
+    local q    "`q_`k''"
+    local x    "`x_`k''"
+    local file "`f_`k''"
 
     est clear
 
@@ -193,7 +205,7 @@ foreach q in qtr qtr2 {
         quietly summarize `var' if `fcond'
         local ymean = r(mean)
 
-        reghdfe `var' std_pop_share1 if `fcond', ///
+        reghdfe `var' `x' if `fcond', ///
             absorb(ac_uq_id monthyear) cluster(ac_uq_id)
         estadd scalar ymean = `ymean'
         estadd scalar acq = `numacs'
@@ -212,8 +224,8 @@ foreach q in qtr qtr2 {
         using "${tables}/`file'${sample}.tex", replace ///
         cells(b(fmt(a3) star) se(par fmt(a3))) ///
         star(* 0.10 ** 0.05 *** 0.01) ///
-        keep(std_pop_share1) nocons nobaselevels ///
-        varlabels(std_pop_share1 "Exposure") ///
+        keep(`x') nocons nobaselevels ///
+        varlabels(`x' "Exposure") ///
         stats(N acfe acmonthfe ymean, ///
               fmt(%12.0fc %s %s %9.3f) ///
               labels("Observations" "AC FE" "Month-Year FE" "Mean DV")) ///
