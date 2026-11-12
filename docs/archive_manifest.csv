@@ -8687,6 +8687,8 @@ tables/_main_3_bureau_polisc_did_rural_acpop.tex,keep,table used in main.tex / t
 tables/_main_3_bureau_polisc_did_rural_stacked.ster,keep,saved estimates read by kept post-processing
 tables/_main_3_bureau_polisc_did_sample_rural_stacked.ster,archive,table/estimate not used in main.tex / talks
 tables/_main_4_protest_5km_fe12_did_downup.ster,archive,table/estimate not used in main.tex / talks
+tables/_main_4_protest_5km_fe12_did_downup_distmaj_rural_acpop.ster,keep,district-majority heterogeneity of Tables C.3 and D.3 requested by the team (not yet in main.tex)
+tables/_main_4_protest_5km_fe12_did_downup_distmaj_rural_acpop.tex,keep,district-majority heterogeneity of Tables C.3 and D.3 requested by the team (not yet in main.tex)
 tables/_main_4_protest_5km_fe12_did_downup_inter_rural_table.ster,archive,table/estimate not used in main.tex / talks
 tables/_main_4_protest_5km_fe12_did_downup_rural.ster,keep,saved estimates read by kept post-processing
 tables/_main_4_protest_5km_fe12_did_downup_rural.tex,archive,table/estimate not used in main.tex / talks
@@ -8708,6 +8710,8 @@ tables/_main_4_protest_fe12_did_in_india_coalition_rural_table.ster,archive,tabl
 tables/_main_4_protest_fe12_did_in_state_coalition_rural.ster,archive,table/estimate not used in main.tex / talks
 tables/_main_4_protest_fe12_did_in_state_coalition_rural_table.ster,archive,table/estimate not used in main.tex / talks
 tables/_main_5_polischar_fe12_did_downup_inter.ster,archive,table/estimate not used in main.tex / talks
+tables/_main_5_polischar_fe12_did_downup_inter_distmaj_rural_acpop.ster,keep,district-majority heterogeneity of Tables C.3 and D.3 requested by the team (not yet in main.tex)
+tables/_main_5_polischar_fe12_did_downup_inter_distmaj_rural_acpop.tex,keep,district-majority heterogeneity of Tables C.3 and D.3 requested by the team (not yet in main.tex)
 tables/_main_5_polischar_fe12_did_downup_inter_rural.ster,keep,saved estimates read by kept post-processing
 tables/_main_5_polischar_fe12_did_downup_inter_rural.tex,archive,table/estimate not used in main.tex / talks
 tables/_main_5_polischar_fe12_did_downup_inter_rural_acpop.ster,keep,saved estimates read by kept post-processing
