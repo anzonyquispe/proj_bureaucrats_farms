@@ -564,23 +564,6 @@ event_cases <- list(
     pre = 5, post = 6, omitted = 0,
     ylim_original = c(-80, 50), ylim_rotated = c(-80, 50)
   ),
-  # District-majority heterogeneity (_app_23): the plain event study on the
-  # single-district-AC sample, and the dist_maj_party == 1 interaction terms,
-  # laid out like the rice moderator above.
-  event_case(
-    id = "distmaj_population_baseline",
-    csv_stem = "stacked_event_study_pop_5pre_distmaj", model = "evreg1",
-    rows = 15:25, columns = c(3, 4, 19:29),
-    figure_base = "stacked_event_study_pop_5pre_distmaj_rural_1",
-    pre = 5, post = 6, omitted = 0, required = FALSE
-  ),
-  event_case(
-    id = "distmaj_population_majority",
-    csv_stem = "stacked_event_study_pop_5pre_distmaj", model = "evreg2",
-    rows = 39:49, columns = c(3, 4, 43:53),
-    figure_base = "stacked_event_study_pop_5pre_distmaj_rural_maj",
-    pre = 5, post = 6, omitted = 0, required = FALSE
-  ),
   # Ruling-coalition decomposition (_app_25): the coalition_ac == 1
   # interaction terms, laid out like the rice moderator above. Its evreg1 is
   # Figure 3 itself, so it is not plotted again.
@@ -1051,8 +1034,6 @@ production_main_case_ids <- c(
   "final_stacked_area_rice",
   "final_stacked_population_baseline",
   "final_stacked_population_rice",
-  "distmaj_population_baseline",
-  "distmaj_population_majority",
   "coalition_population_coalition",
   "final_politician_fe03_baseline",
   "final_politician_fe03_rice"

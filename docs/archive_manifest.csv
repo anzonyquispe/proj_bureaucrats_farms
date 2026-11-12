@@ -3186,8 +3186,6 @@ code/_stacked_downup_replication/_app_19_polischar_fe12_did_downup_inter_plot.lo
 code/_stacked_downup_replication/_app_20_did_downwind_hm.do,keep,estimation feeding a used table/figure (or read by _generate_all_tables.do)
 code/_stacked_downup_replication/_app_21_5km_allfe_same_term.do,archive,code not contributing to a used output
 code/_stacked_downup_replication/_app_22_event_study_cluster.do,keep,Figure 3 clustering robustness requested by the team (not yet in main.tex)
-code/_stacked_downup_replication/_app_23_event_study_dist_maj.do,keep,district-majority heterogeneity of Figure 3, B.3 and B.10 requested by the team (not yet in main.tex)
-code/_stacked_downup_replication/_app_24_did_dist_maj.do,keep,district-majority heterogeneity of Figure 3, B.3 and B.10 requested by the team (not yet in main.tex)
 code/_stacked_downup_replication/_app_25_event_study_coalition.do,keep,ruling-coalition decomposition of Figure 3 requested by the team (not yet in main.tex)
 code/_stacked_downup_replication/_app_6_main_did_treat_definition.do,keep,estimation feeding a used table/figure (or read by _generate_all_tables.do)
 code/_stacked_downup_replication/_app_6_main_did_treat_definition.log,archive,log / scratch / OS file
@@ -3196,9 +3194,7 @@ code/_stacked_downup_replication/_app_8_main_did_by_year.do,keep,estimation feed
 code/_stacked_downup_replication/_app_9_main_did_by_state.do,keep,estimation feeding a used table/figure (or read by _generate_all_tables.do)
 code/_stacked_downup_replication/_app_coalition_generation.do,keep,ruling-coalition decomposition of Figure 3 requested by the team (not yet in main.tex)
 code/_stacked_downup_replication/_app_disha_cluster.do,keep,main DISHA table (tab:mechanism) and its ENP, ruling-coalition share and co-partisan share interactions, plus Table B.10 x co-partisan share, with AC x month-year and district x month-year clustering requested by the team (not yet in main.tex)
-code/_stacked_downup_replication/_app_disha_dist_maj.do,keep,district-majority heterogeneity of Figure 3, B.3 and B.10 requested by the team (not yet in main.tex)
 code/_stacked_downup_replication/_app_disha_fragmentation.do,keep,DISHA main table (tab:mechanism) interacted with the district's ENP and ruling-coalition shares (task 2 fragmentation measures) requested by the team (not yet in main.tex)
-code/_stacked_downup_replication/_app_dist_maj_party_generation.do,keep,district-majority heterogeneity of Figure 3, B.3 and B.10 requested by the team (not yet in main.tex)
 code/_stacked_downup_replication/_app_maps_acs.ipynb,keep,figure/table generator used in paper or talks
 code/_stacked_downup_replication/_apply_analysis_subsample.do,keep,estimation feeding a used table/figure (or read by _generate_all_tables.do)
 code/_stacked_downup_replication/_compare_protest2.do,keep,estimation feeding a used table/figure (or read by _generate_all_tables.do)
@@ -3225,7 +3221,6 @@ code/_stacked_downup_replication/_main_6_neighbour.do,keep,estimation feeding a 
 code/_stacked_downup_replication/_main_6_neighbour_plot.do,keep,estimation feeding a used table/figure (or read by _generate_all_tables.do)
 code/_stacked_downup_replication/_master_replication.do,keep,driver for kept scripts
 code/_stacked_downup_replication/_master_replication_log_sample.txt,archive,code not contributing to a used output
-code/_stacked_downup_replication/_merge_dist_maj_party.do,keep,district-majority heterogeneity of Figure 3, B.3 and B.10 requested by the team (not yet in main.tex)
 code/_stacked_downup_replication/_mla_party.do,keep,ruling-coalition decomposition of Figure 3 requested by the team (not yet in main.tex)
 code/_stacked_downup_replication/_protest_definition.do,keep,estimation feeding a used table/figure (or read by _generate_all_tables.do)
 code/_stacked_downup_replication/_ruling_coalition.do,keep,state ruling coalition for the Figure 3 decomposition and the DISHA ruling-coalition shares requested by the team (not yet in main.tex)
@@ -8366,10 +8361,6 @@ figures/stacked_event_study_5pre_rural_riceP_rot_honest2.png,archive,figure not 
 figures/stacked_event_study_5pre_rural_riceP_rotated.png,keep,figure used in main.tex / talks
 figures/stacked_event_study_pop_5pre_coalition_rural_coal_ori.png,keep,ruling-coalition decomposition of Figure 3 requested by the team (not yet in main.tex)
 figures/stacked_event_study_pop_5pre_coalition_rural_coal_rotated.png,keep,ruling-coalition decomposition of Figure 3 requested by the team (not yet in main.tex)
-figures/stacked_event_study_pop_5pre_distmaj_rural_1_ori.png,keep,district-majority heterogeneity of Figure 3, B.3 and B.10 requested by the team (not yet in main.tex)
-figures/stacked_event_study_pop_5pre_distmaj_rural_1_rotated.png,keep,district-majority heterogeneity of Figure 3, B.3 and B.10 requested by the team (not yet in main.tex)
-figures/stacked_event_study_pop_5pre_distmaj_rural_maj_ori.png,keep,district-majority heterogeneity of Figure 3, B.3 and B.10 requested by the team (not yet in main.tex)
-figures/stacked_event_study_pop_5pre_distmaj_rural_maj_rotated.png,keep,district-majority heterogeneity of Figure 3, B.3 and B.10 requested by the team (not yet in main.tex)
 figures/stacked_event_study_pop_5pre_rural_1_honest1.png,archive,figure not used in main.tex / talks
 figures/stacked_event_study_pop_5pre_rural_1_honest2.png,archive,figure not used in main.tex / talks
 figures/stacked_event_study_pop_5pre_rural_1_ori.png,keep,figure used in main.tex / talks
@@ -8748,7 +8739,6 @@ tables/action_final_prev_year_count_copart_cluster.tex,keep,main DISHA table (ta
 tables/action_final_prev_year_count_enp_cluster.tex,keep,main DISHA table (tab:mechanism) and its ENP and ruling-coalition share interactions with AC x month-year and district x month-year clustering requested by the team (not yet in main.tex)
 tables/action_final_prev_year_count_ruling_cluster.tex,keep,main DISHA table (tab:mechanism) and its ENP and ruling-coalition share interactions with AC x month-year and district x month-year clustering requested by the team (not yet in main.tex)
 tables/action_final_prev_year_count_ruling_ext_cluster.tex,keep,main DISHA table (tab:mechanism) and its ENP, ruling-coalition share and co-partisan share interactions with AC x month-year and district x month-year clustering requested by the team (not yet in main.tex)
-tables/action_final_prev_year_dist_maj.tex,keep,district-majority heterogeneity of Figure 3, B.3 and B.10 requested by the team (not yet in main.tex)
 tables/app_18_polishcar_fe12_rubric2.ster,archive,table/estimate not used in main.tex / talks
 tables/app_19_5km_fe12_rubric1.ster,archive,table/estimate not used in main.tex / talks
 tables/app_19_5km_fe12_rubric2.ster,archive,table/estimate not used in main.tex / talks
@@ -11529,7 +11519,6 @@ tables/exploratory_analysis/protest_original_controls_fe_sweep/sample/protest_or
 tables/exploratory_analysis/protest_province_election_switch/protest_province_election_switch_event_rural.csv,archive,table/estimate not used in main.tex / talks
 tables/exploratory_analysis/protest_province_election_switch/protest_province_election_switch_event_rural.ster,archive,table/estimate not used in main.tex / talks
 tables/exploratory_analysis/protest_province_election_switch/protest_province_election_switch_event_rural_scalars.csv,archive,table/estimate not used in main.tex / talks
-tables/main_did_downup_ac_distmaj_rural_acpop.tex,keep,district-majority heterogeneity of Figure 3, B.3 and B.10 requested by the team (not yet in main.tex)
 tables/main_did_downup_ac_rural_acpop.tex,keep,table used in main.tex / talks
 tables/main_did_downup_area_ac.ster,archive,table/estimate not used in main.tex / talks
 tables/main_did_downup_area_ac_rural.ster,archive,table/estimate not used in main.tex / talks
@@ -11537,7 +11526,6 @@ tables/main_did_downup_area_ac_rural.tex,keep,table used in main.tex / talks
 tables/main_did_downup_area_ac_rural_acpop.ster,archive,table/estimate not used in main.tex / talks
 tables/main_did_downup_area_ac_rural_stacked.ster,keep,saved estimates read by kept post-processing
 tables/main_did_downup_area_ac_sample_rural_stacked.ster,archive,table/estimate not used in main.tex / talks
-tables/main_did_downup_pop_ac_distmaj_rural.ster,keep,district-majority heterogeneity of Figure 3, B.3 and B.10 requested by the team (not yet in main.tex)
 tables/main_did_downup_pop_ac_rural_stacked.ster,keep,saved estimates read by kept post-processing
 tables/main_did_downup_pop_ac_sample_rural_stacked.ster,archive,table/estimate not used in main.tex / talks
 tables/main_did_downup_pop_ac_sample_rural_stacked_ricehigh.ster,archive,table/estimate not used in main.tex / talks
@@ -11581,9 +11569,6 @@ tables/stacked_event_study_5pre_sample_rural_scalars.csv,archive,table/estimate 
 tables/stacked_event_study_pop_5pre_coalition_rural.csv,keep,ruling-coalition decomposition of Figure 3 requested by the team (not yet in main.tex)
 tables/stacked_event_study_pop_5pre_coalition_rural.ster,keep,ruling-coalition decomposition of Figure 3 requested by the team (not yet in main.tex)
 tables/stacked_event_study_pop_5pre_coalition_rural_scalars.csv,keep,ruling-coalition decomposition of Figure 3 requested by the team (not yet in main.tex)
-tables/stacked_event_study_pop_5pre_distmaj_rural.csv,keep,district-majority heterogeneity of Figure 3, B.3 and B.10 requested by the team (not yet in main.tex)
-tables/stacked_event_study_pop_5pre_distmaj_rural.ster,keep,district-majority heterogeneity of Figure 3, B.3 and B.10 requested by the team (not yet in main.tex)
-tables/stacked_event_study_pop_5pre_distmaj_rural_scalars.csv,keep,district-majority heterogeneity of Figure 3, B.3 and B.10 requested by the team (not yet in main.tex)
 tables/stacked_event_study_pop_5pre_grid_monthyear_fe_gridmonth_cluster_omit0_rural.csv,archive,table/estimate not used in main.tex / talks
 tables/stacked_event_study_pop_5pre_grid_monthyear_fe_gridmonth_cluster_omit0_rural.ster,archive,table/estimate not used in main.tex / talks
 tables/stacked_event_study_pop_5pre_grid_monthyear_fe_gridmonth_cluster_omit0_rural_scalars.csv,archive,table/estimate not used in main.tex / talks
