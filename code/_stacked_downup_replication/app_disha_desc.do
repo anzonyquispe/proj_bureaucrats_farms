@@ -145,6 +145,10 @@ gen byte esample = e(sample)
 keep if esample == 1
 drop esample
 
+* The table describes the DISHA sample only.
+keep if disha_sample == 1
+assert is_rural != 0
+
 quietly count
 display as result "Descriptive sample: " r(N) " AC-months"
 
@@ -163,9 +167,11 @@ local eol "\\"
 local colsel ac_uq_id year month province count ///
     substitution_qtr y_environment_qtr y_agri_qtr ///
     y_development_qtr y_election_qtr y_governance_qtr y_welfare_qtr ///
-    y_others_qtr y_fir ///
+    y_others_qtr ///
     pop_share2 av_wind_speed wind_direction
 local uniquevars ac_uq_id year month province
+* Rows written commented out (%), as in the paper's version of the table.
+local commented av_wind_speed wind_direction
 
 * Row labels. The macro name must be lab_<varname> exactly, otherwise the row
 * falls back to the variable label and then to the escaped variable name.
@@ -174,15 +180,14 @@ local lab_year                  "Year"
 local lab_month                 "Month"
 local lab_province              "Province"
 local lab_count                 "Number of Fires"
-local lab_substitution_qtr      "Substitution Index"
-local lab_y_environment_qtr     "Any Environment / Pollution Document (\%)"
-local lab_y_agri_qtr            "Any Agriculture Document (\%)"
-local lab_y_development_qtr     "Any Development Document (\%)"
-local lab_y_election_qtr        "Any Election Campaign Document (\%)"
-local lab_y_governance_qtr      "Any Governance Document (\%)"
-local lab_y_welfare_qtr         "Any Welfare Document (\%)"
-local lab_y_others_qtr          "Any Other-Topic Document (\%)"
-local lab_y_fir                 "Any FIR (\%)"
+local lab_substitution_qtr      "Quarterly Substitution Index"
+local lab_y_environment_qtr     "Quarterly Any Environment / Pollution Document (\%)"
+local lab_y_agri_qtr            "Quarterly Any Agriculture Document (\%)"
+local lab_y_development_qtr     "Quarterly Any Development Document (\%)"
+local lab_y_election_qtr        "Quarterly Any Election Campaign Document (\%)"
+local lab_y_governance_qtr      "Quarterly Any Governance Document (\%)"
+local lab_y_welfare_qtr         "Quarterly Any Welfare Document (\%)"
+local lab_y_others_qtr          "Quarterly Any Other-Topic Document (\%)"
 local lab_pop_share2            "Downwind Rural Pop., Previous Year (share)"
 local lab_av_wind_speed         "Average Wind Speed"
 local lab_wind_direction        "Wind Direction"
@@ -194,8 +199,6 @@ file write texout "\begin{tabular}{lrrrrrr}" _n
 file write texout "\toprule" _n
 file write texout " & Mean & SD & Min & Max & Observations & Unique Obs.`eol'" _n
 file write texout "\midrule" _n
-
-local in_id_block = 1
 
 foreach v of local colsel {
 
@@ -209,11 +212,8 @@ foreach v of local colsel {
     local isuniq = 0
     if strpos(" `uniquevars' ", " `v' ") local isuniq = 1
 
-    * rule between the identifier rows and the variable rows
-    if `in_id_block' == 1 & `isuniq' == 0 {
-        file write texout "\midrule" _n
-        local in_id_block = 0
-    }
+    local pct ""
+    if strpos(" `commented' ", " `v' ") local pct "%"
 
     if `isuniq' == 1 {
         quietly _unique_count `v' `sample_if'
@@ -255,7 +255,7 @@ foreach v of local colsel {
         local vlabel = subinstr("`v'", "_", "\_", .)
     }
 
-    file write texout "`vlabel' & `meanfmt' & `sdfmt' & `minfmt' & `maxfmt' & `Nfmt' & `ufmt'`eol'" _n
+    file write texout "`pct'`vlabel' & `meanfmt' & `sdfmt' & `minfmt' & `maxfmt' & `Nfmt' & `ufmt'`eol'" _n
 }
 
 file write texout "\bottomrule" _n
