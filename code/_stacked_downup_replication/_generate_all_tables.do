@@ -958,9 +958,9 @@ esttab eq1 eq2 eq3 using ///
     nomtitles nonumbers collabels(none) nobaselevels ///
     prehead("\begin{tabular}{lccc}" ///
             "\hline" ///
-            "& \multicolumn{3}{c}{Number of Fires (in 1,000 units)}\\" ///
-            "& Full Sample & Treated for Politicians & Control for Politicians \\" ///
             "& (1) & (2) & (3) \\" ///
+            "& \multicolumn{3}{c}{Number of Fires (per 1,000 units)}\\" ///
+            "& Full Sample & Treated for Politicians & Control for Politicians \\" ///
             "\midrule") ///
     posthead("") prefoot("\hline") ///
     postfoot("\hline" "\end{tabular}")
