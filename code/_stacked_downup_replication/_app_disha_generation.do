@@ -228,7 +228,19 @@ replace tmp_mp = 30000 if tmp_mp == .
 bysort district (monthyear): egen min_my = min(tmp_mp)
 gen byte disha_sample = (monthyear >= min_my)
 
-merge m:1 ac_uq_id using "${int_data}/AC_total_pop.dta"
+* AC population: 2010 GPW total from the replication build, keyed by this
+* panel's ac_uq_id. AC_total_pop.dta was 55,547 for every AC (filter bug in
+* 2-ac-total-population.R) and used another map's AC numbering.
+preserve
+    use ac_uq_id total_pop_ac using ///
+        "${int_data}/data_2012_2024_ac_downup_pop_rice.dta", clear
+    bysort ac_uq_id: keep if _n == 1
+    rename total_pop_ac total_pop_ac_nosmall
+    tempfile acpop
+    save `acpop'
+restore
+
+merge m:1 ac_uq_id using `acpop'
 * Drops ACs present only in the population file, and units left without an AC
 * by the earlier merges.
 keep if _merge == 3
