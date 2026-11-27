@@ -1,0 +1,20 @@
+{
+\def\sym#1{\ifmmode^{#1}\else\(^{#1}\)\fi}
+\begin{tabular}{l*{6}{c}}
+\toprule
+            &\multicolumn{4}{c}{\textbf{Government documents}}&\multicolumn{2}{c}{\textbf{Court Data}}\\\cmidrule(lr){2-5}\cmidrule(lr){6-7}
+            &\multicolumn{2}{c}{\textbf{Month}}&\multicolumn{2}{c}{\textbf{Quarter}}&\multicolumn{1}{c}{\textbf{Month}}&\multicolumn{1}{c}{\textbf{Quarter}}\\\cmidrule(lr){2-3}\cmidrule(lr){4-5}\cmidrule(lr){6-6}\cmidrule(lr){7-7}
+            &\multicolumn{1}{c}{(1)}&\multicolumn{1}{c}{(2)}&\multicolumn{1}{c}{(3)}&\multicolumn{1}{c}{(4)}&\multicolumn{1}{c}{(5)}&\multicolumn{1}{c}{(6)}\\
+            &\multicolumn{1}{c}{\makecell{\textbf{Most about} \\ \textbf{crop burning}}}&\multicolumn{1}{c}{\makecell{\textbf{Only about} \\ \textbf{crop burning}}}&\multicolumn{1}{c}{\makecell{\textbf{Most about} \\ \textbf{crop burning}}}&\multicolumn{1}{c}{\makecell{\textbf{Only about} \\ \textbf{crop burning}}}&\multicolumn{2}{c}{\textbf{Cases}}\\
+\midrule
+Exposure    &0.226&0.266\sym{*}&0.705\sym{**}&0.964\sym{***}&0.329\sym{***}&0.744\sym{**}\\
+            &(0.148)&(0.149)&(0.318)&(0.320)&(0.108)&(0.292)\\
+\midrule
+Observations&13,432&13,432&4,339&4,339&54,264&17,850\\
+AC FE       &Y&Y&Y&Y&Y&Y\\
+Month-Year FE&Y&Y&N&N&Y&N\\
+Quarter-Year FE&N&N&Y&Y&N&Y\\
+Mean DV     &0.849&0.752&2.522&2.224&6.778&14.745\\
+\bottomrule
+\end{tabular}
+}

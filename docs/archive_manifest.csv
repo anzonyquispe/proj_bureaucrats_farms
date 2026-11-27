@@ -3197,6 +3197,10 @@ code/_stacked_downup_replication/_app_disha.do,keep,DISHA tables in main.tex: Ta
 code/_stacked_downup_replication/_app_disha_cluster.do,keep,main DISHA table (tab:mechanism) and its ENP, ruling-coalition share and co-partisan share interactions, plus Table B.10 x co-partisan share, with AC x month-year and district x month-year clustering requested by the team (not yet in main.tex)
 code/_stacked_downup_replication/_app_disha_fragmentation.do,keep,DISHA main table (tab:mechanism) interacted with the district's ENP and ruling-coalition shares (task 2 fragmentation measures) requested by the team (not yet in main.tex)
 code/_stacked_downup_replication/_app_maps_acs.ipynb,keep,figure/table generator used in paper or talks
+code/_stacked_downup_replication/_app_mech_cb_docs.py,keep,"crop-burning government documents by district-month (cb_district_month.csv, cb_entry.csv) for Tables B.8-B.10 (tab:disha_descriptive, tab:mechanism_count, tab:mechanism)"
+code/_stacked_downup_replication/_app_mech_merge.do,keep,"builds action_final_merged_kw.dta (Air Act court cases, electoral variables, protests), the AC-month input of the mechanism tables B.8-B.11"
+code/_stacked_downup_replication/_app_mech_tables.do,keep,"estimates and descriptives of Tables B.8-B.11 (tab:disha_descriptive, tab:mechanism_count, tab:mechanism, tab:app_courts_leads)"
+code/_stacked_downup_replication/_app_mech_tables.py,keep,writes the .tex of Tables B.8-B.11 from tables/mech_results.csv and tables/mech_descriptives.csv
 code/_stacked_downup_replication/_apply_analysis_subsample.do,keep,estimation feeding a used table/figure (or read by _generate_all_tables.do)
 code/_stacked_downup_replication/_compare_protest2.do,keep,estimation feeding a used table/figure (or read by _generate_all_tables.do)
 code/_stacked_downup_replication/_disha_fragmentation.do,keep,main DISHA table (tab:mechanism) and its ENP and ruling-coalition share interactions with AC x month-year and district x month-year clustering requested by the team (not yet in main.tex)
@@ -8753,8 +8757,12 @@ tables/app_19_5km_fe12_rubric2_agg.ster,archive,table/estimate not used in main.
 tables/app_19_5km_fe12_rubric2_india.ster,archive,table/estimate not used in main.tex / talks
 tables/app_19_5km_fe12_rubric2_state.ster,archive,table/estimate not used in main.tex / talks
 tables/archive_files.sh,archive,table/estimate not used in main.tex / talks
+tables/cb_docs_courts.tex,keep,Table B.10 in main.tex (tab:mechanism): crop-burning documents and Air Act court cases
+tables/cb_fires.tex,keep,Table B.9 in main.tex (tab:mechanism_count): number of fires on exposure
+tables/courts_leads_t3.tex,keep,"Table B.11 in main.tex (tab:app_courts_leads): Air Act court cases, t to t+3"
 tables/descriptives_main.tex,keep,table used in main.tex / talks
 tables/descriptives_main_sample.tex,archive,table/estimate not used in main.tex / talks
+tables/descriptives_mech.tex,keep,Table B.8 in main.tex (tab:disha_descriptive): descriptives of the mechanism samples
 tables/disha_enp_alliance_all.tex,keep,DISHA main table (tab:mechanism) interacted with the district's ENP and ruling-coalition shares (task 2 fragmentation measures) requested by the team (not yet in main.tex)
 tables/disha_enp_alliance_rural.tex,keep,DISHA main table (tab:mechanism) interacted with the district's ENP and ruling-coalition shares (task 2 fragmentation measures) requested by the team (not yet in main.tex)
 tables/disha_enp_party_all.tex,keep,DISHA main table (tab:mechanism) interacted with the district's ENP and ruling-coalition shares (task 2 fragmentation measures) requested by the team (not yet in main.tex)
@@ -11554,6 +11562,8 @@ tables/main_figure4_neighbour.ster,archive,table/estimate not used in main.tex /
 tables/main_figure4_neighbour_rural.ster,keep,saved estimates read by kept post-processing
 tables/main_figure4_neighbour_sample_rural.ster,archive,table/estimate not used in main.tex / talks
 tables/main_figure4_neighbour_sample_rural_ricehigh.ster,archive,table/estimate not used in main.tex / talks
+tables/mech_descriptives.csv,keep,descriptive statistics read by _app_mech_tables.py for Table B.8
+tables/mech_results.csv,keep,estimates read by _app_mech_tables.py for Tables B.9-B.11
 tables/panelview_downup_ac_pop_excluded_grids.csv,archive,table/estimate not used in main.tex / talks
 tables/panelview_downup_ac_pop_selected_grids.csv,archive,table/estimate not used in main.tex / talks
 tables/panelview_self_profession_selected_acs.csv,keep,sampled-AC audit list for figures/panelview_self_profession.png

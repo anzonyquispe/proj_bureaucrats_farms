@@ -1,0 +1,21 @@
+{
+\def\sym#1{\ifmmode^{#1}\else\(^{#1}\)\fi}
+\begin{tabular}{l*{4}{c}}
+\toprule
+            &\multicolumn{4}{c}{Number of Fires}\\\cmidrule(lr){2-5}
+            &\multicolumn{2}{c}{Month}&\multicolumn{2}{c}{Quarter}\\\cmidrule(lr){2-3}\cmidrule(lr){4-5}
+            &\multicolumn{1}{c}{(1)}&\multicolumn{1}{c}{(2)}&\multicolumn{1}{c}{(3)}&\multicolumn{1}{c}{(4)}\\
+\midrule
+Exposure    &91.36\sym{***}&2.850&201.8\sym{***}&22.98\\
+            &(3.157)&(12.78)&(5.890)&(23.18)\\
+Number of Fires$_{t-12}$&&0.906\sym{***}&&0.803\sym{***}\\
+            &&(0.125)&&(0.100)\\
+\midrule
+Observations&13,432&13,432&4,339&4,339\\
+AC FE       &Y&Y&Y&Y\\
+Month-Year FE&Y&Y&N&N\\
+Quarter-Year FE&N&N&Y&Y\\
+Mean DV     &21.037&21.037&69.106&69.106\\
+\bottomrule
+\end{tabular}
+}

@@ -1,0 +1,18 @@
+{
+\def\sym#1{\ifmmode^{#1}\else\(^{#1}\)\fi}
+\begin{tabular}{l*{4}{c}}
+\toprule
+            &\multicolumn{4}{c}{\textbf{Air Act court cases (any case)}}\\\cmidrule(lr){2-5}
+            &\multicolumn{1}{c}{(1)}&\multicolumn{1}{c}{(2)}&\multicolumn{1}{c}{(3)}&\multicolumn{1}{c}{(4)}\\
+            &\multicolumn{1}{c}{$\boldsymbol{t}$}&\multicolumn{1}{c}{$\boldsymbol{t+1}$}&\multicolumn{1}{c}{$\boldsymbol{t+2}$}&\multicolumn{1}{c}{$\boldsymbol{t+3}$}\\
+\midrule
+Exposure    &0.329\sym{***}&0.394\sym{***}&0.335\sym{***}&-0.0705\\
+            &(0.108)&(0.0999)&(0.121)&(0.104)\\
+\midrule
+Observations&54,264&53,550&52,836&52,122\\
+AC FE       &Y&Y&Y&Y\\
+Month-Year FE&Y&Y&Y&Y\\
+Mean DV     &6.778&6.820&6.887&6.953\\
+\bottomrule
+\end{tabular}
+}
